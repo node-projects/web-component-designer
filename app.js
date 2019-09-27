@@ -9,41 +9,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 */
 
 window.addEventListener('WebComponentsReady', function() {
-  window.addEventListener('hashchange', retheme);
-  retheme();
-
   document.addEventListener('update-code', function(event) {
     codeView.dump(event.detail.target);
   }, true);
 });
 
-function retheme()  {
-  if (window.location.hash === '#tufte' || window.location.search === '?tufte') {
-    window.shell.updateStyles({
-      '--canvas-background': '#f35970',
-      '--help-color': 'white',
-      '--almost-black': '#594a7d',
-      '--dark-grey': '#f15195',
-      '--medium-grey': '#62bff7',
-      '--light-grey': '#594a7d',
-      '--highlight-pink': '#f5e566',
-      '--highlight-blue': '#f5e566',
-      '--input-border-color': '#f5e566'
-    });
-  } else {
-    window.shell.updateStyles({
-      '--canvas-background': 'white',
-      '--help-color': 'black',
-      '--almost-black': '#141720',
-      '--dark-grey': '#232733',
-      '--medium-grey': '#2f3545',
-      '--light-grey': '#383f52',
-      '--highlight-pink': '#e91e63',
-      '--highlight-blue': '#2196f3',
-      '--input-border-color': '#596c7a'
-    });
-  }
-}
+
 function getProtoProperties(target) {
   // If this is a custom element, you need to go up the prototype
   // chain until you get proper HTMLElement, since everything under it
