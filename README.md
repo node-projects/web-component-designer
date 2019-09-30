@@ -16,13 +16,12 @@ should -- making that kind of app is really hard, and requires a lot of work and
 
   * Install dependencies
 ```
-  $ npm install -g bower
-  $ bower install
+  $ npm install
 ```
 
   * Run the app in a local server
 ```
-  $ python3 -m http.server --bind localhost 8000
+  $ polymer serve --port 8000 --open
 ```
 
   * Navigate Chrome to [localhost:8000]() to see the app.
@@ -52,7 +51,7 @@ native element, you might have to do some code changes:
 ### Adding another custom element
 
 Add the element you want to the `devDependencies` section of this
-project's `bower.json` file, then run `bower install`. This element needs
+project's `package.json` file, then run `npm install`. This element needs
 to use HTML Imports for it to work. If the import isn't of the form
 `element-name/element-name.html`, you'll have to hand craft `dumpImports()` in
 `code-view.html`.

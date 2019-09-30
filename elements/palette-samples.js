@@ -12,7 +12,7 @@ import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import './palette-shared-styles.js';
 import './palette-base.js';
-import { Base } from '@polymer/polymer/polymer-legacy.js';
+
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 /*
@@ -46,14 +46,14 @@ class SamplesView extends PaletteBase(PolymerElement) {
 
   static get is() { return 'palette-samples'; }
 
-  _doClick(target, kind) {
-    let url = `samples/${kind}.html`;
+  async _doClick(_, kind) {
+    this._fireEvent('new-sample', kind, '', '');
 
-    Base.importHref(url, function(e) {
+    /*Base.import(url, function(e) {
       let doc = e.target.import;
       let template = doc.querySelector('template');
       this._fireEvent('new-sample', kind, '', template);
-    }.bind(this));
+    }.bind(this));*/
   }
 }
 customElements.define(SamplesView.is, SamplesView);

@@ -52,5 +52,30 @@
     "@polymer/iron-autogrow-textarea": "^3.0.0",
     "@polymer/iron-collapse": "^3.0.0",
     "@polymer/iron-image": "^3.0.0"
+  },
+  "subelements": {
+    "iron-icons": [
+      "communication-icons",
+      "device-icons",
+      "editor-icons",
+      "hardware-icons",
+      "image-icons",
+      "maps-icons",
+      "notification-icons",
+      "places-icons",
+      "social-icons",
+      "update-icons"
+    ],
+    "paper-input": [
+      "paper-textarea"
+    ],
+    "paper-tabs": [
+      "paper-tab"
+    ],
+    "app-layout": [
+      "app-header",
+      "app-toolbar",
+      "app-drawer"
+    ]
   }
 }

@@ -108,7 +108,7 @@ class CodeView extends PolymerElement {
     let bonusHost = `        ${hostCss}`;
 
     let polygitBase = '';
-    var directoryPrefix = usePolygit ? '' : 'bower_components/';
+    var directoryPrefix = usePolygit ? '' : 'node_modules/';
     if (usePolygit) {
       polygitBase = '<base href="https://polygit.org/polymer+:master/webcomponents+:master/shadycss+webcomponents+:master/paper*+polymerelements+:master/iron*+polymerelements+:master/app*+polymerelements+:master/neon*+polymerelements+:master/components/">';
     }
@@ -153,6 +153,10 @@ class CodeView extends PolymerElement {
           <title>${appTitle}</title>
           ${polygitBase}
           <script src="${directoryPrefix}webcomponentsjs/webcomponents-loader.js">&lt;/script>
+          <script type="module">
+            import '/samples/flex-horizontal-layout.js';
+            import '/samples/iron-form-sample.js';
+          </script>
           <link rel="import" href="${directoryPrefix}polymer/polymer-element.html">
           ${this._imports.trimRight()}
           <style>

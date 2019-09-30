@@ -19,7 +19,7 @@ import { Base } from '@polymer/polymer/polymer-legacy.js';
 /*
  * List of elements that can be added to the view.
  * This list is generated from the `devDependencies` field of this
- * app's bower.json
+ * app's package.json
  */
 class ElementsView extends PaletteBase(PolymerElement) {
   static get template() {
@@ -42,7 +42,7 @@ class ElementsView extends PaletteBase(PolymerElement) {
           <button>[[item]]</button>
         </template>
       </dom-repeat>
-      <iron-ajax auto="" url="bower.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
+      <iron-ajax auto="" url="package.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
     `;
   }
 
@@ -94,10 +94,8 @@ class ElementsView extends PaletteBase(PolymerElement) {
       // Oof, someone didn't know what element this was. Find it in the list.
       packageName = this.namesToPackages[kind];
     }
-    let url = `bower_components/${packageName}/${kind}.html`;
-    Base.importHref(url, function(e) {
-      this._fireEvent('new-element', kind, packageName, '');
-    }.bind(this));
+    
+    this._fireEvent('new-element', kind, packageName, '');
   }
 }
 customElements.define(ElementsView.is, ElementsView);

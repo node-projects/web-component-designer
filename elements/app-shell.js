@@ -316,52 +316,40 @@ class AppShell extends PolymerElement {
    * Adds a new element to the view.
    */
   createElement(event) {
+    //let url = `@polymer/${packageName}/${kind}.js`;
     let tag = event.detail.type.toLowerCase();
+
     let el = document.createElement(tag);
     this.$.viewContainer.add(el);
 
     // If we haven't before, save this initial state of a <tag> element,
     // so that we can diff it to produce the actual state of the world
     codeView.save(tag, event.detail.package, el);
-    this.$.actionHistory.add('new', el, {parent: el.parentNode});
+    /*this.$.actionHistory.add('new', el, {parent: el.parentNode});
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
     requestAnimationFrame(function() {
       el.click();
-    });
+    });*/
   }
 
   /*
    * Adds a new sample code to the view.
    */
   createSample(event) {
-    let template = event.detail.template;
-    let templateTag = event.detail.type;
+    let tag = event.detail.type.toLowerCase();;
 
-    // Clone the template and add it to the document.
-    let children = template.content.children;
-    let el;
-    let nonStyleChildren = 0;
-    for (let i = 0; i < children.length; i++) {
-      el = document.importNode(children[i], true);
-      this.$.viewContainer.add(el);
-      this.$.actionHistory.add('new', el, {parent: el.parentNode});
-      let tag = el.localName;
-      if (tag !== 'style') {
-        nonStyleChildren++;
-      }
-      el.id = el.id || this._makeUniqueId(el, tag);
-    }
-
-    // Position the sample better, if it was a one element thing.
-    if (nonStyleChildren === 1 && templateTag !== 'app-layout-sample' &&
-        templateTag !== 'wizzywid-sample') {
+    let el = document.createElement(tag);
+    this.$.viewContainer.add(el);
+    
+    if (tag !== 'app-layout-sample') {
       el.style.boxSizing = 'border-box';
       el.style.position = 'absolute';
       el.style.left = el.style.top = '20px';
       el.click();
     }
+
     this.refreshView();
   }
 

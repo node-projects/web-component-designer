@@ -18,7 +18,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 /*
  * List of elements that can be added to the view.
  * This list is generated from the `devDependencies` field of this
- * app's bower.json
+ * app's package.json
  */
 class NativeView extends PaletteBase(PolymerElement) {
   static get template() {
