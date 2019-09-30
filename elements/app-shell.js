@@ -325,13 +325,13 @@ class AppShell extends PolymerElement {
     // If we haven't before, save this initial state of a <tag> element,
     // so that we can diff it to produce the actual state of the world
     codeView.save(tag, event.detail.package, el);
-    /*this.$.actionHistory.add('new', el, {parent: el.parentNode});
+    this.$.actionHistory.add('new', el, {parent: el.parentNode});
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
     requestAnimationFrame(function() {
       el.click();
-    });*/
+    });
   }
 
   /*
