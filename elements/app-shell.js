@@ -13,6 +13,7 @@ import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import './app-icons.js';
 import './app-controls.js';
 import './designer-tabs.js';
