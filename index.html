@@ -17,10 +17,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <title>wizzywid</title>
 
-    <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
-    <script src="bower_components/web-animations-js/web-animations-next-lite.min.js"></script>
-    <link rel="import" href="elements/app-shell.html">
-    <link rel="import" href="elements/code-view.html">
+    <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
+
+    <script type="module">
+      import '/elements/app-shell.js';
+      import '/elements/code-view.js';
+
+      import '/samples/app-header-sample.js';
+      import '/samples/app-layout-sample.js';
+      import '/samples/flex-horizontal-layout.js';
+      import '/samples/flex-vertical-layout.js';
+      import '/samples/iron-form-sample.js';
+      import '/samples/iron-pages-sample.js';
+      import '/samples/paper-card-actions-sample.js';
+      import '/samples/paper-card-image-sample.js';
+      import '/samples/paper-dropdown-menu-sample.js';
+    </script>
+
     <style>
       body {
         margin: 0;
@@ -135,3 +149,4 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="app.js"></script>
   </body>
 </html>
+<script src="./app.js"></script><script src="./third-party/ace.js" type="text/javascript" charset="utf-8"></script>

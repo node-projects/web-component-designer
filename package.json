@@ -1,0 +1,81 @@
+{
+  "description": "A UI designer for Polymer apps",
+  "homepage": "https://github.com/PolymerLabs/wizzywid",
+  "name": "@polymer/wizzywid",
+  "version": "",
+  "resolutions": {
+    "inherits": "2.0.3",
+    "samsam": "1.1.3",
+    "supports-color": "3.1.2",
+    "type-detect": "1.0.0"
+  },
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "@polymer/polymer": "^3.0.0",
+    "@polymer/app-layout": "^3.0.0",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "@polymer/iron-icon": "^3.0.0",
+    "@polymer/iron-icons": "^3.0.0",
+    "@polymer/iron-iconset-svg": "^3.0.0",
+    "@polymer/iron-selector": "^3.0.0",
+    "@polymer/iron-pages": "^3.0.0",
+    "@polymer/iron-ajax": "^3.0.0",
+    "@polymer/paper-toggle-button": "^3.0.0",
+    "@polymer/paper-swatch-picker": "^3.0.0",
+    "web-animations-js": "^2.3.1"
+  },
+  "devDependencies": {
+    "@polymer/iron-icons": "^3.0.0",
+    "@polymer/iron-icon": "^3.0.0",
+    "@polymer/iron-pages": "^3.0.0",
+    "@polymer/iron-form": "^3.0.0",
+    "@polymer/paper-checkbox": "^3.0.0",
+    "@polymer/paper-dropdown-menu": "^3.0.0",
+    "@polymer/paper-input": "^3.0.0",
+    "@polymer/paper-listbox": "^3.0.0",
+    "@polymer/paper-radio-button": "^3.0.0",
+    "@polymer/paper-radio-group": "^3.0.0",
+    "@polymer/paper-slider": "^3.0.0",
+    "@polymer/paper-toggle-button": "^3.0.0",
+    "@polymer/paper-fab": "^3.0.0",
+    "@polymer/paper-button": "^3.0.0",
+    "@polymer/paper-badge": "^3.0.0",
+    "@polymer/paper-card": "^3.0.0",
+    "@polymer/paper-icon-button": "^3.0.0",
+    "@polymer/paper-item": "^3.0.0",
+    "@polymer/paper-menu-button": "^3.0.0",
+    "@polymer/paper-progress": "^3.0.0",
+    "@polymer/paper-spinner": "^3.0.0",
+    "@polymer/paper-tabs": "^3.0.0",
+    "@polymer/iron-ajax": "^3.0.0",
+    "@polymer/iron-autogrow-textarea": "^3.0.0",
+    "@polymer/iron-collapse": "^3.0.0",
+    "@polymer/iron-image": "^3.0.0"
+  },
+  "subelements": {
+    "iron-icons": [
+      "communication-icons",
+      "device-icons",
+      "editor-icons",
+      "hardware-icons",
+      "image-icons",
+      "maps-icons",
+      "notification-icons",
+      "places-icons",
+      "social-icons",
+      "update-icons"
+    ],
+    "paper-input": [
+      "paper-textarea"
+    ],
+    "paper-tabs": [
+      "paper-tab"
+    ],
+    "app-layout": [
+      "app-header",
+      "app-toolbar",
+      "app-drawer"
+    ]
+  }
+}
