@@ -105,7 +105,6 @@ class CodeView extends PolymerElement {
 
     // Host styles.
     let hostCss = parent.style.cssText.replace(/;/g, `;\n       `).trim();
-    let bonusHost = `        ${hostCss}`;
 
     let polygitBase = '';
     var directoryPrefix = usePolygit ? '' : 'node_modules/';
@@ -125,20 +124,20 @@ class CodeView extends PolymerElement {
               width: 100%;
               height: 100%;
               box-sizing: border-box;
-              ${bonusHost.trimRight()}
+              ${hostCss.trimRight()}
             }
             ${this._style.trimRight()}
           </style>
           ${this._template.trimRight()}
         </template>
-        <script>
-        window.addEventListener('WebComponentsReady', function() {
-          class MainApp extends Polymer.Element {
+        <script type="module">
+          import { PolymerElement } from '/node_modules/@polymer/polymer/polymer-element.js';
+
+          class MainApp extends PolymerElement {
             static get is() { return 'main-app'; }
           }
           
           customElements.define(MainApp.is, MainApp);
-        });
         &lt;/script>
       </dom-module>
     `;
@@ -152,12 +151,7 @@ class CodeView extends PolymerElement {
           <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
           <title>${appTitle}</title>
           ${polygitBase}
-          <script src="${directoryPrefix}webcomponentsjs/webcomponents-loader.js">&lt;/script>
-          <script type="module">
-            import '/samples/flex-horizontal-layout.js';
-            import '/samples/iron-form-sample.js';
-          </script>
-          <link rel="import" href="${directoryPrefix}polymer/polymer-element.html">
+          <script src="${directoryPrefix}@webcomponents/webcomponentsjs/webcomponents-loader.js">&lt;/script>
           ${this._imports.trimRight()}
           <style>
             body {
@@ -248,12 +242,15 @@ class CodeView extends PolymerElement {
   }
 
   dumpStyle(tag, node, indent) {
-    let css = node.style.cssText.replace(/;/g, `;\n${indent} `).trim();
+    let css = node.style.cssText.replace(/;/g, `;\n       ${indent}`).trim();
     if (css === '') {
       return '';
     }
     let id = node.id ? '#' + node.id : '';
-    return `${indent}${tag}${id} {${indent}  ${css} ${indent}}`
+    return `
+      ${indent}${tag}${id} {
+      ${indent}  ${css} ${indent}
+            }`
   }
 
   dumpPropsAndAttributes(tag, node) {
@@ -319,9 +316,6 @@ class CodeView extends PolymerElement {
   }
 
   dumpImports(tag, indent, directoryPrefix) {
-    if (tag === 'dom-repeat') {
-      return `${indent}<link rel="import" href="${directoryPrefix}polymer/lib/elements/dom-repeat.html">`;
-    }
     if (!this._propertyDefaultsForTag[tag]) {
       this._doDefaultsForUnseenTag(tag);
     }
@@ -333,7 +327,10 @@ class CodeView extends PolymerElement {
       packageName = tag;
     }
 
-    return `${indent}<link rel="import" href="${directoryPrefix}${packageName}/${tag}.html">`;
+    return `${indent}<script type="module">
+            import '/samples/${tag}.js';
+          </script>
+    `;
   }
 
   _doDefaultsForUnseenTag(tag) {
