@@ -26,7 +26,7 @@ import './tree-view.js';
 import './element-view.js';
 import './canvas-view.js';
 import './canvas-controls.js';
-import '../third-party/ace.js';
+import 'ace-builds/src-min/ace.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Base } from '@polymer/polymer/polymer-legacy.js';
 
