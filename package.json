@@ -23,12 +23,10 @@
     "@polymer/iron-ajax": "^3.0.0",
     "@polymer/paper-toggle-button": "^3.0.0",
     "@polymer/paper-swatch-picker": "^3.0.0",
-    "web-animations-js": "^2.3.1"
+    "web-animations-js": "^2.3.1",
+    "ace-builds": "^1.4.6"
   },
   "devDependencies": {
-    "@polymer/iron-icons": "^3.0.0",
-    "@polymer/iron-icon": "^3.0.0",
-    "@polymer/iron-pages": "^3.0.0",
     "@polymer/iron-form": "^3.0.0",
     "@polymer/paper-checkbox": "^3.0.0",
     "@polymer/paper-dropdown-menu": "^3.0.0",
@@ -37,7 +35,6 @@
     "@polymer/paper-radio-button": "^3.0.0",
     "@polymer/paper-radio-group": "^3.0.0",
     "@polymer/paper-slider": "^3.0.0",
-    "@polymer/paper-toggle-button": "^3.0.0",
     "@polymer/paper-fab": "^3.0.0",
     "@polymer/paper-button": "^3.0.0",
     "@polymer/paper-badge": "^3.0.0",
@@ -48,7 +45,6 @@
     "@polymer/paper-progress": "^3.0.0",
     "@polymer/paper-spinner": "^3.0.0",
     "@polymer/paper-tabs": "^3.0.0",
-    "@polymer/iron-ajax": "^3.0.0",
     "@polymer/iron-autogrow-textarea": "^3.0.0",
     "@polymer/iron-collapse": "^3.0.0",
     "@polymer/iron-image": "^3.0.0"
