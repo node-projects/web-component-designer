@@ -1,19 +1,13 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement } from '@polymer/decorators';
+import { ElementStuffBase } from './element-stuff-base.js';
 
 import './element-stuff-base.js';
 import './element-stuff-shared-styles.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
-class ElementFlex extends ElementStuffBase(PolymerElement) {
+@customElement('element-stuff-flex')
+export class ElementFlex extends ElementStuffBase(PolymerElement) {
   static get template() {
     return html`
       <style include="element-stuff-shared-styles"></style>
@@ -87,8 +81,6 @@ class ElementFlex extends ElementStuffBase(PolymerElement) {
       </div>
     `;
   }
-
-  static get is() { return 'element-stuff-flex'; }
   
   constructor() {
     super();
@@ -98,9 +90,8 @@ class ElementFlex extends ElementStuffBase(PolymerElement) {
   display(elementStyles) {
     for (let i = 0; i < this._stuff.length; i++) {
       let name = this._stuff[i];
-      let el = this.root.querySelector(`[name=${name}]`);
+      let el = this.root.querySelector(`[name=${name}]`) as HTMLInputElement;
       el.value = elementStyles[name];
     }
   }
 }
-customElements.define(ElementFlex.is, ElementFlex);

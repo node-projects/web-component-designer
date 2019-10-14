@@ -1,17 +1,13 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement } from '@polymer/decorators';
 
-class TreeView extends PolymerElement {
+@customElement('tree-view')
+export class TreeView extends PolymerElement {
+  items: any;
+  _index: number;
+  _previouslySelected: HTMLInputElement;
+
   static get template() {
     return html`
       <style>
@@ -113,8 +109,6 @@ class TreeView extends PolymerElement {
       <div id="tree"></div>
     `;
   }
-
-  static get is() { return 'tree-view'; }
 
   ready() {
     super.ready();
@@ -229,4 +223,3 @@ class TreeView extends PolymerElement {
     }
   }
 }
-customElements.define(TreeView.is, TreeView);

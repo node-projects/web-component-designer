@@ -1,13 +1,6 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { PolymerElement } from '@polymer/polymer';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement, property } from '@polymer/decorators';
 
 import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
@@ -26,13 +19,21 @@ import './tree-view.js';
 import './element-view.js';
 import './canvas-view.js';
 import './canvas-controls.js';
-import 'ace-builds/src-min/ace.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { Base } from '@polymer/polymer/polymer-legacy.js';
+import { CanvasControls } from './canvas-controls.js';
+import { ActionHistory } from './action-history.js';
+import { AppControls } from './app-controls.js';
+import { TreeView } from './tree-view.js';
+import { CanvasView } from './canvas-view.js';
+import { CodeView } from './code-view.js';
+import { DemoView } from './demo-view.js';
+import { NativeView } from './palette-native.js';
+import { ElementView } from './element-view.js';
 
+//@ts-ignore
 window.require(["ace/ace"], function(a) {
     if (a) {
         a.config.init(true);
+        //@ts-ignore
         a.define = window.define;
     }
     if (!window.ace)
@@ -40,7 +41,14 @@ window.require(["ace/ace"], function(a) {
     for (var key in a) if (a.hasOwnProperty(key))
         window.ace[key] = a[key];
 });
-class AppShell extends PolymerElement {
+
+@customElement('app-shell')
+export class AppShell extends PolymerElement {
+  @property({ type: Object })
+  activeElement: HTMLElement;
+  @property({ type: String })
+  mainPage = 'designer';
+
   static get template() {
     return html`
       <style>
@@ -219,77 +227,66 @@ class AppShell extends PolymerElement {
     `;
   }
 
-  static get is() { return 'app-shell'; }
-
-  static get properties() {
-    return {
-      activeElement: {
-        type: Object
-      },
-      mainPage: {
-        type: String,
-        value: 'designer'
-      }
-    }
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
+  ready() {
+    super.ready();
 
     // Explanation and apology: normally, codeView would be a child
     // of this element, and could be this.$.codeView, but ace.js
     // doesn't like being in the shadow dom, and this is why we
     // can't have nice things.
+
+    //@ts-ignore
     window.codeView.canvasElement = this.$.viewContainer;
 
     this.setActiveElement(this.$.viewContainer);
     this.refreshView();
 
-    this.$.canvasControls.actionHistory = this.$.actionHistory;
-    this.$.canvasControls.canvasElement = this.$.viewContainer;
-    this.$.appControls.actionHistory = this.$.actionHistory;
-    this.$.viewContainer.actionHistory = this.$.actionHistory;
+    (this.$.canvasControls as CanvasControls).actionHistory = this.$.actionHistory as ActionHistory;
+    (this.$.canvasControls as CanvasControls).canvasElement = this.$.viewContainer;
+    (this.$.appControls as AppControls).actionHistory = this.$.actionHistory as ActionHistory;
+    (this.$.viewContainer as CanvasView).actionHistory = this.$.actionHistory as ActionHistory;
 
     this.addEventListener('new-element', event => this.createElement(event));
     this.addEventListener('new-sample', event => this.createSample(event));
     this.addEventListener('element-updated', event => this.updateElement(event));
 
-    this.addEventListener('refresh-view', event => this.refreshView(event));
-    this.addEventListener('selected-element-changed', event => {
+    this.addEventListener('refresh-view', (event : CustomEvent) => this.refreshView(event));
+    this.addEventListener('selected-element-changed', (event : CustomEvent) => {
       this.setActiveElement(event.detail.target);
     });
-    this.addEventListener('finish-clone', event => {
+    this.addEventListener('finish-clone', (event : CustomEvent) => {
       this._finishNewElement(event.detail.target, event.detail.target.localName, true);
     });
-    this.addEventListener('update-action-buttons', event => {
-      this.$.appControls.update(event.detail.undos, event.detail.redos);
+    this.addEventListener('update-action-buttons', (event : CustomEvent) => {
+      (this.$.appControls as AppControls).update(event.detail.undos, event.detail.redos);
     });
-    this.addEventListener('package-names-ready', event => {
+    this.addEventListener('package-names-ready', (event : CustomEvent) => {
+      //@ts-ignore
       window.codeView.elementsToPackages = event.detail.list;
     });
 
-    this.addEventListener('remove-from-canvas', event => {
+    this.addEventListener('remove-from-canvas', (event : CustomEvent) => {
       const parent = event.detail.parent;
       const node = event.detail.target;
       if (parent === this.$.viewContainer) {
-        this.$.viewContainer.remove(node);
+        (this.$.viewContainer as CanvasView).removes(node);
       } else {
         parent.removeChild(node);
       }
       parent.click();
     });
-    this.addEventListener('add-to-canvas', event => {
+    this.addEventListener('add-to-canvas', (event : CustomEvent) => {
       const parent = event.detail.parent;
       const node = event.detail.target;
       if (parent === this.$.viewContainer) {
-        this.$.viewContainer.add(node);
+        (this.$.viewContainer as CanvasView).add(node);
       } else {
         parent.appendChild(node);
       }
       node.click();
     });
-    this.addEventListener('move', event => {
-      this.$.canvasControls.move(event.detail.type, event.detail.skipHistory);
+    this.addEventListener('move', (event : CustomEvent) => {
+      (this.$.canvasControls as CanvasControls).move(event.detail.type, event.detail.skipHistory);
     });
   }
 
@@ -307,10 +304,9 @@ class AppShell extends PolymerElement {
     el.classList.add('active');
 
     // Tell everyone who cares about this.
-    this.$.canvasControls.selectedElement =
-        this.$.viewContainer.selectedElement = this.activeElement = el;
-    this.$.canvasControls.selectedElement = this.activeElement;
-    this.$.canvasControls.update(this.activeElement === this.$.viewContainer);
+    (this.$.canvasControls as CanvasControls).selectedElement = (this.$.viewContainer as CanvasView).selectedElement = this.activeElement = el;
+    (this.$.canvasControls as CanvasControls).selectedElement = this.activeElement;
+    (this.$.canvasControls as CanvasControls).update(this.activeElement === this.$.viewContainer);
   }
 
   /*
@@ -321,12 +317,13 @@ class AppShell extends PolymerElement {
     let tag = event.detail.type.toLowerCase();
 
     let el = document.createElement(tag);
-    this.$.viewContainer.add(el);
+    (this.$.viewContainer as CanvasView).add(el);
 
     // If we haven't before, save this initial state of a <tag> element,
     // so that we can diff it to produce the actual state of the world
-    codeView.save(tag, event.detail.package, el);
-    this.$.actionHistory.add('new', el, {parent: el.parentNode});
+    //@ts-ignore
+    (window.codeView as CodeView).save(tag, event.detail.package, el);
+    (this.$.actionHistory as ActionHistory).add('new', el, {parent: el.parentNode});
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
@@ -342,7 +339,7 @@ class AppShell extends PolymerElement {
     let tag = event.detail.type.toLowerCase();;
 
     let el = document.createElement(tag);
-    this.$.viewContainer.add(el);
+    (this.$.viewContainer as CanvasView).add(el);
     
     if (tag !== 'app-layout-sample') {
       el.style.boxSizing = 'border-box';
@@ -357,18 +354,18 @@ class AppShell extends PolymerElement {
   /**
    * Refreshes all the properties/styles of the active element.
    */
-  refreshView(event) {
+  refreshView(event? : CustomEvent) {
     if (event && event.detail.whileTracking) {
       let size = this.activeElement.getBoundingClientRect();
-      this.$.elementView.displayPosition(size.top, size.left);
+      (this.$.elementView as ElementView).displayPosition(size.top, size.left);
       return;
     }
 
     let el = this.activeElement ? this.activeElement : this.$.viewContainer;
     // Display its properties in the side view.
-    this.$.elementView.display(el);
+    (this.$.elementView as ElementView).display(el);
     // Highlight it in the tree.
-    this.$.treeView.recomputeTree(this.$.viewContainer, el);
+    (this.$.treeView as TreeView).recomputeTree(this.$.viewContainer, el);
   }
 
   updateElement(event) {
@@ -378,7 +375,7 @@ class AppShell extends PolymerElement {
     if (detail.skipHistory) {
       return;
     }
-    this.$.actionHistory.add('update', this.activeElement,
+    (this.$.actionHistory as ActionHistory).add('update', this.activeElement,
       {
         type: detail.type, name: detail.name,
         new: {value: detail.value},
@@ -397,7 +394,9 @@ class AppShell extends PolymerElement {
       if (name === 'display' && value === 'flex') {
         let children = this.activeElement.children;
         for (let i = 0; i < children.length; i++) {
+          //@ts-ignore
           children[i].style.position = 'relative';
+          //@ts-ignore
           children[i].style.top = children[i].style.left = 'auto';
         }
       }
@@ -423,18 +422,21 @@ class AppShell extends PolymerElement {
       }
     }
 
-    this.$.treeView.recomputeTree(this.$.viewContainer, this.activeElement);
+    (this.$.treeView as TreeView).recomputeTree(this.$.viewContainer, this.activeElement);
     return previousValue;
   }
 
   viewCode() {
-    Base.fire('update-code', {target: this.$.viewContainer}, {node: this});
+    this.dispatchEvent(new CustomEvent('update-code', {detail: {target: this.$.viewContainer, node: this}}));
+    //Base.fire('update-code', {target: this.$.viewContainer}, {node: this});
   }
 
   viewDemo() {
+    //@ts-ignore
     if (!window.codeView.get)
       return;
-    this.$.demoView.display(window.codeView.get());
+      //@ts-ignore
+    (this.$.demoView as DemoView).display(window.codeView.get());
   }
 
   _setPropertyOrValue(name, value, isAttribute) {
@@ -448,12 +450,11 @@ class AppShell extends PolymerElement {
   /**
    * Initializes a new element that has just been added to the canvas.
    */
-  _finishNewElement(el, tag, isClone) {
+  _finishNewElement(el, tag, isClone = false) {
     el.id = this._makeUniqueId(el, tag);
 
     if (isClone) {
       // Go through the children and reset their IDs too.
-      let children = el.querySelectorAll('*');
       for (let i = 0; i < el.length; i++) {
         el[i].id = this._makeUniqueId(el[i], el[i].localName);
       }
@@ -470,17 +471,16 @@ class AppShell extends PolymerElement {
     // to indicate that.
     let slots = el.root ? el.root.querySelectorAll('slot') : [];
 
-    if ((this.$.paletteView.isNativeElement(tag) && tag !== 'input') ||
+    if (((this.$.paletteView as NativeView).isNativeElement(tag) && tag !== 'input') ||
         slots.length != 0) {
       el.textContent = tag;
     }
   }
 
-  _makeUniqueId(node, id, suffix) {
+  _makeUniqueId(node, id, suffix = null) {
     id = id.replace('-', '_');
     let uId = id + (suffix || '');
-    return this.$.viewContainer.has('#' + uId) ?
+    return (this.$.viewContainer as CanvasView).has('#' + uId) ?
       this._makeUniqueId(node, id, suffix ? ++suffix : 1) : uId;
   }
 }
-customElements.define(AppShell.is, AppShell);

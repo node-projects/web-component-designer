@@ -1,19 +1,13 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement } from '@polymer/decorators';
+import { ElementStuffBase } from './element-stuff-base.js';
 
 import './element-stuff-base.js';
 import './element-stuff-shared-styles.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
-class ElementStyles extends ElementStuffBase(PolymerElement) {
+@customElement('element-stuff-styles')
+export class ElementStyles extends ElementStuffBase(PolymerElement) {
   static get template() {
     return html`
       <style include="element-stuff-shared-styles">
@@ -83,8 +77,6 @@ class ElementStyles extends ElementStuffBase(PolymerElement) {
     `;
   }
 
-  static get is() { return 'element-stuff-styles'; }
-
   constructor() {
     super();
     this.stuffType = 'style';
@@ -95,8 +87,9 @@ class ElementStyles extends ElementStuffBase(PolymerElement) {
       let name = this._stuff[i];
       if (!elementStyles[name])
         continue;
-      let el = this.root.querySelector(`[name=${name}]`);
+      let el = this.root.querySelector(`[name=${name}]`) as HTMLInputElement;
       if (name === 'backgroundColor' || name === 'color') {
+        //@ts-ignore
         el.color = this._rgb2hex(elementStyles[name]);
       } else if (name === 'width' || name === 'height') {
         // For width or height, the computedStyle gives us exact pixels
@@ -125,4 +118,3 @@ class ElementStyles extends ElementStuffBase(PolymerElement) {
     ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
   }
 }
-customElements.define(ElementStyles.is, ElementStyles);

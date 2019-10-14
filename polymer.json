@@ -1,0 +1,31 @@
+{
+  "sources": [
+   "dist/**"
+  ],
+  "extraDependencies": [],
+  "builds": [
+    {
+	  "name": "HTML",
+	  "browserCapabilities": ["es2015", "push", "serviceworker", "modules"],
+      "html": { "minify": true},
+      "css": { "minify": true},
+      "js": { "minify": true, "compile": false},
+	  "bundle": {             
+		"inlineCss": false,          
+		"inlineScripts": true,       
+		"rewriteUrlsInTemplates": false, 
+		"sourcemaps": false,          
+		"stripComments": true   
+	  },
+      "addServiceWorker": false,
+      "addPushManifest": false
+    }
+  ],
+  "moduleResolution": "node",
+  "npm": true,
+  "lint": {
+    "rules": [
+      "polymer-3"
+    ]
+  }
+}

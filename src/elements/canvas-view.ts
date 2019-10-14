@@ -1,20 +1,21 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement } from '@polymer/decorators';
 
 import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { addListener } from '@polymer/polymer/lib/utils/gestures.js';
-import { Base } from '@polymer/polymer/polymer-legacy.js';
+import { ActionHistory } from './action-history';
 
-class CanvasView extends PolymerElement {
+@customElement('canvas-view')
+export class CanvasView extends PolymerElement {
+  actionHistory: ActionHistory;
+  selectedElement: HTMLElement;
+  _justFinishedDraggingOrDropping: boolean;
+  _resizing: boolean;
+  _dropTarget: Element;
+  _initialWidth: number;
+  _initialHeight: number;
+
   static get template() {
     return html`
     <style>
@@ -98,10 +99,8 @@ class CanvasView extends PolymerElement {
       }
     </style>
     <div id="canvas"></div>
-`;
+    `;
   }
-
-  static get is() { return 'canvas-view'; }
 
   connectedCallback() {
     super.connectedCallback();
@@ -110,11 +109,11 @@ class CanvasView extends PolymerElement {
     this.addEventListener('click', event => {
       this.updateActiveElement(this);
     });
-    this.$.canvas.addEventListener('click', event => {
+    this.$.canvas.addEventListener('click', (event : CustomEvent) => {
       // If this element is a link, it will actually do a navigation, so, don't.
       event.preventDefault();
       event.stopImmediatePropagation();
-      if (event.target.id === 'canvas' && !this._justFinishedDraggingOrDropping) {
+      if ((event.target as HTMLElement).id === 'canvas' && !this._justFinishedDraggingOrDropping) {
         this.updateActiveElement(this);
       } else {
         this.updateActiveElement(event.target);
@@ -128,7 +127,7 @@ class CanvasView extends PolymerElement {
     this.$.canvas.appendChild(el);
   }
 
-  remove(el) {
+  removes(el) {
     this.$.canvas.removeChild(el);
   }
 
@@ -150,8 +149,10 @@ class CanvasView extends PolymerElement {
 
   updateActiveElement(el) {
     this.selectedElement = el;
-    Base.fire('selected-element-changed', {target: el}, {node: this});
-    Base.fire('refresh-view', {}, {node: this});
+    this.dispatchEvent(new CustomEvent('selected-element-changed', {detail: {target: el, node: this}}));
+    //Base.fire('selected-element-changed', {target: el}, {node: this});
+    this.dispatchEvent(new CustomEvent('refresh-view', {detail: {node: this}}));
+    //Base.fire('refresh-view', {}, {node: this});
   }
 
   trackElement(event) {
@@ -202,10 +203,10 @@ class CanvasView extends PolymerElement {
         break;
       case 'track':
         // Grid is 10.
-        this._trackx = Math.round(event.detail.dx / 10) * 10;
-        this._tracky = Math.round(event.detail.dy / 10) * 10;
+        let _trackx = Math.round(event.detail.dx / 10) * 10;
+        let _tracky = Math.round(event.detail.dy / 10) * 10;
         el.style.transform = el.style.webkitTransform =
-          'translate(' + this._trackx + 'px, ' + this._tracky + 'px)';
+          'translate(' + _trackx + 'px, ' + _tracky + 'px)';
 
         // See if it's over anything.
         this._dropTarget = null;
@@ -216,7 +217,7 @@ class CanvasView extends PolymerElement {
 
           // Only some native elements and things with slots can be
           // drop targets.
-          let slots = t.root ? t.root.querySelectorAll('slot') : [];
+          let slots = t ? t.querySelectorAll('slot') : [];
 
           // input is the only native in this app that doesn't have a slot
           let canDrop =
@@ -308,7 +309,8 @@ class CanvasView extends PolymerElement {
         break;
     }
     this.updateActiveElement(el);
-    Base.fire('refresh-view', {whileTracking:true}, {node: this});
+    this.dispatchEvent(new CustomEvent('refresh-view', {detail: {whileTracking: true, node: this}}));
+    //Base.fire('refresh-view', {whileTracking:true}, {node: this});
   }
 
   resizeElement(event, el) {
@@ -354,7 +356,7 @@ class CanvasView extends PolymerElement {
     // this code path is only taken when native ShadowDOM is used
     // if there is a shadowroot, it may have a node at x/y
     // if there is not a shadowroot, exit the loop
-    while (next !== notThis && next && next.shadowRoot && !window.ShadyDOM) {
+    while (next !== notThis && next && next.shadowRoot) {
       // if there is a node at x/y in the shadowroot, look deeper
       let oldNext = next;
       next = next.shadowRoot.elementFromPoint(x, y);
@@ -396,7 +398,8 @@ class CanvasView extends PolymerElement {
       case 38:  // up arrow
         if (event.shiftKey) {
           event.preventDefault();
-          Base.fire('move', {type:'up'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', {detail: {type:'up', node: this}}));
+          //Base.fire('move', {type:'up'}, {node: this});
         } else {
           el.style.top = oldTop - 10 + 'px';
         }
@@ -404,7 +407,8 @@ class CanvasView extends PolymerElement {
       case 40:  // down arrow
         if (event.shiftKey) {
           event.preventDefault();
-          Base.fire('move', {type:'down'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', {detail: {type:'down', node: this}}));
+          //Base.fire('move', {type:'down'}, {node: this});
         } else {
           el.style.top = oldTop + 10 + 'px';
         }
@@ -412,7 +416,8 @@ class CanvasView extends PolymerElement {
       case 37:  // left arrow
         if (event.shiftKey) {
           event.preventDefault();
-          Base.fire('move', {type:'back'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', {detail: {type:'back', node: this}}));
+          //Base.fire('move', {type:'back'}, {node: this});
         } else {
           el.style.left = oldLeft - 10 + 'px';
         }
@@ -420,7 +425,8 @@ class CanvasView extends PolymerElement {
       case 39:  // right arrow
         if (event.shiftKey) {
           event.preventDefault();
-          Base.fire('move', {type:'forward'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', {detail: {type:'forward', node: this}}));
+          //Base.fire('move', {type:'forward'}, {node: this});
         } else {
           el.style.left = oldLeft + 10 + 'px';
         }
@@ -433,4 +439,3 @@ class CanvasView extends PolymerElement {
         });
   }
 }
-customElements.define(CanvasView.is, CanvasView);

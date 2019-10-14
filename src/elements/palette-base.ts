@@ -1,16 +1,7 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
-import { Base } from '@polymer/polymer/polymer-legacy.js';
+type Constructor<T> = { new(...args: any[]): T };
 
-window.PaletteBase = function(base) {
-  return class extends base {
+export function PaletteBase<B extends Constructor<any>>(base: B) {
+  class PaletteElementMixin extends base {
     static get properties() {
       return {
         elements: { type: Array }
@@ -54,11 +45,14 @@ window.PaletteBase = function(base) {
     }
 
     _fireEvent(name, tag, packageName, template) {
-      Base.fire(name, {
+      this.dispatchEvent(new CustomEvent(name, {detail: {type: tag, template: template, package: packageName, node: this}}));
+      /*Base.fire(name, {
         type: tag,
         template: template,
         package: packageName
-      }, {node: this});
+      }, {node: this});*/
     }
-  };
+  }
+
+  return PaletteElementMixin;
 }

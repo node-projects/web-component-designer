@@ -1,21 +1,17 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { Base } from '@polymer/polymer/polymer-legacy.js';
+import { customElement, property } from '@polymer/decorators';
 
 /*
  * Manages a stack of available undo/redo actions
  */
-class ActionHistory extends PolymerElement {
+@customElement('action-history')
+export class ActionHistory extends PolymerElement {
+  @property({ type: Array })
+  undoHistory = [];
+  @property({ type: Array })
+  redoHistory = [];
+
   static get template() {
     return html`
       <style>
@@ -26,15 +22,11 @@ class ActionHistory extends PolymerElement {
     `;
   }
 
-  static get is() { return 'action-history'; }
-
   constructor() {
     super();
-    this.undoHistory = [];
-    this.redoHistory = [];
   }
 
-  add(action, node, detail) {
+  add(action, node, detail?) {
     const item = {
       action: action,
       node: node,
@@ -76,14 +68,12 @@ class ActionHistory extends PolymerElement {
     item.node.click();
     switch(item.action) {
       case 'update':
-          Base.fire('element-updated',
-              {type: detail.type, name: detail.name, value: detail.old.value, skipHistory: true},
-              {node: this});
+          this.dispatchEvent(new CustomEvent('element-updated', {detail: {type: detail.type, name: detail.name, value: detail.old.value, skipHistory: true, node: this}}));
+          //Base.fire('element-updated', {type: detail.type, name: detail.name, value: detail.old.value, skipHistory: true}, {node: this});
           break;
       case 'new':
-          Base.fire('remove-from-canvas',
-              {target: item.node, parent: item.detail.parent},
-              {node: this});
+          this.dispatchEvent(new CustomEvent('remove-from-canvas', {detail: {target: item.node, parent: item.detail.parent, node: this}}));
+          //Base.fire('remove-from-canvas', {target: item.node, parent: item.detail.parent}, {node: this});
           break;
       case 'delete':
           if (item.node.id === 'viewContainer') {
@@ -109,10 +99,12 @@ class ActionHistory extends PolymerElement {
           this._updateSize(item.node, detail.old);
           break;
       case 'move-back':
-          Base.fire('move', {type:'forward', skipHistory: true}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', {detail: {type:'forward', skipHistory: true, node: this}}));
+          //Base.fire('move', {type:'forward', skipHistory: true}, {node: this});
           break;
       case 'move-forward':
-          Base.fire('move', {type:'back', skipHistory: true}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', {detail: {type:'back', skipHistory: true, node: this}}));
+          //Base.fire('move', {type:'back', skipHistory: true}, {node: this});
           break;
     }
     item.node.click();
@@ -128,14 +120,12 @@ class ActionHistory extends PolymerElement {
     item.node.click();
     switch(item.action) {
       case 'update':
-          Base.fire('element-updated',
-              {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true},
-              {node: this});
+          this.dispatchEvent(new CustomEvent('element-updated', {detail: {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true, node: this}}));
+          //Base.fire('element-updated', {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true}, {node: this});
           break;
       case 'new':
-          Base.fire('add-to-canvas',
-              {target: item.node, parent: item.detail.parent},
-              {node: this});
+          this.dispatchEvent(new CustomEvent('add-to-canvas', {detail: {target: item.node, parent: item.detail.parent, node: this}}));
+          //Base.fire('add-to-canvas', {target: item.node, parent: item.detail.parent}, {node: this});
           break;
       case 'delete':
           // If the node is the viewContainer, clear its inner HTML.
@@ -163,18 +153,20 @@ class ActionHistory extends PolymerElement {
           this._updatePosition(item.node, detail.new);
           break;
       case 'move-back':
-          Base.fire('move', {type:'forward', skipHistory: true}, {node: this});
+          this.dispatchEvent(new CustomEvent('forward', {detail: {type:'forward', skipHistory: true, node: this}}));
+          //Base.fire('move', {type:'forward', skipHistory: true}, {node: this});
           break;
       case 'move-forward':
-          Base.fire('move', {type:'back', skipHistory: true}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', {detail: {type:'back', skipHistory: true, node: this}}));
+          //Base.fire('move', {type:'back', skipHistory: true}, {node: this});
           break;
     }
     item.node.click();
   }
 
   updateButtons() {
-    Base.fire('update-action-buttons',
-        {undos: this.undoHistory.length, redos: this.redoHistory.length}, {node: this});
+    this.dispatchEvent(new CustomEvent('update-action-buttons', {detail: {undos: this.undoHistory.length, redos: this.redoHistory.length, node: this}}));
+    //Base.fire('update-action-buttons', {undos: this.undoHistory.length, redos: this.redoHistory.length}, {node: this});
   }
 
   _itemsMatch(action, first, second) {
@@ -202,4 +194,3 @@ class ActionHistory extends PolymerElement {
     newParent.appendChild(node);
   }
 }
-customElements.define(ActionHistory.is, ActionHistory);

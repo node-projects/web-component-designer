@@ -1,17 +1,20 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement, property } from '@polymer/decorators';
 
-class CodeView extends PolymerElement {
+@customElement('code-view')
+export class CodeView extends PolymerElement {
+  @property({ type: Object })
+  canvasElement: HTMLElement;
+  @property({ type: Object })
+  elementsToPackages: Object;
+  _aceEditor: AceAjax.Editor;
+  _propertyDefaultsForTag: Object;
+  _attributeDefaultsForTag: Object;
+  _style: any;
+  _templates: any;
+  _imports: any;
+
   static get template() {
     return html`
       <style>
@@ -21,11 +24,6 @@ class CodeView extends PolymerElement {
       </style>
       <div id="__editor" style="height: 100%; width:100%"></div>
     `;
-  }
-
-  static get is() { return 'code-view'; }
-  static get properties() {
-    return { canvasElement: Object, elementsToPackages: Object }
   }
 
   // Yeah so Ace editor doesn't work with shadow roots because
@@ -100,7 +98,7 @@ class CodeView extends PolymerElement {
 
     // Imports. Yes i'm using element globals because I'm lazy. Fight me.
     this._imports = '';
-    this._template = '';
+    this._templates = '';
     this._style = '';
 
     // Host styles.
@@ -124,11 +122,11 @@ class CodeView extends PolymerElement {
               width: 100%;
               height: 100%;
               box-sizing: border-box;
-              ${hostCss.trimRight()}
+              ${hostCss}
             }
             ${this._style.trimRight()}
           </style>
-          ${this._template.trimRight()}
+          ${this._templates.trimRight()}
         </template>
         <script type="module">
           import { PolymerElement } from '/node_modules/@polymer/polymer/polymer-element.js';
@@ -198,28 +196,28 @@ class CodeView extends PolymerElement {
       this._style += this.dumpStyle(tag, nodes[i], '      ');
 
       // If this element doesn't have children, do it on one line.
-      this._template += this.dumpElementStartTag(tag, nodes[i], indent);
+      this._templates += this.dumpElementStartTag(tag, nodes[i], indent);
       if (tag === 'dom-repeat') {
         // We need to wrap the children in a template.
-        this._template += `\n${indent}  <template>`;
+        this._templates += `\n${indent}  <template>`;
       }
 
       let endTagIndent = indent;
       if (nodes[i].children.length == 0) {
-        this._template += this.dumpElementText(tag, nodes[i], '');
+        this._templates += this.dumpElementText(tag, nodes[i], '');
         endTagIndent = '';
       } else {
-        this._template += '\n'
+        this._templates += '\n'
         this.dumpNode(nodes[i], indent + '  ', directoryPrefix) + '\n';
       }
 
       if (tag === 'dom-repeat') {
         // We need to wrap the children in a template.
-        this._template += `${indent}  </template>\n`;
+        this._templates += `${indent}  </template>\n`;
         endTagIndent = indent;
       }
 
-      this._template += this.dumpElementEndTag(tag, nodes[i], endTagIndent) + '\n';
+      this._templates += this.dumpElementEndTag(tag, nodes[i], endTagIndent) + '\n';
     }
   }
 
@@ -343,4 +341,3 @@ class CodeView extends PolymerElement {
     return hasQuotes ? `${name}='${value}' ` : `${name}="${value}" `;
   }
 }
-customElements.define(CodeView.is, CodeView);

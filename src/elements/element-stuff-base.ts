@@ -1,16 +1,7 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
-import { Base } from '@polymer/polymer/polymer-legacy.js';
+type Constructor<T> = { new(...args: any[]): T };
 
-window.ElementStuffBase = function(base) {
-  return class extends base {
+export function ElementStuffBase<B extends Constructor<any>>(base: B) {
+  class ElementStuffElementMixin extends base {
     ready() {
       super.ready();
       this._recomputeStuff();
@@ -40,13 +31,16 @@ window.ElementStuffBase = function(base) {
       let value = target.value;
       if (target.classList.contains('custom-picker')) { value = target.color; }
 
-      Base.fire('element-updated',
+      this.dispatchEvent(new CustomEvent('element-updated', {detail: {type: this.stuffType, name: target.getAttribute('name'), value: value, isAttribute: target.classList.contains('attribute'), node: this}}));
+      /*Base.fire('element-updated',
           {
             type: this.stuffType,
             name: target.getAttribute('name'),
             value: value,
             isAttribute: target.classList.contains('attribute')
-          }, {node: this});
+          }, {node: this});*/
     }
-  };
+  }
+
+  return ElementStuffElementMixin;
 }

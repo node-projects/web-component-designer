@@ -1,19 +1,13 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement } from '@polymer/decorators';
+import { ElementStuffBase } from './element-stuff-base.js';
 
 import './element-stuff-base.js';
 import './element-stuff-shared-styles.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
-class ElementProperties extends ElementStuffBase(PolymerElement) {
+@customElement('element-stuff-properties')
+export class ElementProperties extends ElementStuffBase(PolymerElement) {
   static get template() {
     return html`
       <style include="element-stuff-shared-styles"></style>
@@ -32,8 +26,6 @@ class ElementProperties extends ElementStuffBase(PolymerElement) {
       </div>
     `;
   }
-
-  static get is() { return 'element-stuff-properties'; }
 
   constructor() {
     super();
@@ -62,7 +54,7 @@ class ElementProperties extends ElementStuffBase(PolymerElement) {
   _displayBasicProperties(target) {
     for (let i = 0; i < this._stuff.length; i++) {
       let prop = this._stuff[i];
-      let el = this.root.querySelector(`[name=${prop}]`);
+      let el = this.root.querySelector(`[name=${prop}]`) as HTMLInputElement;
       // Ugh
       if (prop === 'attributes') {
         let v = '';
@@ -95,7 +87,7 @@ class ElementProperties extends ElementStuffBase(PolymerElement) {
     }
   }
 
-  _displayPropsOrAttributes(target, propNames, isAttribute) {
+  _displayPropsOrAttributes(target, propNames, isAttribute = false) {
     for (let i = 0; i < propNames.length; i++) {
       let name = propNames[i];
       // Ignore things that start with a _. Polymer converts every property
@@ -132,4 +124,3 @@ class ElementProperties extends ElementStuffBase(PolymerElement) {
     }
   }
 }
-customElements.define(ElementProperties.is, ElementProperties);

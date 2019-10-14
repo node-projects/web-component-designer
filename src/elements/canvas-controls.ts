@@ -1,21 +1,21 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement, property } from '@polymer/decorators';
 
 import '@polymer/iron-icon/iron-icon.js';
 import './app-icons.js';
 import './designer-tab.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { Base } from '@polymer/polymer/polymer-legacy.js';
+import { ActionHistory } from './action-history.js';
 
-class CanvasControls extends PolymerElement {
+@customElement('canvas-controls')
+export class CanvasControls extends PolymerElement {
+  @property({ type: Object, observer: '_selectedElementChanged' })
+  selectedElement: HTMLElement;
+  @property({ type: Object })
+  canvasElement: Object;
+  @property({ type: Object })
+  actionHistory: ActionHistory;
+
   static get template() {
     return html`
       <style>
@@ -107,28 +107,16 @@ class CanvasControls extends PolymerElement {
     `;
   }
 
-  static get is() { return 'canvas-controls'; }
-
-  static get properties() { return {
-      selectedElement: {
-        type: Object,
-        observer: '_selectedElementChanged'
-      },
-      canvasElement: Object,
-      actionHistory: Object
-    }
-  }
-
   /**
    * Disable a bunch of UI if the selected element is the canvas element.
    */
   update(disableUI) {
-    this.$.cloneBtn.disabled = disableUI;
-    this.$.fitBtn.disabled = disableUI;
-    this.$.moveUpBtn.disabled = disableUI;
-    this.$.moveDownBtn.disabled = disableUI;
-    this.$.moveBackBtn.disabled = disableUI;
-    this.$.moveForwardBtn.disabled = disableUI;
+    (this.$.cloneBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.fitBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveUpBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveDownBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveBackBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveForwardBtn as HTMLInputElement).disabled = disableUI;
   }
 
   /**
@@ -143,8 +131,8 @@ class CanvasControls extends PolymerElement {
     const el = this.selectedElement;
     // Deleting the top level app should remove its children.
     if (this._isCanvasElement(el)) {
-      this.actionHistory.add('delete', el, {innerHTML: el.getInnerHTML()});
-      el.setInnerHTML('');
+      this.actionHistory.add('delete', el, {innerHTML: el.innerHTML});
+      el.innerHTML = '';
     } else {
       const parent = el.parentElement;
       parent.removeChild(el);
@@ -167,7 +155,8 @@ class CanvasControls extends PolymerElement {
     let clone = el.cloneNode(true);
     el.parentNode.appendChild(clone);
 
-    Base.fire('finish-clone', {target: clone}, {node: this});
+    this.dispatchEvent(new CustomEvent('selected-element-changed', {detail: {target: clone, node: this}}));
+    //Base.fire('finish-clone', {target: clone}, {node: this});
 
     // P.S: Since we did a clone, we already have the initial state of the <tag>.
     this.actionHistory.add('new', clone, {parent: el.parentNode});
@@ -298,7 +287,7 @@ class CanvasControls extends PolymerElement {
 
     // Not everything accepts children, as we've learnt from canvas-view
     // (where I copied this code from like a lazy bum)
-    let slots = sibling.root ? sibling.root.querySelectorAll('slot') : [];
+    let slots = sibling ? sibling.querySelectorAll('slot') : [];
     let canDrop =
       (sibling.localName.indexOf('-') === -1 && sibling.localName !== 'input') ||
        sibling.localName === 'dom-repeat' || slots.length !== 0;
@@ -325,15 +314,16 @@ class CanvasControls extends PolymerElement {
   }
 
   _refreshView() {
-    Base.fire('refresh-view', {}, {node: this});
+    this.dispatchEvent(new CustomEvent('refresh-view', {detail: {node: this}}));
+    //Base.fire('refresh-view', {}, {node: this});
   }
 
   _selectedElementChanged() {
-    Base.fire('selected-element-changed', {target: this.selectedElement}, {node: this});
+    this.dispatchEvent(new CustomEvent('selected-element-changed', {detail: {target: this.selectedElement, node: this}}));
+    //Base.fire('selected-element-changed', {target: this.selectedElement}, {node: this});
   }
 
   _isCanvasElement(el) {
     return (el === this.canvasElement);
   }
 }
-customElements.define(CanvasControls.is, CanvasControls);
