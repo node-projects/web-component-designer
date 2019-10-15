@@ -1,22 +1,13 @@
-/**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
-
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement } from '@polymer/decorators';
 
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-tabs/paper-tab.js';
 
-class IronPagesSample extends PolymerElement {
+@customElement("iron-pages-sample")
+export class IronPagesSample extends PolymerElement {
   static get template() {
     return html`
       <style>
@@ -40,7 +31,4 @@ class IronPagesSample extends PolymerElement {
       </iron-pages>
     `;
   }
-
-  static get is() { return 'iron-pages-sample'; }
 }
-customElements.define(IronPagesSample.is, IronPagesSample);
