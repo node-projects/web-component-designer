@@ -1,6 +1,15 @@
 import { PolymerElement } from '@polymer/polymer';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
+import { CanvasControls } from './canvas-controls.js';
+import { ActionHistory } from './action-history.js';
+import { AppControls } from './app-controls.js';
+import { TreeView } from './tree-view.js';
+import { CanvasView } from './canvas-view.js';
+import { CodeView } from './code-view.js';
+import { DemoView } from './demo-view.js';
+import { NativeView } from './palette-native.js';
+import { ElementView } from './element-view.js';
 
 import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
@@ -19,15 +28,6 @@ import './tree-view.js';
 import './element-view.js';
 import './canvas-view.js';
 import './canvas-controls.js';
-import { CanvasControls } from './canvas-controls.js';
-import { ActionHistory } from './action-history.js';
-import { AppControls } from './app-controls.js';
-import { TreeView } from './tree-view.js';
-import { CanvasView } from './canvas-view.js';
-import { CodeView } from './code-view.js';
-import { DemoView } from './demo-view.js';
-import { NativeView } from './palette-native.js';
-import { ElementView } from './element-view.js';
 
 //@ts-ignore
 window.require(["ace/ace"], function(a) {

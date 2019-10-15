@@ -1,6 +1,7 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
+import { NativeView } from './palette-native.js';
 
 import '@polymer/iron-pages/iron-pages.js';
 import './designer-tabs.js';
@@ -8,7 +9,6 @@ import './designer-tab.js';
 import './palette-elements.js';
 import './palette-native.js';
 import './palette-samples.js';
-import { NativeView } from './palette-native.js';
 
 @customElement('palette-view')
 export class PaletteView extends PolymerElement {

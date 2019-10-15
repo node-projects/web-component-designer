@@ -1,10 +1,10 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement } from '@polymer/decorators';
-
-import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
 import { addListener } from '@polymer/polymer/lib/utils/gestures.js';
 import { ActionHistory } from './action-history';
+
+import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
 
 @customElement('canvas-view')
 export class CanvasView extends PolymerElement {

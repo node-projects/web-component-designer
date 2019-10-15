@@ -1,6 +1,9 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
+import { ElementProperties } from './element-stuff-properties.js';
+import { ElementStyles } from './element-stuff-styles.js';
+import { ElementFlex } from './element-stuff-flex.js';
 
 import '@polymer/iron-pages/iron-pages.js';
 import './designer-tabs.js';
@@ -8,9 +11,6 @@ import './designer-tab.js';
 import './element-stuff-styles.js';
 import './element-stuff-flex.js';
 import './element-stuff-properties.js';
-import { ElementProperties } from './element-stuff-properties.js';
-import { ElementStyles } from './element-stuff-styles.js';
-import { ElementFlex } from './element-stuff-flex.js';
 
 @customElement('element-view')
 export class ElementView extends PolymerElement {
