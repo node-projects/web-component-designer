@@ -39,9 +39,9 @@ export class DemoView extends PolymerElement {
     this.$.placeholder.appendChild(iframe);
     (this.$.loading as HTMLDivElement).hidden = false;
 
-    /*iframe.onload = function() {
+    iframe.onload = function(this: DemoView) {
       (this.$.loading as HTMLDivElement).hidden = true;
-    }.bind(this);*/
+    }.bind(this);
 
     let doc = iframe.contentWindow.document;
     doc.open();
