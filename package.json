@@ -57,30 +57,5 @@
     "@types/ace": "^0.0.42",
     "typescript": "^3.6.3",
     "typescript-lit-html-plugin": "^0.9.0"
-  },
-  "subelements": {
-    "iron-icons": [
-      "communication-icons",
-      "device-icons",
-      "editor-icons",
-      "hardware-icons",
-      "image-icons",
-      "maps-icons",
-      "notification-icons",
-      "places-icons",
-      "social-icons",
-      "update-icons"
-    ],
-    "paper-input": [
-      "paper-textarea"
-    ],
-    "paper-tabs": [
-      "paper-tab"
-    ],
-    "app-layout": [
-      "app-header",
-      "app-toolbar",
-      "app-drawer"
-    ]
   }
 }

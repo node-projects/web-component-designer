@@ -7,7 +7,7 @@ import '@polymer/polymer/lib/elements/dom-repeat.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import './palette-shared-styles.js';
 
-@customElement('elements-view')
+@customElement('palette-elements')
 export class ElementsView extends PaletteBase(PolymerElement) {
   namesToPackages : Object;
 
@@ -31,7 +31,7 @@ export class ElementsView extends PaletteBase(PolymerElement) {
           <button>[[item]]</button>
         </template>
       </dom-repeat>
-      <iron-ajax auto="" url="package.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
+      <iron-ajax auto="" url="elements.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
     `;
   }
 
@@ -43,7 +43,7 @@ export class ElementsView extends PaletteBase(PolymerElement) {
   _elementsReady(event) {
     // First, some elements have sub-elements in the same package.
     let subElements = event.detail.response.subelements;
-    let list = event.detail.response.devDependencies;
+    let list = event.detail.response;
 
     for (let p in list) {
       this.namesToPackages[p] = p;
