@@ -9,7 +9,7 @@ import './palette-shared-styles.js';
 
 @customElement('palette-elements')
 export class ElementsView extends PaletteBase(PolymerElement) {
-  namesToPackages: Object;
+  namesToPackages: Map<string, string>;
 
   static get template() {
     return html`
@@ -37,7 +37,7 @@ export class ElementsView extends PaletteBase(PolymerElement) {
 
   ready() {
     super.ready();
-    this.namesToPackages = {};
+    this.namesToPackages = new Map();
   }
 
   _elementsReady(event) {

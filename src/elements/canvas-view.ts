@@ -149,9 +149,9 @@ export class CanvasView extends PolymerElement {
 
   updateActiveElement(el) {
     this.selectedElement = el;
-    this.dispatchEvent(new CustomEvent('selected-element-changed', {detail: {target: el, node: this}}));
+    this.dispatchEvent(new CustomEvent('selected-element-changed', {bubbles: true, composed: true, detail: {target: el, node: this}}));
     //Base.fire('selected-element-changed', {target: el}, {node: this});
-    this.dispatchEvent(new CustomEvent('refresh-view', {detail: {node: this}}));
+    this.dispatchEvent(new CustomEvent('refresh-view', {bubbles: true, composed: true, detail: {node: this}}));
     //Base.fire('refresh-view', {}, {node: this});
   }
 
@@ -309,7 +309,7 @@ export class CanvasView extends PolymerElement {
         break;
     }
     this.updateActiveElement(el);
-    this.dispatchEvent(new CustomEvent('refresh-view', {detail: {whileTracking: true, node: this}}));
+    this.dispatchEvent(new CustomEvent('refresh-view', {bubbles: true, composed: true, detail: {whileTracking: true, node: this}}));
     //Base.fire('refresh-view', {whileTracking:true}, {node: this});
   }
 
@@ -398,7 +398,7 @@ export class CanvasView extends PolymerElement {
       case 38:  // up arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {detail: {type:'up', node: this}}));
+          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'up', node: this}}));
           //Base.fire('move', {type:'up'}, {node: this});
         } else {
           el.style.top = oldTop - 10 + 'px';
@@ -407,7 +407,7 @@ export class CanvasView extends PolymerElement {
       case 40:  // down arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {detail: {type:'down', node: this}}));
+          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'down', node: this}}));
           //Base.fire('move', {type:'down'}, {node: this});
         } else {
           el.style.top = oldTop + 10 + 'px';
@@ -416,7 +416,7 @@ export class CanvasView extends PolymerElement {
       case 37:  // left arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {detail: {type:'back', node: this}}));
+          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', node: this}}));
           //Base.fire('move', {type:'back'}, {node: this});
         } else {
           el.style.left = oldLeft - 10 + 'px';
@@ -425,7 +425,7 @@ export class CanvasView extends PolymerElement {
       case 39:  // right arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {detail: {type:'forward', node: this}}));
+          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'forward', node: this}}));
           //Base.fire('move', {type:'forward'}, {node: this});
         } else {
           el.style.left = oldLeft + 10 + 'px';

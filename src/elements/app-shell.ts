@@ -427,7 +427,7 @@ export class AppShell extends PolymerElement {
   }
 
   viewCode() {
-    this.dispatchEvent(new CustomEvent('update-code', {detail: {target: this.$.viewContainer, node: this}}));
+    this.dispatchEvent(new CustomEvent('update-code', {bubbles: true, composed: true, detail: {target: this.$.viewContainer, node: this}}));
     //Base.fire('update-code', {target: this.$.viewContainer}, {node: this});
   }
 
