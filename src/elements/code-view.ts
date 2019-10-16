@@ -7,7 +7,8 @@ export class CodeView extends PolymerElement {
   @property({ type: Object })
   canvasElement: HTMLElement;
   @property({ type: Object })
-  elementsToPackages: Object;
+  elementsToPackages: Map<string, string>;
+  
   _aceEditor: AceAjax.Editor;
   _propertyDefaultsForTag: Object;
   _attributeDefaultsForTag: Object;
