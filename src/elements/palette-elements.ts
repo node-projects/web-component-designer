@@ -9,7 +9,7 @@ import './palette-shared-styles.js';
 
 @customElement('palette-elements')
 export class ElementsView extends PaletteBase(PolymerElement) {
-  namesToPackages : Object;
+  namesToPackages: Object;
 
   static get template() {
     return html`
@@ -62,7 +62,7 @@ export class ElementsView extends PaletteBase(PolymerElement) {
     }
     this.elements = Object.keys(list).concat(subelements).sort();
 
-    this.dispatchEvent(new CustomEvent('package-names-ready', {detail: {list: this.namesToPackages, node: this}}));
+    this.dispatchEvent(new CustomEvent('package-names-ready', { bubbles: true, composed: true, detail: { list: this.namesToPackages, node: this } }));
     //Base.fire('package-names-ready', {list: this.namesToPackages}, {node: this});
   }
 
@@ -80,7 +80,7 @@ export class ElementsView extends PaletteBase(PolymerElement) {
       // Oof, someone didn't know what element this was. Find it in the list.
       packageName = this.namesToPackages[kind];
     }
-    
+
     this._fireEvent('new-element', kind, packageName, '');
   }
 }

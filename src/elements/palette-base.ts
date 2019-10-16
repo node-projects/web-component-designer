@@ -1,6 +1,8 @@
+import { PolymerElement } from "@polymer/polymer";
+
 type Constructor<T> = { new(...args: any[]): T };
 
-export function PaletteBase<B extends Constructor<any>>(base: B) {
+export function PaletteBase<B extends Constructor<PolymerElement & any>>(base: B) {
   class PaletteElementMixin extends base {
     static get properties() {
       return {
@@ -45,12 +47,7 @@ export function PaletteBase<B extends Constructor<any>>(base: B) {
     }
 
     _fireEvent(name, tag, packageName, template) {
-      this.dispatchEvent(new CustomEvent(name, {detail: {type: tag, template: template, package: packageName, node: this}}));
-      /*Base.fire(name, {
-        type: tag,
-        template: template,
-        package: packageName
-      }, {node: this});*/
+      this.dispatchEvent(new CustomEvent(name, { bubbles: true, composed: true, detail: { type: tag, template: template, package: packageName, node: this } }));
     }
   }
 
