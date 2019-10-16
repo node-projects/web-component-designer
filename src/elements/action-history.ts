@@ -68,11 +68,11 @@ export class ActionHistory extends PolymerElement {
     item.node.click();
     switch(item.action) {
       case 'update':
-          this.dispatchEvent(new CustomEvent('element-updated', {detail: {type: detail.type, name: detail.name, value: detail.old.value, skipHistory: true, node: this}}));
+          this.dispatchEvent(new CustomEvent('element-updated', {bubbles: true, composed: true, detail: {type: detail.type, name: detail.name, value: detail.old.value, skipHistory: true, node: this}}));
           //Base.fire('element-updated', {type: detail.type, name: detail.name, value: detail.old.value, skipHistory: true}, {node: this});
           break;
       case 'new':
-          this.dispatchEvent(new CustomEvent('remove-from-canvas', {detail: {target: item.node, parent: item.detail.parent, node: this}}));
+          this.dispatchEvent(new CustomEvent('remove-from-canvas', {bubbles: true, composed: true, detail: {target: item.node, parent: item.detail.parent, node: this}}));
           //Base.fire('remove-from-canvas', {target: item.node, parent: item.detail.parent}, {node: this});
           break;
       case 'delete':
@@ -99,11 +99,11 @@ export class ActionHistory extends PolymerElement {
           this._updateSize(item.node, detail.old);
           break;
       case 'move-back':
-          this.dispatchEvent(new CustomEvent('move', {detail: {type:'forward', skipHistory: true, node: this}}));
+          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'forward', skipHistory: true, node: this}}));
           //Base.fire('move', {type:'forward', skipHistory: true}, {node: this});
           break;
       case 'move-forward':
-          this.dispatchEvent(new CustomEvent('move', {detail: {type:'back', skipHistory: true, node: this}}));
+          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', skipHistory: true, node: this}}));
           //Base.fire('move', {type:'back', skipHistory: true}, {node: this});
           break;
     }
@@ -120,11 +120,11 @@ export class ActionHistory extends PolymerElement {
     item.node.click();
     switch(item.action) {
       case 'update':
-          this.dispatchEvent(new CustomEvent('element-updated', {detail: {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true, node: this}}));
+          this.dispatchEvent(new CustomEvent('element-updated', {bubbles: true, composed: true, detail: {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true, node: this}}));
           //Base.fire('element-updated', {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true}, {node: this});
           break;
       case 'new':
-          this.dispatchEvent(new CustomEvent('add-to-canvas', {detail: {target: item.node, parent: item.detail.parent, node: this}}));
+          this.dispatchEvent(new CustomEvent('add-to-canvas', {bubbles: true, composed: true, detail: {target: item.node, parent: item.detail.parent, node: this}}));
           //Base.fire('add-to-canvas', {target: item.node, parent: item.detail.parent}, {node: this});
           break;
       case 'delete':
@@ -153,11 +153,11 @@ export class ActionHistory extends PolymerElement {
           this._updatePosition(item.node, detail.new);
           break;
       case 'move-back':
-          this.dispatchEvent(new CustomEvent('forward', {detail: {type:'forward', skipHistory: true, node: this}}));
+          this.dispatchEvent(new CustomEvent('forward', {bubbles: true, composed: true, detail: {type:'forward', skipHistory: true, node: this}}));
           //Base.fire('move', {type:'forward', skipHistory: true}, {node: this});
           break;
       case 'move-forward':
-          this.dispatchEvent(new CustomEvent('move', {detail: {type:'back', skipHistory: true, node: this}}));
+          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', skipHistory: true, node: this}}));
           //Base.fire('move', {type:'back', skipHistory: true}, {node: this});
           break;
     }
@@ -165,7 +165,7 @@ export class ActionHistory extends PolymerElement {
   }
 
   updateButtons() {
-    this.dispatchEvent(new CustomEvent('update-action-buttons', {detail: {undos: this.undoHistory.length, redos: this.redoHistory.length, node: this}}));
+    this.dispatchEvent(new CustomEvent('update-action-buttons', {bubbles: true, composed: true, detail: {undos: this.undoHistory.length, redos: this.redoHistory.length, node: this}}));
     //Base.fire('update-action-buttons', {undos: this.undoHistory.length, redos: this.redoHistory.length}, {node: this});
   }
 
