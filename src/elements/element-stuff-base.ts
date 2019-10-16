@@ -32,13 +32,6 @@ export function ElementStuffBase<B extends Constructor<any>>(base: B) {
       if (target.classList.contains('custom-picker')) { value = target.color; }
 
       this.dispatchEvent(new CustomEvent('element-updated', {bubbles: true, composed: true, detail: {type: this.stuffType, name: target.getAttribute('name'), value: value, isAttribute: target.classList.contains('attribute'), node: this}}));
-      /*Base.fire('element-updated',
-          {
-            type: this.stuffType,
-            name: target.getAttribute('name'),
-            value: value,
-            isAttribute: target.classList.contains('attribute')
-          }, {node: this});*/
     }
   }
 

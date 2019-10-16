@@ -156,8 +156,7 @@ export class CanvasControls extends PolymerElement {
     el.parentNode.appendChild(clone);
 
     this.dispatchEvent(new CustomEvent('selected-element-changed', {bubbles: true, composed: true, detail: {target: clone, node: this}}));
-    //Base.fire('finish-clone', {target: clone}, {node: this});
-
+   
     // P.S: Since we did a clone, we already have the initial state of the <tag>.
     this.actionHistory.add('new', clone, {parent: el.parentNode});
     this._refreshView();
@@ -315,12 +314,10 @@ export class CanvasControls extends PolymerElement {
 
   _refreshView() {
     this.dispatchEvent(new CustomEvent('refresh-view', {bubbles: true, composed: true, detail: {node: this}}));
-    //Base.fire('refresh-view', {}, {node: this});
   }
 
   _selectedElementChanged() {
     this.dispatchEvent(new CustomEvent('selected-element-changed', {bubbles: true, composed: true, detail: {target: this.selectedElement, node: this}}));
-    //Base.fire('selected-element-changed', {target: this.selectedElement}, {node: this});
   }
 
   _isCanvasElement(el) {

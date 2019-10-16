@@ -155,13 +155,11 @@ export class CanvasView extends PolymerElement {
   updateActiveElement(el) {
     this.selectedElement = el;
     this.dispatchEvent(new CustomEvent('selected-element-changed', { bubbles: true, composed: true, detail: { target: el, node: this } }));
-    //Base.fire('selected-element-changed', {target: el}, {node: this});
     this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { node: this } }));
-    //Base.fire('refresh-view', {}, {node: this});
   }
 
   downOnElement(event) {
-    // STore initial Mouse Pos for checking if resizeing
+    // Store initial Mouse Pos for checking if resizeing
     this._downX = event.detail.x;
     this._downY = event.detail.y;
   }
@@ -324,7 +322,6 @@ export class CanvasView extends PolymerElement {
     }
     this.updateActiveElement(el);
     this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
-    //Base.fire('refresh-view', {whileTracking:true}, {node: this});
   }
 
   resizeElement(event, el) {
@@ -416,7 +413,6 @@ export class CanvasView extends PolymerElement {
         if (event.shiftKey) {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
-          //Base.fire('move', {type:'up'}, {node: this});
         } else {
           el.style.top = oldTop - 10 + 'px';
         }
@@ -425,7 +421,6 @@ export class CanvasView extends PolymerElement {
         if (event.shiftKey) {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
-          //Base.fire('move', {type:'down'}, {node: this});
         } else {
           el.style.top = oldTop + 10 + 'px';
         }
@@ -434,7 +429,6 @@ export class CanvasView extends PolymerElement {
         if (event.shiftKey) {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
-          //Base.fire('move', {type:'back'}, {node: this});
         } else {
           el.style.left = oldLeft - 10 + 'px';
         }
@@ -443,7 +437,6 @@ export class CanvasView extends PolymerElement {
         if (event.shiftKey) {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
-          //Base.fire('move', {type:'forward'}, {node: this});
         } else {
           el.style.left = oldLeft + 10 + 'px';
         }
