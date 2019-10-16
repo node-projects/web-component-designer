@@ -1,0 +1,5 @@
+language: nodejs
+
+script:
+  - npm run setup
+  - npm run build
