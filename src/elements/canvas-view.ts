@@ -15,6 +15,8 @@ export class CanvasView extends PolymerElement {
   _dropTarget: Element;
   _initialWidth: number;
   _initialHeight: number;
+  _downX: number;
+  _downY: number;
 
   static get template() {
     return html`
@@ -105,6 +107,7 @@ export class CanvasView extends PolymerElement {
   connectedCallback() {
     super.connectedCallback();
 
+    addListener(this.$.canvas, 'down', this.downOnElement.bind(this));
     addListener(this.$.canvas, 'track', this.trackElement.bind(this));
     this.addEventListener('click', event => {
       this.updateActiveElement(this);
@@ -155,6 +158,12 @@ export class CanvasView extends PolymerElement {
     //Base.fire('refresh-view', {}, {node: this});
   }
 
+  downOnElement(event) {
+    // STore initial Mouse Pos for checking if resizeing
+    this._downX = event.detail.x;
+    this._downY = event.detail.y;
+  }
+
   trackElement(event) {
     let el = event.target;
     this._justFinishedDraggingOrDropping = false;
@@ -168,7 +177,7 @@ export class CanvasView extends PolymerElement {
     }
 
     let rekt = el.getBoundingClientRect();
-    let shouldResize = this.dragShouldSize(event, rekt);
+    let shouldResize = this.dragShouldSize(rekt);
     if (shouldResize) {
       this._resizing = true;
       this._initialWidth = rekt.width;
@@ -344,9 +353,9 @@ export class CanvasView extends PolymerElement {
     this.updateActiveElement(el);
   }
 
-  dragShouldSize(event, rect) {
-    const right = Math.abs(rect.right - event.detail.x);
-    const bottom = Math.abs(rect.bottom - event.detail.y);
+  dragShouldSize(rect) {
+    const right = rect.right - this._downX;
+    const bottom = rect.bottom - this._downY;
     return (right < 8 && bottom < 8);
   }
 
