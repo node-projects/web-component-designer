@@ -1,5 +1,7 @@
 # wizzywid
 
+[![Build Status](https://travis-ci.com/jzeyer/wizzywid.svg?branch=master)](https://travis-ci.com/jzeyer/wizzywid)
+
 This is a very simple UI getting-started-tool for HTML, Custom Elements, and Polymer.
 
 It does not have all of the features that a full UI [designer app](https://github.com/polymer/designer)
