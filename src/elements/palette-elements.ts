@@ -43,12 +43,6 @@ export class ElementsView extends PaletteBase(PolymerElement) {
   _elementsReady(event) {
     // First, some elements have sub-elements in the same package.
     let subElements = event.detail.response.subelements;
-    let list = event.detail.response;
-
-    for (let p in list) {
-      this.namesToPackages[p] = p;
-    }
-
     let subelements = [];
     for (let parent in subElements) {
       for (let i = 0; i < subElements[parent].length; i++) {
@@ -60,7 +54,7 @@ export class ElementsView extends PaletteBase(PolymerElement) {
         this.namesToPackages[subElements[parent][i]] = packageName;
       }
     }
-    this.elements = Object.keys(list).concat(subelements).sort();
+    this.elements = subelements.sort();
 
     this.dispatchEvent(new CustomEvent('package-names-ready', { bubbles: true, composed: true, detail: { list: this.namesToPackages, node: this } }));
     //Base.fire('package-names-ready', {list: this.namesToPackages}, {node: this});
