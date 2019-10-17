@@ -99,6 +99,13 @@ export class CanvasView extends PolymerElement {
         outline: dashed 3px var(--highlight-blue) !important;
         outline-offset: 2px;
       }
+      .over::before {
+        content: 'press "alt" to enter container';
+        top: 5px;
+        left: 5px;
+        position: absolute;
+        opacity: 0.5;
+      }
     </style>
     <div id="canvas"></div>
     `;
@@ -247,7 +254,9 @@ export class CanvasView extends PolymerElement {
               previousTargets[j].classList.remove('over');
             }
             t.classList.add('over');
-            this._dropTarget = t;
+
+            if (event.detail.sourceEvent.altKey)
+              this._dropTarget = t;
           }
         }
         break;
