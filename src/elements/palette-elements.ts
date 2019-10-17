@@ -57,7 +57,6 @@ export class ElementsView extends PaletteBase(PolymerElement) {
     this.elements = subelements.sort();
 
     this.dispatchEvent(new CustomEvent('package-names-ready', { bubbles: true, composed: true, detail: { list: this.namesToPackages, node: this } }));
-    //Base.fire('package-names-ready', {list: this.namesToPackages}, {node: this});
   }
 
   _doClick(target, kind) {

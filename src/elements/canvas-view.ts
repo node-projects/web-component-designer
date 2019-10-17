@@ -17,6 +17,8 @@ export class CanvasView extends PolymerElement {
   _initialHeight: number;
   _downX: number;
   _downY: number;
+  _gridSize = 10;
+  _alignOnGrid = true;
 
   static get template() {
     return html`
@@ -112,7 +114,7 @@ export class CanvasView extends PolymerElement {
     this.addEventListener('click', event => {
       this.updateActiveElement(this);
     });
-    this.$.canvas.addEventListener('click', (event : CustomEvent) => {
+    this.$.canvas.addEventListener('click', (event: CustomEvent) => {
       // If this element is a link, it will actually do a navigation, so, don't.
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -145,21 +147,19 @@ export class CanvasView extends PolymerElement {
   getInnerHTML() {
     return this.$.canvas.innerHTML;
   }
-  
+
   get children() {
     return this.$.canvas.children;
   }
 
   updateActiveElement(el) {
     this.selectedElement = el;
-    this.dispatchEvent(new CustomEvent('selected-element-changed', {bubbles: true, composed: true, detail: {target: el, node: this}}));
-    //Base.fire('selected-element-changed', {target: el}, {node: this});
-    this.dispatchEvent(new CustomEvent('refresh-view', {bubbles: true, composed: true, detail: {node: this}}));
-    //Base.fire('refresh-view', {}, {node: this});
+    this.dispatchEvent(new CustomEvent('selected-element-changed', { bubbles: true, composed: true, detail: { target: el, node: this } }));
+    this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { node: this } }));
   }
 
   downOnElement(event) {
-    // STore initial Mouse Pos for checking if resizeing
+    // Store initial Mouse Pos for checking if resizeing
     this._downX = event.detail.x;
     this._downY = event.detail.y;
   }
@@ -203,7 +203,7 @@ export class CanvasView extends PolymerElement {
   }
 
   dragElement(event, el, rekt) {
-    switch(event.detail.state) {
+    switch (event.detail.state) {
       case 'start':
         this._resizing = false;
         el.style.position = 'absolute';
@@ -211,11 +211,14 @@ export class CanvasView extends PolymerElement {
         el.classList.add('active');
         break;
       case 'track':
-        // Grid is 10.
-        let _trackx = Math.round(event.detail.dx / 10) * 10;
-        let _tracky = Math.round(event.detail.dy / 10) * 10;
+        let trackX = event.detail.dx;
+        let trackY = event.detail.dy;
+        if (this._alignOnGrid) {
+          trackX = Math.round(trackX / this._gridSize) * this._gridSize;
+          trackY = Math.round(trackY / this._gridSize) * this._gridSize;
+        }
         el.style.transform = el.style.webkitTransform =
-          'translate(' + _trackx + 'px, ' + _tracky + 'px)';
+          'translate(' + trackX + 'px, ' + trackY + 'px)';
 
         // See if it's over anything.
         this._dropTarget = null;
@@ -230,8 +233,8 @@ export class CanvasView extends PolymerElement {
 
           // input is the only native in this app that doesn't have a slot
           let canDrop =
-              (t.localName.indexOf('-') === -1 && t.localName !== 'input') ||
-              t.localName === 'dom-repeat' || slots.length !== 0;
+            (t.localName.indexOf('-') === -1 && t.localName !== 'input') ||
+            t.localName === 'dom-repeat' || slots.length !== 0;
 
           if (!canDrop) {
             continue;
@@ -240,11 +243,11 @@ export class CanvasView extends PolymerElement {
           // Do we actually intersect this child?
           let b = t.getBoundingClientRect();
           if (rekt.left > b.left && rekt.left < b.left + b.width &&
-              rekt.top > b.top && rekt.top < b.top + b.height) {
+            rekt.top > b.top && rekt.top < b.top + b.height) {
 
             // New target! Remove the other target indicators.
             var previousTargets = this.root.querySelectorAll('.over');
-            for (var j = 0; j < previousTargets.length; j++ ){
+            for (var j = 0; j < previousTargets.length; j++) {
               previousTargets[j].classList.remove('over');
             }
             t.classList.add('over');
@@ -287,24 +290,24 @@ export class CanvasView extends PolymerElement {
           el.style.position = 'relative';
           el.style.left = el.style.top = '0px';
           this.actionHistory.add('reparent', el,
-              {
-                new: {
-                  parent: newParent,
-                  left: el.style.left, top: el.style.top, position: el.style.position
-                },
-                old: {
-                  parent: oldParent,
-                  left: oldLeft, top: oldTop, position:oldPosition
-                }
-              });
+            {
+              new: {
+                parent: newParent,
+                left: el.style.left, top: el.style.top, position: el.style.position
+              },
+              old: {
+                parent: oldParent,
+                left: oldLeft, top: oldTop, position: oldPosition
+              }
+            });
         } else {
           el.style.position = 'absolute';
           el.style.left = rekt.left - parent.left + 'px';
           el.style.top = rekt.top - parent.top + 'px';
           this.actionHistory.add('move', el,
             {
-              new:{left: el.style.left, top: el.style.top, position: el.style.position},
-              old:{left: oldLeft, top: oldTop, position:oldPosition}
+              new: { left: el.style.left, top: el.style.top, position: el.style.position },
+              old: { left: oldLeft, top: oldTop, position: oldPosition }
             });
         }
 
@@ -318,26 +321,28 @@ export class CanvasView extends PolymerElement {
         break;
     }
     this.updateActiveElement(el);
-    this.dispatchEvent(new CustomEvent('refresh-view', {bubbles: true, composed: true, detail: {whileTracking: true, node: this}}));
-    //Base.fire('refresh-view', {whileTracking:true}, {node: this});
+    this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
   }
 
   resizeElement(event, el) {
-    switch(event.detail.state) {
+    switch (event.detail.state) {
       case 'track':
-        // Grid is 10.
-        let trackX = Math.round(event.detail.dx / 10) * 10;
-        let trackY = Math.round(event.detail.dy / 10) * 10;
+        let trackX = event.detail.dx;
+        let trackY = event.detail.dy;
+        if (this._alignOnGrid) {
+          trackX = Math.round(trackX / this._gridSize) * this._gridSize;
+          trackY = Math.round(trackY / this._gridSize) * this._gridSize;
+        }
         el.style.width = this._initialWidth + trackX + 'px';
         el.style.height = this._initialHeight + trackY + 'px';
         break;
       case 'end':
         this._resizing = false;
         this.actionHistory.add('resize', el,
-           {
-             new:{width: el.style.width, height: el.style.height},
-             old:{width: this._initialWidth + 'px', height: this._initialHeight + 'px'}
-           });
+          {
+            new: { width: el.style.width, height: el.style.height },
+            old: { width: this._initialWidth + 'px', height: this._initialHeight + 'px' }
+          });
         el.classList.remove('resizing');
         el.classList.remove('dragging');
 
@@ -345,7 +350,7 @@ export class CanvasView extends PolymerElement {
         // i.e.: Sometimes the end of a resize can end up outside of the element,
         // and register as a click on the main canvas, deselecting the thing
         // you were dragging.
-        setTimeout(function() {
+        setTimeout(function () {
           el.click();
         }, 50)
         break;
@@ -392,9 +397,9 @@ export class CanvasView extends PolymerElement {
     // TODO: can this be less bad since it's p horrid?
     let isOk =
       (event.composedPath()[0].localName === 'button' &&
-       event.composedPath()[2].localName == 'tree-view') ||
+        event.composedPath()[2].localName == 'tree-view') ||
       (event.composedPath()[0].localName == 'body') ||
-       event.composedPath()[0].classList.contains('active');
+      event.composedPath()[0].classList.contains('active');
 
     if (!isOk) {
       return;
@@ -403,12 +408,11 @@ export class CanvasView extends PolymerElement {
     let oldTop = parseInt(el.style.top);
     let oldPosition = el.style.position;
 
-    switch(event.keyCode) {
+    switch (event.keyCode) {
       case 38:  // up arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'up', node: this}}));
-          //Base.fire('move', {type:'up'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
         } else {
           el.style.top = oldTop - 10 + 'px';
         }
@@ -416,8 +420,7 @@ export class CanvasView extends PolymerElement {
       case 40:  // down arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'down', node: this}}));
-          //Base.fire('move', {type:'down'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
         } else {
           el.style.top = oldTop + 10 + 'px';
         }
@@ -425,8 +428,7 @@ export class CanvasView extends PolymerElement {
       case 37:  // left arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', node: this}}));
-          //Base.fire('move', {type:'back'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
         } else {
           el.style.left = oldLeft - 10 + 'px';
         }
@@ -434,17 +436,16 @@ export class CanvasView extends PolymerElement {
       case 39:  // right arrow
         if (event.shiftKey) {
           event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'forward', node: this}}));
-          //Base.fire('move', {type:'forward'}, {node: this});
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
         } else {
           el.style.left = oldLeft + 10 + 'px';
         }
         break;
     }
     this.actionHistory.add('move', el,
-        {
-          new:{left: el.style.left, top: el.style.top, position: el.style.position},
-          old:{left: oldLeft, top: oldTop, position:oldPosition}
-        });
+      {
+        new: { left: el.style.left, top: el.style.top, position: el.style.position },
+        old: { left: oldLeft, top: oldTop, position: oldPosition }
+      });
   }
 }
