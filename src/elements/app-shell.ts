@@ -180,7 +180,7 @@ export class AppShell extends PolymerElement {
       <div class="app-body" fullscreen\$="[[toggleFullscreen]]">
         <dock-spawn-ts style="width: 100%; height: 100%; position: relative;">
           
-          <div title="Main" class="main-view">
+          <div title="Document1" class="main-view">
             <designer-tabs attr-for-selected="name" selected="{{mainPage}}">
               <designer-tab name="designer">
                 <button>Designer</button>
@@ -204,11 +204,11 @@ export class AppShell extends PolymerElement {
             </iron-pages>
           </div>
 
-          <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.25">
+          <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2">
             <tree-view name="tree" id="treeView"></tree-view>
           </div>
 
-          <div title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.25">
+          <div title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.2">
             <canvas-controls id="canvasControls"></canvas-controls>
             <element-view id="elementView"></element-view>
             <palette-view id="paletteView"></palette-view>
