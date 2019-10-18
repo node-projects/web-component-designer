@@ -15,8 +15,6 @@ export class CanvasView extends PolymerElement {
   _dropTarget: Element;
   _initialWidth: number;
   _initialHeight: number;
-  _downX: number;
-  _downY: number;
   _gridSize = 10;
   _alignOnGrid = true;
 
@@ -101,6 +99,13 @@ export class CanvasView extends PolymerElement {
         outline: dashed 3px var(--highlight-blue) !important;
         outline-offset: 2px;
       }
+      .over::before {
+        content: 'press "alt" to enter container';
+        top: 5px;
+        left: 5px;
+        position: absolute;
+        opacity: 0.5;
+      }
     </style>
     <div id="canvas"></div>
     `;
@@ -159,9 +164,21 @@ export class CanvasView extends PolymerElement {
   }
 
   downOnElement(event) {
-    // Store initial Mouse Pos for checking if resizeing
-    this._downX = event.detail.x;
-    this._downY = event.detail.y;
+    let el = event.target;
+    this._justFinishedDraggingOrDropping = false;
+    if (el === this || el === this.$.canvas) {
+      return;
+    }
+
+    let rekt = el.getBoundingClientRect();
+    let shouldResize = this.dragShouldSize(event, rekt);
+    if (shouldResize) {
+      this._resizing = true;
+      this._initialWidth = rekt.width;
+      this._initialHeight = rekt.height;
+      el.classList.add('resizing');
+      el.classList.add('active');
+    }
   }
 
   trackElement(event) {
@@ -170,25 +187,11 @@ export class CanvasView extends PolymerElement {
     if (el === this || el === this.$.canvas) {
       return;
     }
-    // If we're already resizing, continue.
-    if (this._resizing) {
-      this.resizeElement(event, el);
-      return;
-    }
-
-    let rekt = el.getBoundingClientRect();
-    let shouldResize = this.dragShouldSize(rekt);
-    if (shouldResize) {
-      this._resizing = true;
-      this._initialWidth = rekt.width;
-      this._initialHeight = rekt.height;
-      el.classList.add('resizing');
-      el.classList.add('active');
-    }
 
     if (this._resizing) {
       this.resizeElement(event, el);
     } else {
+      let rekt = el.getBoundingClientRect();
       this.dragElement(event, el, rekt);
     }
 
@@ -251,7 +254,9 @@ export class CanvasView extends PolymerElement {
               previousTargets[j].classList.remove('over');
             }
             t.classList.add('over');
-            this._dropTarget = t;
+
+            if (event.detail.sourceEvent.altKey)
+              this._dropTarget = t;
           }
         }
         break;
@@ -358,9 +363,9 @@ export class CanvasView extends PolymerElement {
     this.updateActiveElement(el);
   }
 
-  dragShouldSize(rect) {
-    const right = rect.right - this._downX;
-    const bottom = rect.bottom - this._downY;
+  dragShouldSize(event, rect) {
+    const right = rect.right - event.detail.x;
+    const bottom = rect.bottom - event.detail.y;
     return (right < 8 && bottom < 8);
   }
 

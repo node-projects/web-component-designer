@@ -10,6 +10,7 @@ import { CodeView } from './code-view.js';
 import { DemoView } from './demo-view.js';
 import { NativeView } from './palette-native.js';
 import { ElementView } from './element-view.js';
+import { DockSpawnTsWebcomponent } from 'dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent';
 
 import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
@@ -28,6 +29,8 @@ import './tree-view.js';
 import './element-view.js';
 import './canvas-view.js';
 import './canvas-controls.js';
+
+DockSpawnTsWebcomponent.cssRootDirectory = "assets/css/";
 
 //@ts-ignore
 window.require(["ace/ace"], function(a) {
@@ -119,20 +122,6 @@ export class AppShell extends PolymerElement {
           padding-top: 60px;
           height: 100vh;
         }
-        .app-body[fullscreen] .drawer {
-          display: none;
-        }
-
-        .drawer {
-          min-width: 270px;
-          width: 270px;
-          height: 100%;
-          overflow: hidden;
-          background: var(--medium-grey);
-          color: white;
-          display: flex;
-          flex-direction: column;
-        }
 
         .main-view {
           position: relative;
@@ -189,40 +178,42 @@ export class AppShell extends PolymerElement {
       </app-header>
 
       <div class="app-body" fullscreen\$="[[toggleFullscreen]]">
-        <div class="drawer">
-          <designer-tab class="single"><span>Tree</span></designer-tab>
-          <tree-view name="tree" id="treeView"></tree-view>
-        </div>
+        <dock-spawn-ts style="width: 100%; height: 100%; position: relative;">
+          
+          <div title="Main" class="main-view">
+            <designer-tabs attr-for-selected="name" selected="{{mainPage}}">
+              <designer-tab name="designer">
+                <button>Designer</button>
+              </designer-tab>
+              <designer-tab name="preview">
+                <button on-click="viewDemo">Preview</button>
+              </designer-tab>
+              <designer-tab name="code">
+                <button on-click="viewCode">Code</button>
+              </designer-tab>
+              <designer-tab name="help">
+                <button>Help</button>
+              </designer-tab>
+            </designer-tabs>
+            <paper-toggle-button unchecked="" noink="" checked="{{toggleFullscreen}}">Fullscreen</paper-toggle-button>
+            <iron-pages selected="[[mainPage]]" attr-for-selected="name" selected-attribute="visible">
+              <canvas-view name="designer" id="viewContainer" style="height:100%"></canvas-view>
+              <div name="code" style="width:100%;height:100%;"><slot name="code"></slot></div>
+              <demo-view id="demoView" name="preview"></demo-view>
+              <help-view name="help"></help-view>
+            </iron-pages>
+          </div>
 
-        <div class="main-view">
-          <designer-tabs attr-for-selected="name" selected="{{mainPage}}">
-            <designer-tab name="designer">
-              <button>Designer</button>
-            </designer-tab>
-            <designer-tab name="preview">
-              <button on-click="viewDemo">Preview</button>
-            </designer-tab>
-            <designer-tab name="code">
-              <button on-click="viewCode">Code</button>
-            </designer-tab>
-            <designer-tab name="help">
-              <button>Help</button>
-            </designer-tab>
-          </designer-tabs>
-          <paper-toggle-button unchecked="" noink="" checked="{{toggleFullscreen}}">Fullscreen</paper-toggle-button>
-          <iron-pages selected="[[mainPage]]" attr-for-selected="name" selected-attribute="visible">
-            <canvas-view name="designer" id="viewContainer" style="height:100%"></canvas-view>
-            <div name="code" style="width:100%;height:100%;"><slot name="code"></slot></div>
-            <demo-view id="demoView" name="preview"></demo-view>
-            <help-view name="help"></help-view>
-          </iron-pages>
-        </div>
+          <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.25">
+            <tree-view name="tree" id="treeView"></tree-view>
+          </div>
 
-        <div class="drawer">
-          <canvas-controls id="canvasControls"></canvas-controls>
-          <element-view id="elementView"></element-view>
-          <palette-view id="paletteView"></palette-view>
-        </div>
+          <div title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.25">
+            <canvas-controls id="canvasControls"></canvas-controls>
+            <element-view id="elementView"></element-view>
+            <palette-view id="paletteView"></palette-view>
+          </div>
+        </dock-spawn-ts>
       </div>
     `;
   }
