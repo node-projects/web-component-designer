@@ -3,6 +3,7 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement } from '@polymer/decorators';
 import { ElementStuffBase } from './element-stuff-base.js';
 
+import '@polymer/paper-swatch-picker/paper-swatch-picker.js';
 import './element-stuff-base.js';
 import './element-stuff-shared-styles.js';
 
