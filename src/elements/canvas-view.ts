@@ -253,7 +253,8 @@ export class CanvasView extends PolymerElement {
             for (var j = 0; j < previousTargets.length; j++) {
               previousTargets[j].classList.remove('over');
             }
-            t.classList.add('over');
+            if (el != t)
+              t.classList.add('over');
 
             if (event.detail.sourceEvent.altKey)
               this._dropTarget = t;
