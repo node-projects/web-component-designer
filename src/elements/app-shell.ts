@@ -177,7 +177,7 @@ export class AppShell extends PolymerElement {
         </app-toolbar>
       </app-header>
 
-      <div class="app-body" fullscreen\$="[[toggleFullscreen]]">
+      <div class="app-body">
         <dock-spawn-ts style="width: 100%; height: 100%; position: relative;">
           
           <div title="Main" class="main-view">
@@ -195,7 +195,6 @@ export class AppShell extends PolymerElement {
                 <button>Help</button>
               </designer-tab>
             </designer-tabs>
-            <paper-toggle-button unchecked="" noink="" checked="{{toggleFullscreen}}">Fullscreen</paper-toggle-button>
             <iron-pages selected="[[mainPage]]" attr-for-selected="name" selected-attribute="visible">
               <canvas-view name="designer" id="viewContainer" style="height:100%"></canvas-view>
               <div name="code" style="width:100%;height:100%;"><slot name="code"></slot></div>
