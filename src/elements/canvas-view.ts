@@ -5,6 +5,7 @@ import { addListener } from '@polymer/polymer/lib/utils/gestures.js';
 import { ActionHistory } from './action-history';
 
 import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
+import { ActionType } from '../enums/action-type';
 
 @customElement('canvas-view')
 export class CanvasView extends PolymerElement {
@@ -17,6 +18,9 @@ export class CanvasView extends PolymerElement {
   _initialHeight: number;
   _gridSize = 10;
   _alignOnGrid = true;
+  _actionType: ActionType;
+  _initialX: number;
+  _initialY: number;
 
   static get template() {
     return html`
@@ -106,8 +110,14 @@ export class CanvasView extends PolymerElement {
         position: absolute;
         opacity: 0.5;
       }
+      #selector {
+        border: 1px dotted #000;
+        position: absolute;
+        pointer-events: none;
+      }
     </style>
     <div id="canvas"></div>
+    <div id="selector" hidden></div>
     `;
   }
 
@@ -166,7 +176,13 @@ export class CanvasView extends PolymerElement {
   downOnElement(event) {
     let el = event.target;
     this._justFinishedDraggingOrDropping = false;
+
+    let rect = this.getBoundingClientRect();
+    this._initialX = event.detail.x - rect.left;
+    this._initialY = event.detail.y - rect.top;
+
     if (el === this || el === this.$.canvas) {
+      this._actionType = ActionType.DrawSelection;
       return;
     }
 
@@ -174,16 +190,25 @@ export class CanvasView extends PolymerElement {
     let shouldResize = this.dragShouldSize(event, rekt);
     if (shouldResize) {
       this._resizing = true;
+      this._actionType = ActionType.Resize;
       this._initialWidth = rekt.width;
       this._initialHeight = rekt.height;
       el.classList.add('resizing');
       el.classList.add('active');
+    } else {
+      this._actionType = ActionType.Drag;
     }
   }
 
   trackElement(event) {
     let el = event.target;
     this._justFinishedDraggingOrDropping = false;
+
+    if (this._actionType == ActionType.DrawSelection) {
+      this.drawSelection(event);
+      return;
+    }
+
     if (el === this || el === this.$.canvas) {
       return;
     }
@@ -201,7 +226,48 @@ export class CanvasView extends PolymerElement {
     // register as a click on the canvas and it's annoying. This gets
     // around that but in a gross way.
     if (event.detail.state === 'end') {
+      this._actionType = ActionType.None;
       this._justFinishedDraggingOrDropping = true;
+    }
+  }
+
+  drawSelection(event) {
+    switch (event.detail.state) {
+      case 'start':
+      case 'track':
+      case 'end':
+        let rect = this.getBoundingClientRect();
+        let trackX = event.detail.x - rect.left;
+        let trackY = event.detail.y - rect.top;
+
+        let x3 = Math.min(this._initialX, trackX);
+        let x4 = Math.max(this._initialX, trackX);
+        let y3 = Math.min(this._initialY, trackY);
+        let y4 = Math.max(this._initialY, trackY);
+
+        let selector = this.$.selector as HTMLDivElement;
+        selector.style.left = x3 + 'px';
+        selector.style.top = y3 + 'px';
+        selector.style.width = x4 - x3 + 'px';
+        selector.style.height = y4 - y3 + 'px';
+        selector.hidden = false;
+
+        if (event.detail.state == 'end') {
+          selector.hidden = true;
+          this._actionType == ActionType.None;
+
+          let elements = this.$.canvas.querySelectorAll('*');
+          for (let e of elements) {
+            let elementRect = e.getBoundingClientRect();
+            if (elementRect.top - rect.top >= y3 &&
+              elementRect.left - rect.left >= x3 &&
+              elementRect.top - rect.top + elementRect.width <= y4 &&
+              elementRect.left - rect.left + elementRect.width <= x4) {
+              e.classList.add('active');
+            }
+          }
+        }
+        break;
     }
   }
 
