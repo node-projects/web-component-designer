@@ -191,9 +191,6 @@ export class AppShell extends PolymerElement {
               <designer-tab name="code">
                 <button on-click="viewCode">Code</button>
               </designer-tab>
-              <designer-tab name="help">
-                <button>Help</button>
-              </designer-tab>
             </designer-tabs>
             <iron-pages selected="[[mainPage]]" attr-for-selected="name" selected-attribute="visible">
               <canvas-view name="designer" id="viewContainer" style="height:100%"></canvas-view>
@@ -288,10 +285,10 @@ export class AppShell extends PolymerElement {
       el = this.$.viewContainer;
     }
 
-    if (this.activeElement) {
+    /*if (this.activeElement) {
       this.activeElement.classList.remove('active');
     }
-    el.classList.add('active');
+    el.classList.add('active');*/
 
     // Tell everyone who cares about this.
     (this.$.canvasControls as CanvasControls).selectedElement = (this.$.viewContainer as CanvasView).selectedElement = this.activeElement = el;

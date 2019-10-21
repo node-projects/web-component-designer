@@ -9,8 +9,11 @@ import { ActionType } from '../enums/action-type';
 
 @customElement('canvas-view')
 export class CanvasView extends PolymerElement {
+
   actionHistory: ActionHistory;
   selectedElement: HTMLElement;
+  selectedElements: HTMLElement[];
+
   _justFinishedDraggingOrDropping: boolean;
   _resizing: boolean;
   _dropTarget: Element;
@@ -127,16 +130,16 @@ export class CanvasView extends PolymerElement {
     addListener(this.$.canvas, 'down', this.downOnElement.bind(this));
     addListener(this.$.canvas, 'track', this.trackElement.bind(this));
     this.addEventListener('click', event => {
-      this.updateActiveElement(this);
+      this.updateActiveElement([this]);
     });
     this.$.canvas.addEventListener('click', (event: CustomEvent) => {
       // If this element is a link, it will actually do a navigation, so, don't.
       event.preventDefault();
       event.stopImmediatePropagation();
       if ((event.target as HTMLElement).id === 'canvas' && !this._justFinishedDraggingOrDropping) {
-        this.updateActiveElement(this);
+        this.updateActiveElement([this]);
       } else {
-        this.updateActiveElement(event.target);
+        this.updateActiveElement([event.target as HTMLElement]);
       }
     });
 
@@ -167,9 +170,18 @@ export class CanvasView extends PolymerElement {
     return this.$.canvas.children;
   }
 
-  updateActiveElement(el) {
-    this.selectedElement = el;
-    this.dispatchEvent(new CustomEvent('selected-element-changed', { bubbles: true, composed: true, detail: { target: el, node: this } }));
+  updateActiveElement(elements: HTMLElement[]) { //todo remove only when new not in old
+    if (this.selectedElements) {
+      for (let e of this.selectedElements)
+        e.classList.remove('active');
+    }
+    this.selectedElement = elements[0];
+    this.selectedElements = elements;
+    if (this.selectedElements) {
+      for (let e of this.selectedElements)
+        e.classList.add('active');
+    }
+    this.dispatchEvent(new CustomEvent('selected-element-changed', { bubbles: true, composed: true, detail: { target: this.selectedElement, node: this } }));
     this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { node: this } }));
   }
 
@@ -194,7 +206,7 @@ export class CanvasView extends PolymerElement {
       this._initialWidth = rekt.width;
       this._initialHeight = rekt.height;
       el.classList.add('resizing');
-      el.classList.add('active');
+      //el.classList.add('active');
     } else {
       this._actionType = ActionType.Drag;
     }
@@ -253,31 +265,35 @@ export class CanvasView extends PolymerElement {
         selector.hidden = false;
 
         if (event.detail.state == 'end') {
+          //this._justFinishedDraggingOrDropping = true;
           selector.hidden = true;
           this._actionType == ActionType.None;
 
           let elements = this.$.canvas.querySelectorAll('*');
+          let inSelectionElements: HTMLElement[] = [];
           for (let e of elements) {
             let elementRect = e.getBoundingClientRect();
             if (elementRect.top - rect.top >= y3 &&
               elementRect.left - rect.left >= x3 &&
               elementRect.top - rect.top + elementRect.width <= y4 &&
               elementRect.left - rect.left + elementRect.width <= x4) {
-              e.classList.add('active');
+              //e.classList.add('active');
+              inSelectionElements.push(e as HTMLElement);
             }
           }
+          this.updateActiveElement(inSelectionElements);
         }
         break;
     }
   }
 
-  dragElement(event, el, rekt) {
+  dragElement(event, el: HTMLElement, rekt) {
     switch (event.detail.state) {
       case 'start':
         this._resizing = false;
         el.style.position = 'absolute';
         el.classList.add('dragging');
-        el.classList.add('active');
+        //el.classList.add('active');
         break;
       case 'track':
         let trackX = event.detail.dx;
@@ -392,11 +408,11 @@ export class CanvasView extends PolymerElement {
         el.style.transform = el.style.webkitTransform = 'none';
         break;
     }
-    this.updateActiveElement(el);
+    this.updateActiveElement([el]);
     this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
   }
 
-  resizeElement(event, el) {
+  resizeElement(event, el: HTMLElement) {
     switch (event.detail.state) {
       case 'track':
         let trackX = event.detail.dx;
@@ -427,7 +443,7 @@ export class CanvasView extends PolymerElement {
         }, 50)
         break;
     }
-    this.updateActiveElement(el);
+    this.updateActiveElement([el]);
   }
 
   dragShouldSize(event, rect) {
