@@ -31,7 +31,7 @@ export class ElementsView extends PaletteBase(PolymerElement) {
           <button>[[item]]</button>
         </template>
       </dom-repeat>
-      <iron-ajax auto="" url="elements.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
+      <iron-ajax auto="" url="./elements.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
     `;
   }
 

@@ -28,7 +28,7 @@ import './element-view.js';
 import './canvas-view.js';
 import './canvas-controls.js';
 import { ActionHistoryType } from "../enums/ActionHistoryType.js";
-DockSpawnTsWebcomponent.cssRootDirectory = "assets/css/"; //@ts-ignore
+DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/"; //@ts-ignore
 
 window.require(["ace/ace"], function (a) {
   if (a) {

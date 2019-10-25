@@ -24,6 +24,7 @@ look at: https://node-projects.github.io/web-component-designer/build/HTML/
 
 ## Features we are workin on
 
+ - Refactor as a reusable NPM component (not yet started, (remove app-shell))
  - Conversation to Typescript (done)
  - Multiselection (WIP)
  - Drag/Move refactoring (WIP)

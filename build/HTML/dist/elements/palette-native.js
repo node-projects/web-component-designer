@@ -42,7 +42,7 @@ let NativeView = class NativeView extends PaletteBase(PolymerElement) {
         </template>
       </dom-repeat>
 
-      <iron-ajax auto="" url="elements-native.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
+      <iron-ajax auto="" url="./elements-native.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
     `;
   }
 

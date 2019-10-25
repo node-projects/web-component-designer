@@ -31,7 +31,7 @@ import './canvas-view.js';
 import './canvas-controls.js';
 import { ActionHistoryType } from "../enums/ActionHistoryType";
 
-DockSpawnTsWebcomponent.cssRootDirectory = "assets/css/";
+DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
 //@ts-ignore
 window.require(["ace/ace"], function(a) {

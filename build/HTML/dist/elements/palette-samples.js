@@ -39,7 +39,7 @@ let SamplesView = class SamplesView extends PaletteBase(PolymerElement) {
         </template>
       </dom-repeat>
 
-      <iron-ajax auto="" url="elements-samples.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
+      <iron-ajax auto="" url="./elements-samples.json" handle-as="json" on-response="_elementsReady"></iron-ajax>
     `;
   }
 
