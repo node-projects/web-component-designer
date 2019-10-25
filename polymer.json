@@ -1,16 +1,30 @@
 {
   "sources": [
-   "dist/**"
+    "dist/**",
+    "assets/**",
+    "elements*.json"
   ],
   "extraDependencies": [],
   "builds": [
     {
-	  "name": "HTML",
-	  "browserCapabilities": ["es2015", "push", "serviceworker", "modules"],
-      "html": { "minify": false},
-      "css": { "minify": false},
-      "js": { "minify": false, "compile": false},
-	  "bundle": false,
+      "name": "HTML",
+      "browserCapabilities": [
+        "es2015",
+        "push",
+        "serviceworker",
+        "modules"
+      ],
+      "html": {
+        "minify": false
+      },
+      "css": {
+        "minify": false
+      },
+      "js": {
+        "minify": false,
+        "compile": false
+      },
+      "bundle": false,
       "addServiceWorker": false,
       "addPushManifest": false
     }

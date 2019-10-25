@@ -3,6 +3,8 @@
   "fragments": [],
   "sources": [
     "dist/**",
+    "assets/**",
+    "elements*.json",
     "index.html"
   ],
   "extraDependencies": [
