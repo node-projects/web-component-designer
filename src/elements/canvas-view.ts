@@ -25,6 +25,7 @@ export class CanvasView extends HTMLElement {
   private _initialPoint: IPoint;
   private _initialSizes: ISize[];
   private _clickThroughElements: HTMLElement[] = []
+  private _previousEventName: EventNames;
 
   private static _sheet: CSSStyleSheet;
   private _firstConnect: boolean;
@@ -289,22 +290,26 @@ export class CanvasView extends HTMLElement {
   private _pointerDownOnElement(event: PointerEvent) {
     this._canvas.setPointerCapture(event.pointerId);
     this._pointerEventHandler(event);
+    this._previousEventName = <EventNames>event.type;
   }
 
   private _pointerMoveOnElement(event: PointerEvent) {
     this._pointerEventHandler(event);
+    this._previousEventName = <EventNames>event.type;
   }
 
   private _pointerUpOnElement(event: PointerEvent) {
     this._canvas.releasePointerCapture(event.pointerId);
     this._pointerEventHandler(event);
+    this._previousEventName = <EventNames>event.type;
   }
 
   private _pointerEventHandler(event: PointerEvent) {
     if (!event.altKey)
       this._resetPointerEventsForClickThrough();
 
-    const currentElement = event.target as HTMLElement;
+    //const currentElement = event.target as HTMLElement;
+    const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
     this._ownBoundingRect = this.getBoundingClientRect();
     const currentPoint = { x: event.x - this._ownBoundingRect.left, y: event.y - this._ownBoundingRect.top };
 
@@ -409,7 +414,7 @@ export class CanvasView extends HTMLElement {
         }
         break;
       case EventNames.PointerMove:
-        if (trackX > 0 || trackY > 0)
+        if (trackX != 0 || trackY != 0)
           this._actionType = PointerActionType.Drag;
 
         if (this._actionType != PointerActionType.Drag)
@@ -471,6 +476,8 @@ export class CanvasView extends HTMLElement {
         break;
       case EventNames.PointerUp:
         if (this._actionType == PointerActionType.DragOrSelect) {
+          if (this._previousEventName == EventNames.PointerDown)
+            this.setSelectedElements([currentElement]);
           return;
         }
 

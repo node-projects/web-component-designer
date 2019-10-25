@@ -324,21 +324,28 @@ export class CanvasView extends HTMLElement {
     this._canvas.setPointerCapture(event.pointerId);
 
     this._pointerEventHandler(event);
+
+    this._previousEventName = event.type;
   }
 
   _pointerMoveOnElement(event) {
     this._pointerEventHandler(event);
+
+    this._previousEventName = event.type;
   }
 
   _pointerUpOnElement(event) {
     this._canvas.releasePointerCapture(event.pointerId);
 
     this._pointerEventHandler(event);
+
+    this._previousEventName = event.type;
   }
 
   _pointerEventHandler(event) {
-    if (!event.altKey) this._resetPointerEventsForClickThrough();
-    const currentElement = event.target;
+    if (!event.altKey) this._resetPointerEventsForClickThrough(); //const currentElement = event.target as HTMLElement;
+
+    const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y);
     this._ownBoundingRect = this.getBoundingClientRect();
     const currentPoint = {
       x: event.x - this._ownBoundingRect.left,
@@ -456,7 +463,7 @@ export class CanvasView extends HTMLElement {
         break;
 
       case EventNames.PointerMove:
-        if (trackX > 0 || trackY > 0) this._actionType = PointerActionType.Drag;
+        if (trackX != 0 || trackY != 0) this._actionType = PointerActionType.Drag;
         if (this._actionType != PointerActionType.Drag) return; //todo -> what is if a transform already exists -> backup existing style.?
 
         for (const element of this.selectedElements) {
@@ -513,6 +520,7 @@ export class CanvasView extends HTMLElement {
 
       case EventNames.PointerUp:
         if (this._actionType == PointerActionType.DragOrSelect) {
+          if (this._previousEventName == EventNames.PointerDown) this.setSelectedElements([currentElement]);
           return;
         } //todo this needs also to get info from container handler, cause position is dependent of container
 
