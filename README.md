@@ -22,6 +22,10 @@ should -- making that kind of app is really hard, and requires a lot of work and
 
 look at: https://node-projects.github.io/web-component-designer/build/
 
+## what is needed
+
+- constructable-stylesheets-polyfill on browser not yet supporting these
+
 ## Features we are workin on
 
  - Refactor as a reusable NPM component (not yet started, (remove app-shell))
