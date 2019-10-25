@@ -1,33 +1,44 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { customElement } from '@polymer/decorators';
-import { addListener } from '@polymer/polymer/lib/utils/gestures.js';
 import { ActionHistory } from './action-history';
 
-import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
-import { ActionType } from '../enums/action-type';
+//import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
+import { IPoint } from '../interfaces/ipoint';
+import { PointerActionType } from "../enums/PointerActionType";
+import { EventNames } from "../enums/EventNames";
+import { ActionHistoryType } from "../enums/ActionHistoryType";
+import { ISize } from '../interfaces/isize';
 
-@customElement('canvas-view')
-export class CanvasView extends PolymerElement {
+export class CanvasView extends HTMLElement {
+  //Public Properties
+  public actionHistory: ActionHistory;
+  public selectedElements: HTMLElement[] = [];
 
-  actionHistory: ActionHistory;
-  selectedElement: HTMLElement;
-  selectedElements: HTMLElement[];
+  // Settings
+  private _gridSize = 10;
+  private _alignOnGrid = true;
 
-  _justFinishedDraggingOrDropping: boolean;
-  _resizing: boolean;
-  _dropTarget: Element;
-  _initialWidth: number;
-  _initialHeight: number;
-  _gridSize = 10;
-  _alignOnGrid = true;
-  _actionType: ActionType;
-  _initialX: number;
-  _initialY: number;
+  private _canvas: HTMLDivElement;
+  private _selector: HTMLDivElement;
 
-  static get template() {
-    return html`
-    <style>
+  private _dropTarget: Element;
+
+  private _actionType?: PointerActionType;
+  private _initialPoint: IPoint;
+  private _initialSizes: ISize[];
+  private _clickThroughElements: HTMLElement[] = []
+
+  private static _sheet: CSSStyleSheet;
+  private _firstConnect: boolean;
+  private _ownBoundingRect: ClientRect | DOMRect;
+
+  private _onKeyDownBound: any;
+  private _onKeyUpBound: any;
+
+  constructor() {
+    super();
+    if (!CanvasView._sheet) {
+      CanvasView._sheet = new CSSStyleSheet();
+      //@ts-ignore
+      CanvasView._sheet.replaceSync(`
       :host {
         display: block;
         box-sizing: border-box;
@@ -84,12 +95,10 @@ export class CanvasView extends PolymerElement {
         text-align: center;
         background: var(--highlight-blue);
         color: white;
+        z-index: 1000000;
       }
       .dragging, .resizing {
         user-select: none;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
       }
       .dragging {
         /*opacity: 0.6;*/
@@ -103,7 +112,7 @@ export class CanvasView extends PolymerElement {
         cursor: se-resize;
       }
       .over {
-        outline: dashed 3px var(--highlight-blue) !important;
+        outline: dashed 3px var(--highlight-green) !important;
         outline-offset: 2px;
       }
       .over::before {
@@ -113,342 +122,514 @@ export class CanvasView extends PolymerElement {
         position: absolute;
         opacity: 0.5;
       }
+      .over-enter {
+        outline: solid 3px var(--highlight-green) !important;
+        outline-offset: 2px;
+      }
       #selector {
         border: 1px dotted #000;
         position: absolute;
         pointer-events: none;
       }
-    </style>
-    <div id="canvas"></div>
-    <div id="selector" hidden></div>
-    `;
+    }`);
+    }
+
+    const shadow = this.attachShadow({ mode: 'open' });
+    //@ts-ignore
+    shadow.adoptedStyleSheets = [CanvasView._sheet];
+    this._canvas = document.createElement('div');
+    this._canvas.id = 'canvas';
+    shadow.appendChild(this._canvas)
+    this._selector = document.createElement('div');
+    this._selector.id = 'selector';
+    this._selector.hidden = true;
+    shadow.appendChild(this._selector)
+
+    this._onKeyDownBound = this.onKeyDown.bind(this);
+    this._onKeyUpBound = this.onKeyUp.bind(this);
   }
 
   connectedCallback() {
-    super.connectedCallback();
-
-    addListener(this.$.canvas, 'down', this.downOnElement.bind(this));
-    addListener(this.$.canvas, 'track', this.trackElement.bind(this));
-    this.addEventListener('click', event => {
-      this.updateActiveElement([this]);
-    });
-    this.$.canvas.addEventListener('click', (event: CustomEvent) => {
-      // If this element is a link, it will actually do a navigation, so, don't.
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      if ((event.target as HTMLElement).id === 'canvas' && !this._justFinishedDraggingOrDropping) {
-        this.updateActiveElement([this]);
-      } else {
-        this.updateActiveElement([event.target as HTMLElement]);
-      }
-    });
-
-    window.addEventListener('keydown', this.onKeyDown.bind(this), true);
+    if (!this._firstConnect) {
+      this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerDownOnElement(event));
+      this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerMoveOnElement(event));
+      this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerUpOnElement(event));
+      window.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
+      window.addEventListener('keyup', this._onKeyUpBound, true);
+    }
   }
 
+
+  disconnectedCallback() {
+    window.removeEventListener('keydown', this._onKeyDownBound, true);
+    window.removeEventListener('keyup', this._onKeyUpBound, true);
+  }
+
+  private onKeyUp(event: KeyboardEvent) {
+    switch (event.key) {
+      case 'ArrowUp':
+        this._resetPointerEventsForClickThrough();
+        break;
+    }
+  }
+
+  private _resetPointerEventsForClickThrough() {
+    if (this._clickThroughElements.length == 0)
+      return;
+    this._clickThroughElements = [];
+  }
+
+  private onKeyDown(event: KeyboardEvent) {
+    let el = this.selectedElements[0];
+    if (!el) {
+      return;
+    }
+
+    // This is a global window handler, so clicks can come from anywhere
+    // We only care about keys that come after you've clicked on an element,
+    // or keys after you've selected something from the tree view.
+    // TODO: can this be less bad since it's p horrid?
+    let isOk =
+      //@ts-ignore
+      (event.composedPath()[0].localName === 'button' && event.composedPath()[2].localName == 'tree-view') ||
+      //@ts-ignore
+      (event.composedPath()[0].localName == 'body') || event.composedPath()[0].classList.contains('active');
+
+    if (!isOk) {
+      return;
+    }
+    let oldLeft = parseInt(el.style.left);
+    let oldTop = parseInt(el.style.top);
+    let oldPosition = el.style.position;
+
+    switch (event.key) {
+      case 'ArrowUp':
+        if (event.shiftKey) {
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
+        } else {
+          el.style.top = oldTop - 10 + 'px';
+        }
+        break;
+      case 'ArrowDown':
+        if (event.shiftKey) {
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
+        } else {
+          el.style.top = oldTop + 10 + 'px';
+        }
+        break;
+      case 'ArrowLeft':
+        if (event.shiftKey) {
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
+        } else {
+          el.style.left = oldLeft - 10 + 'px';
+        }
+        break;
+      case 'ArrowRight':
+        if (event.shiftKey) {
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
+        } else {
+          el.style.left = oldLeft + 10 + 'px';
+        }
+        break;
+    }
+    this.actionHistory.add(ActionHistoryType.Move, el,
+      {
+        new: { left: el.style.left, top: el.style.top, position: el.style.position },
+        old: { left: oldLeft, top: oldTop, position: oldPosition }
+      });
+  }
+
+  // Access canvas API
+
   add(el) {
-    this.$.canvas.appendChild(el);
+    this._canvas.appendChild(el);
   }
 
   removes(el) {
-    this.$.canvas.removeChild(el);
+    this._canvas.removeChild(el);
   }
 
   has(query) {
-    return this.$.canvas.querySelector(query);
+    return this._canvas.querySelector(query);
   }
 
   setInnerHTML(thing) {
-    this.$.canvas.innerHTML = thing;
+    this._canvas.innerHTML = thing;
   }
 
   getInnerHTML() {
-    return this.$.canvas.innerHTML;
+    return this._canvas.innerHTML;
   }
 
   get children() {
-    return this.$.canvas.children;
+    return this._canvas.children;
   }
 
-  updateActiveElement(elements: HTMLElement[]) { //todo remove only when new not in old
+  // end
+
+  setSelectedElements(elements: HTMLElement[]) { //todo remove only when new not in old
     if (this.selectedElements) {
       for (let e of this.selectedElements)
         e.classList.remove('active');
     }
-    this.selectedElement = elements[0];
+    //this.selectedElement = elements[0];
     this.selectedElements = elements;
     if (this.selectedElements) {
       for (let e of this.selectedElements)
         e.classList.add('active');
     }
-    this.dispatchEvent(new CustomEvent('selected-element-changed', { bubbles: true, composed: true, detail: { target: this.selectedElement, node: this } }));
+    this.dispatchEvent(new CustomEvent('selected-element-changed', { bubbles: true, composed: true, detail: { target: this.selectedElements[0], node: this } }));
     this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { node: this } }));
   }
 
-  downOnElement(event) {
-    let el = event.target;
-    this._justFinishedDraggingOrDropping = false;
+  private _pointerDownOnElement(event: PointerEvent) {
+    this._canvas.setPointerCapture(event.pointerId);
+    this._pointerEventHandler(event);
+  }
 
-    let rect = this.getBoundingClientRect();
-    this._initialX = event.detail.x - rect.left;
-    this._initialY = event.detail.y - rect.top;
+  private _pointerMoveOnElement(event: PointerEvent) {
+    this._pointerEventHandler(event);
+  }
 
-    if (el === this || el === this.$.canvas) {
-      this._actionType = ActionType.DrawSelection;
-      return;
+  private _pointerUpOnElement(event: PointerEvent) {
+    this._canvas.releasePointerCapture(event.pointerId);
+    this._pointerEventHandler(event);
+  }
+
+  private _pointerEventHandler(event: PointerEvent) {
+    if (!event.altKey)
+      this._resetPointerEventsForClickThrough();
+
+    const currentElement = event.target as HTMLElement;
+    this._ownBoundingRect = this.getBoundingClientRect();
+    const currentPoint = { x: event.x - this._ownBoundingRect.left, y: event.y - this._ownBoundingRect.top };
+
+    if (this._actionType == null) {
+      this._initialPoint = currentPoint;
+      if (event.type == EventNames.PointerDown) {
+        if (currentElement === this || currentElement === this._canvas || currentElement == null) {
+          this._actionType = PointerActionType.DrawSelection;
+          return;
+        } else {
+          let rectCurrentElement = currentElement.getBoundingClientRect();
+          this._actionType = this._shouldResize(currentPoint, { x: rectCurrentElement.right - this._ownBoundingRect.left, y: rectCurrentElement.bottom - this._ownBoundingRect.top }) ? PointerActionType.Resize : PointerActionType.DragOrSelect;
+          //el.classList.add('resizing');
+        }
+      }
     }
 
-    let rekt = el.getBoundingClientRect();
-    let shouldResize = this.dragShouldSize(event, rekt);
-    if (shouldResize) {
-      this._resizing = true;
-      this._actionType = ActionType.Resize;
-      this._initialWidth = rekt.width;
-      this._initialHeight = rekt.height;
-      el.classList.add('resizing');
-      //el.classList.add('active');
-    } else {
-      this._actionType = ActionType.Drag;
+    if (this._actionType == PointerActionType.DrawSelection) {
+      this._pointerActionTypeDrawSelection(event, currentElement, currentPoint);
+    } else if (this._actionType == PointerActionType.Resize) {
+      this._pointerActionTypeResize(event, currentElement, currentPoint);
+    } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
+      this._pointerActionTypeDragOrSelect(event, currentElement, currentPoint);
+    }
+    if (event.type == EventNames.PointerUp) {
+      this._actionType = null;
     }
   }
 
-  trackElement(event) {
-    let el = event.target;
-    this._justFinishedDraggingOrDropping = false;
+  private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
+    let x1 = Math.min(this._initialPoint.x, currentPoint.x);
+    let x2 = Math.max(this._initialPoint.x, currentPoint.x);
+    let y1 = Math.min(this._initialPoint.y, currentPoint.y);
+    let y2 = Math.max(this._initialPoint.y, currentPoint.y);
 
-    if (this._actionType == ActionType.DrawSelection) {
-      this.drawSelection(event);
-      return;
-    }
+    let selector = this._selector as HTMLDivElement;
+    selector.style.left = x1 + 'px';
+    selector.style.top = y1 + 'px';
+    selector.style.width = x2 - x1 + 'px';
+    selector.style.height = y2 - y1 + 'px';
+    selector.hidden = false;
 
-    if (el === this || el === this.$.canvas) {
-      return;
-    }
-
-    if (this._resizing) {
-      this.resizeElement(event, el);
-    } else {
-      let rekt = el.getBoundingClientRect();
-      this.dragElement(event, el, rekt);
-    }
-
-    // TODO: I don't know how to do this better, but I should fix this one day.
-    // The problem is that sometimes when you drag, the end drag is outside
-    // the dragging target (like, if it resizes because CSS), and will
-    // register as a click on the canvas and it's annoying. This gets
-    // around that but in a gross way.
-    if (event.detail.state === 'end') {
-      this._actionType = ActionType.None;
-      this._justFinishedDraggingOrDropping = true;
+    if (event.type == EventNames.PointerUp) {
+      selector.hidden = true;
+      let elements = this._canvas.querySelectorAll('*');
+      let inSelectionElements: HTMLElement[] = [];
+      for (let e of elements) {
+        let elementRect = e.getBoundingClientRect();
+        if (elementRect.top - this._ownBoundingRect.top >= y1 &&
+          elementRect.left - this._ownBoundingRect.left >= x1 &&
+          elementRect.top - this._ownBoundingRect.top + elementRect.height <= y2 &&
+          elementRect.left - this._ownBoundingRect.left + elementRect.width <= x2) {
+          inSelectionElements.push(e as HTMLElement);
+        }
+      }
+      this.setSelectedElements(inSelectionElements);
     }
   }
 
-  drawSelection(event) {
-    switch (event.detail.state) {
-      case 'start':
-      case 'track':
-      case 'end':
-        let rect = this.getBoundingClientRect();
-        let trackX = event.detail.x - rect.left;
-        let trackY = event.detail.y - rect.top;
+  _pointerActionTypeDragOrSelect(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
+    if (event.altKey) {
+      let backup: string[] = [];
+      if (event.type == EventNames.PointerDown)
+        this._clickThroughElements.push(currentElement);
+      for (const e of this._clickThroughElements) {
+        backup.push(e.style.pointerEvents)
+        e.style.pointerEvents = 'none';
+      }
+      currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+      for (const e of this._clickThroughElements) {
+        e.style.pointerEvents = backup.shift();
+      }
+    } else {
+      this._clickThroughElements = []
+    }
 
-        let x3 = Math.min(this._initialX, trackX);
-        let x4 = Math.max(this._initialX, trackX);
-        let y3 = Math.min(this._initialY, trackY);
-        let y4 = Math.max(this._initialY, trackY);
+    let trackX = currentPoint.x - this._initialPoint.x;
+    let trackY = currentPoint.y - this._initialPoint.y;
+    if (this._alignOnGrid) {
+      trackX = Math.round(trackX / this._gridSize) * this._gridSize;
+      trackY = Math.round(trackY / this._gridSize) * this._gridSize;
+    }
 
-        let selector = this.$.selector as HTMLDivElement;
-        selector.style.left = x3 + 'px';
-        selector.style.top = y3 + 'px';
-        selector.style.width = x4 - x3 + 'px';
-        selector.style.height = y4 - y3 + 'px';
-        selector.hidden = false;
-
-        if (event.detail.state == 'end') {
-          //this._justFinishedDraggingOrDropping = true;
-          selector.hidden = true;
-          this._actionType == ActionType.None;
-
-          let elements = this.$.canvas.querySelectorAll('*');
-          let inSelectionElements: HTMLElement[] = [];
-          for (let e of elements) {
-            let elementRect = e.getBoundingClientRect();
-            if (elementRect.top - rect.top >= y3 &&
-              elementRect.left - rect.left >= x3 &&
-              elementRect.top - rect.top + elementRect.width <= y4 &&
-              elementRect.left - rect.left + elementRect.width <= x4) {
-              //e.classList.add('active');
-              inSelectionElements.push(e as HTMLElement);
-            }
+    switch (event.type) {
+      case EventNames.PointerDown:
+        this._dropTarget = null;
+        if (event.shiftKey || event.ctrlKey) {
+          const index = this.selectedElements.indexOf(currentElement);
+          if (index >= 0) {
+            let newSelectedList = this.selectedElements.slice(0);
+            newSelectedList.splice(index, 1);
+            this.setSelectedElements(newSelectedList);
           }
-          this.updateActiveElement(inSelectionElements);
+          else {
+            let newSelectedList = this.selectedElements.slice(0);
+            newSelectedList.push(currentElement);
+            this.setSelectedElements(newSelectedList);
+          }
+        } else {
+          if (this.selectedElements.indexOf(currentElement) < 0)
+            this.setSelectedElements([currentElement]);
         }
         break;
-    }
-  }
+      case EventNames.PointerMove:
+        if (trackX > 0 || trackY > 0)
+          this._actionType = PointerActionType.Drag;
 
-  dragElement(event, el: HTMLElement, rekt) {
-    switch (event.detail.state) {
-      case 'start':
-        this._resizing = false;
-        el.style.position = 'absolute';
-        el.classList.add('dragging');
-        //el.classList.add('active');
-        break;
-      case 'track':
-        let trackX = event.detail.dx;
-        let trackY = event.detail.dy;
-        if (this._alignOnGrid) {
-          trackX = Math.round(trackX / this._gridSize) * this._gridSize;
-          trackY = Math.round(trackY / this._gridSize) * this._gridSize;
+        if (this._actionType != PointerActionType.Drag)
+          return;
+
+        //todo -> what is if a transform already exists -> backup existing style.?
+        for (const element of this.selectedElements) {
+          element.style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
         }
-        el.style.transform = el.style.webkitTransform =
-          'translate(' + trackX + 'px, ' + trackY + 'px)';
 
         // See if it's over anything.
         this._dropTarget = null;
-        let targets = this.$.canvas.querySelectorAll('*');
+        let targets = this._canvas.querySelectorAll('*');
         for (let i = 0; i < targets.length; i++) {
-          let t = targets[i];
-          t.classList.remove('over');
+          let possibleTarget = targets[i] as HTMLElement;
+          possibleTarget.classList.remove('over');
 
-          // Only some native elements and things with slots can be
-          // drop targets.
-          let slots = t ? t.querySelectorAll('slot') : [];
+          if (this.selectedElements.indexOf(possibleTarget) >= 0)
+            continue;
+
+          // todo put following a extenable function ...
+          // in IContainerHandler ...
+
+          // Only some native elements and things with slots can be drop targets.
+          let slots = possibleTarget ? possibleTarget.querySelectorAll('slot') : [];
 
           // input is the only native in this app that doesn't have a slot
-          let canDrop =
-            (t.localName.indexOf('-') === -1 && t.localName !== 'input') ||
-            t.localName === 'dom-repeat' || slots.length !== 0;
+          let canDrop = (possibleTarget.localName.indexOf('-') === -1 && possibleTarget.localName !== 'input') || possibleTarget.localName === 'dom-repeat' || slots.length !== 0;
 
           if (!canDrop) {
             continue;
           }
 
           // Do we actually intersect this child?
-          let b = t.getBoundingClientRect();
-          if (rekt.left > b.left && rekt.left < b.left + b.width &&
-            rekt.top > b.top && rekt.top < b.top + b.height) {
+          const possibleTargetRect = possibleTarget.getBoundingClientRect();
+          if (possibleTargetRect.top - this._ownBoundingRect.top <= currentPoint.y &&
+            possibleTargetRect.left - this._ownBoundingRect.left <= currentPoint.x &&
+            possibleTargetRect.top - this._ownBoundingRect.top + possibleTargetRect.height >= currentPoint.y &&
+            possibleTargetRect.left - this._ownBoundingRect.left + possibleTargetRect.width >= currentPoint.x) {
 
             // New target! Remove the other target indicators.
-            var previousTargets = this.root.querySelectorAll('.over');
+            var previousTargets = this._canvas.querySelectorAll('.over');
             for (var j = 0; j < previousTargets.length; j++) {
               previousTargets[j].classList.remove('over');
             }
-            if (el != t)
-              t.classList.add('over');
+            if (currentElement != possibleTarget && this._dropTarget != possibleTarget) {
+              possibleTarget.classList.add('over');
 
-            if (event.detail.sourceEvent.altKey)
-              this._dropTarget = t;
+              if (event.altKey) {
+                if (this._dropTarget != null)
+                  this._dropTarget.classList.remove('over-enter');
+                this._dropTarget = possibleTarget;
+                this._dropTarget.classList.remove('over');
+                this._dropTarget.classList.add('over-enter');
+              }
+            }
           }
         }
         break;
-      case 'end':
-        this._resizing = false;
-        let reparented = false;
-        let oldParent = el.parentElement;
-        let newParent;
-        // Does this need to be added to a new parent?
-        if (this._dropTarget) {
-          reparented = true;
-          oldParent.removeChild(el);
+      case EventNames.PointerUp:
+        if (this._actionType == PointerActionType.DragOrSelect) {
+          return;
+        }
 
-          // If there was a textContent nuke it, or else you'll
-          // never be able to again.
-          if (this._dropTarget.children.length === 0) {
-            this._dropTarget.textContent = '';
+        //todo this needs also to get info from container handler, cause position is dependent of container
+        for (const movedElement of this.selectedElements) {
+          if (this._dropTarget && this._dropTarget != movedElement.parentElement) {
+            let oldParent = movedElement.parentElement;
+            movedElement.parentElement.removeChild(currentElement);
+
+            // If there was a textContent nuke it, or else you'll
+            // never be able to again.
+            /*if (this._dropTarget.children.length === 0) {
+              this._dropTarget.textContent = '';
+            }
+            this._dropTarget.appendChild(currentElement);
+
+            this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
+              {
+                new: {
+                  parent: this._dropTarget,
+                  left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
+                },
+                old: {
+                  parent: oldParent,
+                  left: oldLeft, top: oldTop, position: oldPosition
+                }
+              });*/
+          } else {
+            let oldLeft = movedElement.style.left;
+            let oldTop = movedElement.style.top;
+            let oldPosition = movedElement.style.position;
+
+            //todo: move get old Position to a handler
+            movedElement.style.transform = null;
+            movedElement.style.position = 'absolute';
+            movedElement.style.left = (trackX + parseInt(oldLeft)) + "px";
+            movedElement.style.top = (trackY + parseInt(oldTop)) + "px";
+            this.actionHistory.add(ActionHistoryType.Move, movedElement,
+              {
+                new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
+                old: { left: oldLeft, top: oldTop, position: oldPosition }
+              });
           }
-          this._dropTarget.appendChild(el);
-          newParent = this._dropTarget;
+
+          if (this._dropTarget != null)
+            this._dropTarget.classList.remove('over-enter');
           this._dropTarget = null;
-        } else if (el.parentElement && (el.parentElement !== this.$.canvas)) {
-          reparented = true;
-          // If there's no drop target and the el used to be in a different
-          // parent, move it to the main view.
-          newParent = this.$.canvas;
-          el.parentElement.removeChild(el);
-          this.add(el);
-        }
-        let parent = el.parentElement.getBoundingClientRect();
-
-        let oldLeft = el.style.left;
-        let oldTop = el.style.top;
-        let oldPosition = el.style.position;
-        if (reparented) {
-          el.style.position = 'relative';
-          el.style.left = el.style.top = '0px';
-          this.actionHistory.add('reparent', el,
-            {
-              new: {
-                parent: newParent,
-                left: el.style.left, top: el.style.top, position: el.style.position
-              },
-              old: {
-                parent: oldParent,
-                left: oldLeft, top: oldTop, position: oldPosition
-              }
-            });
-        } else {
-          el.style.position = 'absolute';
-          el.style.left = rekt.left - parent.left + 'px';
-          el.style.top = rekt.top - parent.top + 'px';
-          this.actionHistory.add('move', el,
-            {
-              new: { left: el.style.left, top: el.style.top, position: el.style.position },
-              old: { left: oldLeft, top: oldTop, position: oldPosition }
-            });
         }
 
-        if (newParent)
-          newParent.classList.remove('over');
-        if (oldParent)
-          oldParent.classList.remove('over');
-        el.classList.remove('dragging');
-        el.classList.remove('resizing');
-        el.style.transform = el.style.webkitTransform = 'none';
+
+
+
+
+        /* let oldParent = currentElement.parentElement;
+         let newParent;
+         // Does this need to be added to a new parent?
+         if (this._dropTarget) {
+           reparented = true;
+           oldParent.removeChild(currentElement);
+ 
+           // If there was a textContent nuke it, or else you'll
+           // never be able to again.
+           if (this._dropTarget.children.length === 0) {
+             this._dropTarget.textContent = '';
+           }
+           this._dropTarget.appendChild(currentElement);
+           newParent = this._dropTarget;
+           this._dropTarget = null;
+         } else if (currentElement.parentElement && (currentElement.parentElement !== this._canvas)) {
+           reparented = true;
+           // If there's no drop target and the el used to be in a different
+           // parent, move it to the main view.
+           newParent = this._canvas;
+           currentElement.parentElement.removeChild(currentElement);
+           this.add(currentElement);
+         }
+         let parent = currentElement.parentElement.getBoundingClientRect();
+ 
+         let oldLeft = currentElement.style.left;
+         let oldTop = currentElement.style.top;
+         let oldPosition = currentElement.style.position;
+         if (reparented) {
+           currentElement.style.position = 'relative';
+           currentElement.style.left = currentElement.style.top = '0px';
+           this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
+             {
+               new: {
+                 parent: newParent,
+                 left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
+               },
+               old: {
+                 parent: oldParent,
+                 left: oldLeft, top: oldTop, position: oldPosition
+               }
+             });
+         } else {
+           currentElement.style.position = 'absolute';
+           currentElement.style.left = rekt.left - parent.left + 'px';
+           currentElement.style.top = rekt.top - parent.top + 'px';
+           this.actionHistory.add(ActionHistoryType.Move, el,
+             {
+               new: { left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position },
+               old: { left: oldLeft, top: oldTop, position: oldPosition }
+             });
+         }
+ 
+         if (newParent)
+           newParent.classList.remove('over');
+         if (oldParent)
+           oldParent.classList.remove('over');
+         currentElement.classList.remove('dragging');
+         currentElement.classList.remove('resizing');
+         currentElement.style.transform = 'none'; */
         break;
     }
-    this.updateActiveElement([el]);
-    this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
+    //todo this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
   }
 
-  resizeElement(event, el: HTMLElement) {
-    switch (event.detail.state) {
-      case 'track':
-        let trackX = event.detail.dx;
-        let trackY = event.detail.dy;
+  _pointerActionTypeResize(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
+    switch (event.type) {
+      case EventNames.PointerDown:
+        this._initialSizes = [];
+        for (const element of this.selectedElements) {
+          let rect = element.getBoundingClientRect();
+          this._initialSizes.push({ width: rect.width, height: rect.height });
+        }
+        break;
+      case EventNames.PointerMove:
+        let trackX = currentPoint.x - this._initialPoint.x;
+        let trackY = currentPoint.y - this._initialPoint.y;
         if (this._alignOnGrid) {
           trackX = Math.round(trackX / this._gridSize) * this._gridSize;
           trackY = Math.round(trackY / this._gridSize) * this._gridSize;
         }
-        el.style.width = this._initialWidth + trackX + 'px';
-        el.style.height = this._initialHeight + trackY + 'px';
+        let i = 0;
+        for (const element of this.selectedElements) {
+          element.style.width = this._initialSizes[i].width + trackX + 'px';
+          element.style.height = this._initialSizes[i].height + trackY + 'px';
+        }
         break;
-      case 'end':
-        this._resizing = false;
-        this.actionHistory.add('resize', el,
-          {
-            new: { width: el.style.width, height: el.style.height },
-            old: { width: this._initialWidth + 'px', height: this._initialHeight + 'px' }
-          });
-        el.classList.remove('resizing');
-        el.classList.remove('dragging');
-
-        // Ensure that this element is still selected after we're done.
-        // i.e.: Sometimes the end of a resize can end up outside of the element,
-        // and register as a click on the main canvas, deselecting the thing
-        // you were dragging.
-        setTimeout(function () {
-          el.click();
-        }, 50)
+      case EventNames.PointerUp:
+        let j = 0;
+        for (const element of this.selectedElements) {
+          this.actionHistory.add(ActionHistoryType.Resize, element,
+            {
+              new: { width: element.style.width, height: element.style.height },
+              old: { width: this._initialSizes[j].width + 'px', height: this._initialSizes[j].height + 'px' }
+            });
+          element.classList.remove('resizing');
+          element.classList.remove('dragging');
+        }
+        this._initialSizes = null;
         break;
     }
-    this.updateActiveElement([el]);
   }
 
-  dragShouldSize(event, rect) {
-    const right = rect.right - event.detail.x;
-    const bottom = rect.bottom - event.detail.y;
+  _shouldResize(pointerPoint: IPoint, bottomPoint: IPoint) {
+    const right = bottomPoint.x - pointerPoint.x;
+    const bottom = bottomPoint.y - pointerPoint.y;
     return (right < 8 && bottom < 8);
   }
 
@@ -472,68 +653,6 @@ export class CanvasView extends PolymerElement {
     }
     return node;
   }
-
-  onKeyDown(event) {
-    let el = this.selectedElement;
-    if (!el) {
-      return;
-    }
-
-    // This is a global window handler, so clicks can come from anywhere
-    // We only care about keys that come after you've clicked on an element,
-    // or keys after you've selected something from the tree view.
-    // TODO: can this be less bad since it's p horrid?
-    let isOk =
-      (event.composedPath()[0].localName === 'button' &&
-        event.composedPath()[2].localName == 'tree-view') ||
-      (event.composedPath()[0].localName == 'body') ||
-      event.composedPath()[0].classList.contains('active');
-
-    if (!isOk) {
-      return;
-    }
-    let oldLeft = parseInt(el.style.left);
-    let oldTop = parseInt(el.style.top);
-    let oldPosition = el.style.position;
-
-    switch (event.keyCode) {
-      case 38:  // up arrow
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
-        } else {
-          el.style.top = oldTop - 10 + 'px';
-        }
-        break;
-      case 40:  // down arrow
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
-        } else {
-          el.style.top = oldTop + 10 + 'px';
-        }
-        break;
-      case 37:  // left arrow
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
-        } else {
-          el.style.left = oldLeft - 10 + 'px';
-        }
-        break;
-      case 39:  // right arrow
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
-        } else {
-          el.style.left = oldLeft + 10 + 'px';
-        }
-        break;
-    }
-    this.actionHistory.add('move', el,
-      {
-        new: { left: el.style.left, top: el.style.top, position: el.style.position },
-        old: { left: oldLeft, top: oldTop, position: oldPosition }
-      });
-  }
 }
+
+customElements.define('canvas-view', CanvasView);

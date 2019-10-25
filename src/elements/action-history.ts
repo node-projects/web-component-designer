@@ -1,6 +1,9 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
+import { ActionHistoryType } from "../enums/ActionHistoryType";
+import { IActionHistoyItem } from '../interfaces/iaction-history-item';
+import { CanvasView } from './canvas-view';
 
 /*
  * Manages a stack of available undo/redo actions
@@ -8,9 +11,9 @@ import { customElement, property } from '@polymer/decorators';
 @customElement('action-history')
 export class ActionHistory extends PolymerElement {
   @property({ type: Array })
-  undoHistory = [];
+  undoHistory: IActionHistoyItem[] = [];
   @property({ type: Array })
-  redoHistory = [];
+  redoHistory: IActionHistoyItem[] = [];
 
   static get template() {
     return html`
@@ -26,8 +29,8 @@ export class ActionHistory extends PolymerElement {
     super();
   }
 
-  add(action, node, detail?) {
-    const item = {
+  add(action: ActionHistoryType, node, detail?) {
+    const item: IActionHistoyItem = {
       action: action,
       node: node,
       detail: detail
@@ -75,7 +78,7 @@ export class ActionHistory extends PolymerElement {
           break;
       case 'delete':
           if (item.node.id === 'viewContainer') {
-            item.node.setInnerHTML(detail.innerHTML);
+            (<CanvasView>item.node).setInnerHTML(detail.innerHTML);
           } else {
             detail.parent.appendChild(item.node);
           }
@@ -115,41 +118,41 @@ export class ActionHistory extends PolymerElement {
 
     item.node.click();
     switch(item.action) {
-      case 'update':
+      case ActionHistoryType.Update:
           this.dispatchEvent(new CustomEvent('element-updated', {bubbles: true, composed: true, detail: {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true, node: this}}));
           break;
-      case 'new':
+      case ActionHistoryType.New:
           this.dispatchEvent(new CustomEvent('add-to-canvas', {bubbles: true, composed: true, detail: {target: item.node, parent: item.detail.parent, node: this}}));
           break;
-      case 'delete':
+      case ActionHistoryType.Delete:
           // If the node is the viewContainer, clear its inner HTML.
           if (item.node.id === 'viewContainer') {
-            item.node.setInnerHTML('');
+            (<CanvasView>item.node).setInnerHTML('');
           } else {
             item.node.parentElement.click();
             item.node.parentElement.removeChild(item.node);
           }
           break;
-      case 'move':
+      case ActionHistoryType.Move:
           this._updatePosition(item.node, detail.new);
           break;
-      case 'resize':
+      case ActionHistoryType.Resize:
           this._updateSize(item.node, detail.new);
           break;
-      case 'reparent':
-      case 'move-up':
-      case 'move-down':
+      case ActionHistoryType.Reparent:
+      case ActionHistoryType.MoveUp:
+      case ActionHistoryType.MoveDown:
           this._reparent(item.node, detail.old.parent, detail.new.parent);
           this._updatePosition(item.node, detail.new);
           break;
-      case 'fit':
+      case ActionHistoryType.Fit:
           this._updateSize(item.node, detail.new);
           this._updatePosition(item.node, detail.new);
           break;
-      case 'move-back':
+      case ActionHistoryType.MoveBack:
           this.dispatchEvent(new CustomEvent('forward', {bubbles: true, composed: true, detail: {type:'forward', skipHistory: true, node: this}}));
           break;
-      case 'move-forward':
+      case ActionHistoryType.MoveForward:
           this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', skipHistory: true, node: this}}));
           break;
     }

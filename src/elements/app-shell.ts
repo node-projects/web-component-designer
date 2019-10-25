@@ -29,6 +29,7 @@ import './tree-view.js';
 import './element-view.js';
 import './canvas-view.js';
 import './canvas-controls.js';
+import { ActionHistoryType } from "../enums/ActionHistoryType";
 
 DockSpawnTsWebcomponent.cssRootDirectory = "assets/css/";
 
@@ -68,6 +69,7 @@ export class AppShell extends PolymerElement {
           --light-grey: #383f52;
           --highlight-pink: #e91e63;
           --highlight-blue: #2196f3;
+          --highlight-green: #99ff33;
           --input-border-color: #596c7a;
         }
 
@@ -291,7 +293,7 @@ export class AppShell extends PolymerElement {
     el.classList.add('active');*/
 
     // Tell everyone who cares about this.
-    (this.$.canvasControls as CanvasControls).selectedElement = (this.$.viewContainer as CanvasView).selectedElement = this.activeElement = el;
+    //todo: (this.$.viewContainer as CanvasView).setSelectedElements([this.activeElement = el]);
     (this.$.canvasControls as CanvasControls).selectedElement = this.activeElement;
     (this.$.canvasControls as CanvasControls).update(this.activeElement === this.$.viewContainer);
   }
@@ -310,7 +312,7 @@ export class AppShell extends PolymerElement {
     // so that we can diff it to produce the actual state of the world
     //@ts-ignore
     (window.codeView as CodeView).save(tag, event.detail.package, el);
-    (this.$.actionHistory as ActionHistory).add('new', el, {parent: el.parentNode});
+    (this.$.actionHistory as ActionHistory).add(ActionHistoryType.New, el, {parent: el.parentNode});
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
@@ -362,7 +364,7 @@ export class AppShell extends PolymerElement {
     if (detail.skipHistory) {
       return;
     }
-    (this.$.actionHistory as ActionHistory).add('update', this.activeElement,
+    (this.$.actionHistory as ActionHistory).add(ActionHistoryType.Update, this.activeElement,
       {
         type: detail.type, name: detail.name,
         new: {value: detail.value},

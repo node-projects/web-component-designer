@@ -1,5 +1,5 @@
-export enum ActionType {
-    None = 'None',
+export enum PointerActionType {
+    DragOrSelect = 'DragOrSelect',
     Drag = 'Drag',
     Resize = 'Resize',
     DrawSelection = 'DrawSelection'

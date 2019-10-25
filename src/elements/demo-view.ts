@@ -7,25 +7,26 @@ export class DemoView extends LitElement {
   _loading: HTMLDivElement;
 
   static get styles() {
-    return css`:host {
-      display: block;
-      overflow: hidden;
-      height: 100%;
-      width: 100%;
-    }
-    #placeholder {
-      height: 100%;
-      width: 100%;
-    }
-    #loading {
-      position: absolute;
-      top: 60px;
-      left: 20px;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-    }`;
+    return css`
+      :host {
+        display: block;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+      }
+      #placeholder {
+        height: 100%;
+        width: 100%;
+      }
+      #loading {
+        position: absolute;
+        top: 60px;
+        left: 20px;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+      }`;
   }
 
   render() {

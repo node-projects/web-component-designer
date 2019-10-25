@@ -1,8 +1,12 @@
-# wizzywid
+# web-component-designer
+
+A HTML WebComponent for Designing Webcomponents and HTML Pages.
+
+Based on https://github.com/PolymerLabs/wizzywid
 
 [![Build Status](https://travis-ci.com/jzeyer/wizzywid.svg?branch=master)](https://travis-ci.com/jzeyer/wizzywid)
 
-This is a very simple UI getting-started-tool for HTML, Custom Elements, and Polymer.
+This is a WIP for getting a full Designer Framework wich could easily be included in your own Software.
 
 It does not have all of the features that a full UI [designer app](https://github.com/polymer/designer)
 should -- making that kind of app is really hard, and requires a lot of work and maintenance.
