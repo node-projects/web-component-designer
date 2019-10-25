@@ -20,7 +20,7 @@ should -- making that kind of app is really hard, and requires a lot of work and
 
 ## demo
 
-look at: https://node-projects.github.io/web-component-designer/build/HTML/
+look at: https://node-projects.github.io/web-component-designer/build/
 
 ## Features we are workin on
 

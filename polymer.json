@@ -2,12 +2,14 @@
   "sources": [
     "dist/**",
     "assets/**",
-    "elements*.json"
+    "elements*.json",
+    "node_modules/ace-builds/src-min/theme-monokai.js",
+    "node_modules/ace-builds/src-min/mode-html.js"
   ],
   "extraDependencies": [],
   "builds": [
     {
-      "name": "HTML",
+      "name": "./",
       "browserCapabilities": [
         "es2015",
         "push",
