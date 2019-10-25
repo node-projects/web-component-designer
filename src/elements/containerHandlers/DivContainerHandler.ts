@@ -1,5 +1,5 @@
-import { IContainerHandler } from "./IContainerHandler";
-import { IPoint } from '../../interfaces/ipoint';
+import { IContainerHandler } from "./IContainerHandler.js";
+import { IPoint } from '../../interfaces/ipoint.js';
 
 export class DivContainerHandler implements IContainerHandler {
     

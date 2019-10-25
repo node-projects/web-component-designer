@@ -7,15 +7,15 @@
     {
 	  "name": "HTML",
 	  "browserCapabilities": ["es2015", "push", "serviceworker", "modules"],
-      "html": { "minify": true},
-      "css": { "minify": true},
-      "js": { "minify": true, "compile": false},
+      "html": { "minify": false},
+      "css": { "minify": false},
+      "js": { "minify": false, "compile": false},
 	  "bundle": {             
 		"inlineCss": false,          
-		"inlineScripts": true,       
+		"inlineScripts": false,       
 		"rewriteUrlsInTemplates": false, 
 		"sourcemaps": false,          
-		"stripComments": true   
+		"stripComments": false   
 	  },
       "addServiceWorker": false,
       "addPushManifest": false

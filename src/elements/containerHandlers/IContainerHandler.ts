@@ -1,4 +1,4 @@
-import { IPoint } from "../../interfaces/ipoint";
+import { IPoint } from "../../interfaces/ipoint.js";
 
 export interface IContainerHandler {
     CanEnterContainer(element: HTMLElement);

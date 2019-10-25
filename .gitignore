@@ -1,3 +1,2 @@
-node_modules
-wizzywid
-dist
+/node_modules
+/dist
