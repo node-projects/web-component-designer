@@ -94,7 +94,7 @@ export class CodeView extends PolymerElement {
     }
   }
 
-  get(usePolygit) {
+  get() {
     const parent = this.canvasElement;
 
     // Imports. Yes i'm using element globals because I'm lazy. Fight me.
@@ -105,11 +105,7 @@ export class CodeView extends PolymerElement {
     // Host styles.
     let hostCss = parent.style.cssText.replace(/;/g, `;\n       `).trim();
 
-    let polygitBase = '';
-    var directoryPrefix = usePolygit ? '' : 'node_modules/';
-    if (usePolygit) {
-      polygitBase = '<base href="https://polygit.org/polymer+:master/webcomponents+:master/shadycss+webcomponents+:master/paper*+polymerelements+:master/iron*+polymerelements+:master/app*+polymerelements+:master/neon*+polymerelements+:master/components/">';
-    }
+    let directoryPrefix = './node_modules/';
 
     this.dumpNode(parent, '    ', directoryPrefix);
 
@@ -130,7 +126,7 @@ export class CodeView extends PolymerElement {
           ${this._templates.trimRight()}
         </template>
         <script type="module">
-          import { PolymerElement } from '/node_modules/@polymer/polymer/polymer-element.js';
+          import { PolymerElement } from './node_modules/@polymer/polymer/polymer-element.js';
 
           class MainApp extends PolymerElement {
             static get is() { return 'main-app'; }
@@ -149,7 +145,6 @@ export class CodeView extends PolymerElement {
           <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
           <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
           <title>${appTitle}</title>
-          ${polygitBase}
           <script src="${directoryPrefix}@webcomponents/webcomponentsjs/webcomponents-loader.js">&lt;/script>
           ${this._imports.trimRight()}
           <style>
@@ -171,7 +166,7 @@ export class CodeView extends PolymerElement {
   }
 
   dump(parent) {
-    this.update(this.get(parent));
+    this.update(this.get());
   }
 
   dumpNode(parent, indent, directoryPrefix) {

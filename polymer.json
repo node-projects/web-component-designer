@@ -4,7 +4,8 @@
     "assets/**",
     "elements*.json",
     "node_modules/ace-builds/src-min/theme-monokai.js",
-    "node_modules/ace-builds/src-min/mode-html.js"
+    "node_modules/ace-builds/src-min/mode-html.js",
+    "node_modules/ace-builds/src-min/worker-html.js"
   ],
   "extraDependencies": [],
   "builds": [
