@@ -10,13 +10,7 @@
       "html": { "minify": false},
       "css": { "minify": false},
       "js": { "minify": false, "compile": false},
-	  "bundle": {             
-		"inlineCss": false,          
-		"inlineScripts": false,       
-		"rewriteUrlsInTemplates": false, 
-		"sourcemaps": false,          
-		"stripComments": false   
-	  },
+	  "bundle": false,
       "addServiceWorker": false,
       "addPushManifest": false
     }

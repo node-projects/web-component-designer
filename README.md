@@ -18,6 +18,10 @@ should -- making that kind of app is really hard, and requires a lot of work and
 
 <img width="985" alt="screenshot of wizzywid" src="https://user-images.githubusercontent.com/1369170/28957547-22175752-78a7-11e7-8770-49df35698e55.png">
 
+## demo
+
+look at: https://node-projects.github.io/web-component-designer/build/HTML/
+
 ## Features we are workin on
 
  - Conversation to Typescript (done)
