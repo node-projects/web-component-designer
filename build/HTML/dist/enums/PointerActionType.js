@@ -5,4 +5,4 @@ export var PointerActionType;
   PointerActionType["Drag"] = "Drag";
   PointerActionType["Resize"] = "Resize";
   PointerActionType["DrawSelection"] = "DrawSelection";
-})(PointerActionType || (PointerActionType = {})); //# sourceMappingURL=PointerActionType.js.map
+})(PointerActionType || (PointerActionType = {}));

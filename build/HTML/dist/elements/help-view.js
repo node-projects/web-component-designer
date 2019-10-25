@@ -65,4 +65,4 @@ let HelpView = class HelpView extends PolymerElement {
 
 };
 HelpView = __decorate([customElement('help-view')], HelpView);
-export { HelpView }; //# sourceMappingURL=help-view.js.map
+export { HelpView };

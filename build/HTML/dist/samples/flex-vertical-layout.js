@@ -38,4 +38,4 @@ let FlexVerticalLayout = class FlexVerticalLayout extends PolymerElement {
 
 };
 FlexVerticalLayout = __decorate([customElement("flex-vertical-layout")], FlexVerticalLayout);
-export { FlexVerticalLayout }; //# sourceMappingURL=flex-vertical-layout.js.map
+export { FlexVerticalLayout };

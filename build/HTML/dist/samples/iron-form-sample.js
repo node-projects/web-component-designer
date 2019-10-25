@@ -32,4 +32,4 @@ let IronFormSample = class IronFormSample extends PolymerElement {
 
 };
 IronFormSample = __decorate([customElement("iron-form-sample")], IronFormSample);
-export { IronFormSample }; //# sourceMappingURL=iron-form-sample.js.map
+export { IronFormSample };

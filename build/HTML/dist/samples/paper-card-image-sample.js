@@ -29,4 +29,4 @@ let PaperCardImageSample = class PaperCardImageSample extends PolymerElement {
 
 };
 PaperCardImageSample = __decorate([customElement("paper-card-image-sample")], PaperCardImageSample);
-export { PaperCardImageSample }; //# sourceMappingURL=paper-card-image-sample.js.map
+export { PaperCardImageSample };

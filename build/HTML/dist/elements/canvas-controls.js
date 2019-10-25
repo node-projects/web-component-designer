@@ -399,4 +399,4 @@ __decorate([property({
 })], CanvasControls.prototype, "actionHistory", void 0);
 
 CanvasControls = __decorate([customElement('canvas-controls')], CanvasControls);
-export { CanvasControls }; //# sourceMappingURL=canvas-controls.js.map
+export { CanvasControls };

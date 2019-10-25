@@ -55,4 +55,4 @@ let SamplesView = class SamplesView extends PaletteBase(PolymerElement) {
 
 };
 SamplesView = __decorate([customElement('palette-samples')], SamplesView);
-export { SamplesView }; //# sourceMappingURL=palette-samples.js.map
+export { SamplesView };

@@ -102,4 +102,4 @@ let ElementFlex = class ElementFlex extends ElementStuffBase(PolymerElement) {
 
 };
 ElementFlex = __decorate([customElement('element-stuff-flex')], ElementFlex);
-export { ElementFlex }; //# sourceMappingURL=element-stuff-flex.js.map
+export { ElementFlex };

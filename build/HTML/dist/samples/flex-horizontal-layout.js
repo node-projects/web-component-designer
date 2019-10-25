@@ -37,4 +37,4 @@ let FlexHorizontalLayout = class FlexHorizontalLayout extends PolymerElement {
 
 };
 FlexHorizontalLayout = __decorate([customElement("flex-horizontal-layout")], FlexHorizontalLayout);
-export { FlexHorizontalLayout }; //# sourceMappingURL=flex-horizontal-layout.js.map
+export { FlexHorizontalLayout };

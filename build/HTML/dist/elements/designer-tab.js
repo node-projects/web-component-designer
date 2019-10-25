@@ -51,4 +51,4 @@ let DesignerTab = class DesignerTab extends PolymerElement {
 
 };
 DesignerTab = __decorate([customElement('designer-tab')], DesignerTab);
-export { DesignerTab }; //# sourceMappingURL=designer-tab.js.map
+export { DesignerTab };

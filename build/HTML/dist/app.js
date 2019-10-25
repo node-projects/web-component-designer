@@ -70,4 +70,4 @@ function getAttributesIfCustomElement(target) {
   } else {
     return [];
   }
-} //# sourceMappingURL=app.js.map
+}

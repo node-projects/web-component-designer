@@ -63,4 +63,4 @@ export function PaletteBase(base) {
   }
 
   return PaletteElementMixin;
-} //# sourceMappingURL=palette-base.js.map
+}

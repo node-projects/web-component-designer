@@ -52,4 +52,4 @@ $_documentPalContainer.innerHTML = `<dom-module id="palette-shared-styles">
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentPalContainer.content); //# sourceMappingURL=palette-shared-styles.js.map
+document.head.appendChild($_documentPalContainer.content);

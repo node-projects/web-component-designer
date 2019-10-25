@@ -70,4 +70,4 @@ __decorate([property({
 })], AppControls.prototype, "actionHistory", void 0);
 
 AppControls = __decorate([customElement('app-controls')], AppControls);
-export { AppControls }; //# sourceMappingURL=app-controls.js.map
+export { AppControls };

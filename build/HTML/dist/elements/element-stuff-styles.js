@@ -123,4 +123,4 @@ let ElementStyles = class ElementStyles extends ElementStuffBase(PolymerElement)
 
 };
 ElementStyles = __decorate([customElement('element-stuff-styles')], ElementStyles);
-export { ElementStyles }; //# sourceMappingURL=element-stuff-styles.js.map
+export { ElementStyles };

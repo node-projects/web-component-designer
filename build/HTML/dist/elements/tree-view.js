@@ -227,4 +227,4 @@ let TreeView = class TreeView extends PolymerElement {
 
 };
 TreeView = __decorate([customElement('tree-view')], TreeView);
-export { TreeView }; //# sourceMappingURL=tree-view.js.map
+export { TreeView };

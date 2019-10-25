@@ -492,4 +492,4 @@ __decorate([property({
 })], AppShell.prototype, "mainPage", void 0);
 
 AppShell = __decorate([customElement('app-shell')], AppShell);
-export { AppShell }; //# sourceMappingURL=app-shell.js.map
+export { AppShell };

@@ -4,4 +4,4 @@ export var EventNames;
   EventNames["PointerDown"] = "pointerdown";
   EventNames["PointerMove"] = "pointermove";
   EventNames["PointerUp"] = "pointerup";
-})(EventNames || (EventNames = {})); //# sourceMappingURL=EventNames.js.map
+})(EventNames || (EventNames = {}));

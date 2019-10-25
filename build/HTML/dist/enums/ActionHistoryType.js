@@ -12,4 +12,4 @@ export var ActionHistoryType;
   ActionHistoryType["MoveDown"] = "move-down";
   ActionHistoryType["MoveBack"] = "move-back";
   ActionHistoryType["MoveForward"] = "move-forward";
-})(ActionHistoryType || (ActionHistoryType = {})); //# sourceMappingURL=ActionHistoryType.js.map
+})(ActionHistoryType || (ActionHistoryType = {}));

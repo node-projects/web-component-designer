@@ -302,4 +302,4 @@ __decorate([property({
 })], ActionHistory.prototype, "redoHistory", void 0);
 
 ActionHistory = __decorate([customElement('action-history')], ActionHistory);
-export { ActionHistory }; //# sourceMappingURL=action-history.js.map
+export { ActionHistory };

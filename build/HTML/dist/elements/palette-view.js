@@ -73,4 +73,4 @@ __decorate([property({
 })], PaletteView.prototype, "selected", void 0);
 
 PaletteView = __decorate([customElement('palette-view')], PaletteView);
-export { PaletteView }; //# sourceMappingURL=palette-view.js.map
+export { PaletteView };

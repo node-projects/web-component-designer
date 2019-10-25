@@ -715,4 +715,4 @@ export class CanvasView extends HTMLElement {
   }
 
 }
-customElements.define('canvas-view', CanvasView); //# sourceMappingURL=canvas-view.js.map
+customElements.define('canvas-view', CanvasView);

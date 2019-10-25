@@ -94,4 +94,4 @@ let ElementsView = class ElementsView extends PaletteBase(PolymerElement) {
 
 };
 ElementsView = __decorate([customElement('palette-elements')], ElementsView);
-export { ElementsView }; //# sourceMappingURL=palette-elements.js.map
+export { ElementsView };

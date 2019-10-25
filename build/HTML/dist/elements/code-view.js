@@ -361,4 +361,4 @@ __decorate([property({
 })], CodeView.prototype, "elementsToPackages", void 0);
 
 CodeView = __decorate([customElement('code-view')], CodeView);
-export { CodeView }; //# sourceMappingURL=code-view.js.map
+export { CodeView };

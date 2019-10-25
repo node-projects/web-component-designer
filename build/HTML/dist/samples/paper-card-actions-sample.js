@@ -34,4 +34,4 @@ let PaperCardActionsSample = class PaperCardActionsSample extends PolymerElement
 
 };
 PaperCardActionsSample = __decorate([customElement("paper-card-actions-sample")], PaperCardActionsSample);
-export { PaperCardActionsSample }; //# sourceMappingURL=paper-card-actions-sample.js.map
+export { PaperCardActionsSample };

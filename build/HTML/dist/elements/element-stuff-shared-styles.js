@@ -53,4 +53,4 @@ $_documentContainer.innerHTML = `<dom-module id="element-stuff-shared-styles">
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer.content); //# sourceMappingURL=element-stuff-shared-styles.js.map
+document.head.appendChild($_documentContainer.content);

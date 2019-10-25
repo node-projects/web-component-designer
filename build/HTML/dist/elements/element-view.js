@@ -85,4 +85,4 @@ __decorate([property({
 })], ElementView.prototype, "selected", void 0);
 
 ElementView = __decorate([customElement('element-view')], ElementView);
-export { ElementView }; //# sourceMappingURL=element-view.js.map
+export { ElementView };

@@ -28,4 +28,4 @@ let PaperDropdownMenuSample = class PaperDropdownMenuSample extends PolymerEleme
 
 };
 PaperDropdownMenuSample = __decorate([customElement("paper-dropdown-menu-sample")], PaperDropdownMenuSample);
-export { PaperDropdownMenuSample }; //# sourceMappingURL=paper-dropdown-menu-sample.js.map
+export { PaperDropdownMenuSample };

@@ -140,4 +140,4 @@ let ElementProperties = class ElementProperties extends ElementStuffBase(Polymer
 
 };
 ElementProperties = __decorate([customElement('element-stuff-properties')], ElementProperties);
-export { ElementProperties }; //# sourceMappingURL=element-stuff-properties.js.map
+export { ElementProperties };

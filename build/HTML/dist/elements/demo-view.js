@@ -64,4 +64,4 @@ let DemoView = class DemoView extends LitElement {
 
 };
 DemoView = __decorate([customElement('demo-view')], DemoView);
-export { DemoView }; //# sourceMappingURL=demo-view.js.map
+export { DemoView };

@@ -28,4 +28,4 @@ export class DesignerTabs extends mixinBehaviors([IronSelectableBehavior], Polym
   }
 
 }
-customElements.define(DesignerTabs.is, DesignerTabs); //# sourceMappingURL=designer-tabs.js.map
+customElements.define(DesignerTabs.is, DesignerTabs);

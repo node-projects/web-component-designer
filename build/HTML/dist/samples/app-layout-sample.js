@@ -80,4 +80,4 @@ let AppLayoutSample = class AppLayoutSample extends PolymerElement {
 
 };
 AppLayoutSample = __decorate([customElement("app-layout-sample")], AppLayoutSample);
-export { AppLayoutSample }; //# sourceMappingURL=app-layout-sample.js.map
+export { AppLayoutSample };

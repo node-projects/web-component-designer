@@ -25,4 +25,4 @@ let AppHeaderSample = class AppHeaderSample extends PolymerElement {
 
 };
 AppHeaderSample = __decorate([customElement("app-header-sample")], AppHeaderSample);
-export { AppHeaderSample }; //# sourceMappingURL=app-header-sample.js.map
+export { AppHeaderSample };

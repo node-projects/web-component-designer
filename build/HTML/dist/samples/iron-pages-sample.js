@@ -39,4 +39,4 @@ let IronPagesSample = class IronPagesSample extends PolymerElement {
 
 };
 IronPagesSample = __decorate([customElement("iron-pages-sample")], IronPagesSample);
-export { IronPagesSample }; //# sourceMappingURL=iron-pages-sample.js.map
+export { IronPagesSample };

@@ -52,4 +52,4 @@ let NativeView = class NativeView extends PaletteBase(PolymerElement) {
 
 };
 NativeView = __decorate([customElement('palette-native')], NativeView);
-export { NativeView }; //# sourceMappingURL=palette-native.js.map
+export { NativeView };
