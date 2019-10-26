@@ -47,7 +47,7 @@ export class CanvasView extends HTMLElement {
         position: relative;
         background-color: var(--canvas-background);
         /* 10px grid, using http://www.patternify.com/ */
-        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAIElEQVQoU2NkYGBIY2BgmMVAADASUgCTH1WIN6SIDh4AnhABC01te2MAAAAASUVORK5CYII=);
+        background-image: url(./assets/images/grid.png);
         background-position: 0px 0px;
         transform: translateZ(0);
       }

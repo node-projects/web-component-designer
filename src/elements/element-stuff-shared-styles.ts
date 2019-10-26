@@ -11,6 +11,10 @@ $_documentContainer.innerHTML = `<dom-module id="element-stuff-shared-styles">
       }
       .content-wrapper {
         padding: .5em;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        grid-auto-rows: 30px;
       }
       label, input, select {
         display: inline-block;
@@ -20,6 +24,7 @@ $_documentContainer.innerHTML = `<dom-module id="element-stuff-shared-styles">
         margin: 2px 0;
         padding: 0 2px 0 4px;
         width: 110px;
+        white-space: nowrap;
       }
       label, .style-label {
         box-sizing: border-box;
@@ -36,6 +41,7 @@ $_documentContainer.innerHTML = `<dom-module id="element-stuff-shared-styles">
         border-radius: 5px;
         box-sizing: border-box;
         font-size: 11px;
+        width: 100%;
       }
       /*input {
         margin-left: 4px;

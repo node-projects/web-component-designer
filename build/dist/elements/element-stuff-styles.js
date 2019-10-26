@@ -41,7 +41,12 @@ let ElementStyles = class ElementStyles extends ElementStuffBase(PolymerElement)
         paper-swatch-picker {
           border: 1px solid var(--input-border-color);
           border-radius: 5px;
-          margin: 2px 0;
+          margin: 0;
+          height: 100%;
+          justify-content: center;
+          padding: 0;
+          display: flex;
+          align-items: center;
           --paper-icon-button-ink-color: var(--input-border-color);
           --paper-icon-button: {
             padding: 0;
