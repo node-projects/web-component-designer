@@ -1,11 +1,11 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
-import { ActionHistory } from './action-history.js';
+import { ActionHistory } from '../elements/ActionHistory.js';
 
 import '@polymer/iron-icon/iron-icon.js';
 import './app-icons.js';
-import './designer-tab.js';
+import '../elements/designer-tab.js';
 import { ActionHistoryType } from "../enums/ActionHistoryType";
 
 @customElement('canvas-controls')

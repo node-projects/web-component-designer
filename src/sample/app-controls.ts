@@ -1,15 +1,19 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
-import { ActionHistory } from './action-history.js';
+import { ActionHistory } from '../elements/ActionHistory.js';
 
 import '@polymer/iron-icon/iron-icon.js';
 import './app-icons.js';
+import { AppShell } from './app-shell';
 
 @customElement('app-controls')
 export class AppControls extends PolymerElement {
   @property({type: Array})
   actionHistory : ActionHistory;
+
+  @property({type: Object})
+  appShell : AppShell;
 
   static get template() {
     return html`
@@ -52,6 +56,10 @@ export class AppControls extends PolymerElement {
   update(undos, redos) {
     (this.$.undoBtn as HTMLInputElement).disabled = (undos === 0);
     (this.$.redoBtn as HTMLInputElement).disabled = (redos === 0);
+  }
+
+  new() {
+    this.appShell.new();
   }
 
   undo() {

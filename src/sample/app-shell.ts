@@ -2,16 +2,14 @@ import { PolymerElement } from '@polymer/polymer';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
 import { CanvasControls } from './canvas-controls.js';
-import { ActionHistory } from './action-history.js';
+import { ActionHistory } from '../elements/ActionHistory.js';
 import { AppControls } from './app-controls.js';
-import { TreeView } from './tree-view.js';
-import { CanvasView } from './canvas-view.js';
-import { CodeView } from './code-view.js';
-import { DemoView } from './demo-view.js';
-import { NativeView } from './palette-native.js';
-import { ElementView } from './element-view.js';
-import { DockSpawnTsWebcomponent } from 'dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent';
-
+import { TreeView } from '../elements/tree-view.js';
+import { CanvasView } from '../elements/canvas-view.js';
+import { CodeView } from '../elements/code-view.js';
+import { DemoView } from '../elements/demo-view.js';
+import { NativeView } from '../elements/palette-native.js';
+import { ElementView } from '../elements/element-view.js';
 import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
 import '@polymer/iron-pages/iron-pages.js';
@@ -19,31 +17,39 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 import './app-icons.js';
 import './app-controls.js';
-import './designer-tabs.js';
-import './designer-tab.js';
-import './palette-view.js';
-import './action-history.js';
-import './demo-view.js';
-import './help-view.js';
-import './tree-view.js';
-import './element-view.js';
-import './canvas-view.js';
+import '../elements/designer-tabs.js';
+import '../elements/designer-tab.js';
+import '../elements/palette-view.js';
+import '../elements/ActionHistory.js';
+import '../elements/demo-view.js';
+import '../elements/help-view.js';
+import '../elements/tree-view.js';
+import '../elements/element-view.js';
+import '../elements/canvas-view.js';
 import './canvas-controls.js';
+import './sample-document.js'
 import { ActionHistoryType } from "../enums/ActionHistoryType";
+import { DockSpawnTsWebcomponent } from 'dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent';
+import { JsonElementsService } from '../elements/services/elementsService/JsonElementsService';
+
+import serviceContainer from '../elements/services/DefaultServiceBootstrap';
+serviceContainer.register('elementsService', new JsonElementsService('./elements-native.json'))
+serviceContainer.register('elementsService', new JsonElementsService('./elements-samples.json'))
+serviceContainer.register('elementsService', new JsonElementsService('./elements.json'))
 
 DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
 //@ts-ignore
-window.require(["ace/ace"], function(a) {
-    if (a) {
-        a.config.init(true);
-        //@ts-ignore
-        a.define = window.define;
-    }
-    if (!window.ace)
-        window.ace = a;
-    for (var key in a) if (a.hasOwnProperty(key))
-        window.ace[key] = a[key];
+window.require(["ace/ace"], function (a) {
+  if (a) {
+    a.config.init(true);
+    //@ts-ignore
+    a.define = window.define;
+  }
+  if (!window.ace)
+    window.ace = a;
+  for (var key in a) if (a.hasOwnProperty(key))
+    window.ace[key] = a[key];
 });
 
 @customElement('app-shell')
@@ -52,6 +58,8 @@ export class AppShell extends PolymerElement {
   activeElement: HTMLElement;
   @property({ type: String })
   mainPage = 'designer';
+
+  private _documentNumber: number;
 
   static get template() {
     return html`
@@ -104,25 +112,12 @@ export class AppShell extends PolymerElement {
           justify-content: space-between;
         }
 
-        designer-tab.single {
-          color: white;
-          background: var(--dark-grey);
-          width: 100%;
-          height: 41px;
-          margin: 0;
-          padding: 0;
-          border: none;
-        }
-        designer-tab.single span {
-          box-shadow: none;
-        }
-
         .app-body {
           box-sizing: border-box;
           display: flex;
           flex-direction: row;
           padding-top: 60px;
-          height: 100vh;
+          height: 100%;
         }
 
         .main-view {
@@ -135,11 +130,6 @@ export class AppShell extends PolymerElement {
           flex-direction: column;
         }
 
-        iron-pages  {
-          height: 100%;
-          overflow: auto;
-        }
-
         .heavy {
           font-weight: 900;
           letter-spacing: 2px;
@@ -149,9 +139,7 @@ export class AppShell extends PolymerElement {
           opacity: 0.5;
           letter-spacing: normal;
         }
-        canvas-view {
-          overflow: auto;
-        }
+        
         paper-toggle-button {
           position: absolute;
           top: 0;
@@ -170,11 +158,9 @@ export class AppShell extends PolymerElement {
         }
       </style>
 
-      <action-history id="actionHistory"></action-history>
-
       <app-header fixed="">
         <app-toolbar>
-          <span class="heavy">wizzywid <span class="lite">// what you see is what you deserve</span></span>
+          <span class="heavy">web-component-designer <span class="lite">a design framework for web-components using web-components</span></span>
           <app-controls id="appControls"></app-controls>
         </app-toolbar>
       </app-header>
@@ -182,25 +168,7 @@ export class AppShell extends PolymerElement {
       <div class="app-body">
         <dock-spawn-ts style="width: 100%; height: 100%; position: relative;">
           
-          <div title="Document1" class="main-view">
-            <designer-tabs attr-for-selected="name" selected="{{mainPage}}">
-              <designer-tab name="designer">
-                <button>Designer</button>
-              </designer-tab>
-              <designer-tab name="preview">
-                <button on-click="viewDemo">Preview</button>
-              </designer-tab>
-              <designer-tab name="code">
-                <button on-click="viewCode">Code</button>
-              </designer-tab>
-            </designer-tabs>
-            <iron-pages selected="[[mainPage]]" attr-for-selected="name" selected-attribute="visible">
-              <canvas-view name="designer" id="viewContainer" style="height:100%"></canvas-view>
-              <div name="code" style="width:100%;height:100%;"><slot name="code"></slot></div>
-              <demo-view id="demoView" name="preview"></demo-view>
-              <help-view name="help"></help-view>
-            </iron-pages>
-          </div>
+          <sample-document></sample-document>
 
           <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2">
             <tree-view name="tree" id="treeView"></tree-view>
@@ -230,31 +198,31 @@ export class AppShell extends PolymerElement {
     this.setActiveElement(this.$.viewContainer);
     this.refreshView();
 
-    (this.$.canvasControls as CanvasControls).actionHistory = this.$.actionHistory as ActionHistory;
-    (this.$.canvasControls as CanvasControls).canvasElement = this.$.viewContainer;
-    (this.$.appControls as AppControls).actionHistory = this.$.actionHistory as ActionHistory;
-    (this.$.viewContainer as CanvasView).actionHistory = this.$.actionHistory as ActionHistory;
+    //(this.$.canvasControls as CanvasControls).actionHistory = this.$.actionHistory as ActionHistory;
+    //(this.$.canvasControls as CanvasControls).canvasElement = this.$.viewContainer;
+    //(this.$.appControls as AppControls).actionHistory = this.$.actionHistory as ActionHistory;
+    //(this.$.viewContainer as CanvasView).actionHistory = this.$.actionHistory as ActionHistory;
 
     this.addEventListener('new-element', event => this.createElement(event));
     this.addEventListener('new-sample', event => this.createSample(event));
     this.addEventListener('element-updated', event => this.updateElement(event));
 
-    this.addEventListener('refresh-view', (event : CustomEvent) => this.refreshView(event));
-    this.addEventListener('selected-element-changed', (event : CustomEvent) => {
+    this.addEventListener('refresh-view', (event: CustomEvent) => this.refreshView(event));
+    this.addEventListener('selected-element-changed', (event: CustomEvent) => {
       this.setActiveElement(event.detail.target);
     });
-    this.addEventListener('finish-clone', (event : CustomEvent) => {
+    this.addEventListener('finish-clone', (event: CustomEvent) => {
       this._finishNewElement(event.detail.target, event.detail.target.localName, true);
     });
-    this.addEventListener('update-action-buttons', (event : CustomEvent) => {
+    this.addEventListener('update-action-buttons', (event: CustomEvent) => {
       (this.$.appControls as AppControls).update(event.detail.undos, event.detail.redos);
     });
-    this.addEventListener('package-names-ready', (event : CustomEvent) => {
+    this.addEventListener('package-names-ready', (event: CustomEvent) => {
       //@ts-ignore
       window.codeView.elementsToPackages = event.detail.list;
     });
 
-    this.addEventListener('remove-from-canvas', (event : CustomEvent) => {
+    this.addEventListener('remove-from-canvas', (event: CustomEvent) => {
       const parent = event.detail.parent;
       const node = event.detail.target;
       if (parent === this.$.viewContainer) {
@@ -264,7 +232,7 @@ export class AppShell extends PolymerElement {
       }
       parent.click();
     });
-    this.addEventListener('add-to-canvas', (event : CustomEvent) => {
+    this.addEventListener('add-to-canvas', (event: CustomEvent) => {
       const parent = event.detail.parent;
       const node = event.detail.target;
       if (parent === this.$.viewContainer) {
@@ -274,9 +242,13 @@ export class AppShell extends PolymerElement {
       }
       node.click();
     });
-    this.addEventListener('move', (event : CustomEvent) => {
+    this.addEventListener('move', (event: CustomEvent) => {
       (this.$.canvasControls as CanvasControls).move(event.detail.type, event.detail.skipHistory);
     });
+  }
+
+  new() {
+    this._documentNumber++;
   }
 
   /*
@@ -312,11 +284,11 @@ export class AppShell extends PolymerElement {
     // so that we can diff it to produce the actual state of the world
     //@ts-ignore
     (window.codeView as CodeView).save(tag, event.detail.package, el);
-    (this.$.actionHistory as ActionHistory).add(ActionHistoryType.New, el, {parent: el.parentNode});
+    (this.$.actionHistory as ActionHistory).add(ActionHistoryType.New, el, { parent: el.parentNode });
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
-    requestAnimationFrame(function() {
+    requestAnimationFrame(function () {
       el.click();
     });
   }
@@ -329,7 +301,7 @@ export class AppShell extends PolymerElement {
 
     let el = document.createElement(tag);
     (this.$.viewContainer as CanvasView).add(el);
-    
+
     if (tag !== 'app-layout-sample') {
       el.style.boxSizing = 'border-box';
       el.style.position = 'absolute';
@@ -343,7 +315,7 @@ export class AppShell extends PolymerElement {
   /**
    * Refreshes all the properties/styles of the active element.
    */
-  refreshView(event? : CustomEvent) {
+  refreshView(event?: CustomEvent) {
     if (event && event.detail.whileTracking) {
       let size = this.activeElement.getBoundingClientRect();
       (this.$.elementView as ElementView).displayPosition(size.top, size.left);
@@ -367,8 +339,8 @@ export class AppShell extends PolymerElement {
     (this.$.actionHistory as ActionHistory).add(ActionHistoryType.Update, this.activeElement,
       {
         type: detail.type, name: detail.name,
-        new: {value: detail.value},
-        old: {value: oldValue}
+        new: { value: detail.value },
+        old: { value: oldValue }
       });
   }
 
@@ -416,14 +388,14 @@ export class AppShell extends PolymerElement {
   }
 
   viewCode() {
-    this.dispatchEvent(new CustomEvent('update-code', {bubbles: true, composed: true, detail: {target: this.$.viewContainer, node: this}}));
+    this.dispatchEvent(new CustomEvent('update-code', { bubbles: true, composed: true, detail: { target: this.$.viewContainer, node: this } }));
   }
 
   viewDemo() {
     //@ts-ignore
     if (!window.codeView.get)
       return;
-      //@ts-ignore
+    //@ts-ignore
     (this.$.demoView as DemoView).display(window.codeView.get());
   }
 
@@ -460,7 +432,7 @@ export class AppShell extends PolymerElement {
     let slots = el.root ? el.root.querySelectorAll('slot') : [];
 
     if (((this.$.paletteView as NativeView).isNativeElement(tag) && tag !== 'input') ||
-        slots.length != 0) {
+      slots.length != 0) {
       el.textContent = tag;
     }
   }

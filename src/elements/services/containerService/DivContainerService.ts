@@ -1,7 +1,7 @@
-import { IContainerHandler } from "./IContainerHandler.js";
-import { IPoint } from '../../interfaces/ipoint.js';
+import { IPoint } from '../../../interfaces/ipoint.js';
+import { IContainerService } from './IContainerService.js';
 
-export class DivContainerHandler implements IContainerHandler {
+export class DivContainerService implements IContainerService {
     
     CanEnterContainer(element: HTMLElement) {
         throw new Error("Method not implemented.");

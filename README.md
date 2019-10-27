@@ -50,6 +50,12 @@ look at: https://node-projects.github.io/web-component-designer/build/
 
   * Navigate Chrome to [localhost:8000]() to see the app.
 
+## Using
+
+at first you have to setup a service container, providing services for History, Properties, Elements, ....
+
+
+
 ## Configuring
 **Disclaimer**: to configure the app to have other elements than the ones it
 already has, you should clone it, build it, and make one of the changes below.

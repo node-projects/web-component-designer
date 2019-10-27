@@ -1,49 +1,43 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { customElement, property } from '@polymer/decorators';
+export class CodeView extends HTMLElement {
 
-@customElement('code-view')
-export class CodeView extends PolymerElement {
-  @property({ type: Object })
   canvasElement: HTMLElement;
-  @property({ type: Object })
   elementsToPackages: Map<string, string>;
-  
-  _aceEditor: AceAjax.Editor;
-  _propertyDefaultsForTag: Object;
-  _attributeDefaultsForTag: Object;
-  _style: any;
-  _templates: any;
-  _imports: any;
 
-  static get template() {
-    return html`
-      <style>
-        :host {
-          display: block;
-        }
-      </style>
-      <div id="__editor" style="height: 100%; width:100%"></div>
-    `;
-  }
+  private _aceEditor: AceAjax.Editor;
+  private _propertyDefaultsForTag: Object;
+  private _attributeDefaultsForTag: Object;
+  private _style: any;
+  private _templates: any;
+  private _imports: any;
+  private _initialized: boolean;
+  _editor: HTMLDivElement;
 
-  // Yeah so Ace editor doesn't work with shadow roots because
-  // it probably does a document.getElementById in the edit function.
-  _attachDom(dom) {
-    return this.appendChild(dom);
+  constructor() {
+    super();
+
+    this.style.display = 'block';
+    this._editor = document.createElement("div");
+    this._editor.style.height = '100%';
+    this._editor.style.width = '100%';
+
+    const shadow = this.attachShadow({ mode: 'open' });
+    shadow.appendChild(this._editor)
+    //this.appendChild(this._editor);
   }
 
   connectedCallback() {
-    super.connectedCallback();
-    this._propertyDefaultsForTag = {};
-    this._attributeDefaultsForTag = {};
+    if (!this._initialized) {
+      this._propertyDefaultsForTag = {};
+      this._attributeDefaultsForTag = {};
 
-    this._aceEditor = ace.edit('__editor');
-    this._aceEditor.setReadOnly(true);
-    this._aceEditor.setTheme("ace/theme/monokai");
-    this._aceEditor.getSession().setMode("ace/mode/html");
-    this._aceEditor.$blockScrolling = Infinity;
-    this._aceEditor.setOptions({fontSize: "14px"});
+      this._aceEditor = ace.edit(this._editor);
+      this._aceEditor.setReadOnly(true);
+      this._aceEditor.setTheme("ace/theme/monokai");
+      this._aceEditor.getSession().setMode("ace/mode/html");
+      this._aceEditor.$blockScrolling = Infinity;
+      this._aceEditor.setOptions({ fontSize: "14px" });
+      this._initialized = true;
+    }
   }
 
   update(code) {
@@ -225,7 +219,7 @@ export class CodeView extends PolymerElement {
       return '';
     }
   }
-  
+
   dumpElementStartTag(tag, node, indent) {
     let str = this.dumpPropsAndAttributes(tag, node);
     return str.length === 0 ? `${indent}<${tag}>` : `${indent}<${tag} ${str}>`;

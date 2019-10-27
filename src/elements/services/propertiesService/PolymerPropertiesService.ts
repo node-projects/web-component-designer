@@ -1,7 +1,7 @@
-import { IPropertyHandler } from './IPropertyHandler';
+import { IPropertiesService } from "./IPropertiesService";
 import { IProperty } from './IProperty';
 
-export class PolymerPropertiesHandler implements IPropertyHandler {
+export class PolymerPropertiesService implements IPropertiesService {
 
     isHandledElement(element: Element): boolean {
         return (<any>element.constructor).polymerElementVersion != null;

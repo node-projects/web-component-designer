@@ -1,7 +1,7 @@
-import { IPropertyHandler } from './IPropertyHandler';
+import { IPropertiesService } from "./IPropertiesService";
 import { IProperty } from './IProperty';
 
-export class LitElementPropertiesHandler implements IPropertyHandler {
+export class LitElementPropertiesService implements IPropertiesService {
 
     isHandledElement(element: Element): boolean {
         let proto = (<any>element.constructor).__proto__;

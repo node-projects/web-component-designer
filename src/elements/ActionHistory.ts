@@ -1,32 +1,17 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { customElement, property } from '@polymer/decorators';
 import { ActionHistoryType } from "../enums/ActionHistoryType";
 import { IActionHistoyItem } from '../interfaces/iaction-history-item';
 import { CanvasView } from './canvas-view';
+import { ChangeGroup } from "./ChangeGroup";
 
 /*
  * Manages a stack of available undo/redo actions
  */
-@customElement('action-history')
-export class ActionHistory extends PolymerElement {
-  @property({ type: Array })
+export class ActionHistory {
   undoHistory: IActionHistoyItem[] = [];
-  @property({ type: Array })
   redoHistory: IActionHistoyItem[] = [];
 
-  static get template() {
-    return html`
-      <style>
-        :host {
-          display: none;
-        }
-      </style>
-    `;
-  }
-
-  constructor() {
-    super();
+  createChangeGroup(): ChangeGroup {
+    return null;
   }
 
   add(action: ActionHistoryType, node, detail?) {

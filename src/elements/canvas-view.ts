@@ -1,21 +1,22 @@
-import { ActionHistory } from './action-history';
-
 //import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
 import { IPoint } from '../interfaces/ipoint';
 import { PointerActionType } from "../enums/PointerActionType";
 import { EventNames } from "../enums/EventNames";
 import { ActionHistoryType } from "../enums/ActionHistoryType";
 import { ISize } from '../interfaces/isize';
+import { ServiceContainer } from './services/ServiceContainer';
 
 export class CanvasView extends HTMLElement {
-  //Public Properties
-  public actionHistory: ActionHistory;
+  // Public Properties
+  public serviceContainer : ServiceContainer;
   public selectedElements: HTMLElement[] = [];
 
   // Settings
   private _gridSize = 10;
   private _alignOnGrid = true;
+  private _resizeOffset = 10;
 
+  // Private Variables
   private _canvas: HTMLDivElement;
   private _selector: HTMLDivElement;
 
@@ -40,99 +41,99 @@ export class CanvasView extends HTMLElement {
       CanvasView._sheet = new CSSStyleSheet();
       //@ts-ignore
       CanvasView._sheet.replaceSync(`
-      :host {
-        display: block;
-        box-sizing: border-box;
-        width: 100%;
-        position: relative;
-        background-color: var(--canvas-background);
-        /* 10px grid, using http://www.patternify.com/ */
-        background-image: url(./assets/images/grid.png);
-        background-position: 0px 0px;
-        transform: translateZ(0);
-      }
-      #canvas {
-        box-sizing: border-box;
-        width: 100%;
-        height: 100%;
-      }
+        :host {
+          display: block;
+          box-sizing: border-box;
+          width: 100%;
+          position: relative;
+          background-color: var(--canvas-background);
+          /* 10px grid, using http://www.patternify.com/ */
+          background-image: url(./assets/images/grid.png);
+          background-position: 0px 0px;
+          transform: translateZ(0);
+        }
+        #canvas {
+          box-sizing: border-box;
+          width: 100%;
+          height: 100%;
+        }
 
-      #canvas > dom-repeat {
-        height: 20px;
-        width: 20px;
-        display: inline-block;
-      }
-      #canvas * {
-        cursor: pointer;
-        user-select: none;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-      }
-      #canvas *:not(.active):hover {
-        outline: solid 2px #90CAF9 !important;
-        outline-offset: 2px;
-      }
-      .active, :host(.active) {
-        outline: solid 3px var(--highlight-blue) !important;
-        outline-offset: 2px;
-        transform: translateZ(0);
-      }
-      :host(.active) {
-        outline-offset: -3px;
-      }
+        #canvas > dom-repeat {
+          height: 20px;
+          width: 20px;
+          display: inline-block;
+        }
+        #canvas * {
+          cursor: pointer;
+          user-select: none;
+          -moz-user-select: none;
+          -webkit-user-select: none;
+          -ms-user-select: none;
+        }
+        #canvas *:not(.active):hover {
+          outline: solid 2px #90CAF9 !important;
+          outline-offset: 2px;
+        }
+        .active, :host(.active) {
+          outline: solid 3px var(--highlight-blue) !important;
+          outline-offset: 2px;
+          transform: translateZ(0);
+        }
+        :host(.active) {
+          outline-offset: -3px;
+        }
 
-      /* Show a resize cursor in the corner */
-      .active:after {
-        position: absolute;
-        bottom: -5px;
-        right: -5px;
-        height: 14px;
-        width: 14px;
-        content: '↘';
-        cursor: se-resize;
-        font-size: 10px;
-        font-weight: bold;
-        text-align: center;
-        background: var(--highlight-blue);
-        color: white;
-        z-index: 1000000;
-      }
-      .dragging, .resizing {
-        user-select: none;
-      }
-      .dragging {
-        /*opacity: 0.6;*/
-        z-index: 1000;
-        cursor: move;
-      }
-      .dragging.active:after {
-        display: none;
-      }
-      .resizing {
-        cursor: se-resize;
-      }
-      .over {
-        outline: dashed 3px var(--highlight-green) !important;
-        outline-offset: 2px;
-      }
-      .over::before {
-        content: 'press "alt" to enter container';
-        top: 5px;
-        left: 5px;
-        position: absolute;
-        opacity: 0.5;
-      }
-      .over-enter {
-        outline: solid 3px var(--highlight-green) !important;
-        outline-offset: 2px;
-      }
-      #selector {
-        border: 1px dotted #000;
-        position: absolute;
-        pointer-events: none;
-      }
-    }`);
+        /* Show a resize cursor in the corner */
+        .active:after {
+          position: absolute;
+          bottom: -5px;
+          right: -5px;
+          height: 14px;
+          width: 14px;
+          content: '↘';
+          cursor: se-resize;
+          font-size: 10px;
+          font-weight: bold;
+          text-align: center;
+          background: var(--highlight-blue);
+          color: white;
+          z-index: 1000000;
+        }
+        .dragging, .resizing {
+          user-select: none;
+        }
+        .dragging {
+          /*opacity: 0.6;*/
+          z-index: 1000;
+          cursor: move;
+        }
+        .dragging.active:after {
+          display: none;
+        }
+        .resizing {
+          cursor: se-resize;
+        }
+        .over {
+          outline: dashed 3px var(--highlight-green) !important;
+          outline-offset: 2px;
+        }
+        .over::before {
+          content: 'press "alt" to enter container';
+          top: 5px;
+          left: 5px;
+          position: absolute;
+          opacity: 0.5;
+        }
+        .over-enter {
+          outline: solid 3px var(--highlight-green) !important;
+          outline-offset: 2px;
+        }
+        #selector {
+          border: 1px dotted #000;
+          position: absolute;
+          pointer-events: none;
+        }
+      }`);
     }
 
     const shadow = this.attachShadow({ mode: 'open' });
@@ -155,15 +156,25 @@ export class CanvasView extends HTMLElement {
       this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerDownOnElement(event));
       this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerMoveOnElement(event));
       this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerUpOnElement(event));
-      window.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
-      window.addEventListener('keyup', this._onKeyUpBound, true);
-    }
+      this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
+      this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
+    } 
+    window.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
+    window.addEventListener('keyup', this._onKeyUpBound, true);
   }
 
 
   disconnectedCallback() {
     window.removeEventListener('keydown', this._onKeyDownBound, true);
     window.removeEventListener('keyup', this._onKeyUpBound, true);
+  }
+
+  private _onDragOver(event: DragEvent) {
+    event.preventDefault();
+  }
+
+  private _onDrop(event: DragEvent) {
+    event.preventDefault();
   }
 
   private onKeyUp(event: KeyboardEvent) {
@@ -237,7 +248,7 @@ export class CanvasView extends HTMLElement {
         }
         break;
     }
-    this.actionHistory.add(ActionHistoryType.Move, el,
+    this.serviceContainer.actionHistory.add(ActionHistoryType.Move, el,
       {
         new: { left: el.style.left, top: el.style.top, position: el.style.position },
         old: { left: oldLeft, top: oldTop, position: oldPosition }
@@ -515,7 +526,7 @@ export class CanvasView extends HTMLElement {
             movedElement.style.position = 'absolute';
             movedElement.style.left = (trackX + parseInt(oldLeft)) + "px";
             movedElement.style.top = (trackY + parseInt(oldTop)) + "px";
-            this.actionHistory.add(ActionHistoryType.Move, movedElement,
+            this.serviceContainer.actionHistory.add(ActionHistoryType.Move, movedElement,
               {
                 new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
                 old: { left: oldLeft, top: oldTop, position: oldPosition }
@@ -621,7 +632,7 @@ export class CanvasView extends HTMLElement {
       case EventNames.PointerUp:
         let j = 0;
         for (const element of this.selectedElements) {
-          this.actionHistory.add(ActionHistoryType.Resize, element,
+          this.serviceContainer.actionHistory.add(ActionHistoryType.Resize, element,
             {
               new: { width: element.style.width, height: element.style.height },
               old: { width: this._initialSizes[j].width + 'px', height: this._initialSizes[j].height + 'px' }
@@ -637,7 +648,7 @@ export class CanvasView extends HTMLElement {
   _shouldResize(pointerPoint: IPoint, bottomPoint: IPoint) {
     const right = bottomPoint.x - pointerPoint.x;
     const bottom = bottomPoint.y - pointerPoint.y;
-    return (right < 8 && bottom < 8);
+    return (right < this._resizeOffset && bottom < this._resizeOffset);
   }
 
   deepTargetFind(x, y, notThis) {
