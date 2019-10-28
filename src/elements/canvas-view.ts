@@ -2,8 +2,8 @@
 import { IPoint } from '../interfaces/ipoint';
 import { PointerActionType } from "../enums/PointerActionType";
 import { EventNames } from "../enums/EventNames";
-import { ActionHistoryType } from "../enums/ActionHistoryType";
-import { ISize } from '../interfaces/isize';
+import { UndoItemType } from "./services/undoService/UndoItemType";
+import { ISize } from '../interfaces/ISize';
 import { ServiceContainer } from './services/ServiceContainer';
 
 export class CanvasView extends HTMLElement {
@@ -28,7 +28,7 @@ export class CanvasView extends HTMLElement {
   private _clickThroughElements: HTMLElement[] = []
   private _previousEventName: EventNames;
 
-  private static _sheet: CSSStyleSheet;
+  private static _style: CSSStyleSheet;
   private _firstConnect: boolean;
   private _ownBoundingRect: ClientRect | DOMRect;
 
@@ -37,10 +37,10 @@ export class CanvasView extends HTMLElement {
 
   constructor() {
     super();
-    if (!CanvasView._sheet) {
-      CanvasView._sheet = new CSSStyleSheet();
+    if (!CanvasView._style) {
+      CanvasView._style = new CSSStyleSheet();
       //@ts-ignore
-      CanvasView._sheet.replaceSync(`
+      CanvasView._style.replaceSync(`
         :host {
           display: block;
           box-sizing: border-box;
@@ -138,7 +138,7 @@ export class CanvasView extends HTMLElement {
 
     const shadow = this.attachShadow({ mode: 'open' });
     //@ts-ignore
-    shadow.adoptedStyleSheets = [CanvasView._sheet];
+    shadow.adoptedStyleSheets = [CanvasView._style];
     this._canvas = document.createElement('div');
     this._canvas.id = 'canvas';
     shadow.appendChild(this._canvas)
@@ -248,7 +248,7 @@ export class CanvasView extends HTMLElement {
         }
         break;
     }
-    this.serviceContainer.actionHistory.add(ActionHistoryType.Move, el,
+    this.serviceContainer.actionHistory.add(UndoItemType.Move, el,
       {
         new: { left: el.style.left, top: el.style.top, position: el.style.position },
         old: { left: oldLeft, top: oldTop, position: oldPosition }
@@ -526,7 +526,7 @@ export class CanvasView extends HTMLElement {
             movedElement.style.position = 'absolute';
             movedElement.style.left = (trackX + parseInt(oldLeft)) + "px";
             movedElement.style.top = (trackY + parseInt(oldTop)) + "px";
-            this.serviceContainer.actionHistory.add(ActionHistoryType.Move, movedElement,
+            this.serviceContainer.actionHistory.add(UndoItemType.Move, movedElement,
               {
                 new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
                 old: { left: oldLeft, top: oldTop, position: oldPosition }
@@ -632,7 +632,7 @@ export class CanvasView extends HTMLElement {
       case EventNames.PointerUp:
         let j = 0;
         for (const element of this.selectedElements) {
-          this.serviceContainer.actionHistory.add(ActionHistoryType.Resize, element,
+          this.serviceContainer.actionHistory.add(UndoItemType.Resize, element,
             {
               new: { width: element.style.width, height: element.style.height },
               old: { width: this._initialSizes[j].width + 'px', height: this._initialSizes[j].height + 'px' }

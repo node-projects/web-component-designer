@@ -1,12 +1,12 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
-import { ActionHistory } from '../elements/ActionHistory.js';
+import { UndoService } from '../elements/services/undoService/UndoService.js';
 
 import '@polymer/iron-icon/iron-icon.js';
 import './app-icons.js';
 import '../elements/designer-tab.js';
-import { ActionHistoryType } from "../enums/ActionHistoryType";
+import { UndoItemType } from "../elements/services/undoService/UndoItemType";
 
 @customElement('canvas-controls')
 export class CanvasControls extends PolymerElement {
@@ -15,7 +15,7 @@ export class CanvasControls extends PolymerElement {
   @property({ type: Object })
   canvasElement: Object;
   @property({ type: Object })
-  actionHistory: ActionHistory;
+  actionHistory: UndoService;
 
   static get template() {
     return html`
@@ -132,13 +132,13 @@ export class CanvasControls extends PolymerElement {
     const el = this.selectedElement;
     // Deleting the top level app should remove its children.
     if (this._isCanvasElement(el)) {
-      this.actionHistory.add(ActionHistoryType.Delete, el, {innerHTML: el.innerHTML});
+      this.actionHistory.add(UndoItemType.Delete, el, {innerHTML: el.innerHTML});
       el.innerHTML = '';
     } else {
       const parent = el.parentElement;
       parent.removeChild(el);
       this.selectedElement = parent;
-      this.actionHistory.add(ActionHistoryType.Delete, el, {parent: parent});
+      this.actionHistory.add(UndoItemType.Delete, el, {parent: parent});
     }
     this._refreshView();
 
@@ -159,7 +159,7 @@ export class CanvasControls extends PolymerElement {
     this.dispatchEvent(new CustomEvent('selected-element-changed', {bubbles: true, composed: true, detail: {target: clone, node: this}}));
    
     // P.S: Since we did a clone, we already have the initial state of the <tag>.
-    this.actionHistory.add(ActionHistoryType.New, clone, {parent: el.parentNode});
+    this.actionHistory.add(UndoItemType.New, clone, {parent: el.parentNode});
     this._refreshView();
 
   }
@@ -173,7 +173,7 @@ export class CanvasControls extends PolymerElement {
       return;
     }
 
-    this.actionHistory.add(ActionHistoryType.Fit, el,
+    this.actionHistory.add(UndoItemType.Fit, el,
       {
         new: {
           position: 'absolute',
@@ -229,7 +229,7 @@ export class CanvasControls extends PolymerElement {
     if (skipHistory === true) {
       return;
     }
-    this.actionHistory.add(ActionHistoryType.MoveBack, el);
+    this.actionHistory.add(UndoItemType.MoveBack, el);
   }
 
   moveForward(skipHistory) {
@@ -257,7 +257,7 @@ export class CanvasControls extends PolymerElement {
     if (skipHistory === true) {
       return;
     }
-    this.actionHistory.add(ActionHistoryType.MoveForward, el);
+    this.actionHistory.add(UndoItemType.MoveForward, el);
   }
 
   moveUp(skipHistory) {
@@ -274,7 +274,7 @@ export class CanvasControls extends PolymerElement {
     if (skipHistory === true) {
       return;
     }
-    this.actionHistory.add(ActionHistoryType.MoveUp, el,
+    this.actionHistory.add(UndoItemType.MoveUp, el,
       {old: {parent: parent}, new: {parent: parent.parentElement}});
   }
 
@@ -306,7 +306,7 @@ export class CanvasControls extends PolymerElement {
     if (skipHistory === true) {
       return;
     }
-    this.actionHistory.add(ActionHistoryType.MoveDown, el,
+    this.actionHistory.add(UndoItemType.MoveDown, el,
         {
           old: {parent: oldParent, position: oldPosition},
           new: {parent: sibling, position: 'relative'}

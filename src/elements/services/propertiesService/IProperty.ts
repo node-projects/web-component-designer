@@ -1,6 +1,9 @@
 export interface IProperty {
     name: string;
-    type?: object;
-    defaultValue?: any; // if not set, show it in the propertygrid
-    // editor: () => void;
+    type?: string; // -> string, number, list, color, thickness, css-length
+    default?: any;
+    min?: number;
+    max?: number;
+    values?: string[]; // list selectable values
+    createEditor?: (property: IProperty) => HTMLElement;
 }

@@ -1,10 +1,3 @@
-window.addEventListener('WebComponentsReady', function() {
-  document.addEventListener('update-code', function(event: CustomEvent) {
-    // @ts-ignore
-    codeView.dump(event.detail.target);
-  }, true);
-});
-
 function getProtoProperties(target) {
   // If this is a custom element, you need to go up the prototype
   // chain until you get proper HTMLElement, since everything under it

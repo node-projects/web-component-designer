@@ -1,7 +1,7 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
-import { ActionHistory } from '../elements/ActionHistory.js';
+import { UndoService } from '../elements/services/undoService/UndoService.js';
 
 import '@polymer/iron-icon/iron-icon.js';
 import './app-icons.js';
@@ -10,7 +10,7 @@ import { AppShell } from './app-shell';
 @customElement('app-controls')
 export class AppControls extends PolymerElement {
   @property({type: Array})
-  actionHistory : ActionHistory;
+  actionHistory : UndoService;
 
   @property({type: Object})
   appShell : AppShell;

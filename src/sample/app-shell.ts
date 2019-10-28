@@ -2,13 +2,12 @@ import { PolymerElement } from '@polymer/polymer';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
 import { CanvasControls } from './canvas-controls.js';
-import { ActionHistory } from '../elements/ActionHistory.js';
+import { UndoService } from '../elements/services/undoService/UndoService.js';
 import { AppControls } from './app-controls.js';
 import { TreeView } from '../elements/tree-view.js';
 import { CanvasView } from '../elements/canvas-view.js';
 import { CodeView } from '../elements/code-view.js';
 import { DemoView } from '../elements/demo-view.js';
-import { NativeView } from '../elements/palette-native.js';
 import { ElementView } from '../elements/element-view.js';
 import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
@@ -20,7 +19,7 @@ import './app-controls.js';
 import '../elements/designer-tabs.js';
 import '../elements/designer-tab.js';
 import '../elements/palette-view.js';
-import '../elements/ActionHistory.js';
+import '../elements/services/undoService/UndoService.js';
 import '../elements/demo-view.js';
 import '../elements/help-view.js';
 import '../elements/tree-view.js';
@@ -28,14 +27,14 @@ import '../elements/element-view.js';
 import '../elements/canvas-view.js';
 import './canvas-controls.js';
 import './sample-document.js'
-import { ActionHistoryType } from "../enums/ActionHistoryType";
+import { UndoItemType } from "../elements/services/undoService/UndoItemType";
 import { DockSpawnTsWebcomponent } from 'dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent';
 import { JsonElementsService } from '../elements/services/elementsService/JsonElementsService';
 
 import serviceContainer from '../elements/services/DefaultServiceBootstrap';
-serviceContainer.register('elementsService', new JsonElementsService('./elements-native.json'))
-serviceContainer.register('elementsService', new JsonElementsService('./elements-samples.json'))
-serviceContainer.register('elementsService', new JsonElementsService('./elements.json'))
+serviceContainer.register('elementsService', new JsonElementsService('native', './elements-native.json'))
+serviceContainer.register('elementsService', new JsonElementsService('samples', './elements-samples.json'))
+serviceContainer.register('elementsService', new JsonElementsService('custom', './elements.json'))
 
 DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
@@ -284,7 +283,7 @@ export class AppShell extends PolymerElement {
     // so that we can diff it to produce the actual state of the world
     //@ts-ignore
     (window.codeView as CodeView).save(tag, event.detail.package, el);
-    (this.$.actionHistory as ActionHistory).add(ActionHistoryType.New, el, { parent: el.parentNode });
+    (this.$.actionHistory as UndoService).add(UndoItemType.New, el, { parent: el.parentNode });
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
@@ -336,7 +335,7 @@ export class AppShell extends PolymerElement {
     if (detail.skipHistory) {
       return;
     }
-    (this.$.actionHistory as ActionHistory).add(ActionHistoryType.Update, this.activeElement,
+    (this.$.actionHistory as UndoService).add(UndoItemType.Update, this.activeElement,
       {
         type: detail.type, name: detail.name,
         new: { value: detail.value },

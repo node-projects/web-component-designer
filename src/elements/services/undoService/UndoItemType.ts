@@ -1,4 +1,4 @@
-export enum ActionHistoryType {
+export enum UndoItemType {
     Update = 'update',
     New = 'new',
     Delete = 'delete',

@@ -17,6 +17,7 @@ export class LitElementPropertiesService implements IPropertiesService {
 
     getProperties(element: Element): IProperty[] {
         let list = (<any>element.constructor)._classProperties as Map<string, object>;
+        // @ts-ignore
         for (const litProperty of list) {
         }
         return null;

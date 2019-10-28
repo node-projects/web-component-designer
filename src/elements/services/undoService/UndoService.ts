@@ -1,21 +1,22 @@
-import { ActionHistoryType } from "../enums/ActionHistoryType";
-import { IActionHistoyItem } from '../interfaces/iaction-history-item';
-import { CanvasView } from './canvas-view';
+import { UndoItemType } from "./UndoItemType";
+import { IUndoItem } from './IUndoItem';
+import { CanvasView } from '../../canvas-view';
 import { ChangeGroup } from "./ChangeGroup";
+import { IUndoService } from './IUndoService';
 
 /*
  * Manages a stack of available undo/redo actions
  */
-export class ActionHistory {
-  undoHistory: IActionHistoyItem[] = [];
-  redoHistory: IActionHistoyItem[] = [];
+export class UndoService implements IUndoService {
+  undoHistory: IUndoItem[] = [];
+  redoHistory: IUndoItem[] = [];
 
   createChangeGroup(): ChangeGroup {
     return null;
   }
 
-  add(action: ActionHistoryType, node, detail?) {
-    const item: IActionHistoyItem = {
+  add(action: UndoItemType, node, detail?) {
+    const item: IUndoItem = {
       action: action,
       node: node,
       detail: detail
@@ -103,13 +104,13 @@ export class ActionHistory {
 
     item.node.click();
     switch(item.action) {
-      case ActionHistoryType.Update:
+      case UndoItemType.Update:
           this.dispatchEvent(new CustomEvent('element-updated', {bubbles: true, composed: true, detail: {type: detail.type, name: detail.name, value: detail.new.value, skipHistory: true, node: this}}));
           break;
-      case ActionHistoryType.New:
+      case UndoItemType.New:
           this.dispatchEvent(new CustomEvent('add-to-canvas', {bubbles: true, composed: true, detail: {target: item.node, parent: item.detail.parent, node: this}}));
           break;
-      case ActionHistoryType.Delete:
+      case UndoItemType.Delete:
           // If the node is the viewContainer, clear its inner HTML.
           if (item.node.id === 'viewContainer') {
             (<CanvasView>item.node).setInnerHTML('');
@@ -118,26 +119,26 @@ export class ActionHistory {
             item.node.parentElement.removeChild(item.node);
           }
           break;
-      case ActionHistoryType.Move:
+      case UndoItemType.Move:
           this._updatePosition(item.node, detail.new);
           break;
-      case ActionHistoryType.Resize:
+      case UndoItemType.Resize:
           this._updateSize(item.node, detail.new);
           break;
-      case ActionHistoryType.Reparent:
-      case ActionHistoryType.MoveUp:
-      case ActionHistoryType.MoveDown:
+      case UndoItemType.Reparent:
+      case UndoItemType.MoveUp:
+      case UndoItemType.MoveDown:
           this._reparent(item.node, detail.old.parent, detail.new.parent);
           this._updatePosition(item.node, detail.new);
           break;
-      case ActionHistoryType.Fit:
+      case UndoItemType.Fit:
           this._updateSize(item.node, detail.new);
           this._updatePosition(item.node, detail.new);
           break;
-      case ActionHistoryType.MoveBack:
+      case UndoItemType.MoveBack:
           this.dispatchEvent(new CustomEvent('forward', {bubbles: true, composed: true, detail: {type:'forward', skipHistory: true, node: this}}));
           break;
-      case ActionHistoryType.MoveForward:
+      case UndoItemType.MoveForward:
           this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', skipHistory: true, node: this}}));
           break;
     }
@@ -148,7 +149,7 @@ export class ActionHistory {
     this.dispatchEvent(new CustomEvent('update-action-buttons', {bubbles: true, composed: true, detail: {undos: this.undoHistory.length, redos: this.redoHistory.length, node: this}}));
   }
 
-  _itemsMatch(action, first, second) {
+  private _itemsMatch(action, first, second) {
     // These kinds of actions have element refs in the details,
     // and you can't json those anyway.
     if (action === 'reparent' || action === 'move-up' || action === 'move-down') {
@@ -157,18 +158,18 @@ export class ActionHistory {
     return JSON.stringify(first) === JSON.stringify(second);
   }
 
-  _updatePosition(node, detail) {
+  private _updatePosition(node, detail) {
     node.style.left = detail.left;
     node.style.top = detail.top;
     node.style.position = detail.position;
   }
 
-  _updateSize(node, detail) {
+ private  _updateSize(node, detail) {
     node.style.width = detail.width;
     node.style.height = detail.height;
   }
 
-  _reparent(node, oldParent, newParent) {
+  private _reparent(node, oldParent, newParent) {
     oldParent.removeChild(node);
     newParent.appendChild(node);
   }

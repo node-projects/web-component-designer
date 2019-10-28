@@ -1,10 +1,10 @@
-import { ActionHistory } from '../ActionHistory';
+import { IUndoService } from './undoService/IUndoService';
 import { IPropertiesService } from "./propertiesService/IPropertiesService";
 import { IContainerService } from './containerService/IContainerService';
 import { IElementsService } from './elementsService/IElementsService';
 
 interface ServiceNameMap {
-    "actionHistory": ActionHistory;
+    "actionHistory": IUndoService;
     "porpertyService": IPropertiesService;
     "containerService": IContainerService;
     "elementsService": IElementsService;
@@ -28,7 +28,7 @@ export class ServiceContainer {
         this._services[<string>name].push(service);
     }
 
-    get actionHistory(): ActionHistory {
+    get actionHistory(): IUndoService {
         return this.getLastService('actionHistory');
     }
 
