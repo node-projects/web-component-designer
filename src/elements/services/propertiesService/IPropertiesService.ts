@@ -1,5 +1,7 @@
 import { IProperty } from './IProperty';
-export interface IPropertiesService {
+import { IService } from '../IService';
+
+export interface IPropertiesService extends IService {
     isHandledElement(element: Element): boolean;
     getProperties(element: Element): IProperty[];
 }

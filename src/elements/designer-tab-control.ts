@@ -1,16 +1,11 @@
 export class DesignerTabControl extends HTMLElement {
 
-    selectedIndex: number;
+    public selectedIndex: number = -1;
 
-    private _boundHeaderClick: any;
     private _contentObserver: MutationObserver;
-    private _ready: boolean;
-    private _oldIndex: number;
-
     private static _style: CSSStyleSheet;
-    private _tabs: HTMLDivElement;
     private _panels: HTMLDivElement;
-    _headerDiv: HTMLDivElement;
+    private _headerDiv: HTMLDivElement;
 
     constructor() {
         super();
@@ -31,17 +26,16 @@ export class DesignerTabControl extends HTMLElement {
                 user-select: none; 
                 flex-direction: row; 
                 cursor: pointer; 
-                height: 30px;
+                height: 40px;
+                background-color: var(--dark-grey);
             }
             .tab-header {
                 font-family: Arial;
                 display: flex;
                 justify-content: center;
-                align-items: center;
-                background-color: var(--dark-grey);
+                align-items: center;                
                 text-transform: uppercase;                
-                box-sizing: content-box;
-                height: 30px;
+                box-sizing: content-box;                
                 padding-left: 10px;
                 padding-right: 10px;
                 color: white;
@@ -51,7 +45,7 @@ export class DesignerTabControl extends HTMLElement {
                 letter-spacing: 1px;
             }
             .tab-header:hover {
-                background: var(--medium-grey);
+                background: var(--light-grey);
             }
             .selected {
                 pointer-events: none;
@@ -59,6 +53,7 @@ export class DesignerTabControl extends HTMLElement {
                 box-shadow: inset 0 3px 0 var(--highlight-pink);
             }
             .panels {
+                background: var(--medium-grey);
                 box-shadow: 0 2px 2px rgba(0, 0, 0, .3); 
                 border-radius: 3px; 
                 height: calc(100% - 30px);
@@ -80,9 +75,6 @@ export class DesignerTabControl extends HTMLElement {
         this._headerDiv = document.createElement("div")
         this._headerDiv.className = 'header';
         outerDiv.appendChild(this._headerDiv);
-        this._tabs = document.createElement("div")
-        this._tabs.className = 'tabs';
-        //headerDiv.appendChild(this._tabs);
         this._panels = document.createElement("div")
         this._panels.className = 'panels';
         outerDiv.appendChild(this._panels);
@@ -93,12 +85,14 @@ export class DesignerTabControl extends HTMLElement {
 
     connectedCallback() {
         this._createItems();
-
-        this._ready = true;
         this._selectedIndexChanged();
-
         this._contentObserver.observe(this, { childList: true });
-        this._oldIndex = -1;
+
+        let selectedIndexAttribute = this.getAttribute("selected-index")
+        if (selectedIndexAttribute) {
+            this.selectedIndex = <number><any>selectedIndexAttribute;
+            this._selectedIndexChanged();
+        }
     }
 
     disconnectedCallback() {
@@ -121,12 +115,14 @@ export class DesignerTabControl extends HTMLElement {
             this._headerDiv.appendChild(tabHeaderDiv);
             i++;
         }
+
+        this._selectedIndexChanged();
     }
 
-    private _selectedIndexChanged() {        
+    private _selectedIndexChanged() {
         for (let index = 0; index < this.children.length; index++) {
             const element = this.children[index];
-            if (index == this.selectedIndex) {                
+            if (index == this.selectedIndex) {
                 element.slot = "panels";
                 this._headerDiv.children[index].classList.add('selected');
             } else {

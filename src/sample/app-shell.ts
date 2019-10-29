@@ -2,13 +2,11 @@ import { PolymerElement } from '@polymer/polymer';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
 import { CanvasControls } from './canvas-controls.js';
-import { UndoService } from '../elements/services/undoService/UndoService.js';
 import { AppControls } from './app-controls.js';
 import { TreeView } from '../elements/tree-view.js';
 import { CanvasView } from '../elements/canvas-view.js';
 import { CodeView } from '../elements/code-view.js';
 import { DemoView } from '../elements/demo-view.js';
-import { ElementView } from '../elements/element-view.js';
 import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
 import '@polymer/iron-pages/iron-pages.js';
@@ -33,6 +31,7 @@ import { JsonElementsService } from '../elements/services/elementsService/JsonEl
 
 import serviceContainer from '../elements/services/DefaultServiceBootstrap';
 import { PaletteView } from '../elements/palette-view.js';
+import { SampleDocument } from './sample-document.js';
 
 DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
@@ -169,7 +168,7 @@ export class AppShell extends PolymerElement {
       <div class="app-body">
         <dock-spawn-ts style="width: 100%; height: 100%; position: relative;">
           
-          <sample-document></sample-document>
+          <sample-document id="doc1"></sample-document>
 
           <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2">
             <!--<tree-view name="tree" id="treeView"></tree-view>-->
@@ -187,6 +186,10 @@ export class AppShell extends PolymerElement {
     `;
   }
 
+  _createServiceContainer() {
+    
+  }
+
   ready() {
     super.ready();
     
@@ -195,6 +198,7 @@ export class AppShell extends PolymerElement {
     serviceContainer.register('elementsService', new JsonElementsService('custom', '/dist/sample/elements.json'));
     (<PaletteView>this.$.paletteView).loadControls(serviceContainer.elementsServices);
 
+    (<SampleDocument>this.$.doc1).serviceContainer = serviceContainer;
 
     // Explanation and apology: normally, codeView would be a child
     // of this element, and could be this.$.codeView, but ace.js

@@ -1,4 +1,5 @@
 import { IElementDefintion } from './services/elementsService/IElementDefinition';
+import { PaperButtonBehavior } from '@polymer/paper-behaviors/paper-button-behavior';
 
 
 export class PaletteElements extends HTMLElement {
@@ -78,7 +79,7 @@ export class PaletteElements extends HTMLElement {
     this._datalist.id = 'list';
     this._shadow.appendChild(this._datalist)
 
-    this.addEventListener('click', this._click.bind(this));
+    this.addEventListener('doubleclick', this._doubleclick.bind(this));
     this._filter.addEventListener('input', this._filterInput.bind(this));
 
     this.namesToPackages = new Map();
@@ -94,6 +95,24 @@ export class PaletteElements extends HTMLElement {
 
       let button = document.createElement("button");
       button.innerText = elementDefintion.tag;
+      button.draggable = true;
+      button.ondragstart = (e) => {
+        e.dataTransfer.setData("text/json/elementDefintion", JSON.stringify(elementDefintion));
+        (<HTMLElement>e.currentTarget).style.border = "dashed";
+
+        // todo: Drag Drop Ghost 
+        /* var elem = document.createElement("button");
+        elem.id = "drag-ghost";
+        elem.style.width = "20px";        
+        elem.style.height = "40px";
+        elem.style.position = "absolute";
+        elem.style.top = "-100px";
+        this._shadow.appendChild(elem);
+        e.dataTransfer.setDragImage(elem, 0, 0);*/
+      }
+      button.ondragend = (e) => {
+        (<HTMLElement>e.currentTarget).style.border = "none";
+      }
       this._shadow.appendChild(button);
     }
 
@@ -117,7 +136,7 @@ export class PaletteElements extends HTMLElement {
     this.dispatchEvent(new CustomEvent('package-names-ready', { bubbles: true, composed: true, detail: { list: this.namesToPackages, node: this } }));*/
   }
 
-  _doClick(target, kind) {
+  private _doClick(target, kind) {
     // maybe it's a package/subpackage kind of thing.
     let matches = kind.match(/(.*)\/(.*)/);
     if (matches && matches.length === 3) {
@@ -135,7 +154,7 @@ export class PaletteElements extends HTMLElement {
     this._fireEvent('new-element', kind, packageName, '');
   }
 
-  _click(event) {
+  private _doubleclick(event) {
     // Need composed path because the event is coming from a shadow root (the sub-palette).
     let target = event.composedPath()[0];
     let kind = target.textContent;
@@ -145,7 +164,7 @@ export class PaletteElements extends HTMLElement {
     this._doClick(target, kind);
   }
 
-  _filterInput(event) {
+  private _filterInput(event) {
     if (!this._elementDefintions) {
       this._filter.removeEventListener('input', this._filterInput);
       return;

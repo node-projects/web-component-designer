@@ -22,18 +22,8 @@ export class PaletteView extends HTMLElement {
         flex: 1;
         height: 100%;
       }
-      iron-pages {
-        flex: 1;
-        overflow: hidden;
-        padding-bottom: 20px;
-        background: var(--medium-grey);
-        color: white;
-      }
-      button:hover {
-        box-shadow: inset 0 3px 0 var(--light-grey);
-      }
-      button:focus {
-        box-shadow: inset 0 3px 0 var(--highlight-pink);
+      designer-tab-control {
+        margin-top: 10px;
       }
       `);
     }
@@ -43,6 +33,7 @@ export class PaletteView extends HTMLElement {
     shadow.adoptedStyleSheets = [PaletteView._style];
 
     this._designerTabControl = new DesignerTabControl();
+    this._designerTabControl.selectedIndex = 0;
     shadow.appendChild(this._designerTabControl);
   }
 

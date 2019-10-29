@@ -1,41 +1,37 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { customElement, property } from '@polymer/decorators';
-import { ElementProperties } from './element-stuff-properties.js';
-import { ElementStyles } from './element-stuff-styles.js';
-import { ElementFlex } from './element-stuff-flex.js';
+export class ElementView extends HTMLElement {
 
-import '@polymer/iron-pages/iron-pages.js';
-import './designer-tabs.js';
-import './designer-tab.js';
-import './element-stuff-styles.js';
-import './element-stuff-flex.js';
-import './element-stuff-properties.js';
+  private static _style: CSSStyleSheet;
+  
+  constructor() {
+    super();
+    if (!ElementView._style) {
+      ElementView._style = new CSSStyleSheet();
+      //@ts-ignore
+      ElementView._style.replaceSync(`
+      :host {
+        display: block;
+      }
+      iron-pages {
+        overflow: hidden;
+        height: 250px;
+        background: var(--medium-grey);
+        color: white;
+      }
+      button:hover {
+        box-shadow: inset 0 3px 0 var(--light-grey);
+      }
+      button:focus {
+        box-shadow: inset 0 3px 0 var(--highlight-pink);
+      }
+      `);
+    }
 
-@customElement('element-view')
-export class ElementView extends PolymerElement {
-  @property({ type: String })
-  selected = 'properties';
+    const shadow = this.attachShadow({ mode: 'open' });
+    //@ts-ignore
+    shadow.adoptedStyleSheets = [ElementView._style];
+  }
 
-  static get template() {
-    return html`
-      <style>
-        :host {
-          display: block;
-        }
-        iron-pages {
-          overflow: hidden;
-          height: 250px;
-          background: var(--medium-grey);
-          color: white;
-        }
-        button:hover {
-          box-shadow: inset 0 3px 0 var(--light-grey);
-        }
-        button:focus {
-          box-shadow: inset 0 3px 0 var(--highlight-pink);
-        }
-      </style>
+/*
       <designer-tabs attr-for-selected="name" selected="{{selected}}">
         <designer-tab name="properties">
           <button>Properties</button>
@@ -53,12 +49,8 @@ export class ElementView extends PolymerElement {
         <element-stuff-styles name="styles" id="stylesContainer"></element-stuff-styles>
         <element-stuff-flex name="flex" id="flexContainer"></element-stuff-flex>
       </iron-pages>
-    `;
-  }
-
-  /**
-   * Updates the views.
    */
+/*
   display(el) {
     let computedStyle = window.getComputedStyle(el);
     (this.$.propertiesContainer as ElementProperties).display(el);
@@ -69,4 +61,6 @@ export class ElementView extends PolymerElement {
   displayPosition(top, left) {
     (this.$.stylesContainer as ElementStyles).display('', { top: top + 'px', left: left + 'px' });
   }
+*/
+
 }

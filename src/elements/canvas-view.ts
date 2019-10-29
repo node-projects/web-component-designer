@@ -5,10 +5,11 @@ import { EventNames } from "../enums/EventNames";
 import { UndoItemType } from "./services/undoService/UndoItemType";
 import { ISize } from '../interfaces/ISize';
 import { ServiceContainer } from './services/ServiceContainer';
+import { IElementDefintion } from './services/elementsService/IElementDefinition';
 
 export class CanvasView extends HTMLElement {
   // Public Properties
-  public serviceContainer : ServiceContainer;
+  public serviceContainer: ServiceContainer;
   public selectedElements: HTMLElement[] = [];
 
   // Settings
@@ -158,7 +159,7 @@ export class CanvasView extends HTMLElement {
       this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerUpOnElement(event));
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
-    } 
+    }
     window.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
     window.addEventListener('keyup', this._onKeyUpBound, true);
   }
@@ -175,6 +176,11 @@ export class CanvasView extends HTMLElement {
 
   private _onDrop(event: DragEvent) {
     event.preventDefault();
+
+    let transferData = event.dataTransfer.getData("text/json/elementDefintion");
+    let elementDefinition = <IElementDefintion>JSON.parse(transferData)
+    let instance = this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
+    this._canvas.appendChild(instance);
   }
 
   private onKeyUp(event: KeyboardEvent) {
@@ -321,11 +327,11 @@ export class CanvasView extends HTMLElement {
 
     // zoomfactor of canvas
     let zoom = parseFloat(window.getComputedStyle(this).transform.split(',')[3])
-      
+
     //const currentElement = event.target as HTMLElement;
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
     this._ownBoundingRect = this.getBoundingClientRect();
-    const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom  - this._ownBoundingRect.top };
+    const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom - this._ownBoundingRect.top };
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -520,15 +526,17 @@ export class CanvasView extends HTMLElement {
                 }
               });*/
           } else {
-            let oldLeft = movedElement.style.left;
-            let oldTop = movedElement.style.top;
+            let oldLeft = parseInt(movedElement.style.left);
+            oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
+            let oldTop = parseInt(movedElement.style.top);
+            oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
             let oldPosition = movedElement.style.position;
 
             //todo: move get old Position to a handler
             movedElement.style.transform = null;
             movedElement.style.position = 'absolute';
-            movedElement.style.left = (trackX + parseInt(oldLeft)) + "px";
-            movedElement.style.top = (trackY + parseInt(oldTop)) + "px";
+            movedElement.style.left = (trackX + oldLeft) + "px";
+            movedElement.style.top = (trackY + oldTop) + "px";
             this.serviceContainer.actionHistory.add(UndoItemType.Move, movedElement,
               {
                 new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
