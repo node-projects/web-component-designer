@@ -4,7 +4,7 @@ A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
 Based on https://github.com/PolymerLabs/wizzywid
 
-[![Build Status](https://travis-ci.com/jzeyer/wizzywid.svg?branch=master)](https://travis-ci.com/jzeyer/wizzywid)
+[![Build Status](https://travis-ci.org/node-projects/web-component-designer.svg?branch=master)](https://travis-ci.org/node-projects/web-component-designer)
 
 This is a WIP for getting a full Designer Framework wich could easily be included in your own Software.
 
