@@ -1,62 +1,60 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { customElement, property } from '@polymer/decorators';
-import { NativeView } from './palette-native.js';
+import './designer-tab-control.js';
+import { IElementsService } from './services/elementsService/IElementsService';
+import { PaletteElements } from './palette-elements';
+import { DesignerTabControl } from './designer-tab-control';
 
-import '@polymer/iron-pages/iron-pages.js';
-import './designer-tabs.js';
-import './designer-tab.js';
-import './palette-elements.js';
-import './palette-native.js';
-import './palette-samples.js';
+export class PaletteView extends HTMLElement {
 
-@customElement('palette-view')
-export class PaletteView extends PolymerElement {
-  @property({ type: String })
-  selected = 'native';
+  public selected = 'native';
 
-  static get template() {
-    return html`
-      <style>
-        :host {
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-        }
-        iron-pages {
-          flex: 1;
-          overflow: hidden;
-          padding-bottom: 20px;
-          background: var(--medium-grey);
-          color: white;
-        }
-        button:hover {
-          box-shadow: inset 0 3px 0 var(--light-grey);
-        }
-        button:focus {
-          box-shadow: inset 0 3px 0 var(--highlight-pink);
-        }
-      </style>
-      <designer-tabs attr-for-selected="name" selected="{{selected}}">
-        <designer-tab name="native">
-          <button>Native</button>
-        </designer-tab>
-        <designer-tab name="elements">
-          <button>Custom</button>
-        </designer-tab>
-        <designer-tab name="samples">
-          <button>Samples</button>
-        </designer-tab>
-      </designer-tabs>
-      <iron-pages selected="[[selected]]" attr-for-selected="name" selected-attribute="visible">
-        <palette-native name="native" id="native"></palette-native>
-        <palette-elements name="elements"></palette-elements>
-        <palette-samples name="samples"></palette-samples>
-      </iron-pages>
-    `;
+  private static _style: CSSStyleSheet;
+  private _designerTabControl: DesignerTabControl;
+
+  constructor() {
+    super();
+    if (!PaletteView._style) {
+      PaletteView._style = new CSSStyleSheet();
+      //@ts-ignore
+      PaletteView._style.replaceSync(`
+      :host {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 100%;
+      }
+      iron-pages {
+        flex: 1;
+        overflow: hidden;
+        padding-bottom: 20px;
+        background: var(--medium-grey);
+        color: white;
+      }
+      button:hover {
+        box-shadow: inset 0 3px 0 var(--light-grey);
+      }
+      button:focus {
+        box-shadow: inset 0 3px 0 var(--highlight-pink);
+      }
+      `);
+    }
+
+    const shadow = this.attachShadow({ mode: 'open' });
+    //@ts-ignore
+    shadow.adoptedStyleSheets = [PaletteView._style];
+
+    this._designerTabControl = new DesignerTabControl();
+    shadow.appendChild(this._designerTabControl);
   }
 
-  isNativeElement(tag) {
-    return (this.$.native as NativeView).elements.indexOf(tag) !== -1;
+  public async loadControls(elementsServices : IElementsService[]) {
+    for (const s of elementsServices) {
+      let elements = await s.getElements();
+      let paletteElement = new PaletteElements();
+      paletteElement.title = s.name;
+      this._designerTabControl.appendChild(paletteElement);
+      paletteElement.loadElements(elements);
+    }
   }
 }
+
+customElements.define('palette-view', PaletteView);

@@ -67,6 +67,6 @@ export class ElementView extends PolymerElement {
   }
 
   displayPosition(top, left) {
-    (this.$.stylesContainer as ElementStyles).display('', {top: top + 'px', left: left + 'px'});
+    (this.$.stylesContainer as ElementStyles).display('', { top: top + 'px', left: left + 'px' });
   }
 }

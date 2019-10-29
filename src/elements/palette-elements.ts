@@ -1,24 +1,27 @@
+import { IElementDefintion } from './services/elementsService/IElementDefinition';
 
 
-export class ElementsView extends HTMLElement {
+export class PaletteElements extends HTMLElement {
+
   namesToPackages: Map<string, string>;
 
   private static _style: CSSStyleSheet;
   private _filter: HTMLInputElement;
   private _datalist: HTMLDataListElement;
+  private _elementDefintions: IElementDefintion[];
+  private _shadow: ShadowRoot;
 
   constructor() {
     super();
-    if (!ElementsView._style) {
-      ElementsView._style = new CSSStyleSheet();
+    if (!PaletteElements._style) {
+      PaletteElements._style = new CSSStyleSheet();
       //@ts-ignore
-      ElementsView._style.replaceSync(`
+      PaletteElements._style.replaceSync(`
       :host {
         display: block;
         box-sizing: border-box;
         height: 100%;
-        overflow: auto;
-        padding-bottom: 60px;
+        overflow: auto;        
       }
 
       button {
@@ -61,54 +64,41 @@ export class ElementsView extends HTMLElement {
       `);
     }
 
-    const shadow = this.attachShadow({ mode: 'open' });
+    this._shadow = this.attachShadow({ mode: 'open' });
     //@ts-ignore
-    shadow.adoptedStyleSheets = [ElementsView._style];
+    this._shadow.adoptedStyleSheets = [PaletteElements._style];
 
     this._filter = document.createElement('input');
     this._filter.setAttribute('list', 'list');
     this._filter.placeholder = 'Filter Custom Elements';
-    shadow.appendChild(this._filter)
+    this._shadow.appendChild(this._filter)
 
     this._datalist = document.createElement('datalist');
     this._datalist.setAttribute('list', 'list');
     this._datalist.id = 'list';
-    shadow.appendChild(this._datalist)
-   
+    this._shadow.appendChild(this._datalist)
+
     this.addEventListener('click', this._click.bind(this));
     this._filter.addEventListener('input', this._filterInput.bind(this));
-    
+
     this.namesToPackages = new Map();
   }
 
-  /*
-  static get template() {
-    return html`
-      <style include="palette-shared-styles"></style>
+  loadElements(elementDefintions: IElementDefintion[]) {
+    this._elementDefintions = elementDefintions;
 
-      <!-- A typeahead search -->
-      <input list="list" placeholder="Filter Custom Elements" id="filter">
-      <datalist id="list">
-        <dom-repeat items="[[elements]]">
-          <template>
-            <option value="[[item]]">
-          </option></template>
-        </dom-repeat>
-      </datalist>
+    for (const elementDefintion of elementDefintions) {
+      let option = document.createElement("option");
+      option.value = elementDefintion.tag;
+      this._datalist.appendChild(option);
 
-      <!-- The list of clickable buttons -->
-      <dom-repeat items="[[elements]]">
-        <template>
-          <button>[[item]]</button>
-        </template>
-      </dom-repeat>
-    `;
-  }*/
+      let button = document.createElement("button");
+      button.innerText = elementDefintion.tag;
+      this._shadow.appendChild(button);
+    }
 
-  _elementsReady(event) {
-    
-
-    /*this.elements = event.detail.response.elements;
+    /*
+    this.elements = event.detail.response.elements;
     // First, some elements have sub-elements in the same package.
     let subElements = event.detail.response.subelements;
     let subelements = [];
@@ -156,14 +146,13 @@ export class ElementsView extends HTMLElement {
   }
 
   _filterInput(event) {
-    if (!this.elements) {
+    if (!this._elementDefintions) {
       this._filter.removeEventListener('input', this._filterInput);
       return;
     }
     var selectedValue = event.target.value;
-    // Only do something if this is a complete element name, not some
-    // partial typing.
-    if (this.elements.indexOf(selectedValue) !== -1) {
+    // Only do something if this is a complete element name, not some partial typing.
+    if (this._elementDefintions.some(x => x.tag == selectedValue)) {
       this._doClick(null, selectedValue);
     }
   }
@@ -172,3 +161,5 @@ export class ElementsView extends HTMLElement {
     this.dispatchEvent(new CustomEvent(name, { bubbles: true, composed: true, detail: { type: tag, template: template, package: packageName, node: this } }));
   }
 }
+
+customElements.define('palette-elements', PaletteElements);

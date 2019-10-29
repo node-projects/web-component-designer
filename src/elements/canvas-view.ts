@@ -319,10 +319,13 @@ export class CanvasView extends HTMLElement {
     if (!event.altKey)
       this._resetPointerEventsForClickThrough();
 
+    // zoomfactor of canvas
+    let zoom = parseFloat(window.getComputedStyle(this).transform.split(',')[3])
+      
     //const currentElement = event.target as HTMLElement;
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
     this._ownBoundingRect = this.getBoundingClientRect();
-    const currentPoint = { x: event.x - this._ownBoundingRect.left, y: event.y - this._ownBoundingRect.top };
+    const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom  - this._ownBoundingRect.top };
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;

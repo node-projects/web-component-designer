@@ -1,15 +1,16 @@
 import { IElementsService } from './IElementsService';
 import { IElementsJson } from './IElementsJson';
+import { IElementDefintion } from './IElementDefinition';
 
 // Reads a Json File and provides the Elements listed there
 export class JsonElementsService implements IElementsService {
     private _name: string;
     get name() { return this._name; }
 
-    private _elementList: string[];
-    private _resolveStored: (value: string[]) => void;
+    private _elementList: IElementDefintion[];
+    private _resolveStored: (value: IElementDefintion[]) => void;
 
-    getElements(): Promise<string[]> {
+    getElements(): Promise<IElementDefintion[]> {
         if (this._elementList)
             return Promise.resolve(this._elementList);
         return new Promise((resolve) => this._resolveStored = resolve);
@@ -19,11 +20,16 @@ export class JsonElementsService implements IElementsService {
         let request = new XMLHttpRequest();
         request.open('GET', file);
         request.onreadystatechange = () => {
-            let data = request.responseText;
-            let parsed = JSON.parse(data) as IElementsJson;
-            this._elementList = parsed.elements;
-            if (this._resolveStored)
-                this._resolveStored(this._elementList);
+            if (request.readyState == 4) {
+                let data = request.responseText;
+                let parsed = JSON.parse(data) as IElementsJson;
+                this._elementList = [];
+                for (const i in parsed.elements) {
+                    this._elementList.push({tag: parsed.elements[i]})
+                }
+                if (this._resolveStored)
+                    this._resolveStored(this._elementList);
+            }
         }
         request.send();
     }

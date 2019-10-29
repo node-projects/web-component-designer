@@ -32,9 +32,7 @@ import { DockSpawnTsWebcomponent } from 'dock-spawn-ts/lib/js/webcomponent/DockS
 import { JsonElementsService } from '../elements/services/elementsService/JsonElementsService';
 
 import serviceContainer from '../elements/services/DefaultServiceBootstrap';
-serviceContainer.register('elementsService', new JsonElementsService('native', './elements-native.json'))
-serviceContainer.register('elementsService', new JsonElementsService('samples', './elements-samples.json'))
-serviceContainer.register('elementsService', new JsonElementsService('custom', './elements.json'))
+import { PaletteView } from '../elements/palette-view.js';
 
 DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
@@ -155,6 +153,10 @@ export class AppShell extends PolymerElement {
           --paper-toggle-button-unchecked-bar-color:  var(--canvas-background);
           --paper-toggle-button-unchecked-button-color:  var(--canvas-background);
         }
+
+        dock-spawn-ts > div {
+          height: 100%
+        }
       </style>
 
       <app-header fixed="">
@@ -170,12 +172,14 @@ export class AppShell extends PolymerElement {
           <sample-document></sample-document>
 
           <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2">
-            <tree-view name="tree" id="treeView"></tree-view>
+            <!--<tree-view name="tree" id="treeView"></tree-view>-->
           </div>
 
-          <div title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.2">
-            <canvas-controls id="canvasControls"></canvas-controls>
-            <element-view id="elementView"></element-view>
+          <div id="properties" title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.2">
+            <!--<canvas-controls id="canvasControls"></canvas-controls>
+            <element-view id="elementView"></element-view>-->
+          </div>
+          <div title="Elements" dock-spawn-dock-type="down" dock-spawn-dock-to="properties" dock-spawn-dock-ratio="0.4">
             <palette-view id="paletteView"></palette-view>
           </div>
         </dock-spawn-ts>
@@ -185,6 +189,12 @@ export class AppShell extends PolymerElement {
 
   ready() {
     super.ready();
+    
+    serviceContainer.register('elementsService', new JsonElementsService('native', '/dist/sample/elements-native.json'));
+    serviceContainer.register('elementsService', new JsonElementsService('samples', '/dist/sample/elements-samples.json'));
+    serviceContainer.register('elementsService', new JsonElementsService('custom', '/dist/sample/elements.json'));
+    (<PaletteView>this.$.paletteView).loadControls(serviceContainer.elementsServices);
+
 
     // Explanation and apology: normally, codeView would be a child
     // of this element, and could be this.$.codeView, but ace.js
@@ -203,7 +213,7 @@ export class AppShell extends PolymerElement {
     //(this.$.viewContainer as CanvasView).actionHistory = this.$.actionHistory as ActionHistory;
 
     this.addEventListener('new-element', event => this.createElement(event));
-    this.addEventListener('new-sample', event => this.createSample(event));
+    //this.addEventListener('new-sample', event => this.createSample(event));
     this.addEventListener('element-updated', event => this.updateElement(event));
 
     this.addEventListener('refresh-view', (event: CustomEvent) => this.refreshView(event));
@@ -265,8 +275,8 @@ export class AppShell extends PolymerElement {
 
     // Tell everyone who cares about this.
     //todo: (this.$.viewContainer as CanvasView).setSelectedElements([this.activeElement = el]);
-    (this.$.canvasControls as CanvasControls).selectedElement = this.activeElement;
-    (this.$.canvasControls as CanvasControls).update(this.activeElement === this.$.viewContainer);
+    //(this.$.canvasControls as CanvasControls).selectedElement = this.activeElement;
+    //(this.$.canvasControls as CanvasControls).update(this.activeElement === this.$.viewContainer);
   }
 
   /*
@@ -283,11 +293,11 @@ export class AppShell extends PolymerElement {
     // so that we can diff it to produce the actual state of the world
     //@ts-ignore
     (window.codeView as CodeView).save(tag, event.detail.package, el);
-    (this.$.actionHistory as UndoService).add(UndoItemType.New, el, { parent: el.parentNode });
+    serviceContainer.actionHistory.add(UndoItemType.New, el, { parent: el.parentNode });
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
-    requestAnimationFrame(function () {
+    requestAnimationFrame(() => {
       el.click();
     });
   }
@@ -295,7 +305,7 @@ export class AppShell extends PolymerElement {
   /*
    * Adds a new sample code to the view.
    */
-  createSample(event) {
+  /*createSample(event) {
     let tag = event.detail.type.toLowerCase();;
 
     let el = document.createElement(tag);
@@ -309,13 +319,13 @@ export class AppShell extends PolymerElement {
     }
 
     this.refreshView();
-  }
+  }*/
 
   /**
    * Refreshes all the properties/styles of the active element.
    */
   refreshView(event?: CustomEvent) {
-    if (event && event.detail.whileTracking) {
+    /*if (event && event.detail.whileTracking) {
       let size = this.activeElement.getBoundingClientRect();
       (this.$.elementView as ElementView).displayPosition(size.top, size.left);
       return;
@@ -325,7 +335,7 @@ export class AppShell extends PolymerElement {
     // Display its properties in the side view.
     (this.$.elementView as ElementView).display(el);
     // Highlight it in the tree.
-    (this.$.treeView as TreeView).recomputeTree(this.$.viewContainer, el);
+    (this.$.treeView as TreeView).recomputeTree(this.$.viewContainer, el);*/
   }
 
   updateElement(event) {
@@ -335,7 +345,7 @@ export class AppShell extends PolymerElement {
     if (detail.skipHistory) {
       return;
     }
-    (this.$.actionHistory as UndoService).add(UndoItemType.Update, this.activeElement,
+    serviceContainer.actionHistory.add(UndoItemType.Update, this.activeElement,
       {
         type: detail.type, name: detail.name,
         new: { value: detail.value },
@@ -430,10 +440,10 @@ export class AppShell extends PolymerElement {
     // to indicate that.
     let slots = el.root ? el.root.querySelectorAll('slot') : [];
 
-    if (((this.$.paletteView as NativeView).isNativeElement(tag) && tag !== 'input') ||
+    /*if (((this.$.paletteView as NativeView).isNativeElement(tag) && tag !== 'input') ||
       slots.length != 0) {
       el.textContent = tag;
-    }
+    }*/
   }
 
   _makeUniqueId(node, id, suffix = null) {

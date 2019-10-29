@@ -11,21 +11,21 @@ interface ServiceNameMap {
 }
 
 export class ServiceContainer {
-    private _services: Map<string, object[]>
+    private _services: Map<string, object[]> = new Map();
 
     private getLastService<K extends keyof ServiceNameMap>(name: K): ServiceNameMap[K] {
-        let list: [] = this._services[<string>name];
-        return <any>list[list.length - 1];
+        let list: [] = <any>this._services.get(<string>name);
+        return list[list.length - 1];
     }
 
     private getServices<K extends keyof ServiceNameMap>(name: K): ServiceNameMap[K][] {
-        return this._services[<string>name];
+        return <any>this._services.get(<string>name);
     }
 
     register<K extends keyof ServiceNameMap>(name: K, service: ServiceNameMap[K]) {
         if (!this._services.has(name))
             this._services.set(name, []);
-        this._services[<string>name].push(service);
+        this._services.get(<string>name).push(service);
     }
 
     get actionHistory(): IUndoService {
@@ -40,7 +40,7 @@ export class ServiceContainer {
         return this.getServices('containerService');
     }
 
-    get elementsService(): IElementsService[] {
+    get elementsServices(): IElementsService[] {
         return this.getServices('elementsService');
     }
 }
