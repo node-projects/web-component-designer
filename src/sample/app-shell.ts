@@ -21,7 +21,7 @@ import '../elements/services/undoService/UndoService.js';
 import '../elements/demo-view.js';
 import '../elements/help-view.js';
 import '../elements/tree-view.js';
-import '../elements/element-view.js';
+import '../elements/attribute-editor.js';
 import '../elements/canvas-view.js';
 import './canvas-controls.js';
 import './sample-document.js'
@@ -32,6 +32,7 @@ import { JsonElementsService } from '../elements/services/elementsService/JsonEl
 import serviceContainer from '../elements/services/DefaultServiceBootstrap';
 import { PaletteView } from '../elements/palette-view.js';
 import { SampleDocument } from './sample-document.js';
+import { AttributeEditor } from '../elements/attribute-editor';
 
 DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
@@ -55,12 +56,12 @@ export class AppShell extends PolymerElement {
   @property({ type: String })
   mainPage = 'designer';
 
-  private _documentNumber: number;
+  private _documentNumber: number = 0;
 
   static get template() {
     return html`
       <style>
-        :host{
+        :host {
           display: block;
           box-sizing: border-box;
           position: relative;
@@ -86,44 +87,12 @@ export class AppShell extends PolymerElement {
           z-index: 100;
         }
 
-        button {
-          color: white;
-          border: none;
-          cursor: pointer;
-        }
-        button:hover {
-          box-shadow: inset 0 3px 0 var(--light-grey);
-        }
-        button:focus {
-          box-shadow: inset 0 3px 0 var(--highlight-pink);
-        }
-
-        button[disabled] {
-          pointer-events: none;
-          opacity: 0.3;
-        }
-
-        app-toolbar {
-          display: flex;
-          justify-content: space-between;
-        }
-
         .app-body {
           box-sizing: border-box;
           display: flex;
           flex-direction: row;
           padding-top: 60px;
           height: 100%;
-        }
-
-        .main-view {
-          position: relative;
-          height: 100%;
-          width: 100%;
-          overflow: auto;
-          display: flex;
-          flex-grow: 1;
-          flex-direction: column;
         }
 
         .heavy {
@@ -135,50 +104,37 @@ export class AppShell extends PolymerElement {
           opacity: 0.5;
           letter-spacing: normal;
         }
-        
-        paper-toggle-button {
-          position: absolute;
-          top: 0;
-          right: 10px;
-          padding: 8px 5px;
-          line-height: 1em;
-          font-size: 12px;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          --paper-toggle-button-checked-bar-color:  var(--highlight-pink);
-          --paper-toggle-button-checked-button-color:  var(--highlight-pink);
-          --paper-toggle-button-label-color: var(--canvas-background);
-          --paper-toggle-button-unchecked-bar-color:  var(--canvas-background);
-          --paper-toggle-button-unchecked-button-color:  var(--canvas-background);
-        }
 
         dock-spawn-ts > div {
-          height: 100%
+          height: 100%;
+        }
+
+        attribute-editor {
+          height: 100%;
+          width: 100%;
         }
       </style>
 
       <app-header fixed="">
         <app-toolbar>
-          <span class="heavy">web-component-designer <span class="lite">a design framework for web-components using web-components</span></span>
-          <app-controls id="appControls"></app-controls>
+          <span class="heavy">web-component-designer <span class="lite">// a design framework for web-components using web-components</span></span>
+          <button on-click="newDocument" style="margin-left: 50px;">new</button>
         </app-toolbar>
       </app-header>
 
       <div class="app-body">
-        <dock-spawn-ts style="width: 100%; height: 100%; position: relative;">
+        <dock-spawn-ts id="dock" style="width: 100%; height: 100%; position: relative;">
           
-          <sample-document id="doc1"></sample-document>
-
           <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2">
             <!--<tree-view name="tree" id="treeView"></tree-view>-->
           </div>
 
-          <div id="properties" title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.2">
+          <div id="attributesDock" title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.2">
+            <attribute-editor id="attributesEditor"></attribute-editor>
             <!--<canvas-controls id="canvasControls"></canvas-controls>
             <element-view id="elementView"></element-view>-->
           </div>
-          <div title="Elements" dock-spawn-dock-type="down" dock-spawn-dock-to="properties" dock-spawn-dock-ratio="0.4">
+          <div title="Elements" dock-spawn-dock-type="down" dock-spawn-dock-to="attributesDock" dock-spawn-dock-ratio="0.4">
             <palette-view id="paletteView"></palette-view>
           </div>
         </dock-spawn-ts>
@@ -187,18 +143,22 @@ export class AppShell extends PolymerElement {
   }
 
   _createServiceContainer() {
-    
+
   }
 
   ready() {
     super.ready();
-    
+
     serviceContainer.register('elementsService', new JsonElementsService('native', '/dist/sample/elements-native.json'));
     serviceContainer.register('elementsService', new JsonElementsService('samples', '/dist/sample/elements-samples.json'));
     serviceContainer.register('elementsService', new JsonElementsService('custom', '/dist/sample/elements.json'));
     (<PaletteView>this.$.paletteView).loadControls(serviceContainer.elementsServices);
+    (<AttributeEditor>this.$.attributesEditor).serviceContainer = serviceContainer;
 
-    (<SampleDocument>this.$.doc1).serviceContainer = serviceContainer;
+    this.newDocument();
+    //(<SampleDocument>this.$.doc1).serviceContainer = serviceContainer;
+
+
 
     // Explanation and apology: normally, codeView would be a child
     // of this element, and could be this.$.codeView, but ace.js
@@ -221,9 +181,7 @@ export class AppShell extends PolymerElement {
     this.addEventListener('element-updated', event => this.updateElement(event));
 
     this.addEventListener('refresh-view', (event: CustomEvent) => this.refreshView(event));
-    this.addEventListener('selected-element-changed', (event: CustomEvent) => {
-      this.setActiveElement(event.detail.target);
-    });
+    
     this.addEventListener('finish-clone', (event: CustomEvent) => {
       this._finishNewElement(event.detail.target, event.detail.target.localName, true);
     });
@@ -260,17 +218,24 @@ export class AppShell extends PolymerElement {
     });
   }
 
-  new() {
+  newDocument() {
     this._documentNumber++;
+    let sampleDocument = new SampleDocument();
+    sampleDocument.title = "document-" + this._documentNumber;
+    this.$.dock.appendChild(sampleDocument);
+    sampleDocument.serviceContainer = serviceContainer;
+
+    sampleDocument.addEventListener('selected-elements-changed', (e: CustomEvent) => this.setActiveElement(e.detail.elements));
   }
 
   /*
    * Updates the new active element in the view.
    */
-  setActiveElement(el) {
-    if (el === this) {
+  setActiveElement(elements: HTMLElement[]) {
+    (<AttributeEditor>this.$.attributesEditor).selectedElements = elements;
+    /*if (el === this) {
       el = this.$.viewContainer;
-    }
+    }*/
 
     /*if (this.activeElement) {
       this.activeElement.classList.remove('active');

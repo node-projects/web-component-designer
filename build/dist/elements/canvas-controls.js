@@ -160,7 +160,7 @@ let CanvasControls = class CanvasControls extends PolymerElement {
 
     let clone = el.cloneNode(true);
     el.parentNode.appendChild(clone);
-    this.dispatchEvent(new CustomEvent('selected-element-changed', {
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', {
       bubbles: true,
       composed: true,
       detail: {
@@ -369,7 +369,7 @@ let CanvasControls = class CanvasControls extends PolymerElement {
   }
 
   _selectedElementChanged() {
-    this.dispatchEvent(new CustomEvent('selected-element-changed', {
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', {
       bubbles: true,
       composed: true,
       detail: {

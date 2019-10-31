@@ -3,6 +3,8 @@ import { IProperty } from './IProperty';
 
 export class LitElementPropertiesService implements IPropertiesService {
 
+    public name = "lit"
+
     isHandledElement(element: Element): boolean {
         let proto = (<any>element.constructor).__proto__;
         while (proto != null) {
@@ -16,6 +18,9 @@ export class LitElementPropertiesService implements IPropertiesService {
     }
 
     getProperties(element: Element): IProperty[] {
+        if (!this.isHandledElement(element))
+            return null;
+            
         let list = (<any>element.constructor)._classProperties as Map<string, object>;
         // @ts-ignore
         for (const litProperty of list) {

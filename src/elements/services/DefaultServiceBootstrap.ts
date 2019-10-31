@@ -4,13 +4,17 @@ import { PolymerPropertiesService } from './propertiesService/PolymerPropertiesS
 import { LitElementPropertiesService } from './propertiesService/LitElementPropertiesService';
 import { NativeElementsPropertiesService } from './propertiesService/NativeElementsPropertiesService';
 import { DefaultInstanceService } from './instanceService/DefaultInstanceService';
+import { DefaultEditorTypesService } from './propertiesService/DefaultEditorTypesService';
 
 let serviceContainer = new ServiceContainer();
 
 serviceContainer.register("actionHistory", new UndoService());
-serviceContainer.register("porpertyService", new PolymerPropertiesService());
-serviceContainer.register("porpertyService", new LitElementPropertiesService());
-serviceContainer.register("porpertyService", new NativeElementsPropertiesService());
+// serviceContainer.register("propertyService", new CssPropertiesService("css"));
+// serviceContainer.register("propertyService", new CssPropertiesService("flex"));
+serviceContainer.register("propertyService", new PolymerPropertiesService());
+serviceContainer.register("propertyService", new LitElementPropertiesService());
+serviceContainer.register("propertyService", new NativeElementsPropertiesService());
 serviceContainer.register("instanceService", new DefaultInstanceService());
+serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
 
 export default serviceContainer;

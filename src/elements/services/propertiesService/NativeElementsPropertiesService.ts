@@ -2,12 +2,23 @@ import { IPropertiesService } from "./IPropertiesService";
 import { IProperty } from './IProperty';
 
 export class NativeElementsPropertiesService implements IPropertiesService {
+    public name = "native"
 
     isHandledElement(element: Element): boolean {
-        throw new Error("Method not implemented.");
-    }    
-    
+        switch (element.localName) {
+            case 'input':
+            case 'button':
+            case 'a':
+            case 'div':
+                return true;
+        }
+        return false;
+    }
+
     getProperties(element: Element): IProperty[] {
-        throw new Error("Method not implemented.");
+        if (!this.isHandledElement(element))
+            return null;
+
+        return null;
     }
 }

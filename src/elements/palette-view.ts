@@ -22,9 +22,6 @@ export class PaletteView extends HTMLElement {
         flex: 1;
         height: 100%;
       }
-      designer-tab-control {
-        margin-top: 10px;
-      }
       `);
     }
 

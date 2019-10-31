@@ -3,11 +3,16 @@ import { IProperty } from './IProperty';
 
 export class PolymerPropertiesService implements IPropertiesService {
 
+    public name = "polymer"
+
     isHandledElement(element: Element): boolean {
         return (<any>element.constructor).polymerElementVersion != null;
     }
 
     getProperties(element: Element): IProperty[] { //todo support typescript enums
+        if (!this.isHandledElement(element))
+            return null;
+
         let properties: IProperty[] = [];
         let list = (<any>element.constructor).properties;
         for (const name in list) {

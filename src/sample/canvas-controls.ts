@@ -156,7 +156,7 @@ export class CanvasControls extends PolymerElement {
     let clone = el.cloneNode(true);
     el.parentNode.appendChild(clone);
 
-    this.dispatchEvent(new CustomEvent('selected-element-changed', {bubbles: true, composed: true, detail: {target: clone, node: this}}));
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', {bubbles: true, composed: true, detail: {target: clone, node: this}}));
    
     // P.S: Since we did a clone, we already have the initial state of the <tag>.
     this.actionHistory.add(UndoItemType.New, clone, {parent: el.parentNode});
@@ -318,7 +318,7 @@ export class CanvasControls extends PolymerElement {
   }
 
   _selectedElementChanged() {
-    this.dispatchEvent(new CustomEvent('selected-element-changed', {bubbles: true, composed: true, detail: {target: this.selectedElement, node: this}}));
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', {bubbles: true, composed: true, detail: {target: this.selectedElement, node: this}}));
   }
 
   _isCanvasElement(el) {

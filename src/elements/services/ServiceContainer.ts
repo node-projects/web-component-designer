@@ -4,13 +4,15 @@ import { IContainerService } from './containerService/IContainerService';
 import { IElementsService } from './elementsService/IElementsService';
 import { IService } from './IService';
 import { IInstanceService } from './instanceService/IInstanceService';
+import { IEditorTypesService } from './propertiesService/IEditorTypesService';
 
 interface ServiceNameMap {
     "actionHistory": IUndoService;
-    "porpertyService": IPropertiesService;
+    "propertyService": IPropertiesService;
     "containerService": IContainerService;
     "elementsService": IElementsService;
-    "instanceService": IInstanceService
+    "instanceService": IInstanceService;
+    "editorTypesService": IEditorTypesService;
 }
 
 export class ServiceContainer {
@@ -36,7 +38,7 @@ export class ServiceContainer {
     }
 
     get porpertiesServices(): IPropertiesService[] {
-        return this.getServices('porpertyService');
+        return this.getServices('propertyService');
     }
 
     get containerServices(): IContainerService[] {
@@ -49,6 +51,10 @@ export class ServiceContainer {
 
     get instanceServices(): IInstanceService[] {
         return this.getServices('instanceService');
+    }
+
+    get editorTypesServices(): IEditorTypesService[] {
+        return this.getServices('editorTypesService');
     }
 
     forSomeServicesTillResult<K extends keyof ServiceNameMap>(service: K, callback: (service: ServiceNameMap[K]) => any): any {

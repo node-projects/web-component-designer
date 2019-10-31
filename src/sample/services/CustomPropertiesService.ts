@@ -3,6 +3,8 @@ import { IProperty } from '../../elements/services/propertiesService/IProperty';
 
 export class CustomPropertiesService implements IPropertiesService {
 
+    name: string = "custom";
+
     isHandledElement(element: Element): boolean {
         if (element.nodeName == "test-element")
             return true;

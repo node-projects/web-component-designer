@@ -303,11 +303,11 @@ export class CanvasView extends HTMLElement {
       for (let e of this.selectedElements) e.classList.add('active');
     }
 
-    this.dispatchEvent(new CustomEvent('selected-element-changed', {
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', {
       bubbles: true,
       composed: true,
       detail: {
-        target: this.selectedElements[0],
+        elements: this.selectedElements,
         node: this
       }
     }));

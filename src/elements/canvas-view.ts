@@ -154,6 +154,7 @@ export class CanvasView extends HTMLElement {
 
   connectedCallback() {
     if (!this._firstConnect) {
+      this._firstConnect = true;
       this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerDownOnElement(event));
       this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerMoveOnElement(event));
       this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerUpOnElement(event));
@@ -300,8 +301,8 @@ export class CanvasView extends HTMLElement {
       for (let e of this.selectedElements)
         e.classList.add('active');
     }
-    this.dispatchEvent(new CustomEvent('selected-element-changed', { bubbles: true, composed: true, detail: { target: this.selectedElements[0], node: this } }));
-    this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { node: this } }));
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', { bubbles: true, composed: true, detail: { elements: this.selectedElements, node: this } }));
+    //this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { node: this } }));
   }
 
   private _pointerDownOnElement(event: PointerEvent) {

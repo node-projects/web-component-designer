@@ -1,9 +1,15 @@
 import { IPropertiesService } from './IPropertiesService';
 import { IProperty } from './IProperty';
 
-import cssProperties from './cssProperties.json'
+import cssProperties from './cssProperties.js'
 
 export class CssPropertiesService implements IPropertiesService {
+
+    name: "flex" | "styles" ;
+
+    constructor(name: "flex" | "styles") {
+        this.name = name;
+    }
 
     isHandledElement(element: Element): boolean {
         return true;
@@ -11,8 +17,9 @@ export class CssPropertiesService implements IPropertiesService {
 
     getProperties(element: Element): IProperty[] {
         let properties: IProperty[] = [];
-        for (const p in cssProperties.flex) {
-            properties.push({ name: p });
+        for (const p in <any>cssProperties[this.name]) {
+            let pr = (<any>cssProperties[this.name][p]);
+            properties.push({ name: p, type: pr.type, values: pr.values  });
         }
         return properties;
     }
