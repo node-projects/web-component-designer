@@ -1,4 +1,4 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+/*import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
 import { UndoService } from '../elements/services/undoService/UndoService.js';
@@ -70,3 +70,4 @@ export class AppControls extends PolymerElement {
     this.actionHistory.redo();
   }
 }
+*/

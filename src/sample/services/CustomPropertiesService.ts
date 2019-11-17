@@ -1,4 +1,4 @@
-import { IPropertiesService } from '../../elements/services/propertiesService/IPropertiesService';
+/*import { IPropertiesService } from '../../elements/services/propertiesService/IPropertiesService';
 import { IProperty } from '../../elements/services/propertiesService/IProperty';
 
 export class CustomPropertiesService implements IPropertiesService {
@@ -16,4 +16,4 @@ export class CustomPropertiesService implements IPropertiesService {
         properties.push({ name: "Test 1", type: "string" });            
         return properties;
     }
-}
+}*/

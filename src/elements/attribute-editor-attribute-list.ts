@@ -97,14 +97,6 @@ export class AttributeEditorAttributeList extends HTMLElement {
       }
     }
   }
-
-  /*display(elementStyles) {
-    for (let i = 0; i < this._stuff.length; i++) {
-      let name = this._stuff[i];
-      let el = this.root.querySelector(`[name=${name}]`) as HTMLInputElement;
-      el.value = elementStyles[name];
-    }
-  }*/
 }
 
 customElements.define('attribute-editor-attribute-list', AttributeEditorAttributeList);

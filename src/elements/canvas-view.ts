@@ -6,11 +6,17 @@ import { UndoItemType } from "./services/undoService/UndoItemType";
 import { ISize } from '../interfaces/ISize';
 import { ServiceContainer } from './services/ServiceContainer';
 import { IElementDefintion } from './services/elementsService/IElementDefinition';
+import { InstanceServiceContainer } from './services/InstanceServiceContainer';
+import { UndoService } from './services/undoService/UndoService';
+import { SelectionService } from './services/selectionService/SelectionService';
+import { ISelectionChangedEvent } from './services/selectionService/ISelectionChangedEvent';
+import { DesignItem } from './item/DesignItem';
+import { IDesignItem } from './item/IDesignItem';
 
 export class CanvasView extends HTMLElement {
   // Public Properties
   public serviceContainer: ServiceContainer;
-  public selectedElements: HTMLElement[] = [];
+  public instanceServiceContainer: InstanceServiceContainer;
 
   // Settings
   private _gridSize = 10;
@@ -26,7 +32,7 @@ export class CanvasView extends HTMLElement {
   private _actionType?: PointerActionType;
   private _initialPoint: IPoint;
   private _initialSizes: ISize[];
-  private _clickThroughElements: HTMLElement[] = []
+  private _clickThroughElements: IDesignItem[] = []
   private _previousEventName: EventNames;
 
   private static _style: CSSStyleSheet;
@@ -38,6 +44,12 @@ export class CanvasView extends HTMLElement {
 
   constructor() {
     super();
+
+    this.instanceServiceContainer = new InstanceServiceContainer();
+    this.instanceServiceContainer.register("undoService", new UndoService);
+    this.instanceServiceContainer.register("selectionService", new SelectionService);
+
+
     if (!CanvasView._style) {
       CanvasView._style = new CSSStyleSheet();
       //@ts-ignore
@@ -150,6 +162,8 @@ export class CanvasView extends HTMLElement {
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
+
+    this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged);
   }
 
   connectedCallback() {
@@ -199,8 +213,9 @@ export class CanvasView extends HTMLElement {
   }
 
   private onKeyDown(event: KeyboardEvent) {
-    let el = this.selectedElements[0];
-    if (!el) {
+    //todo redo this
+    let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
+    if (!primarySelection) {
       return;
     }
 
@@ -217,9 +232,9 @@ export class CanvasView extends HTMLElement {
     if (!isOk) {
       return;
     }
-    let oldLeft = parseInt(el.style.left);
-    let oldTop = parseInt(el.style.top);
-    let oldPosition = el.style.position;
+    let oldLeft = parseInt(primarySelection.element.style.left);
+    let oldTop = parseInt(primarySelection.element.style.top);
+    let oldPosition = primarySelection.element.style.position;
 
     switch (event.key) {
       case 'ArrowUp':
@@ -227,7 +242,7 @@ export class CanvasView extends HTMLElement {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
         } else {
-          el.style.top = oldTop - 10 + 'px';
+          primarySelection.element.style.top = oldTop - 10 + 'px';
         }
         break;
       case 'ArrowDown':
@@ -235,7 +250,7 @@ export class CanvasView extends HTMLElement {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
         } else {
-          el.style.top = oldTop + 10 + 'px';
+          primarySelection.element.style.top = oldTop + 10 + 'px';
         }
         break;
       case 'ArrowLeft':
@@ -243,7 +258,7 @@ export class CanvasView extends HTMLElement {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
         } else {
-          el.style.left = oldLeft - 10 + 'px';
+          primarySelection.element.style.left = oldLeft - 10 + 'px';
         }
         break;
       case 'ArrowRight':
@@ -251,13 +266,13 @@ export class CanvasView extends HTMLElement {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
         } else {
-          el.style.left = oldLeft + 10 + 'px';
+          primarySelection.element.style.left = oldLeft + 10 + 'px';
         }
         break;
     }
-    this.serviceContainer.actionHistory.add(UndoItemType.Move, el,
+    this.instanceServiceContainer.undoService.add(UndoItemType.Move, primarySelection.element,
       {
-        new: { left: el.style.left, top: el.style.top, position: el.style.position },
+        new: { left: primarySelection.element.style.left, top: primarySelection.element.style.top, position: primarySelection.element.style.position },
         old: { left: oldLeft, top: oldTop, position: oldPosition }
       });
   }
@@ -290,19 +305,27 @@ export class CanvasView extends HTMLElement {
 
   // end
 
-  setSelectedElements(elements: HTMLElement[]) { //todo remove only when new not in old
-    if (this.selectedElements) {
-      for (let e of this.selectedElements)
-        e.classList.remove('active');
+  private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
+    if (selectionChangedEvent.oldSelectedElements) {
+      for (let e of selectionChangedEvent.oldSelectedElements)
+        e.element.classList.remove('active');
     }
-    //this.selectedElement = elements[0];
-    this.selectedElements = elements;
-    if (this.selectedElements) {
-      for (let e of this.selectedElements)
-        e.classList.add('active');
+    if (selectionChangedEvent.selectedElements) {
+      for (let e of selectionChangedEvent.selectedElements)
+        e.element.classList.add('active');
     }
-    this.dispatchEvent(new CustomEvent('selected-elements-changed', { bubbles: true, composed: true, detail: { elements: this.selectedElements, node: this } }));
-    //this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { node: this } }));
+  }
+
+  setSelectedElements(elements: HTMLElement[]) {
+    if (elements) {
+      let diArray: IDesignItem[] = [];
+      for (let e of elements) {
+        diArray.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
+        this.instanceServiceContainer.selectionService.setSelectedElements(diArray)
+      }
+    } else {
+      this.instanceServiceContainer.selectionService.setSelectedElements(null);
+    }
   }
 
   private _pointerDownOnElement(event: PointerEvent) {
@@ -333,6 +356,7 @@ export class CanvasView extends HTMLElement {
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
     this._ownBoundingRect = this.getBoundingClientRect();
     const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom - this._ownBoundingRect.top };
+    let currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -353,12 +377,14 @@ export class CanvasView extends HTMLElement {
     } else if (this._actionType == PointerActionType.Resize) {
       this._pointerActionTypeResize(event, currentElement, currentPoint);
     } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
-      this._pointerActionTypeDragOrSelect(event, currentElement, currentPoint);
+      this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
     }
     if (event.type == EventNames.PointerUp) {
       this._actionType = null;
     }
   }
+
+
 
   private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
     let x1 = Math.min(this._initialPoint.x, currentPoint.x);
@@ -390,18 +416,19 @@ export class CanvasView extends HTMLElement {
     }
   }
 
-  _pointerActionTypeDragOrSelect(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
+  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
     if (event.altKey) {
       let backup: string[] = [];
       if (event.type == EventNames.PointerDown)
-        this._clickThroughElements.push(currentElement);
+        this._clickThroughElements.push(currentDesignItem);
       for (const e of this._clickThroughElements) {
-        backup.push(e.style.pointerEvents)
-        e.style.pointerEvents = 'none';
+        backup.push(e.element.style.pointerEvents)
+        e.element.style.pointerEvents = 'none';
       }
-      currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+      let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+      currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
       for (const e of this._clickThroughElements) {
-        e.style.pointerEvents = backup.shift();
+        e.element.style.pointerEvents = backup.shift();
       }
     } else {
       this._clickThroughElements = []
@@ -418,20 +445,20 @@ export class CanvasView extends HTMLElement {
       case EventNames.PointerDown:
         this._dropTarget = null;
         if (event.shiftKey || event.ctrlKey) {
-          const index = this.selectedElements.indexOf(currentElement);
+          const index = this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
           if (index >= 0) {
-            let newSelectedList = this.selectedElements.slice(0);
+            let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
             newSelectedList.splice(index, 1);
-            this.setSelectedElements(newSelectedList);
+            this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
           }
           else {
-            let newSelectedList = this.selectedElements.slice(0);
-            newSelectedList.push(currentElement);
-            this.setSelectedElements(newSelectedList);
+            let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
+            newSelectedList.push(currentDesignItem);
+            this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
           }
         } else {
-          if (this.selectedElements.indexOf(currentElement) < 0)
-            this.setSelectedElements([currentElement]);
+          if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
+          this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
         }
         break;
       case EventNames.PointerMove:
@@ -442,8 +469,8 @@ export class CanvasView extends HTMLElement {
           return;
 
         //todo -> what is if a transform already exists -> backup existing style.?
-        for (const element of this.selectedElements) {
-          element.style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
+        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+          designItem.element.style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
         }
 
         // See if it's over anything.
@@ -453,7 +480,8 @@ export class CanvasView extends HTMLElement {
           let possibleTarget = targets[i] as HTMLElement;
           possibleTarget.classList.remove('over');
 
-          if (this.selectedElements.indexOf(possibleTarget) >= 0)
+          let possibleTargetDesignItem = DesignItem.GetOrCreateDesignItem(possibleTarget, this.serviceContainer, this.instanceServiceContainer);
+          if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(possibleTargetDesignItem) >= 0)
             continue;
 
           // todo put following a extenable function ...
@@ -481,7 +509,7 @@ export class CanvasView extends HTMLElement {
             for (var j = 0; j < previousTargets.length; j++) {
               previousTargets[j].classList.remove('over');
             }
-            if (currentElement != possibleTarget && this._dropTarget != possibleTarget) {
+            if (currentDesignItem != possibleTargetDesignItem && this._dropTarget != possibleTarget) {
               possibleTarget.classList.add('over');
 
               if (event.altKey) {
@@ -498,15 +526,16 @@ export class CanvasView extends HTMLElement {
       case EventNames.PointerUp:
         if (this._actionType == PointerActionType.DragOrSelect) {
           if (this._previousEventName == EventNames.PointerDown)
-            this.setSelectedElements([currentElement]);
+            this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
           return;
         }
 
         //todo this needs also to get info from container handler, cause position is dependent of container
-        for (const movedElement of this.selectedElements) {
+        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+          let movedElement = designItem.element;
           if (this._dropTarget && this._dropTarget != movedElement.parentElement) {
-            let oldParent = movedElement.parentElement;
-            movedElement.parentElement.removeChild(currentElement);
+            //let oldParent = movedElement.parentElement;
+            movedElement.parentElement.removeChild(currentDesignItem.element);
 
             // If there was a textContent nuke it, or else you'll
             // never be able to again.
@@ -531,18 +560,19 @@ export class CanvasView extends HTMLElement {
             oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
             let oldTop = parseInt(movedElement.style.top);
             oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
-            let oldPosition = movedElement.style.position;
+            //let oldPosition = movedElement.style.position;
 
             //todo: move get old Position to a handler
             movedElement.style.transform = null;
             movedElement.style.position = 'absolute';
             movedElement.style.left = (trackX + oldLeft) + "px";
             movedElement.style.top = (trackY + oldTop) + "px";
-            this.serviceContainer.actionHistory.add(UndoItemType.Move, movedElement,
+            //todo
+            /*this.serviceContainer.UndoService.add(UndoItemType.Move, movedElement,
               {
                 new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
                 old: { left: oldLeft, top: oldTop, position: oldPosition }
-              });
+              });*/
           }
 
           if (this._dropTarget != null)
@@ -623,8 +653,8 @@ export class CanvasView extends HTMLElement {
     switch (event.type) {
       case EventNames.PointerDown:
         this._initialSizes = [];
-        for (const element of this.selectedElements) {
-          let rect = element.getBoundingClientRect();
+        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+          let rect = designItem.element.getBoundingClientRect();
           this._initialSizes.push({ width: rect.width, height: rect.height });
         }
         break;
@@ -636,21 +666,22 @@ export class CanvasView extends HTMLElement {
           trackY = Math.round(trackY / this._gridSize) * this._gridSize;
         }
         let i = 0;
-        for (const element of this.selectedElements) {
-          element.style.width = this._initialSizes[i].width + trackX + 'px';
-          element.style.height = this._initialSizes[i].height + trackY + 'px';
+        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+          designItem.element.style.width = this._initialSizes[i].width + trackX + 'px';
+          designItem.element.style.height = this._initialSizes[i].height + trackY + 'px';
         }
         break;
       case EventNames.PointerUp:
-        let j = 0;
-        for (const element of this.selectedElements) {
-          this.serviceContainer.actionHistory.add(UndoItemType.Resize, element,
+        //let j = 0;
+        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+          //todo
+          /*this.serviceContainer.UndoService.add(UndoItemType.Resize, element,
             {
               new: { width: element.style.width, height: element.style.height },
               old: { width: this._initialSizes[j].width + 'px', height: this._initialSizes[j].height + 'px' }
-            });
-          element.classList.remove('resizing');
-          element.classList.remove('dragging');
+            });*/
+            designItem.element.classList.remove('resizing');
+            designItem.element.classList.remove('dragging');
         }
         this._initialSizes = null;
         break;

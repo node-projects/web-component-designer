@@ -32,7 +32,7 @@ export class SampleDocument extends PolymerElement {
         `;
     }
 
-    private _viewDemo() {
+    /*private _viewDemo() {
         //@ts-ignore
         if (!window.codeView.get)
             return;
@@ -42,5 +42,5 @@ export class SampleDocument extends PolymerElement {
 
     private _viewCode() {
         this.dispatchEvent(new CustomEvent('update-code', { bubbles: true, composed: true, detail: { target: this.$.viewContainer, node: this } }));
-    }
+    }*/
 }

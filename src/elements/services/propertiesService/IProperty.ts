@@ -1,3 +1,5 @@
+import { IPropertiesService } from './IPropertiesService';
+
 export interface IProperty {
     name: string;
     type?: string; // -> string, number, list, color, thickness, css-length
@@ -6,4 +8,6 @@ export interface IProperty {
     max?: number;
     values?: string[]; // list selectable values
     createEditor?: (property: IProperty) => HTMLElement;
+    value?: any;
+    service: IPropertiesService;
 }

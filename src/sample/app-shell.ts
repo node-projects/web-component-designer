@@ -2,7 +2,6 @@ import { PolymerElement } from '@polymer/polymer';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
 import { CanvasControls } from './canvas-controls.js';
-import { AppControls } from './app-controls.js';
 import { TreeView } from '../elements/tree-view.js';
 import { CanvasView } from '../elements/canvas-view.js';
 import { CodeView } from '../elements/code-view.js';
@@ -25,7 +24,6 @@ import '../elements/attribute-editor.js';
 import '../elements/canvas-view.js';
 import './canvas-controls.js';
 import './sample-document.js'
-import { UndoItemType } from "../elements/services/undoService/UndoItemType";
 import { DockSpawnTsWebcomponent } from 'dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent';
 import { JsonElementsService } from '../elements/services/elementsService/JsonElementsService';
 
@@ -168,7 +166,7 @@ export class AppShell extends PolymerElement {
     //@ts-ignore
     window.codeView.canvasElement = this.$.viewContainer;
 
-    this.setActiveElement(this.$.viewContainer);
+    //this.setActiveElement(this.$.viewContainer);
     this.refreshView();
 
     //(this.$.canvasControls as CanvasControls).actionHistory = this.$.actionHistory as ActionHistory;
@@ -181,17 +179,17 @@ export class AppShell extends PolymerElement {
     this.addEventListener('element-updated', event => this.updateElement(event));
 
     this.addEventListener('refresh-view', (event: CustomEvent) => this.refreshView(event));
-    
+
     this.addEventListener('finish-clone', (event: CustomEvent) => {
       this._finishNewElement(event.detail.target, event.detail.target.localName, true);
     });
-    this.addEventListener('update-action-buttons', (event: CustomEvent) => {
+    /*this.addEventListener('update-action-buttons', (event: CustomEvent) => {
       (this.$.appControls as AppControls).update(event.detail.undos, event.detail.redos);
     });
     this.addEventListener('package-names-ready', (event: CustomEvent) => {
       //@ts-ignore
       window.codeView.elementsToPackages = event.detail.list;
-    });
+    });*/
 
     this.addEventListener('remove-from-canvas', (event: CustomEvent) => {
       const parent = event.detail.parent;
@@ -225,14 +223,15 @@ export class AppShell extends PolymerElement {
     this.$.dock.appendChild(sampleDocument);
     sampleDocument.serviceContainer = serviceContainer;
 
-    sampleDocument.addEventListener('selected-elements-changed', (e: CustomEvent) => this.setActiveElement(e.detail.elements));
+    //sampleDocument.instanceServiceContainer
+    //sampleDocument.addEventListener('selected-elements-changed', (e: CustomEvent) => this.setActiveElement(e.detail.elements));
   }
 
   /*
    * Updates the new active element in the view.
    */
   setActiveElement(elements: HTMLElement[]) {
-    (<AttributeEditor>this.$.attributesEditor).selectedElements = elements;
+    //(<AttributeEditor>this.$.attributesEditor).selectedElements = elements;
     /*if (el === this) {
       el = this.$.viewContainer;
     }*/
@@ -262,7 +261,7 @@ export class AppShell extends PolymerElement {
     // so that we can diff it to produce the actual state of the world
     //@ts-ignore
     (window.codeView as CodeView).save(tag, event.detail.package, el);
-    serviceContainer.actionHistory.add(UndoItemType.New, el, { parent: el.parentNode });
+    //serviceContainer.actionHistory.add(UndoItemType.New, el, { parent: el.parentNode });
 
     this._finishNewElement(el, tag);
     // You need the item to render first.
@@ -309,17 +308,17 @@ export class AppShell extends PolymerElement {
 
   updateElement(event) {
     let detail = event.detail;
-    let oldValue = this.updateActiveElementValues(detail.type, detail.name, detail.value, detail.isAttribute);
+    //let oldValue = this.updateActiveElementValues(detail.type, detail.name, detail.value, detail.isAttribute);
 
     if (detail.skipHistory) {
       return;
     }
-    serviceContainer.actionHistory.add(UndoItemType.Update, this.activeElement,
+    /*serviceContainer.actionHistory.add(UndoItemType.Update, this.activeElement,
       {
         type: detail.type, name: detail.name,
         new: { value: detail.value },
         old: { value: oldValue }
-      });
+      });*/
   }
 
   /**
@@ -407,7 +406,7 @@ export class AppShell extends PolymerElement {
 
     // If it's a native element, or has a slot, put some text in that slot
     // to indicate that.
-    let slots = el.root ? el.root.querySelectorAll('slot') : [];
+    //let slots = el.root ? el.root.querySelectorAll('slot') : [];
 
     /*if (((this.$.paletteView as NativeView).isNativeElement(tag) && tag !== 'input') ||
       slots.length != 0) {

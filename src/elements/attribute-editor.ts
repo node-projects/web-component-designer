@@ -3,6 +3,7 @@ import serviceContainer from './services/DefaultServiceBootstrap';
 import { AttributeEditorAttributeList } from './attribute-editor-attribute-list';
 import { DesignerTabControl } from './designer-tab-control';
 import { CssPropertiesService } from './services/propertiesService/CssPropertiesService';
+import { IDesignItem } from './item/IDesignItem';
 
 export class AttributeEditor extends HTMLElement {
 
@@ -64,7 +65,7 @@ export class AttributeEditor extends HTMLElement {
     return this._serviceContainer;
   }
 
-  set selectedElements(value: HTMLElement[]) {
+  set selectedElements(value: IDesignItem[]) {
     if (value) {
       if (value.length == 1) {
         let element = value[0];

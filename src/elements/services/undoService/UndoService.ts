@@ -1,6 +1,5 @@
 import { UndoItemType } from "./UndoItemType";
 import { IUndoItem } from './IUndoItem';
-import { CanvasView } from '../../canvas-view';
 import { ChangeGroup } from "./ChangeGroup";
 import { IUndoService } from './IUndoService';
 
@@ -49,7 +48,7 @@ export class UndoService implements IUndoService {
 
   undo() {
     // Take the top action off the undo stack and move it to the redo stack.
-    const item = this.undoHistory.pop();
+    /*const item = this.undoHistory.pop();
     this.redoHistory.push(item);
     this.updateButtons();
 
@@ -92,12 +91,12 @@ export class UndoService implements IUndoService {
           this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', skipHistory: true, node: this}}));
           break;
     }
-    item.node.click();
+    item.node.click();*/
   }
 
   redo() {
     // Take the top action off the redo stack and move it to the undo stack.
-    let item = this.redoHistory.pop();
+    /*let item = this.redoHistory.pop();
     let detail = item.detail;
     this.undoHistory.push(item);
     this.updateButtons();
@@ -142,11 +141,11 @@ export class UndoService implements IUndoService {
           this.dispatchEvent(new CustomEvent('move', {bubbles: true, composed: true, detail: {type:'back', skipHistory: true, node: this}}));
           break;
     }
-    item.node.click();
+    item.node.click();*/
   }
 
   updateButtons() {
-    this.dispatchEvent(new CustomEvent('update-action-buttons', {bubbles: true, composed: true, detail: {undos: this.undoHistory.length, redos: this.redoHistory.length, node: this}}));
+    //this.dispatchEvent(new CustomEvent('update-action-buttons', {bubbles: true, composed: true, detail: {undos: this.undoHistory.length, redos: this.redoHistory.length, node: this}}));
   }
 
   private _itemsMatch(action, first, second) {
@@ -158,7 +157,7 @@ export class UndoService implements IUndoService {
     return JSON.stringify(first) === JSON.stringify(second);
   }
 
-  private _updatePosition(node, detail) {
+  /*private _updatePosition(node, detail) {
     node.style.left = detail.left;
     node.style.top = detail.top;
     node.style.position = detail.position;
@@ -172,5 +171,5 @@ export class UndoService implements IUndoService {
   private _reparent(node, oldParent, newParent) {
     oldParent.removeChild(node);
     newParent.appendChild(node);
-  }
+  }*/
 }

@@ -1,11 +1,12 @@
 import { IPropertiesService } from "./IPropertiesService";
 import { IProperty } from './IProperty';
+import { IDesignItem } from '../../item/IDesignItem';
 
 export class NativeElementsPropertiesService implements IPropertiesService {
     public name = "native"
 
-    isHandledElement(element: Element): boolean {
-        switch (element.localName) {
+    isHandledElement(designItem: IDesignItem): boolean {
+        switch (designItem.element.localName) {
             case 'input':
             case 'button':
             case 'a':
@@ -15,10 +16,17 @@ export class NativeElementsPropertiesService implements IPropertiesService {
         return false;
     }
 
-    getProperties(element: Element): IProperty[] {
-        if (!this.isHandledElement(element))
+    getProperties(designItem: IDesignItem): IProperty[] {
+        if (!this.isHandledElement(designItem))
             return null;
 
         return null;
+    }
+
+    setValue(designItem: IDesignItem, property: IProperty, value: any) {
+    }
+
+    getValue(designItem: IDesignItem, property: IProperty) {
+       return null;
     }
 }

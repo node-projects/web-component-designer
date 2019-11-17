@@ -1,5 +1,4 @@
 import { IElementDefintion } from './services/elementsService/IElementDefinition';
-import { PaperButtonBehavior } from '@polymer/paper-behaviors/paper-button-behavior';
 
 
 export class PaletteElements extends HTMLElement {

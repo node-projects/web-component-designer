@@ -1,12 +1,13 @@
 import { IPropertiesService } from "./IPropertiesService";
 import { IProperty } from './IProperty';
+import { IDesignItem } from '../../item/IDesignItem';
 
 export class LitElementPropertiesService implements IPropertiesService {
 
     public name = "lit"
 
-    isHandledElement(element: Element): boolean {
-        let proto = (<any>element.constructor).__proto__;
+    isHandledElement(designItem: IDesignItem): boolean {
+        let proto = (<any>designItem.element.constructor).__proto__;
         while (proto != null) {
             if (proto.name == 'LitElement')
                 return true;
@@ -17,15 +18,21 @@ export class LitElementPropertiesService implements IPropertiesService {
         return false;
     }
 
-    getProperties(element: Element): IProperty[] {
-        if (!this.isHandledElement(element))
+    getProperties(designItem: IDesignItem): IProperty[] {
+        if (!this.isHandledElement(designItem))
             return null;
             
-        let list = (<any>element.constructor)._classProperties as Map<string, object>;
+        let list = (<any>designItem.element.constructor)._classProperties as Map<string, object>;
         // @ts-ignore
         for (const litProperty of list) {
         }
         return null;
     }
 
+    setValue(designItem: IDesignItem, property: IProperty, value: any) {
+    }
+
+    getValue(designItem: IDesignItem, property: IProperty) {
+       return null;
+    }
 }

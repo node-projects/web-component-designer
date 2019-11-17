@@ -1,5 +1,4 @@
 import { ServiceContainer } from './ServiceContainer';
-import { UndoService } from './undoService/UndoService';
 import { PolymerPropertiesService } from './propertiesService/PolymerPropertiesService';
 import { LitElementPropertiesService } from './propertiesService/LitElementPropertiesService';
 import { NativeElementsPropertiesService } from './propertiesService/NativeElementsPropertiesService';
@@ -8,7 +7,7 @@ import { DefaultEditorTypesService } from './propertiesService/DefaultEditorType
 
 let serviceContainer = new ServiceContainer();
 
-serviceContainer.register("actionHistory", new UndoService());
+// serviceContainer.register("actionHistory", new UndoService());
 // serviceContainer.register("propertyService", new CssPropertiesService("css"));
 // serviceContainer.register("propertyService", new CssPropertiesService("flex"));
 serviceContainer.register("propertyService", new PolymerPropertiesService());
