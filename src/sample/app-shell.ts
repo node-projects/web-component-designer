@@ -1,7 +1,6 @@
 import { PolymerElement } from '@polymer/polymer';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
-import { CanvasControls } from './canvas-controls.js';
 import { TreeView } from '../elements/tree-view.js';
 import { CanvasView } from '../elements/canvas-view.js';
 import { CodeView } from '../elements/code-view.js';
@@ -31,6 +30,7 @@ import serviceContainer from '../elements/services/DefaultServiceBootstrap';
 import { PaletteView } from '../elements/palette-view.js';
 import { SampleDocument } from './sample-document.js';
 import { AttributeEditor } from '../elements/attribute-editor';
+import { DockManager } from 'dock-spawn-ts/lib/js/DockManager';
 
 DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
@@ -154,6 +154,22 @@ export class AppShell extends PolymerElement {
     (<AttributeEditor>this.$.attributesEditor).serviceContainer = serviceContainer;
 
     this.newDocument();
+
+    (<DockManager>(<any>this.$.dock).dockManager).addLayoutListener({
+      onActivePanelChange: (manager, panel) => {
+        if (panel) {
+          let element = ((<HTMLSlotElement><any>panel.elementContent).assignedElements()[0]);
+          if (element.localName == "sample-document") {
+            let sampleDocument = element as SampleDocument;
+            let selection = sampleDocument.instanceServiceContainer.selectionService.selectedElements;
+            (<AttributeEditor>this.$.attributesEditor).selectedElements = selection;
+          }
+        }
+      }
+    });
+
+
+
     //(<SampleDocument>this.$.doc1).serviceContainer = serviceContainer;
 
 
@@ -164,25 +180,24 @@ export class AppShell extends PolymerElement {
     // can't have nice things.
 
     //@ts-ignore
-    window.codeView.canvasElement = this.$.viewContainer;
+    //window.codeView.canvasElement = this.$.viewContainer;
 
     //this.setActiveElement(this.$.viewContainer);
-    this.refreshView();
+    //this.refreshView();
 
     //(this.$.canvasControls as CanvasControls).actionHistory = this.$.actionHistory as ActionHistory;
     //(this.$.canvasControls as CanvasControls).canvasElement = this.$.viewContainer;
     //(this.$.appControls as AppControls).actionHistory = this.$.actionHistory as ActionHistory;
     //(this.$.viewContainer as CanvasView).actionHistory = this.$.actionHistory as ActionHistory;
 
-    this.addEventListener('new-element', event => this.createElement(event));
+    //this.addEventListener('new-element', event => this.createElement(event));
     //this.addEventListener('new-sample', event => this.createSample(event));
-    this.addEventListener('element-updated', event => this.updateElement(event));
+    //this.addEventListener('element-updated', event => this.updateElement(event));
+    //this.addEventListener('refresh-view', (event: CustomEvent) => this.refreshView(event));
 
-    this.addEventListener('refresh-view', (event: CustomEvent) => this.refreshView(event));
-
-    this.addEventListener('finish-clone', (event: CustomEvent) => {
-      this._finishNewElement(event.detail.target, event.detail.target.localName, true);
-    });
+    //this.addEventListener('finish-clone', (event: CustomEvent) => {
+    //  this._finishNewElement(event.detail.target, event.detail.target.localName, true);
+    //});
     /*this.addEventListener('update-action-buttons', (event: CustomEvent) => {
       (this.$.appControls as AppControls).update(event.detail.undos, event.detail.redos);
     });
@@ -191,7 +206,7 @@ export class AppShell extends PolymerElement {
       window.codeView.elementsToPackages = event.detail.list;
     });*/
 
-    this.addEventListener('remove-from-canvas', (event: CustomEvent) => {
+    /*this.addEventListener('remove-from-canvas', (event: CustomEvent) => {
       const parent = event.detail.parent;
       const node = event.detail.target;
       if (parent === this.$.viewContainer) {
@@ -213,16 +228,15 @@ export class AppShell extends PolymerElement {
     });
     this.addEventListener('move', (event: CustomEvent) => {
       (this.$.canvasControls as CanvasControls).move(event.detail.type, event.detail.skipHistory);
-    });
+    });*/
   }
 
   newDocument() {
     this._documentNumber++;
-    let sampleDocument = new SampleDocument();
+    let sampleDocument = new SampleDocument(serviceContainer);
     sampleDocument.title = "document-" + this._documentNumber;
     this.$.dock.appendChild(sampleDocument);
-    sampleDocument.serviceContainer = serviceContainer;
-
+    //sampleDocument.serviceContainer = serviceContainer;
     //sampleDocument.instanceServiceContainer
     //sampleDocument.addEventListener('selected-elements-changed', (e: CustomEvent) => this.setActiveElement(e.detail.elements));
   }

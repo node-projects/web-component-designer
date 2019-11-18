@@ -12,8 +12,9 @@ import { SelectionService } from './services/selectionService/SelectionService';
 import { ISelectionChangedEvent } from './services/selectionService/ISelectionChangedEvent';
 import { DesignItem } from './item/DesignItem';
 import { IDesignItem } from './item/IDesignItem';
+import { BaseCustomWebComponent, css, html } from './controls/BaseCustomWebComponent';
 
-export class CanvasView extends HTMLElement {
+export class CanvasView extends BaseCustomWebComponent {
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
@@ -35,12 +36,115 @@ export class CanvasView extends HTMLElement {
   private _clickThroughElements: IDesignItem[] = []
   private _previousEventName: EventNames;
 
-  private static _style: CSSStyleSheet;
   private _firstConnect: boolean;
   private _ownBoundingRect: ClientRect | DOMRect;
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
+
+  static get style() {
+    return css`
+    :host {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      position: relative;
+      background-color: var(--canvas-background);
+      /* 10px grid, using http://www.patternify.com/ */
+      background-image: url(./assets/images/grid.png);
+      background-position: 0px 0px;
+      transform: translateZ(0);
+    }
+    #canvas {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+    }
+
+    #canvas > dom-repeat {
+      height: 20px;
+      width: 20px;
+      display: inline-block;
+    }
+    #canvas * {
+      cursor: pointer;
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+    }
+    #canvas *:not(.active):hover {
+      outline: solid 2px #90CAF9 !important;
+      outline-offset: 2px;
+    }
+    .active, :host(.active) {
+      outline: solid 3px var(--highlight-blue) !important;
+      outline-offset: 2px;
+      transform: translateZ(0);
+    }
+    :host(.active) {
+      outline-offset: -3px;
+    }
+
+    /* Show a resize cursor in the corner */
+    .active:after {
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      height: 14px;
+      width: 14px;
+      content: '↘';
+      cursor: se-resize;
+      font-size: 10px;
+      font-weight: bold;
+      text-align: center;
+      background: var(--highlight-blue);
+      color: white;
+      z-index: 1000000;
+    }
+    .dragging, .resizing {
+      user-select: none;
+    }
+    .dragging {
+      /*opacity: 0.6;*/
+      z-index: 1000;
+      cursor: move;
+    }
+    .dragging.active:after {
+      display: none;
+    }
+    .resizing {
+      cursor: se-resize;
+    }
+    .over {
+      outline: dashed 3px var(--highlight-green) !important;
+      outline-offset: 2px;
+    }
+    .over::before {
+      content: 'press "alt" to enter container';
+      top: 5px;
+      left: 5px;
+      position: absolute;
+      opacity: 0.5;
+    }
+    .over-enter {
+      outline: solid 3px var(--highlight-green) !important;
+      outline-offset: 2px;
+    }
+    #selector {
+      border: 1px dotted #000;
+      position: absolute;
+      pointer-events: none;
+    }
+  }`;
+  }
+
+  static get template() {
+    return html`
+        <div id="canvas"></div>
+        <div id="selector" hidden></div>
+          `;
+  }
 
   constructor() {
     super();
@@ -49,116 +153,8 @@ export class CanvasView extends HTMLElement {
     this.instanceServiceContainer.register("undoService", new UndoService);
     this.instanceServiceContainer.register("selectionService", new SelectionService);
 
-
-    if (!CanvasView._style) {
-      CanvasView._style = new CSSStyleSheet();
-      //@ts-ignore
-      CanvasView._style.replaceSync(`
-        :host {
-          display: block;
-          box-sizing: border-box;
-          width: 100%;
-          position: relative;
-          background-color: var(--canvas-background);
-          /* 10px grid, using http://www.patternify.com/ */
-          background-image: url(./assets/images/grid.png);
-          background-position: 0px 0px;
-          transform: translateZ(0);
-        }
-        #canvas {
-          box-sizing: border-box;
-          width: 100%;
-          height: 100%;
-        }
-
-        #canvas > dom-repeat {
-          height: 20px;
-          width: 20px;
-          display: inline-block;
-        }
-        #canvas * {
-          cursor: pointer;
-          user-select: none;
-          -moz-user-select: none;
-          -webkit-user-select: none;
-          -ms-user-select: none;
-        }
-        #canvas *:not(.active):hover {
-          outline: solid 2px #90CAF9 !important;
-          outline-offset: 2px;
-        }
-        .active, :host(.active) {
-          outline: solid 3px var(--highlight-blue) !important;
-          outline-offset: 2px;
-          transform: translateZ(0);
-        }
-        :host(.active) {
-          outline-offset: -3px;
-        }
-
-        /* Show a resize cursor in the corner */
-        .active:after {
-          position: absolute;
-          bottom: -5px;
-          right: -5px;
-          height: 14px;
-          width: 14px;
-          content: '↘';
-          cursor: se-resize;
-          font-size: 10px;
-          font-weight: bold;
-          text-align: center;
-          background: var(--highlight-blue);
-          color: white;
-          z-index: 1000000;
-        }
-        .dragging, .resizing {
-          user-select: none;
-        }
-        .dragging {
-          /*opacity: 0.6;*/
-          z-index: 1000;
-          cursor: move;
-        }
-        .dragging.active:after {
-          display: none;
-        }
-        .resizing {
-          cursor: se-resize;
-        }
-        .over {
-          outline: dashed 3px var(--highlight-green) !important;
-          outline-offset: 2px;
-        }
-        .over::before {
-          content: 'press "alt" to enter container';
-          top: 5px;
-          left: 5px;
-          position: absolute;
-          opacity: 0.5;
-        }
-        .over-enter {
-          outline: solid 3px var(--highlight-green) !important;
-          outline-offset: 2px;
-        }
-        #selector {
-          border: 1px dotted #000;
-          position: absolute;
-          pointer-events: none;
-        }
-      }`);
-    }
-
-    const shadow = this.attachShadow({ mode: 'open' });
-    //@ts-ignore
-    shadow.adoptedStyleSheets = [CanvasView._style];
-    this._canvas = document.createElement('div');
-    this._canvas.id = 'canvas';
-    shadow.appendChild(this._canvas)
-    this._selector = document.createElement('div');
-    this._selector.id = 'selector';
-    this._selector.hidden = true;
-    shadow.appendChild(this._selector)
+    this._canvas = <HTMLDivElement>this._shadow.getElementById('canvas');
+    this._selector = <HTMLDivElement>this._shadow.getElementById('selector');
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
@@ -458,7 +454,7 @@ export class CanvasView extends HTMLElement {
           }
         } else {
           if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
-          this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+            this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
         }
         break;
       case EventNames.PointerMove:
@@ -680,8 +676,8 @@ export class CanvasView extends HTMLElement {
               new: { width: element.style.width, height: element.style.height },
               old: { width: this._initialSizes[j].width + 'px', height: this._initialSizes[j].height + 'px' }
             });*/
-            designItem.element.classList.remove('resizing');
-            designItem.element.classList.remove('dragging');
+          designItem.element.classList.remove('resizing');
+          designItem.element.classList.remove('dragging');
         }
         this._initialSizes = null;
         break;

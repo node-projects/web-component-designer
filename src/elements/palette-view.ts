@@ -1,37 +1,30 @@
-import './designer-tab-control.js';
+import './controls/designer-tab-control.js';
 import { IElementsService } from './services/elementsService/IElementsService';
 import { PaletteElements } from './palette-elements';
-import { DesignerTabControl } from './designer-tab-control';
+import { DesignerTabControl } from './controls/designer-tab-control';
+import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
 
-export class PaletteView extends HTMLElement {
+export class PaletteView extends BaseCustomWebComponent {
 
   public selected = 'native';
 
-  private static _style: CSSStyleSheet;
   private _designerTabControl: DesignerTabControl;
+
+  static get style() {
+    return css`
+    :host {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      height: 100%;
+    }`;
+  }
 
   constructor() {
     super();
-    if (!PaletteView._style) {
-      PaletteView._style = new CSSStyleSheet();
-      //@ts-ignore
-      PaletteView._style.replaceSync(`
-      :host {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        height: 100%;
-      }
-      `);
-    }
-
-    const shadow = this.attachShadow({ mode: 'open' });
-    //@ts-ignore
-    shadow.adoptedStyleSheets = [PaletteView._style];
-
     this._designerTabControl = new DesignerTabControl();
     this._designerTabControl.selectedIndex = 0;
-    shadow.appendChild(this._designerTabControl);
+    this._shadow.appendChild(this._designerTabControl);
   }
 
   public async loadControls(elementsServices : IElementsService[]) {

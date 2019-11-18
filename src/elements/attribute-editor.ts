@@ -1,48 +1,40 @@
 import { ServiceContainer } from './services/ServiceContainer';
 import serviceContainer from './services/DefaultServiceBootstrap';
 import { AttributeEditorAttributeList } from './attribute-editor-attribute-list';
-import { DesignerTabControl } from './designer-tab-control';
+import { DesignerTabControl } from './controls/designer-tab-control';
 import { CssPropertiesService } from './services/propertiesService/CssPropertiesService';
 import { IDesignItem } from './item/IDesignItem';
+import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
 
-export class AttributeEditor extends HTMLElement {
+export class AttributeEditor extends BaseCustomWebComponent {
 
   private _serviceContainer: ServiceContainer;
-
-  private static _style: CSSStyleSheet;
   private _designerTabControl: DesignerTabControl;
-  _firstConnect: any;
+
+  static get style() {
+    return css`
+    :host {
+      display: block;
+    }
+    iron-pages {
+      overflow: hidden;
+      height: 250px;
+      background: var(--medium-grey);
+      color: white;
+    }
+    button:hover {
+      box-shadow: inset 0 3px 0 var(--light-grey);
+    }
+    button:focus {
+      box-shadow: inset 0 3px 0 var(--highlight-pink);
+    }
+    `;
+  }
 
   constructor() {
     super();
-    if (!AttributeEditor._style) {
-      AttributeEditor._style = new CSSStyleSheet();
-      //@ts-ignore
-      AttributeEditor._style.replaceSync(`
-      :host {
-        display: block;
-      }
-      iron-pages {
-        overflow: hidden;
-        height: 250px;
-        background: var(--medium-grey);
-        color: white;
-      }
-      button:hover {
-        box-shadow: inset 0 3px 0 var(--light-grey);
-      }
-      button:focus {
-        box-shadow: inset 0 3px 0 var(--highlight-pink);
-      }
-      `);
-    }
-
-    const shadow = this.attachShadow({ mode: 'open' });
-    //@ts-ignore
-    shadow.adoptedStyleSheets = [AttributeEditor._style];
-
     this._designerTabControl = new DesignerTabControl();
-    shadow.appendChild(this._designerTabControl);
+    this._shadow.appendChild(this._designerTabControl);
   }
 
   public set serviceContainer(value: ServiceContainer) {
