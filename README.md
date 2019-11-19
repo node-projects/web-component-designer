@@ -4,8 +4,6 @@ A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
 Based on PolymerLabs Wizzywid
 
-[![Build Status](https://travis-ci.com/jzeyer/wizzywid.svg?branch=master)](https://travis-ci.com/jzeyer/wizzywid)
-
 This is a Designer Framework wich could easily be included in your own Software..
 
 <img width="985" alt="screenshot of wizzywid" src="https://user-images.githubusercontent.com/1369170/28957547-22175752-78a7-11e7-8770-49df35698e55.png">
@@ -46,6 +44,13 @@ look at: https://node-projects.github.io/web-component-designer/build/
 ```
 
   * Navigate Chrome to [localhost:8000]() to see the app.
+
+  * To build GitHub Page run
+```
+  $ polymer build
+```
+
+
 
 ## Using
 

@@ -1,9 +1,9 @@
-"use strict";
+export class PaletteSharedStyle {} //const $_documentPalContainer = document.createElement('template');
+//$_documentPalContainer.innerHTML = `<dom-module id="palette-shared-styles">
 
-const $_documentPalContainer = document.createElement('template');
-$_documentPalContainer.innerHTML = `<dom-module id="palette-shared-styles">
-  <template>
-    <style>
+PaletteSharedStyle.Style = new CSSStyleSheet(); //@ts-ignore
+
+PaletteSharedStyle.Style.replaceSync(`
       :host {
         display: block;
         box-sizing: border-box;
@@ -48,8 +48,4 @@ $_documentPalContainer.innerHTML = `<dom-module id="palette-shared-styles">
       ::-webkit-input-placeholder { color: white; font-weight: 100; font-size: 14px; }
       ::-moz-placeholder { color: white; font-weight: 100; font-size: 14px;  }
       :-ms-input-placeholder { color: white; font-weight: 100; font-size: 14px;  }
-      :-moz-placeholder { color: white; font-weight: 100; font-size: 14px;  }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentPalContainer.content);
+      :-moz-placeholder { color: white; font-weight: 100; font-size: 14px;  }`);

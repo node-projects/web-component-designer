@@ -99,25 +99,12 @@ let AppShell = class AppShell extends PolymerElement {
           justify-content: space-between;
         }
 
-        designer-tab.single {
-          color: white;
-          background: var(--dark-grey);
-          width: 100%;
-          height: 41px;
-          margin: 0;
-          padding: 0;
-          border: none;
-        }
-        designer-tab.single span {
-          box-shadow: none;
-        }
-
         .app-body {
           box-sizing: border-box;
           display: flex;
           flex-direction: row;
           padding-top: 60px;
-          height: 100vh;
+          height: 100%;
         }
 
         .main-view {
@@ -130,11 +117,6 @@ let AppShell = class AppShell extends PolymerElement {
           flex-direction: column;
         }
 
-        iron-pages  {
-          height: 100%;
-          overflow: auto;
-        }
-
         .heavy {
           font-weight: 900;
           letter-spacing: 2px;
@@ -144,9 +126,7 @@ let AppShell = class AppShell extends PolymerElement {
           opacity: 0.5;
           letter-spacing: normal;
         }
-        canvas-view {
-          overflow: auto;
-        }
+        
         paper-toggle-button {
           position: absolute;
           top: 0;
@@ -165,11 +145,9 @@ let AppShell = class AppShell extends PolymerElement {
         }
       </style>
 
-      <action-history id="actionHistory"></action-history>
-
       <app-header fixed="">
         <app-toolbar>
-          <span class="heavy">wizzywid <span class="lite">// what you see is what you deserve</span></span>
+          <span class="heavy">web-component-designer <span class="lite">a design framework for web-components using web-components</span></span>
           <app-controls id="appControls"></app-controls>
         </app-toolbar>
       </app-header>
@@ -177,25 +155,7 @@ let AppShell = class AppShell extends PolymerElement {
       <div class="app-body">
         <dock-spawn-ts style="width: 100%; height: 100%; position: relative;">
           
-          <div title="Document1" class="main-view">
-            <designer-tabs attr-for-selected="name" selected="{{mainPage}}">
-              <designer-tab name="designer">
-                <button>Designer</button>
-              </designer-tab>
-              <designer-tab name="preview">
-                <button on-click="viewDemo">Preview</button>
-              </designer-tab>
-              <designer-tab name="code">
-                <button on-click="viewCode">Code</button>
-              </designer-tab>
-            </designer-tabs>
-            <iron-pages selected="[[mainPage]]" attr-for-selected="name" selected-attribute="visible">
-              <canvas-view name="designer" id="viewContainer" style="height:100%"></canvas-view>
-              <div name="code" style="width:100%;height:100%;"><slot name="code"></slot></div>
-              <demo-view id="demoView" name="preview"></demo-view>
-              <help-view name="help"></help-view>
-            </iron-pages>
-          </div>
+          <sample-document></sample-document>
 
           <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2">
             <tree-view name="tree" id="treeView"></tree-view>
@@ -229,7 +189,7 @@ let AppShell = class AppShell extends PolymerElement {
     this.addEventListener('new-sample', event => this.createSample(event));
     this.addEventListener('element-updated', event => this.updateElement(event));
     this.addEventListener('refresh-view', event => this.refreshView(event));
-    this.addEventListener('selected-elements-changed', event => {
+    this.addEventListener('selected-element-changed', event => {
       this.setActiveElement(event.detail.target);
     });
     this.addEventListener('finish-clone', event => {
@@ -269,6 +229,10 @@ let AppShell = class AppShell extends PolymerElement {
     this.addEventListener('move', event => {
       this.$.canvasControls.move(event.detail.type, event.detail.skipHistory);
     });
+  }
+
+  new() {
+    this._documentNumber++;
   }
   /*
    * Updates the new active element in the view.
