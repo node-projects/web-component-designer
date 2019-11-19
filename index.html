@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="height: 100%;">
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="wizzywid - what you see is what you deserve">
@@ -14,8 +14,10 @@
     <script src="./node_modules/ace-builds/src-min/ace.js"></script>
 
     <script type="module">
-      import './dist/elements/app-shell.js';
+      import './dist/sample/app-shell.js';
       import './dist/elements/code-view.js';
+      
+      import '@polymer/font-roboto/roboto.js';
 
       //import '/samples/app-header-sample.js';
       //import '/samples/app-layout-sample.js';
@@ -97,8 +99,8 @@
       }
     </style>
   </head>
-  <body>
-    <app-shell id="shell">
+  <body style="height: 100%;">
+    <app-shell id="shell" style="height: 100%;">
       <code-view id="codeView" slot="code"></code-view>
     </app-shell>
     <script src="./dist/app.js"></script>

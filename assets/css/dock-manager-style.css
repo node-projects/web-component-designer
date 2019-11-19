@@ -9,6 +9,8 @@
 .panel-titlebar-text {
 	font-weight: bold;
 	color:#aaa;
+	padding-left: 5px;
+	padding-top: 0;
 }
 
 .panel-titlebar-button-close {
@@ -137,11 +139,12 @@
 }
 
 .dockspan-tab-handle-selected:hover {
-    background-color: #2f3545;
+    background-color: #008749;
 	color:#fff;
 }
 
 .dockspan-tab-handle-text {
+	margin-top: 0;
 }
 
 .dockspan-tab-handle-close-button {
@@ -157,4 +160,19 @@
 
 .dockspan-tab-handle-content-seperator {
 	background-color: #2f3545;
+}
+
+.dockspan-tab-handle-content-seperator-active {
+	background-color: #008749;
+}
+
+.dockspan-tab-handle-active {
+	background-color: #008749;
+}
+
+.dockspan-panel-active {
+	background-color: #008749;
+}
+.dockspan-panel-titlebar-text-active {
+	color: white;
 }

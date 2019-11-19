@@ -1,13 +1,16 @@
-import { customElement, LitElement, html, css } from 'lit-element';
 
-@customElement('demo-view')
-export class DemoView extends LitElement {
+export class DemoView extends HTMLElement {
 
-  _placeholder: HTMLDivElement;
-  _loading: HTMLDivElement;
+  private _placeholder: HTMLDivElement;
+  private _loading: HTMLDivElement;
+  private static _style: CSSStyleSheet;
 
-  static get styles() {
-    return css`
+  constructor() {
+    super();
+    if (!DemoView._style) {
+      DemoView._style = new CSSStyleSheet();
+      //@ts-ignore
+      DemoView._style.replaceSync(`
       :host {
         display: block;
         overflow: hidden;
@@ -26,19 +29,19 @@ export class DemoView extends LitElement {
       iframe {
         width: 100%;
         height: 100%;
-      }`;
-  }
+      }`);
+    }
 
-  render() {
-    return html`
-      <div id="placeholder"></div>
-      <div id="loading">🛀 Hold on, loading...</div>
-    `;
-  }
-
-  firstUpdated() {
-    this._placeholder = this.shadowRoot.getElementById('placeholder') as HTMLDivElement;
-    this._loading = this.shadowRoot.getElementById('loading') as HTMLDivElement;
+    const shadow = this.attachShadow({ mode: 'open' });
+    //@ts-ignore
+    shadow.adoptedStyleSheets = [DemoView._style];
+    this._placeholder = document.createElement('div');
+    this._placeholder.id = 'placeholder';
+    shadow.appendChild(this._placeholder)
+    this._loading = document.createElement('div');
+    this._loading.id = 'loading';
+    this._loading.textContent = '🛀 Hold on, loading...';
+    shadow.appendChild(this._loading)
   }
 
   display(code) {
@@ -50,7 +53,7 @@ export class DemoView extends LitElement {
     this._loading.hidden = false;
 
     iframe.onload = () => {
-      this._loading .hidden = true;
+      this._loading.hidden = true;
     };
 
     let doc = iframe.contentWindow.document;
@@ -59,3 +62,5 @@ export class DemoView extends LitElement {
     doc.close();
   }
 }
+
+customElements.define('demo-view', DemoView);

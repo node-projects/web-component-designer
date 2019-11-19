@@ -229,7 +229,7 @@ let AppShell = class AppShell extends PolymerElement {
     this.addEventListener('new-sample', event => this.createSample(event));
     this.addEventListener('element-updated', event => this.updateElement(event));
     this.addEventListener('refresh-view', event => this.refreshView(event));
-    this.addEventListener('selected-element-changed', event => {
+    this.addEventListener('selected-elements-changed', event => {
       this.setActiveElement(event.detail.target);
     });
     this.addEventListener('finish-clone', event => {

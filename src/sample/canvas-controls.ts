@@ -1,19 +1,22 @@
-var __decorate = this && this.__decorate || function (decorators, target, key, desc) {
-  var c = arguments.length,
-      r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
-      d;
-  if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-  return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
+import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { customElement, property } from '@polymer/decorators';
+import { UndoService } from '../elements/services/undoService/UndoService.js';
 
-import { PolymerElement } from "../../node_modules/@polymer/polymer/polymer-element.js";
-import { html } from "../../node_modules/@polymer/polymer/lib/utils/html-tag.js";
-import { customElement, property } from "../../node_modules/@polymer/decorators/lib/decorators.js";
-import "../../node_modules/@polymer/iron-icon/iron-icon.js";
+import '@polymer/iron-icon/iron-icon.js';
 import './app-icons.js';
-import './designer-tab.js';
-import { ActionHistoryType } from "../enums/ActionHistoryType.js";
-let CanvasControls = class CanvasControls extends PolymerElement {
+import '../elements/designer-tab.js';
+import { UndoItemType } from "../elements/services/undoService/UndoItemType";
+
+@customElement('canvas-controls')
+export class CanvasControls extends PolymerElement {
+  @property({ type: Object, observer: '_selectedElementChanged' })
+  selectedElement: HTMLElement;
+  @property({ type: Object })
+  canvasElement: Object;
+  @property({ type: Object })
+  actionHistory: UndoService;
+
   static get template() {
     return html`
       <style>
@@ -104,128 +107,105 @@ let CanvasControls = class CanvasControls extends PolymerElement {
       </designer-tab>
     `;
   }
+
   /**
    * Disable a bunch of UI if the selected element is the canvas element.
    */
-
-
   update(disableUI) {
-    this.$.cloneBtn.disabled = disableUI;
-    this.$.fitBtn.disabled = disableUI;
-    this.$.moveUpBtn.disabled = disableUI;
-    this.$.moveDownBtn.disabled = disableUI;
-    this.$.moveBackBtn.disabled = disableUI;
-    this.$.moveForwardBtn.disabled = disableUI;
+    (this.$.cloneBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.fitBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveUpBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveDownBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveBackBtn as HTMLInputElement).disabled = disableUI;
+    (this.$.moveForwardBtn as HTMLInputElement).disabled = disableUI;
   }
+
   /**
    * Deletes the active element.
    */
-
-
   delete() {
     if (!this.selectedElement) {
       console.log('🔥 how did i get here?');
       return;
     }
 
-    const el = this.selectedElement; // Deleting the top level app should remove its children.
-
+    const el = this.selectedElement;
+    // Deleting the top level app should remove its children.
     if (this._isCanvasElement(el)) {
-      this.actionHistory.add(ActionHistoryType.Delete, el, {
-        innerHTML: el.innerHTML
-      });
+      this.actionHistory.add(UndoItemType.Delete, el, {innerHTML: el.innerHTML});
       el.innerHTML = '';
     } else {
       const parent = el.parentElement;
       parent.removeChild(el);
       this.selectedElement = parent;
-      this.actionHistory.add(ActionHistoryType.Delete, el, {
-        parent: parent
-      });
+      this.actionHistory.add(UndoItemType.Delete, el, {parent: parent});
     }
-
     this._refreshView();
+
   }
+
   /**
    * Creates a sibling copy of the active element.
    */
-
-
   clone() {
     const el = this.selectedElement;
-
     if (this._isCanvasElement(el)) {
       return;
     }
 
     let clone = el.cloneNode(true);
     el.parentNode.appendChild(clone);
-    this.dispatchEvent(new CustomEvent('selected-elements-changed', {
-      bubbles: true,
-      composed: true,
-      detail: {
-        target: clone,
-        node: this
-      }
-    })); // P.S: Since we did a clone, we already have the initial state of the <tag>.
 
-    this.actionHistory.add(ActionHistoryType.New, clone, {
-      parent: el.parentNode
-    });
-
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', {bubbles: true, composed: true, detail: {target: clone, node: this}}));
+   
+    // P.S: Since we did a clone, we already have the initial state of the <tag>.
+    this.actionHistory.add(UndoItemType.New, clone, {parent: el.parentNode});
     this._refreshView();
+
   }
+
   /**
    * Fit an element to its target
    */
-
-
   fit() {
     const el = this.selectedElement;
-
     if (this._isCanvasElement(el)) {
       return;
     }
 
-    this.actionHistory.add(ActionHistoryType.Fit, el, {
-      new: {
-        position: 'absolute',
-        left: '0',
-        top: '0',
-        width: '100%',
-        height: '100%'
-      },
-      old: {
-        position: el.style.position,
-        left: el.style.left,
-        top: el.style.top,
-        width: el.style.width,
-        height: el.style.height
-      }
-    });
+    this.actionHistory.add(UndoItemType.Fit, el,
+      {
+        new: {
+          position: 'absolute',
+          left: '0', top: '0',
+          width: '100%', height: '100%'
+        },
+        old: {
+          position: el.style.position,
+          left: el.style.left, top: el.style.top,
+          width: el.style.width, height: el.style.height,
+        }
+      });
+
     el.style.position = 'absolute';
     el.style.left = el.style.top = '0px';
     el.style.height = el.style.width = '100%';
   }
+
   /**
    * Moving elements in the DOM
    */
-
-
   move(type, skipHistory) {
-    switch (type) {
+    switch(type) {
       case 'forward':
         this.moveForward(skipHistory);
         break;
-
       case 'back':
         this.moveBack(skipHistory);
         break;
-
       case 'up':
         this.moveUp(skipHistory);
         break;
-
       case 'down':
         this.moveDown(skipHistory);
         break;
@@ -234,44 +214,36 @@ let CanvasControls = class CanvasControls extends PolymerElement {
 
   moveBack(skipHistory) {
     const el = this.selectedElement;
-
     if (this._isCanvasElement(el)) {
       return;
     }
 
     let parent = el.parentElement;
     let previous = el.previousElementSibling;
-
     if (previous) {
       parent.insertBefore(el, previous);
     } else {
       parent.appendChild(el);
     }
-
     this._refreshView();
-
     if (skipHistory === true) {
       return;
     }
-
-    this.actionHistory.add(ActionHistoryType.MoveBack, el);
+    this.actionHistory.add(UndoItemType.MoveBack, el);
   }
 
   moveForward(skipHistory) {
     const el = this.selectedElement;
-
     if (this._isCanvasElement(el)) {
       return;
     }
+    let parent = el.parentElement;
 
-    let parent = el.parentElement; // Since you can't insertAfter your next sibling, you need to
+    // Since you can't insertAfter your next sibling, you need to
     // insert before two siblings over.
-
     let next = el.nextElementSibling;
-
     if (next) {
       next = next.nextElementSibling;
-
       if (next) {
         parent.insertBefore(el, next);
       } else {
@@ -280,123 +252,76 @@ let CanvasControls = class CanvasControls extends PolymerElement {
     } else {
       parent.insertBefore(el, parent.firstChild);
     }
-
     this._refreshView();
 
     if (skipHistory === true) {
       return;
     }
-
-    this.actionHistory.add(ActionHistoryType.MoveForward, el);
+    this.actionHistory.add(UndoItemType.MoveForward, el);
   }
 
   moveUp(skipHistory) {
     const el = this.selectedElement;
-    let parent = el.parentElement; // If the parent isn't already the viewContainer, move it one up.
-
-    if (this._isCanvasElement(el) || parent && parent.id === 'canvas') {
+    let parent = el.parentElement;
+    // If the parent isn't already the viewContainer, move it one up.
+    if (this._isCanvasElement(el) || (parent && parent.id === 'canvas')) {
       return;
     }
-
     parent.removeChild(el);
     parent.parentElement.appendChild(el);
-
     this._refreshView();
 
     if (skipHistory === true) {
       return;
     }
-
-    this.actionHistory.add(ActionHistoryType.MoveUp, el, {
-      old: {
-        parent: parent
-      },
-      new: {
-        parent: parent.parentElement
-      }
-    });
+    this.actionHistory.add(UndoItemType.MoveUp, el,
+      {old: {parent: parent}, new: {parent: parent.parentElement}});
   }
 
   moveDown(skipHistory) {
     const el = this.selectedElement;
     let sibling = el.nextElementSibling;
-
     if (this._isCanvasElement(el) || !sibling) {
       return;
-    } // Not everything accepts children, as we've learnt from canvas-view
+    }
+
+    // Not everything accepts children, as we've learnt from canvas-view
     // (where I copied this code from like a lazy bum)
-
-
     let slots = sibling ? sibling.querySelectorAll('slot') : [];
-    let canDrop = sibling.localName.indexOf('-') === -1 && sibling.localName !== 'input' || sibling.localName === 'dom-repeat' || slots.length !== 0;
+    let canDrop =
+      (sibling.localName.indexOf('-') === -1 && sibling.localName !== 'input') ||
+       sibling.localName === 'dom-repeat' || slots.length !== 0;
 
     if (!canDrop) {
       return;
-    } // If you can, add it there.
+    }
 
-
+    // If you can, add it there.
     const oldParent = el.parentElement;
     sibling.appendChild(el);
     const oldPosition = el.style.position;
     el.style.position = 'relative';
-
     this._refreshView();
 
     if (skipHistory === true) {
       return;
     }
-
-    this.actionHistory.add(ActionHistoryType.MoveDown, el, {
-      old: {
-        parent: oldParent,
-        position: oldPosition
-      },
-      new: {
-        parent: sibling,
-        position: 'relative'
-      }
-    });
+    this.actionHistory.add(UndoItemType.MoveDown, el,
+        {
+          old: {parent: oldParent, position: oldPosition},
+          new: {parent: sibling, position: 'relative'}
+        });
   }
 
   _refreshView() {
-    this.dispatchEvent(new CustomEvent('refresh-view', {
-      bubbles: true,
-      composed: true,
-      detail: {
-        node: this
-      }
-    }));
+    this.dispatchEvent(new CustomEvent('refresh-view', {bubbles: true, composed: true, detail: {node: this}}));
   }
 
   _selectedElementChanged() {
-    this.dispatchEvent(new CustomEvent('selected-elements-changed', {
-      bubbles: true,
-      composed: true,
-      detail: {
-        target: this.selectedElement,
-        node: this
-      }
-    }));
+    this.dispatchEvent(new CustomEvent('selected-elements-changed', {bubbles: true, composed: true, detail: {target: this.selectedElement, node: this}}));
   }
 
   _isCanvasElement(el) {
-    return el === this.canvasElement;
+    return (el === this.canvasElement);
   }
-
-};
-
-__decorate([property({
-  type: Object,
-  observer: '_selectedElementChanged'
-})], CanvasControls.prototype, "selectedElement", void 0);
-
-__decorate([property({
-  type: Object
-})], CanvasControls.prototype, "canvasElement", void 0);
-
-__decorate([property({
-  type: Object
-})], CanvasControls.prototype, "actionHistory", void 0);
-
-CanvasControls = __decorate([customElement('canvas-controls')], CanvasControls);
-export { CanvasControls };
+}
