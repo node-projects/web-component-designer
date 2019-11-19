@@ -1,5 +1,7 @@
 # web-component-designer
 
+## Caution - this is a preview Version, we hope to release a RC in December 2019
+
 A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
 Based on PolymerLabs Wizzywid
