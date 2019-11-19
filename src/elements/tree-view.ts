@@ -1,125 +1,123 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import { customElement } from '@polymer/decorators';
+import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
 
-@customElement('tree-view')
-export class TreeView extends PolymerElement {
+export class TreeView extends BaseCustomWebComponent {
   items: any;
   _index: number;
   _previouslySelected: HTMLInputElement;
+  _treeDiv: HTMLDivElement;
 
-  static get template() {
-    return html`
-      <style>
-        :host {
-          --horz-margin: 20px;
-          --vert-margin: 0px;
-          --horz-shift: calc(var(--horz-margin) / 2); /* typically */
-          --vert-shift: 12px;
+  static get style() {
+    return css`
+    :host {
+      --horz-margin: 20px;
+      --vert-margin: 0px;
+      --horz-shift: calc(var(--horz-margin) / 2); /* typically */
+      --vert-shift: 12px;
 
-          display: inline-block;
-          position: relative;
-          width: 100%;
-          height: 100%;
-          background: var(--dark-grey);
-          overflow-y: auto;
-          padding-bottom: 60px;
-        }
-        button {
-          border: none;
-          font-size: 13px;
-          display: block;
-          padding: 4px 0;
-          cursor: pointer;
-          width: 100%;
-          text-align: left;
-          display: inline-block;
-          margin: 0;
-          background: var(--dark-grey);
-          position: relative;
-          color: white;
-        }
-        button:hover, button:focus {
-          background: var(--light-grey);
-        }
-        span {
-          margin: 4px;
-        }
-        .id {
-          font-style: italic;
-          color: var(--highlight-pink);
-        }
-        .selected {
-          background: var(--light-grey);
-          outline: none;
-        }
+      display: inline-block;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--dark-grey);
+      overflow-y: auto;
+      padding-bottom: 60px;
+    }
+    button {
+      border: none;
+      font-size: 13px;
+      display: block;
+      padding: 4px 0;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      display: inline-block;
+      margin: 0;
+      background: var(--dark-grey);
+      position: relative;
+      color: white;
+    }
+    button:hover, button:focus {
+      background: var(--light-grey);
+    }
+    span {
+      margin: 4px;
+    }
+    .id {
+      font-style: italic;
+      color: var(--highlight-pink);
+    }
+    .selected {
+      background: var(--light-grey);
+      outline: none;
+    }
 
-        li, ul {
-          margin: 0;
-          padding: 0;
-        }
-        .tree ul {
-          margin-left: var(--horz-margin);
-        }
-        .tree li {
-          list-style-type: none;
-          margin-top: var(--vert-margin);
-          margin-bottom: var(--vert-margin);
-          position: relative;
-        }
+    li, ul {
+      margin: 0;
+      padding: 0;
+    }
+    .tree ul {
+      margin-left: var(--horz-margin);
+    }
+    .tree li {
+      list-style-type: none;
+      margin-top: var(--vert-margin);
+      margin-bottom: var(--vert-margin);
+      position: relative;
+    }
 
-        /* up connector */
-        .tree li::before {
-            content: "";
-            position: absolute;
-            top: calc(0px - var(--vert-margin));
-            left: calc(var(--horz-shift) - var(--horz-margin));
-            width: calc(var(--horz-margin) - var(--horz-shift));
-            height: calc(var(--vert-shift) + var(--vert-margin));
-            border-left: 1px solid #ccc;
-            border-bottom: 1px solid #ccc;
-            border-radius: 0;
-        }
+    /* up connector */
+    .tree li::before {
+        content: "";
+        position: absolute;
+        top: calc(0px - var(--vert-margin));
+        left: calc(var(--horz-shift) - var(--horz-margin));
+        width: calc(var(--horz-margin) - var(--horz-shift));
+        height: calc(var(--vert-shift) + var(--vert-margin));
+        border-left: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        border-radius: 0;
+    }
 
-        /* down connector */
-        .tree li::after {
-            position: absolute;
-            content: "";
-            top: var(--vert-shift);
-            left: calc(var(--horz-shift) - var(--horz-margin));
-            width: calc(var(--horz-margin) - var(--horz-shift));
-            height: calc(100% - var(--vert-shift));
-            border-left: 1px solid #ccc;
-            border-top: 1px solid #ccc;
-            border-radius: 0;
-        }
+    /* down connector */
+    .tree li::after {
+        position: absolute;
+        content: "";
+        top: var(--vert-shift);
+        left: calc(var(--horz-shift) - var(--horz-margin));
+        width: calc(var(--horz-margin) - var(--horz-shift));
+        height: calc(100% - var(--vert-shift));
+        border-left: 1px solid #ccc;
+        border-top: 1px solid #ccc;
+        border-radius: 0;
+    }
 
-        /* do not draw: up connector of first root item */
-        ul.tree>li:first-child::before { display:none; }
+    /* do not draw: up connector of first root item */
+    ul.tree>li:first-child::before { display:none; }
 
-        /* do not draw: down connector of last item */
-        .tree li:last-child::after  { display:none; }
+    /* do not draw: down connector of last item */
+    .tree li:last-child::after  { display:none; }
 
-        /* draw rounded: down connector of first root item */
-        ul.tree>li:first-child::after { border-radius: 5px 0 0 0; }
+    /* draw rounded: down connector of first root item */
+    ul.tree>li:first-child::after { border-radius: 5px 0 0 0; }
 
-        /* draw rounded: up connector of last item */
-        .tree li:last-child:before { border-radius: 0 0 0 5px; }
-      </style>
-      <div id="tree"></div>
+    /* draw rounded: up connector of last item */
+    .tree li:last-child:before { border-radius: 0 0 0 5px; }
     `;
   }
 
-  ready() {
-    super.ready();
-    this.$.tree.addEventListener('click', this.findElement.bind(this));
+  constructor() {
+    super();
+
+    this._treeDiv = document.createElement('div');
+    this._shadow.appendChild(this._treeDiv);
+    this._treeDiv.addEventListener('click', this.findElement.bind(this));
   }
 
   recomputeTree(parent, active) {
-    this.$.tree.innerHTML = '';
+    this._treeDiv.innerHTML = '';
     let ul = document.createElement('ul');
     ul.classList.add('tree');
-    this.$.tree.appendChild(ul);
+    this._treeDiv.appendChild(ul);
 
     // Since we can't add a pojo to each button, generate a new index for
     // each button in the this.items array of useful data.
@@ -149,7 +147,7 @@ export class TreeView extends PolymerElement {
 
     let isViewContainer = item.id === 'viewContainer';
     let data = {
-      tag: isViewContainer ? 'main-app': item.tagName.toLowerCase(),
+      tag: isViewContainer ? 'main-app' : item.tagName.toLowerCase(),
       id: isViewContainer ? '' : (item.id ? '#' + item.id : ''),
       text: isViewContainer ? '' : '"' + item.textContent + '"',
       ref: item,
@@ -175,9 +173,9 @@ export class TreeView extends PolymerElement {
         continue;
       }
 
-      if (ul == null) { 
+      if (ul == null) {
         ul = document.createElement('ul');
-        li.appendChild(ul);         
+        li.appendChild(ul);
       }
       nodes = nodes.concat(this.getChildren(child, ul));
     }
@@ -210,7 +208,7 @@ export class TreeView extends PolymerElement {
 
   highlight(element) {
     // Find it in the tree.
-    let buttons = this.root.querySelectorAll('button');
+    let buttons = this._shadow.querySelectorAll('button');
     if (buttons.length !== this.items.length) {
       return;
     }
@@ -223,3 +221,5 @@ export class TreeView extends PolymerElement {
     }
   }
 }
+
+customElements.define('tree-view', TreeView);

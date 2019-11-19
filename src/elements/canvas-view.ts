@@ -183,6 +183,7 @@ export class CanvasView extends BaseCustomWebComponent {
 
   private _onDragOver(event: DragEvent) {
     event.preventDefault();
+    //console.log(event);
   }
 
   private _onDrop(event: DragEvent) {
@@ -357,12 +358,12 @@ export class CanvasView extends BaseCustomWebComponent {
       this._initialPoint = currentPoint;
       if (event.type == EventNames.PointerDown) {
         if (currentElement === this || currentElement === this._canvas || currentElement == null) {
+          this.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
           return;
         } else {
           let rectCurrentElement = currentElement.getBoundingClientRect();
           this._actionType = this._shouldResize(currentPoint, { x: rectCurrentElement.right - this._ownBoundingRect.left, y: rectCurrentElement.bottom - this._ownBoundingRect.top }) ? PointerActionType.Resize : PointerActionType.DragOrSelect;
-          //el.classList.add('resizing');
         }
       }
     }

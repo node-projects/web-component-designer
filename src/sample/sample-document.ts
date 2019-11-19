@@ -40,18 +40,6 @@ export class SampleDocument extends BaseCustomWebComponent {
   public get instanceServiceContainer() : InstanceServiceContainer {
     return this._canvasView.instanceServiceContainer;
   }
-
-  /*private _viewDemo() {
-      //@ts-ignore
-      if (!window.codeView.get)
-          return;
-      //@ts-ignore
-      (this.$.demoView as DemoView).display(window.codeView.get());
-  }
-
-  private _viewCode() {
-      this.dispatchEvent(new CustomEvent('update-code', { bubbles: true, composed: true, detail: { target: this.$.viewContainer, node: this } }));
-  }*/
 }
 
 customElements.define("sample-document", SampleDocument);
