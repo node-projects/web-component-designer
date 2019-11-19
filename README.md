@@ -2,19 +2,11 @@
 
 A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
-Based on https://github.com/PolymerLabs/wizzywid
+Based on PolymerLabs Wizzywid
 
 [![Build Status](https://travis-ci.com/jzeyer/wizzywid.svg?branch=master)](https://travis-ci.com/jzeyer/wizzywid)
 
-This is a WIP for getting a full Designer Framework wich could easily be included in your own Software.
-
-It does not have all of the features that a full UI [designer app](https://github.com/polymer/designer)
-should -- making that kind of app is really hard, and requires a lot of work and maintenance.
-
-👉 I've built this with the idea that if you want to customize it (i.e. add
-  your own custom elements to it, or very specific features), you should be
-  able to clone it, make changes, and deploy it somewhere. Bug fixes are
-  always appreciated ❤️.
+This is a Designer Framework wich could easily be included in your own Software..
 
 <img width="985" alt="screenshot of wizzywid" src="https://user-images.githubusercontent.com/1369170/28957547-22175752-78a7-11e7-8770-49df35698e55.png">
 
@@ -41,6 +33,11 @@ look at: https://node-projects.github.io/web-component-designer/build/
   * Install dependencies
 ```
   $ npm install
+```
+
+  * Compile Typescript after doing changes
+```
+  $ npm run build
 ```
 
   * Run the app in a local server

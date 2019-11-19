@@ -21,7 +21,14 @@ export class DesignItem implements IDesignItem {
         let designItem: IDesignItem = element[DesignItem._designItemSymbol];
         if (!designItem) {
             designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
+            element[DesignItem._designItemSymbol] = designItem;
         }
         return designItem;
+    }
+
+    static RemoveDesignItemFromElement(element: HTMLElement) {
+        if (!element)
+            return null;
+        delete element[DesignItem._designItemSymbol];
     }
 }

@@ -3,26 +3,24 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { customElement, property } from '@polymer/decorators';
 import { TreeView } from '../elements/tree-view.js';
 import { CanvasView } from '../elements/canvas-view.js';
-import { CodeView } from '../elements/code-view.js';
+//import { CodeView } from '../elements/code-view.js';
 import { DemoView } from '../elements/demo-view.js';
 import '@polymer/app-layout/app-header/app-header.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
-import './app-icons.js';
+//import './app-icons.js';
 import './app-controls.js';
 import '../elements/designer-tabs.js';
 import '../elements/designer-tab.js';
 import '../elements/palette-view.js';
 import '../elements/services/undoService/UndoService.js';
 import '../elements/demo-view.js';
-import '../elements/help-view.js';
+//import '../elements/help-view.js';
 import '../elements/tree-view.js';
 import '../elements/attribute-editor.js';
 import '../elements/canvas-view.js';
-import './canvas-controls.js';
-import './sample-document.js'
 import { DockSpawnTsWebcomponent } from 'dock-spawn-ts/lib/js/webcomponent/DockSpawnTsWebcomponent';
 import { JsonElementsService } from '../elements/services/elementsService/JsonElementsService';
 
@@ -264,7 +262,7 @@ export class AppShell extends PolymerElement {
   /*
    * Adds a new element to the view.
    */
-  createElement(event) {
+  /*createElement(event) {
     //let url = `@polymer/${packageName}/${kind}.js`;
     let tag = event.detail.type.toLowerCase();
 
@@ -282,7 +280,7 @@ export class AppShell extends PolymerElement {
     requestAnimationFrame(() => {
       el.click();
     });
-  }
+  }*/
 
   /*
    * Adds a new sample code to the view.

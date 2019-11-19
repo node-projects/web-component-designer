@@ -352,8 +352,7 @@ export class CanvasView extends BaseCustomWebComponent {
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
     this._ownBoundingRect = this.getBoundingClientRect();
     const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom - this._ownBoundingRect.top };
-    let currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-
+   
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       if (event.type == EventNames.PointerDown) {
@@ -368,6 +367,8 @@ export class CanvasView extends BaseCustomWebComponent {
       }
     }
 
+    let currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
+
     if (this._actionType == PointerActionType.DrawSelection) {
       this._pointerActionTypeDrawSelection(event, currentElement, currentPoint);
     } else if (this._actionType == PointerActionType.Resize) {
@@ -379,8 +380,6 @@ export class CanvasView extends BaseCustomWebComponent {
       this._actionType = null;
     }
   }
-
-
 
   private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
     let x1 = Math.min(this._initialPoint.x, currentPoint.x);
@@ -485,7 +484,6 @@ export class CanvasView extends BaseCustomWebComponent {
 
           // Only some native elements and things with slots can be drop targets.
           let slots = possibleTarget ? possibleTarget.querySelectorAll('slot') : [];
-
           // input is the only native in this app that doesn't have a slot
           let canDrop = (possibleTarget.localName.indexOf('-') === -1 && possibleTarget.localName !== 'input') || possibleTarget.localName === 'dom-repeat' || slots.length !== 0;
 
