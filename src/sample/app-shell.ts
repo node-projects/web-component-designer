@@ -12,8 +12,6 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/paper-toggle-button/paper-toggle-button.js';
 //import './app-icons.js';
 import './app-controls.js';
-import '../elements/designer-tabs.js';
-import '../elements/designer-tab.js';
 import '../elements/palette-view.js';
 import '../elements/services/undoService/UndoService.js';
 import '../elements/demo-view.js';

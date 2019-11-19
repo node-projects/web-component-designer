@@ -1,27 +1,27 @@
 {
-    "subelements": {
-        "iron-icons": [
-            "communication-icons",
-            "device-icons",
-            "editor-icons",
-            "hardware-icons",
-            "image-icons",
-            "maps-icons",
-            "notification-icons",
-            "places-icons",
-            "social-icons",
-            "update-icons"
-        ],
-        "paper-input": [
-            "paper-textarea"
-        ],
-        "paper-tabs": [
-            "paper-tab"
-        ],
-        "app-layout": [
-            "app-header",
-            "app-toolbar",
-            "app-drawer"
-        ]
-    }
+  "subelements": {
+    "iron-icons": [
+      "communication-icons",
+      "device-icons",
+      "editor-icons",
+      "hardware-icons",
+      "image-icons",
+      "maps-icons",
+      "notification-icons",
+      "places-icons",
+      "social-icons",
+      "update-icons"
+    ],
+    "paper-input": [
+      "paper-textarea"
+    ],
+    "paper-tabs": [
+      "paper-tab"
+    ],
+    "app-layout": [
+      "app-header",
+      "app-toolbar",
+      "app-drawer"
+    ]
+  }
 }

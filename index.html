@@ -14,20 +14,8 @@
     <script src="./node_modules/ace-builds/src-min/ace.js"></script>
 
     <script type="module">
-      import './dist/sample/app-shell.js';
-      import './dist/elements/code-view.js';
-      
+      import './dist/sample/app-shell.js';            
       import '@polymer/font-roboto/roboto.js';
-
-      //import '/samples/app-header-sample.js';
-      //import '/samples/app-layout-sample.js';
-      //import '/samples/flex-horizontal-layout.js';
-      //import '/samples/flex-vertical-layout.js';
-      //import '/samples/iron-form-sample.js';
-      //import '/samples/iron-pages-sample.js';
-      //import '/samples/paper-card-actions-sample.js';
-      //import '/samples/paper-card-image-sample.js';
-      //import '/samples/paper-dropdown-menu-sample.js';
     </script>
 
     <style>
@@ -102,7 +90,6 @@
   <body style="height: 100%;">
     <app-shell id="shell" style="height: 100%;">
       <code-view id="codeView" slot="code"></code-view>
-    </app-shell>
-    <script src="./dist/app.js"></script>
+    </app-shell>   
   </body>
 </html>
