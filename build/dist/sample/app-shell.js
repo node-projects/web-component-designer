@@ -136,9 +136,9 @@ let AppShell = class AppShell extends PolymerElement {
 
   ready() {
     super.ready();
-    serviceContainer.register('elementsService', new JsonElementsService('native', '/dist/sample/elements-native.json'));
-    serviceContainer.register('elementsService', new JsonElementsService('samples', '/dist/sample/elements-samples.json'));
-    serviceContainer.register('elementsService', new JsonElementsService('custom', '/dist/sample/elements.json'));
+    serviceContainer.register('elementsService', new JsonElementsService('native', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements-native.json'));
+    serviceContainer.register('elementsService', new JsonElementsService('samples', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements-samples.json'));
+    serviceContainer.register('elementsService', new JsonElementsService('custom', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements.json'));
     this.$.paletteView.loadControls(serviceContainer.elementsServices);
     this.$.attributesEditor.serviceContainer = serviceContainer;
     this.newDocument();
