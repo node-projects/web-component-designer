@@ -4,15 +4,17 @@ A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
 Based on PolymerLabs Wizzywid
 
+[![Build Status](https://github.com/node-projects/web-component-designer/workflows/Node%20CI/badge.svg?branch=master)](https://github.com/node-projects/web-component-designer/actions?query=workflow%3A%22Node+CI%22+branch%3Amaster)
+
 This is a Designer Framework wich could easily be included in your own Software..
 
 <img width="985" alt="screenshot of wizzywid" src="https://user-images.githubusercontent.com/1369170/28957547-22175752-78a7-11e7-8770-49df35698e55.png">
 
-## demo
+## Demo
 
 look at: https://node-projects.github.io/web-component-designer/build/
 
-## what is needed
+## What is needed
 
 - constructable-stylesheets-polyfill on browser not yet supporting these
 
