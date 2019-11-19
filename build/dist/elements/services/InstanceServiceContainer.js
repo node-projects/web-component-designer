@@ -8,4 +8,8 @@ export class InstanceServiceContainer extends BaseServiceContainer {
     return this.getLastService('selectionService');
   }
 
+  get contentService() {
+    return this.getLastService('contentService');
+  }
+
 }

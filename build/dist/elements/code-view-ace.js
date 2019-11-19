@@ -1,18 +1,19 @@
-export class CodeView extends HTMLElement {
+import { BaseCustomWebComponent } from "./controls/BaseCustomWebComponent.js";
+import { LazyLoadJavascript } from "./controls/LazyLoadJavascript.js";
+export class CodeViewAce extends BaseCustomWebComponent {
   constructor() {
     super();
     this.style.display = 'block';
     this._editor = document.createElement("div");
     this._editor.style.height = '100%';
     this._editor.style.width = '100%';
-    const shadow = this.attachShadow({
-      mode: 'open'
-    });
-    shadow.appendChild(this._editor); //this.appendChild(this._editor);
+
+    this._shadow.appendChild(this._editor);
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     if (!this._initialized) {
+      await LazyLoadJavascript.Load('./node_modules/ace-builds/src-min/ace.js');
       this._propertyDefaultsForTag = {};
       this._attributeDefaultsForTag = {};
       this._aceEditor = ace.edit(this._editor);
