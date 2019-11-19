@@ -10,7 +10,7 @@ import { PolymerElement } from "../../node_modules/@polymer/polymer/polymer-elem
 import { html } from "../../node_modules/@polymer/polymer/lib/utils/html-tag.js";
 import { customElement, property } from "../../node_modules/@polymer/decorators/lib/decorators.js";
 import "../../node_modules/@polymer/iron-icon/iron-icon.js";
-import './app-icons.js';
+import '../sample/app-icons.js';
 import './designer-tab.js';
 import { ActionHistoryType } from "../enums/ActionHistoryType.js";
 let CanvasControls = class CanvasControls extends PolymerElement {
@@ -160,7 +160,7 @@ let CanvasControls = class CanvasControls extends PolymerElement {
 
     let clone = el.cloneNode(true);
     el.parentNode.appendChild(clone);
-    this.dispatchEvent(new CustomEvent('selected-elements-changed', {
+    this.dispatchEvent(new CustomEvent('selected-element-changed', {
       bubbles: true,
       composed: true,
       detail: {
@@ -369,7 +369,7 @@ let CanvasControls = class CanvasControls extends PolymerElement {
   }
 
   _selectedElementChanged() {
-    this.dispatchEvent(new CustomEvent('selected-elements-changed', {
+    this.dispatchEvent(new CustomEvent('selected-element-changed', {
       bubbles: true,
       composed: true,
       detail: {

@@ -55,6 +55,10 @@ let AppControls = class AppControls extends PolymerElement {
     this.$.redoBtn.disabled = redos === 0;
   }
 
+  new() {
+    this.appShell.new();
+  }
+
   undo() {
     this.actionHistory.undo();
   }
@@ -68,6 +72,10 @@ let AppControls = class AppControls extends PolymerElement {
 __decorate([property({
   type: Array
 })], AppControls.prototype, "actionHistory", void 0);
+
+__decorate([property({
+  type: Object
+})], AppControls.prototype, "appShell", void 0);
 
 AppControls = __decorate([customElement('app-controls')], AppControls);
 export { AppControls };
