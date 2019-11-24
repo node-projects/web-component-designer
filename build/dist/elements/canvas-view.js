@@ -7,6 +7,7 @@ import { SelectionService } from "./services/selectionService/SelectionService.j
 import { DesignItem } from "./item/DesignItem.js";
 import { BaseCustomWebComponent, css, html } from "./controls/BaseCustomWebComponent.js";
 import { dragDropFormatName } from "../Constants.js";
+import { ContentService } from "./services/contentService/ContentService.js";
 export class CanvasView extends BaseCustomWebComponent {
   constructor() {
     super(); // Settings
@@ -15,15 +16,16 @@ export class CanvasView extends BaseCustomWebComponent {
     this._alignOnGrid = true;
     this._resizeOffset = 10;
     this._clickThroughElements = [];
-    this.instanceServiceContainer = new InstanceServiceContainer();
-    this.instanceServiceContainer.register("undoService", new UndoService());
-    this.instanceServiceContainer.register("selectionService", new SelectionService());
     this._canvas = this._getDomElement('canvas');
     this._selector = this._getDomElement('selector');
     /*let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     let zoomIncrease = this._getDomElement<HTMLImageElement>('zoomIncrease');
     let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');*/
 
+    this.instanceServiceContainer = new InstanceServiceContainer();
+    this.instanceServiceContainer.register("undoService", new UndoService());
+    this.instanceServiceContainer.register("selectionService", new SelectionService());
+    this.instanceServiceContainer.register("contentService", new ContentService(this._canvas));
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged);
@@ -792,4 +794,4 @@ export class CanvasView extends BaseCustomWebComponent {
   }
 
 }
-customElements.define('canvas-view', CanvasView);
+customElements.define('node-projects-canvas-view', CanvasView);

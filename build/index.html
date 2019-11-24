@@ -8,20 +8,14 @@
 
     <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
     <script src="./node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js"></script>
-    <script src="./node_modules/web-animations-js/web-animations-next-lite.min.js"></script>
-    <script src="./node_modules/ace-builds/src-min/ace.js"></script>
 
-    <script type="module">import "./node_modules/@polymer/iron-pages/iron-pages.js";
-import "./node_modules/@polymer/iron-icon/iron-icon.js";
-import "./node_modules/@polymer/paper-toggle-button/paper-toggle-button.js";
-import './dist/elements/palette-view.js';
+    <script type="module">import './dist/elements/palette-view.js';
 import './dist/elements/services/undoService/UndoService.js';
 import './dist/elements/demo-view.js';
 import './dist/elements/tree-view.js';
 import './dist/elements/attribute-editor.js';
 import './dist/elements/canvas-view.js';
-import './dist/sample/app-shell.js';
-import "./node_modules/@polymer/font-roboto/roboto.js";</script>
+import './dist/sample/app-shell.js';</script>
 
     <style>
       body {
@@ -93,9 +87,8 @@ import "./node_modules/@polymer/font-roboto/roboto.js";</script>
     </style>
   </head>
   <body style="height: 100%;">
-    <app-shell id="shell" style="height: 100%;">
-      <code-view id="codeView" slot="code"></code-view>
-    </app-shell>   
+    <node-projects-app-shell id="shell" style="height: 100%;">
+    </node-projects-app-shell>   
   
 
 </body></html>

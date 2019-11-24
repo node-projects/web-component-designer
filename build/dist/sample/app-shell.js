@@ -9,12 +9,11 @@ export class AppShell extends BaseCustomWebComponent {
     super();
     this.mainPage = 'designer';
     this._documentNumber = 0;
-    this._dock = this._shadow.getElementById('dock');
-    this._paletteView = this._shadow.getElementById('paletteView');
-    this._treeView = this._shadow.getElementById('tree');
-    this._attributeEditor = this._shadow.getElementById('attributeEditor');
-
-    let newButton = this._shadow.getElementById('newButton');
+    this._dock = this.shadowRoot.getElementById('dock');
+    this._paletteView = this.shadowRoot.getElementById('paletteView');
+    this._treeView = this.shadowRoot.getElementById('treeView');
+    this._attributeEditor = this.shadowRoot.getElementById('attributeEditor');
+    let newButton = this.shadowRoot.getElementById('newButton');
 
     newButton.onclick = () => this.newDocument(); //@ts-ignore
 
@@ -26,10 +25,13 @@ export class AppShell extends BaseCustomWebComponent {
         if (panel) {
           let element = panel.elementContent.assignedElements()[0];
 
-          if (element.localName == "sample-document") {
+          if (element.localName == "node-projects-sample-document") {
             let sampleDocument = element;
+            sampleDocument.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this._selectionChanged(e));
             let selection = sampleDocument.instanceServiceContainer.selectionService.selectedElements;
             this._attributeEditor.selectedElements = selection;
+
+            this._treeView.createTree(sampleDocument.instanceServiceContainer.contentService.rootElement, null);
           }
         }
       }
@@ -114,20 +116,26 @@ export class AppShell extends BaseCustomWebComponent {
         <dock-spawn-ts id="dock" style="width: 100%; height: 100%; position: relative;">
           
           <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2" style="position: absolute;">
-            <tree-view name="tree" id="treeView"></tree-view>
+            <node-projects-tree-view name="tree" id="treeView"></node-projects-tree-view>
           </div>
 
           <div id="attributeDock" title="Properties" dock-spawn-dock-type="right" dock-spawn-dock-ratio="0.2">
-            <attribute-editor id="attributeEditor"></attribute-editor>
+            <node-projects-attribute-editor id="attributeEditor"></node-projects-attribute-editor>
             <!--<canvas-controls id="canvasControls"></canvas-controls>
             <element-view id="elementView"></element-view>-->
           </div>
           <div title="Elements" dock-spawn-dock-type="down" dock-spawn-dock-to="attributeDock" dock-spawn-dock-ratio="0.4">
-            <palette-view id="paletteView"></palette-view>
+            <node-projects-palette-view id="paletteView"></node-projects-palette-view>
           </div>
         </dock-spawn-ts>
       </div>
     `;
+  }
+
+  _selectionChanged(e) {
+    this._attributeEditor.selectedElements = e.selectedElements;
+
+    this._treeView.selectionChanged(e);
   }
 
   _setupServiceContainer() {
@@ -149,4 +157,4 @@ export class AppShell extends BaseCustomWebComponent {
   }
 
 }
-window.customElements.define('app-shell', AppShell);
+window.customElements.define('node-projects-app-shell', AppShell);

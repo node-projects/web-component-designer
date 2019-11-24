@@ -3,10 +3,9 @@ export class TreeView extends BaseCustomWebComponent {
   constructor() {
     super();
     this._treeDiv = document.createElement('div');
+    this.shadowRoot.appendChild(this._treeDiv);
 
-    this._shadow.appendChild(this._treeDiv);
-
-    this._treeDiv.addEventListener('click', this.findElement.bind(this));
+    this._treeDiv.addEventListener('click', this._findElement.bind(this));
   }
 
   static get style() {
@@ -108,7 +107,13 @@ export class TreeView extends BaseCustomWebComponent {
     `;
   }
 
-  recomputeTree(parent, active) {
+  createTree(element, activeElement) {
+    return this._recomputeTree(element, activeElement);
+  }
+
+  selectionChanged(event) {}
+
+  _recomputeTree(parent, activeElement) {
     this._treeDiv.innerHTML = '';
     let ul = document.createElement('ul');
     ul.classList.add('tree');
@@ -118,8 +123,10 @@ export class TreeView extends BaseCustomWebComponent {
 
 
     this._index = 0;
-    this.items = this.getChildren(parent, ul);
-    this.highlight(active);
+    this.items = this._getChildren(parent, ul);
+
+    this._highlight(activeElement);
+
     return this.items;
   }
 
@@ -137,7 +144,7 @@ export class TreeView extends BaseCustomWebComponent {
     return aButton;
   }
 
-  getChildren(item, list) {
+  _getChildren(item, list) {
     // Add item and its children into nested ul list
     let isViewContainer = item.id === 'viewContainer';
     let data = {
@@ -171,13 +178,13 @@ export class TreeView extends BaseCustomWebComponent {
         li.appendChild(ul);
       }
 
-      nodes = nodes.concat(this.getChildren(child, ul));
+      nodes = nodes.concat(this._getChildren(child, ul));
     }
 
     return nodes;
   }
 
-  findElement(event) {
+  _findElement(event) {
     // If the target is a <span>, you clicked on the span inside the button
     // so you need to use currentTarget.
     let item = event.target;
@@ -186,14 +193,15 @@ export class TreeView extends BaseCustomWebComponent {
       item = item.parentElement;
     }
 
-    this.selectTreeElement(item); // Find the actual element it points to.
+    this._selectTreeElement(item); // Find the actual element it points to.
+
 
     let index = item.dataset.index;
     let el = this.items[index].ref;
     el.click();
   }
 
-  selectTreeElement(item) {
+  _selectTreeElement(item) {
     if (this._previouslySelected) {
       this._previouslySelected.classList.remove('selected');
     }
@@ -202,9 +210,9 @@ export class TreeView extends BaseCustomWebComponent {
     item.classList.add('selected');
   }
 
-  highlight(element) {
+  _highlight(element) {
     // Find it in the tree.
-    let buttons = this._shadow.querySelectorAll('button');
+    let buttons = this.shadowRoot.querySelectorAll('button');
 
     if (buttons.length !== this.items.length) {
       return;
@@ -212,11 +220,12 @@ export class TreeView extends BaseCustomWebComponent {
 
     for (let i = 0; i < this.items.length; i++) {
       if (this.items[i].ref === element) {
-        this.selectTreeElement(buttons[i]);
+        this._selectTreeElement(buttons[i]);
+
         return;
       }
     }
   }
 
 }
-customElements.define('tree-view', TreeView);
+customElements.define('node-projects-tree-view', TreeView);

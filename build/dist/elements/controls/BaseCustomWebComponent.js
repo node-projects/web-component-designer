@@ -12,7 +12,7 @@ export const css = function html(strings, ...values) {
 export class BaseCustomWebComponent extends HTMLElement {
   constructor() {
     super();
-    this._shadow = this.attachShadow({
+    this.attachShadow({
       mode: 'open'
     }); //@ts-ignore
 
@@ -24,7 +24,7 @@ export class BaseCustomWebComponent extends HTMLElement {
       } //@ts-ignore
 
 
-      this._shadow.adoptedStyleSheets = [this.constructor._style];
+      this.shadowRoot.adoptedStyleSheets = [this.constructor._style];
     } //@ts-ignore
 
 
@@ -36,12 +36,12 @@ export class BaseCustomWebComponent extends HTMLElement {
       } //@ts-ignore
 
 
-      this._shadow.appendChild(this.constructor._template.content.cloneNode(true));
+      this.shadowRoot.appendChild(this.constructor._template.content.cloneNode(true));
     }
   }
 
   _getDomElement(id) {
-    return this._shadow.getElementById(id);
+    return this.shadowRoot.getElementById(id);
   }
 
 }

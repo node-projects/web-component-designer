@@ -3,7 +3,7 @@ export class SampleDocument extends BaseCustomWebComponent {
   constructor(serviceContainer) {
     super();
     this.mainPage = 'designer';
-    this._canvasView = this._shadow.getElementById('canvasView');
+    this._canvasView = this.shadowRoot.getElementById('canvasView');
     this._canvasView.serviceContainer = serviceContainer;
   }
 
@@ -22,11 +22,11 @@ export class SampleDocument extends BaseCustomWebComponent {
   static get template() {
     return html`
         <div>
-          <designer-tab-control selected-index="0">              
-            <canvas-view title="Designer" name="designer" id="canvasView" style="height:100%"></canvas-view>
+          <node-projects-designer-tab-control selected-index="0">              
+            <node-projects-canvas-view title="Designer" name="designer" id="canvasView" style="height:100%"></node-projects-canvas-view>
             <div title="Preview" name="code" style="width:100%;height:100%;"><slot name="code"></slot></div>
-            <demo-view title="Code" id="demoView" name="preview"></demo-view>
-          </designer-tab-control>              
+            <node-projects-demo-view title="Code" id="demoView" name="preview"></node-projects-demo-view>
+          </node-projects-designer-tab-control>              
         </div>`;
   }
 
@@ -35,4 +35,4 @@ export class SampleDocument extends BaseCustomWebComponent {
   }
 
 }
-customElements.define("sample-document", SampleDocument);
+customElements.define("node-projects-sample-document", SampleDocument);

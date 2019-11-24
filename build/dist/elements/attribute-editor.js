@@ -1,14 +1,13 @@
 import serviceContainer from "./services/DefaultServiceBootstrap.js";
 import { AttributeEditorAttributeList } from "./attribute-editor-attribute-list.js";
-import { DesignerTabControl } from "./controls/designer-tab-control.js";
+import { DesignerTabControl } from "./controls/DesignerTabControl.js";
 import { CssPropertiesService } from "./services/propertiesService/CssPropertiesService.js";
 import { BaseCustomWebComponent, css } from "./controls/BaseCustomWebComponent.js";
 export class AttributeEditor extends BaseCustomWebComponent {
   constructor() {
     super();
     this._designerTabControl = new DesignerTabControl();
-
-    this._shadow.appendChild(this._designerTabControl);
+    this.shadowRoot.appendChild(this._designerTabControl);
   }
 
   static get style() {
@@ -72,4 +71,4 @@ export class AttributeEditor extends BaseCustomWebComponent {
   }
 
 }
-customElements.define('attribute-editor', AttributeEditor);
+customElements.define('node-projects-attribute-editor', AttributeEditor);

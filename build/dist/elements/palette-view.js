@@ -1,6 +1,6 @@
-import './controls/designer-tab-control.js';
+import './controls/DesignerTabControl.js';
 import { PaletteElements } from "./palette-elements.js";
-import { DesignerTabControl } from "./controls/designer-tab-control.js";
+import { DesignerTabControl } from "./controls/DesignerTabControl.js";
 import { BaseCustomWebComponent, css } from "./controls/BaseCustomWebComponent.js";
 export class PaletteView extends BaseCustomWebComponent {
   constructor() {
@@ -8,8 +8,7 @@ export class PaletteView extends BaseCustomWebComponent {
     this.selected = 'native';
     this._designerTabControl = new DesignerTabControl();
     this._designerTabControl.selectedIndex = 0;
-
-    this._shadow.appendChild(this._designerTabControl);
+    this.shadowRoot.appendChild(this._designerTabControl);
   }
 
   static get style() {
@@ -35,4 +34,4 @@ export class PaletteView extends BaseCustomWebComponent {
   }
 
 }
-customElements.define('palette-view', PaletteView);
+customElements.define('node-projects-palette-view', PaletteView);

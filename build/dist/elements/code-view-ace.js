@@ -7,8 +7,7 @@ export class CodeViewAce extends BaseCustomWebComponent {
     this._editor = document.createElement("div");
     this._editor.style.height = '100%';
     this._editor.style.width = '100%';
-
-    this._shadow.appendChild(this._editor);
+    this.shadowRoot.appendChild(this._editor);
   }
 
   async connectedCallback() {
