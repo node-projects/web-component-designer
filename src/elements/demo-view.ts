@@ -63,4 +63,4 @@ export class DemoView extends HTMLElement {
   }
 }
 
-customElements.define('demo-view', DemoView);
+customElements.define('node-projects-demo-view', DemoView);

@@ -66,7 +66,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
 
         let outerDiv = document.createElement("div")
         outerDiv.className = 'outer';
-        this._shadow.appendChild(outerDiv);
+        this.shadowRoot.appendChild(outerDiv);
         this._headerDiv = document.createElement("div")
         this._headerDiv.className = 'header';
         outerDiv.appendChild(this._headerDiv);
@@ -128,4 +128,4 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     }
 }
 
-customElements.define('designer-tab-control', DesignerTabControl);
+customElements.define('node-projects-designer-tab-control', DesignerTabControl);

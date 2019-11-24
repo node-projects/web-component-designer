@@ -758,4 +758,4 @@ export class CanvasView extends BaseCustomWebComponent {
   }
 }
 
-customElements.define('canvas-view', CanvasView);
+customElements.define('node-projects-canvas-view', CanvasView);

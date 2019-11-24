@@ -70,7 +70,7 @@ export class AttributeEditorAttributeList extends BaseCustomWebComponent {
    
     this._div = document.createElement("div");
     this._div.className = "content-wrapper";
-    this._shadow.appendChild(this._div);
+    this.shadowRoot.appendChild(this._div);
   }
 
   public createElements(properties: IProperty[]) {
@@ -94,4 +94,4 @@ export class AttributeEditorAttributeList extends BaseCustomWebComponent {
   }
 }
 
-customElements.define('attribute-editor-attribute-list', AttributeEditorAttributeList);
+customElements.define('node-projects-attribute-editor-attribute-list', AttributeEditorAttributeList);

@@ -13,8 +13,6 @@ export const css = function html(strings: TemplateStringsArray, ...values: any[]
 
 
 export abstract class BaseCustomWebComponent extends HTMLElement {
-    protected _shadow: ShadowRoot;
-
     static readonly style: CSSStyleSheet;
     //@ts-ignore
     private static _style: CSSStyleSheet;
@@ -23,12 +21,12 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
     private static  _template: HTMLTemplateElement;
 
     protected _getDomElement<T extends HTMLElement>(id: string): T {
-        return <T><any>this._shadow.getElementById(id);
+        return <T><any>this.shadowRoot.getElementById(id);
     }
     constructor() {
         super();
 
-        this._shadow = this.attachShadow({ mode: 'open' });
+        this.attachShadow({ mode: 'open' });
         //@ts-ignore
         if (this.constructor.style) {
             //@ts-ignore
@@ -37,7 +35,7 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
                 this.constructor._style = this.constructor.style;
             }
             //@ts-ignore
-            this._shadow.adoptedStyleSheets = [this.constructor._style]
+            this.shadowRoot.adoptedStyleSheets = [this.constructor._style]
         }
 
         //@ts-ignore
@@ -48,7 +46,7 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
                 this.constructor._template = this.constructor.template;
             }
             //@ts-ignore
-            this._shadow.appendChild(this.constructor._template.content.cloneNode(true));
+            this.shadowRoot.appendChild(this.constructor._template.content.cloneNode(true));
         }
     }
 }

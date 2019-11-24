@@ -24,7 +24,7 @@ export class PaletteView extends BaseCustomWebComponent {
     super();
     this._designerTabControl = new DesignerTabControl();
     this._designerTabControl.selectedIndex = 0;
-    this._shadow.appendChild(this._designerTabControl);
+    this.shadowRoot.appendChild(this._designerTabControl);
   }
 
   public async loadControls(elementsServices : IElementsService[]) {
@@ -38,4 +38,4 @@ export class PaletteView extends BaseCustomWebComponent {
   }
 }
 
-customElements.define('palette-view', PaletteView);
+customElements.define('node-projects-palette-view', PaletteView);

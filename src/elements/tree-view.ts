@@ -109,7 +109,7 @@ export class TreeView extends BaseCustomWebComponent {
     super();
 
     this._treeDiv = document.createElement('div');
-    this._shadow.appendChild(this._treeDiv);
+    this.shadowRoot.appendChild(this._treeDiv);
     this._treeDiv.addEventListener('click', this.findElement.bind(this));
   }
 
@@ -208,7 +208,7 @@ export class TreeView extends BaseCustomWebComponent {
 
   highlight(element) {
     // Find it in the tree.
-    let buttons = this._shadow.querySelectorAll('button');
+    let buttons = this.shadowRoot.querySelectorAll('button');
     if (buttons.length !== this.items.length) {
       return;
     }
@@ -222,4 +222,4 @@ export class TreeView extends BaseCustomWebComponent {
   }
 }
 
-customElements.define('tree-view', TreeView);
+customElements.define('node-projects-tree-view', TreeView);

@@ -34,7 +34,7 @@ export class AttributeEditor extends BaseCustomWebComponent {
   constructor() {
     super();
     this._designerTabControl = new DesignerTabControl();
-    this._shadow.appendChild(this._designerTabControl);
+    this.shadowRoot.appendChild(this._designerTabControl);
   }
 
   public set serviceContainer(value: ServiceContainer) {
@@ -90,4 +90,4 @@ export class AttributeEditor extends BaseCustomWebComponent {
   */
 }
 
-customElements.define('attribute-editor', AttributeEditor);
+customElements.define('node-projects-attribute-editor', AttributeEditor);
