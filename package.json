@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@types/ace": "^0.0.42",
+    "dock-spawn-ts": "^2.36.0",
     "typescript": "^3.7.2",
-    "typescript-lit-html-plugin": "^0.9.0",
-    "dock-spawn-ts": "^2.35.0"
+    "typescript-lit-html-plugin": "^0.9.0"
   }
 }

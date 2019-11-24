@@ -123,7 +123,6 @@ export class AppShell extends BaseCustomWebComponent {
     let newButton = this.shadowRoot.getElementById('newButton') as HTMLButtonElement;
     newButton.onclick = () => this.newDocument();
 
-    //@ts-ignore
     this._dockManager = this._dock.dockManager;
 
     this._dockManager.addLayoutListener({
