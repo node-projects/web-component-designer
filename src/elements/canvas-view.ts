@@ -14,6 +14,7 @@ import { DesignItem } from './item/DesignItem';
 import { IDesignItem } from './item/IDesignItem';
 import { BaseCustomWebComponent, css, html } from './controls/BaseCustomWebComponent';
 import { dragDropFormatName } from '../Constants';
+import { ContentService } from './services/contentService/ContentService';
 
 export class CanvasView extends BaseCustomWebComponent {
   // Public Properties
@@ -195,15 +196,16 @@ export class CanvasView extends BaseCustomWebComponent {
   constructor() {
     super();
 
-    this.instanceServiceContainer = new InstanceServiceContainer();
-    this.instanceServiceContainer.register("undoService", new UndoService);
-    this.instanceServiceContainer.register("selectionService", new SelectionService);
-
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
     this._selector = this._getDomElement<HTMLDivElement>('selector');
     /*let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     let zoomIncrease = this._getDomElement<HTMLImageElement>('zoomIncrease');
     let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');*/
+
+    this.instanceServiceContainer = new InstanceServiceContainer();
+    this.instanceServiceContainer.register("undoService", new UndoService);
+    this.instanceServiceContainer.register("selectionService", new SelectionService);
+    this.instanceServiceContainer.register("contentService", new ContentService(this._canvas));
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);

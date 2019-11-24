@@ -11,7 +11,6 @@ export const css = function html(strings: TemplateStringsArray, ...values: any[]
     return cssStyleSheet;
 };
 
-
 export abstract class BaseCustomWebComponent extends HTMLElement {
     static readonly style: CSSStyleSheet;
     //@ts-ignore

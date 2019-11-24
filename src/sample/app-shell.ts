@@ -8,6 +8,7 @@ import { BaseCustomWebComponent, html, css } from '../elements/controls/BaseCust
 
 import serviceContainer from '../elements/services/DefaultServiceBootstrap';
 import { TreeView } from '../elements/tree-view';
+import { ISelectionChangedEvent } from '../elements/services/selectionService/ISelectionChangedEvent';
 DockSpawnTsWebcomponent.cssRootDirectory = "./assets/css/";
 
 export class AppShell extends BaseCustomWebComponent {
@@ -116,7 +117,7 @@ export class AppShell extends BaseCustomWebComponent {
 
     this._dock = this.shadowRoot.getElementById('dock') as DockSpawnTsWebcomponent;
     this._paletteView = this.shadowRoot.getElementById('paletteView') as PaletteView;
-    this._treeView = this.shadowRoot.getElementById('tree') as TreeView;
+    this._treeView = this.shadowRoot.getElementById('treeView') as TreeView;
     this._attributeEditor = this.shadowRoot.getElementById('attributeEditor') as AttributeEditor;
 
     let newButton = this.shadowRoot.getElementById('newButton') as HTMLButtonElement;
@@ -129,10 +130,14 @@ export class AppShell extends BaseCustomWebComponent {
       onActivePanelChange: (manager, panel) => {
         if (panel) {
           let element = ((<HTMLSlotElement><any>panel.elementContent).assignedElements()[0]);
-          if (element.localName == "sample-document") {
+          if (element.localName == "node-projects-sample-document") {
             let sampleDocument = element as SampleDocument;
+
+            sampleDocument.instanceServiceContainer.selectionService.onSelectionChanged.on((e) => this._selectionChanged(e));
+            
             let selection = sampleDocument.instanceServiceContainer.selectionService.selectedElements;
             this._attributeEditor.selectedElements = selection;
+            this._treeView.createTree(sampleDocument.instanceServiceContainer.contentService.rootElement, null);
           }
         }
       }
@@ -143,11 +148,16 @@ export class AppShell extends BaseCustomWebComponent {
     this.newDocument();
   }
 
+  private _selectionChanged(e: ISelectionChangedEvent) {
+    this._attributeEditor.selectedElements = e.selectedElements;
+    this._treeView.selectionChanged(e);
+  }
+
   private _setupServiceContainer() {
     serviceContainer.register('elementsService', new JsonElementsService('native', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements-native.json'));
     serviceContainer.register('elementsService', new JsonElementsService('samples', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements-samples.json'));
     serviceContainer.register('elementsService', new JsonElementsService('custom', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements.json'));
-  
+
     this._paletteView.loadControls(serviceContainer.elementsServices);
     this._attributeEditor.serviceContainer = serviceContainer;
   }

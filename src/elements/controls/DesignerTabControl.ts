@@ -103,7 +103,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
             tabHeaderDiv.innerText = htmlItem.title;
             tabHeaderDiv.className = 'tab-header';
             let j = i;
-            tabHeaderDiv.onclick = () => {
+            tabHeaderDiv.onpointerdown = () => {
                 this.selectedIndex = j;
                 this._selectedIndexChanged()
             }

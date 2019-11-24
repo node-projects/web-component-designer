@@ -1,7 +1,7 @@
 import { ServiceContainer } from './services/ServiceContainer';
 import serviceContainer from './services/DefaultServiceBootstrap';
 import { AttributeEditorAttributeList } from './attribute-editor-attribute-list';
-import { DesignerTabControl } from './controls/designer-tab-control';
+import { DesignerTabControl } from './controls/DesignerTabControl';
 import { CssPropertiesService } from './services/propertiesService/CssPropertiesService';
 import { IDesignItem } from './item/IDesignItem';
 import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
