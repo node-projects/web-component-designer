@@ -130,7 +130,7 @@ export class AppShell extends BaseCustomWebComponent {
       onActivePanelChange: (manager, panel) => {
         if (panel) {
           let element = ((<HTMLSlotElement><any>panel.elementContent).assignedElements()[0]);
-          if (element.localName == "node-projects-sample-document") {
+          if (element && element.localName == "node-projects-sample-document") {
             let sampleDocument = element as SampleDocument;
 
             sampleDocument.instanceServiceContainer.selectionService.onSelectionChanged.on((e) => this._selectionChanged(e));

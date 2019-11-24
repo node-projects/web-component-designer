@@ -25,7 +25,7 @@ export class AppShell extends BaseCustomWebComponent {
         if (panel) {
           let element = panel.elementContent.assignedElements()[0];
 
-          if (element.localName == "node-projects-sample-document") {
+          if (element && element.localName == "node-projects-sample-document") {
             let sampleDocument = element;
             sampleDocument.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this._selectionChanged(e));
             let selection = sampleDocument.instanceServiceContainer.selectionService.selectedElements;
