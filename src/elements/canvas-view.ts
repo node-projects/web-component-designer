@@ -13,6 +13,7 @@ import { ISelectionChangedEvent } from './services/selectionService/ISelectionCh
 import { DesignItem } from './item/DesignItem';
 import { IDesignItem } from './item/IDesignItem';
 import { BaseCustomWebComponent, css, html } from './controls/BaseCustomWebComponent';
+import { dragDropFormatName } from '../Constants';
 
 export class CanvasView extends BaseCustomWebComponent {
   // Public Properties
@@ -49,23 +50,18 @@ export class CanvasView extends BaseCustomWebComponent {
       box-sizing: border-box;
       width: 100%;
       position: relative;
+      transform: translateZ(0);
+    }
+    #canvas {
       background-color: var(--canvas-background);
       /* 10px grid, using http://www.patternify.com/ */
       background-image: url(./assets/images/grid.png);
       background-position: 0px 0px;
-      transform: translateZ(0);
-    }
-    #canvas {
       box-sizing: border-box;
       width: 100%;
       height: 100%;
     }
 
-    #canvas > dom-repeat {
-      height: 20px;
-      width: 20px;
-      display: inline-block;
-    }
     #canvas * {
       cursor: pointer;
       user-select: none;
@@ -84,6 +80,50 @@ export class CanvasView extends BaseCustomWebComponent {
     }
     :host(.active) {
       outline-offset: -3px;
+    }
+    #selector {
+      border: 1px dotted #000;
+      position: absolute;
+      pointer-events: none;
+    }
+    .lowertoolbar {
+      height: 16px;
+      background: #787f82;
+      display: flex;
+    }
+    input {
+      width: 40px;
+      height: 16px;
+      padding: 0;
+      border: 0;
+      font-size: 12px;
+      text-align: center;
+      margin-right: 1px;
+    }
+    img {
+      width: 16px;
+      height: 16px;
+      display: block;
+      margin-right: 1px;
+    }
+    img:hover {
+      background: white;
+    }
+    .outer {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+    .outercanvas1 {
+      width: 100%;
+      height: 100%;
+    }
+    .outercanvas2 {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: auto;
     }
 
     /* Show a resize cursor in the corner */
@@ -131,18 +171,24 @@ export class CanvasView extends BaseCustomWebComponent {
       outline: solid 3px var(--highlight-green) !important;
       outline-offset: 2px;
     }
-    #selector {
-      border: 1px dotted #000;
-      position: absolute;
-      pointer-events: none;
-    }
   }`;
   }
 
   static get template() {
     return html`
-        <div id="canvas"></div>
-        <div id="selector" hidden></div>
+        <div class="outer">
+          <div class="outercanvas1">
+            <div class="outercanvas2">
+              <div id="canvas"></div>
+              <div id="selector" hidden></div>
+            </div>
+          </div>
+          <div class="lowertoolbar">
+            <input id="zoomInput" type="text" value="100%">
+            <img id="zoomIncrease" src="./assets/images/zoom_out-24px.svg">
+            <img id="zoomDecrease" src="./assets/images/zoom_in-24px.svg">
+          </div>
+        </div>
           `;
   }
 
@@ -153,8 +199,11 @@ export class CanvasView extends BaseCustomWebComponent {
     this.instanceServiceContainer.register("undoService", new UndoService);
     this.instanceServiceContainer.register("selectionService", new SelectionService);
 
-    this._canvas = <HTMLDivElement>this._shadow.getElementById('canvas');
-    this._selector = <HTMLDivElement>this._shadow.getElementById('selector');
+    this._canvas = this._getDomElement<HTMLDivElement>('canvas');
+    this._selector = this._getDomElement<HTMLDivElement>('selector');
+    let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
+    let zoomIncrease = this._getDomElement<HTMLImageElement>('zoomIncrease');
+    let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
@@ -175,7 +224,6 @@ export class CanvasView extends BaseCustomWebComponent {
     window.addEventListener('keyup', this._onKeyUpBound, true);
   }
 
-
   disconnectedCallback() {
     window.removeEventListener('keydown', this._onKeyDownBound, true);
     window.removeEventListener('keyup', this._onKeyUpBound, true);
@@ -183,13 +231,12 @@ export class CanvasView extends BaseCustomWebComponent {
 
   private _onDragOver(event: DragEvent) {
     event.preventDefault();
-    //console.log(event);
   }
 
   private _onDrop(event: DragEvent) {
     event.preventDefault();
 
-    let transferData = event.dataTransfer.getData("text/json/elementDefintion");
+    let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = <IElementDefintion>JSON.parse(transferData)
     let instance = this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
     this._canvas.appendChild(instance);
@@ -352,8 +399,8 @@ export class CanvasView extends BaseCustomWebComponent {
     //const currentElement = event.target as HTMLElement;
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
     this._ownBoundingRect = this.getBoundingClientRect();
-    const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom - this._ownBoundingRect.top };
-   
+    const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom - this._ownBoundingRect.top, zoom: zoom };
+
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       if (event.type == EventNames.PointerDown) {
@@ -382,7 +429,7 @@ export class CanvasView extends BaseCustomWebComponent {
     }
   }
 
-  private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
+  private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint & { zoom: number }) {
     let x1 = Math.min(this._initialPoint.x, currentPoint.x);
     let x2 = Math.max(this._initialPoint.x, currentPoint.x);
     let y1 = Math.min(this._initialPoint.y, currentPoint.y);
@@ -412,7 +459,7 @@ export class CanvasView extends BaseCustomWebComponent {
     }
   }
 
-  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
+  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IPoint & { zoom: number }) {
     if (event.altKey) {
       let backup: string[] = [];
       if (event.type == EventNames.PointerDown)

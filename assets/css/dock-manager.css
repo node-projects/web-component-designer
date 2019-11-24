@@ -34,7 +34,11 @@
 	display: flex;
     justify-content: flex-end;
     align-items: center;
-    height: 100%;
+	width: 25px;
+    height: 25px;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .panel-titlebar-button-close::after {
@@ -261,7 +265,9 @@
 	position: absolute;
 }
 
-.dockspan-tab-content {}
+.dockspan-tab-content {
+	position: relative;
+}
 
 .dockspan-tab-content:focus {
 	outline: 0;
@@ -300,8 +306,7 @@
 	vertical-align: top;
 }
 
-.dockspan-tab-handle-close-button {
-}
+.dockspan-tab-handle-close-button {}
 
 .dockspan-tab-handle-close-button::after {
 	margin-right: 5px;
@@ -329,6 +334,8 @@
 .dockspan-tab-handle-content-seperator {
 	height: 4px;
 }
+
+.dockspan-tab-handle-content-seperator-selected {}
 
 .dockspab-tab-handle-context-menu {
 	position: absolute;

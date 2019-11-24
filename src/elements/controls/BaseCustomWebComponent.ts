@@ -16,8 +16,15 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
     protected _shadow: ShadowRoot;
 
     static readonly style: CSSStyleSheet;
+    //@ts-ignore
+    private static _style: CSSStyleSheet;
     static readonly template: HTMLTemplateElement;
+    //@ts-ignore
+    private static  _template: HTMLTemplateElement;
 
+    protected _getDomElement<T extends HTMLElement>(id: string): T {
+        return <T><any>this._shadow.getElementById(id);
+    }
     constructor() {
         super();
 
@@ -25,13 +32,23 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
         //@ts-ignore
         if (this.constructor.style) {
             //@ts-ignore
-            this._shadow.adoptedStyleSheets = [this.constructor.style];
+            if (!this.constructor._style) {
+                //@ts-ignore
+                this.constructor._style = this.constructor.style;
+            }
+            //@ts-ignore
+            this._shadow.adoptedStyleSheets = [this.constructor._style]
         }
 
         //@ts-ignore
         if (this.constructor.template) {
+             //@ts-ignore
+            if (!this.constructor._template) {
+                //@ts-ignore
+                this.constructor._template = this.constructor.template;
+            }
             //@ts-ignore
-            this._shadow.appendChild(this.constructor.template.content.cloneNode(true));
+            this._shadow.appendChild(this.constructor._template.content.cloneNode(true));
         }
     }
 }
