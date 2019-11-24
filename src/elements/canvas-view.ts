@@ -201,9 +201,9 @@ export class CanvasView extends BaseCustomWebComponent {
 
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
     this._selector = this._getDomElement<HTMLDivElement>('selector');
-    let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
+    /*let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     let zoomIncrease = this._getDomElement<HTMLImageElement>('zoomIncrease');
-    let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');
+    let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');*/
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);

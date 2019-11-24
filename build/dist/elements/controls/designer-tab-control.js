@@ -1,71 +1,16 @@
-export class DesignerTabControl extends HTMLElement {
+import { BaseCustomWebComponent, css } from "./BaseCustomWebComponent.js";
+export class DesignerTabControl extends BaseCustomWebComponent {
   constructor() {
     super();
     this.selectedIndex = -1;
-
-    if (!DesignerTabControl._style) {
-      DesignerTabControl._style = new CSSStyleSheet(); //@ts-ignore
-
-      DesignerTabControl._style.replaceSync(`
-            :host {
-                height: 100%;
-            }
-            .outer {
-                display: flex; 
-                flex-direction: column; 
-                height: 100%;
-            }
-            .header {
-                display: inline-flex; 
-                user-select: none; 
-                flex-direction: row; 
-                cursor: pointer; 
-                height: 40px;
-                background-color: var(--dark-grey);
-            }
-            .tab-header {
-                font-family: Arial;
-                display: flex;
-                justify-content: center;
-                align-items: center;                
-                text-transform: uppercase;                
-                box-sizing: content-box;                
-                padding-left: 10px;
-                padding-right: 10px;
-                color: white;
-                font-size: 12px;
-                font-weight: 500;
-                line-height: 1.5;
-                letter-spacing: 1px;
-            }
-            .tab-header:hover {
-                background: var(--light-grey);
-            }
-            .selected {
-                pointer-events: none;
-                background: var(--medium-grey);
-                box-shadow: inset 0 3px 0 var(--highlight-pink);
-            }
-            .panels {
-                background: var(--medium-grey);
-                box-shadow: 0 2px 2px rgba(0, 0, 0, .3); 
-                border-radius: 3px; 
-                height: calc(100% - 30px);
-            }
-      `);
-    }
-
     this._contentObserver = new MutationObserver(() => {
       this._createItems();
     });
-    const shadow = this.attachShadow({
-      mode: 'open'
-    }); //@ts-ignore
-
-    shadow.adoptedStyleSheets = [DesignerTabControl._style];
     let outerDiv = document.createElement("div");
     outerDiv.className = 'outer';
-    shadow.appendChild(outerDiv);
+
+    this._shadow.appendChild(outerDiv);
+
     this._headerDiv = document.createElement("div");
     this._headerDiv.className = 'header';
     outerDiv.appendChild(this._headerDiv);
@@ -78,6 +23,56 @@ export class DesignerTabControl extends HTMLElement {
     _slot.name = 'panels';
 
     this._panels.appendChild(_slot);
+  }
+
+  static get style() {
+    return css`
+        :host {
+            height: 100%;
+        }
+        .outer {
+            display: flex; 
+            flex-direction: column; 
+            height: 100%;
+        }
+        .header {
+            display: inline-flex; 
+            user-select: none; 
+            flex-direction: row; 
+            cursor: pointer; 
+            height: 40px;
+            background-color: var(--dark-grey);
+        }
+        .tab-header {
+            font-family: Arial;
+            display: flex;
+            justify-content: center;
+            align-items: center;                
+            text-transform: uppercase;                
+            box-sizing: content-box;                
+            padding-left: 10px;
+            padding-right: 10px;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.5;
+            letter-spacing: 1px;
+        }
+        .tab-header:hover {
+            background: var(--light-grey);
+        }
+        .selected {
+            pointer-events: none;
+            background: var(--medium-grey);
+            box-shadow: inset 0 3px 0 var(--highlight-pink);
+        }
+        .panels {
+            background: var(--medium-grey);
+            box-shadow: 0 2px 2px rgba(0, 0, 0, .3); 
+            border-radius: 3px; 
+            height: calc(100% - 30px);
+        }
+        `;
   }
 
   connectedCallback() {

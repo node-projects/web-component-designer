@@ -6,6 +6,7 @@ import { UndoService } from "./services/undoService/UndoService.js";
 import { SelectionService } from "./services/selectionService/SelectionService.js";
 import { DesignItem } from "./item/DesignItem.js";
 import { BaseCustomWebComponent, css, html } from "./controls/BaseCustomWebComponent.js";
+import { dragDropFormatName } from "../Constants.js";
 export class CanvasView extends BaseCustomWebComponent {
   constructor() {
     super(); // Settings
@@ -17,8 +18,12 @@ export class CanvasView extends BaseCustomWebComponent {
     this.instanceServiceContainer = new InstanceServiceContainer();
     this.instanceServiceContainer.register("undoService", new UndoService());
     this.instanceServiceContainer.register("selectionService", new SelectionService());
-    this._canvas = this._shadow.getElementById('canvas');
-    this._selector = this._shadow.getElementById('selector');
+    this._canvas = this._getDomElement('canvas');
+    this._selector = this._getDomElement('selector');
+    /*let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
+    let zoomIncrease = this._getDomElement<HTMLImageElement>('zoomIncrease');
+    let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');*/
+
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged);
@@ -31,23 +36,18 @@ export class CanvasView extends BaseCustomWebComponent {
       box-sizing: border-box;
       width: 100%;
       position: relative;
+      transform: translateZ(0);
+    }
+    #canvas {
       background-color: var(--canvas-background);
       /* 10px grid, using http://www.patternify.com/ */
       background-image: url(./assets/images/grid.png);
       background-position: 0px 0px;
-      transform: translateZ(0);
-    }
-    #canvas {
       box-sizing: border-box;
       width: 100%;
       height: 100%;
     }
 
-    #canvas > dom-repeat {
-      height: 20px;
-      width: 20px;
-      display: inline-block;
-    }
     #canvas * {
       cursor: pointer;
       user-select: none;
@@ -66,6 +66,50 @@ export class CanvasView extends BaseCustomWebComponent {
     }
     :host(.active) {
       outline-offset: -3px;
+    }
+    #selector {
+      border: 1px dotted #000;
+      position: absolute;
+      pointer-events: none;
+    }
+    .lowertoolbar {
+      height: 16px;
+      background: #787f82;
+      display: flex;
+    }
+    input {
+      width: 40px;
+      height: 16px;
+      padding: 0;
+      border: 0;
+      font-size: 12px;
+      text-align: center;
+      margin-right: 1px;
+    }
+    img {
+      width: 16px;
+      height: 16px;
+      display: block;
+      margin-right: 1px;
+    }
+    img:hover {
+      background: white;
+    }
+    .outer {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+    .outercanvas1 {
+      width: 100%;
+      height: 100%;
+    }
+    .outercanvas2 {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: auto;
     }
 
     /* Show a resize cursor in the corner */
@@ -113,18 +157,24 @@ export class CanvasView extends BaseCustomWebComponent {
       outline: solid 3px var(--highlight-green) !important;
       outline-offset: 2px;
     }
-    #selector {
-      border: 1px dotted #000;
-      position: absolute;
-      pointer-events: none;
-    }
   }`;
   }
 
   static get template() {
     return html`
-        <div id="canvas"></div>
-        <div id="selector" hidden></div>
+        <div class="outer">
+          <div class="outercanvas1">
+            <div class="outercanvas2">
+              <div id="canvas"></div>
+              <div id="selector" hidden></div>
+            </div>
+          </div>
+          <div class="lowertoolbar">
+            <input id="zoomInput" type="text" value="100%">
+            <img id="zoomIncrease" src="./assets/images/zoom_out-24px.svg">
+            <img id="zoomDecrease" src="./assets/images/zoom_in-24px.svg">
+          </div>
+        </div>
           `;
   }
 
@@ -154,12 +204,12 @@ export class CanvasView extends BaseCustomWebComponent {
   }
 
   _onDragOver(event) {
-    event.preventDefault(); //console.log(event);
+    event.preventDefault();
   }
 
   _onDrop(event) {
     event.preventDefault();
-    let transferData = event.dataTransfer.getData("text/json/elementDefintion");
+    let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = JSON.parse(transferData);
     let instance = this.serviceContainer.forSomeServicesTillResult("instanceService", service => service.getElement(elementDefinition));
 
@@ -368,7 +418,8 @@ export class CanvasView extends BaseCustomWebComponent {
     this._ownBoundingRect = this.getBoundingClientRect();
     const currentPoint = {
       x: event.x * zoom - this._ownBoundingRect.left,
-      y: event.y * zoom - this._ownBoundingRect.top
+      y: event.y * zoom - this._ownBoundingRect.top,
+      zoom: zoom
     };
 
     if (this._actionType == null) {

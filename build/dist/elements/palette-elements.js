@@ -1,3 +1,4 @@
+import { dragDropFormatName } from "../Constants.js";
 export class PaletteElements extends HTMLElement {
   constructor() {
     super();
@@ -95,8 +96,8 @@ export class PaletteElements extends HTMLElement {
       button.draggable = true;
 
       button.ondragstart = e => {
-        e.dataTransfer.setData("text/json/elementDefintion", JSON.stringify(elementDefintion));
-        e.currentTarget.style.border = "dashed"; // todo: Drag Drop Ghost 
+        e.dataTransfer.setData(dragDropFormatName, JSON.stringify(elementDefintion));
+        e.currentTarget.style.outline = "dashed"; // todo: Drag Drop Ghost 
 
         /* var elem = document.createElement("button");
         elem.id = "drag-ghost";
@@ -108,8 +109,16 @@ export class PaletteElements extends HTMLElement {
         e.dataTransfer.setDragImage(elem, 0, 0);*/
       };
 
+      let i = 0;
+
+      button.ondrag = e => {
+        i++;
+        if (i > 20) e.stopPropagation();
+        console.log(i, e);
+      };
+
       button.ondragend = e => {
-        e.currentTarget.style.border = "none";
+        e.currentTarget.style.outline = "none";
       };
 
       this._shadow.appendChild(button);
@@ -141,17 +150,6 @@ export class PaletteElements extends HTMLElement {
     if (matches && matches.length === 3) {
       kind = matches[2];
     }
-
-    this.maybeDoHTMLImport(kind, this.namesToPackages[kind]);
-  }
-
-  maybeDoHTMLImport(kind, packageName) {
-    if (packageName === undefined) {
-      // Oof, someone didn't know what element this was. Find it in the list.
-      packageName = this.namesToPackages[kind];
-    }
-
-    this._fireEvent('new-element', kind, packageName, '');
   }
 
   _doubleclick(event) {
@@ -173,24 +171,11 @@ export class PaletteElements extends HTMLElement {
       return;
     }
 
-    var selectedValue = event.target.value; // Only do something if this is a complete element name, not some partial typing.
+    let selectedValue = event.target.value; // Only do something if this is a complete element name, not some partial typing.
 
     if (this._elementDefintions.some(x => x.tag == selectedValue)) {
       this._doClick(null, selectedValue);
     }
-  }
-
-  _fireEvent(name, tag, packageName, template) {
-    this.dispatchEvent(new CustomEvent(name, {
-      bubbles: true,
-      composed: true,
-      detail: {
-        type: tag,
-        template: template,
-        package: packageName,
-        node: this
-      }
-    }));
   }
 
 }
