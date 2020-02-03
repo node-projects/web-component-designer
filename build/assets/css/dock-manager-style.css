@@ -23,7 +23,8 @@
 
 .panel-content {
 	background-color: #232733;
-    overflow: auto;
+	overflow: auto;
+	position: relative;
 }
 
 .panel-content * {

@@ -114,7 +114,7 @@ export class AppShell extends BaseCustomWebComponent {
       <div class="app-body">
         <dock-spawn-ts id="dock" style="width: 100%; height: 100%; position: relative;">
           
-          <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2" style="position: absolute;">
+          <div title="Tree" dock-spawn-dock-type="left" dock-spawn-dock-ratio="0.2" style="position: absolute; overflow: hidden;">
             <node-projects-tree-view name="tree" id="treeView"></node-projects-tree-view>
           </div>
 
