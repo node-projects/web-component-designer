@@ -21,7 +21,6 @@ export class TreeView extends BaseCustomWebComponent {
       height: 100%;
       background: var(--dark-grey);
       overflow-y: auto;
-      padding-bottom: 60px;
     }
     button {
       border: none;

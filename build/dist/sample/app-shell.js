@@ -15,8 +15,7 @@ export class AppShell extends BaseCustomWebComponent {
     this._attributeEditor = this.shadowRoot.getElementById('attributeEditor');
     let newButton = this.shadowRoot.getElementById('newButton');
 
-    newButton.onclick = () => this.newDocument(); //@ts-ignore
-
+    newButton.onclick = () => this.newDocument();
 
     this._dockManager = this._dock.dockManager;
 
