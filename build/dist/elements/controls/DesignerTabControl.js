@@ -38,7 +38,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
             user-select: none; 
             flex-direction: row; 
             cursor: pointer; 
-            height: 40px;
+            height: 30px;
             background-color: var(--dark-grey);
         }
         .tab-header {

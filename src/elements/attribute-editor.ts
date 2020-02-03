@@ -15,6 +15,7 @@ export class AttributeEditor extends BaseCustomWebComponent {
     return css`
     :host {
       display: block;
+      height: 100%;
     }
     iron-pages {
       overflow: hidden;
