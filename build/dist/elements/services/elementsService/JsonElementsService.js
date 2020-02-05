@@ -12,8 +12,9 @@ export class JsonElementsService {
         this._elementList = [];
 
         for (const i in parsed.elements) {
-          this._elementList.push({
-            tag: parsed.elements[i]
+          let element = parsed.elements[i];
+          if (this.isIElementDefintion(element)) this._elementList.push(element);else this._elementList.push({
+            tag: element
           });
         }
 
@@ -31,6 +32,10 @@ export class JsonElementsService {
   getElements() {
     if (this._elementList) return Promise.resolve(this._elementList);
     return new Promise(resolve => this._resolveStored = resolve);
+  }
+
+  isIElementDefintion(object) {
+    return object != null && object.tag != null;
   }
 
 }

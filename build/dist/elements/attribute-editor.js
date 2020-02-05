@@ -10,7 +10,7 @@ export class AttributeEditor extends BaseCustomWebComponent {
     this.shadowRoot.appendChild(this._designerTabControl);
   }
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: block;

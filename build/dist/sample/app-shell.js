@@ -41,7 +41,7 @@ export class AppShell extends BaseCustomWebComponent {
     this.newDocument();
   }
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: block;
@@ -139,8 +139,8 @@ export class AppShell extends BaseCustomWebComponent {
 
   _setupServiceContainer() {
     serviceContainer.register('elementsService', new JsonElementsService('native', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements-native.json'));
-    serviceContainer.register('elementsService', new JsonElementsService('samples', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements-samples.json'));
-    serviceContainer.register('elementsService', new JsonElementsService('custom', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements.json'));
+    serviceContainer.register('elementsService', new JsonElementsService('samples', 'https://raw.githubusercontent.com/node-projects/web-component-designer/master/src/sample/elements-samples.json')); //serviceContainer.register('elementsService', new JsonElementsService('native', './src/sample/elements-native.json'));
+    //serviceContainer.register('elementsService', new JsonElementsService('samples', './src/sample/elements-samples.json'));
 
     this._paletteView.loadControls(serviceContainer.elementsServices);
 

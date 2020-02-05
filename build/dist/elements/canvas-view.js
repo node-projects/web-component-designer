@@ -31,7 +31,7 @@ export class CanvasView extends BaseCustomWebComponent {
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged);
   }
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: block;

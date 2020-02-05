@@ -8,7 +8,7 @@ export class TreeView extends BaseCustomWebComponent {
     this._treeDiv.addEventListener('click', this._findElement.bind(this));
   }
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       --horz-margin: 20px;

@@ -7,7 +7,7 @@ export class AttributeEditorAttributeList extends BaseCustomWebComponent {
     this.shadowRoot.appendChild(this._div);
   }
 
-  static get style() {
+  static get astyle() {
     return css`
     :host{
       display: block;

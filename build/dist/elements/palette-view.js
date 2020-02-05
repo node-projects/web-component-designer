@@ -11,7 +11,7 @@ export class PaletteView extends BaseCustomWebComponent {
     this.shadowRoot.appendChild(this._designerTabControl);
   }
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: flex;

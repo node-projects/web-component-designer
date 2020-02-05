@@ -1,0 +1,14 @@
+{
+  "name": "@vanillawc/wc-marquee",
+  "authors": [
+    "Evan Plaice <evanplaice@gmail.com> (http://evanplaice.com/)"
+  ],
+  "keywords": [
+    "web-components",
+    "vanilla",
+    "marquee",
+    "party"
+  ],
+  "license": "MIT",
+  "dependencies": {}
+}

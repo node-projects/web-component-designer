@@ -7,7 +7,7 @@ export class SampleDocument extends BaseCustomWebComponent {
     this._canvasView.serviceContainer = serviceContainer;
   }
 
-  static get style() {
+  static get astyle() {
     return css`
       div {
         height: 100%;

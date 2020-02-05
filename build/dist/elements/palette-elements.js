@@ -22,7 +22,7 @@ export class PaletteElements extends BaseCustomWebComponent {
     this.namesToPackages = new Map();
   }
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: block;

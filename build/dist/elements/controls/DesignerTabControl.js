@@ -2,7 +2,8 @@ import { BaseCustomWebComponent, css } from "./BaseCustomWebComponent.js";
 export class DesignerTabControl extends BaseCustomWebComponent {
   constructor() {
     super();
-    this.selectedIndex = -1;
+    this.selectedIndex = -1; //debugger;
+
     this._contentObserver = new MutationObserver(() => {
       this._createItems();
     });
@@ -23,7 +24,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     this._panels.appendChild(_slot);
   }
 
-  static get style() {
+  static get astyle() {
     return css`
         :host {
             height: 100%;
