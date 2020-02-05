@@ -8,7 +8,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     private _panels: HTMLDivElement;
     private _headerDiv: HTMLDivElement;
 
-    static get style() {
+    static get astyle() {
         return css`
         :host {
             height: 100%;
@@ -60,6 +60,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     constructor() {
         super();
         
+        //debugger;
         this._contentObserver = new MutationObserver(() => {
             this._createItems();
         });

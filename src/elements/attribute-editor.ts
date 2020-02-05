@@ -11,7 +11,7 @@ export class AttributeEditor extends BaseCustomWebComponent {
   private _serviceContainer: ServiceContainer;
   private _designerTabControl: DesignerTabControl;
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: block;

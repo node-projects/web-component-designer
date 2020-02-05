@@ -10,7 +10,7 @@ export class PaletteElements extends BaseCustomWebComponent {
   private _datalist: HTMLDataListElement;
   private _elementDefintions: IElementDefintion[];
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: block;

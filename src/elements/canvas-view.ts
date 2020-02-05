@@ -44,7 +44,7 @@ export class CanvasView extends BaseCustomWebComponent {
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: block;

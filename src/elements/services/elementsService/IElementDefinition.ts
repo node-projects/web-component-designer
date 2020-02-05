@@ -1,3 +1,8 @@
 export interface IElementDefintion {
-    tag: string;
+  tag: string;
+  import?: string;
+  type?: string;
+  defaultContent?: any;
+  defaultAttributes?: any; //([key: string]: any)[]array of key value pairs...
+  defaultStyles?: any; //([key: string]: any)[]array of key value pairs...
 }

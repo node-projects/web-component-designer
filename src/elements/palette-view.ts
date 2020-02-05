@@ -10,7 +10,7 @@ export class PaletteView extends BaseCustomWebComponent {
 
   private _designerTabControl: DesignerTabControl;
 
-  static get style() {
+  static get astyle() {
     return css`
     :host {
       display: flex;

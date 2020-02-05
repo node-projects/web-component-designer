@@ -7,12 +7,12 @@ export const html = function html(strings: TemplateStringsArray, ...values: any[
 export const css = function html(strings: TemplateStringsArray, ...values: any[]): CSSStyleSheet {
     const cssStyleSheet = new CSSStyleSheet()
     //@ts-ignore
-    cssStyleSheet.replaceSync(strings.raw[0]);
+    cssStyleSheet.replace(strings.raw[0]);
     return cssStyleSheet;
 };
 
 export abstract class BaseCustomWebComponent extends HTMLElement {
-    static readonly style: CSSStyleSheet;
+    static readonly astyle: CSSStyleSheet;
     //@ts-ignore
     private static _style: CSSStyleSheet;
     static readonly template: HTMLTemplateElement;
@@ -25,17 +25,9 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
     constructor() {
         super();
 
+//if (brk)
+//debugger;
         this.attachShadow({ mode: 'open' });
-        //@ts-ignore
-        if (this.constructor.style) {
-            //@ts-ignore
-            if (!this.constructor._style) {
-                //@ts-ignore
-                this.constructor._style = this.constructor.style;
-            }
-            //@ts-ignore
-            this.shadowRoot.adoptedStyleSheets = [this.constructor._style]
-        }
 
         //@ts-ignore
         if (this.constructor.template) {
@@ -47,5 +39,16 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
             //@ts-ignore
             this.shadowRoot.appendChild(this.constructor._template.content.cloneNode(true));
         }
+        
+        //@ts-ignore
+        if (this.constructor.astyle) {
+          //@ts-ignore
+          if (!this.constructor._style) {
+              //@ts-ignore
+              this.constructor._style = this.constructor.astyle;
+          }
+          //@ts-ignore
+          this.shadowRoot.adoptedStyleSheets = [this.constructor._style]
+      }
     }
 }

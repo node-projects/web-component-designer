@@ -1,14 +1,6 @@
 {
   "elements":
   [
-    "flex-horizontal-layout",
-    "flex-vertical-layout",
-    "app-header-sample",
-    "app-layout-sample",
-    "iron-form-sample",
-    "iron-pages-sample",
-    "paper-card-image-sample",
-    "paper-card-actions-sample",
-    "paper-dropdown-menu-sample"
+    {"tag" : "wc-marquee", "import": "/node_modules/@vanillawc/wc-marquee/index.js", "type" : "polymer", "defaultContent": "This is a sample Marquee Text" }
   ]
 }

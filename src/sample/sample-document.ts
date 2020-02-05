@@ -8,7 +8,7 @@ export class SampleDocument extends BaseCustomWebComponent {
   mainPage = 'designer';
   _canvasView: CanvasView;
 
-  static get style() {
+  static get astyle() {
     return css`
       div {
         height: 100%;
