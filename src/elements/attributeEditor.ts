@@ -1,6 +1,6 @@
 import { ServiceContainer } from './services/ServiceContainer';
 import serviceContainer from './services/DefaultServiceBootstrap';
-import { AttributeEditorAttributeList } from './attribute-editor-attribute-list';
+import { AttributeEditorAttributeList } from './attributeEditorAttributeList';
 import { DesignerTabControl } from './controls/DesignerTabControl';
 import { CssPropertiesService } from './services/propertiesService/CssPropertiesService';
 import { IDesignItem } from './item/IDesignItem';
@@ -11,7 +11,7 @@ export class AttributeEditor extends BaseCustomWebComponent {
   private _serviceContainer: ServiceContainer;
   private _designerTabControl: DesignerTabControl;
 
-  static get astyle() {
+  static get style() {
     return css`
     :host {
       display: block;

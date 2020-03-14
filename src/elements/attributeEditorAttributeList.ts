@@ -8,7 +8,7 @@ export class AttributeEditorAttributeList extends BaseCustomWebComponent {
 
   private _div: HTMLDivElement;
 
-  static get astyle() {
+  static get style() {
     return css`
     :host{
       display: block;

@@ -44,7 +44,7 @@ export class CanvasView extends BaseCustomWebComponent {
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
 
-  static get astyle() {
+  static get style() {
     return css`
     :host {
       display: block;
@@ -235,12 +235,12 @@ export class CanvasView extends BaseCustomWebComponent {
     event.preventDefault();
   }
 
-  private _onDrop(event: DragEvent) {
+  private async _onDrop(event: DragEvent) {
     event.preventDefault();
 
     let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = <IElementDefintion>JSON.parse(transferData)
-    let instance = this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
+    let instance = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
     this._canvas.appendChild(instance);
   }
 

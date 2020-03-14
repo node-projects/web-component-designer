@@ -1,6 +1,0 @@
-{
-  "elements":
-  [
-    {"tag" : "wc-marquee", "import": "https://raw.githubusercontent.com/node-projects/web-component-designer/master/build/node_modules/@vanillawc/wc-marquee/index.js", "type" : "polymer", "defaultContent": "This is a sample Marquee Text" }
-  ]
-}

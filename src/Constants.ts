@@ -1,1 +1,1 @@
-export const dragDropFormatName='text/json/elementDefintion';
+export const dragDropFormatName = 'text/json/elementDefintion';

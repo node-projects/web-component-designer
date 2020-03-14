@@ -12,7 +12,7 @@ export const css = function html(strings: TemplateStringsArray, ...values: any[]
 };
 
 export abstract class BaseCustomWebComponent extends HTMLElement {
-    static readonly astyle: CSSStyleSheet;
+    static readonly style: CSSStyleSheet;
     //@ts-ignore
     private static _style: CSSStyleSheet;
     static readonly template: HTMLTemplateElement;
@@ -25,8 +25,6 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
     constructor() {
         super();
 
-//if (brk)
-//debugger;
         this.attachShadow({ mode: 'open' });
 
         //@ts-ignore

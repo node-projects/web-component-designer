@@ -7,7 +7,7 @@ export class TreeView extends BaseCustomWebComponent {
   _previouslySelected: HTMLInputElement;
   _treeDiv: HTMLDivElement;
 
-  static get astyle() {
+  static get style() {
     return css`
     :host {
       --horz-margin: 20px;

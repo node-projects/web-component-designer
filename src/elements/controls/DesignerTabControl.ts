@@ -8,7 +8,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     private _panels: HTMLDivElement;
     private _headerDiv: HTMLDivElement;
 
-    static get astyle() {
+    static get style() {
         return css`
         :host {
             height: 100%;

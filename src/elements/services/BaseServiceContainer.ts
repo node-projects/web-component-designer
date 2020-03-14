@@ -19,7 +19,7 @@ export class BaseServiceContainer<NameMap> {
         this._services.get(<string>name).push(service);
     }
 
-    forSomeServicesTillResult<K extends keyof NameMap>(service: K, callback: (service: NameMap[K]) => any): any {
+    forSomeServicesTillResult<K extends keyof NameMap, Y>(service: K, callback: (service: NameMap[K]) => Y): Y {
         let services = this.getServices<K>(<any>service);
         for (let index = services.length - 1; index >= 0; index--) {
             const currentService = services[index];

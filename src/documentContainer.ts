@@ -1,11 +1,10 @@
-import { BaseCustomWebComponent, html, css } from "../elements/controls/BaseCustomWebComponent";
-import { CanvasView } from '../elements/canvas-view';
-import { ServiceContainer } from '../elements/services/ServiceContainer';
-import { InstanceServiceContainer } from '../elements/services/InstanceServiceContainer';
+import { BaseCustomWebComponent, html, css } from "./elements/controls/BaseCustomWebComponent";
+import { CanvasView } from './elements/canvasView';
+import { ServiceContainer } from './elements/services/ServiceContainer';
+import { InstanceServiceContainer } from './elements/services/InstanceServiceContainer';
 
-export class SampleDocument extends BaseCustomWebComponent {
+export class DocumentContainer extends BaseCustomWebComponent {
 
-  mainPage = 'designer';
   _canvasView: CanvasView;
 
   static get astyle() {
@@ -42,4 +41,4 @@ export class SampleDocument extends BaseCustomWebComponent {
   }
 }
 
-customElements.define("node-projects-sample-document", SampleDocument);
+customElements.define("node-projects-document-container", DocumentContainer);

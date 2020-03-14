@@ -1,6 +1,6 @@
 import './controls/DesignerTabControl.js';
 import { IElementsService } from './services/elementsService/IElementsService';
-import { PaletteElements } from './palette-elements';
+import { PaletteElements } from './paletteElements';
 import { DesignerTabControl } from './controls/DesignerTabControl';
 import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
 
@@ -10,7 +10,7 @@ export class PaletteView extends BaseCustomWebComponent {
 
   private _designerTabControl: DesignerTabControl;
 
-  static get astyle() {
+  static get style() {
     return css`
     :host {
       display: flex;
