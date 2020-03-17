@@ -5,7 +5,7 @@ import { EventNames } from "../enums/EventNames";
 import { UndoItemType } from "./services/undoService/UndoItemType";
 import { ISize } from '../interfaces/ISize';
 import { ServiceContainer } from './services/ServiceContainer';
-import { IElementDefintion } from './services/elementsService/IElementDefinition';
+import { IElementDefinition } from './services/elementsService/IElementDefinition';
 import { InstanceServiceContainer } from './services/InstanceServiceContainer';
 import { UndoService } from './services/undoService/UndoService';
 import { SelectionService } from './services/selectionService/SelectionService';
@@ -239,7 +239,7 @@ export class CanvasView extends BaseCustomWebComponent {
     event.preventDefault();
 
     let transferData = event.dataTransfer.getData(dragDropFormatName);
-    let elementDefinition = <IElementDefintion>JSON.parse(transferData)
+    let elementDefinition = <IElementDefinition>JSON.parse(transferData)
     let instance = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
     this._canvas.appendChild(instance);
   }

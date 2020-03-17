@@ -1,16 +1,16 @@
 import { IElementsService } from './IElementsService';
 import { IElementsJson } from './IElementsJson';
-import { IElementDefintion } from './IElementDefinition';
+import { IElementDefinition } from './IElementDefinition';
 
 // Reads a Json File and provides the Elements listed there
 export class JsonElementsService implements IElementsService {
   private _name: string;
   get name() { return this._name; }
 
-  private _elementList: IElementDefintion[];
-  private _resolveStored: (value: IElementDefintion[]) => void;
+  private _elementList: IElementDefinition[];
+  private _resolveStored: (value: IElementDefinition[]) => void;
 
-  getElements(): Promise<IElementDefintion[]> {
+  getElements(): Promise<IElementDefinition[]> {
     if (this._elementList)
       return Promise.resolve(this._elementList);
     return new Promise((resolve) => this._resolveStored = resolve);
@@ -38,7 +38,7 @@ export class JsonElementsService implements IElementsService {
     request.send();
   }
 
-  isIElementDefintion(object: string | IElementDefintion): object is IElementDefintion {
-    return object != null && (<IElementDefintion>object).tag != null;
+  isIElementDefintion(object: string | IElementDefinition): object is IElementDefinition {
+    return object != null && (<IElementDefinition>object).tag != null;
   }
 } 

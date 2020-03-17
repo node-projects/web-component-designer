@@ -1,4 +1,4 @@
-import { IElementDefintion } from './services/elementsService/IElementDefinition';
+import { IElementDefinition } from './services/elementsService/IElementDefinition';
 import { dragDropFormatName } from '../Constants';
 import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
 
@@ -8,7 +8,7 @@ export class PaletteElements extends BaseCustomWebComponent {
 
   private _filter: HTMLInputElement;
   private _datalist: HTMLDataListElement;
-  private _elementDefintions: IElementDefintion[];
+  private _elementDefintions: IElementDefinition[];
 
   static get style() {
     return css`
@@ -78,7 +78,7 @@ export class PaletteElements extends BaseCustomWebComponent {
     this.namesToPackages = new Map();
   }
 
-  loadElements(elementDefintions: IElementDefintion[]) {
+  loadElements(elementDefintions: IElementDefinition[]) {
     this._elementDefintions = elementDefintions;
 
     for (const elementDefintion of elementDefintions) {

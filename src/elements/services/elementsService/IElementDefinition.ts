@@ -1,4 +1,4 @@
-export interface IElementDefintion {
+export interface IElementDefinition {
   tag: string;
   import?: string;
   type?: string;

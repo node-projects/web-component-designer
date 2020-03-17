@@ -3,6 +3,7 @@
   "name": "@node-projects/web-component-designer",
   "version": "0.0.1",
   "type": "module",
+  "main": "./dist/index.js",
   "author": "",
   "license": "BSD-3-Clause",
   "scripts": {

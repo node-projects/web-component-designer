@@ -41,4 +41,5 @@ export class DocumentContainer extends BaseCustomWebComponent {
   }
 }
 
+//@ts-ignore
 customElements.define("node-projects-document-container", DocumentContainer);

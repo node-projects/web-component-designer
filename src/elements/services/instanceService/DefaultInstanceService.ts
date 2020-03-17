@@ -1,8 +1,8 @@
 import { IInstanceService } from './IInstanceService';
-import { IElementDefintion } from '../elementsService/IElementDefinition';
+import { IElementDefinition } from '../elementsService/IElementDefinition';
 
 export class DefaultInstanceService implements IInstanceService {
-  async getElement(definition: IElementDefintion): Promise<HTMLElement> {
+  async getElement(definition: IElementDefinition): Promise<HTMLElement> {
     if (definition.import)
       await import(definition.import);
     let element = document.createElement(definition.tag);

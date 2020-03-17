@@ -1,6 +1,6 @@
 import { IService } from '../IService';
-import { IElementDefintion } from '../elementsService/IElementDefinition';
+import { IElementDefinition } from '../elementsService/IElementDefinition';
 
 export interface IInstanceService extends IService {
-    getElement(definition: IElementDefintion) : Promise<HTMLElement>
+    getElement(definition: IElementDefinition) : Promise<HTMLElement>
 }

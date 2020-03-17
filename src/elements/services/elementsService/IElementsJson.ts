@@ -1,5 +1,5 @@
-import { IElementDefintion } from './IElementDefinition';
+import { IElementDefinition } from './IElementDefinition';
 
 export interface IElementsJson {
-    "elements": (string | IElementDefintion)[]
+    "elements": (string | IElementDefinition)[]
 }
