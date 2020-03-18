@@ -13,7 +13,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@webcomponents/webcomponentsjs": "^2.4.2",
+    "@webcomponents/webcomponentsjs": "^2.4.3",
     "construct-style-sheets-polyfill": "^2.3.5",
     "ace-builds": "^1.4.8"
   },
