@@ -51,8 +51,6 @@ export class DesignerTabControl extends BaseCustomWebComponent {
         }
         .panels {
             background: var(--medium-grey);
-            box-shadow: 0 2px 2px rgba(0, 0, 0, .3); 
-            border-radius: 3px; 
             height: calc(100% - 30px);
         }
         `;}

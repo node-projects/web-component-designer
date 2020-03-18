@@ -12,10 +12,10 @@ export const css = function html(strings: TemplateStringsArray, ...values: any[]
 };
 
 export abstract class BaseCustomWebComponent extends HTMLElement {
-    static readonly style: CSSStyleSheet;
+    public static readonly style: CSSStyleSheet;
     //@ts-ignore
     private static _style: CSSStyleSheet;
-    static readonly template: HTMLTemplateElement;
+    public static readonly template: HTMLTemplateElement;
     //@ts-ignore
     private static  _template: HTMLTemplateElement;
 
@@ -39,11 +39,11 @@ export abstract class BaseCustomWebComponent extends HTMLElement {
         }
         
         //@ts-ignore
-        if (this.constructor.astyle) {
+        if (this.constructor.style) {
           //@ts-ignore
           if (!this.constructor._style) {
               //@ts-ignore
-              this.constructor._style = this.constructor.astyle;
+              this.constructor._style = this.constructor.style;
           }
           //@ts-ignore
           this.shadowRoot.adoptedStyleSheets = [this.constructor._style]

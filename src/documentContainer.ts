@@ -7,7 +7,7 @@ export class DocumentContainer extends BaseCustomWebComponent {
 
   _canvasView: CanvasView;
 
-  static get astyle() {
+  static get style() {
     return css`
       div {
         height: 100%;
