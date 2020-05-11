@@ -57,3 +57,4 @@ export * from "./elements/demoView.js";
 export * from "./elements/paletteElements.js";
 export * from "./elements/paletteView.js";
 export * from "./elements/treeView.js";
+export * from "./elements/treeViewExtended.js";
