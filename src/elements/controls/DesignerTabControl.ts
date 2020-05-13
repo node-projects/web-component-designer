@@ -58,7 +58,6 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     constructor() {
         super();
         
-        //debugger;
         this._contentObserver = new MutationObserver(() => {
             this._createItems();
         });

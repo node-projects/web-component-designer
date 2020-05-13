@@ -2,10 +2,11 @@ import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
 import { ISelectionChangedEvent } from './services/selectionService/ISelectionChangedEvent';
 
 export class TreeView extends BaseCustomWebComponent {
-  items: any;
-  _index: number;
-  _previouslySelected: HTMLInputElement;
-  _treeDiv: HTMLDivElement;
+  
+  private _items: any;
+  private _index: number;
+  private _previouslySelected: HTMLInputElement;
+  private _treeDiv: HTMLDivElement;
 
   static get style() {
     return css`
@@ -130,9 +131,9 @@ export class TreeView extends BaseCustomWebComponent {
     // each button in the this.items array of useful data.
 
     this._index = 0;
-    this.items = this._getChildren(parent, ul);
+    this._items = this._getChildren(parent, ul);
     this._highlight(activeElement);
-    return this.items;
+    return this._items;
   }
 
   private _makeButton(tag, id, index) {
@@ -201,7 +202,7 @@ export class TreeView extends BaseCustomWebComponent {
 
     // Find the actual element it points to.
     let index = item.dataset.index;
-    let el = this.items[index].ref;
+    let el = this._items[index].ref;
     el.click();
   }
 
@@ -216,12 +217,12 @@ export class TreeView extends BaseCustomWebComponent {
   private _highlight(element: Element) {
     // Find it in the tree.
     let buttons = this.shadowRoot.querySelectorAll('button');
-    if (buttons.length !== this.items.length) {
+    if (buttons.length !== this._items.length) {
       return;
     }
 
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i].ref === element) {
+    for (let i = 0; i < this._items.length; i++) {
+      if (this._items[i].ref === element) {
         this._selectTreeElement(buttons[i]);
         return;
       }

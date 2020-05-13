@@ -2,7 +2,6 @@
 import { IPoint } from '../interfaces/ipoint';
 import { PointerActionType } from "../enums/PointerActionType";
 import { EventNames } from "../enums/EventNames";
-import { UndoItemType } from "./services/undoService/UndoItemType";
 import { ISize } from '../interfaces/ISize';
 import { ServiceContainer } from './services/ServiceContainer';
 import { IElementDefinition } from './services/elementsService/IElementDefinition';
@@ -15,11 +14,13 @@ import { IDesignItem } from './item/IDesignItem';
 import { BaseCustomWebComponent, css, html } from './controls/BaseCustomWebComponent';
 import { dragDropFormatName } from '../Constants';
 import { ContentService } from './services/contentService/ContentService';
+import { InsertAction } from './services/undoService/transactionItems/InsertAction';
 
 export class CanvasView extends BaseCustomWebComponent {
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
+  public rootDesignItem: IDesignItem;
 
   // Settings
   private _gridSize = 10;
@@ -43,6 +44,7 @@ export class CanvasView extends BaseCustomWebComponent {
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
+  
 
   static get style() {
     return css`
@@ -217,6 +219,8 @@ export class CanvasView extends BaseCustomWebComponent {
     this._onKeyUpBound = this.onKeyUp.bind(this);
 
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged);
+
+    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer)
   }
 
   connectedCallback() {
@@ -245,9 +249,11 @@ export class CanvasView extends BaseCustomWebComponent {
     event.preventDefault();
 
     let transferData = event.dataTransfer.getData(dragDropFormatName);
-    let elementDefinition = <IElementDefinition>JSON.parse(transferData)
+    let elementDefinition = <IElementDefinition>JSON.parse(transferData);
     let instance = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
-    this._canvas.appendChild(instance);
+    let di = DesignItem.GetOrCreateDesignItem(instance, this.serviceContainer, this.instanceServiceContainer);
+    this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
+    //this._canvas.appendChild(instance);
   }
 
   private onKeyUp(event: KeyboardEvent) {
@@ -294,7 +300,7 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
         } else {
-          primarySelection.element.style.top = oldTop - 10 + 'px';
+          primarySelection.element.style.top = oldTop - 1 + 'px';
         }
         break;
       case 'ArrowDown':
@@ -302,7 +308,7 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
         } else {
-          primarySelection.element.style.top = oldTop + 10 + 'px';
+          primarySelection.element.style.top = oldTop + 1 + 'px';
         }
         break;
       case 'ArrowLeft':
@@ -310,7 +316,7 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
         } else {
-          primarySelection.element.style.left = oldLeft - 10 + 'px';
+          primarySelection.element.style.left = oldLeft - 1 + 'px';
         }
         break;
       case 'ArrowRight':
@@ -318,15 +324,16 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
         } else {
-          primarySelection.element.style.left = oldLeft + 10 + 'px';
+          primarySelection.element.style.left = oldLeft + 1 + 'px';
         }
         break;
     }
-    this.instanceServiceContainer.undoService.add(UndoItemType.Move, primarySelection.element,
+    
+    /*this.instanceServiceContainer.undoService.add(UndoItemType.Move, primarySelection.element,
       {
         new: { left: primarySelection.element.style.left, top: primarySelection.element.style.top, position: primarySelection.element.style.position },
         old: { left: oldLeft, top: oldTop, position: oldPosition }
-      });
+      });*/
   }
 
   // Access canvas API

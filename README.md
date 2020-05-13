@@ -19,6 +19,10 @@ look at: https://node-projects.github.io/web-component-designer/build/
 ## What is needed
 
 - constructable-stylesheets-polyfill on browser not yet supporting these
+- optional - ace code editor (if you use code-view-ace)
+- optional - code mirrow code editor (if you use code-view-codemirrow) (todo)
+- optional - monaco code editor (if you use code-view-monaco) (todo)
+- optional - fancytree (if you use tree-view-fancytree) (todo)
 
 ## Features we are workin on
 
@@ -59,8 +63,6 @@ look at: https://node-projects.github.io/web-component-designer/build/
 ## Using
 
 at first you have to setup a service container, providing services for History, Properties, Elements, ....
-
-
 
 ## Configuring
 **Disclaimer**: to configure the app to have other elements than the ones it

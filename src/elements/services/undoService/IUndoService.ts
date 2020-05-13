@@ -1,14 +1,8 @@
-import { UndoItemType } from "./UndoItemType";
-import { IUndoItem } from './IUndoItem';
-import { ChangeGroup } from "./ChangeGroup";
 import { IService } from '../IService';
+import { ChangeGroup } from './ChangeGroup';
+import { ITransactionItem } from './ITransactionItem';
 
 export interface IUndoService extends IService {
-  undoHistory: IUndoItem[]
-  redoHistory: IUndoItem[]
-  createChangeGroup(): ChangeGroup
-  add(action: UndoItemType, node, detail?)
-  undo() 
-  redo() 
-  updateButtons()
+  openGroup(title: string): ChangeGroup
+  execute(item: ITransactionItem) :void
 }
