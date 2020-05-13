@@ -3,19 +3,19 @@ import { IDesignItem } from './IDesignItem';
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
 
 export class DesignItem implements IDesignItem {
-    element: HTMLElement;
+    element: Element;
     serviceContainer: ServiceContainer;
     instanceServiceContainer: InstanceServiceContainer;
 
     private static _designItemSymbol = Symbol('DesignItem');
 
-    constructor(element: HTMLElement, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+    constructor(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
         this.element = element;
         this.serviceContainer = serviceContainer;
         this.instanceServiceContainer = instanceServiceContainer;
     }
 
-    static GetOrCreateDesignItem(element: HTMLElement, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
+    static GetOrCreateDesignItem(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
         if (!element)
             return null;
         let designItem: IDesignItem = element[DesignItem._designItemSymbol];

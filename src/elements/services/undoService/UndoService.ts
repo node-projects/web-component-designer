@@ -1,6 +1,7 @@
 import { ITransactionItem } from './ITransactionItem.js';
 import { ChangeGroup } from "./ChangeGroup.js";
 import { IUndoService } from './IUndoService.js';
+import { IDesignItem } from '../../item/IDesignItem';
 
 /*
  * Manages a stack of available undo/redo actions
@@ -10,8 +11,8 @@ export class UndoService implements IUndoService {
   private _redoStack: ITransactionItem[] = [];
   private _transactionStack: ChangeGroup[] = [];
 
-  openGroup(title: string): ChangeGroup {
-    let t = new ChangeGroup(title);
+  openGroup(title: string, affectedItems: IDesignItem[]): ChangeGroup {
+    let t = new ChangeGroup(title, affectedItems);
     this._transactionStack.push(t);
     return t;
   }

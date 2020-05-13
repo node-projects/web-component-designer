@@ -32,7 +32,7 @@ export class CssStyleChangeAction implements ITransactionItem {
   public oldValue: any;
 
   mergeWith(other: ITransactionItem) {
-    if (other instanceof CssStyleChangeAction && this.designItem === other.designItem) {
+    if (other instanceof CssStyleChangeAction && this.designItem === other.designItem && this.name === other.name) {
       this.newValue = other.newValue;
       return true;
     }

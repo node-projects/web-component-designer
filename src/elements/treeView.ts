@@ -1,12 +1,18 @@
 import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
 import { ISelectionChangedEvent } from './services/selectionService/ISelectionChangedEvent';
+import { IDesignItem } from './item/IDesignItem';
+import { DesignItem } from './item/DesignItem';
 
 export class TreeView extends BaseCustomWebComponent {
-  
+
   private _items: any;
   private _index: number;
-  private _previouslySelected: HTMLInputElement;
+  private _previouslySelected: Element;
   private _treeDiv: HTMLDivElement;
+
+  private _mapElementTreeitem: Map<Element, HTMLElement>;
+
+  private _rootItem: IDesignItem
 
   static get style() {
     return css`
@@ -111,17 +117,26 @@ export class TreeView extends BaseCustomWebComponent {
 
     this._treeDiv = document.createElement('div');
     this.shadowRoot.appendChild(this._treeDiv);
-    this._treeDiv.addEventListener('click', this._findElement.bind(this));
+    this._treeDiv.addEventListener('click', this._clickElement.bind(this));
   }
 
-  public createTree(element: Element, activeElement: Element) {
-    return this._recomputeTree(element, activeElement);
+  public createTree(rootItem: IDesignItem /*, activeElement: Element */) {
+    this._rootItem = rootItem;
+    if (rootItem != null)
+      this._recomputeTree(rootItem.element, null /*, activeElement */);
   }
+
+  // this.instanceServiceContainer.selectionService.setSelectedElements(null);
 
   public selectionChanged(event: ISelectionChangedEvent) {
+    if (event.selectedElements.length > 0){
+      this._selectTreeElement(this._mapElementTreeitem.get(event.selectedElements[0].element));
+      
+    }
   }
 
   private _recomputeTree(parent, activeElement: Element) {
+    this._mapElementTreeitem = new Map<HTMLElement, HTMLElement>();
     this._treeDiv.innerHTML = '';
     let ul = document.createElement('ul');
     ul.classList.add('tree');
@@ -132,6 +147,7 @@ export class TreeView extends BaseCustomWebComponent {
 
     this._index = 0;
     this._items = this._getChildren(parent, ul);
+
     this._highlight(activeElement);
     return this._items;
   }
@@ -167,6 +183,7 @@ export class TreeView extends BaseCustomWebComponent {
     let button = this._makeButton(data.tag, data.id, data.index);
     li.appendChild(button);
     list.appendChild(li);
+    this._mapElementTreeitem.set(data.ref, button);
 
     this._index++;
     let nodes = [data];
@@ -191,7 +208,7 @@ export class TreeView extends BaseCustomWebComponent {
     return nodes;
   }
 
-  private _findElement(event) {
+  private _clickElement(event) {
     // If the target is a <span>, you clicked on the span inside the button
     // so you need to use currentTarget.
     let item = event.target;
@@ -199,14 +216,10 @@ export class TreeView extends BaseCustomWebComponent {
       item = item.parentElement;
     }
     this._selectTreeElement(item);
-
-    // Find the actual element it points to.
-    let index = item.dataset.index;
-    let el = this._items[index].ref;
-    el.click();
+    this._selectDesignerElement(item);
   }
 
-  private _selectTreeElement(item) {
+  private _selectTreeElement(item: Element) {
     if (this._previouslySelected) {
       this._previouslySelected.classList.remove('selected');
     }
@@ -214,7 +227,16 @@ export class TreeView extends BaseCustomWebComponent {
     item.classList.add('selected');
   }
 
+  private _selectDesignerElement(item: any) {
+    let index = item.dataset.index;
+    let el = this._items[index].ref;
+    let d = DesignItem.GetOrCreateDesignItem(el, this._rootItem.serviceContainer, this._rootItem.instanceServiceContainer);
+    d.instanceServiceContainer.selectionService.setSelectedElements([d]);
+  }
+
   private _highlight(element: Element) {
+    if (!element)
+      return;
     // Find it in the tree.
     let buttons = this.shadowRoot.querySelectorAll('button');
     if (buttons.length !== this._items.length) {

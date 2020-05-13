@@ -1,14 +1,15 @@
 import { ITransactionItem } from './ITransactionItem';
-import { IDesignItem } from '../../../../dist/elements/item/IDesignItem';
+import { IDesignItem } from '../../item/IDesignItem';
 
 export class ChangeGroup implements ITransactionItem {
 
-  constructor(title?: string) {
+  constructor(title: string, affectedItems: IDesignItem[]) {
     this.title = title;
+    this.affectedItems = affectedItems;
   }
 
-  title?: string;
-  affectedItems?: IDesignItem[];
+  title: string;
+  affectedItems: IDesignItem[];
 
   commit() {
   }

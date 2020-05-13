@@ -213,14 +213,14 @@ export class CanvasView extends BaseCustomWebComponent {
     this.instanceServiceContainer = new InstanceServiceContainer();
     this.instanceServiceContainer.register("undoService", new UndoService);
     this.instanceServiceContainer.register("selectionService", new SelectionService);
-    this.instanceServiceContainer.register("contentService", new ContentService(this._canvas));
+    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
+    this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
 
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged);
 
-    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer)
   }
 
   connectedCallback() {

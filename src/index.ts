@@ -40,7 +40,6 @@ export * from "./elements/services/selectionService/SelectionService.js";
 export * from "./elements/services/undoService/ChangeGroup.js";
 export type { ITransactionItem } from "./elements/services/undoService/ITransactionItem.js";
 export type { IUndoService } from "./elements/services/undoService/IUndoService.js";
-export * from "./elements/services/undoService/UndoItemType.js";
 export * from "./elements/services/undoService/UndoService.js";
 
 export * from "./elements/services/BaseServiceContainer.js";

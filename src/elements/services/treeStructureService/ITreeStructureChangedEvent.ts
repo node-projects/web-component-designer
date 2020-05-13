@@ -1,4 +1,4 @@
-import { IDesignItem } from '../../../../dist/elements/item/IDesignItem';
+import { IDesignItem } from '../../item/IDesignItem';
 
 export interface ITreeStructureChangedEvent {
   action: 'add' | 'move' | 'remove' | 'replace' | 'reset'
