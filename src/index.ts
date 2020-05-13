@@ -55,5 +55,7 @@ export * from "./elements/code-view-ace.js";
 export * from "./elements/demoView.js";
 export * from "./elements/paletteElements.js";
 export * from "./elements/paletteView.js";
-export * from "./elements/treeView.js";
-export * from "./elements/treeViewExtended.js";
+
+export type { ITreeView } from "./elements/treeView/ITreeView.js";
+export * from "./elements/treeView/treeView.js";
+export * from "./elements/treeView/treeViewExtended.js";

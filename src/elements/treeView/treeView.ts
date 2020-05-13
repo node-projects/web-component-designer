@@ -1,9 +1,10 @@
-import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
-import { ISelectionChangedEvent } from './services/selectionService/ISelectionChangedEvent';
-import { IDesignItem } from './item/IDesignItem';
-import { DesignItem } from './item/DesignItem';
+import { BaseCustomWebComponent, css } from '../controls/BaseCustomWebComponent';
+import { ISelectionChangedEvent } from '../services/selectionService/ISelectionChangedEvent';
+import { IDesignItem } from '../item/IDesignItem';
+import { DesignItem } from '../item/DesignItem';
+import { ITreeView } from './ITreeView';
 
-export class TreeView extends BaseCustomWebComponent {
+export class TreeView extends BaseCustomWebComponent implements ITreeView {
 
   private _items: any;
   private _index: number;

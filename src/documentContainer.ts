@@ -32,7 +32,7 @@ export class DocumentContainer extends BaseCustomWebComponent {
 
   constructor(serviceContainer: ServiceContainer) {
     super();
-    this._canvasView = this.shadowRoot.getElementById('canvasView') as CanvasView;
+    this._canvasView = this._getDomElement('canvasView');
     this._canvasView.serviceContainer = serviceContainer;
   }
 
