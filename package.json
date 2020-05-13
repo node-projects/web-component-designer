@@ -16,9 +16,9 @@
   },
   "devDependencies": {
     "@types/ace": "^0.0.43",
-    "@types/jquery": "^3.3.34",
-    "@types/jquery.fancytree": "0.0.3",
-    "jquery": "^3.5.0",
+    "@types/jquery": "^3.3.38",
+    "@types/jquery.fancytree": "0.0.4",
+    "jquery": "^3.5.1",
     "jquery.fancytree": "^2.35.0",
     "typescript": "^3.9.2",
     "typescript-lit-html-plugin": "^0.9.0"
