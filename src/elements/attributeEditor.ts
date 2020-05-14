@@ -11,8 +11,7 @@ export class AttributeEditor extends BaseCustomWebComponent {
   private _serviceContainer: ServiceContainer;
   private _designerTabControl: DesignerTabControl;
 
-  static get style() {
-    return css`
+  static readonly style = css`
     :host {
       display: block;
       height: 100%;
@@ -30,7 +29,6 @@ export class AttributeEditor extends BaseCustomWebComponent {
       box-shadow: inset 0 3px 0 var(--highlight-pink);
     }
     `;
-  }
 
   constructor() {
     super();
@@ -52,6 +50,8 @@ export class AttributeEditor extends BaseCustomWebComponent {
     attributeEditorAttributeList.createElements((new CssPropertiesService("flex")).getProperties(null));
     attributeEditorAttributeList.title = "flex";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
+
+    this._designerTabControl.selectedIndex = 0;
   }
 
   public get serviceContainer(): ServiceContainer {

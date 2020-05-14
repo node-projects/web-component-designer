@@ -1,20 +1,21 @@
 //import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
-import { IPoint } from '../interfaces/ipoint';
-import { PointerActionType } from "../enums/PointerActionType";
-import { EventNames } from "../enums/EventNames";
-import { ISize } from '../interfaces/ISize';
-import { ServiceContainer } from './services/ServiceContainer';
-import { IElementDefinition } from './services/elementsService/IElementDefinition';
-import { InstanceServiceContainer } from './services/InstanceServiceContainer';
-import { UndoService } from './services/undoService/UndoService';
-import { SelectionService } from './services/selectionService/SelectionService';
-import { ISelectionChangedEvent } from './services/selectionService/ISelectionChangedEvent';
-import { DesignItem } from './item/DesignItem';
-import { IDesignItem } from './item/IDesignItem';
-import { BaseCustomWebComponent, css, html } from './controls/BaseCustomWebComponent';
-import { dragDropFormatName } from '../Constants';
-import { ContentService } from './services/contentService/ContentService';
-import { InsertAction } from './services/undoService/transactionItems/InsertAction';
+import { IPoint } from '../../../interfaces/ipoint';
+import { PointerActionType } from "../../../enums/PointerActionType";
+import { EventNames } from "../../../enums/EventNames";
+import { ISize } from '../../../interfaces/ISize';
+import { ServiceContainer } from '../../services/ServiceContainer';
+import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
+import { UndoService } from '../../services/undoService/UndoService';
+import { SelectionService } from '../../services/selectionService/SelectionService';
+import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
+import { DesignItem } from '../../item/DesignItem';
+import { IDesignItem } from '../../item/IDesignItem';
+import { BaseCustomWebComponent, css, html } from '../../controls/BaseCustomWebComponent';
+import { dragDropFormatName } from '../../../Constants';
+import { ContentService } from '../../services/contentService/ContentService';
+import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
+import { DomConverter } from './DomConverter';
 
 export class CanvasView extends BaseCustomWebComponent {
   // Public Properties
@@ -45,9 +46,9 @@ export class CanvasView extends BaseCustomWebComponent {
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
   
+  private static _activeClassName = 'active';
 
-  static get style() {
-    return css`
+  static readonly style = css`
     :host {
       display: block;
       box-sizing: border-box;
@@ -181,10 +182,8 @@ export class CanvasView extends BaseCustomWebComponent {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' d='M0 0h24v24H0V0z'/%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z'/%3E%3C/svg%3E"); 
     }
   }`;
-  }
 
-  static get template() {
-    return html`
+  static readonly template = html`
         <div class="outer">
           <div class="outercanvas1">
             <div class="outercanvas2">
@@ -199,7 +198,6 @@ export class CanvasView extends BaseCustomWebComponent {
           </div>
         </div>
           `;
-  }
 
   constructor() {
     super();
@@ -239,6 +237,10 @@ export class CanvasView extends BaseCustomWebComponent {
   disconnectedCallback() {
     window.removeEventListener('keydown', this._onKeyDownBound, true);
     window.removeEventListener('keyup', this._onKeyUpBound, true);
+  }
+  
+  public getCode() {
+    return DomConverter.ConvertDomToString(this.rootDesignItem.element);
   }
 
   private _onDragOver(event: DragEvent) {
@@ -285,7 +287,7 @@ export class CanvasView extends BaseCustomWebComponent {
       //@ts-ignore
       (event.composedPath()[0].localName === 'button' && event.composedPath()[2].localName == 'tree-view') ||
       //@ts-ignore
-      (event.composedPath()[0].localName == 'body') || event.composedPath()[0].classList.contains('active');
+      (event.composedPath()[0].localName == 'body') || event.composedPath()[0].classList.contains(CanvasView._activeClassName);
 
     if (!isOk) {
       return;
@@ -367,11 +369,11 @@ export class CanvasView extends BaseCustomWebComponent {
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
     if (selectionChangedEvent.oldSelectedElements) {
       for (let e of selectionChangedEvent.oldSelectedElements)
-        e.element.classList.remove('active');
+        e.element.classList.remove(CanvasView._activeClassName);
     }
     if (selectionChangedEvent.selectedElements) {
       for (let e of selectionChangedEvent.selectedElements)
-        e.element.classList.add('active');
+        e.element.classList.add(CanvasView._activeClassName);
     }
   }
 
@@ -748,7 +750,7 @@ export class CanvasView extends BaseCustomWebComponent {
   _shouldResize(pointerPoint: IPoint, bottomPoint: IPoint) {
     const right = bottomPoint.x - pointerPoint.x;
     const bottom = bottomPoint.y - pointerPoint.y;
-    return (right < this._resizeOffset && bottom < this._resizeOffset);
+    return (right < this._resizeOffset && right >= -4 && bottom < this._resizeOffset && bottom >= -4);
   }
 
   deepTargetFind(x, y, notThis) {

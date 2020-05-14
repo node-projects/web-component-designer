@@ -6,8 +6,10 @@ export class DefaultInstanceService implements IInstanceService {
     if (definition.import)
       await import(definition.import);
     let element = document.createElement(definition.tag);
-    element.style.width = '60px';
-    element.style.height = '20px';
+    if (definition.defaultWidth)
+      element.style.width = definition.defaultWidth; // '60px';
+    if (definition.defaultHeight)
+      element.style.height = definition.defaultHeight; '20px';
     element.style.position = 'absolute'
 
     switch (definition.tag) {

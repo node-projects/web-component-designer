@@ -1,10 +1,8 @@
-export * from "./documentContainer.js";
-
 export * from "./basic/TypedEvent.js";
 
 export * from "./elements/controls/BaseCustomWebComponent.js";
 export * from "./elements/controls/DesignerTabControl.js";
-export * from "./elements/controls/LazyLoadJavascript.js";
+export * from "./elements/controls/LazyLoader.js";
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
@@ -50,12 +48,15 @@ export * from "./elements/services/ServiceContainer.js";
 
 export * from "./elements/attributeEditor.js";
 export * from "./elements/attributeEditorAttributeList.js";
-export * from "./elements/canvasView.js";
-export * from "./elements/code-view-ace.js";
-export * from "./elements/demoView.js";
+export * from "./elements/widgets/designerView/canvasView.js";
+
+export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/paletteElements.js";
 export * from "./elements/paletteView.js";
 
-export type { ITreeView } from "./elements/treeView/ITreeView.js";
-export * from "./elements/treeView/treeView.js";
-export * from "./elements/treeView/treeViewExtended.js";
+export type { ITreeView } from "./elements/widgets/treeView/ITreeView.js";
+export * from "./elements/widgets/treeView/treeView.js";
+export * from "./elements/widgets/treeView/treeViewExtended.js";
+
+export type { ICodeView } from "./elements/widgets/codeView/ICodeView.js";
+export * from "./elements/widgets/codeView/code-view-ace.js";

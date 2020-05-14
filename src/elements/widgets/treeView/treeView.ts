@@ -1,7 +1,7 @@
-import { BaseCustomWebComponent, css } from '../controls/BaseCustomWebComponent';
-import { ISelectionChangedEvent } from '../services/selectionService/ISelectionChangedEvent';
-import { IDesignItem } from '../item/IDesignItem';
-import { DesignItem } from '../item/DesignItem';
+import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
+import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
+import { IDesignItem } from '../../item/IDesignItem';
+import { DesignItem } from '../../item/DesignItem';
 import { ITreeView } from './ITreeView';
 
 export class TreeView extends BaseCustomWebComponent implements ITreeView {
@@ -15,8 +15,7 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
 
   private _rootItem: IDesignItem
 
-  static get style() {
-    return css`
+  static readonly style = css`
     :host {
       --horz-margin: 20px;
       --vert-margin: 0px;
@@ -111,7 +110,6 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
     /* draw rounded: up connector of last item */
     .tree li:last-child:before { border-radius: 0 0 0 5px; }
     `;
-  }
 
   constructor() {
     super();

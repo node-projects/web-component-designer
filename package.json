@@ -15,7 +15,6 @@
     "ace-builds": "^1.4.11"
   },
   "devDependencies": {
-    "@types/ace": "^0.0.43",
     "@types/jquery": "^3.3.38",
     "@types/jquery.fancytree": "0.0.4",
     "jquery": "^3.5.1",

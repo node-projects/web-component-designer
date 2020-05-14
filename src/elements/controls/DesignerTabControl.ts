@@ -1,4 +1,5 @@
 import { BaseCustomWebComponent, css } from './BaseCustomWebComponent';
+import { TypedEvent } from '../../basic/TypedEvent';
 
 export class DesignerTabControl extends BaseCustomWebComponent {
 
@@ -8,8 +9,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     private _panels: HTMLDivElement;
     private _headerDiv: HTMLDivElement;
 
-    static get style() {
-        return css`
+    static readonly style = css`
         :host {
             height: 100%;
         }
@@ -53,7 +53,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
             background: var(--medium-grey);
             height: calc(100% - 30px);
         }
-        `;}
+        `;
 
     constructor() {
         super();
@@ -123,7 +123,10 @@ export class DesignerTabControl extends BaseCustomWebComponent {
                 this._headerDiv.children[index].classList.remove('selected');
             }
         }
+        this.onSelectedTabChanged.emit(this.selectedIndex);
     }
+
+    public readonly onSelectedTabChanged = new TypedEvent<number>();
 }
 
 customElements.define('node-projects-designer-tab-control', DesignerTabControl);

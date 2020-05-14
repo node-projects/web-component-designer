@@ -1,17 +1,15 @@
-import { BaseCustomWebComponent, css } from '../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css, html } from '../../controls/BaseCustomWebComponent';
 import { ITreeView } from './ITreeView';
-import { DesignItem } from '../item/DesignItem';
+import { DesignItem } from '../../item/DesignItem';
 
 export class TreeViewExtended extends BaseCustomWebComponent implements ITreeView {
-
   public items: any;
 
   private _index: number;
   private _treeDiv: HTMLDivElement;
   private _tree: Fancytree.Fancytree;
 
-  static get style() {
-    return css`
+  static readonly style= css`
       span.drag-source {
         border: 1px solid grey;
         border-radius: 3px;
@@ -29,7 +27,10 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
         outline: 1px dotted red;
       }
     `;
-  }
+
+    static readonly template = html`
+      <link rel="stylesheet" href="/node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css">
+    `;
 
   constructor() {
     super();
@@ -37,23 +38,17 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
     this._treeDiv = document.createElement('div');
     this._treeDiv.setAttribute('id', 'tree');
     this.shadowRoot.appendChild(this._treeDiv);
-
-    //todo: load as CSSStyleSheet and add to adopted
-
-    const linkElement = document.createElement("link");
-    linkElement.rel = "stylesheet";
-    linkElement.href = "/node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css";
-    this.shadowRoot.appendChild(linkElement);
   }
 
-  async connectedCallback() {
+
+  async ready() {
     this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
       icon: false, //atm, maybe if we include icons for specific elements
       extensions: ['dnd5'],
       source: []
     });
-    
+
     //@ts-ignore
     this._tree = $.ui.fancytree.getTree(this._treeDiv);
   }
@@ -76,7 +71,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
     if (currentNode == null) {
       currentNode = this._tree.getRootNode();
     }
-    
+
     const data = {
       tag: element.tagName.toLowerCase(),
       id: element.id ? ('#' + element.id) : '',
@@ -102,7 +97,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
 
   private _highlight(activeElement: Element) {
     if (activeElement != null) {
-      this._tree.getRootNode().getChildren().forEach(function(node) {
+      this._tree.getRootNode().getChildren().forEach(function (node) {
         //@ts-ignore
         if (node.ref === activeElement) {
           node.setSelected(true);

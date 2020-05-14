@@ -1,12 +1,12 @@
 {
   "elements":
   [
-    "a",
+    {"tag" : "a" },
     "p",
     "span",
     "div",
     "input",
-    "button",
+    {"tag" : "button", "defaultWidth": "80px", "defaultHeight": "30px", "defaultContent": "Button" },
     "form",
     "img",
     "h1",
