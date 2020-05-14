@@ -1,6 +1,6 @@
 # web-component-designer
 
-## Caution - this is a preview Version, we hope to release a RC in April 2020
+## Caution - this is a preview Version, we hope to release a RC in May/June 2020
 
 A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
@@ -14,7 +14,9 @@ This is a Designer Framework wich could easily be included in your own Software.
 
 ## Demo
 
-look at: https://node-projects.github.io/web-component-designer/build/
+look at: https://node-projects.github.io/web-component-designer-demo/index.html
+
+repository: https://github.com/node-projects/web-component-designer-demo
 
 ## What is needed
 
