@@ -292,9 +292,9 @@ export class CanvasView extends BaseCustomWebComponent {
     if (!isOk) {
       return;
     }
-    let oldLeft = parseInt(primarySelection.element.style.left);
-    let oldTop = parseInt(primarySelection.element.style.top);
-    let oldPosition = primarySelection.element.style.position;
+    let oldLeft = parseInt((<HTMLElement>primarySelection.element).style.left);
+    let oldTop = parseInt((<HTMLElement>primarySelection.element).style.top);
+    //let oldPosition = (<HTMLElement>primarySelection.element).style.position;
 
     switch (event.key) {
       case 'ArrowUp':
@@ -302,7 +302,7 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
         } else {
-          primarySelection.element.style.top = oldTop - 1 + 'px';
+          (<HTMLElement>primarySelection.element).style.top = oldTop - 1 + 'px';
         }
         break;
       case 'ArrowDown':
@@ -310,7 +310,7 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
         } else {
-          primarySelection.element.style.top = oldTop + 1 + 'px';
+          (<HTMLElement>primarySelection.element).style.top = oldTop + 1 + 'px';
         }
         break;
       case 'ArrowLeft':
@@ -318,7 +318,7 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
         } else {
-          primarySelection.element.style.left = oldLeft - 1 + 'px';
+          (<HTMLElement>primarySelection.element).style.left = oldLeft - 1 + 'px';
         }
         break;
       case 'ArrowRight':
@@ -326,7 +326,7 @@ export class CanvasView extends BaseCustomWebComponent {
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
         } else {
-          primarySelection.element.style.left = oldLeft + 1 + 'px';
+          (<HTMLElement>primarySelection.element).style.left = oldLeft + 1 + 'px';
         }
         break;
     }
@@ -482,13 +482,13 @@ export class CanvasView extends BaseCustomWebComponent {
       if (event.type == EventNames.PointerDown)
         this._clickThroughElements.push(currentDesignItem);
       for (const e of this._clickThroughElements) {
-        backup.push(e.element.style.pointerEvents)
-        e.element.style.pointerEvents = 'none';
+        backup.push((<HTMLElement>e.element).style.pointerEvents);
+        (<HTMLElement>e.element).style.pointerEvents = 'none';
       }
       let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
       currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
       for (const e of this._clickThroughElements) {
-        e.element.style.pointerEvents = backup.shift();
+        (<HTMLElement>e.element).style.pointerEvents = backup.shift();
       }
     } else {
       this._clickThroughElements = []
@@ -530,7 +530,7 @@ export class CanvasView extends BaseCustomWebComponent {
 
         //todo -> what is if a transform already exists -> backup existing style.?
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          designItem.element.style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
+          (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
         }
 
         // See if it's over anything.
@@ -615,17 +615,17 @@ export class CanvasView extends BaseCustomWebComponent {
                 }
               });*/
           } else {
-            let oldLeft = parseInt(movedElement.style.left);
+            let oldLeft = parseInt((<HTMLElement>movedElement).style.left);
             oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
-            let oldTop = parseInt(movedElement.style.top);
+            let oldTop = parseInt((<HTMLElement>movedElement).style.top);
             oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
             //let oldPosition = movedElement.style.position;
 
             //todo: move get old Position to a handler
-            movedElement.style.transform = null;
-            movedElement.style.position = 'absolute';
-            movedElement.style.left = (trackX + oldLeft) + "px";
-            movedElement.style.top = (trackY + oldTop) + "px";
+            (<HTMLElement>movedElement).style.transform = null;
+            (<HTMLElement>movedElement).style.position = 'absolute';
+            (<HTMLElement>movedElement).style.left = (trackX + oldLeft) + "px";
+            (<HTMLElement>movedElement).style.top = (trackY + oldTop) + "px";
             //todo
             /*this.serviceContainer.UndoService.add(UndoItemType.Move, movedElement,
               {
@@ -726,8 +726,8 @@ export class CanvasView extends BaseCustomWebComponent {
         }
         let i = 0;
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          designItem.element.style.width = this._initialSizes[i].width + trackX + 'px';
-          designItem.element.style.height = this._initialSizes[i].height + trackY + 'px';
+          (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
+          (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
         }
         break;
       case EventNames.PointerUp:
