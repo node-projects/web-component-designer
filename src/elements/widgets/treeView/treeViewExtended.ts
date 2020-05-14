@@ -29,7 +29,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
     `;
 
     static readonly template = html`
-      <link rel="stylesheet" href="/node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css">
+      <link rel="stylesheet" href="./node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css">
     `;
 
   constructor() {
