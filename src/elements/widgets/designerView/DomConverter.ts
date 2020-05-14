@@ -10,11 +10,12 @@ export class DomConverter {
   }
 
   private static _convertDomToString(element: Element, level: number): string {
-    let retVal = ''.padEnd(level * this.intend, ' ') + '<' + element.localName + ' ';
+    let retVal = ''.padEnd(level * this.intend, ' ') + '<' + element.localName;
     for (let a of element.attributes) {
       //Replace " in a.value with &quot;
-      retVal += a.name + '="' + a.value.replace(/"/g, '&quot;') + '">\n';
+      retVal += ' ' + a.name + '="' + a.value.replace(/"/g, '&quot;') + '"';
     }
+    retVal += '>\n';
     if (element.childNodes.length) {
       for (let e of element.childNodes) {
         if (e instanceof Element)
