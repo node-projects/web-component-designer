@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, css, html } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, cssAsync } from '../../controls/BaseCustomWebComponent';
 import { ITreeView } from './ITreeView';
 import { DesignItem } from '../../item/DesignItem';
 
@@ -9,7 +9,9 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
   private _treeDiv: HTMLDivElement;
   private _tree: Fancytree.Fancytree;
 
-  static readonly style= css`
+  static readonly style = cssAsync`
+      @import url("./node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css");
+
       span.drag-source {
         border: 1px solid grey;
         border-radius: 3px;
@@ -26,10 +28,6 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
       span.fancytree-node.fancytree-drop-reject {
         outline: 1px dotted red;
       }
-    `;
-
-    static readonly template = html`
-      <link rel="stylesheet" href="./node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css">
     `;
 
   constructor() {

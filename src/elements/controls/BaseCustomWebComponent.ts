@@ -1,83 +1,95 @@
-export const html = function html(strings: TemplateStringsArray, ...values: any[]): HTMLTemplateElement {
+export const html = function (strings: TemplateStringsArray, ...values: any[]): HTMLTemplateElement {
   const template = document.createElement('template');
   template.innerHTML = strings.raw[0];
   return template;
 };
 
-export const css = function html(strings: TemplateStringsArray, ...values: any[]): CSSStyleSheet {
+export const css = function (strings: TemplateStringsArray, ...values: any[]): CSSStyleSheet {
   const cssStyleSheet = new CSSStyleSheet();
   //@ts-ignore
   cssStyleSheet.replaceSync(strings.raw[0]);
   return cssStyleSheet;
 };
 
+export const cssAsync = async function (strings: TemplateStringsArray, ...values: any[]): Promise<CSSStyleSheet> {
+  const cssStyleSheet = new CSSStyleSheet();
+  //@ts-ignore
+  await cssStyleSheet.replace(strings.raw[0]);
+  return cssStyleSheet;
+};
+
 export class BaseCustomWebComponent extends HTMLElement {
-  static readonly style: CSSStyleSheet;
+  static readonly style: CSSStyleSheet | Promise<CSSStyleSheet>;
   static readonly template: HTMLTemplateElement;
 
   protected _getDomElement<T extends Element>(id: string): T {
-      if (this.shadowRoot.children.length > 0)
-          return <T>(<any>this.shadowRoot.getElementById(id));
-      return <T>(<any>this._rootDocumentFragment.getElementById(id));
+    if (this.shadowRoot.children.length > 0)
+      return <T>(<any>this.shadowRoot.getElementById(id));
+    return <T>(<any>this._rootDocumentFragment.getElementById(id));
   }
 
   protected _getDomElements<T extends Element>(selector: string): T[] {
-      if (this.shadowRoot.children.length > 0)
-          return <T[]>(<any>this.shadowRoot.querySelectorAll(selector));
-      return <T[]>(<any>this._rootDocumentFragment.querySelectorAll(selector));
+    if (this.shadowRoot.children.length > 0)
+      return <T[]>(<any>this.shadowRoot.querySelectorAll(selector));
+    return <T[]>(<any>this._rootDocumentFragment.querySelectorAll(selector));
   }
 
   //@ts-ignore
   private static _propertiesDictionary: Map<string, string>;
   protected _parseAttributesToProperties() {
+    //@ts-ignore
+    if (!this.constructor._propertiesDictionary) {
       //@ts-ignore
-      if (!this.constructor._propertiesDictionary) {
-          //@ts-ignore
-          this.constructor._propertiesDictionary = new Map<string, [string, any]>();
-          //@ts-ignore
-          for (let i in this.constructor.properties) {
-              //@ts-ignore
-              this.constructor._propertiesDictionary.set(i.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`), [i, this.constructor.properties[i]]);
-          }
+      this.constructor._propertiesDictionary = new Map<string, [string, any]>();
+      //@ts-ignore
+      for (let i in this.constructor.properties) {
+        //@ts-ignore
+        this.constructor._propertiesDictionary.set(i.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`), [i, this.constructor.properties[i]]);
       }
-      for (const a of this.attributes) {
-          //@ts-ignore
-          let pair = this.constructor._propertiesDictionary.get(a.name);
-          if (pair) {
-              if (pair[1] === Boolean)
-                  this[pair[0]] = true;
-              else
-                  this[pair[0]] = a.value;
-          }
+    }
+    for (const a of this.attributes) {
+      //@ts-ignore
+      let pair = this.constructor._propertiesDictionary.get(a.name);
+      if (pair) {
+        if (pair[1] === Boolean)
+          this[pair[0]] = true;
+        else
+          this[pair[0]] = a.value;
       }
+    }
   }
 
   private _rootDocumentFragment: DocumentFragment;
 
   constructor() {
-      super();
+    super();
 
-      this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: 'open' });
 
+    //@ts-ignore
+    if (this.constructor.template) {
       //@ts-ignore
-      if (this.constructor.template) {
-          //@ts-ignore
-          this._rootDocumentFragment = this.constructor.template.content.cloneNode(true);
-      }
+      this._rootDocumentFragment = this.constructor.template.content.cloneNode(true);
+    }
 
+    //@ts-ignore
+    if (this.constructor.style) {
       //@ts-ignore
-      if (this.constructor.style) {
-          //@ts-ignore
-          this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
-      }
+      if (this.constructor.style instanceof Promise)
+        //@ts-ignore
+        this.constructor.style.then((style) => this.shadowRoot.adoptedStyleSheets = [style]);
+      else
+        //@ts-ignore
+        this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
+    }
 
-      queueMicrotask(() => {
-          if (this._rootDocumentFragment)
-              this.shadowRoot.appendChild(this._rootDocumentFragment);
-          //@ts-ignore
-          if (this.ready)
-              //@ts-ignore
-              this.ready();
-      })
+    queueMicrotask(() => {
+      if (this._rootDocumentFragment)
+        this.shadowRoot.appendChild(this._rootDocumentFragment);
+      //@ts-ignore
+      if (this.ready)
+        //@ts-ignore
+        this.ready();
+    })
   }
 }
