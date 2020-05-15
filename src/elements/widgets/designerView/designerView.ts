@@ -16,8 +16,9 @@ import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
 import { DomConverter } from './DomConverter';
+import { IDesignerView } from './IDesignerView';
 
-export class CanvasView extends BaseCustomWebComponent {
+export class DesignerView extends BaseCustomWebComponent implements IDesignerView {
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
@@ -45,8 +46,8 @@ export class CanvasView extends BaseCustomWebComponent {
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
-  
-  private static _activeClassName = 'active';
+
+  private static _designerClassPrefix = 'node-projects-wcdesigner-';
 
   static readonly style = css`
     :host {
@@ -73,16 +74,11 @@ export class CanvasView extends BaseCustomWebComponent {
       -webkit-user-select: none;
       -ms-user-select: none;
     }
-    #canvas *:not(.active):hover {
+    #canvas *:not(.node-projects-wcdesigner-active):hover {
       outline: solid 2px #90CAF9 !important;
       outline-offset: 2px;
     }
-    .active, :host(.active) {
-      outline: solid 3px var(--highlight-blue) !important;
-      outline-offset: 2px;
-      transform: translateZ(0);
-    }
-    :host(.active) {
+    :host(.node-projects-wcdesigner-active) {
       outline-offset: -3px;
     }
     #selector {
@@ -130,22 +126,6 @@ export class CanvasView extends BaseCustomWebComponent {
       overflow: auto;
     }
 
-    /* Show a resize cursor in the corner */
-    .active:after {
-      position: absolute;
-      bottom: -5px;
-      right: -5px;
-      height: 14px;
-      width: 14px;
-      content: '↘';
-      cursor: se-resize;
-      font-size: 10px;
-      font-weight: bold;
-      text-align: center;
-      background: var(--highlight-blue);
-      color: white;
-      z-index: 1000000;
-    }
     .dragging, .resizing {
       user-select: none;
     }
@@ -180,6 +160,28 @@ export class CanvasView extends BaseCustomWebComponent {
     }
     .zoom-out {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' d='M0 0h24v24H0V0z'/%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z'/%3E%3C/svg%3E"); 
+    }
+
+    .node-projects-wcdesigner-active, :host(.node-projects-wcdesigner-active) {
+      outline: solid 3px var(--highlight-blue) !important;
+      outline-offset: 2px;
+      transform: translateZ(0);
+    }
+    /* Show a resize cursor in the corner */
+    .node-projects-wcdesigner-active:after {
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      height: 14px;
+      width: 14px;
+      content: '↘';
+      cursor: se-resize;
+      font-size: 10px;
+      font-weight: bold;
+      text-align: center;
+      background: var(--highlight-blue);
+      color: white;
+      z-index: 1000000;
     }
   }`;
 
@@ -217,7 +219,7 @@ export class CanvasView extends BaseCustomWebComponent {
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
 
-    this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged);
+    this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
 
   }
 
@@ -238,9 +240,14 @@ export class CanvasView extends BaseCustomWebComponent {
     window.removeEventListener('keydown', this._onKeyDownBound, true);
     window.removeEventListener('keyup', this._onKeyUpBound, true);
   }
-  
-  public getCode() {
+
+  public getHTML() {
+    this.instanceServiceContainer.selectionService.setSelectedElements(null);
     return DomConverter.ConvertDomToString(this.rootDesignItem.element);
+  }
+
+  public parseHTML(html: string) {
+    return this.rootDesignItem.element.innerHTML = html;
   }
 
   private _onDragOver(event: DragEvent) {
@@ -255,7 +262,6 @@ export class CanvasView extends BaseCustomWebComponent {
     let instance = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
     let di = DesignItem.GetOrCreateDesignItem(instance, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
-    //this._canvas.appendChild(instance);
   }
 
   private onKeyUp(event: KeyboardEvent) {
@@ -287,7 +293,7 @@ export class CanvasView extends BaseCustomWebComponent {
       //@ts-ignore
       (event.composedPath()[0].localName === 'button' && event.composedPath()[2].localName == 'tree-view') ||
       //@ts-ignore
-      (event.composedPath()[0].localName == 'body') || event.composedPath()[0].classList.contains(CanvasView._activeClassName);
+      (event.composedPath()[0].localName == 'body') || event.composedPath()[0].classList.contains(DesignerView._activeClassName);
 
     if (!isOk) {
       return;
@@ -330,7 +336,7 @@ export class CanvasView extends BaseCustomWebComponent {
         }
         break;
     }
-    
+
     /*this.instanceServiceContainer.undoService.add(UndoItemType.Move, primarySelection.element,
       {
         new: { left: primarySelection.element.style.left, top: primarySelection.element.style.top, position: primarySelection.element.style.position },
@@ -369,11 +375,23 @@ export class CanvasView extends BaseCustomWebComponent {
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
     if (selectionChangedEvent.oldSelectedElements) {
       for (let e of selectionChangedEvent.oldSelectedElements)
-        e.element.classList.remove(CanvasView._activeClassName);
+        this._toggleDesignerClass(e, 'active', false);
     }
     if (selectionChangedEvent.selectedElements) {
       for (let e of selectionChangedEvent.selectedElements)
-        e.element.classList.add(CanvasView._activeClassName);
+        this._toggleDesignerClass(e, 'active', true);
+    }
+  }
+
+  private _toggleDesignerClass(designItem: IDesignItem, className: 'active', state: boolean) {
+    if (state) {
+      designItem.element.classList.add(DesignerView._designerClassPrefix + className);
+    } else {
+      if (designItem.element.classList.contains(DesignerView._designerClassPrefix + className)) {
+        designItem.element.classList.remove(DesignerView._designerClassPrefix + className);
+        if (designItem.element.classList.length === 0)
+          designItem.element.removeAttribute('class');
+      }
     }
   }
 
@@ -775,4 +793,4 @@ export class CanvasView extends BaseCustomWebComponent {
   }
 }
 
-customElements.define('node-projects-canvas-view', CanvasView);
+customElements.define('node-projects-designer-view', DesignerView);

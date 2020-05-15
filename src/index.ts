@@ -48,7 +48,9 @@ export * from "./elements/services/ServiceContainer.js";
 
 export * from "./elements/attributeEditor.js";
 export * from "./elements/attributeEditorAttributeList.js";
-export * from "./elements/widgets/designerView/canvasView.js";
+
+export type { IDesignerView } from "./elements/widgets/designerView/IDesignerView.js";
+export * from "./elements/widgets/designerView/designerView.js";
 
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/paletteElements.js";

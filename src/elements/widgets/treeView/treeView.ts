@@ -128,9 +128,9 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
   // this.instanceServiceContainer.selectionService.setSelectedElements(null);
 
   public selectionChanged(event: ISelectionChangedEvent) {
-    if (event.selectedElements.length > 0){
+    if (event.selectedElements.length > 0) {
       this._selectTreeElement(this._mapElementTreeitem.get(event.selectedElements[0].element));
-      
+
     }
   }
 
@@ -223,7 +223,8 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
       this._previouslySelected.classList.remove('selected');
     }
     this._previouslySelected = item;
-    item.classList.add('selected');
+    if (item)
+      item.classList.add('selected');
   }
 
   private _selectDesignerElement(item: any) {

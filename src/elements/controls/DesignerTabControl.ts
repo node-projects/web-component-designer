@@ -1,15 +1,17 @@
 import { BaseCustomWebComponent, css } from './BaseCustomWebComponent';
 import { TypedEvent } from '../../basic/TypedEvent';
 
+export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number };
+
 export class DesignerTabControl extends BaseCustomWebComponent {
 
-    public selectedIndex: number = -1;
+  public selectedIndex: number = -1;
 
-    private _contentObserver: MutationObserver;
-    private _panels: HTMLDivElement;
-    private _headerDiv: HTMLDivElement;
+  private _contentObserver: MutationObserver;
+  private _panels: HTMLDivElement;
+  private _headerDiv: HTMLDivElement;
 
-    static readonly style = css`
+  static readonly style = css`
         :host {
             height: 100%;
         }
@@ -55,78 +57,79 @@ export class DesignerTabControl extends BaseCustomWebComponent {
         }
         `;
 
-    constructor() {
-        super();
-        
-        this._contentObserver = new MutationObserver(() => {
-            this._createItems();
-        });
+  constructor() {
+    super();
 
-        let outerDiv = document.createElement("div")
-        outerDiv.className = 'outer';
-        this.shadowRoot.appendChild(outerDiv);
-        this._headerDiv = document.createElement("div")
-        this._headerDiv.className = 'header';
-        outerDiv.appendChild(this._headerDiv);
-        this._panels = document.createElement("div")
-        this._panels.className = 'panels';
-        outerDiv.appendChild(this._panels);
-        let _slot = document.createElement("slot")
-        _slot.name = 'panels';
-        this._panels.appendChild(_slot);
+    this._contentObserver = new MutationObserver(() => {
+      this._createItems();
+    });
+
+    let outerDiv = document.createElement("div")
+    outerDiv.className = 'outer';
+    this.shadowRoot.appendChild(outerDiv);
+    this._headerDiv = document.createElement("div")
+    this._headerDiv.className = 'header';
+    outerDiv.appendChild(this._headerDiv);
+    this._panels = document.createElement("div")
+    this._panels.className = 'panels';
+    outerDiv.appendChild(this._panels);
+    let _slot = document.createElement("slot")
+    _slot.name = 'panels';
+    this._panels.appendChild(_slot);
+  }
+
+  connectedCallback() {
+    this._createItems();
+    this._selectedIndexChanged();
+    this._contentObserver.observe(this, { childList: true });
+
+    let selectedIndexAttribute = this.getAttribute("selected-index")
+    if (selectedIndexAttribute) {
+      let oldIndex = this.selectedIndex;
+      this.selectedIndex = <number><any>selectedIndexAttribute;
+      this._selectedIndexChanged(oldIndex);
+    }
+  }
+
+  disconnectedCallback() {
+    this._contentObserver.disconnect();
+  }
+
+  private _createItems() {
+    this._headerDiv.innerHTML = "";
+    let i = 0;
+    for (let item of this.children) {
+      let htmlItem = item as HTMLElement;
+      let tabHeaderDiv = document.createElement("div")
+      tabHeaderDiv.innerText = htmlItem.title;
+      tabHeaderDiv.className = 'tab-header';
+      let j = i;
+      tabHeaderDiv.onpointerdown = () => {
+        let oldIndex = this.selectedIndex;
+        this.selectedIndex = j;
+        this._selectedIndexChanged(oldIndex)
+      }
+      this._headerDiv.appendChild(tabHeaderDiv);
+      i++;
     }
 
-    connectedCallback() {
-        this._createItems();
-        this._selectedIndexChanged();
-        this._contentObserver.observe(this, { childList: true });
+    this._selectedIndexChanged();
+  }
 
-        let selectedIndexAttribute = this.getAttribute("selected-index")
-        if (selectedIndexAttribute) {
-            this.selectedIndex = <number><any>selectedIndexAttribute;
-            this._selectedIndexChanged();
-        }
+  private _selectedIndexChanged(oldIndex?: number) {
+    for (let index = 0; index < this.children.length; index++) {
+      const element = this.children[index];
+      if (index == this.selectedIndex) {
+        element.slot = "panels";
+        this._headerDiv.children[index].classList.add('selected');
+      } else {
+        element.removeAttribute("slot");
+        this._headerDiv.children[index].classList.remove('selected');
+      }
     }
+    this.onSelectedTabChanged.emit({ newIndex: this.selectedIndex, oldIndex: oldIndex });
+  }
 
-    disconnectedCallback() {
-        this._contentObserver.disconnect();
-    }
-
-    private _createItems() {
-        this._headerDiv.innerHTML = "";
-        let i = 0;
-        for (let item of this.children) {
-            let htmlItem = item as HTMLElement;
-            let tabHeaderDiv = document.createElement("div")
-            tabHeaderDiv.innerText = htmlItem.title;
-            tabHeaderDiv.className = 'tab-header';
-            let j = i;
-            tabHeaderDiv.onpointerdown = () => {
-                this.selectedIndex = j;
-                this._selectedIndexChanged()
-            }
-            this._headerDiv.appendChild(tabHeaderDiv);
-            i++;
-        }
-
-        this._selectedIndexChanged();
-    }
-
-    private _selectedIndexChanged() {
-        for (let index = 0; index < this.children.length; index++) {
-            const element = this.children[index];
-            if (index == this.selectedIndex) {
-                element.slot = "panels";
-                this._headerDiv.children[index].classList.add('selected');
-            } else {
-                element.removeAttribute("slot");
-                this._headerDiv.children[index].classList.remove('selected');
-            }
-        }
-        this.onSelectedTabChanged.emit(this.selectedIndex);
-    }
-
-    public readonly onSelectedTabChanged = new TypedEvent<number>();
+  public readonly onSelectedTabChanged = new TypedEvent<DesignerTabControlIndexChangedEventArgs>();
 }
-
 customElements.define('node-projects-designer-tab-control', DesignerTabControl);

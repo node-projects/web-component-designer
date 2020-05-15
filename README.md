@@ -84,7 +84,7 @@ native element, you might have to do some code changes:
   in `code-view.html`
   - if it doesn't have a "slot", i.e. you shouldn't be able to drop children
   in it (like `<input>`), you need to make 1 change each in `app-shell.html`.
-  `canvas-view.html` and `canvas-controls.html` (just search for `input`, you'll find it.).
+  `designer-view.html` (just search for `input`, you'll find it.).
   Yes I should probably make this only exist in one place, but you know what,
   communicating between siblings is hard.
 
