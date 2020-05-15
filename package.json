@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@webcomponents/webcomponentsjs": "^2.4.3",
-    "construct-style-sheets-polyfill": "^2.3.5",
-    "ace-builds": "^1.4.11"
+    "construct-style-sheets-polyfill": "^2.3.5"   
   },
   "devDependencies": {
+    "ace-builds": "^1.4.11",
     "@types/jquery": "^3.3.38",
     "@types/jquery.fancytree": "0.0.4",
     "jquery": "^3.5.1",

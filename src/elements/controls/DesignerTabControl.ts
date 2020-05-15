@@ -26,7 +26,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
             flex-direction: row; 
             cursor: pointer; 
             height: 30px;
-            background-color: var(--dark-grey);
+            background-color: var(--dark-grey, #232733);
         }
         .tab-header {
             font-family: Arial;
@@ -44,15 +44,15 @@ export class DesignerTabControl extends BaseCustomWebComponent {
             letter-spacing: 1px;
         }
         .tab-header:hover {
-            background: var(--light-grey);
+            background: var(--light-grey, #383f52);
         }
         .selected {
             pointer-events: none;
-            background: var(--medium-grey);
-            box-shadow: inset 0 3px 0 var(--highlight-pink);
+            background: var(--medium-grey, #2f3545);
+            box-shadow: inset 0 3px 0 var(--highlight-pink, #e91e63);
         }
         .panels {
-            background: var(--medium-grey);
+            background: var(--medium-grey, #2f3545);
             height: calc(100% - 30px);
         }
         `;
@@ -86,7 +86,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     let selectedIndexAttribute = this.getAttribute("selected-index")
     if (selectedIndexAttribute) {
       let oldIndex = this.selectedIndex;
-      this.selectedIndex = <number><any>selectedIndexAttribute;
+      this.selectedIndex = parseInt(selectedIndexAttribute);
       this._selectedIndexChanged(oldIndex);
     }
   }

@@ -26,7 +26,7 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
       position: relative;
       width: 100%;
       height: 100%;
-      background: var(--dark-grey);
+      background: var(--dark-grey, #232733);
       overflow-y: auto;
     }
     button {
@@ -39,22 +39,22 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
       text-align: left;
       display: inline-block;
       margin: 0;
-      background: var(--dark-grey);
+      background: var(--dark-grey, #232733);
       position: relative;
       color: white;
     }
     button:hover, button:focus {
-      background: var(--light-grey);
+      background: var(--light-grey, #383f52);
     }
     span {
       margin: 4px;
     }
     .id {
       font-style: italic;
-      color: var(--highlight-pink);
+      color: var(--highlight-pink, #e91e63);
     }
     .selected {
-      background: var(--light-grey);
+      background: var(--light-grey, #383f52);
       outline: none;
     }
 

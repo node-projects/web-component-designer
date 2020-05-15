@@ -19,14 +19,14 @@ export class AttributeEditor extends BaseCustomWebComponent {
     iron-pages {
       overflow: hidden;
       height: 250px;
-      background: var(--medium-grey);
+      background: var(--medium-grey, #2f3545);
       color: white;
     }
     button:hover {
       box-shadow: inset 0 3px 0 var(--light-grey);
     }
     button:focus {
-      box-shadow: inset 0 3px 0 var(--highlight-pink);
+      box-shadow: inset 0 3px 0 var(--highlight-pink, #e91e63);
     }
     `;
 

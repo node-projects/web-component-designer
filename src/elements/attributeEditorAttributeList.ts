@@ -44,7 +44,7 @@ export class AttributeEditorAttributeList extends BaseCustomWebComponent {
       cursor: pointer;
     }
     input, select {
-      border: 1px solid var(--input-border-color);
+      border: 1px solid var(--input-border-color, #596c7a);
       border-radius: 5px;
       box-sizing: border-box;
       font-size: 11px;

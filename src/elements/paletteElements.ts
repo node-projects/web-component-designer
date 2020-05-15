@@ -31,7 +31,7 @@ export class PaletteElements extends BaseCustomWebComponent {
       padding: 8px 14px;
     }
     button:hover {
-      background: var(--light-grey);
+      background: var(--light-grey, #383f52);
     }
 
     div {
