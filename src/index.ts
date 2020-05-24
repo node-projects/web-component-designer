@@ -17,7 +17,11 @@ export type { IContentService }  from "./elements/services/contentService/IConte
 export type { IElementDefinition } from "./elements/services/elementsService/IElementDefinition.js";
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
-export * from "./elements/services/elementsService/JsonElementsService.js";
+export * from "./elements/services/elementsService/JsonFileElementsService.js";
+
+export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
+export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
+export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
 
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";
@@ -46,15 +50,15 @@ export type { IService } from "./elements/services/IService.js";
 export type { IServiceContainer } from "./elements/services/IServiceContainer.js";
 export * from "./elements/services/ServiceContainer.js";
 
-export * from "./elements/attributeEditor.js";
-export * from "./elements/attributeEditorAttributeList.js";
+export * from "./elements/widgets/propertyGrid/PropertyGrid.js";
+export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";
 
 export type { IDesignerView } from "./elements/widgets/designerView/IDesignerView.js";
 export * from "./elements/widgets/designerView/designerView.js";
 
 export * from "./elements/widgets/demoView/demoView.js";
-export * from "./elements/paletteElements.js";
-export * from "./elements/paletteView.js";
+export * from "./elements/widgets/paletteView/paletteElements.js";
+export * from "./elements/widgets/paletteView/paletteView.js";
 
 export type { ITreeView } from "./elements/widgets/treeView/ITreeView.js";
 export * from "./elements/widgets/treeView/treeView.js";

@@ -68,7 +68,7 @@ export class DocumentContainer extends BaseCustomWebComponent {
     this._designerView = this._getDomElement('designerView');
     this._codeView = this._getDomElement('codeView');
     this._demoView = this._getDomElement('demoView');
-    this._designerView.serviceContainer = this._serviceContainer;
+    this._designerView.initialize(this._serviceContainer);
 
     this._tabControl.onSelectedTabChanged.on((i) => {
       if (i.oldIndex === 0)

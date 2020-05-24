@@ -1,6 +1,6 @@
-import { IElementDefinition } from './services/elementsService/IElementDefinition';
-import { dragDropFormatName } from '../Constants';
-import { BaseCustomWebComponent, css } from './controls/BaseCustomWebComponent';
+import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
+import { dragDropFormatName } from '../../../Constants';
+import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
 
 export class PaletteElements extends BaseCustomWebComponent {
 
@@ -53,9 +53,6 @@ export class PaletteElements extends BaseCustomWebComponent {
     }
 
     ::-webkit-input-placeholder { color: white; font-weight: 100; font-size: 14px; }
-    ::-moz-placeholder { color: white; font-weight: 100; font-size: 14px;  }
-    :-ms-input-placeholder { color: white; font-weight: 100; font-size: 14px;  }
-    :-moz-placeholder { color: white; font-weight: 100; font-size: 14px;  }
     `;
   }
 

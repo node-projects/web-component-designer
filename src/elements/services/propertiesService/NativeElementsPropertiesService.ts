@@ -1,6 +1,7 @@
 import { IPropertiesService } from "./IPropertiesService";
 import { IProperty } from './IProperty';
 import { IDesignItem } from '../../item/IDesignItem';
+import { ValueType } from "./ValueType";
 
 export class NativeElementsPropertiesService implements IPropertiesService {
     public name = "native"
@@ -23,10 +24,18 @@ export class NativeElementsPropertiesService implements IPropertiesService {
         return null;
     }
 
-    setValue(designItem: IDesignItem, property: IProperty, value: any) {
+    setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     }
-
-    getValue(designItem: IDesignItem, property: IProperty) {
-       return null;
+  
+    isSet(designItems: IDesignItem[], property: IProperty): ValueType {
+      return ValueType.none;
+    }
+  
+    getValue(designItems: IDesignItem[], property: IProperty) {
+      return null;
+    }
+  
+    getUnsetValue(designItems: IDesignItem[], property: IProperty) {
+      return null;
     }
 }

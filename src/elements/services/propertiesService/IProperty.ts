@@ -1,4 +1,5 @@
 import { IPropertiesService } from './IPropertiesService';
+import { IPropertyEditor } from './IPropertyEditor';
 
 export interface IProperty {
     name: string;
@@ -7,7 +8,7 @@ export interface IProperty {
     min?: number;
     max?: number;
     values?: string[]; // list selectable values
-    createEditor?: (property: IProperty) => HTMLElement;
+    createEditor?: (property: IProperty) => IPropertyEditor;
     value?: any;
     service: IPropertiesService;
 }

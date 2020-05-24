@@ -4,16 +4,15 @@ import { LitElementPropertiesService } from './propertiesService/LitElementPrope
 import { NativeElementsPropertiesService } from './propertiesService/NativeElementsPropertiesService';
 import { DefaultInstanceService } from './instanceService/DefaultInstanceService';
 import { DefaultEditorTypesService } from './propertiesService/DefaultEditorTypesService';
+import { HtmlWriterService } from './htmlWriterService/HtmlWriterService';
 
 let serviceContainer = new ServiceContainer();
 
-// serviceContainer.register("actionHistory", new UndoService());
-// serviceContainer.register("propertyService", new CssPropertiesService("css"));
-// serviceContainer.register("propertyService", new CssPropertiesService("flex"));
 serviceContainer.register("propertyService", new PolymerPropertiesService());
 serviceContainer.register("propertyService", new LitElementPropertiesService());
 serviceContainer.register("propertyService", new NativeElementsPropertiesService());
 serviceContainer.register("instanceService", new DefaultInstanceService());
 serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
+serviceContainer.register("htmlWriterService", new HtmlWriterService());
 
 export default serviceContainer;

@@ -1,6 +1,6 @@
 import { BaseCustomWebComponent, cssAsync } from '../../controls/BaseCustomWebComponent';
 import { ITreeView } from './ITreeView';
-import { DesignItem } from '../../item/DesignItem';
+import { IDesignItem } from '../../item/IDesignItem';
 
 export class TreeViewExtended extends BaseCustomWebComponent implements ITreeView {
   public items: any;
@@ -51,7 +51,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
     this._tree = $.ui.fancytree.getTree(this._treeDiv);
   }
 
-  public createTree(rootItem: DesignItem): void {
+  public createTree(rootItem: IDesignItem): void {
     this._recomputeTree(rootItem.element, null);
   }
 

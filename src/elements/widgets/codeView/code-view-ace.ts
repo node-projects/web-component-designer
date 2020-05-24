@@ -2,6 +2,25 @@ import { BaseCustomWebComponent, css } from "../../controls/BaseCustomWebCompone
 import { ICodeView } from "./ICodeView";
 import type { Ace } from "ace-builds";
 
+class CodeViewAceCompleter {
+  getCompletions(editor, session, pos, prefix, callback) {
+    if (prefix.length === 0) 
+      { callback(null, []); return }
+
+
+    let wordList=['t-t', 'visu-conveyor']; //todo: get word list from custom elements 
+    {
+        callback(null, wordList.map((w) => {
+          return { name: w, value: w, score: 1, meta: "tag" }
+        }));
+    }
+  }
+}
+
+//@ts-ignore
+let langTools = ace.require("ace/ext/language_tools");
+langTools.addCompleter(new CodeViewAceCompleter());
+
 export class CodeViewAce extends BaseCustomWebComponent implements ICodeView {
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
@@ -33,13 +52,27 @@ export class CodeViewAce extends BaseCustomWebComponent implements ICodeView {
     this._aceEditor = ace.edit(this._editor, {
       theme: "ace/theme/chrome",
       mode: "ace/mode/html",
-      value: "test"
-    }
-    );
+      value: "test",
+      autoScrollEditorIntoView: true,
+      fontSize: "14px",
+      showPrintMargin: false,
+      displayIndentGuides: true,
+      enableBasicAutocompletion: true,
+      enableSnippets: true,
+      enableLiveAutocompletion: true
+    });
+    //own snippet completer: http://plnkr.co/edit/6MVntVmXYUbjR0DI82Cr?p=preview
     this._aceEditor.renderer.attachToShadowRoot();
+
+    let observer = new MutationObserver((m) => {
+      this._aceEditor.setAutoScrollEditorIntoView(false);
+      this._aceEditor.setAutoScrollEditorIntoView(true);
+    });
+
     
-    //this._aceEditor.$blockScrolling = Infinity;
-    this._aceEditor.setOptions({ fontSize: "14px" });
+
+    let config = { attributes: true, childList: true, characterData: true };
+    observer.observe(this.shadowRoot.querySelector('.ace_content'), config);
   }
 
   update(code) {
@@ -49,6 +82,10 @@ export class CodeViewAce extends BaseCustomWebComponent implements ICodeView {
   getText() {
     return this._aceEditor.getValue();
   }
+
+  //todo reset undo stack, when and why?
+  //bind to global und and redo
+  //editor.getSession().setUndoManager(new ace.UndoManager())
 }
 
 customElements.define('node-projects-code-view-ace', CodeViewAce);

@@ -1,6 +1,7 @@
 import { IPropertiesService } from "./IPropertiesService";
 import { IProperty } from './IProperty';
 import { IDesignItem } from '../../item/IDesignItem';
+import { ValueType } from "./ValueType";
 
 export class PolymerPropertiesService implements IPropertiesService {
     
@@ -53,8 +54,8 @@ export class PolymerPropertiesService implements IPropertiesService {
         return properties;
     }
 
-    setValue(designItem: IDesignItem, property: IProperty, value: any) {
-        //let oldValue = (<HTMLElement>designItem.element)[property.name];
+    setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+      //let oldValue = (<HTMLElement>designItem.element)[property.name];
 
         //let doFunc = () => (<HTMLElement>designItem.element).setAttribute(this._camelToDashCase(property.name), value);
         //let undoFunc = () => (<HTMLElement>designItem.element).setAttribute(this._camelToDashCase(property.name), oldValue);
@@ -66,9 +67,17 @@ export class PolymerPropertiesService implements IPropertiesService {
               old: { value: oldValue }
             });*/
     }
-
-    getValue(designItem: IDesignItem, property: IProperty) {
-        return (<HTMLElement>designItem.element)[property.name];
+  
+    isSet(designItems: IDesignItem[], property: IProperty): ValueType {
+      return ValueType.none;
+    }
+  
+    getValue(designItems: IDesignItem[], property: IProperty) {
+      return null;
+    }
+  
+    getUnsetValue(designItems: IDesignItem[], property: IProperty) {
+      return null;
     }
 
     /*private _camelToDashCase(text: string){

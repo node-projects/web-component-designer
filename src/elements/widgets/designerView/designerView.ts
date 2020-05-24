@@ -29,6 +29,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private _alignOnGrid = true;
   private _resizeOffset = 10;
 
+  private _zoomFactor = 100;
+
   // Private Variables
   private _canvas: HTMLDivElement;
   private _selector: HTMLDivElement;
@@ -65,14 +67,12 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       box-sizing: border-box;
       width: 100%;
       height: 100%;
+      transform-origin: 0 0;
     }
 
     #canvas * {
       cursor: pointer;
       user-select: none;
-      -moz-user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
     }
     #canvas *:not(.node-projects-wcdesigner-active):hover {
       outline: solid 2px #90CAF9 !important;
@@ -117,7 +117,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
     .outercanvas1 {
       width: 100%;
-      height: 100%;
+      height: calc(100% - 17px);
     }
     .outercanvas2 {
       width: 100%;
@@ -206,21 +206,28 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
     this._selector = this._getDomElement<HTMLDivElement>('selector');
-    /*let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
+    let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
+    zoomInput.onchange = () => { this._zoomFactor = parseInt(zoomInput.value); zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    zoomInput.onclick = zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLImageElement>('zoomIncrease');
-    let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');*/
+    zoomIncrease.onclick = () => { this._zoomFactor += 10; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');
+    zoomDecrease.onclick = () => { this._zoomFactor -= 10; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
 
     this.instanceServiceContainer = new InstanceServiceContainer();
     this.instanceServiceContainer.register("undoService", new UndoService);
     this.instanceServiceContainer.register("selectionService", new SelectionService);
-    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
-    this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
 
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
+  }
 
+  initialize(serviceContainer: ServiceContainer) {
+    this.serviceContainer = serviceContainer;
+    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
+    this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
   }
 
   connectedCallback() {
@@ -229,6 +236,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerDownOnElement(event));
       this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerMoveOnElement(event));
       this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerUpOnElement(event));
+      this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
     }
@@ -241,13 +249,29 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     window.removeEventListener('keyup', this._onKeyUpBound, true);
   }
 
+  zoomFactorChanged() {
+    this._canvas.style.transform = "scale(" + (this._zoomFactor / 100) + ")";
+  }
+
   public getHTML() {
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
-    return DomConverter.ConvertDomToString(this.rootDesignItem.element);
+    return DomConverter.ConvertToString(this.rootDesignItem);
   }
 
   public parseHTML(html: string) {
-    return this.rootDesignItem.element.innerHTML = html;
+    this.rootDesignItem.element.innerHTML = html;
+    this._createDesignItemsRecursive(this.rootDesignItem.element);
+  }
+
+  private _createDesignItemsRecursive(element: Element) {
+    DesignItem.GetOrCreateDesignItem(element, this.serviceContainer, this.instanceServiceContainer);
+    for (let e of element.children) {
+      this._createDesignItemsRecursive(e);
+    }
+  }
+
+  private _onDragEnter(event: DragEvent) {
+    event.preventDefault();
   }
 
   private _onDragOver(event: DragEvent) {
