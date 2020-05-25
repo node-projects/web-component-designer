@@ -21,8 +21,8 @@ export interface IDesignItem {
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
 
-  setStyle(property: keyof CSSStyleDeclaration, value?: string | null);
-  removeStyle(property: keyof CSSStyleDeclaration);
+  setStyle(name: keyof CSSStyleDeclaration, value?: string | null);
+  removeStyle(name: keyof CSSStyleDeclaration);
 
   setAttribute(name: string, value?: string | null);
   removeAttribute(name: string);

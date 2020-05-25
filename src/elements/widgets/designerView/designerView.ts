@@ -332,7 +332,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
         } else {
-          (<HTMLElement>primarySelection.element).style.top = oldTop - 1 + 'px';
+          primarySelection.setStyle('top', oldTop - 1 + 'px');
         }
         break;
       case 'ArrowDown':
@@ -340,7 +340,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
         } else {
-          (<HTMLElement>primarySelection.element).style.top = oldTop + 1 + 'px';
+          primarySelection.setStyle('top', oldTop + 1 + 'px');
         }
         break;
       case 'ArrowLeft':
@@ -348,7 +348,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
         } else {
-          (<HTMLElement>primarySelection.element).style.left = oldLeft - 1 + 'px';
+          primarySelection.setStyle('left', oldLeft - 1 + 'px');
         }
         break;
       case 'ArrowRight':
@@ -356,7 +356,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           event.preventDefault();
           this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
         } else {
-          (<HTMLElement>primarySelection.element).style.left = oldLeft + 1 + 'px';
+          primarySelection.setStyle('left', oldLeft + 1 + 'px');
         }
         break;
     }
@@ -663,11 +663,12 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
             oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
             //let oldPosition = movedElement.style.position;
 
-            //todo: move get old Position to a handler
-            (<HTMLElement>movedElement).style.transform = null;
-            (<HTMLElement>movedElement).style.position = 'absolute';
-            (<HTMLElement>movedElement).style.left = (trackX + oldLeft) + "px";
-            (<HTMLElement>movedElement).style.top = (trackY + oldTop) + "px";
+            //todo: move this to handler wich is specific depeding on the container (e.g. canvasHandler, gridHandler, flexboxHandler...)
+            //todo: designitem set properties undo...
+            (<HTMLElement>designItem.element).style.transform = null;
+            designItem.setStyle('position', 'absolute');
+            designItem.setStyle('left', (trackX + oldLeft) + "px");
+            designItem.setStyle('top', (trackY + oldTop) + "px");
             //todo
             /*this.serviceContainer.UndoService.add(UndoItemType.Move, movedElement,
               {
@@ -768,8 +769,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
         }
         let i = 0;
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
-          (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
+          designItem.setStyle('width', this._initialSizes[i].width + trackX + 'px');
+          designItem.setStyle('height', this._initialSizes[i].height + trackY + 'px');
         }
         break;
       case EventNames.PointerUp:

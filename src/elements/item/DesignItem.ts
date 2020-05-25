@@ -133,9 +133,13 @@ export class DesignItem implements IDesignItem {
     delete element[DesignItem._designItemSymbol];
   }
 
-  public setStyle(property: keyof CSSStyleDeclaration, value?: string | null) {
+  public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {
+    this.styles.set(<string>name, value);
+    (<HTMLElement>this.element).style[<string>name] = value;
   }
   public removeStyle(property: keyof CSSStyleDeclaration) {
+    this.styles.delete(<string>name);
+    (<HTMLElement>this.element).style[<string>name] = '';
   }
 
   public setAttribute(name: string, value?: string | null) {

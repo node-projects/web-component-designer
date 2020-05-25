@@ -103,6 +103,9 @@ export class PaletteElements extends BaseCustomWebComponent {
       button.ondragend = (e) => {
         (<HTMLElement>e.currentTarget).style.outline = "none";
       }
+      button.ontouchstart = (e) => {
+        e.preventDefault();
+      }
       this.shadowRoot.appendChild(button);
     }
 

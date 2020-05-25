@@ -67,6 +67,27 @@ repository: https://github.com/node-projects/web-component-designer-demo
 at first you have to setup a service container, providing services for History, Properties, Elements, ....
 
 ## Configuring
+
+## For some Widgets the Designer needs Additional Dependencies
+
+## Code Editor
+
+You can select to use on of 3 Code Editors Available (ACE, CodeMirrow, Monaco).
+If you use one of the Widgets, you need to include the JS lib in you index.html and then use the specific widget.
+
+## TreeView
+
+We have 2 Tree Components. One Dependend Less and one Feature Rich wich uses FancyTree (and cause of this it needs JQuery and JqueryUI)
+
+## DragDrop
+
+If you'd like to use the Designer on Mobile, you need the mobile-drag-drop npm Library and include our polyfill.
+Your addition to your index.html should look like this:
+
+    <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
+    <script src="/node_modules/mobile-drag-drop/index.js"></script>
+    <script src="/node_modules/@node-projects/web-component-designer/dist/polyfill/mobileDragDrop.js"></script>
+
 **Disclaimer**: to configure the app to have other elements than the ones it
 already has, you should clone it, build it, and make one of the changes below.
 I don't want to add a "anyone should add any element to this exact deployed app"
