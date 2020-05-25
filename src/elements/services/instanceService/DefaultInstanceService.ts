@@ -5,8 +5,8 @@ export class DefaultInstanceService implements IInstanceService {
   async getElement(definition: IElementDefinition): Promise<HTMLElement> {
     if (definition.import) {
       let importUri = definition.import;
-      if (importUri[0] === '.' || importUri[0] === '/')
-        importUri = '../../../../../../../..' + (importUri[0] === '/' ? '' : '/') + importUri;
+      if (importUri[0] === '.')
+        importUri = '../../../../../../../../' + importUri;
       await import(importUri);
     }
     let element = document.createElement(definition.tag);
