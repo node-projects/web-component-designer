@@ -84,7 +84,7 @@ export class PaletteElements extends BaseCustomWebComponent {
       this._datalist.appendChild(option);
 
       let button = document.createElement("button");
-      button.innerText = elementDefintion.tag;
+      button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
       button.draggable = true;
       button.ondragstart = (e) => {
         e.dataTransfer.setData(dragDropFormatName, JSON.stringify(elementDefintion));
