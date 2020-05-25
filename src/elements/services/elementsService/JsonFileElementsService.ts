@@ -31,8 +31,9 @@ export class JsonFileElementsService implements IElementsService {
           for (const i in parsed.elements) {
             let element = parsed.elements[i];
             if (this.isIElementDefintion(element)) {
-              if (element.import)
+              if (element.import && element.import[0] == '.') {
                 element.import = prefix + element.import;
+              }
               this._elementList.push(element)
             }
             else
