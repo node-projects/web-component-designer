@@ -52,7 +52,9 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
   }
 
   public createTree(rootItem: IDesignItem): void {
-    this._recomputeTree(rootItem.element, null);
+    if (this._tree) {
+      this._recomputeTree(rootItem.element, null);
+    }
   }
 
   private _recomputeTree(rootElement: Element, activeElement: Element): void {
