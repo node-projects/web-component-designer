@@ -28,8 +28,7 @@ export class JsonFileElementsService implements IElementsService {
           let data = request.responseText;
           let parsed = JSON.parse(data) as IElementsJson;
           this._elementList = [];
-          for (const i in parsed.elements) {
-            let element = parsed.elements[i];
+          parsed.elements.forEach(element => {
             if (this.isIElementDefintion(element)) {
               if (element.import && element.import[0] == '.') {
                 element.import = prefix + element.import;
@@ -38,7 +37,7 @@ export class JsonFileElementsService implements IElementsService {
             }
             else
               this._elementList.push({ tag: element })
-          }
+          });
           if (this._resolveStored)
             this._resolveStored(this._elementList);
         } else {

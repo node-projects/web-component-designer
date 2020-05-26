@@ -108,25 +108,6 @@ export class PaletteElements extends BaseCustomWebComponent {
       }
       this.shadowRoot.appendChild(button);
     }
-
-    /*
-    this.elements = event.detail.response.elements;
-    // First, some elements have sub-elements in the same package.
-    let subElements = event.detail.response.subelements;
-    let subelements = [];
-    for (let parent in subElements) {
-      for (let i = 0; i < subElements[parent].length; i++) {
-        subelements.push(`${parent}/${subElements[parent][i]}`);
-        let packageName = parent;
-        if (parent === 'app-layout') {
-          packageName = parent + '/' + subElements[parent][i];
-        }
-        this.namesToPackages[subElements[parent][i]] = packageName;
-      }
-    }
-    this.elements = subelements.sort();
-
-    this.dispatchEvent(new CustomEvent('package-names-ready', { bubbles: true, composed: true, detail: { list: this.namesToPackages, node: this } }));*/
   }
 
   private _doClick(target, kind) {
