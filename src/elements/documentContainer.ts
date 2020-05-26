@@ -48,19 +48,25 @@ export class DocumentContainer extends BaseCustomWebComponent {
 
   set content(value: string) {
     this._content = value;
-    if (this._tabControl.selectedIndex === 0)
-      this._designerView.parseHTML(this._content);
-    else if (this._tabControl.selectedIndex === 1)
-      this._codeView.update(this._content);
-    else if (this._tabControl.selectedIndex === 2)
-      this._demoView.display(this._content);
+
+    if (this._tabControl) {
+      if (this._tabControl.selectedIndex === 0)
+        this._designerView.parseHTML(this._content);
+      else if (this._tabControl.selectedIndex === 1)
+        this._codeView.update(this._content);
+      else if (this._tabControl.selectedIndex === 2)
+        this._demoView.display(this._content);
+    }
   }
   get content() {
-    if (this._tabControl.selectedIndex === 0)
-      this._content = this._designerView.getHTML();
-    else if (this._tabControl.selectedIndex === 1)
-      this._content = this._codeView.getText();
-    return this._content;
+    if (this._tabControl) {
+      if (this._tabControl.selectedIndex === 0)
+        this._content = this._designerView.getHTML();
+      else if (this._tabControl.selectedIndex === 1)
+        this._content = this._codeView.getText();
+      return this._content;
+    }
+    return null;
   }
 
   ready() {
@@ -83,6 +89,8 @@ export class DocumentContainer extends BaseCustomWebComponent {
       else if (i.newIndex === 2)
         this._demoView.display(this._content);
     });
+    if (this._content)
+      this.content = this._content;
   }
 
 

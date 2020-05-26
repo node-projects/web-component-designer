@@ -87,6 +87,13 @@ export class BaseCustomWebComponent extends HTMLElement {
       if (this._rootDocumentFragment)
         this.shadowRoot.appendChild(this._rootDocumentFragment);
       //@ts-ignore
+      if (this.oneTimeSetup && !this.constructor._oneTimeSetup) {
+        //@ts-ignore
+        this.constructor._oneTimeSetup = true;
+        //@ts-ignore
+        this.oneTimeSetup();
+      }
+      //@ts-ignore
       if (this.ready)
         //@ts-ignore
         this.ready();

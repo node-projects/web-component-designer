@@ -58,6 +58,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       width: 100%;
       position: relative;
       transform: translateZ(0);
+      overflow: hidden;
     }
     #canvas {
       background-color: var(--canvas-background, white);

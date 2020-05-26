@@ -34,6 +34,8 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
     super();
 
     this._treeDiv = document.createElement('div');
+    this._treeDiv.style.height = '100%'
+    this._treeDiv.style.overflow = 'auto';
     this._treeDiv.setAttribute('id', 'tree');
     this.shadowRoot.appendChild(this._treeDiv);
   }

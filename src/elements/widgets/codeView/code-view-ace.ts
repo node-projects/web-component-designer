@@ -4,22 +4,17 @@ import type { Ace } from "ace-builds";
 
 class CodeViewAceCompleter {
   getCompletions(editor, session, pos, prefix, callback) {
-    if (prefix.length === 0) 
-      { callback(null, []); return }
+    if (prefix.length === 0) { callback(null, []); return }
 
 
-    let wordList=['t-t', 'visu-conveyor']; //todo: get word list from custom elements 
+    let wordList = ['t-t', 'visu-conveyor']; //todo: get word list from custom elements 
     {
-        callback(null, wordList.map((w) => {
-          return { name: w, value: w, score: 1, meta: "tag" }
-        }));
+      callback(null, wordList.map((w) => {
+        return { name: w, value: w, score: 1, meta: "tag" }
+      }));
     }
   }
 }
-
-//@ts-ignore
-let langTools = ace.require("ace/ext/language_tools");
-langTools.addCompleter(new CodeViewAceCompleter());
 
 export class CodeViewAce extends BaseCustomWebComponent implements ICodeView {
   canvasElement: HTMLElement;
@@ -47,6 +42,12 @@ export class CodeViewAce extends BaseCustomWebComponent implements ICodeView {
     this.shadowRoot.appendChild(this._editor)
   }
 
+  oneTimeSetup() {
+    //@ts-ignore
+    let langTools = ace.require("ace/ext/language_tools");
+    langTools.addCompleter(new CodeViewAceCompleter());
+  }
+
   ready() {
     //@ts-ignore
     this._aceEditor = ace.edit(this._editor, {
@@ -69,7 +70,7 @@ export class CodeViewAce extends BaseCustomWebComponent implements ICodeView {
       this._aceEditor.setAutoScrollEditorIntoView(true);
     });
 
-    
+
 
     let config = { attributes: true, childList: true, characterData: true };
     observer.observe(this.shadowRoot.querySelector('.ace_content'), config);
