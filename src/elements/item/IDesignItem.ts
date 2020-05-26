@@ -1,5 +1,6 @@
 import { ServiceContainer } from "../services/ServiceContainer";
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
+import { ChangeGroup } from "../services/undoService/ChangeGroup";
 
 export interface IDesignItem {
 
@@ -21,6 +22,8 @@ export interface IDesignItem {
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
 
+  openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup
+  
   setStyle(name: keyof CSSStyleDeclaration, value?: string | null);
   removeStyle(name: keyof CSSStyleDeclaration);
 

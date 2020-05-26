@@ -31,7 +31,7 @@ export class DomConverter {
 
   public static ConvertToString(designItem: IDesignItem) {
     let itw = new IndentedTextWriter();
-    let options: IHtmlWriterOptions = { beautifyOutput: true, writeDesignerProperties: true };
+    let options: IHtmlWriterOptions = { beautifyOutput: true, writeDesignerProperties: true, compressCssToShorthandProperties: true };
 
     if (designItem.hasChildren) {
       for (let d of designItem.children()) {

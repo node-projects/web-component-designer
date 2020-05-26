@@ -19,11 +19,19 @@ export class CssStyleChangeAction implements ITransactionItem {
   }
 
   undo() {
-    (<ElementCSSInlineStyle><unknown>this.designItem.element).style[name] = this.oldValue;
+    if (this.oldValue === '')
+      this.designItem.styles.delete(<string>this.name);
+    else
+      this.designItem.styles.set(<string>this.name, this.oldValue);
+    (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.oldValue;
   }
 
   do() {
-    (<ElementCSSInlineStyle><unknown>this.designItem.element).style[name] = this.newValue;
+    if (this.newValue === '')
+      this.designItem.styles.delete(<string>this.name);
+    else
+      this.designItem.styles.set(<string>this.name, this.newValue);
+    (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.newValue;
   }
 
   public designItem: IDesignItem;

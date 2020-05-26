@@ -3,6 +3,7 @@ import { IHtmlWriterService } from './IHtmlWriterService';
 import { IHtmlWriterOptions } from './IHtmlWriterOptions';
 import { DomConverter } from '../../widgets/designerView/DomConverter';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter';
+import { CssCombiner } from '../../helper/CssCombiner';
 
 export class HtmlWriterService implements IHtmlWriterService {
   canWrite(designItem: IDesignItem) {
@@ -22,13 +23,16 @@ export class HtmlWriterService implements IHtmlWriterService {
 
     if (designItem.hasStyles) {
       indentedTextWriter.write(' style="');
-      for (const s of designItem.styles) {
+      let styles = designItem.styles;
+      if (options.compressCssToShorthandProperties)
+        styles = CssCombiner.combine(styles);
+      for (const s of styles) {
         indentedTextWriter.write(s[0] + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
       }
       indentedTextWriter.write('"');
     }
     indentedTextWriter.write('>');
-    
+
     if (designItem.hasChildren) {
       indentedTextWriter.writeNewline();
       indentedTextWriter.levelRaise();

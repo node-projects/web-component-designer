@@ -1,6 +1,8 @@
 import { ServiceContainer } from '../services/ServiceContainer';
 import { IDesignItem } from './IDesignItem';
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
+import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction';
+import { ChangeGroup } from '../services/undoService/ChangeGroup';
 
 export class DesignItem implements IDesignItem {
   element: Element;
@@ -116,6 +118,10 @@ export class DesignItem implements IDesignItem {
       this.content = this.element.textContent;
   }
 
+  public openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup {
+    return this.instanceServiceContainer.undoService.openGroup(title, affectedItems);
+  }
+
   static GetOrCreateDesignItem(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     if (!element)
       return null;
@@ -134,12 +140,12 @@ export class DesignItem implements IDesignItem {
   }
 
   public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {
-    this.styles.set(<string>name, value);
-    (<HTMLElement>this.element).style[<string>name] = value;
+    let action = new CssStyleChangeAction(this, name, value);
+    this.instanceServiceContainer.undoService.execute(action);
   }
   public removeStyle(property: keyof CSSStyleDeclaration) {
-    this.styles.delete(<string>name);
-    (<HTMLElement>this.element).style[<string>name] = '';
+    let action = new CssStyleChangeAction(this, name, '');
+    this.instanceServiceContainer.undoService.execute(action);
   }
 
   public setAttribute(name: string, value?: string | null) {

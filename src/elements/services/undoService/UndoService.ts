@@ -12,9 +12,27 @@ export class UndoService implements IUndoService {
   private _transactionStack: ChangeGroup[] = [];
 
   openGroup(title: string, affectedItems: IDesignItem[]): ChangeGroup {
-    let t = new ChangeGroup(title, affectedItems);
+    let t = new ChangeGroup(title, affectedItems, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t));
     this._transactionStack.push(t);
     return t;
+  }
+
+  private commitTransactionItem(transactionItem: ITransactionItem) {
+    let itm = this._transactionStack.pop();
+    if (itm !== transactionItem) {
+      this.clear();
+      throw "UndoService - Commited Transation was not the last";
+    }
+    this._undoStack.push(itm);
+  }
+
+  private abortTransactionItem(transactionItem: ITransactionItem) {
+    let itm = this._transactionStack.pop();
+    if (itm !== transactionItem) {
+      this.clear();
+      throw "UndoService - Aborted Transation was not the last";
+    }
+    itm.undo();
   }
 
   execute(item: ITransactionItem) {
@@ -30,6 +48,7 @@ export class UndoService implements IUndoService {
   clear() {
     this._undoStack = [];
     this._redoStack = [];
+    this._transactionStack = [];
   }
 
   undo() {

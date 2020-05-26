@@ -122,6 +122,12 @@ export class DesignerTabControl extends BaseCustomWebComponent {
       if (index == this.selectedIndex) {
         element.slot = "panels";
         this._headerDiv.children[index].classList.add('selected');
+        //bugfix sometimes not shown content
+        let oldDisplay = (<HTMLElement>element).style.display;
+        requestAnimationFrame(() => {
+          (<HTMLElement>element).style.display = 'none';
+          (<HTMLElement>element).style.display = oldDisplay;
+        });
       } else {
         element.removeAttribute("slot");
         this._headerDiv.children[index].classList.remove('selected');

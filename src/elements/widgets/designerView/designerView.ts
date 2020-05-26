@@ -183,6 +183,22 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       color: white;
       z-index: 1000000;
     }
+    /* Show a move cursor in the corner */
+    .node-projects-wcdesigner-active:before {
+      position: absolute;
+      top: -15px;
+      left: -15px;
+      height: 14px;
+      width: 14px;
+      content: '⤨';
+      cursor: move;
+      font-size: 10px;
+      font-weight: bold;
+      text-align: center;
+      background: var(--highlight-blue, #2196f3);
+      color: white;
+      z-index: 1000000;
+    }
   }`;
 
   static readonly template = html`
@@ -457,18 +473,26 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     //const currentElement = event.target as HTMLElement;
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+
     this._ownBoundingRect = this.getBoundingClientRect();
     const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom - this._ownBoundingRect.top, zoom: zoom };
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       if (event.type == EventNames.PointerDown) {
-        if (currentElement === this || currentElement === this._canvas || currentElement == null) {
+        let composedPath = event.composedPath();
+        let rectCurrentElement = currentElement.getBoundingClientRect();
+        if (this._forceMove(currentPoint, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })) {
+          this._actionType = PointerActionType.Drag;
+        } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || currentElement.innerText == '') &&
+          currentElement.style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
+          this.setSelectedElements(null);
+          this._actionType = PointerActionType.DrawSelection;
+        } else if (currentElement === this || currentElement === this._canvas || currentElement == null) {
           this.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
           return;
         } else {
-          let rectCurrentElement = currentElement.getBoundingClientRect();
           this._actionType = this._shouldResize(currentPoint, { x: rectCurrentElement.right - this._ownBoundingRect.left, y: rectCurrentElement.bottom - this._ownBoundingRect.top }) ? PointerActionType.Resize : PointerActionType.DragOrSelect;
         }
       }
@@ -476,7 +500,12 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     let currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
 
-    if (this._actionType == PointerActionType.DrawSelection) {
+    if (event.type === EventNames.PointerMove) {
+      if (this._actionType == PointerActionType.DrawSelection)
+        this._actionType = PointerActionType.DrawingSelection;
+    }
+
+    if (this._actionType == PointerActionType.DrawSelection || this._actionType == PointerActionType.DrawingSelection) {
       this._pointerActionTypeDrawSelection(event, currentElement, currentPoint);
     } else if (this._actionType == PointerActionType.Resize) {
       this._pointerActionTypeResize(event, currentElement, currentPoint);
@@ -484,6 +513,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
     }
     if (event.type == EventNames.PointerUp) {
+      if (this._actionType == PointerActionType.DrawSelection) {
+        this.setSelectedElements([currentElement]);
+      }
       this._actionType = null;
     }
   }
@@ -631,6 +663,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           return;
         }
 
+        let cg = this.rootDesignItem.openGroup("Move Element", this.instanceServiceContainer.selectionService.selectedElements);
         //todo this needs also to get info from container handler, cause position is dependent of container
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
           let movedElement = designItem.element;
@@ -676,6 +709,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
                 old: { left: oldLeft, top: oldTop, position: oldPosition }
               });*/
           }
+          cg.commit();
 
           if (this._dropTarget != null)
             this._dropTarget.classList.remove('over-enter');
@@ -794,6 +828,10 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     const right = bottomPoint.x - pointerPoint.x;
     const bottom = bottomPoint.y - pointerPoint.y;
     return (right < this._resizeOffset && right >= -4 && bottom < this._resizeOffset && bottom >= -4);
+  }
+
+  _forceMove(pointerPoint: IPoint, elementPoint: IPoint) {
+    return (pointerPoint.x < elementPoint.x && pointerPoint.y < elementPoint.y);
   }
 
   deepTargetFind(x, y, notThis) {

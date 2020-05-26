@@ -18,10 +18,19 @@ export class DefaultInstanceService implements IInstanceService {
 
     switch (definition.tag) {
       case "div":
-        element.innerHTML = "div";
         break;
       case "input":
         (<HTMLInputElement>element).type = "text";
+    }
+
+    if (definition.defaultAttributes) {
+      for (let a in definition.defaultAttributes)
+        element.setAttribute(a, definition.defaultAttributes[a])
+    }
+
+    if (definition.defaultStyles) {
+      for (let s in definition.defaultStyles)
+        element.style[s] = definition.defaultStyles[s];
     }
 
     if (definition.defaultContent) {
