@@ -89,7 +89,41 @@ export class CssCombiner {
   }
 
   private static combineBackground(styles: Map<string, string>) {
-    //let e = CssCombiner._helperElement;
+    let e = CssCombiner._helperElement;
+    styles.delete('background-image');
+    styles.delete('background-position');
+    styles.delete('background-position-x'); //todo
+    styles.delete('background-position-y'); //todo
+    styles.delete('background-size');
+    styles.delete('background-repeat');
+    styles.delete('background-repeat-x'); //todo
+    styles.delete('background-repeat-y'); //todo
+    styles.delete('background-attachment');
+    styles.delete('background-origin');
+    styles.delete('background-clip');
+    styles.delete('background-color');
+    styles.delete('background');
+
+    let background = '';
+    if (e.style.backgroundImage)
+      background += (background === '' ? '' : ' ') + e.style.backgroundImage;
+    if (e.style.backgroundPosition)
+      background += (background === '' ? '' : ' ') + e.style.backgroundPosition;
+    if (e.style.backgroundSize)
+      background += (background === '' ? '' : ' / ') + e.style.backgroundSize;
+    if (e.style.backgroundRepeat)
+      background += (background === '' ? '' : ' ') + e.style.backgroundRepeat;
+    if (e.style.backgroundAttachment)
+      background += (background === '' ? '' : ' ') + e.style.backgroundAttachment;
+    if (e.style.backgroundOrigin)
+      background += (background === '' ? '' : ' ') + e.style.backgroundOrigin;
+    if (e.style.backgroundClip)
+      background += (background === '' ? '' : ' ') + e.style.backgroundClip;
+    if (e.style.backgroundColor)
+      background += (background === '' ? '' : ' ') + e.style.backgroundColor;
+
+    if (background)
+      styles.set('background', background);
   }
 
   private static combineFont(styles: Map<string, string>) {
@@ -104,15 +138,15 @@ export class CssCombiner {
 
       let font = '';
       if (e.style.fontStyle)
-        font += font === '' ? '' : ' ' + e.style.fontStyle;
+        font += (font === '' ? '' : ' ') + e.style.fontStyle;
       if (e.style.fontWeight)
-        font += font === '' ? '' : ' ' + e.style.fontWeight;
+        font += (font === '' ? '' : ' ') + e.style.fontWeight;
       if (e.style.fontSize)
-        font += font === '' ? '' : ' ' + e.style.fontSize;
+        font += (font === '' ? '' : ' ') + e.style.fontSize;
       if (e.style.lineHeight)
         font += '/' + e.style.lineHeight;
       if (e.style.fontFamily)
-        font += font === '' ? '' : ' ' + e.style.fontFamily;
+        font += (font === '' ? '' : ' ') + e.style.fontFamily;
       styles.set('font', font);
     }
   }

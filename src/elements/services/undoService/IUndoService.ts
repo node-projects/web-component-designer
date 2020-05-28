@@ -5,5 +5,9 @@ import { IDesignItem } from '../../item/IDesignItem';
 
 export interface IUndoService extends IService {
   openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup
-  execute(item: ITransactionItem) :void
+  execute(item: ITransactionItem): void
+  canUndo(): boolean;
+  canRedo(): boolean;
+  undo();
+  redo();
 }
