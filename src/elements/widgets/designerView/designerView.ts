@@ -17,6 +17,7 @@ import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
 import { DomConverter } from './DomConverter';
 import { IDesignerView } from './IDesignerView';
+import { Snaplines } from './Snaplines';
 
 export class DesignerView extends BaseCustomWebComponent implements IDesignerView {
   // Public Properties
@@ -70,7 +71,18 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       height: 100%;
       transform-origin: 0 0;
     }
-
+    #svg {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+    .svg-snapline {
+      stroke: red;
+    }
     #canvas * {
       cursor: pointer;
       user-select: none;
@@ -156,17 +168,25 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       outline: solid 3px var(--highlight-green, #99ff33) !important;
       outline-offset: 2px;
     }
+  
     .zoom-in {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3Cpath fill='none' d='M0 0h24v24H0V0z'/%3E%3Cpath d='M12 10h-2v2H9v-2H7V9h2V7h1v2h2v1z'/%3E%3C/svg%3E");
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAn9JREFUeNqkU11o01AUTtI06U/6tzHWbnNVS+k67FAG/gwfZEOcCrpNEBwEH2Q+Otqxh+5VEaHYV18UwQd9sk4Q+6CUKogbtSoM10qftJS2iGuT/iRpshvvDZu4DHHggY+TnHu+795zz7m4qqrYxfA6pjerlcHMZvMQQRCL8Hccoh+iBJECAMQEQci3Wk2MxP5iqgqmJUmIB3xkdTRoKgQG6Wr1JxBX1oTQx3UxCdcjMO2ZJiCK4g4y3HUIACV+bsL5dSRAWfwe636z0WBzWEFzn5vku5xyIZGsx2UF5AhEaDYbO8Dz3KLPi1X9B2iTy0pRiDx5/Z2bJgmGwDH8WMhuDxzEf6A8TYDneT3GR4JMzcVQThNlcCtANaM48pICutodxXTkkI1HeVslSPor6B/wWL7B3Z1n2KR3O3h05rkDOkd2eYoSxM025PVrAgAQeoFSuSLI3Q66jpJNRsIWPLvM5JJTTUkGGsqVtgJ5JU3AaLTqBVKZT9xh7yDT2Gh05G4bNQBzGETkBbkMVAxbzdadMJbSBDzCHXgKgKGZQJCp0IP32dnEaKhd6nOZAay7mXk6UUGeIHDDh88NKb0qumjaHiN391/1GjtrJ6ZPSb33H9eJYomuTJ601Qf7SKVYVlqplZblxRvOThrtEaC28qSOPAwncCYSWbzJsrO3XP4br9KZa1fTmcaOSTQYLDFFaeURh/yDfLynp/fCwkI0yrKX79ZqG49sUr2A44a3u+d08/fXVhfAeZ8vcDocjs6z7KV7xeL3JzBcwPZgmoAkScGlpdvzc3NXHuZyXxIwlMX2aJoAfFkvx8aGnRzH5WEpr7cXuerKPwVw1Lb/sV8CDACbf0U37X3NqwAAAABJRU5ErkJggg==);
     }
     .zoom-out {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' d='M0 0h24v24H0V0z'/%3E%3Cpath d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z'/%3E%3C/svg%3E"); 
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmVJREFUeNqkU01oE0EUnv3Nf0xsS01jEzWUNCUplh7U4kEiVVEQqyBYWDxor5am5JBeFRGCuXpRBA8KHqIHMYISohdTYlQo2kguaghJUNvd/O1udjvr7NKWZHuw4IMHM/v9zHu8t5iiKCAYDAKi/xQ4MHEdbIXFYgUmk2kUx/EouoZRulGWUaYhhHGe5wutVhOQKtk3/RToQ1HgjCjyCb+PrE0GjEW/x1Cr/YFCdoUPffwqpBAeQbRnmoEgCD1i9OoohHLi7EnHt3E/bfb0m/pwDGBeF04P77Mpex1SMZliE5IMV3FV0Gw2erJe56I+L6iNHDQYnRaaVsXb5uh8JGS3+w9hv1SeVkG9Xtd3EB4PDBecVtplpAmHKMMesN2R2Ymg7fer9PfwZgui3sC932X+gV53nGZSXj2Yf36B5oWNNtK5NQMIcT2nXKnyUt8eA6uSUf1YNyhKsFmptmWkK2sGFGXRG6Rzn7jDXo+1sdboSBSJEd0gVABYzrMOpEtrBi7+DqoCAnUn1JTo0IP3+dnkZKhdHnKaIEUSXRPCiA+fG2JmWXAaDPY4uXP+ipfqrBybOSEO3n/M4qWyoXrmuE30DJHWUkVupbMt44u3nJ2k7BGotAqkTjyGNvBiJBK9yTCzt5wjN15ncteuZnKNnk0kCHNcllsFVUN2iY8ODAyeX1yMxRjm8t319bVHNpEtYhjxbseago3t0+YU4Dmfzz+9sBCbZ5hL90qln0/Q5yLYRWgGoigGlpZuz8/NXXm4uvolqY4a7DI0A/RnvZyaGnNwHFdArbzZArla9p8GmDq2/4m/AgwATHQSD48kJDUAAAAASUVORK5CYII=);
+    }
+    .snap-grid {
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAblJREFUeNqkUjtLA0EQnntFyKNKJdiFgIlGC5G0FlaaIsYgiKAgKIKdjbV/wM7GImBhI6JFMFWKK3yBimBAhJDuUEgimMSYS0hunbncHRtFjLjw7X7z7ezszM4KjDEQRRG+jnlEgvYAAgLAJpoT1tYdA9gzAAqLuC/DD4N1EZC87v1IYnZ0MBj0k/6Szw/nTs7GO+8f62gWBCuDHTRG+ABxgGScsd3JlYWlJogu9TSjkT41NzM0AEbr5uDocJmxLTv3CCJpgbRkAKcWpq14vP7scVqrVKsbBOKktayS7BL4RzB5uxvAo7++SfV6vYnmBenESaM9/qCESFt4pPUJJzrlLpe/vQ9pTeex8A0EQcggwILJo9EohMPhNVW9ZqFQaJvsWCzWozGuCxJ3gck1TYNGo+Hy+XxQKpXalUoFisUi1Go1RyM/uwtZLsADYkxRlGnMZLXT6QQkSSqglsIV0HY0XddTdgkqV4LD6YPJsgwYzLSJEygQraz70YDvRg9Hh3O8DdptM1uTEwzDMDnvTHVfWfy+D8592W4Jt1wJfXOnC0h8XMw/cbuEHOKZc/iNX9qC2cb/jE8BBgAvhdOb37HVsgAAAABJRU5ErkJggg==);
+    }
+    .snap-guide {
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAYVJREFUeNqkU7tKA1EQnbs3CnlVqbQNARMjFilS+AnZQhIbW0ER/AA/wlYbhXR2wUKx0iKNYGMKDViEdEIgieBujGvCPpyz7sK6iWLIwJk798zsuXsfIxzHoXksAqcoij+vMbYq7MoszGxaEB3wtODlH3i5E5uojck210RCgq7SJie4MC0TsdO1cim/lMmkwHdarZWni+t16/1jz/FElJBAGc5imLzyakXNG0IuVo+OnwHE4JCzgisG7BJu/I3CQjyRuq1dvWi6vg8gBofcOHgGAZO+AFv88/VNDofDEcd3IBCD43ycfhEowY28Sazfnzh1cKMggWsUQvi4waiqKuVyud16/d7JZrOHxWJxKudMuQV3C81mk3RdX0wmk9Tr9UxN06jb7dJgMPjBwQRUAu/AtWg0SpZl7TDSUso2/1UVNWHOMIwJARzWBhcQwMXu1oJb9Ufbtsk0zYktPLrvgD8E/mWeYoNxxlj2xoZ3qI2/YrePQs10PksjTRPozCog5m3nLwEGABrLzseuHT6IAAAAAElFTkSuQmCC);
     }
 
     .node-projects-wcdesigner-active, :host(.node-projects-wcdesigner-active) {
       outline: solid 3px var(--highlight-blue, #2196f3) !important;
       outline-offset: 2px;
       transform: translateZ(0);
+      cursor: pointer !important;
     }
     /* Show a resize cursor in the corner */
     .node-projects-wcdesigner-active:after {
@@ -208,15 +228,21 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
             <div class="outercanvas2">
               <div id="canvas"></div>
               <div id="selector" hidden></div>
+              <svg id="svg"></svg>
             </div>
           </div>
           <div class="lowertoolbar">
             <input id="zoomInput" type="text" value="100%">
             <img id="zoomIncrease" class="zoom-in">
             <img id="zoomDecrease" class="zoom-out">
+            <div style="width: 16px; height: 16px; font-size: 14px; display: flex; align-items: center; justify-content: center;">1</div>
+            <div style="width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center;">100%</div>
+            <img class="snap-grid">
+            <img class="snap-guide">
           </div>
         </div>
           `;
+  private _snaplines: Snaplines;
 
   constructor() {
     super();
@@ -239,6 +265,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this._onKeyUpBound = this.onKeyUp.bind(this);
 
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
+
+    this._snaplines = new Snaplines(this._getDomElement<SVGElement>('svg'));
   }
 
   initialize(serviceContainer: ServiceContainer) {
@@ -277,7 +305,10 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   public parseHTML(html: string) {
     this.rootDesignItem.element.innerHTML = html;
+    this.instanceServiceContainer.undoService.clear();
     this._createDesignItemsRecursive(this.rootDesignItem.element);
+    this._snaplines.initialize(this.rootDesignItem);
+    this._snaplines.calculateSnaplines();
   }
 
   private _createDesignItemsRecursive(element: Element) {
@@ -664,7 +695,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           return;
         }
 
-        let cg = this.rootDesignItem.openGroup("Move Element", this.instanceServiceContainer.selectionService.selectedElements);
+        let cg = this.rootDesignItem.openGroup("Move Elements", this.instanceServiceContainer.selectionService.selectedElements);
         //todo this needs also to get info from container handler, cause position is dependent of container
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
           let movedElement = designItem.element;
@@ -804,22 +835,21 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
         }
         let i = 0;
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          designItem.setStyle('width', this._initialSizes[i].width + trackX + 'px');
-          designItem.setStyle('height', this._initialSizes[i].height + trackY + 'px');
+          (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
+          (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
         }
         break;
       case EventNames.PointerUp:
-        //let j = 0;
+        let cg = this.rootDesignItem.openGroup("Resize Elements", this.instanceServiceContainer.selectionService.selectedElements);
+        
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          //todo
-          /*this.serviceContainer.UndoService.add(UndoItemType.Resize, element,
-            {
-              new: { width: element.style.width, height: element.style.height },
-              old: { width: this._initialSizes[j].width + 'px', height: this._initialSizes[j].height + 'px' }
-            });*/
+          designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
+          designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
+
           designItem.element.classList.remove('resizing');
           designItem.element.classList.remove('dragging');
         }
+        cg.commit();
         this._initialSizes = null;
         break;
     }

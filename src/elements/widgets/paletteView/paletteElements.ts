@@ -90,15 +90,35 @@ export class PaletteElements extends BaseCustomWebComponent {
         e.dataTransfer.setData(dragDropFormatName, JSON.stringify(elementDefintion));
         (<HTMLElement>e.currentTarget).style.outline = "dashed";
 
-        // todo: Drag Drop Ghost 
-        /* var elem = document.createElement("button");
-        elem.id = "drag-ghost";
-        elem.style.width = "20px";        
-        elem.style.height = "40px";
-        elem.style.position = "absolute";
-        elem.style.top = "-100px";
-        this._shadow.appendChild(elem);
-        e.dataTransfer.setDragImage(elem, 0, 0);*/
+        if (elementDefintion.ghostElement) {
+          if (typeof elementDefintion.ghostElement === 'string') {
+
+            const range = document.createRange();
+            range.selectNode(document.body);
+            const fragment = range.createContextualFragment(elementDefintion.ghostElement);
+            let elem = fragment.firstChild as HTMLElement;
+            elem.style.position = "absolute";
+            elem.style.top = "-1000px";
+            document.body.appendChild(elem);
+            e.dataTransfer.setDragImage(elem, 0, 0);
+            requestAnimationFrame(() => document.body.removeChild(elem));
+          } else {
+            e.dataTransfer.setDragImage(elementDefintion.ghostElement, 0, 0);
+          }
+        }
+        else if (elementDefintion.defaultWidth && elementDefintion.defaultHeight && !elementDefintion.import) {
+          let elem = document.createElement(elementDefintion.tag);
+          if (elementDefintion.defaultContent)
+            elem.innerHTML = elementDefintion.defaultContent;
+          elem.style.width = elementDefintion.defaultWidth;
+          elem.style.height = elementDefintion.defaultHeight;
+          elem.style.position = "absolute";
+          elem.style.top = "-" + elementDefintion.defaultHeight;
+          document.body.appendChild(elem);
+          e.dataTransfer.setDragImage(elem, 0, 0);
+          requestAnimationFrame(() => document.body.removeChild(elem));
+        }
+
       }
       button.ondragend = (e) => {
         (<HTMLElement>e.currentTarget).style.outline = "none";

@@ -81,11 +81,25 @@ export class CssCombiner {
   }
 
   private static combineMargin(styles: Map<string, string>) {
-    //let e = CssCombiner._helperElement;
+    let e = CssCombiner._helperElement;
+    if (e.style.marginTop && e.style.marginRight && e.style.marginBottom && e.style.marginLeft) {
+      styles.delete('margin-top');
+      styles.delete('margin-right');
+      styles.delete('margin-bottom');
+      styles.delete('margin-left');
+      styles.set('margin', e.style.marginTop + ' ' + e.style.marginRight + ' ' + e.style.marginBottom + ' ' + e.style.marginLeft);
+    }
   }
 
   private static combinePadding(styles: Map<string, string>) {
-    //let e = CssCombiner._helperElement;
+    let e = CssCombiner._helperElement;
+    if (e.style.paddingTop && e.style.paddingRight && e.style.paddingBottom && e.style.paddingLeft) {
+      styles.delete('padding-top');
+      styles.delete('padding-right');
+      styles.delete('padding-bottom');
+      styles.delete('padding-left');
+      styles.set('padding', e.style.paddingTop + ' ' + e.style.paddingRight + ' ' + e.style.paddingBottom + ' ' + e.style.paddingLeft);
+    }
   }
 
   private static combineBackground(styles: Map<string, string>) {
@@ -105,21 +119,21 @@ export class CssCombiner {
     styles.delete('background');
 
     let background = '';
-    if (e.style.backgroundImage)
+    if (e.style.backgroundImage && e.style.backgroundImage  !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundImage;
-    if (e.style.backgroundPosition)
+    if (e.style.backgroundPosition && e.style.backgroundPosition  !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundPosition;
-    if (e.style.backgroundSize)
+    if (e.style.backgroundSize && e.style.backgroundSize  !== 'initial')
       background += (background === '' ? '' : ' / ') + e.style.backgroundSize;
-    if (e.style.backgroundRepeat)
+    if (e.style.backgroundRepeat && e.style.backgroundRepeat  !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundRepeat;
-    if (e.style.backgroundAttachment)
+    if (e.style.backgroundAttachment && e.style.backgroundAttachment  !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundAttachment;
-    if (e.style.backgroundOrigin)
+    if (e.style.backgroundOrigin && e.style.backgroundOrigin  !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundOrigin;
-    if (e.style.backgroundClip)
+    if (e.style.backgroundClip && e.style.backgroundClip  !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundClip;
-    if (e.style.backgroundColor)
+    if (e.style.backgroundColor && e.style.backgroundColor  !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundColor;
 
     if (background)

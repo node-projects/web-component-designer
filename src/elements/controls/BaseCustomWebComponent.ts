@@ -11,6 +11,7 @@ export const css = function (strings: TemplateStringsArray, ...values: any[]): C
   return cssStyleSheet;
 };
 
+/* @import could not be used in asyncStyles any more https://www.chromestatus.com/feature/4735925877735424 */
 export const cssAsync = async function (strings: TemplateStringsArray, ...values: any[]): Promise<CSSStyleSheet> {
   const cssStyleSheet = new CSSStyleSheet();
   //@ts-ignore

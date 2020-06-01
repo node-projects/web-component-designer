@@ -8,6 +8,7 @@ export interface IUndoService extends IService {
   execute(item: ITransactionItem): void
   canUndo(): boolean;
   canRedo(): boolean;
+  clear();
   undo();
   redo();
 }

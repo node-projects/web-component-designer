@@ -16,24 +16,27 @@ export class ChangeGroup implements ITransactionItem {
   }
 
   do() {
-    let item = this.undoStack.pop();
-    try {
-      item.do();
-      this.undoStack.push(item);
-    } catch (err) {
-      throw err;
+    let item: ITransactionItem = null;
+    while (item = this.redoStack.pop()) {
+      try {
+        item.do();
+        this.undoStack.push(item);
+      } catch (err) {
+        throw err;
+      }
     }
   }
 
   undo() {
-    let item = this.undoStack.pop();
-    try {
-      item.undo();
-      this.redoStack.push(item);
-    } catch (err) {
-      throw err;
+    let item: ITransactionItem = null;
+    while (item = this.undoStack.pop()) {
+      try {
+        item.undo();
+        this.redoStack.push(item);
+      } catch (err) {
+        throw err;
+      }
     }
-
   };
 
   commit() {

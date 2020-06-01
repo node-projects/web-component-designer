@@ -8,4 +8,6 @@ export interface IElementDefinition {
   defaultStyles?: { [key: string]: string; };
   defaultWidth?: string;
   defaultHeight?: string;
+  ghostElement ?: Element;
+  doNotSetInNodeProjectsDesignerViewOnInstance ?: boolean;
 }

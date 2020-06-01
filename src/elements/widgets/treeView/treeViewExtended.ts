@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, cssAsync } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
 import { ITreeView } from './ITreeView';
 import { IDesignItem } from '../../item/IDesignItem';
 
@@ -9,9 +9,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
   private _treeDiv: HTMLDivElement;
   private _tree: Fancytree.Fancytree;
 
-  static readonly style = cssAsync`
-      @import url("./node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css");
-
+  static readonly style = css`
       span.drag-source {
         border: 1px solid grey;
         border-radius: 3px;
@@ -32,6 +30,10 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
 
   constructor() {
     super();
+
+    let externalCss = document.createElement('style');
+    externalCss.innerHTML = '@import url("./node_modules/jquery.fancytree/dist/skin-xp/ui.fancytree.css");';
+    this.shadowRoot.appendChild(externalCss);
 
     this._treeDiv = document.createElement('div');
     this._treeDiv.style.height = '100%'

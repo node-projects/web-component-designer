@@ -3,13 +3,13 @@ import { IDesignItem } from '../../../item/IDesignItem';
 
 export class CssStyleChangeAction implements ITransactionItem {
 
-  constructor(designItem: IDesignItem, name: keyof CSSStyleDeclaration, newValue: any) {
+  constructor(designItem: IDesignItem, name: keyof CSSStyleDeclaration, newValue: any, oldValue: any) {
     this.title = "Change CSS Style";
 
     this.designItem = designItem;
     this.name = name;
     this.newValue = newValue;
-    this.oldValue = (<ElementCSSInlineStyle><unknown>designItem.element).style[name];
+    this.oldValue = oldValue;
   }
 
   title?: string;

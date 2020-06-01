@@ -1,5 +1,6 @@
 import { IInstanceService } from './IInstanceService';
 import { IElementDefinition } from '../elementsService/IElementDefinition';
+import { IDesignerInstance } from './IDesignerInstance';
 
 export class DefaultInstanceService implements IInstanceService {
   async getElement(definition: IElementDefinition): Promise<HTMLElement> {
@@ -10,6 +11,8 @@ export class DefaultInstanceService implements IInstanceService {
       await import(importUri);
     }
     let element = document.createElement(definition.tag);
+    if (!definition.doNotSetInNodeProjectsDesignerViewOnInstance)
+      (<IDesignerInstance><any>element)._inNodeProjectsDesignerView = true;
     if (definition.defaultWidth)
       element.style.width = definition.defaultWidth; // '60px';
     if (definition.defaultHeight)

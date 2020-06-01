@@ -140,11 +140,11 @@ export class DesignItem implements IDesignItem {
   }
 
   public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {
-    let action = new CssStyleChangeAction(this, name, value);
+    let action = new CssStyleChangeAction(this, name, value, this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);
   }
   public removeStyle(property: keyof CSSStyleDeclaration) {
-    let action = new CssStyleChangeAction(this, name, '');
+    let action = new CssStyleChangeAction(this, name, '', this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);
   }
 

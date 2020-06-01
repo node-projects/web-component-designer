@@ -8,12 +8,14 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
 
   private _items: any;
   private _index: number;
-  private _previouslySelected: Element;
+  private _previouslySelected: Element[];
   private _treeDiv: HTMLDivElement;
 
   private _mapElementTreeitem: Map<Element, HTMLElement>;
 
   private _rootItem: IDesignItem
+
+  //todo, buuton so key events can be transfered to designer Cnvas (so you can move controls with keys)
 
   static readonly style = css`
     :host {
@@ -129,7 +131,7 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
 
   public selectionChanged(event: ISelectionChangedEvent) {
     if (event.selectedElements.length > 0) {
-      this._selectTreeElement(this._mapElementTreeitem.get(event.selectedElements[0].element));
+      this._selectTreeElements(event.selectedElements.map(x => this._mapElementTreeitem.get(x.element)));
 
     }
   }
@@ -214,17 +216,21 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
     if (item.tagName === 'SPAN') {
       item = item.parentElement;
     }
-    this._selectTreeElement(item);
+    this._selectTreeElements([item]);
     this._selectDesignerElement(item);
   }
 
-  private _selectTreeElement(item: Element) {
+  private _selectTreeElements(items: Element[]) {
     if (this._previouslySelected) {
-      this._previouslySelected.classList.remove('selected');
+      for (let e of this._previouslySelected)
+        if (e)
+          e.classList.remove('selected');
     }
-    this._previouslySelected = item;
-    if (item)
-      item.classList.add('selected');
+    this._previouslySelected = items;
+    if (items)
+      for (let e of items)
+        if (e)
+          e.classList.add('selected');
   }
 
   private _selectDesignerElement(item: any) {
@@ -245,7 +251,7 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
 
     for (let i = 0; i < this._items.length; i++) {
       if (this._items[i].ref === element) {
-        this._selectTreeElement(buttons[i]);
+        this._selectTreeElements([buttons[i]]);
         return;
       }
     }
