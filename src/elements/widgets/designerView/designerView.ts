@@ -331,8 +331,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = <IElementDefinition>JSON.parse(transferData);
-    let instance = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition));
-    let di = DesignItem.GetOrCreateDesignItem(instance, this.serviceContainer, this.instanceServiceContainer);
+    let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
   }
 

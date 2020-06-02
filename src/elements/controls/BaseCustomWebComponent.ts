@@ -54,11 +54,20 @@ export class BaseCustomWebComponent extends HTMLElement {
       if (pair) {
         if (pair[1] === Boolean)
           this[pair[0]] = true;
+        else if (pair[1] === Object)
+          this[pair[0]] = JSON.parse(a.value);
         else
           this[pair[0]] = a.value;
       }
     }
   }
+
+  /*attributeChangedCallback(name, oldValue, newValue) {
+    //@ts-ignore
+    if (this.constructor._propertiesDictionary) {
+      this._parseAttributesToProperties();
+    }
+  }*/
 
   private _rootDocumentFragment: DocumentFragment;
 

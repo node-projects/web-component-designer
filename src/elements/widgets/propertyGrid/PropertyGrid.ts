@@ -1,9 +1,9 @@
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { PropertyGridPropertyList } from './PropertyGridPropertyList';
 import { DesignerTabControl } from '../../controls/DesignerTabControl';
-import { CssPropertiesService } from '../../services/propertiesService/CssPropertiesService';
 import { IDesignItem } from '../../item/IDesignItem';
 import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
+import { CssPropertiesService } from '../../services/propertiesService/services/CssPropertiesService';
 
 export class PropertyGrid extends BaseCustomWebComponent {
 

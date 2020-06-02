@@ -26,14 +26,14 @@ export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";
 
-export * from "./elements/services/propertiesService/CssPropertiesService.js";
 export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
-export * from "./elements/services/propertiesService/LitElementPropertiesService.js";
-export * from "./elements/services/propertiesService/NativeElementsPropertiesService.js";
-export * from "./elements/services/propertiesService/PolymerPropertiesService.js";
+export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
+export * from "./elements/services/propertiesService/services/LitElementPropertiesService.js";
+export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
+export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";

@@ -1,7 +1,7 @@
-import { IPropertiesService } from "./IPropertiesService";
-import { IProperty } from './IProperty';
-import { IDesignItem } from '../../item/IDesignItem';
-import { ValueType } from "./ValueType";
+import { IPropertiesService } from "../IPropertiesService";
+import { IProperty } from '../IProperty';
+import { IDesignItem } from '../../../item/IDesignItem';
+import { ValueType } from "../ValueType";
 
 export class LitElementPropertiesService implements IPropertiesService {
 

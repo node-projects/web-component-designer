@@ -17,7 +17,7 @@ interface ServiceNameMap {
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
-  get porpertiesServices(): IPropertiesService[] {
+  get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');
   }
 

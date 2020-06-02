@@ -33,4 +33,19 @@ export class BaseServiceContainer<NameMap> {
     }
     return null;
   }
+
+  getLastServiceWhere<K extends keyof NameMap, Y>(service: K, callback: (service: NameMap[K]) => Y): NameMap[K] {
+    let services = this.getServices<K>(<any>service);
+    if (services == null) {
+      console.warn('no services of type: ' + service + ' found');
+      return null;
+    }
+    for (let index = services.length - 1; index >= 0; index--) {
+      const currentService = services[index];
+      let result = callback(currentService);
+      if (result != null)
+        return currentService;
+    }
+    return null;
+  }
 }
