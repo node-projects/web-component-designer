@@ -5,7 +5,7 @@ export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldInd
 
 export class DesignerTabControl extends BaseCustomWebComponent {
 
-  public selectedIndex: number = -1;
+  private _selectedIndex: number = -1;
 
   private _contentObserver: MutationObserver;
   private _panels: HTMLDivElement;
@@ -85,10 +85,18 @@ export class DesignerTabControl extends BaseCustomWebComponent {
 
     let selectedIndexAttribute = this.getAttribute("selected-index")
     if (selectedIndexAttribute) {
-      let oldIndex = this.selectedIndex;
       this.selectedIndex = parseInt(selectedIndexAttribute);
-      this._selectedIndexChanged(oldIndex);
     }
+  }
+
+  public get selectedIndex() {
+    return this._selectedIndex;
+  }
+  public set selectedIndex(value: number) {
+    let old = this._selectedIndex;
+    this._selectedIndex = value;
+    if (this._headerDiv.children.length)
+      this._selectedIndexChanged(old);
   }
 
   disconnectedCallback() {
@@ -105,9 +113,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
       tabHeaderDiv.className = 'tab-header';
       let j = i;
       tabHeaderDiv.onpointerdown = () => {
-        let oldIndex = this.selectedIndex;
         this.selectedIndex = j;
-        this._selectedIndexChanged(oldIndex)
       }
       this._headerDiv.appendChild(tabHeaderDiv);
       i++;
@@ -119,7 +125,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
   private _selectedIndexChanged(oldIndex?: number) {
     for (let index = 0; index < this.children.length; index++) {
       const element = this.children[index];
-      if (index == this.selectedIndex) {
+      if (index == this._selectedIndex) {
         element.slot = "panels";
         this._headerDiv.children[index].classList.add('selected');
         //bugfix sometimes not shown content
@@ -133,7 +139,7 @@ export class DesignerTabControl extends BaseCustomWebComponent {
         this._headerDiv.children[index].classList.remove('selected');
       }
     }
-    this.onSelectedTabChanged.emit({ newIndex: this.selectedIndex, oldIndex: oldIndex });
+    this.onSelectedTabChanged.emit({ newIndex: this._selectedIndex, oldIndex: oldIndex });
   }
 
   public readonly onSelectedTabChanged = new TypedEvent<DesignerTabControlIndexChangedEventArgs>();

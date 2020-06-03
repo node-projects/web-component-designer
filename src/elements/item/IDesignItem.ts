@@ -5,6 +5,7 @@ import { ChangeGroup } from "../services/undoService/ChangeGroup";
 export interface IDesignItem {
 
   readonly name: string
+  readonly id: string
 
   readonly hasAttributes: boolean;
   readonly attributes: Map<string, string>

@@ -25,6 +25,13 @@ export class DesignItem implements IDesignItem {
     return this.element.localName;
   }
 
+  public get id(): string {
+    return this.element.id;
+  }
+  public set id(value: string) {
+    this.element.id = value;
+  }
+
   public get hasChildren() {
     return this.element.children.length > 0;
   }

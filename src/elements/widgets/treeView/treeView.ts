@@ -132,7 +132,6 @@ export class TreeView extends BaseCustomWebComponent implements ITreeView {
   public selectionChanged(event: ISelectionChangedEvent) {
     if (event.selectedElements.length > 0) {
       this._selectTreeElements(event.selectedElements.map(x => this._mapElementTreeitem.get(x.element)));
-
     }
   }
 

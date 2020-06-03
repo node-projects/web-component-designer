@@ -27,17 +27,21 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   // Settings
   private _gridSize = 10;
-  private _alignOnGrid = true;
+  private _alignOnGrid = false;
+  private _alignOnSnap = true;
+
   private _resizeOffset = 10;
 
   private _zoomFactor = 100;
 
   // Private Variables
   private _canvas: HTMLDivElement;
+  private _canvasContainer: HTMLDivElement;
   private _selector: HTMLDivElement;
 
   private _dropTarget: Element;
-
+  private _snaplines: Snaplines;
+  
   private _actionType?: PointerActionType;
   private _initialPoint: IPoint;
   private _initialSizes: ISize[];
@@ -61,6 +65,12 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       transform: translateZ(0);
       overflow: hidden;
     }
+    #canvasContainer {
+      width: 100%;
+      height: 100%;
+      margin: auto;
+      position: relative;
+    }
     #canvas {
       background-color: var(--canvas-background, white);
       /* 10px grid, using http://www.patternify.com/ */
@@ -81,7 +91,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       pointer-events: none;
     }
     .svg-snapline {
-      stroke: red;
+      stroke: purple;
+      fill: transparent;
     }
     #canvas * {
       cursor: pointer;
@@ -113,14 +124,15 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       text-align: center;
       margin-right: 1px;
     }
-    img {
+    .toolbar-control {
       width: 16px;
       height: 16px;
       display: block;
       margin-right: 1px;
+      cursor: default;
     }
-    img:hover {
-      background: white;
+    .toolbar-control:hover {
+      background-color:rgba(164,206,249,.6);
     }
     .outer {
       display: flex;
@@ -226,36 +238,52 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
         <div class="outer">
           <div class="outercanvas1">
             <div class="outercanvas2">
-              <div id="canvas"></div>
-              <div id="selector" hidden></div>
-              <svg id="svg"></svg>
+              <div id="canvasContainer">
+                <div id="canvas"></div>
+                <div id="selector" hidden></div>
+                <svg id="svg"></svg>
+              </div>
             </div>
           </div>
           <div class="lowertoolbar">
             <input id="zoomInput" type="text" value="100%">
-            <img id="zoomIncrease" class="zoom-in">
-            <img id="zoomDecrease" class="zoom-out">
-            <div style="width: 16px; height: 16px; font-size: 14px; display: flex; align-items: center; justify-content: center;">1</div>
-            <div style="width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center;">100%</div>
-            <img class="snap-grid">
-            <img class="snap-guide">
+            <div title="decrease zoom" id="zoomIncrease" class="toolbar-control zoom-in"></div>
+            <div title="increase zoom" id="zoomDecrease" class="toolbar-control zoom-out"></div>
+            <div title="reset zoom" id="zoomReset" class="toolbar-control"
+              style="width: 16px; height: 16px; font-size: 14px; display: flex; align-items: center; justify-content: center;">1
+            </div>
+            <div title="zoom to fit" id="zoomFit" class="toolbar-control"
+              style="width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center;">
+              100%</div>
+            <div title="snap to grid" id="alignSnap" class="toolbar-control snap-grid"></div>
+            <div title="snap to elements" id="alignGrid" class="toolbar-control snap-guide"></div>
           </div>
         </div>
           `;
-  private _snaplines: Snaplines;
 
   constructor() {
     super();
 
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
+    this._canvasContainer = this._getDomElement<HTMLDivElement>('canvasContainer');
+ 
     this._selector = this._getDomElement<HTMLDivElement>('selector');
     let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     zoomInput.onchange = () => { this._zoomFactor = parseInt(zoomInput.value); zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
     zoomInput.onclick = zoomInput.select
-    let zoomIncrease = this._getDomElement<HTMLImageElement>('zoomIncrease');
+    let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
     zoomIncrease.onclick = () => { this._zoomFactor += 10; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
-    let zoomDecrease = this._getDomElement<HTMLImageElement>('zoomDecrease');
+    let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
     zoomDecrease.onclick = () => { this._zoomFactor -= 10; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
+    zoomReset.onclick = () => { this._zoomFactor = 100; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
+    zoomFit.onclick = () => { this._zoomFactor = 77; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+
+    let alignSnap = this._getDomElement<HTMLDivElement>('alignSnap');
+    alignSnap.onclick = () => { this._alignOnSnap = !this._alignOnSnap; }
+    let alignGrid = this._getDomElement<HTMLDivElement>('alignGrid');
+    alignGrid.onclick = () => { this._alignOnGrid = !this._alignOnGrid; }
 
     this.instanceServiceContainer = new InstanceServiceContainer();
     this.instanceServiceContainer.register("undoService", new UndoService);
@@ -269,10 +297,24 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this._snaplines = new Snaplines(this._getDomElement<SVGElement>('svg'));
   }
 
+  get designerWidth(): string {
+    return this._canvasContainer.style.width;
+  }
+  set designerWidth(value: string) {
+    this._canvasContainer.style.width = value;
+  }
+  get designerHeight(): string {
+    return this._canvasContainer.style.height;
+  }
+  set designerHeight(value: string) {
+    this._canvasContainer.style.height = value;
+  }
+
   initialize(serviceContainer: ServiceContainer) {
     this.serviceContainer = serviceContainer;
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
+    this._snaplines.initialize(this.rootDesignItem);
   }
 
   connectedCallback() {
@@ -295,7 +337,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   }
 
   zoomFactorChanged() {
-    this._canvas.style.transform = "scale(" + (this._zoomFactor / 100) + ")";
+    this._canvasContainer.style.transform = "scale(" + (this._zoomFactor / 100) + ")";
   }
 
   public getHTML() {
@@ -307,8 +349,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this.rootDesignItem.element.innerHTML = html;
     this.instanceServiceContainer.undoService.clear();
     this._createDesignItemsRecursive(this.rootDesignItem.element);
-    this._snaplines.initialize(this.rootDesignItem);
-    this._snaplines.calculateSnaplines();
+    this._snaplines.clearSnaplines();
   }
 
   private _createDesignItemsRecursive(element: Element) {
@@ -601,13 +642,23 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     let trackX = currentPoint.x - this._initialPoint.x;
     let trackY = currentPoint.y - this._initialPoint.y;
-    if (this._alignOnGrid) {
-      trackX = Math.round(trackX / this._gridSize) * this._gridSize;
-      trackY = Math.round(trackY / this._gridSize) * this._gridSize;
+    if (event.type !== EventNames.PointerDown) {
+      if (this._alignOnGrid) {
+        trackX = Math.round(trackX / this._gridSize) * this._gridSize;
+        trackY = Math.round(trackY / this._gridSize) * this._gridSize;
+      }
+      else if (this._alignOnSnap) {
+        //let rect = this.instanceServiceContainer.selectionService.primarySelection.element.getBoundingClientRect();
+        let newPos = this._snaplines.snapToPosition({ x: currentPoint.x, y: currentPoint.y }, { x: 0, y: 0 })
+        trackX = newPos.x - this._initialPoint.x;
+        trackY = newPos.y - this._initialPoint.y;
+      }
     }
 
     switch (event.type) {
       case EventNames.PointerDown:
+        if (this._alignOnSnap)
+          this._snaplines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
         this._dropTarget = null;
         if (event.shiftKey || event.ctrlKey) {
           const index = this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
@@ -632,6 +683,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
         if (this._actionType != PointerActionType.Drag)
           return;
+
 
         //todo -> what is if a transform already exists -> backup existing style.?
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
@@ -840,7 +892,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
         break;
       case EventNames.PointerUp:
         let cg = this.rootDesignItem.openGroup("Resize Elements", this.instanceServiceContainer.selectionService.selectedElements);
-        
+
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
           designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
           designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
