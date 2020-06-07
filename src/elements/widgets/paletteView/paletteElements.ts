@@ -86,6 +86,7 @@ export class PaletteElements extends BaseCustomWebComponent {
       let button = document.createElement("button");
       button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
       button.draggable = true;
+      //todo: onclick set tool to draw new element
       button.ondragstart = (e) => {
         e.dataTransfer.setData(dragDropFormatName, JSON.stringify(elementDefintion));
         (<HTMLElement>e.currentTarget).style.outline = "dashed";
@@ -118,7 +119,6 @@ export class PaletteElements extends BaseCustomWebComponent {
           e.dataTransfer.setDragImage(elem, 0, 0);
           requestAnimationFrame(() => document.body.removeChild(elem));
         }
-
       }
       button.ondragend = (e) => {
         (<HTMLElement>e.currentTarget).style.outline = "none";

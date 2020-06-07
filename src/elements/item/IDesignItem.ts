@@ -19,7 +19,9 @@ export interface IDesignItem {
   readonly hasContent: boolean;
   content: string
 
-  element: Element;
+  readonly node: Node;
+  readonly element: Element;
+
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
 

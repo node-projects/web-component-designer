@@ -5,7 +5,7 @@ import { CssStyleChangeAction } from '../services/undoService/transactionItems/C
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
 
 export class DesignItem implements IDesignItem {
-  element: Element;
+  node: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
 
@@ -20,6 +20,10 @@ export class DesignItem implements IDesignItem {
   public styles: Map<string, string>
 
   private static _designItemSymbol = Symbol('DesignItem');
+
+  public get element(): Element {
+    return <Element>this.node;
+  }
 
   public get name() {
     return this.element.localName;
@@ -88,15 +92,15 @@ export class DesignItem implements IDesignItem {
     }
   }
 
-  constructor(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
-    this.element = element;
+  constructor(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+    this.node = node;
     this.serviceContainer = serviceContainer;
     this.instanceServiceContainer = instanceServiceContainer;
 
     this.attributes = new Map();
     this.styles = new Map();
 
-    for (let a of element.attributes) {
+    for (let a of this.element.attributes) {
       if (a.name !== 'style') {
         this.attributes.set(a.name, a.value);
         if (a.name === 'node-projects-hide-at-design-time')
@@ -107,19 +111,19 @@ export class DesignItem implements IDesignItem {
           this._lockAtDesignTime = true;
       }
     }
-    if (element instanceof HTMLElement || element instanceof SVGElement) {
-      for (let s of element.style) {
-        let val = element.style[s];
+    if (node instanceof HTMLElement || node instanceof SVGElement) {
+      for (let s of node.style) {
+        let val = node.style[s];
         if (val && typeof val === 'string')
-          this.styles.set(s, element.style[s]);
+          this.styles.set(s, node.style[s]);
       }
       if (!this._lockAtDesignTime)
-        element.style.pointerEvents = 'auto';
+        node.style.pointerEvents = 'auto';
       else
-        element.style.pointerEvents = 'none';
+        node.style.pointerEvents = 'none';
     }
 
-    (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
+    (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
 
     if (this.element.children.length === 0)
       this.content = this.element.textContent;
@@ -129,13 +133,13 @@ export class DesignItem implements IDesignItem {
     return this.instanceServiceContainer.undoService.openGroup(title, affectedItems);
   }
 
-  static GetOrCreateDesignItem(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
-    if (!element)
+  static GetOrCreateDesignItem(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
+    if (!node)
       return null;
-    let designItem: IDesignItem = element[DesignItem._designItemSymbol];
+    let designItem: IDesignItem = node[DesignItem._designItemSymbol];
     if (!designItem) {
-      designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
-      element[DesignItem._designItemSymbol] = designItem;
+      designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
+      node[DesignItem._designItemSymbol] = designItem;
     }
     return designItem;
   }

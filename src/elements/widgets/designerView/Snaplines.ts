@@ -1,6 +1,6 @@
 import { IDesignItem } from "../../item/IDesignItem";
 import { DomHelper } from "../../helper/DomHelper";
-import { IPoint } from "../../../interfaces/ipoint";
+import { IPoint } from "../../../interfaces/IPoint";
 
 export class Snaplines {
 

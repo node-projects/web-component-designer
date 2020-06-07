@@ -1,5 +1,5 @@
 //import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
-import { IPoint } from '../../../interfaces/ipoint';
+import { IPoint } from '../../../interfaces/IPoint';
 import { PointerActionType } from "../../../enums/PointerActionType";
 import { EventNames } from "../../../enums/EventNames";
 import { ISize } from '../../../interfaces/ISize';
@@ -18,6 +18,8 @@ import { InsertAction } from '../../services/undoService/transactionItems/Insert
 import { DomConverter } from './DomConverter';
 import { IDesignerView } from './IDesignerView';
 import { Snaplines } from './Snaplines';
+import { IDesignerMousePoint } from '../../../interfaces/IDesignermousePoint';
+import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 
 export class DesignerView extends BaseCustomWebComponent implements IDesignerView {
   // Public Properties
@@ -32,7 +34,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   private _resizeOffset = 10;
 
-  private _zoomFactor = 100;
+  private _zoomFactor = 1;
 
   // Private Variables
   private _canvas: HTMLDivElement;
@@ -41,15 +43,16 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   private _dropTarget: Element;
   private _snaplines: Snaplines;
-  
+
   private _actionType?: PointerActionType;
-  private _initialPoint: IPoint;
+  private _initialPoint: IDesignerMousePoint;
   private _initialSizes: ISize[];
   private _clickThroughElements: IDesignItem[] = []
   private _previousEventName: EventNames;
 
   private _firstConnect: boolean;
   private _ownBoundingRect: ClientRect | DOMRect;
+  private _containerBoundingRect: ClientRect | DOMRect;
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
@@ -223,12 +226,15 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       left: -15px;
       height: 14px;
       width: 14px;
-      content: '⤨';
+      content: ' ';
       cursor: move;
       font-size: 10px;
       font-weight: bold;
       text-align: center;
-      background: var(--highlight-blue, #2196f3);
+      background-image: url("data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 96 96' enable-background='new 0 0 96 96' xml:space='preserve'%3E%3Cg%3E%3Cpath d='M73,48.4l-10.4-9.6v4.8H52.4V33.4h4.8L47.6,23l-8.9,10.4h4.8v10.2H33.4v-4.8L23,48.4l10.4,8.9v-4.8h10.2v10.2h-4.8L47.6,73 l9.6-10.4h-4.8V52.4h10.2v4.8L73,48.4z'/%3E%3C/g%3E%3C/svg%3E%0A");
+      background-color: var(--highlight-blue, #2196f3);
+      background-size: 26px;
+      background-position: center;
       color: white;
       z-index: 1000000;
     }
@@ -239,6 +245,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           <div class="outercanvas1">
             <div class="outercanvas2">
               <div id="canvasContainer">
+                <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="canvas"></div>
                 <div id="selector" hidden></div>
                 <svg id="svg"></svg>
@@ -260,25 +267,29 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           </div>
         </div>
           `;
+  //private _zoomHelper: HTMLDivElement;
+  private _zoomInput: HTMLInputElement;
+  private _onContextMenuBound: any;
 
   constructor() {
     super();
 
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
     this._canvasContainer = this._getDomElement<HTMLDivElement>('canvasContainer');
- 
+    //this._zoomHelper = this._getDomElement<HTMLDivElement>('zoomHelper');
+
     this._selector = this._getDomElement<HTMLDivElement>('selector');
-    let zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
-    zoomInput.onchange = () => { this._zoomFactor = parseInt(zoomInput.value); zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
-    zoomInput.onclick = zoomInput.select
+    this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
+    this._zoomInput.onchange = () => { this._zoomFactor = parseInt(this._zoomInput.value) / 100; this.zoomFactorChanged(); }
+    this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
-    zoomIncrease.onclick = () => { this._zoomFactor += 10; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    zoomIncrease.onclick = () => { this._zoomFactor += 0.1; this.zoomFactorChanged(); }
     let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
-    zoomDecrease.onclick = () => { this._zoomFactor -= 10; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    zoomDecrease.onclick = () => { this._zoomFactor -= 0.1; this.zoomFactorChanged(); }
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
-    zoomReset.onclick = () => { this._zoomFactor = 100; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    zoomReset.onclick = () => { this._zoomFactor = 1; this.zoomFactorChanged(); }
     let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
-    zoomFit.onclick = () => { this._zoomFactor = 77; zoomInput.value = <any>this._zoomFactor + '%'; this.zoomFactorChanged(); }
+    zoomFit.onclick = () => { this._zoomFactor = 7.7; this.zoomFactorChanged(); }
 
     let alignSnap = this._getDomElement<HTMLDivElement>('alignSnap');
     alignSnap.onclick = () => { this._alignOnSnap = !this._alignOnSnap; }
@@ -291,6 +302,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
+    this._onContextMenuBound = this._onContextMenu.bind(this);
+
+    this._canvas.oncontextmenu = this._onContextMenuBound;
 
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
 
@@ -327,17 +341,19 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
     }
-    window.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
-    window.addEventListener('keyup', this._onKeyUpBound, true);
+    //todo change these event handlers maybe???
+    this._canvas.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
+    this._canvas.addEventListener('keyup', this._onKeyUpBound, true);
   }
 
   disconnectedCallback() {
-    window.removeEventListener('keydown', this._onKeyDownBound, true);
-    window.removeEventListener('keyup', this._onKeyUpBound, true);
+    this._canvas.removeEventListener('keydown', this._onKeyDownBound, true);
+    this._canvas.removeEventListener('keyup', this._onKeyUpBound, true);
   }
 
   zoomFactorChanged() {
-    this._canvasContainer.style.transform = "scale(" + (this._zoomFactor / 100) + ")";
+    this._canvasContainer.style.zoom = <any>this._zoomFactor;
+    this._zoomInput.value = (this._zoomFactor * 100).toFixed(0) + '%';
   }
 
   public getHTML() {
@@ -376,6 +392,26 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
   }
 
+  private _onContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    this.showDesignItemContextMenu([], event);
+  }
+
+  public showDesignItemContextMenu(designItem: IDesignItem[], event: MouseEvent) {
+    let mnuItems = [
+      { title: 'copy', action: () => { } },
+      { title: 'cut', action: () => { } },
+      { title: 'paste', action: () => { } },
+      { title: '-' },
+      { title: 'delete', action: () => { } },
+    ];
+    if (designItem.length > 1) {
+      //todo: special menu for multiple items?
+    }
+    let ctxMnu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
+    return ctxMnu;
+  }
+
   private onKeyUp(event: KeyboardEvent) {
     switch (event.key) {
       case 'ArrowUp':
@@ -401,7 +437,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     // We only care about keys that come after you've clicked on an element,
     // or keys after you've selected something from the tree view.
     // TODO: can this be less bad since it's p horrid?
-    let isOk =
+    /*let isOk =
       //@ts-ignore
       (event.composedPath()[0].localName === 'button' && event.composedPath()[2].localName == 'tree-view') ||
       //@ts-ignore
@@ -409,7 +445,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     if (!isOk) {
       return;
-    }
+    }*/
     let oldLeft = parseInt((<HTMLElement>primarySelection.element).style.left);
     let oldTop = parseInt((<HTMLElement>primarySelection.element).style.top);
     //let oldPosition = (<HTMLElement>primarySelection.element).style.position;
@@ -448,41 +484,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
         }
         break;
     }
-
-    /*this.instanceServiceContainer.undoService.add(UndoItemType.Move, primarySelection.element,
-      {
-        new: { left: primarySelection.element.style.left, top: primarySelection.element.style.top, position: primarySelection.element.style.position },
-        old: { left: oldLeft, top: oldTop, position: oldPosition }
-      });*/
   }
-
-  // Access canvas API
-
-  add(el) {
-    this._canvas.appendChild(el);
-  }
-
-  removes(el) {
-    this._canvas.removeChild(el);
-  }
-
-  has(query) {
-    return this._canvas.querySelector(query);
-  }
-
-  setInnerHTML(thing) {
-    this._canvas.innerHTML = thing;
-  }
-
-  getInnerHTML() {
-    return this._canvas.innerHTML;
-  }
-
-  get children() {
-    return this._canvas.children;
-  }
-
-  // end
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
     if (selectionChangedEvent.oldSelectedElements) {
@@ -507,7 +509,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
   }
 
-  setSelectedElements(elements: HTMLElement[]) {
+  private setSelectedElements(elements: HTMLElement[]) {
     if (elements) {
       let diArray: IDesignItem[] = [];
       for (let e of elements) {
@@ -540,14 +542,17 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     if (!event.altKey)
       this._resetPointerEventsForClickThrough();
 
-    // zoomfactor of canvas
-    let zoom = parseFloat(window.getComputedStyle(this).transform.split(',')[3])
-
-    //const currentElement = event.target as HTMLElement;
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
 
     this._ownBoundingRect = this.getBoundingClientRect();
-    const currentPoint = { x: event.x * zoom - this._ownBoundingRect.left, y: event.y * zoom - this._ownBoundingRect.top, zoom: zoom };
+    this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+    const currentPoint: IDesignerMousePoint = {
+      originalX: event.offsetX,
+      x: event.offsetX / this._zoomFactor,
+      originalY: event.offsetY,
+      y: event.offsetY / this._zoomFactor,
+      zoom: this._zoomFactor
+    };
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -586,35 +591,41 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
     if (event.type == EventNames.PointerUp) {
       if (this._actionType == PointerActionType.DrawSelection) {
-        this.setSelectedElements([currentElement]);
+        if (currentElement !== this.rootDesignItem.element)
+          this.setSelectedElements([currentElement]);
       }
       this._actionType = null;
     }
   }
 
-  private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint & { zoom: number }) {
-    let x1 = Math.min(this._initialPoint.x, currentPoint.x);
-    let x2 = Math.max(this._initialPoint.x, currentPoint.x);
-    let y1 = Math.min(this._initialPoint.y, currentPoint.y);
-    let y2 = Math.max(this._initialPoint.y, currentPoint.y);
+  private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint) {
+    let ox1 = Math.min(this._initialPoint.originalX, currentPoint.originalX);
+    let ox2 = Math.max(this._initialPoint.originalX, currentPoint.originalX);
+    let oy1 = Math.min(this._initialPoint.originalY, currentPoint.originalY);
+    let oy2 = Math.max(this._initialPoint.originalY, currentPoint.originalY);
 
     let selector = this._selector as HTMLDivElement;
-    selector.style.left = x1 + 'px';
-    selector.style.top = y1 + 'px';
-    selector.style.width = x2 - x1 + 'px';
-    selector.style.height = y2 - y1 + 'px';
+    selector.style.left = ox1 / this._zoomFactor + 'px';
+    selector.style.top = oy1 / this._zoomFactor + 'px';
+    selector.style.width = (ox2 - ox1) / this._zoomFactor + 'px';
+    selector.style.height = (oy2 - oy1) / this._zoomFactor + 'px';
     selector.hidden = false;
 
     if (event.type == EventNames.PointerUp) {
+      let x1 = Math.min(this._initialPoint.originalX, currentPoint.originalX);
+      let x2 = Math.max(this._initialPoint.originalX, currentPoint.originalX);
+      let y1 = Math.min(this._initialPoint.originalY, currentPoint.originalY);
+      let y2 = Math.max(this._initialPoint.originalY, currentPoint.originalY);
+
       selector.hidden = true;
       let elements = this._canvas.querySelectorAll('*');
       let inSelectionElements: HTMLElement[] = [];
       for (let e of elements) {
         let elementRect = e.getBoundingClientRect();
-        if (elementRect.top - this._ownBoundingRect.top >= y1 &&
-          elementRect.left - this._ownBoundingRect.left >= x1 &&
-          elementRect.top - this._ownBoundingRect.top + elementRect.height <= y2 &&
-          elementRect.left - this._ownBoundingRect.left + elementRect.width <= x2) {
+        if (elementRect.top - this._containerBoundingRect.top >= y1 &&
+          elementRect.left - this._containerBoundingRect.left >= x1 &&
+          elementRect.top - this._containerBoundingRect.top + elementRect.height <= y2 &&
+          elementRect.left - this._containerBoundingRect.left + elementRect.width <= x2) {
           inSelectionElements.push(e as HTMLElement);
         }
       }
@@ -622,7 +633,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
   }
 
-  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IPoint & { zoom: number }) {
+  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
     if (event.altKey) {
       let backup: string[] = [];
       if (event.type == EventNames.PointerDown)

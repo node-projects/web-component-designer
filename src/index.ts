@@ -7,8 +7,8 @@ export * from "./elements/controls/LazyLoader.js";
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
 
-export * from "./elements/services/containerService/DivContainerService.js";
-export type { IContainerService }  from "./elements/services/containerService/IContainerService.js";
+//export * from "./elements/services/placementService/DefaultPlacementService.js";
+export type { IContainerService }  from "./elements/services/placementService/IContainerService.js";
 
 export * from "./elements/services/contentService/ContentService.js";
 export type { IContentChanged }  from "./elements/services/contentService/IContentChanged.js";
@@ -19,9 +19,9 @@ export type { IElementsJson } from "./elements/services/elementsService/IElement
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
 export * from "./elements/services/elementsService/JsonFileElementsService.js";
 
-export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
-export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
-export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
+export type { IHtmlWriterService } from "./elements/services/serializationService/IHtmlWriterService.js";
+export type { IHtmlWriterOptions } from "./elements/services/serializationService/IHtmlWriterOptions.js";
+export * from "./elements/services/serializationService/HtmlWriterService.js";
 
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";

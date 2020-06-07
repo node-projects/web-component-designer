@@ -1,6 +1,6 @@
 import { IDesignItem } from "../../item/IDesignItem";
 import { IndentedTextWriter } from "../../helper/IndentedTextWriter";
-import { IHtmlWriterOptions } from "../../services/htmlWriterService/IHtmlWriterOptions";
+import { IHtmlWriterOptions } from "../../services/serializationService/IHtmlWriterOptions";
 
 export class DomConverter {
 

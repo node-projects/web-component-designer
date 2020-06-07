@@ -1,10 +1,10 @@
 import { IPropertiesService } from "./propertiesService/IPropertiesService";
-import { IContainerService } from './containerService/IContainerService';
+import { IContainerService } from './placementService/IContainerService';
 import { IElementsService } from './elementsService/IElementsService';
 import { IInstanceService } from './instanceService/IInstanceService';
 import { IEditorTypesService } from './propertiesService/IEditorTypesService';
 import { BaseServiceContainer } from './BaseServiceContainer';
-import { IHtmlWriterService } from './htmlWriterService/IHtmlWriterService';
+import { IHtmlWriterService } from './serializationService/IHtmlWriterService';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;

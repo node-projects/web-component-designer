@@ -128,7 +128,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
           }
           if (data.otherNode) {
             // Drop another Fancytree node from same frame (maybe a different tree however)
-            let sameTree = (data.otherNode.tree === data.tree);
+            //let sameTree = (data.otherNode.tree === data.tree);
 
             if (mode === "move") {
               data.otherNode.moveTo(node, data.hitMode);
@@ -191,6 +191,10 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
         hideZeros: true,
         hideExpanded: true
       },
+      /*loadChildren: (event, data) => {
+        // update node and parent counters after lazy loading
+        data.node.updateCounters();
+      }*/
     });
 
     //@ts-ignore
@@ -214,6 +218,8 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
 
     this._getChildren(rootItem, null);
     this._tree.expandAll();
+    //@ts-ignore
+    this._tree.getRootNode().updateCounters();
   }
 
   private _getChildren(item: IDesignItem, currentNode: Fancytree.FancytreeNode): any {
