@@ -18,7 +18,7 @@ export class ColorPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
 
   refreshValue(valueType: ValueType, value: any) {
     if (valueType == 'none')
-      this.element.value = null;
+      this.element.value = '#000000';
     else {
       let w3Col = w3color.toColorObject(value);
       this.element.value = w3Col.toHexString();

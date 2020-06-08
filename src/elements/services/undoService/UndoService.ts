@@ -23,7 +23,8 @@ export class UndoService implements IUndoService {
       this.clear();
       throw "UndoService - Commited Transation was not the last";
     }
-    this._undoStack.push(itm);
+    if (itm.undoStack.length)
+      this._undoStack.push(itm);
   }
 
   private abortTransactionItem(transactionItem: ITransactionItem) {

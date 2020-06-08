@@ -3,6 +3,7 @@ import { IDesignItem } from './IDesignItem';
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
 import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction';
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
+import { IDesignItem } from '../../../dist/elements/item/IDesignItem';
 
 export class DesignItem implements IDesignItem {
   node: Node;
@@ -43,6 +44,9 @@ export class DesignItem implements IDesignItem {
     for (const e of this.element.children) {
       yield DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer);
     }
+  }
+  public get parent(): IDesignItem {
+    return this.getOrCreateDesignItem(this.element.parentNode);
   }
 
   public get hasContent() {
@@ -131,6 +135,10 @@ export class DesignItem implements IDesignItem {
 
   public openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup {
     return this.instanceServiceContainer.undoService.openGroup(title, affectedItems);
+  }
+
+  public getOrCreateDesignItem(node: Node) {
+    return DesignItem.GetOrCreateDesignItem(node, this.serviceContainer, this.instanceServiceContainer);
   }
 
   static GetOrCreateDesignItem(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {

@@ -6,6 +6,7 @@ import { DefaultInstanceService } from './instanceService/DefaultInstanceService
 import { DefaultEditorTypesService } from './propertiesService/DefaultEditorTypesService';
 import { HtmlWriterService } from './serializationService/HtmlWriterService';
 import { BaseCustomWebComponentPropertiesService } from './propertiesService/services/BaseCustomWebComponentPropertiesService';
+import { DefaultPlacementService } from './placementService/DefaultPlacementService';
 
 let serviceContainer = new ServiceContainer();
 
@@ -16,5 +17,6 @@ serviceContainer.register("propertyService", new BaseCustomWebComponentPropertie
 serviceContainer.register("instanceService", new DefaultInstanceService());
 serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
 serviceContainer.register("htmlWriterService", new HtmlWriterService());
+serviceContainer.register("containerService", new DefaultPlacementService());
 
 export default serviceContainer;

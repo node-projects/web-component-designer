@@ -7,7 +7,7 @@ export * from "./elements/controls/LazyLoader.js";
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
 
-//export * from "./elements/services/placementService/DefaultPlacementService.js";
+export * from "./elements/services/placementService/DefaultPlacementService.js";
 export type { IContainerService }  from "./elements/services/placementService/IContainerService.js";
 
 export * from "./elements/services/contentService/ContentService.js";

@@ -20,20 +20,22 @@ import { IDesignerView } from './IDesignerView';
 import { Snaplines } from './Snaplines';
 import { IDesignerMousePoint } from '../../../interfaces/IDesignermousePoint';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
+import { IPlacementView } from './IPlacementView';
 
-export class DesignerView extends BaseCustomWebComponent implements IDesignerView {
+export class DesignerView extends BaseCustomWebComponent implements IDesignerView, IPlacementView {
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
+
+  // IPlacementView
+  public gridSize = 10;
+  public alignOnGrid = false;
+  public alignOnSnap = true;
+  public snapLines: Snaplines;
+  public svgLayer: SVGElement;
   public rootDesignItem: IDesignItem;
 
-  // Settings
-  private _gridSize = 10;
-  private _alignOnGrid = false;
-  private _alignOnSnap = true;
-
   private _resizeOffset = 10;
-
   private _zoomFactor = 1;
 
   // Private Variables
@@ -42,7 +44,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private _selector: HTMLDivElement;
 
   private _dropTarget: Element;
-  private _snaplines: Snaplines;
+
 
   private _actionType?: PointerActionType;
   private _initialPoint: IDesignerMousePoint;
@@ -95,6 +97,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
     .svg-snapline {
       stroke: purple;
+      stroke-dasharray: 4;
       fill: transparent;
     }
     #canvas * {
@@ -292,9 +295,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     zoomFit.onclick = () => { this._zoomFactor = 7.7; this.zoomFactorChanged(); }
 
     let alignSnap = this._getDomElement<HTMLDivElement>('alignSnap');
-    alignSnap.onclick = () => { this._alignOnSnap = !this._alignOnSnap; }
+    alignSnap.onclick = () => { this.alignOnSnap = !this.alignOnSnap; }
     let alignGrid = this._getDomElement<HTMLDivElement>('alignGrid');
-    alignGrid.onclick = () => { this._alignOnGrid = !this._alignOnGrid; }
+    alignGrid.onclick = () => { this.alignOnGrid = !this.alignOnGrid; }
 
     this.instanceServiceContainer = new InstanceServiceContainer();
     this.instanceServiceContainer.register("undoService", new UndoService);
@@ -308,7 +311,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
 
-    this._snaplines = new Snaplines(this._getDomElement<SVGElement>('svg'));
+    this.svgLayer = this._getDomElement<SVGElement>('svg')
+    this.snapLines = new Snaplines(this.svgLayer);
   }
 
   get designerWidth(): string {
@@ -328,7 +332,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this.serviceContainer = serviceContainer;
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
-    this._snaplines.initialize(this.rootDesignItem);
+    this.snapLines.initialize(this.rootDesignItem);
   }
 
   connectedCallback() {
@@ -365,7 +369,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this.rootDesignItem.element.innerHTML = html;
     this.instanceServiceContainer.undoService.clear();
     this._createDesignItemsRecursive(this.rootDesignItem.element);
-    this._snaplines.clearSnaplines();
+    this.snapLines.clearSnaplines();
   }
 
   private _createDesignItemsRecursive(element: Element) {
@@ -451,6 +455,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     //let oldPosition = (<HTMLElement>primarySelection.element).style.position;
 
     switch (event.key) {
+      case 'Delete':
+      case 'Backspace':
+        break;
       case 'ArrowUp':
         if (event.shiftKey) {
           event.preventDefault();
@@ -546,17 +553,21 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     this._ownBoundingRect = this.getBoundingClientRect();
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+    let targetRect = (<HTMLElement>event.target).getBoundingClientRect();
     const currentPoint: IDesignerMousePoint = {
-      originalX: event.offsetX,
-      x: event.offsetX / this._zoomFactor,
-      originalY: event.offsetY,
-      y: event.offsetY / this._zoomFactor,
+      originalX: event.offsetX + (targetRect.left - this._containerBoundingRect.left),
+      x: (event.offsetX + (targetRect.left - this._containerBoundingRect.left)) / this._zoomFactor,
+      originalY: event.offsetY + (targetRect.top - this._containerBoundingRect.top),
+      y: (event.offsetY + (targetRect.top - this._containerBoundingRect.top)) / this._zoomFactor,
+      controlOffsetX: event.offsetX,
+      controlOffsetY: event.offsetY,
       zoom: this._zoomFactor
     };
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       if (event.type == EventNames.PointerDown) {
+        this.snapLines.clearSnaplines();
         let composedPath = event.composedPath();
         let rectCurrentElement = currentElement.getBoundingClientRect();
         if (this._forceMove(currentPoint, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })) {
@@ -590,6 +601,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
     }
     if (event.type == EventNames.PointerUp) {
+      this.snapLines.clearSnaplines();
       if (this._actionType == PointerActionType.DrawSelection) {
         if (currentElement !== this.rootDesignItem.element)
           this.setSelectedElements([currentElement]);
@@ -633,7 +645,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
   }
 
-  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
+  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IDesignerMousePoint) {
     if (event.altKey) {
       let backup: string[] = [];
       if (event.type == EventNames.PointerDown)
@@ -651,7 +663,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._clickThroughElements = []
     }
 
-    let trackX = currentPoint.x - this._initialPoint.x;
+    /*let trackX = currentPoint.x - this._initialPoint.x;
     let trackY = currentPoint.y - this._initialPoint.y;
     if (event.type !== EventNames.PointerDown) {
       if (this._alignOnGrid) {
@@ -664,217 +676,231 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
         trackX = newPos.x - this._initialPoint.x;
         trackY = newPos.y - this._initialPoint.y;
       }
-    }
+    }*/
 
     switch (event.type) {
       case EventNames.PointerDown:
-        if (this._alignOnSnap)
-          this._snaplines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
-        this._dropTarget = null;
-        if (event.shiftKey || event.ctrlKey) {
-          const index = this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
-          if (index >= 0) {
-            let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
-            newSelectedList.splice(index, 1);
-            this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
-          }
-          else {
-            let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
-            newSelectedList.push(currentDesignItem);
-            this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
-          }
-        } else {
-          if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
-            this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
-        }
-        break;
-      case EventNames.PointerMove:
-        if (trackX != 0 || trackY != 0)
-          this._actionType = PointerActionType.Drag;
-
-        if (this._actionType != PointerActionType.Drag)
-          return;
-
-
-        //todo -> what is if a transform already exists -> backup existing style.?
-        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
-        }
-
-        // See if it's over anything.
-        this._dropTarget = null;
-        let targets = this._canvas.querySelectorAll('*');
-        for (let i = 0; i < targets.length; i++) {
-          let possibleTarget = targets[i] as HTMLElement;
-          possibleTarget.classList.remove('over');
-
-          let possibleTargetDesignItem = DesignItem.GetOrCreateDesignItem(possibleTarget, this.serviceContainer, this.instanceServiceContainer);
-          if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(possibleTargetDesignItem) >= 0)
-            continue;
-
-          // todo put following a extenable function ...
-          // in IContainerHandler ...
-
-          // Only some native elements and things with slots can be drop targets.
-          let slots = possibleTarget ? possibleTarget.querySelectorAll('slot') : [];
-          // input is the only native in this app that doesn't have a slot
-          let canDrop = (possibleTarget.localName.indexOf('-') === -1 && possibleTarget.localName !== 'input') || possibleTarget.localName === 'dom-repeat' || slots.length !== 0;
-
-          if (!canDrop) {
-            continue;
-          }
-
-          // Do we actually intersect this child?
-          const possibleTargetRect = possibleTarget.getBoundingClientRect();
-          if (possibleTargetRect.top - this._ownBoundingRect.top <= currentPoint.y &&
-            possibleTargetRect.left - this._ownBoundingRect.left <= currentPoint.x &&
-            possibleTargetRect.top - this._ownBoundingRect.top + possibleTargetRect.height >= currentPoint.y &&
-            possibleTargetRect.left - this._ownBoundingRect.left + possibleTargetRect.width >= currentPoint.x) {
-
-            // New target! Remove the other target indicators.
-            var previousTargets = this._canvas.querySelectorAll('.over');
-            for (var j = 0; j < previousTargets.length; j++) {
-              previousTargets[j].classList.remove('over');
+        {
+          this._dropTarget = null;
+          if (event.shiftKey || event.ctrlKey) {
+            const index = this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
+            if (index >= 0) {
+              let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
+              newSelectedList.splice(index, 1);
+              this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
             }
-            if (currentDesignItem != possibleTargetDesignItem && this._dropTarget != possibleTarget) {
-              possibleTarget.classList.add('over');
+            else {
+              let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
+              newSelectedList.push(currentDesignItem);
+              this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
+            }
+          } else {
+            if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
+              this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+          }
+          if (this.alignOnSnap)
+            this.snapLines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
 
-              if (event.altKey) {
-                if (this._dropTarget != null)
-                  this._dropTarget.classList.remove('over-enter');
-                this._dropTarget = possibleTarget;
-                this._dropTarget.classList.remove('over');
-                this._dropTarget.classList.add('over-enter');
+          break;
+        }
+      case EventNames.PointerMove:
+        {
+          if (currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y)
+            this._actionType = PointerActionType.Drag;
+
+          if (this._actionType != PointerActionType.Drag)
+            return;
+
+          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
+          containerService.place(this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+          //todo -> what is if a transform already exists -> backup existing style.?
+          /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+            (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
+          }
+  
+          // See if it's over anything.
+          this._dropTarget = null;
+          let targets = this._canvas.querySelectorAll('*');
+          for (let i = 0; i < targets.length; i++) {
+            let possibleTarget = targets[i] as HTMLElement;
+            possibleTarget.classList.remove('over');
+  
+            let possibleTargetDesignItem = DesignItem.GetOrCreateDesignItem(possibleTarget, this.serviceContainer, this.instanceServiceContainer);
+            if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(possibleTargetDesignItem) >= 0)
+              continue;
+  
+            // todo put following a extenable function ...
+            // in IContainerHandler ...
+  
+            // Only some native elements and things with slots can be drop targets.
+            let slots = possibleTarget ? possibleTarget.querySelectorAll('slot') : [];
+            // input is the only native in this app that doesn't have a slot
+            let canDrop = (possibleTarget.localName.indexOf('-') === -1 && possibleTarget.localName !== 'input') || possibleTarget.localName === 'dom-repeat' || slots.length !== 0;
+  
+            if (!canDrop) {
+              continue;
+            }
+  
+            // Do we actually intersect this child?
+            const possibleTargetRect = possibleTarget.getBoundingClientRect();
+            if (possibleTargetRect.top - this._ownBoundingRect.top <= currentPoint.y &&
+              possibleTargetRect.left - this._ownBoundingRect.left <= currentPoint.x &&
+              possibleTargetRect.top - this._ownBoundingRect.top + possibleTargetRect.height >= currentPoint.y &&
+              possibleTargetRect.left - this._ownBoundingRect.left + possibleTargetRect.width >= currentPoint.x) {
+  
+              // New target! Remove the other target indicators.
+              var previousTargets = this._canvas.querySelectorAll('.over');
+              for (var j = 0; j < previousTargets.length; j++) {
+                previousTargets[j].classList.remove('over');
+              }
+              if (currentDesignItem != possibleTargetDesignItem && this._dropTarget != possibleTarget) {
+                possibleTarget.classList.add('over');
+  
+                if (event.altKey) {
+                  if (this._dropTarget != null)
+                    this._dropTarget.classList.remove('over-enter');
+                  this._dropTarget = possibleTarget;
+                  this._dropTarget.classList.remove('over');
+                  this._dropTarget.classList.add('over-enter');
+                }
               }
             }
-          }
+          }*/
+          break;
         }
-        break;
       case EventNames.PointerUp:
-        if (this._actionType == PointerActionType.DragOrSelect) {
-          if (this._previousEventName == EventNames.PointerDown)
-            this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
-          return;
-        }
-
-        let cg = this.rootDesignItem.openGroup("Move Elements", this.instanceServiceContainer.selectionService.selectedElements);
-        //todo this needs also to get info from container handler, cause position is dependent of container
-        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          let movedElement = designItem.element;
-          if (this._dropTarget && this._dropTarget != movedElement.parentElement) {
-            //let oldParent = movedElement.parentElement;
-            movedElement.parentElement.removeChild(currentDesignItem.element);
-
-            // If there was a textContent nuke it, or else you'll
-            // never be able to again.
-            /*if (this._dropTarget.children.length === 0) {
-              this._dropTarget.textContent = '';
-            }
-            this._dropTarget.appendChild(currentElement);
-
-            this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
-              {
-                new: {
-                  parent: this._dropTarget,
-                  left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
-                },
-                old: {
-                  parent: oldParent,
-                  left: oldLeft, top: oldTop, position: oldPosition
-                }
-              });*/
-          } else {
-            let oldLeft = parseInt((<HTMLElement>movedElement).style.left);
-            oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
-            let oldTop = parseInt((<HTMLElement>movedElement).style.top);
-            oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
-            //let oldPosition = movedElement.style.position;
-
-            //todo: move this to handler wich is specific depeding on the container (e.g. canvasHandler, gridHandler, flexboxHandler...)
-            //todo: designitem set properties undo...
-            (<HTMLElement>designItem.element).style.transform = null;
-            designItem.setStyle('position', 'absolute');
-            designItem.setStyle('left', (trackX + oldLeft) + "px");
-            designItem.setStyle('top', (trackY + oldTop) + "px");
-            //todo
-            /*this.serviceContainer.UndoService.add(UndoItemType.Move, movedElement,
-              {
-                new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
-                old: { left: oldLeft, top: oldTop, position: oldPosition }
-              });*/
+        {
+          if (this._actionType == PointerActionType.DragOrSelect) {
+            if (this._previousEventName == EventNames.PointerDown)
+              this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+            return;
           }
+
+          //this._actionType = null;
+
+          let cg = this.rootDesignItem.openGroup("Move Elements", this.instanceServiceContainer.selectionService.selectedElements);
+          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
+          containerService.finishPlace(this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
           cg.commit();
+          break;
+          //todo this needs also to get info from container handler, cause position is dependent of container
+          for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+            let movedElement = designItem.element;
+            if (this._dropTarget && this._dropTarget != movedElement.parentElement) {
+              //let oldParent = movedElement.parentElement;
+              movedElement.parentElement.removeChild(currentDesignItem.element);
 
-          if (this._dropTarget != null)
-            this._dropTarget.classList.remove('over-enter');
-          this._dropTarget = null;
-        }
+              // If there was a textContent nuke it, or else you'll
+              // never be able to again.
+              /*if (this._dropTarget.children.length === 0) {
+                this._dropTarget.textContent = '';
+              }
+              this._dropTarget.appendChild(currentElement);
+  
+              this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
+                {
+                  new: {
+                    parent: this._dropTarget,
+                    left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
+                  },
+                  old: {
+                    parent: oldParent,
+                    left: oldLeft, top: oldTop, position: oldPosition
+                  }
+                });*/
+            } else {
+              let oldLeft = parseInt((<HTMLElement>movedElement).style.left);
+              oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
+              let oldTop = parseInt((<HTMLElement>movedElement).style.top);
+              oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
+              //let oldPosition = movedElement.style.position;
+
+              //todo: move this to handler wich is specific depeding on the container (e.g. canvasHandler, gridHandler, flexboxHandler...)
+              //todo: designitem set properties undo...
+              (<HTMLElement>designItem.element).style.transform = null;
+              designItem.setStyle('position', 'absolute');
+              designItem.setStyle('left', (trackX + oldLeft) + "px");
+              designItem.setStyle('top', (trackY + oldTop) + "px");
+              //todo
+              /*this.serviceContainer.UndoService.add(UndoItemType.Move, movedElement,
+                {
+                  new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
+                  old: { left: oldLeft, top: oldTop, position: oldPosition }
+                });*/
+            }
+            cg.commit();
+
+            if (this._dropTarget != null)
+              this._dropTarget.classList.remove('over-enter');
+            this._dropTarget = null;
+          }
 
 
 
 
 
-        /* let oldParent = currentElement.parentElement;
-         let newParent;
-         // Does this need to be added to a new parent?
-         if (this._dropTarget) {
-           reparented = true;
-           oldParent.removeChild(currentElement);
- 
-           // If there was a textContent nuke it, or else you'll
-           // never be able to again.
-           if (this._dropTarget.children.length === 0) {
-             this._dropTarget.textContent = '';
+          /* let oldParent = currentElement.parentElement;
+           let newParent;
+           // Does this need to be added to a new parent?
+           if (this._dropTarget) {
+             reparented = true;
+             oldParent.removeChild(currentElement);
+   
+             // If there was a textContent nuke it, or else you'll
+             // never be able to again.
+             if (this._dropTarget.children.length === 0) {
+               this._dropTarget.textContent = '';
+             }
+             this._dropTarget.appendChild(currentElement);
+             newParent = this._dropTarget;
+             this._dropTarget = null;
+           } else if (currentElement.parentElement && (currentElement.parentElement !== this._canvas)) {
+             reparented = true;
+             // If there's no drop target and the el used to be in a different
+             // parent, move it to the main view.
+             newParent = this._canvas;
+             currentElement.parentElement.removeChild(currentElement);
+             this.add(currentElement);
            }
-           this._dropTarget.appendChild(currentElement);
-           newParent = this._dropTarget;
-           this._dropTarget = null;
-         } else if (currentElement.parentElement && (currentElement.parentElement !== this._canvas)) {
-           reparented = true;
-           // If there's no drop target and the el used to be in a different
-           // parent, move it to the main view.
-           newParent = this._canvas;
-           currentElement.parentElement.removeChild(currentElement);
-           this.add(currentElement);
-         }
-         let parent = currentElement.parentElement.getBoundingClientRect();
- 
-         let oldLeft = currentElement.style.left;
-         let oldTop = currentElement.style.top;
-         let oldPosition = currentElement.style.position;
-         if (reparented) {
-           currentElement.style.position = 'relative';
-           currentElement.style.left = currentElement.style.top = '0px';
-           this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
-             {
-               new: {
-                 parent: newParent,
-                 left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
-               },
-               old: {
-                 parent: oldParent,
-                 left: oldLeft, top: oldTop, position: oldPosition
-               }
-             });
-         } else {
-           currentElement.style.position = 'absolute';
-           currentElement.style.left = rekt.left - parent.left + 'px';
-           currentElement.style.top = rekt.top - parent.top + 'px';
-           this.actionHistory.add(ActionHistoryType.Move, el,
-             {
-               new: { left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position },
-               old: { left: oldLeft, top: oldTop, position: oldPosition }
-             });
-         }
- 
-         if (newParent)
-           newParent.classList.remove('over');
-         if (oldParent)
-           oldParent.classList.remove('over');
-         currentElement.classList.remove('dragging');
-         currentElement.classList.remove('resizing');
-         currentElement.style.transform = 'none'; */
-        break;
+           let parent = currentElement.parentElement.getBoundingClientRect();
+   
+           let oldLeft = currentElement.style.left;
+           let oldTop = currentElement.style.top;
+           let oldPosition = currentElement.style.position;
+           if (reparented) {
+             currentElement.style.position = 'relative';
+             currentElement.style.left = currentElement.style.top = '0px';
+             this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
+               {
+                 new: {
+                   parent: newParent,
+                   left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
+                 },
+                 old: {
+                   parent: oldParent,
+                   left: oldLeft, top: oldTop, position: oldPosition
+                 }
+               });
+           } else {
+             currentElement.style.position = 'absolute';
+             currentElement.style.left = rekt.left - parent.left + 'px';
+             currentElement.style.top = rekt.top - parent.top + 'px';
+             this.actionHistory.add(ActionHistoryType.Move, el,
+               {
+                 new: { left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position },
+                 old: { left: oldLeft, top: oldTop, position: oldPosition }
+               });
+           }
+   
+           if (newParent)
+             newParent.classList.remove('over');
+           if (oldParent)
+             oldParent.classList.remove('over');
+           currentElement.classList.remove('dragging');
+           currentElement.classList.remove('resizing');
+           currentElement.style.transform = 'none'; */
+          break;
+        }
     }
     //todo this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
   }
@@ -891,9 +917,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       case EventNames.PointerMove:
         let trackX = currentPoint.x - this._initialPoint.x;
         let trackY = currentPoint.y - this._initialPoint.y;
-        if (this._alignOnGrid) {
-          trackX = Math.round(trackX / this._gridSize) * this._gridSize;
-          trackY = Math.round(trackY / this._gridSize) * this._gridSize;
+        if (this.alignOnGrid) {
+          trackX = Math.round(trackX / this.gridSize) * this.gridSize;
+          trackY = Math.round(trackY / this.gridSize) * this.gridSize;
         }
         let i = 0;
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {

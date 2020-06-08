@@ -15,6 +15,7 @@ export interface IDesignItem {
 
   readonly hasChildren: boolean;
   children(): IterableIterator<IDesignItem>
+  readonly parent: IDesignItem;
 
   readonly hasContent: boolean;
   content: string
@@ -24,6 +25,8 @@ export interface IDesignItem {
 
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
+
+  getOrCreateDesignItem(node: Node);
 
   openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup
   
