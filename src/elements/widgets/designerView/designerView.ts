@@ -18,9 +18,10 @@ import { InsertAction } from '../../services/undoService/transactionItems/Insert
 import { DomConverter } from './DomConverter';
 import { IDesignerView } from './IDesignerView';
 import { Snaplines } from './Snaplines';
-import { IDesignerMousePoint } from '../../../interfaces/IDesignermousePoint';
+import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
+import { DomHelper } from '../../helper/DomHelper';
 
 export class DesignerView extends BaseCustomWebComponent implements IDesignerView, IPlacementView {
   // Public Properties
@@ -532,6 +533,10 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     if (elements) {
       let diArray: IDesignItem[] = [];
       for (let e of elements) {
+        //console.log(e.getBoundingClientRect());
+        //console.log(DomHelper.getAbsoluteBoundingRect(e));
+        //console.log(e.clientLeft);
+        //console.log(e.scrollLeft);
         diArray.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
         this.instanceServiceContainer.selectionService.setSelectedElements(diArray)
       }
@@ -547,6 +552,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   }
 
   private _pointerMoveOnElement(event: PointerEvent) {
+    //console.log(event.x, event.pageX, event.offsetX, event.screenX, event.clientX);
     this._pointerEventHandler(event);
     this._previousEventName = <EventNames>event.type;
   }
@@ -837,8 +843,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
               //todo: designitem set properties undo...
               (<HTMLElement>designItem.element).style.transform = null;
               designItem.setStyle('position', 'absolute');
-              designItem.setStyle('left', (trackX + oldLeft) + "px");
-              designItem.setStyle('top', (trackY + oldTop) + "px");
+              //designItem.setStyle('left', (trackX + oldLeft) + "px");
+              //designItem.setStyle('top', (trackY + oldTop) + "px");
               //todo
               /*this.serviceContainer.UndoService.add(UndoItemType.Move, movedElement,
                 {

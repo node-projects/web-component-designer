@@ -32,4 +32,25 @@ export class DomHelper {
       node.removeChild(c);
     }
   }
+
+  static getAbsoluteBoundingRect(node: Node, relativeTo?: Node) {
+    let rect = { x: 0, y: 0, unscaledX: 0, unscaledY: 0 };
+    let currentNode = node;
+    while (currentNode) {
+      let st = window.getComputedStyle(<Element>currentNode);
+      //@ts-ignore
+      rect.x = currentNode.offsetLeft + rect.x * st.zoom;
+      //@ts-ignore
+      rect.x = currentNode.offsetTop + rect.y * st.zoom;
+      //@ts-ignore
+      rect.unscaledX += currentNode.offsetLeft;
+      //@ts-ignore
+      rect.unscaledY += currentNode.offsetTop;
+      //@ts-ignore
+      currentNode = currentNode.offsetParent;
+      if (currentNode == relativeTo)
+        break;
+    }
+    return rect;
+  }
 }

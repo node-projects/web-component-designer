@@ -38,6 +38,8 @@ export class Snaplines {
     this.clearSnaplines();
     let ignMap = new Map<Element, IDesignItem>(ignoredItems.map(i => [i.element, i]));
     this._outerRect = this._containerItem.element.getBoundingClientRect();
+    //DomHelper.getAbsoluteBoundingRect(this._containerItem.element);
+
     for (let n of DomHelper.getAllChildNodes(this._containerItem.element)) {
       if (!ignMap.has(<Element>n)) {
         let p = (<Element>n).getBoundingClientRect();

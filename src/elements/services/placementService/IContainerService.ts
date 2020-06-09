@@ -1,7 +1,7 @@
 import { IService } from "../IService";
 import { IDesignItem } from "../../item/IDesignItem";
 import { IPlacementView } from "../../widgets/designerView/IPlacementView";
-import { IDesignerMousePoint } from "../../../interfaces/IDesignermousePoint";
+import { IDesignerMousePoint } from "../../../interfaces/IDesignerMousePoint";
 
 export interface IContainerService extends IService {
   serviceForContainer(container: IDesignItem)
