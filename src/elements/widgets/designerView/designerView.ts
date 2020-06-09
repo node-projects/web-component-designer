@@ -265,8 +265,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
             <div title="zoom to fit" id="zoomFit" class="toolbar-control"
               style="width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center;">
               100%</div>
-            <div title="snap to grid" id="alignSnap" class="toolbar-control snap-grid"></div>
-            <div title="snap to elements" id="alignGrid" class="toolbar-control snap-guide"></div>
+            <div title="snap to grid" id="alignGrid" class="toolbar-control snap-grid"></div>
+            <div title="snap to elements" id="alignSnap" class="toolbar-control snap-guide"></div>
           </div>
         </div>
           `;
@@ -358,6 +358,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   zoomFactorChanged() {
     this._canvasContainer.style.zoom = <any>this._zoomFactor;
     this._zoomInput.value = (this._zoomFactor * 100).toFixed(0) + '%';
+    this.snapLines.clearSnaplines();
   }
 
   public getHTML() {
@@ -385,6 +386,13 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   private _onDragOver(event: DragEvent) {
     event.preventDefault();
+    /*if (this.alignOnSnap) {
+      this.snapLines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
+      //todo fix this following code...
+      const currentPoint = this.getDesignerMousepoint(event);
+      let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.rootDesignItem))
+      containerService.finishPlace(this, this.rootDesignItem, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+    }*/
   }
 
   private async _onDrop(event: DragEvent) {
@@ -393,7 +401,11 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = <IElementDefinition>JSON.parse(transferData);
     let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
+    di.setStyle('position', 'absolute')
+    di.setStyle('top', event.offsetY + 'px')
+    di.setStyle('left', event.offsetX + 'px')
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
+    this.instanceServiceContainer.selectionService.setSelectedElements([di]);
   }
 
   private _onContextMenu(event: MouseEvent) {
@@ -545,6 +557,19 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this._previousEventName = <EventNames>event.type;
   }
 
+  private getDesignerMousepoint(event: MouseEvent, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
+    let targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+    return {
+      originalX: Math.round(event.x - this._containerBoundingRect.left),
+      x: Math.round((event.x - this._containerBoundingRect.left) / this._zoomFactor),
+      originalY: Math.round(event.y - this._containerBoundingRect.top),
+      y: Math.round((event.y - this._containerBoundingRect.top) / this._zoomFactor),
+      controlOffsetX: (startPoint ? startPoint.controlOffsetX : event.x - targetRect.x),
+      controlOffsetY: (startPoint ? startPoint.controlOffsetY : event.y - targetRect.y),
+      zoom: this._zoomFactor
+    };
+  }
+
   private _pointerEventHandler(event: PointerEvent) {
     if (!event.altKey)
       this._resetPointerEventsForClickThrough();
@@ -553,16 +578,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
     this._ownBoundingRect = this.getBoundingClientRect();
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
-    let targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-    const currentPoint: IDesignerMousePoint = {
-      originalX: event.offsetX + (targetRect.left - this._containerBoundingRect.left),
-      x: (event.offsetX + (targetRect.left - this._containerBoundingRect.left)) / this._zoomFactor,
-      originalY: event.offsetY + (targetRect.top - this._containerBoundingRect.top),
-      y: (event.offsetY + (targetRect.top - this._containerBoundingRect.top)) / this._zoomFactor,
-      controlOffsetX: event.offsetX,
-      controlOffsetY: event.offsetY,
-      zoom: this._zoomFactor
-    };
+    
+    const currentPoint = this.getDesignerMousepoint(event, event.type === 'pointerdown' ? null : this._initialPoint);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -607,6 +624,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           this.setSelectedElements([currentElement]);
       }
       this._actionType = null;
+      this._initialPoint = null;
     }
   }
 

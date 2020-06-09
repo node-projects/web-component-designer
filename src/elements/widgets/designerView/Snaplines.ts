@@ -30,6 +30,8 @@ export class Snaplines {
     DomHelper.removeAllChildnodes(this._svg);
     this._positionsH.clear();
     this._positionsMiddleH.clear();
+    this._positionsV.clear();
+    this._positionsMiddleV.clear();
   }
 
   calculateSnaplines(ignoredItems: IDesignItem[]) {
@@ -40,9 +42,9 @@ export class Snaplines {
       if (!ignMap.has(<Element>n)) {
         let p = (<Element>n).getBoundingClientRect();
 
-        let pLeft = p.left - this._outerRect.left;
-        let pMidH = p.left - this._outerRect.left + Math.round(p.width / 2)
-        let pRight = p.left - this._outerRect.left + p.width;
+        let pLeft = Math.round(p.left - this._outerRect.left);
+        let pMidH = Math.round(p.left - this._outerRect.left + p.width / 2)
+        let pRight = Math.round(p.left - this._outerRect.left + p.width);
         if (!this._positionsH.has(pLeft))
           this._positionsH.set(pLeft, []);
         this._positionsH.get(pLeft).push(p);
@@ -53,9 +55,9 @@ export class Snaplines {
           this._positionsMiddleH.set(pMidH, []);
         this._positionsMiddleH.get(pMidH).push(p);
 
-        let pTop = p.top - this._outerRect.top;
-        let pMidV = p.top - this._outerRect.top + Math.round(p.height / 2)
-        let pBottom = p.top - this._outerRect.top + p.height;
+        let pTop = Math.round(p.top - this._outerRect.top);
+        let pMidV = Math.round(p.top - this._outerRect.top + p.height / 2)
+        let pBottom = Math.round(p.top - this._outerRect.top + p.height);
         if (!this._positionsV.has(pTop))
           this._positionsV.set(pTop, []);
         this._positionsV.get(pTop).push(p);

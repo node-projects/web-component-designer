@@ -49,11 +49,14 @@ export class DefaultPlacementService implements IContainerService {
 
     let track = this.calculateTrack(placementView, startPoint, newPoint, items[0]);
 
+    //console.warn('track', track);
     //todo -> what is if a transform already exists -> backup existing style.?
     for (const designItem of items) {
       (<HTMLElement>designItem.element).style.transform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
     }
 
+    console.warn(startPoint)
+    console.warn(newPoint)
     /*
     // See if it's over anything.
     let targets = this._rootContainer.element.querySelectorAll('*');
