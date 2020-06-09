@@ -20,7 +20,7 @@ import { IDesignerView } from './IDesignerView';
 import { Snaplines } from './Snaplines';
 import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
-import { IPlacementView } from './IPlacementView';import { DomHelper } from '../../helper/DomHelper';
+import { IPlacementView } from './IPlacementView';
 
 export class DesignerView extends BaseCustomWebComponent implements IDesignerView, IPlacementView {
   // Public Properties
