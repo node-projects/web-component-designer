@@ -1,7 +1,7 @@
 import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IContainerService } from './IContainerService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
-import { IDesignerMousePoint } from '../../../interfaces/IDesignermousePoint.js';
+import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 
 export class DefaultPlacementService implements IContainerService {
@@ -55,8 +55,8 @@ export class DefaultPlacementService implements IContainerService {
       (<HTMLElement>designItem.element).style.transform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
     }
 
-    console.warn(startPoint)
-    console.warn(newPoint)
+    //console.warn(startPoint)
+    //console.warn(newPoint)
     /*
     // See if it's over anything.
     let targets = this._rootContainer.element.querySelectorAll('*');
