@@ -3,7 +3,6 @@ import { IDesignItem } from './IDesignItem';
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
 import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction';
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
-import { IDesignItem } from '../../../dist/elements/item/IDesignItem';
 
 export class DesignItem implements IDesignItem {
   node: Node;

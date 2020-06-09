@@ -128,12 +128,12 @@ export class DesignerTabControl extends BaseCustomWebComponent {
       if (index == this._selectedIndex) {
         element.slot = "panels";
         this._headerDiv.children[index].classList.add('selected');
+
         //bugfix sometimes not shown content
-        let oldDisplay = (<HTMLElement>element).style.display;
-        requestAnimationFrame(() => {
-          (<HTMLElement>element).style.display = 'none';
-          (<HTMLElement>element).style.display = oldDisplay;
-        });
+        if (!(<HTMLElement>element).clientWidth) {
+          let oldDisplay = (<HTMLElement>element).style.display;
+          this._bugfixNotShownContent((<HTMLElement>element), oldDisplay);
+        }
       } else {
         element.removeAttribute("slot");
         this._headerDiv.children[index].classList.remove('selected');
@@ -142,6 +142,16 @@ export class DesignerTabControl extends BaseCustomWebComponent {
     this.onSelectedTabChanged.emit({ newIndex: this._selectedIndex, oldIndex: oldIndex });
   }
 
+  private _bugfixNotShownContent(element: HTMLElement, oldDisplay: string) {
+    requestAnimationFrame(() => {
+      element.style.display = 'none';
+      element.style.display = oldDisplay;
+      if (!(<HTMLElement>element).clientWidth)
+        this._bugfixNotShownContent(element, oldDisplay);
+    });
+  }
+
   public readonly onSelectedTabChanged = new TypedEvent<DesignerTabControlIndexChangedEventArgs>();
 }
+
 customElements.define('node-projects-designer-tab-control', DesignerTabControl);
