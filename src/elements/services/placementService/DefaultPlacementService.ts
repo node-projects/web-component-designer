@@ -31,12 +31,12 @@ export class DefaultPlacementService implements IContainerService {
     else if (placementView.alignOnSnap) {
       //let rect = this.instanceServiceContainer.selectionService.primarySelection.element.getBoundingClientRect();
       let rect = item.element.getBoundingClientRect();
-      let newPos = placementView.snapLines.snapToPosition({ x: newPoint.x - startPoint.controlOffsetX, y: newPoint.y - startPoint.controlOffsetY }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+      let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.controlOffsetX, y: newPoint.originalY - startPoint.controlOffsetY }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
       if (newPos.x !== null) {
-        trackX = newPos.x - startPoint.x + startPoint.controlOffsetX;
+        trackX = newPos.x - startPoint.originalX + Math.round(startPoint.controlOffsetX);
       }
       if (newPos.y !== null) {
-        trackY = newPos.y - startPoint.y + startPoint.controlOffsetY;
+        trackY = newPos.y - startPoint.originalY + Math.round(startPoint.controlOffsetY);
       }
     }
 

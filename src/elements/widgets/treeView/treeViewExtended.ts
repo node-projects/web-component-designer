@@ -25,6 +25,12 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
       span.fancytree-node.fancytree-drop-reject {
         outline: 1px dotted red;
       }
+      #tree ul {
+        border: none;
+      }
+      #tree ul:focus {
+        outline: none;
+      }
     `;
 
   constructor() {
@@ -55,7 +61,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
 
 
   async ready() {
-    this._treeDiv.classList.add('fancytree-connectors');
+    //this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
       icon: false, //atm, maybe if we include icons for specific elements
       extensions: ['dnd5', 'multi', 'filter', 'childcounter'],
@@ -199,6 +205,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
 
     //@ts-ignore
     this._tree = $.ui.fancytree.getTree(this._treeDiv);
+    this._treeDiv.children[0].classList.add('fancytree-connectors');
   }
 
   public createTree(rootItem: IDesignItem): void {

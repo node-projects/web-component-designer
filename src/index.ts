@@ -7,6 +7,10 @@ export * from "./elements/controls/LazyLoader.js";
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
 
+export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
+export type { IBindableObject }  from "./elements/services/bindableObjectsService/IBindableObject.js";
+export type { IBindableObjectsService }  from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
+
 export * from "./elements/services/placementService/DefaultPlacementService.js";
 export type { IContainerService }  from "./elements/services/placementService/IContainerService.js";
 

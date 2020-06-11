@@ -26,7 +26,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponent {
       display: grid;
       grid-template-columns: 11px auto 1fr;
       align-items: center;
-      grid-auto-rows: 30px;
+      grid-auto-rows: 24px;
       align-items: center;
     }
     label, input, select {
@@ -51,10 +51,14 @@ export class PropertyGridPropertyList extends BaseCustomWebComponent {
     input, select {
       height: 24px;
       border: 1px solid var(--input-border-color, #596c7a);
-      border-radius: 5px;
+      border-radius: 0;
+      -webkit-appearance: none;
       box-sizing: border-box;
       font-size: 11px;
       width: 100%;
+      padding:0;
+      padding-left: 3px;
+      margin:0;
     }
     /*input {
       margin-left: 4px;

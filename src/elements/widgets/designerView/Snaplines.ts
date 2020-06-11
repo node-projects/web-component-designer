@@ -6,14 +6,14 @@ import type { ISize } from '../../../interfaces/ISize';
 
 export class Snaplines {
 
-  public snapOffset = 10;
+  public snapOffset = 20;
 
   private _svg: SVGElement;
   private _containerItem: IDesignItem;
-  private _positionsH: Map<number, DOMRect[]> = new Map();
-  private _positionsMiddleH: Map<number, DOMRect[]> = new Map();
-  private _positionsV: Map<number, DOMRect[]> = new Map();
-  private _positionsMiddleV: Map<number, DOMRect[]> = new Map();
+  private _positionsH: [number, DOMRect][] = [];
+  private _positionsMiddleH: [number, DOMRect][] = [];
+  private _positionsV: [number, DOMRect][] = [];
+  private _positionsMiddleV: [number, DOMRect][] = [];
   private _outerRect: DOMRect;
   //private _lastPh: DOMRect[];
 
@@ -28,116 +28,101 @@ export class Snaplines {
 
   clearSnaplines() {
     DomHelper.removeAllChildnodes(this._svg);
-    this._positionsH.clear();
-    this._positionsMiddleH.clear();
-    this._positionsV.clear();
-    this._positionsMiddleV.clear();
+    this._positionsH = [];
+    this._positionsMiddleH = [];
+    this._positionsV = [];
+    this._positionsMiddleV = [];
   }
 
   calculateSnaplines(ignoredItems: IDesignItem[]) {
     this.clearSnaplines();
     let ignMap = new Map<Element, IDesignItem>(ignoredItems.map(i => [i.element, i]));
     this._outerRect = this._containerItem.element.getBoundingClientRect();
-    //DomHelper.getAbsoluteBoundingRect(this._containerItem.element);
 
     for (let n of DomHelper.getAllChildNodes(this._containerItem.element)) {
       if (!ignMap.has(<Element>n)) {
         let p = (<Element>n).getBoundingClientRect();
 
-        let pLeft = Math.round(p.left - this._outerRect.left);
-        let pMidH = Math.round(p.left - this._outerRect.left + p.width / 2)
-        let pRight = Math.round(p.left - this._outerRect.left + p.width);
-        if (!this._positionsH.has(pLeft))
-          this._positionsH.set(pLeft, []);
-        this._positionsH.get(pLeft).push(p);
-        if (!this._positionsH.has(pRight))
-          this._positionsH.set(pRight, []);
-        this._positionsH.get(pRight).push(p);
-        if (!this._positionsMiddleH.has(pMidH))
-          this._positionsMiddleH.set(pMidH, []);
-        this._positionsMiddleH.get(pMidH).push(p);
+        let pLeft = p.x - this._outerRect.x;
+        let pMidH = p.x - this._outerRect.x + p.width / 2;
+        let pRight = p.x - this._outerRect.x + p.width;
+        this._positionsH.push([pLeft, p])
+        this._positionsMiddleH.push([pMidH, p])
+        this._positionsH.push([pRight, p])
 
-        let pTop = Math.round(p.top - this._outerRect.top);
-        let pMidV = Math.round(p.top - this._outerRect.top + p.height / 2)
-        let pBottom = Math.round(p.top - this._outerRect.top + p.height);
-        if (!this._positionsV.has(pTop))
-          this._positionsV.set(pTop, []);
-        this._positionsV.get(pTop).push(p);
-        if (!this._positionsV.has(pBottom))
-          this._positionsV.set(pBottom, []);
-        this._positionsV.get(pBottom).push(p);
-        if (!this._positionsMiddleV.has(pMidV))
-          this._positionsMiddleV.set(pMidV, []);
-        this._positionsMiddleV.get(pMidV).push(p);
+
+        let pTop = p.y - this._outerRect.y;
+        let pMidV = p.y - this._outerRect.y + p.height / 2;
+        let pBottom = p.y - this._outerRect.y + p.height;
+        this._positionsV.push([pTop, p])
+        this._positionsMiddleV.push([pMidV, p])
+        this._positionsV.push([pBottom, p])
       }
     }
+    this._positionsH.sort((a, b) => a[0] - b[0]);
+    this._positionsMiddleH.sort((a, b) => a[0] - b[0]);
+    this._positionsV.sort((a, b) => a[0] - b[0]);
+    this._positionsMiddleV.sort((a, b) => a[0] - b[0]);
   }
 
   //return the snapped position
   snapToPosition(position: IPoint, size: ISize, moveDirection: IPoint): IPoint {
-    let pH = this._positionsH.get(position.x);
-    if (pH === undefined)
-      pH = this._positionsMiddleH.get(position.x + Math.round(size.width / 2));
-    let posH = position.x;
-    if (pH === undefined) {
-      for (let i = 1; i <= this.snapOffset; i++) {
-        let pSmall = this._positionsH.get(position.x - i);
-        if (pSmall === undefined)
-          pSmall = this._positionsH.get(position.x - i + size.width);
-        if (pSmall === undefined)
-          pSmall = this._positionsMiddleH.get(position.x - i + Math.round(size.width / 2));
-        let pBig = this._positionsH.get(position.x + i);
-        if (pBig === undefined)
-          pBig = this._positionsH.get(position.x - i + size.width);
-        if (pBig === undefined)
-          pBig = this._positionsMiddleH.get(position.x - i + Math.round(size.width / 2));
-        if (pSmall !== undefined && pBig !== undefined) {
-          if (moveDirection.x > 0) {
-            pH = pBig;
-            posH = position.x + i;
-          } else {
-            pH = pSmall;
-            posH = position.x - i;
-          }
-        } else {
-          pH = pBig ? pBig : pSmall;
-          posH = pBig ? position.x + i : position.x - i;
-        }
-        if (pH)
+    console.log(this._positionsH[0], position.x)
+    let idx = this._positionsH.findIndex(x => x[0] > position.x);
+    /*let idx2 = this._positionsH.findIndex(x => x[0] + size.width > position.x);
+    if (idx2 >= 0) {
+      if (idx < 0 || this._positionsH[idx][0] > (this._positionsH[idx2][0] - size.width))
+        idx = idx2;
+    }*/
+    let pH = undefined;
+    let posH = undefined;
+    if (idx >= 0) {
+      if (this._positionsH[idx][0] <= position.x + this.snapOffset) {
+        posH = this._positionsH[idx][0];
+        pH = [this._positionsH[idx][1]];
+        for (let i = idx + 1; i < this._positionsH.length; i++) {
+          if (this._positionsH[i][0] === posH)
+            pH.push(this._positionsH[i][1]);
           break;
+        }
+      }
+    }
+    if (idx > 0) {
+      if ((posH === undefined || this._positionsH[idx - 1][0] - position.x > position.x - this._positionsH[idx - 1][0]) && this._positionsH[idx - 1][0] >= position.x - this.snapOffset) {
+        posH = this._positionsH[idx - 1][0];
+        pH = [this._positionsH[idx - 1][1]];
+        for (let i = idx - 2; i >= 0; i--) {
+          if (this._positionsH[i][0] === posH)
+            pH.push(this._positionsH[i][1]);
+          break;
+        }
       }
     }
 
-    let pV = this._positionsV.get(position.y);
-    if (pV === undefined)
-      pV = this._positionsMiddleV.get(position.y + Math.round(size.height / 2));
-    let posV = position.y;
-    if (pV === undefined) {
-      for (let i = 1; i <= this.snapOffset; i++) {
-        let pSmall = this._positionsV.get(position.y - i);
-        if (pSmall === undefined)
-          pSmall = this._positionsV.get(position.y - i + size.height);
-        if (pSmall === undefined)
-          pSmall = this._positionsMiddleV.get(position.y - i + Math.round(size.height / 2));
-        let pBig = this._positionsV.get(position.y + i);
-        if (pBig === undefined)
-          pBig = this._positionsV.get(position.y - i + size.height);
-        if (pBig === undefined)
-          pBig = this._positionsMiddleV.get(position.y - i + Math.round(size.height / 2));
-        if (pSmall !== undefined && pBig !== undefined) {
-          if (moveDirection.y > 0) {
-            pV = pBig;
-            posV = position.y + i;
-          } else {
-            pV = pSmall;
-            posV = position.y - i;
-          }
-        } else {
-          pV = pBig ? pBig : pSmall;
-          posV = pBig ? position.y + i : position.y - i;
-        }
-        if (pV)
+    idx = this._positionsV.findIndex(x => x[0] > position.y);
+    //idx2 = this._positionsH.findIndex(x => x[0] > position.y + size.height);
+    let pV = undefined;
+    let posV = undefined;
+    if (idx >= 0) {
+      if (this._positionsV[idx][0] <= position.y + this.snapOffset) {
+        posV = this._positionsV[idx][0];
+        pV = [this._positionsV[idx][1]];
+        for (let i = idx + 1; i < this._positionsV.length; i++) {
+          if (this._positionsV[i][0] === posV)
+            pV.push(this._positionsV[i][1]);
           break;
+        }
+      }
+    }
+    if (idx > 0) {
+      if ((posV === undefined || this._positionsV[idx - 1][0] - position.y > position.y - this._positionsV[idx - 1][0]) && this._positionsV[idx - 1][0] >= position.y - this.snapOffset) {
+        posV = this._positionsV[idx - 1][0];
+        pV = [this._positionsV[idx - 1][1]];
+        for (let i = idx - 2; i >= 0; i--) {
+          if (this._positionsV[i][0] === posH)
+            pV.push(this._positionsV[i][1]);
+          break;
+        }
       }
     }
 

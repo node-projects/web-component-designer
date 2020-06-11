@@ -53,8 +53,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private _previousEventName: EventNames;
 
   private _firstConnect: boolean;
-  private _ownBoundingRect: ClientRect | DOMRect;
-  private _containerBoundingRect: ClientRect | DOMRect;
+  private _ownBoundingRect:  DOMRect;
+  private _containerBoundingRect:  DOMRect;
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
@@ -74,7 +74,11 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       width: 100%;
       height: 100%;
       margin: auto;
-      position: relative;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
     }
     #canvas {
       background-color: var(--canvas-background, white);
@@ -146,11 +150,11 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       width: 100%;
       height: 100%;
     }
-    .outercanvas1 {
+    #outercanvas1 {
       width: 100%;
       height: calc(100% - 17px);
     }
-    .outercanvas2 {
+    #outercanvas2 {
       width: 100%;
       height: 100%;
       position: relative;
@@ -245,8 +249,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   static readonly template = html`
         <div class="outer">
-          <div class="outercanvas1">
-            <div class="outercanvas2">
+          <div id="outercanvas1">
+            <div id="outercanvas2">
               <div id="canvasContainer">
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="canvas"></div>
@@ -273,12 +277,14 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   //private _zoomHelper: HTMLDivElement;
   private _zoomInput: HTMLInputElement;
   private _onContextMenuBound: any;
+  //private _outerCanvas2: HTMLDivElement;
 
   constructor() {
     super();
 
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
     this._canvasContainer = this._getDomElement<HTMLDivElement>('canvasContainer');
+    //this._outerCanvas2 = this._getDomElement<HTMLDivElement>('outercanvas2');
     //this._zoomHelper = this._getDomElement<HTMLDivElement>('zoomHelper');
 
     this._selector = this._getDomElement<HTMLDivElement>('selector');
@@ -565,10 +571,10 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private getDesignerMousepoint(event: MouseEvent, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
     let targetRect = (<HTMLElement>event.target).getBoundingClientRect();
     return {
-      originalX: Math.round(event.x - this._containerBoundingRect.left),
-      x: Math.round((event.x - this._containerBoundingRect.left) / this._zoomFactor),
-      originalY: Math.round(event.y - this._containerBoundingRect.top),
-      y: Math.round((event.y - this._containerBoundingRect.top) / this._zoomFactor),
+      originalX: event.x - this._containerBoundingRect.x,
+      x: (event.x - this._containerBoundingRect.x) / this._zoomFactor,
+      originalY: event.y - this._containerBoundingRect.y,
+      y: (event.y - this._containerBoundingRect.y) / this._zoomFactor,
       controlOffsetX: (startPoint ? startPoint.controlOffsetX : event.x - targetRect.x),
       controlOffsetY: (startPoint ? startPoint.controlOffsetY : event.y - targetRect.y),
       zoom: this._zoomFactor
@@ -582,8 +588,10 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
 
     this._ownBoundingRect = this.getBoundingClientRect();
+    //this._containerBoundingRect = this._outerCanvas2.getBoundingClientRect();
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
     
+
     const currentPoint = this.getDesignerMousepoint(event, event.type === 'pointerdown' ? null : this._initialPoint);
 
     if (this._actionType == null) {
