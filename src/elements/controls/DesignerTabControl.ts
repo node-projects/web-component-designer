@@ -143,12 +143,12 @@ export class DesignerTabControl extends BaseCustomWebComponent {
   }
 
   private _bugfixNotShownContent(element: HTMLElement, oldDisplay: string) {
-    requestAnimationFrame(() => {
+    /*requestAnimationFrame(() => {
       element.style.display = 'none';
       element.style.display = oldDisplay;
       if (!(<HTMLElement>element).clientWidth)
         this._bugfixNotShownContent(element, oldDisplay);
-    });
+    });*/
   }
 
   public readonly onSelectedTabChanged = new TypedEvent<DesignerTabControlIndexChangedEventArgs>();
