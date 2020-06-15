@@ -110,7 +110,7 @@ export class DefaultPlacementService implements IContainerService {
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {
-    let track = this.calculateTrack(placementView, startPoint, newPoint, items[0]);
+    let track = this.calculateTrack(event, placementView, startPoint, newPoint, items[0]);
 
     for (const designItem of items) {
       let movedElement = designItem.element;
