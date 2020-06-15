@@ -6,7 +6,7 @@ import type { ISize } from '../../../interfaces/ISize';
 
 export class Snaplines {
 
-  public snapOffset = 20;
+  public snapOffset = 10;
 
   private _svg: SVGElement;
   private _containerItem: IDesignItem;
@@ -65,64 +65,60 @@ export class Snaplines {
     this._positionsMiddleV.sort((a, b) => a[0] - b[0]);
   }
 
+
+
   //return the snapped position
   snapToPosition(position: IPoint, size: ISize, moveDirection: IPoint): IPoint {
-    console.log(this._positionsH[0], position.x)
-    let idx = this._positionsH.findIndex(x => x[0] > position.x);
-    /*let idx2 = this._positionsH.findIndex(x => x[0] + size.width > position.x);
-    if (idx2 >= 0) {
-      if (idx < 0 || this._positionsH[idx][0] > (this._positionsH[idx2][0] - size.width))
-        idx = idx2;
-    }*/
+    let minDiff = this.snapOffset + 1;
+    let idx = -1;
     let pH = undefined;
     let posH = undefined;
-    if (idx >= 0) {
-      if (this._positionsH[idx][0] <= position.x + this.snapOffset) {
-        posH = this._positionsH[idx][0];
-        pH = [this._positionsH[idx][1]];
-        for (let i = idx + 1; i < this._positionsH.length; i++) {
-          if (this._positionsH[i][0] === posH)
-            pH.push(this._positionsH[i][1]);
-          break;
-        }
+    for (let i = 0; i < this._positionsH.length; i++) {
+      let akDiff1 = Math.abs(this._positionsH[i][0] - position.x);
+      let akDiff2 = Math.abs(position.x + size.width - this._positionsH[i][0]);
+      if (akDiff1 < minDiff) {
+        minDiff = akDiff1;
+        idx = i;
+        pH = [];
+        posH = this._positionsH[i][0];
       }
-    }
-    if (idx > 0) {
-      if ((posH === undefined || this._positionsH[idx - 1][0] - position.x > position.x - this._positionsH[idx - 1][0]) && this._positionsH[idx - 1][0] >= position.x - this.snapOffset) {
-        posH = this._positionsH[idx - 1][0];
-        pH = [this._positionsH[idx - 1][1]];
-        for (let i = idx - 2; i >= 0; i--) {
-          if (this._positionsH[i][0] === posH)
-            pH.push(this._positionsH[i][1]);
-          break;
-        }
+      if (akDiff2 < minDiff) {
+        minDiff = akDiff2;
+        idx = i;
+        pH = [];
+        posH = this._positionsH[i][0] - size.width;
+      }
+      if (akDiff1 === minDiff) {
+        pH.push(this._positionsH[i][1]);
+      }
+      if (akDiff2 === minDiff && akDiff1 !== minDiff) {
+        pH.push(this._positionsH[i][1]);
       }
     }
 
-    idx = this._positionsV.findIndex(x => x[0] > position.y);
-    //idx2 = this._positionsH.findIndex(x => x[0] > position.y + size.height);
+    idx = -1;
     let pV = undefined;
     let posV = undefined;
-    if (idx >= 0) {
-      if (this._positionsV[idx][0] <= position.y + this.snapOffset) {
-        posV = this._positionsV[idx][0];
-        pV = [this._positionsV[idx][1]];
-        for (let i = idx + 1; i < this._positionsV.length; i++) {
-          if (this._positionsV[i][0] === posV)
-            pV.push(this._positionsV[i][1]);
-          break;
-        }
+    for (let i = 0; i < this._positionsV.length; i++) {
+      let akDiff1 = Math.abs(this._positionsV[i][0] - position.y);
+      let akDiff2 = Math.abs(position.y + size.height - this._positionsV[i][0]);
+      if (akDiff1 < minDiff) {
+        minDiff = akDiff1;
+        idx = i;
+        pV = [];
+        posV = this._positionsV[i][0];
       }
-    }
-    if (idx > 0) {
-      if ((posV === undefined || this._positionsV[idx - 1][0] - position.y > position.y - this._positionsV[idx - 1][0]) && this._positionsV[idx - 1][0] >= position.y - this.snapOffset) {
-        posV = this._positionsV[idx - 1][0];
-        pV = [this._positionsV[idx - 1][1]];
-        for (let i = idx - 2; i >= 0; i--) {
-          if (this._positionsV[i][0] === posH)
-            pV.push(this._positionsV[i][1]);
-          break;
-        }
+      if (akDiff2 < minDiff) {
+        minDiff = akDiff2;
+        idx = i;
+        pV = [];
+        posV = this._positionsV[i][0] - size.height;
+      }
+      if (akDiff1 === minDiff) {
+        pV.push(this._positionsV[i][1]);
+      }
+      if (akDiff2 === minDiff && akDiff1 !== minDiff) {
+        pV.push(this._positionsV[i][1]);
       }
     }
 

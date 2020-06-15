@@ -7,6 +7,6 @@ export interface IContainerService extends IService {
   serviceForContainer(container: IDesignItem)
   canEnter(container: IDesignItem, items: IDesignItem[])
   canLeave(container: IDesignItem, items: IDesignItem[])
-  place(placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[])
-  finishPlace(placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[])
+  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[])
+  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[])
 }

@@ -20,34 +20,36 @@ export class DefaultPlacementService implements IContainerService {
     return true;
   }
 
-  private calculateTrack(placementView: IPlacementView, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, item: IDesignItem): IPoint {
+  private calculateTrack(event: MouseEvent, placementView: IPlacementView, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, item: IDesignItem): IPoint {
     let trackX = newPoint.x - startPoint.x;
     let trackY = newPoint.y - startPoint.y;
 
-    if (placementView.alignOnGrid) {
-      trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize;
-      trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize;
-    }
-    else if (placementView.alignOnSnap) {
-      //let rect = this.instanceServiceContainer.selectionService.primarySelection.element.getBoundingClientRect();
-      let rect = item.element.getBoundingClientRect();
-      let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.controlOffsetX, y: newPoint.originalY - startPoint.controlOffsetY }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
-      if (newPos.x !== null) {
-        trackX = newPos.x - startPoint.originalX + Math.round(startPoint.controlOffsetX);
+    if (!event.ctrlKey) {
+      if (placementView.alignOnGrid) {
+        trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize;
+        trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize;
       }
-      if (newPos.y !== null) {
-        trackY = newPos.y - startPoint.originalY + Math.round(startPoint.controlOffsetY);
+      else if (placementView.alignOnSnap) {
+        //let rect = this.instanceServiceContainer.selectionService.primarySelection.element.getBoundingClientRect();
+        let rect = item.element.getBoundingClientRect();
+        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.controlOffsetX, y: newPoint.originalY - startPoint.controlOffsetY }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        if (newPos.x !== null) {
+          trackX = newPos.x - Math.round(startPoint.originalX) + Math.round(startPoint.controlOffsetX);
+        }
+        if (newPos.y !== null) {
+          trackY = newPos.y - Math.round(startPoint.originalY) + Math.round(startPoint.controlOffsetY);
+        }
       }
     }
 
     return { x: trackX, y: trackY };
   }
 
-  place(placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {
+  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {
     //todo, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
 
-    let track = this.calculateTrack(placementView, startPoint, newPoint, items[0]);
+    let track = this.calculateTrack(event, placementView, startPoint, newPoint, items[0]);
 
     //console.warn('track', track);
     //todo -> what is if a transform already exists -> backup existing style.?
@@ -107,7 +109,7 @@ export class DefaultPlacementService implements IContainerService {
     }*/
   }
 
-  finishPlace(placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {
+  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {
     let track = this.calculateTrack(placementView, startPoint, newPoint, items[0]);
 
     for (const designItem of items) {
