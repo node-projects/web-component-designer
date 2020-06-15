@@ -1,8 +1,6 @@
 export * from "./basic/TypedEvent.js";
 
-export * from "./elements/controls/BaseCustomWebComponent.js";
 export * from "./elements/controls/DesignerTabControl.js";
-export * from "./elements/controls/LazyLoader.js";
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";

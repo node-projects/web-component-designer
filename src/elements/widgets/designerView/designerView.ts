@@ -11,7 +11,7 @@ import { SelectionService } from '../../services/selectionService/SelectionServi
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponent, css, html } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css, html } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';

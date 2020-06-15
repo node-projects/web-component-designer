@@ -1,6 +1,6 @@
 import { IProperty } from '../../services/propertiesService/IProperty';
 import { ServiceContainer } from '../../services/ServiceContainer';
-import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
 import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IDesignItem } from '../../item/IDesignItem';

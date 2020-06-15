@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, css } from "./controls/BaseCustomWebComponent";
+import { BaseCustomWebComponent, css } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from "./controls/DesignerTabControl";
 import { DesignerView } from "./widgets/designerView/designerView";
 import { CodeViewAce } from "./widgets/codeView/code-view-ace";

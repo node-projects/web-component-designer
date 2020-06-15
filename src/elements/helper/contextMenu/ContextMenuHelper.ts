@@ -1,5 +1,5 @@
 import { IContextMenuItem } from "./IContextmenuItem";
-import { css } from "../../controls/BaseCustomWebComponent";
+import { css } from "@node-projects/base-custom-webcomponent"
 
 export class ContextMenuHelper {
 

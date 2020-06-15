@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { IDesignItem } from '../../item/IDesignItem';
 import { DesignItem } from '../../item/DesignItem';

@@ -2,7 +2,7 @@ import '../../controls/DesignerTabControl.js';
 import { IElementsService } from '../../services/elementsService/IElementsService';
 import { PaletteElements } from './paletteElements';
 import { DesignerTabControl } from '../../controls/DesignerTabControl';
-import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
 
 export class PaletteView extends BaseCustomWebComponent {
 

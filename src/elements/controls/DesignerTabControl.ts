@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, css } from './BaseCustomWebComponent';
+import { BaseCustomWebComponent, css } from "@node-projects/base-custom-webcomponent"
 import { TypedEvent } from '../../basic/TypedEvent';
 
 export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number };

@@ -1,6 +1,6 @@
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
 import { dragDropFormatName } from '../../../Constants';
-import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
 
 export class PaletteElements extends BaseCustomWebComponent {
 

@@ -1,5 +1,5 @@
 import { IDemoView } from "./IDemoView";
-import { BaseCustomWebComponent, css } from '../../controls/BaseCustomWebComponent';
+import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
 
 export class DemoView extends BaseCustomWebComponent implements IDemoView {
 

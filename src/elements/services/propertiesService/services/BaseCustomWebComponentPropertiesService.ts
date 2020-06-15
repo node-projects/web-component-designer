@@ -2,7 +2,7 @@ import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
-import { BaseCustomWebComponent } from "../../../controls/BaseCustomWebComponent";
+import { BaseCustomWebComponent } from "@node-projects/base-custom-webcomponent"
 
 export class BaseCustomWebComponentPropertiesService implements IPropertiesService {
     

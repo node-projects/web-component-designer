@@ -1,5 +1,5 @@
 import type { IDesignItem } from "../../item/IDesignItem";
-import { DomHelper } from "../../helper/DomHelper";
+import { DomHelper } from '@node-projects/base-custom-webcomponent';
 import type { IPoint } from "../../../interfaces/IPoint";
 import type { ISize } from '../../../interfaces/ISize';
 //import { readyException } from "jquery";
@@ -70,7 +70,6 @@ export class Snaplines {
   //return the snapped position
   snapToPosition(position: IPoint, size: ISize, moveDirection: IPoint): IPoint {
     let minDiff = this.snapOffset + 1;
-    let idx = -1;
     let pH = undefined;
     let posH = undefined;
     for (let i = 0; i < this._positionsH.length; i++) {
@@ -78,13 +77,11 @@ export class Snaplines {
       let akDiff2 = Math.abs(position.x + size.width - this._positionsH[i][0]);
       if (akDiff1 < minDiff) {
         minDiff = akDiff1;
-        idx = i;
         pH = [];
         posH = this._positionsH[i][0];
       }
       if (akDiff2 < minDiff) {
         minDiff = akDiff2;
-        idx = i;
         pH = [];
         posH = this._positionsH[i][0] - size.width;
       }
@@ -96,7 +93,6 @@ export class Snaplines {
       }
     }
 
-    idx = -1;
     let pV = undefined;
     let posV = undefined;
     for (let i = 0; i < this._positionsV.length; i++) {
@@ -104,13 +100,11 @@ export class Snaplines {
       let akDiff2 = Math.abs(position.y + size.height - this._positionsV[i][0]);
       if (akDiff1 < minDiff) {
         minDiff = akDiff1;
-        idx = i;
         pV = [];
         posV = this._positionsV[i][0];
       }
       if (akDiff2 < minDiff) {
         minDiff = akDiff2;
-        idx = i;
         pV = [];
         posV = this._positionsV[i][0] - size.height;
       }

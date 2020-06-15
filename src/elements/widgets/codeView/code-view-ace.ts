@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, css } from "../../controls/BaseCustomWebComponent";
+import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from "./ICodeView";
 import type { Ace } from "ace-builds";
 
