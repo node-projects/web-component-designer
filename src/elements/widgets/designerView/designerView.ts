@@ -21,6 +21,7 @@ import { Snaplines } from './Snaplines';
 import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
+import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
 
 export class DesignerView extends BaseCustomWebComponent implements IDesignerView, IPlacementView {
   // Public Properties
@@ -45,6 +46,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   private _dropTarget: Element;
 
+  private _zoomInput: HTMLInputElement;
+  private _onContextMenuBound: () => void;
 
   private _actionType?: PointerActionType;
   private _initialPoint: IDesignerMousePoint;
@@ -53,8 +56,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private _previousEventName: EventNames;
 
   private _firstConnect: boolean;
-  private _ownBoundingRect:  DOMRect;
-  private _containerBoundingRect:  DOMRect;
+  private _ownBoundingRect: DOMRect;
+  private _containerBoundingRect: DOMRect;
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
@@ -253,7 +256,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
             <div id="outercanvas2">
               <div id="canvasContainer">
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
-                <div id="canvas"></div>
+                <div id="canvas" tabindex="0"></div>
                 <div id="selector" hidden></div>
                 <svg id="svg"></svg>
               </div>
@@ -274,18 +277,12 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           </div>
         </div>
           `;
-  //private _zoomHelper: HTMLDivElement;
-  private _zoomInput: HTMLInputElement;
-  private _onContextMenuBound: any;
-  //private _outerCanvas2: HTMLDivElement;
 
   constructor() {
     super();
 
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
     this._canvasContainer = this._getDomElement<HTMLDivElement>('canvasContainer');
-    //this._outerCanvas2 = this._getDomElement<HTMLDivElement>('outercanvas2');
-    //this._zoomHelper = this._getDomElement<HTMLDivElement>('zoomHelper');
 
     this._selector = this._getDomElement<HTMLDivElement>('selector');
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
@@ -334,6 +331,26 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     this._canvasContainer.style.height = value;
   }
 
+  handleCommand(command: string) {
+    switch (command) {
+      case 'delete':
+        this.handleDeleteCommand();
+        break;
+      case 'undo':
+        this.instanceServiceContainer.undoService.undo();
+        break;
+      case 'redo':
+        this.instanceServiceContainer.undoService.redo();
+        break;
+    }
+  }
+
+  handleDeleteCommand() {
+    let items = this.instanceServiceContainer.selectionService.selectedElements;
+    this.instanceServiceContainer.undoService.execute(new DeleteAction(items));
+    this.instanceServiceContainer.selectionService.setSelectedElements(null);
+  }
+
   initialize(serviceContainer: ServiceContainer) {
     this.serviceContainer = serviceContainer;
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
@@ -350,6 +367,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
+      this._canvas.addEventListener(EventNames.Wheel, event => this._onWheel(event));
     }
     //todo change these event handlers maybe???
     this._canvas.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
@@ -407,11 +425,22 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = <IElementDefinition>JSON.parse(transferData);
     let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
+    let grp = di.openGroup("Insert");
     di.setStyle('position', 'absolute')
     di.setStyle('top', event.offsetY + 'px')
     di.setStyle('left', event.offsetX + 'px')
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
+    grp.commit();
     this.instanceServiceContainer.selectionService.setSelectedElements([di]);
+  }
+
+  private _onWheel(event: WheelEvent) {
+    if (event.ctrlKey) {
+      event.preventDefault();
+      this._zoomFactor += event.deltaY * 0.1;
+      this.zoomFactorChanged();
+      //todo: scroll so we zoom on mouse position
+    }
   }
 
   private _onContextMenu(event: MouseEvent) {
@@ -425,7 +454,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       { title: 'cut', action: () => { } },
       { title: 'paste', action: () => { } },
       { title: '-' },
-      { title: 'delete', action: () => { } },
+      { title: 'delete', action: () => { this.handleCommand('delete'); } },
     ];
     if (designItem.length > 1) {
       //todo: special menu for multiple items?
@@ -449,12 +478,6 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   }
 
   private onKeyDown(event: KeyboardEvent) {
-    //todo redo this
-    let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-    if (!primarySelection) {
-      return;
-    }
-
     // This is a global window handler, so clicks can come from anywhere
     // We only care about keys that come after you've clicked on an element,
     // or keys after you've selected something from the tree view.
@@ -464,50 +487,58 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       (event.composedPath()[0].localName === 'button' && event.composedPath()[2].localName == 'tree-view') ||
       //@ts-ignore
       (event.composedPath()[0].localName == 'body') || event.composedPath()[0].classList.contains(DesignerView._activeClassName);
+    */
 
-    if (!isOk) {
-      return;
-    }*/
-    let oldLeft = parseInt((<HTMLElement>primarySelection.element).style.left);
-    let oldTop = parseInt((<HTMLElement>primarySelection.element).style.top);
-    //let oldPosition = (<HTMLElement>primarySelection.element).style.position;
+    if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
+      this.handleCommand('undo');
+    else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
+      this.handleCommand('redo');
+    else {
+      let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
+      if (!primarySelection) {
+        return;
+      }
+      let oldLeft = parseInt((<HTMLElement>primarySelection.element).style.left);
+      let oldTop = parseInt((<HTMLElement>primarySelection.element).style.top);
 
-    switch (event.key) {
-      case 'Delete':
-      case 'Backspace':
-        break;
-      case 'ArrowUp':
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
-        } else {
-          primarySelection.setStyle('top', oldTop - 1 + 'px');
-        }
-        break;
-      case 'ArrowDown':
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
-        } else {
-          primarySelection.setStyle('top', oldTop + 1 + 'px');
-        }
-        break;
-      case 'ArrowLeft':
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
-        } else {
-          primarySelection.setStyle('left', oldLeft - 1 + 'px');
-        }
-        break;
-      case 'ArrowRight':
-        if (event.shiftKey) {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
-        } else {
-          primarySelection.setStyle('left', oldLeft + 1 + 'px');
-        }
-        break;
+      switch (event.key) {
+        case 'Delete':
+        case 'Backspace':
+          this.handleCommand('delete');
+          break;
+        case 'ArrowUp':
+          if (event.shiftKey) {
+            event.preventDefault();
+            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
+          } else {
+            primarySelection.setStyle('top', oldTop - 1 + 'px');
+          }
+          break;
+        case 'ArrowDown':
+          if (event.shiftKey) {
+            event.preventDefault();
+            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
+          } else {
+            primarySelection.setStyle('top', oldTop + 1 + 'px');
+          }
+          break;
+        case 'ArrowLeft':
+          if (event.shiftKey) {
+            event.preventDefault();
+            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
+          } else {
+            primarySelection.setStyle('left', oldLeft - 1 + 'px');
+          }
+          break;
+        case 'ArrowRight':
+          if (event.shiftKey) {
+            event.preventDefault();
+            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
+          } else {
+            primarySelection.setStyle('left', oldLeft + 1 + 'px');
+          }
+          break;
+      }
     }
   }
 
@@ -588,9 +619,8 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
 
     this._ownBoundingRect = this.getBoundingClientRect();
-    //this._containerBoundingRect = this._outerCanvas2.getBoundingClientRect();
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
-    
+
 
     const currentPoint = this.getDesignerMousepoint(event, event.type === 'pointerdown' ? null : this._initialPoint);
 

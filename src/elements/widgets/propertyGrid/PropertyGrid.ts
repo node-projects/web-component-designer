@@ -10,7 +10,8 @@ export class PropertyGrid extends BaseCustomWebComponent {
   private _serviceContainer: ServiceContainer;
   private _designerTabControl: DesignerTabControl;
   private _selectedItems : IDesignItem[];
-  private _propertyGridPropertyLists: PropertyGridPropertyList[]
+  private _propertyGridPropertyLists: PropertyGridPropertyList[];
+  private _itemsObserver: MutationObserver;
 
   static readonly style = css`
     :host {
@@ -30,11 +31,18 @@ export class PropertyGrid extends BaseCustomWebComponent {
       box-shadow: inset 0 3px 0 var(--highlight-pink, #e91e63);
     }
     `;
+  
 
   constructor() {
     super();
     this._designerTabControl = new DesignerTabControl();
     this.shadowRoot.appendChild(this._designerTabControl);
+
+    this._itemsObserver = new MutationObserver((m) => {
+      for (const a of this._propertyGridPropertyLists) {
+        a.refreshForDesignItems(this._selectedItems);
+      } 
+    });
   }
 
   public set serviceContainer(value: ServiceContainer) {
@@ -73,11 +81,11 @@ export class PropertyGrid extends BaseCustomWebComponent {
     this._selectedItems = items;
     if (items) {
       if (items.length == 1) {
-        //let element = items[0];
-
         for (const a of this._propertyGridPropertyLists) {
           a.refreshForDesignItems(items);
         }
+
+        this._observeItems();
         /*let properties = serviceContainer.forSomeServicesTillResult("propertyService", x => x.getProperties(element));
 
         if (properties) {
@@ -89,8 +97,13 @@ export class PropertyGrid extends BaseCustomWebComponent {
         }*/
       }
     } else {
-      //todo
+      this._itemsObserver.disconnect();
     }
+  }
+
+  private _observeItems() {
+    this._itemsObserver.disconnect();
+    this._itemsObserver.observe(this._selectedItems[0].element, { attributes: true, childList: false, characterData: false });
   }
 
   /*

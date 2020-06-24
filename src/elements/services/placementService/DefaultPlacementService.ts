@@ -6,8 +6,6 @@ import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 
 export class DefaultPlacementService implements IContainerService {
 
-  //todo: we should be able to switch what we change 
-  //(margin, absolute/relative position, order in flexbox)
   serviceForContainer(container: IDesignItem) {
     return true;
   }

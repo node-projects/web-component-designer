@@ -74,6 +74,8 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
       dnd5: {
         preventRecursion: true, // Prevent dropping nodes on own descendants
         preventVoidMoves: false,
+        dropMarkerOffsetX: -24,
+        dropMarkerInsertOffsetX: -16,
 
         dragStart: (node, data) => {
           /* This function MUST be defined to enable dragging for the tree.

@@ -9,7 +9,6 @@ export class ContextMenuHelper {
     position: absolute;
     z-index: 10;
     padding: 0px 0;
-    width: 240px;
     background-color: #fff;
     border: solid 1px #dfdfdf;
     box-shadow: 1px 1px 2px #cfcfcf;
@@ -58,8 +57,9 @@ export class ContextMenuHelper {
   private _keyUpBound: () => void;
 
   static addContextMenu(element: HTMLElement, items: IContextMenuItem[]) {
-    element.oncontextmenu = () => {
-      return false;
+    element.oncontextmenu = (event) => {
+      event.preventDefault();
+      ContextMenuHelper.showContextMenu(null, event, null, items);
     }
   }
 
@@ -97,14 +97,16 @@ export class ContextMenuHelper {
   }
 
   public close() {
-    window.removeEventListener('keyup', this._keyUpBound);
-    window.removeEventListener('resize', this._closeBound);
-    window.removeEventListener('mousedown', this._closeBound);
+    setTimeout(() => {
+      window.removeEventListener('keyup', this._keyUpBound);
+      window.removeEventListener('resize', this._closeBound);
+      window.removeEventListener('mousedown', this._closeBound);
 
-    if (this._shadowRoot === document)
-      document.body.removeChild(this._element);
-    else
-      this._shadowRoot.removeChild(this._element);
+      if (this._shadowRoot === document)
+        document.body.removeChild(this._element);
+      else
+        this._shadowRoot.removeChild(this._element);
+    }, 200);
   }
 
   public show() {
@@ -140,7 +142,7 @@ export class ContextMenuHelper {
         div.textContent = i.title;
         li.appendChild(div);
         ul.appendChild(li);
-        div.onclick = (e) => i.action(null, e);
+        li.onclick = (e) => i.action(null, e);
       }
     }
     return nav;
@@ -170,11 +172,11 @@ export class ContextMenuHelper {
     if (!e) e = window.event;
 
     if (e.pageX || e.pageY) {
-      posx = e.pageX;
-      posy = e.pageY;
+      posx = e.pageX + 5;
+      posy = e.pageY - 5;
     } else if (e.clientX || e.clientY) {
-      posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-      posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+      posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft + 5;
+      posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop - 5;
     }
 
     return {
@@ -182,22 +184,6 @@ export class ContextMenuHelper {
       y: posy
     }
   }
-
-  /*clickListener() {
-    document.addEventListener("click", function (e) {
-      var clickeElIsLink = clickInsideElement(e, contextMenuLinkClassName);
-
-      if (clickeElIsLink) {
-        e.preventDefault();
-        menuItemListener(clickeElIsLink);
-      } else {
-        var button = e.which || e.button;
-        if (button === 1) {
-          toggleMenuOff();
-        }
-      }
-    });
-  }*/
 
   public positionMenu(e: MouseEvent) {
     let clickCoords = ContextMenuHelper.getPosition(e);
