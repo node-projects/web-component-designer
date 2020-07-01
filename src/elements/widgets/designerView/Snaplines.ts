@@ -92,6 +92,17 @@ export class Snaplines {
         pH.push(this._positionsH[i][1]);
       }
     }
+    for (let i = 0; i < this._positionsMiddleH.length; i++) {
+      let akDiff1 = Math.abs(this._positionsMiddleH[i][0] - (position.x + size.width / 2));
+      if (akDiff1 < minDiff) {
+        minDiff = akDiff1;
+        pH = [];
+        posH = this._positionsMiddleH[i][0] - size.width / 2;
+      }
+      if (akDiff1 === minDiff) {
+        pH.push(this._positionsMiddleH[i][1]);
+      }
+    }
 
     let pV = undefined;
     let posV = undefined;
@@ -113,6 +124,17 @@ export class Snaplines {
       }
       if (akDiff2 === minDiff && akDiff1 !== minDiff) {
         pV.push(this._positionsV[i][1]);
+      }
+    }
+    for (let i = 0; i < this._positionsMiddleV.length; i++) {
+      let akDiff1 = Math.abs(this._positionsMiddleV[i][0] - (position.y + size.height / 2));
+      if (akDiff1 < minDiff) {
+        minDiff = akDiff1;
+        pV = [];
+        posV = this._positionsMiddleV[i][0] - size.height / 2;
+      }
+      if (akDiff1 === minDiff) {
+        pV.push(this._positionsMiddleV[i][1]);
       }
     }
 
@@ -157,10 +179,10 @@ export class Snaplines {
           this._svg.appendChild(line);
         }
 
-        if (r.x - this._outerRect.left + Math.round(r.width / 2) == position.x + Math.round(size.width / 2)) {
+        if (r.x - this._outerRect.left + r.width / 2 == position.x + size.width / 2) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          line.setAttribute('x1', <string><any>(r.x - this._outerRect.x + Math.round(r.width / 2)));
-          line.setAttribute('x2', <string><any>(r.x - this._outerRect.x + Math.round(r.width / 2)));
+          line.setAttribute('x1', <string><any>(r.x - this._outerRect.x + r.width / 2));
+          line.setAttribute('x2', <string><any>(r.x - this._outerRect.x + r.width / 2));
           line.setAttribute('y1', <string><any>(minY));
           line.setAttribute('y2', <string><any>(maxY));
           line.setAttribute('class', 'svg-snapline');
@@ -206,12 +228,12 @@ export class Snaplines {
           this._svg.appendChild(line);
         }
 
-        if (r.y - this._outerRect.top + Math.round(r.height / 2) == position.y + Math.round(size.height / 2)) {
+        if (r.y - this._outerRect.top + r.height / 2 == position.y + size.height / 2) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
           line.setAttribute('x1', <string><any>(minX));
           line.setAttribute('x2', <string><any>(maxX));
-          line.setAttribute('y1', <string><any>(r.y - this._outerRect.y + Math.round(r.height / 2)));
-          line.setAttribute('y2', <string><any>(r.y - this._outerRect.y + Math.round(r.height / 2)));
+          line.setAttribute('y1', <string><any>(r.y - this._outerRect.y + r.height / 2));
+          line.setAttribute('y2', <string><any>(r.y - this._outerRect.y + r.height / 2));
           line.setAttribute('class', 'svg-snapline');
           this._svg.appendChild(line);
         }

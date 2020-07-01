@@ -102,10 +102,9 @@ export class PropertyGridPropertyList extends BaseCustomWebComponent {
         rect.style.border = '1px white solid';
         this._div.appendChild(rect);
         ContextMenuHelper.addContextMenu(rect, [
-          { title: 'clear', action: (e) => alert('clear') },
+          { title: 'clear', action: (e) => /* todo: we do not have the items here, where should we know them? */ p.service.setValue([designItem], p, null) },
           { title: 'new binding', action: (e) => alert('new binding() ' + p.name) }
         ]);
-
 
         let label = document.createElement("label");
         label.htmlFor = p.name;

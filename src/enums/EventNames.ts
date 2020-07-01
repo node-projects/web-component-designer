@@ -4,5 +4,7 @@ export enum EventNames {
     PointerUp = 'pointerup',
     DragEnter = 'dragenter',
     DragOver = 'dragover',
-    Drop = 'drop'
+    Drop = 'drop',
+    Scroll = 'scroll',
+    Wheel = 'wheel'
 }
