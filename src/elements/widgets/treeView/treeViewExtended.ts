@@ -72,7 +72,7 @@ export class TreeViewExtended extends BaseCustomWebComponent implements ITreeVie
 
 
       dnd5: {
-        dropMarkerRoot: this.shadowRoot,
+        dropMarkerParent: this.shadowRoot,
         preventRecursion: true, // Prevent dropping nodes on own descendants
         preventVoidMoves: false,
         dropMarkerOffsetX: -24,

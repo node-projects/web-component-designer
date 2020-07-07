@@ -39,7 +39,8 @@ export class Snaplines {
     let ignMap = new Map<Element, IDesignItem>(ignoredItems.map(i => [i.element, i]));
     this._outerRect = this._containerItem.element.getBoundingClientRect();
 
-    for (let n of DomHelper.getAllChildNodes(this._containerItem.element)) {
+    let ignoreElements = ignoredItems.map(x => x.element);
+    for (let n of DomHelper.getAllChildNodes(this._containerItem.element, false, ignoreElements)) {
       if (!ignMap.has(<Element>n)) {
         let p = (<Element>n).getBoundingClientRect();
 
@@ -65,8 +66,6 @@ export class Snaplines {
     this._positionsMiddleV.sort((a, b) => a[0] - b[0]);
   }
 
-
-
   //return the snapped position
   snapToPosition(position: IPoint, size: ISize, moveDirection: IPoint): IPoint {
     let minDiff = this.snapOffset + 1;
@@ -75,12 +74,12 @@ export class Snaplines {
     for (let i = 0; i < this._positionsH.length; i++) {
       let akDiff1 = Math.abs(this._positionsH[i][0] - position.x);
       let akDiff2 = Math.abs(position.x + size.width - this._positionsH[i][0]);
-      if (akDiff1 < minDiff) {
+      if (akDiff1 < minDiff || (akDiff1 === minDiff && pH === undefined)) {
         minDiff = akDiff1;
         pH = [];
         posH = this._positionsH[i][0];
       }
-      if (akDiff2 < minDiff) {
+      if (akDiff2 < minDiff || (akDiff2 === minDiff && pH === undefined)) {
         minDiff = akDiff2;
         pH = [];
         posH = this._positionsH[i][0] - size.width;
@@ -94,7 +93,7 @@ export class Snaplines {
     }
     for (let i = 0; i < this._positionsMiddleH.length; i++) {
       let akDiff1 = Math.abs(this._positionsMiddleH[i][0] - (position.x + size.width / 2));
-      if (akDiff1 < minDiff) {
+      if (akDiff1 < minDiff || (akDiff1 === minDiff && pH === undefined)) {
         minDiff = akDiff1;
         pH = [];
         posH = this._positionsMiddleH[i][0] - size.width / 2;
@@ -109,12 +108,12 @@ export class Snaplines {
     for (let i = 0; i < this._positionsV.length; i++) {
       let akDiff1 = Math.abs(this._positionsV[i][0] - position.y);
       let akDiff2 = Math.abs(position.y + size.height - this._positionsV[i][0]);
-      if (akDiff1 < minDiff) {
+      if (akDiff1 < minDiff || (akDiff1 === minDiff && pV === undefined)) {
         minDiff = akDiff1;
         pV = [];
         posV = this._positionsV[i][0];
       }
-      if (akDiff2 < minDiff) {
+      if (akDiff2 < minDiff || (akDiff2 === minDiff && pV === undefined)) {
         minDiff = akDiff2;
         pV = [];
         posV = this._positionsV[i][0] - size.height;
@@ -128,7 +127,7 @@ export class Snaplines {
     }
     for (let i = 0; i < this._positionsMiddleV.length; i++) {
       let akDiff1 = Math.abs(this._positionsMiddleV[i][0] - (position.y + size.height / 2));
-      if (akDiff1 < minDiff) {
+      if (akDiff1 < minDiff || (akDiff1 === minDiff && pV === undefined)) {
         minDiff = akDiff1;
         pV = [];
         posV = this._positionsMiddleV[i][0] - size.height / 2;

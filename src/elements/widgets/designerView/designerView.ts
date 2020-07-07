@@ -367,7 +367,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
-      this._canvas.addEventListener(EventNames.Wheel, event => this._onWheel(event));
+      this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
     }
     //todo change these event handlers maybe???
     this._canvas.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
@@ -437,7 +437,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private _onWheel(event: WheelEvent) {
     if (event.ctrlKey) {
       event.preventDefault();
-      this._zoomFactor += event.deltaY * 0.1;
+      this._zoomFactor += event.deltaY * -0.001; //deltamode = 0
+      if (this._zoomFactor < 0.1)
+        this._zoomFactor = 0.1;
       this.zoomFactorChanged();
       //todo: scroll so we zoom on mouse position
     }

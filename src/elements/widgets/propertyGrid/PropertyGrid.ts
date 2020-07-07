@@ -9,7 +9,7 @@ export class PropertyGrid extends BaseCustomWebComponent {
 
   private _serviceContainer: ServiceContainer;
   private _designerTabControl: DesignerTabControl;
-  private _selectedItems : IDesignItem[];
+  private _selectedItems: IDesignItem[];
   private _propertyGridPropertyLists: PropertyGridPropertyList[];
   private _itemsObserver: MutationObserver;
 
@@ -31,7 +31,6 @@ export class PropertyGrid extends BaseCustomWebComponent {
       box-shadow: inset 0 3px 0 var(--highlight-pink, #e91e63);
     }
     `;
-  
 
   constructor() {
     super();
@@ -41,7 +40,7 @@ export class PropertyGrid extends BaseCustomWebComponent {
     this._itemsObserver = new MutationObserver((m) => {
       for (const a of this._propertyGridPropertyLists) {
         a.refreshForDesignItems(this._selectedItems);
-      } 
+      }
     });
   }
 
