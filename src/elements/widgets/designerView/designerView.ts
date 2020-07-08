@@ -11,7 +11,7 @@ import { SelectionService } from '../../services/selectionService/SelectionServi
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponent, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponent, css, html, DomHelper } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
@@ -62,7 +62,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
 
-  private static _designerClassPrefix = 'node-projects-wcdesigner-';
+  //private static _designerClassPrefix = 'node-projects-wcdesigner-';
 
   static readonly style = css`
     :host {
@@ -93,6 +93,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       height: 100%;
       transform-origin: 0 0;
     }
+
     #svg {
       box-sizing: border-box;
       width: 100%;
@@ -102,11 +103,10 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       left: 0;
       pointer-events: none;
     }
-    .svg-snapline {
-      stroke: purple;
-      stroke-dasharray: 4;
-      fill: transparent;
-    }
+    .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
+    .svg-selection { stroke: blue; fill: transparent; stroke-width: 2; }
+  
+  
     #canvas * {
       cursor: pointer;
       user-select: none;
@@ -164,20 +164,6 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       overflow: auto;
     }
 
-    .dragging, .resizing {
-      user-select: none;
-    }
-    .dragging {
-      /*opacity: 0.6;*/
-      z-index: 1000;
-      cursor: move;
-    }
-    .dragging.active:after {
-      display: none;
-    }
-    .resizing {
-      cursor: se-resize;
-    }
     .over {
       outline: dashed 3px var(--highlight-green, #99ff33) !important;
       outline-offset: 2px;
@@ -205,48 +191,6 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
     .snap-guide {
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAYVJREFUeNqkU7tKA1EQnbs3CnlVqbQNARMjFilS+AnZQhIbW0ER/AA/wlYbhXR2wUKx0iKNYGMKDViEdEIgieBujGvCPpyz7sK6iWLIwJk798zsuXsfIxzHoXksAqcoij+vMbYq7MoszGxaEB3wtODlH3i5E5uojck210RCgq7SJie4MC0TsdO1cim/lMmkwHdarZWni+t16/1jz/FElJBAGc5imLzyakXNG0IuVo+OnwHE4JCzgisG7BJu/I3CQjyRuq1dvWi6vg8gBofcOHgGAZO+AFv88/VNDofDEcd3IBCD43ycfhEowY28Sazfnzh1cKMggWsUQvi4waiqKuVyud16/d7JZrOHxWJxKudMuQV3C81mk3RdX0wmk9Tr9UxN06jb7dJgMPjBwQRUAu/AtWg0SpZl7TDSUso2/1UVNWHOMIwJARzWBhcQwMXu1oJb9Ufbtsk0zYktPLrvgD8E/mWeYoNxxlj2xoZ3qI2/YrePQs10PksjTRPozCog5m3nLwEGABrLzseuHT6IAAAAAElFTkSuQmCC);
-    }
-
-    .node-projects-wcdesigner-active, :host(.node-projects-wcdesigner-active) {
-      outline: solid 3px var(--highlight-blue, #2196f3) !important;
-      outline-offset: 2px;
-      transform: translateZ(0);
-      cursor: pointer !important;
-    }
-    /* Show a resize cursor in the corner */
-    .node-projects-wcdesigner-active:after {
-      position: absolute;
-      bottom: -5px;
-      right: -5px;
-      height: 14px;
-      width: 14px;
-      content: '↘';
-      cursor: se-resize;
-      font-size: 10px;
-      font-weight: bold;
-      text-align: center;
-      background: var(--highlight-blue, #2196f3);
-      color: white;
-      z-index: 1000000;
-    }
-    /* Show a move cursor in the corner */
-    .node-projects-wcdesigner-active:before {
-      position: absolute;
-      top: -15px;
-      left: -15px;
-      height: 14px;
-      width: 14px;
-      content: ' ';
-      cursor: move;
-      font-size: 10px;
-      font-weight: bold;
-      text-align: center;
-      background-image: url("data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 96 96' enable-background='new 0 0 96 96' xml:space='preserve'%3E%3Cg%3E%3Cpath d='M73,48.4l-10.4-9.6v4.8H52.4V33.4h4.8L47.6,23l-8.9,10.4h4.8v10.2H33.4v-4.8L23,48.4l10.4,8.9v-4.8h10.2v10.2h-4.8L47.6,73 l9.6-10.4h-4.8V52.4h10.2v4.8L73,48.4z'/%3E%3C/g%3E%3C/svg%3E%0A");
-      background-color: var(--highlight-blue, #2196f3);
-      background-size: 26px;
-      background-position: center;
-      color: white;
-      z-index: 1000000;
     }
   }`;
 
@@ -545,26 +489,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
-    if (selectionChangedEvent.oldSelectedElements) {
-      for (let e of selectionChangedEvent.oldSelectedElements)
-        this._toggleDesignerClass(e, 'active', false);
-    }
-    if (selectionChangedEvent.selectedElements) {
-      for (let e of selectionChangedEvent.selectedElements)
-        this._toggleDesignerClass(e, 'active', true);
-    }
-  }
-
-  private _toggleDesignerClass(designItem: IDesignItem, className: 'active', state: boolean) {
-    if (state) {
-      designItem.element.classList.add(DesignerView._designerClassPrefix + className);
-    } else {
-      if (designItem.element.classList.contains(DesignerView._designerClassPrefix + className)) {
-        designItem.element.classList.remove(DesignerView._designerClassPrefix + className);
-        if (designItem.element.classList.length === 0)
-          designItem.element.removeAttribute('class');
-      }
-    }
+    this._drawSelectionRects(selectionChangedEvent.selectedElements);
   }
 
   private setSelectedElements(elements: HTMLElement[]) {
@@ -776,6 +701,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
           let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
           containerService.place(event, this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+          this._drawSelectionRects(this.instanceServiceContainer.selectionService.selectedElements);
           //todo -> what is if a transform already exists -> backup existing style.?
           /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
             (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
@@ -996,9 +922,6 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
           designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
           designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
-
-          designItem.element.classList.remove('resizing');
-          designItem.element.classList.remove('dragging');
         }
         cg.commit();
         this._initialSizes = null;
@@ -1014,6 +937,22 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
   _forceMove(pointerPoint: IPoint, elementPoint: IPoint) {
     return (pointerPoint.x < elementPoint.x && pointerPoint.y < elementPoint.y);
+  }
+
+  _drawSelectionRects(selectedElements: IDesignItem[]) {
+    DomHelper.removeAllChildnodes(this.svgLayer, 'svg-selection');
+
+    for (let i of selectedElements) {
+      let p = (<Element>i.element).getBoundingClientRect();
+
+      let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      line.setAttribute('x', <string><any>(p.x - this._ownBoundingRect.x - 2));
+      line.setAttribute('width', <string><any>(p.width + 4));
+      line.setAttribute('y', <string><any>(p.y - this._ownBoundingRect.y - 2));
+      line.setAttribute('height', <string><any>(p.height + 4));
+      line.setAttribute('class', 'svg-selection');
+      this.svgLayer.appendChild(line);
+    }
   }
 
   deepTargetFind(x, y, notThis) {
