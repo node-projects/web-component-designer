@@ -6,7 +6,7 @@ import type { ISize } from '../../../interfaces/ISize';
 
 export class Snaplines {
 
-  public snapOffset = 10;
+  public snapOffset = 15;
 
   private _svg: SVGElement;
   private _containerItem: IDesignItem;

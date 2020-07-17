@@ -105,6 +105,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
     .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
     .svg-selection { stroke: blue; fill: transparent; stroke-width: 2; }
+    .svg-primary-selection-move { fill: blue; pointer-events: all }
   
   
     #canvas * {
@@ -202,7 +203,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="canvas" tabindex="0"></div>
                 <div id="selector" hidden></div>
-                <svg id="svg"></svg>
+                <svg id="svg" style="pointer-events: none;"></svg>
               </div>
             </div>
           </div>
@@ -305,9 +306,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   connectedCallback() {
     if (!this._firstConnect) {
       this._firstConnect = true;
-      this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerDownOnElement(event));
-      this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerMoveOnElement(event));
-      this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerUpOnElement(event));
+      this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerEventHandler(event));
+      this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerEventHandler(event));
+      this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerEventHandler(event));
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
@@ -366,6 +367,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   private async _onDrop(event: DragEvent) {
     event.preventDefault();
 
+    this._fillCalculationrects();
     let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = <IElementDefinition>JSON.parse(transferData);
     let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
@@ -444,44 +446,37 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       if (!primarySelection) {
         return;
       }
-      let oldLeft = parseInt((<HTMLElement>primarySelection.element).style.left);
-      let oldTop = parseInt((<HTMLElement>primarySelection.element).style.top);
-
+      
+      let moveOffset = 1;
+      if (event.shiftKey)
+      moveOffset=10;
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
           this.handleCommand('delete');
           break;
         case 'ArrowUp':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
-          } else {
-            primarySelection.setStyle('top', oldTop - 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) - moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowDown':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
-          } else {
-            primarySelection.setStyle('top', oldTop + 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) + moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowLeft':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
-          } else {
-            primarySelection.setStyle('left', oldLeft - 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) - moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowRight':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
-          } else {
-            primarySelection.setStyle('left', oldLeft + 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) + moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
       }
@@ -489,17 +484,13 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
-    this._drawSelectionRects(selectionChangedEvent.selectedElements);
+    this._drawOutlineRects(selectionChangedEvent.selectedElements);
   }
 
   private setSelectedElements(elements: HTMLElement[]) {
     if (elements) {
       let diArray: IDesignItem[] = [];
       for (let e of elements) {
-        //console.log(e.getBoundingClientRect());
-        //console.log(DomHelper.getAbsoluteBoundingRect(e));
-        //console.log(e.clientLeft);
-        //console.log(e.scrollLeft);
         diArray.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
         this.instanceServiceContainer.selectionService.setSelectedElements(diArray)
       }
@@ -508,30 +499,14 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     }
   }
 
-  private _pointerDownOnElement(event: PointerEvent) {
-    this._canvas.setPointerCapture(event.pointerId);
-    this._pointerEventHandler(event);
-    this._previousEventName = <EventNames>event.type;
-  }
-
-  private _pointerMoveOnElement(event: PointerEvent) {
-    //console.log(event.x, event.pageX, event.offsetX, event.screenX, event.clientX);
-    this._pointerEventHandler(event);
-    this._previousEventName = <EventNames>event.type;
-  }
-
-  private _pointerUpOnElement(event: PointerEvent) {
-    this._canvas.releasePointerCapture(event.pointerId);
-    this._pointerEventHandler(event);
-    this._previousEventName = <EventNames>event.type;
-  }
-
-  private getDesignerMousepoint(event: MouseEvent, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
-    let targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+  private getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
+    let targetRect = target.getBoundingClientRect();
     return {
       originalX: event.x - this._containerBoundingRect.x,
+      containerOriginalX: event.x - this._ownBoundingRect.x,
       x: (event.x - this._containerBoundingRect.x) / this._zoomFactor,
       originalY: event.y - this._containerBoundingRect.y,
+      containerOriginalY: event.y - this._ownBoundingRect.y,
       y: (event.y - this._containerBoundingRect.y) / this._zoomFactor,
       controlOffsetX: (startPoint ? startPoint.controlOffsetX : event.x - targetRect.x),
       controlOffsetY: (startPoint ? startPoint.controlOffsetY : event.y - targetRect.y),
@@ -540,16 +515,31 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
   }
 
   private _pointerEventHandler(event: PointerEvent) {
+    const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+    this._pointerEventHandlerElement(event, currentElement);
+  }
+
+  private _fillCalculationrects() {
+    this._ownBoundingRect = this.getBoundingClientRect();
+    this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+  }
+
+  private _pointerEventHandlerElement(event: PointerEvent, currentElement: HTMLElement) {
+    switch (event.type) {
+      case EventNames.PointerDown:
+        (<Element>event.target).setPointerCapture(event.pointerId);
+        break;
+      case EventNames.PointerUp:
+        (<Element>event.target).releasePointerCapture(event.pointerId);
+        break;
+    }
+
     if (!event.altKey)
       this._resetPointerEventsForClickThrough();
 
-    const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+    this._fillCalculationrects();
 
-    this._ownBoundingRect = this.getBoundingClientRect();
-    this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
-
-
-    const currentPoint = this.getDesignerMousepoint(event, event.type === 'pointerdown' ? null : this._initialPoint);
+    const currentPoint = this.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -596,13 +586,15 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       this._actionType = null;
       this._initialPoint = null;
     }
+
+    this._previousEventName = <EventNames>event.type;
   }
 
   private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint) {
-    let ox1 = Math.min(this._initialPoint.originalX, currentPoint.originalX);
-    let ox2 = Math.max(this._initialPoint.originalX, currentPoint.originalX);
-    let oy1 = Math.min(this._initialPoint.originalY, currentPoint.originalY);
-    let oy2 = Math.max(this._initialPoint.originalY, currentPoint.originalY);
+    let ox1 = Math.min(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
+    let ox2 = Math.max(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
+    let oy1 = Math.min(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
+    let oy2 = Math.max(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
 
     let selector = this._selector as HTMLDivElement;
     selector.style.left = ox1 / this._zoomFactor + 'px';
@@ -612,20 +604,15 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     selector.hidden = false;
 
     if (event.type == EventNames.PointerUp) {
-      let x1 = Math.min(this._initialPoint.originalX, currentPoint.originalX);
-      let x2 = Math.max(this._initialPoint.originalX, currentPoint.originalX);
-      let y1 = Math.min(this._initialPoint.originalY, currentPoint.originalY);
-      let y2 = Math.max(this._initialPoint.originalY, currentPoint.originalY);
-
       selector.hidden = true;
       let elements = this._canvas.querySelectorAll('*');
       let inSelectionElements: HTMLElement[] = [];
       for (let e of elements) {
         let elementRect = e.getBoundingClientRect();
-        if (elementRect.top - this._containerBoundingRect.top >= y1 &&
-          elementRect.left - this._containerBoundingRect.left >= x1 &&
-          elementRect.top - this._containerBoundingRect.top + elementRect.height <= y2 &&
-          elementRect.left - this._containerBoundingRect.left + elementRect.width <= x2) {
+        if (elementRect.top - this._containerBoundingRect.top >= oy1 &&
+          elementRect.left - this._containerBoundingRect.left >= ox1 &&
+          elementRect.top - this._containerBoundingRect.top + elementRect.height <= oy2 &&
+          elementRect.left - this._containerBoundingRect.left + elementRect.width <= ox2) {
           inSelectionElements.push(e as HTMLElement);
         }
       }
@@ -701,7 +688,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
 
           let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
           containerService.place(event, this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
-          this._drawSelectionRects(this.instanceServiceContainer.selectionService.selectedElements);
+          this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           //todo -> what is if a transform already exists -> backup existing style.?
           /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
             (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
@@ -760,7 +747,7 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
       case EventNames.PointerUp:
         {
           if (this._actionType == PointerActionType.DragOrSelect) {
-            if (this._previousEventName == EventNames.PointerDown)
+            if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey)
               this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
             return;
           }
@@ -771,6 +758,9 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
           let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
           containerService.finishPlace(event, this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
           cg.commit();
+
+          this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
+
           break;
           //todo this needs also to get info from container handler, cause position is dependent of container
           for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
@@ -939,19 +929,34 @@ export class DesignerView extends BaseCustomWebComponent implements IDesignerVie
     return (pointerPoint.x < elementPoint.x && pointerPoint.y < elementPoint.y);
   }
 
-  _drawSelectionRects(selectedElements: IDesignItem[]) {
+  _drawOutlineRects(selectedElements: IDesignItem[], mode: 'none' | 'move' | 'resize' = 'none') {
     DomHelper.removeAllChildnodes(this.svgLayer, 'svg-selection');
 
-    for (let i of selectedElements) {
-      let p = (<Element>i.element).getBoundingClientRect();
+    if (selectedElements && selectedElements.length) {
+      let p0 = selectedElements[0].element.getBoundingClientRect();
 
       let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      line.setAttribute('x', <string><any>(p.x - this._ownBoundingRect.x - 2));
-      line.setAttribute('width', <string><any>(p.width + 4));
-      line.setAttribute('y', <string><any>(p.y - this._ownBoundingRect.y - 2));
-      line.setAttribute('height', <string><any>(p.height + 4));
-      line.setAttribute('class', 'svg-selection');
+      line.setAttribute('x', <string><any>(p0.x - this._containerBoundingRect.x - 12));
+      line.setAttribute('width', <string><any>(10));
+      line.setAttribute('y', <string><any>(p0.y - this._containerBoundingRect.y - 12));
+      line.setAttribute('height', <string><any>(10));
+      line.setAttribute('class', 'svg-selection svg-primary-selection-move');
+      line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
+      line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
+      line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
       this.svgLayer.appendChild(line);
+
+      for (let i of selectedElements) {
+        let p = i.element.getBoundingClientRect();
+
+        let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        line.setAttribute('x', <string><any>(p.x - this._containerBoundingRect.x));
+        line.setAttribute('width', <string><any>(p.width));
+        line.setAttribute('y', <string><any>(p.y - this._containerBoundingRect.y));
+        line.setAttribute('height', <string><any>(p.height));
+        line.setAttribute('class', 'svg-selection');
+        this.svgLayer.appendChild(line);
+      }
     }
   }
 
