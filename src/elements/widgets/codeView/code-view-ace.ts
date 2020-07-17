@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from "./ICodeView";
 import type { Ace } from "ace-builds";
 
@@ -16,7 +16,7 @@ class CodeViewAceCompleter {
   }
 }
 
-export class CodeViewAce extends BaseCustomWebComponent implements ICodeView {
+export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICodeView {
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 

@@ -11,7 +11,7 @@ import { SelectionService } from '../../services/selectionService/SelectionServi
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponent, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
@@ -23,7 +23,7 @@ import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
 
-export class DesignerView extends BaseCustomWebComponent implements IDesignerView, IPlacementView {
+export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView {
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;

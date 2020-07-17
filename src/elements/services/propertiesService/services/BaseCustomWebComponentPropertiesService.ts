@@ -2,14 +2,14 @@ import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
-import { BaseCustomWebComponent } from "@node-projects/base-custom-webcomponent"
+import { BaseCustomWebComponentLazyAppend, BaseCustomWebComponentConstructorAppend } from "@node-projects/base-custom-webcomponent"
 
 export class BaseCustomWebComponentPropertiesService implements IPropertiesService {
     
     public name = "baseCustomWebComponent";
 
     isHandledElement(designItem: IDesignItem): boolean {
-        return designItem.element instanceof BaseCustomWebComponent;
+        return designItem.element instanceof BaseCustomWebComponentLazyAppend || designItem.element instanceof BaseCustomWebComponentConstructorAppend;
     }
 
     getProperties(designItem: IDesignItem): IProperty[] { //todo support typescript enums

@@ -1,4 +1,4 @@
-import { BaseCustomWebComponent, css } from "@node-projects/base-custom-webcomponent"
+import { BaseCustomWebComponentLazyAppend, css } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from "./controls/DesignerTabControl";
 import { DesignerView } from "./widgets/designerView/designerView";
 import { CodeViewAce } from "./widgets/codeView/code-view-ace";
@@ -6,7 +6,7 @@ import { ServiceContainer } from "./services/ServiceContainer";
 import { InstanceServiceContainer } from "./services/InstanceServiceContainer";
 import { DemoView } from './widgets/demoView/demoView';
 
-export class DocumentContainer extends BaseCustomWebComponent {
+export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
   public designerView: DesignerView;
   public codeView: CodeViewAce;
   public demoView: DemoView;

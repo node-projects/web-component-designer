@@ -1,8 +1,8 @@
-import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 
-export class BindableObjectsBrowser extends BaseCustomWebComponent {
+export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
   private _treeDiv: HTMLDivElement;
   private _tree: Fancytree.Fancytree;
   private _filter: HTMLInputElement;

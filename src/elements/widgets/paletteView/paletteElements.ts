@@ -1,8 +1,8 @@
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
 import { dragDropFormatName } from '../../../Constants';
-import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 
-export class PaletteElements extends BaseCustomWebComponent {
+export class PaletteElements extends BaseCustomWebComponentLazyAppend {
 
   namesToPackages: Map<string, string>;
 

@@ -1,9 +1,9 @@
-import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { ITreeView } from './ITreeView';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 
-export class TreeViewExtended extends BaseCustomWebComponent implements ITreeView {
+export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implements ITreeView {
   private _treeDiv: HTMLDivElement;
   private _tree: Fancytree.Fancytree;
   private _filter: HTMLInputElement;

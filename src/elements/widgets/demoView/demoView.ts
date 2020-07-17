@@ -1,7 +1,7 @@
 import { IDemoView } from "./IDemoView";
-import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 
-export class DemoView extends BaseCustomWebComponent implements IDemoView {
+export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoView {
 
   private _placeholder: HTMLDivElement;
   private _loading: HTMLDivElement;

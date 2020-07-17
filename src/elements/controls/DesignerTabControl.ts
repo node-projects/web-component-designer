@@ -1,9 +1,9 @@
-import { BaseCustomWebComponent, css } from "@node-projects/base-custom-webcomponent"
+import { BaseCustomWebComponentLazyAppend, css } from "@node-projects/base-custom-webcomponent"
 import { TypedEvent } from '../../basic/TypedEvent';
 
 export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number };
 
-export class DesignerTabControl extends BaseCustomWebComponent {
+export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
 
   private _selectedIndex: number = -1;
 

@@ -2,10 +2,10 @@ import { ServiceContainer } from '../../services/ServiceContainer';
 import { PropertyGridPropertyList } from './PropertyGridPropertyList';
 import { DesignerTabControl } from '../../controls/DesignerTabControl';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { CssPropertiesService } from '../../services/propertiesService/services/CssPropertiesService';
 
-export class PropertyGrid extends BaseCustomWebComponent {
+export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
   private _serviceContainer: ServiceContainer;
   private _designerTabControl: DesignerTabControl;

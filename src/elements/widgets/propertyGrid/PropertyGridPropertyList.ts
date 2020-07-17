@@ -1,12 +1,12 @@
 import { IProperty } from '../../services/propertiesService/IProperty';
 import { ServiceContainer } from '../../services/ServiceContainer';
-import { BaseCustomWebComponent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IDesignItem } from '../../item/IDesignItem';
 import { IPropertiesService } from '../../services/propertiesService/IPropertiesService';
 
-export class PropertyGridPropertyList extends BaseCustomWebComponent {
+export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   private _div: HTMLDivElement;
   private _propertyMap: Map<IProperty, { isSetElement: HTMLElement, editor: IPropertyEditor }> = new Map();
