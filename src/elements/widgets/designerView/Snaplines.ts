@@ -6,7 +6,7 @@ import type { ISize } from '../../../interfaces/ISize';
 
 export class Snaplines {
 
-  public snapOffset = 10;
+  public snapOffset = 15;
 
   private _svg: SVGElement;
   private _containerItem: IDesignItem;
@@ -27,7 +27,7 @@ export class Snaplines {
   }
 
   clearSnaplines() {
-    DomHelper.removeAllChildnodes(this._svg);
+    DomHelper.removeAllChildnodes(this._svg, 'svg-snapline');
     this._positionsH = [];
     this._positionsMiddleH = [];
     this._positionsV = [];
@@ -137,7 +137,7 @@ export class Snaplines {
       }
     }
 
-    DomHelper.removeAllChildnodes(this._svg);
+    DomHelper.removeAllChildnodes(this._svg, 'svg-snapline');
 
     if (pH !== undefined || pV !== undefined) {
       let pos = { x: pH !== undefined ? posH : position.x, y: pV !== undefined ? posV : position.y };

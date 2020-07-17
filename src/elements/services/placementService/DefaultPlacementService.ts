@@ -32,9 +32,13 @@ export class DefaultPlacementService implements IContainerService {
         let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.controlOffsetX, y: newPoint.originalY - startPoint.controlOffsetY }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x - Math.round(startPoint.originalX) + Math.round(startPoint.controlOffsetX);
+        } else {
+          trackX = Math.round(trackX);
         }
         if (newPos.y !== null) {
           trackY = newPos.y - Math.round(startPoint.originalY) + Math.round(startPoint.controlOffsetY);
+        } else {
+          trackY = Math.round(trackY);
         }
       }
     }

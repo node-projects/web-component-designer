@@ -11,7 +11,7 @@ import { SelectionService } from '../../services/selectionService/SelectionServi
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, DomHelper } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
@@ -62,7 +62,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
 
-  private static _designerClassPrefix = 'node-projects-wcdesigner-';
+  //private static _designerClassPrefix = 'node-projects-wcdesigner-';
 
   static readonly style = css`
     :host {
@@ -93,6 +93,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       height: 100%;
       transform-origin: 0 0;
     }
+
     #svg {
       box-sizing: border-box;
       width: 100%;
@@ -102,11 +103,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       left: 0;
       pointer-events: none;
     }
-    .svg-snapline {
-      stroke: purple;
-      stroke-dasharray: 4;
-      fill: transparent;
-    }
+    .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
+    .svg-selection { stroke: blue; fill: transparent; stroke-width: 2; }
+    .svg-primary-selection-move { fill: blue; pointer-events: all }
+  
+  
     #canvas * {
       cursor: pointer;
       user-select: none;
@@ -164,20 +165,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       overflow: auto;
     }
 
-    .dragging, .resizing {
-      user-select: none;
-    }
-    .dragging {
-      /*opacity: 0.6;*/
-      z-index: 1000;
-      cursor: move;
-    }
-    .dragging.active:after {
-      display: none;
-    }
-    .resizing {
-      cursor: se-resize;
-    }
     .over {
       outline: dashed 3px var(--highlight-green, #99ff33) !important;
       outline-offset: 2px;
@@ -206,48 +193,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     .snap-guide {
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAYVJREFUeNqkU7tKA1EQnbs3CnlVqbQNARMjFilS+AnZQhIbW0ER/AA/wlYbhXR2wUKx0iKNYGMKDViEdEIgieBujGvCPpyz7sK6iWLIwJk798zsuXsfIxzHoXksAqcoij+vMbYq7MoszGxaEB3wtODlH3i5E5uojck210RCgq7SJie4MC0TsdO1cim/lMmkwHdarZWni+t16/1jz/FElJBAGc5imLzyakXNG0IuVo+OnwHE4JCzgisG7BJu/I3CQjyRuq1dvWi6vg8gBofcOHgGAZO+AFv88/VNDofDEcd3IBCD43ycfhEowY28Sazfnzh1cKMggWsUQvi4waiqKuVyud16/d7JZrOHxWJxKudMuQV3C81mk3RdX0wmk9Tr9UxN06jb7dJgMPjBwQRUAu/AtWg0SpZl7TDSUso2/1UVNWHOMIwJARzWBhcQwMXu1oJb9Ufbtsk0zYktPLrvgD8E/mWeYoNxxlj2xoZ3qI2/YrePQs10PksjTRPozCog5m3nLwEGABrLzseuHT6IAAAAAElFTkSuQmCC);
     }
-
-    .node-projects-wcdesigner-active, :host(.node-projects-wcdesigner-active) {
-      outline: solid 3px var(--highlight-blue, #2196f3) !important;
-      outline-offset: 2px;
-      transform: translateZ(0);
-      cursor: pointer !important;
-    }
-    /* Show a resize cursor in the corner */
-    .node-projects-wcdesigner-active:after {
-      position: absolute;
-      bottom: -5px;
-      right: -5px;
-      height: 14px;
-      width: 14px;
-      content: '↘';
-      cursor: se-resize;
-      font-size: 10px;
-      font-weight: bold;
-      text-align: center;
-      background: var(--highlight-blue, #2196f3);
-      color: white;
-      z-index: 1000000;
-    }
-    /* Show a move cursor in the corner */
-    .node-projects-wcdesigner-active:before {
-      position: absolute;
-      top: -15px;
-      left: -15px;
-      height: 14px;
-      width: 14px;
-      content: ' ';
-      cursor: move;
-      font-size: 10px;
-      font-weight: bold;
-      text-align: center;
-      background-image: url("data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 96 96' enable-background='new 0 0 96 96' xml:space='preserve'%3E%3Cg%3E%3Cpath d='M73,48.4l-10.4-9.6v4.8H52.4V33.4h4.8L47.6,23l-8.9,10.4h4.8v10.2H33.4v-4.8L23,48.4l10.4,8.9v-4.8h10.2v10.2h-4.8L47.6,73 l9.6-10.4h-4.8V52.4h10.2v4.8L73,48.4z'/%3E%3C/g%3E%3C/svg%3E%0A");
-      background-color: var(--highlight-blue, #2196f3);
-      background-size: 26px;
-      background-position: center;
-      color: white;
-      z-index: 1000000;
-    }
   }`;
 
   static readonly template = html`
@@ -258,7 +203,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="canvas" tabindex="0"></div>
                 <div id="selector" hidden></div>
-                <svg id="svg"></svg>
+                <svg id="svg" style="pointer-events: none;"></svg>
               </div>
             </div>
           </div>
@@ -361,9 +306,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   connectedCallback() {
     if (!this._firstConnect) {
       this._firstConnect = true;
-      this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerDownOnElement(event));
-      this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerMoveOnElement(event));
-      this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerUpOnElement(event));
+      this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerEventHandler(event));
+      this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerEventHandler(event));
+      this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerEventHandler(event));
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
@@ -422,6 +367,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private async _onDrop(event: DragEvent) {
     event.preventDefault();
 
+    this._fillCalculationrects();
     let transferData = event.dataTransfer.getData(dragDropFormatName);
     let elementDefinition = <IElementDefinition>JSON.parse(transferData);
     let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
@@ -500,44 +446,37 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       if (!primarySelection) {
         return;
       }
-      let oldLeft = parseInt((<HTMLElement>primarySelection.element).style.left);
-      let oldTop = parseInt((<HTMLElement>primarySelection.element).style.top);
-
+      
+      let moveOffset = 1;
+      if (event.shiftKey)
+      moveOffset=10;
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
           this.handleCommand('delete');
           break;
         case 'ArrowUp':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'up', node: this } }));
-          } else {
-            primarySelection.setStyle('top', oldTop - 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) - moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowDown':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'down', node: this } }));
-          } else {
-            primarySelection.setStyle('top', oldTop + 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) + moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowLeft':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'back', node: this } }));
-          } else {
-            primarySelection.setStyle('left', oldLeft - 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) - moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowRight':
-          if (event.shiftKey) {
-            event.preventDefault();
-            this.dispatchEvent(new CustomEvent('move', { bubbles: true, composed: true, detail: { type: 'forward', node: this } }));
-          } else {
-            primarySelection.setStyle('left', oldLeft + 1 + 'px');
+          {
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) + moveOffset + 'px'));
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
       }
@@ -545,36 +484,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
-    if (selectionChangedEvent.oldSelectedElements) {
-      for (let e of selectionChangedEvent.oldSelectedElements)
-        this._toggleDesignerClass(e, 'active', false);
-    }
-    if (selectionChangedEvent.selectedElements) {
-      for (let e of selectionChangedEvent.selectedElements)
-        this._toggleDesignerClass(e, 'active', true);
-    }
-  }
-
-  private _toggleDesignerClass(designItem: IDesignItem, className: 'active', state: boolean) {
-    if (state) {
-      designItem.element.classList.add(DesignerView._designerClassPrefix + className);
-    } else {
-      if (designItem.element.classList.contains(DesignerView._designerClassPrefix + className)) {
-        designItem.element.classList.remove(DesignerView._designerClassPrefix + className);
-        if (designItem.element.classList.length === 0)
-          designItem.element.removeAttribute('class');
-      }
-    }
+    this._drawOutlineRects(selectionChangedEvent.selectedElements);
   }
 
   private setSelectedElements(elements: HTMLElement[]) {
     if (elements) {
       let diArray: IDesignItem[] = [];
       for (let e of elements) {
-        //console.log(e.getBoundingClientRect());
-        //console.log(DomHelper.getAbsoluteBoundingRect(e));
-        //console.log(e.clientLeft);
-        //console.log(e.scrollLeft);
         diArray.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
         this.instanceServiceContainer.selectionService.setSelectedElements(diArray)
       }
@@ -583,30 +499,14 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
   }
 
-  private _pointerDownOnElement(event: PointerEvent) {
-    this._canvas.setPointerCapture(event.pointerId);
-    this._pointerEventHandler(event);
-    this._previousEventName = <EventNames>event.type;
-  }
-
-  private _pointerMoveOnElement(event: PointerEvent) {
-    //console.log(event.x, event.pageX, event.offsetX, event.screenX, event.clientX);
-    this._pointerEventHandler(event);
-    this._previousEventName = <EventNames>event.type;
-  }
-
-  private _pointerUpOnElement(event: PointerEvent) {
-    this._canvas.releasePointerCapture(event.pointerId);
-    this._pointerEventHandler(event);
-    this._previousEventName = <EventNames>event.type;
-  }
-
-  private getDesignerMousepoint(event: MouseEvent, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
-    let targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+  private getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
+    let targetRect = target.getBoundingClientRect();
     return {
       originalX: event.x - this._containerBoundingRect.x,
+      containerOriginalX: event.x - this._ownBoundingRect.x,
       x: (event.x - this._containerBoundingRect.x) / this._zoomFactor,
       originalY: event.y - this._containerBoundingRect.y,
+      containerOriginalY: event.y - this._ownBoundingRect.y,
       y: (event.y - this._containerBoundingRect.y) / this._zoomFactor,
       controlOffsetX: (startPoint ? startPoint.controlOffsetX : event.x - targetRect.x),
       controlOffsetY: (startPoint ? startPoint.controlOffsetY : event.y - targetRect.y),
@@ -615,16 +515,31 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _pointerEventHandler(event: PointerEvent) {
+    const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+    this._pointerEventHandlerElement(event, currentElement);
+  }
+
+  private _fillCalculationrects() {
+    this._ownBoundingRect = this.getBoundingClientRect();
+    this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+  }
+
+  private _pointerEventHandlerElement(event: PointerEvent, currentElement: HTMLElement) {
+    switch (event.type) {
+      case EventNames.PointerDown:
+        (<Element>event.target).setPointerCapture(event.pointerId);
+        break;
+      case EventNames.PointerUp:
+        (<Element>event.target).releasePointerCapture(event.pointerId);
+        break;
+    }
+
     if (!event.altKey)
       this._resetPointerEventsForClickThrough();
 
-    const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+    this._fillCalculationrects();
 
-    this._ownBoundingRect = this.getBoundingClientRect();
-    this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
-
-
-    const currentPoint = this.getDesignerMousepoint(event, event.type === 'pointerdown' ? null : this._initialPoint);
+    const currentPoint = this.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -671,13 +586,15 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._actionType = null;
       this._initialPoint = null;
     }
+
+    this._previousEventName = <EventNames>event.type;
   }
 
   private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint) {
-    let ox1 = Math.min(this._initialPoint.originalX, currentPoint.originalX);
-    let ox2 = Math.max(this._initialPoint.originalX, currentPoint.originalX);
-    let oy1 = Math.min(this._initialPoint.originalY, currentPoint.originalY);
-    let oy2 = Math.max(this._initialPoint.originalY, currentPoint.originalY);
+    let ox1 = Math.min(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
+    let ox2 = Math.max(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
+    let oy1 = Math.min(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
+    let oy2 = Math.max(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
 
     let selector = this._selector as HTMLDivElement;
     selector.style.left = ox1 / this._zoomFactor + 'px';
@@ -687,20 +604,15 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     selector.hidden = false;
 
     if (event.type == EventNames.PointerUp) {
-      let x1 = Math.min(this._initialPoint.originalX, currentPoint.originalX);
-      let x2 = Math.max(this._initialPoint.originalX, currentPoint.originalX);
-      let y1 = Math.min(this._initialPoint.originalY, currentPoint.originalY);
-      let y2 = Math.max(this._initialPoint.originalY, currentPoint.originalY);
-
       selector.hidden = true;
       let elements = this._canvas.querySelectorAll('*');
       let inSelectionElements: HTMLElement[] = [];
       for (let e of elements) {
         let elementRect = e.getBoundingClientRect();
-        if (elementRect.top - this._containerBoundingRect.top >= y1 &&
-          elementRect.left - this._containerBoundingRect.left >= x1 &&
-          elementRect.top - this._containerBoundingRect.top + elementRect.height <= y2 &&
-          elementRect.left - this._containerBoundingRect.left + elementRect.width <= x2) {
+        if (elementRect.top - this._containerBoundingRect.top >= oy1 &&
+          elementRect.left - this._containerBoundingRect.left >= ox1 &&
+          elementRect.top - this._containerBoundingRect.top + elementRect.height <= oy2 &&
+          elementRect.left - this._containerBoundingRect.left + elementRect.width <= ox2) {
           inSelectionElements.push(e as HTMLElement);
         }
       }
@@ -776,6 +688,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
           let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
           containerService.place(event, this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+          this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           //todo -> what is if a transform already exists -> backup existing style.?
           /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
             (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
@@ -834,7 +747,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       case EventNames.PointerUp:
         {
           if (this._actionType == PointerActionType.DragOrSelect) {
-            if (this._previousEventName == EventNames.PointerDown)
+            if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey)
               this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
             return;
           }
@@ -845,6 +758,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
           containerService.finishPlace(event, this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
           cg.commit();
+
+          this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
+
           break;
           //todo this needs also to get info from container handler, cause position is dependent of container
           for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
@@ -996,9 +912,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
           designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
           designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
-
-          designItem.element.classList.remove('resizing');
-          designItem.element.classList.remove('dragging');
         }
         cg.commit();
         this._initialSizes = null;
@@ -1014,6 +927,37 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   _forceMove(pointerPoint: IPoint, elementPoint: IPoint) {
     return (pointerPoint.x < elementPoint.x && pointerPoint.y < elementPoint.y);
+  }
+
+  _drawOutlineRects(selectedElements: IDesignItem[], mode: 'none' | 'move' | 'resize' = 'none') {
+    DomHelper.removeAllChildnodes(this.svgLayer, 'svg-selection');
+
+    if (selectedElements && selectedElements.length) {
+      let p0 = selectedElements[0].element.getBoundingClientRect();
+
+      let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      line.setAttribute('x', <string><any>(p0.x - this._containerBoundingRect.x - 12));
+      line.setAttribute('width', <string><any>(10));
+      line.setAttribute('y', <string><any>(p0.y - this._containerBoundingRect.y - 12));
+      line.setAttribute('height', <string><any>(10));
+      line.setAttribute('class', 'svg-selection svg-primary-selection-move');
+      line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
+      line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
+      line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
+      this.svgLayer.appendChild(line);
+
+      for (let i of selectedElements) {
+        let p = i.element.getBoundingClientRect();
+
+        let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        line.setAttribute('x', <string><any>(p.x - this._containerBoundingRect.x));
+        line.setAttribute('width', <string><any>(p.width));
+        line.setAttribute('y', <string><any>(p.y - this._containerBoundingRect.y));
+        line.setAttribute('height', <string><any>(p.height));
+        line.setAttribute('class', 'svg-selection');
+        this.svgLayer.appendChild(line);
+      }
+    }
   }
 
   deepTargetFind(x, y, notThis) {
