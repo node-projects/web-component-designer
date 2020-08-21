@@ -20,6 +20,8 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 
+  public code: string;
+
   private _aceEditor: Ace.Editor;
   private _editor: HTMLDivElement;
 
@@ -69,9 +71,6 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
       this._aceEditor.setAutoScrollEditorIntoView(false);
       this._aceEditor.setAutoScrollEditorIntoView(true);
     });
-
-
-
     let config = { attributes: true, childList: true, characterData: true };
     observer.observe(this.shadowRoot.querySelector('.ace_content'), config);
   }

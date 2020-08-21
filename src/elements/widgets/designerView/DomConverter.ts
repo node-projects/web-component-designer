@@ -5,11 +5,15 @@ import { IHtmlWriterOptions } from "../../services/serializationService/IHtmlWri
 export class DomConverter {
 
   public static normalizeAttributeValue(value: string) {
-    return value.replace(/"/g, '&quot;');
+    if (value)
+      return value.replace(/"/g, '&quot;');
+    return value;
   }
 
   public static normalizeContentValue(value: string) {
-    return value.replace(/</g, '&lt;');
+    if (value)
+      return value.replace(/</g, '&lt;');
+    return value;
   }
 
   public static IsSelfClosingElement(tag: string) {

@@ -1,5 +1,6 @@
 import { BaseCustomWebComponentLazyAppend, css } from "@node-projects/base-custom-webcomponent"
 import { TypedEvent } from '../../basic/TypedEvent';
+import { IActivateable } from '../../../dist/interfaces/IActivateable';
 
 export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number };
 
@@ -128,6 +129,8 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       if (index == this._selectedIndex) {
         element.slot = "panels";
         this._headerDiv.children[index].classList.add('selected');
+        if ((<IActivateable><unknown>element).activated)
+          (<IActivateable><unknown>element).activated();
 
         //bugfix sometimes not shown content
         if (!(<HTMLElement>element).clientWidth) {

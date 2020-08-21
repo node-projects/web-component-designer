@@ -17,7 +17,8 @@ export class HtmlWriterService implements IHtmlWriterService {
     if (designItem.hasAttributes) {
       for (const a of designItem.attributes) {
         indentedTextWriter.write(' ');
-        indentedTextWriter.write(a[0] + '="' + DomConverter.normalizeAttributeValue(a[1]) + '"');
+        if (a[1])
+          indentedTextWriter.write(a[0] + '="' + DomConverter.normalizeAttributeValue(a[1]) + '"');
       }
     }
 
@@ -27,7 +28,8 @@ export class HtmlWriterService implements IHtmlWriterService {
       if (options.compressCssToShorthandProperties)
         styles = CssCombiner.combine(styles);
       for (const s of styles) {
-        indentedTextWriter.write(s[0] + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+        if (s[0])
+          indentedTextWriter.write(s[0] + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
       }
       indentedTextWriter.write('"');
     }
