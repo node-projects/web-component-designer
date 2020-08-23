@@ -1,7 +1,7 @@
 /*
 import { IPoint } from '../../../interfaces/IPoint.js';
 import { IContainerService } from './IContainerService.js';
-import { IDesignItem } from '../../../../dist/elements/item/IDesignItem';
+import { IDesignItem } from '../../elements/item/IDesignItem';
 
 export class FlexContainerService implements IContainerService {
 

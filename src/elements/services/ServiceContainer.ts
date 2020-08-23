@@ -5,6 +5,8 @@ import { IInstanceService } from './instanceService/IInstanceService';
 import { IEditorTypesService } from './propertiesService/IEditorTypesService';
 import { BaseServiceContainer } from './BaseServiceContainer';
 import { IHtmlWriterService } from './serializationService/IHtmlWriterService';
+import { CodeViewMonaco } from "../widgets/codeView/code-view-monaco";
+import { ICodeView } from "../widgets/codeView/ICodeView";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -16,6 +18,12 @@ interface ServiceNameMap {
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
+
+  readonly config: {
+    codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement
+  } = {
+      codeViewWidget: CodeViewMonaco
+    };
 
   get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');

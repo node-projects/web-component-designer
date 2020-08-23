@@ -1,14 +1,14 @@
 import { BaseCustomWebComponentLazyAppend, css } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from "./controls/DesignerTabControl";
 import { DesignerView } from "./widgets/designerView/designerView";
-import { CodeViewMonaco } from "./widgets/codeView/code-view-monaco";
 import { ServiceContainer } from "./services/ServiceContainer";
 import { InstanceServiceContainer } from "./services/InstanceServiceContainer";
 import { DemoView } from './widgets/demoView/demoView';
+import { ICodeView } from '../elements/widgets/codeView/ICodeView';
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
   public designerView: DesignerView;
-  public codeView: CodeViewMonaco;
+  public codeView: ICodeView & HTMLElement;
   public demoView: DemoView;
 
   private _serviceContainer: ServiceContainer;
@@ -35,13 +35,13 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
       this._content = content;
 
     let div = document.createElement("div");
-    this._tabControl = new DesignerTabControl(); // this._getDomElement('tabControl');
+    this._tabControl = new DesignerTabControl();
     div.appendChild(this._tabControl);
     this.designerView = new DesignerView();
     this.designerView.title = 'Designer';
     this._tabControl.appendChild(this.designerView);
     this.designerView.initialize(this._serviceContainer);
-    this.codeView = new CodeViewMonaco();
+    this.codeView = new serviceContainer.config.codeViewWidget();
     this.codeView.title = 'Code';
     this._tabControl.appendChild(this.codeView);
     this.demoView = new DemoView();
