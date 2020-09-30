@@ -42,6 +42,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   // Private Variables
   private _canvas: HTMLDivElement;
   private _canvasContainer: HTMLDivElement;
+  private _outercanvas2: HTMLDivElement;
   private _selector: HTMLDivElement;
 
   private _dropTarget: Element;
@@ -79,9 +80,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       margin: auto;
       position: absolute;
       top: 0;
-      bottom: 0;
+      /* bottom: 0; does not work with fixed sized when size is bigger then view */
       left: 0;
-      right: 0;
+      /* right: 0; */
     }
     #canvas {
       background-color: var(--canvas-background, white);
@@ -102,6 +103,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       top: 0;
       left: 0;
       pointer-events: none;
+      overflow: visible;
     }
     .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
     .svg-selection { stroke: blue; fill: transparent; stroke-width: 2; }
@@ -228,6 +230,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     this._canvas = this._getDomElement<HTMLDivElement>('canvas');
     this._canvasContainer = this._getDomElement<HTMLDivElement>('canvasContainer');
+    this._outercanvas2 = this._getDomElement<HTMLDivElement>('outercanvas2');
 
     this._selector = this._getDomElement<HTMLDivElement>('selector');
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
@@ -268,12 +271,14 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
   set designerWidth(value: string) {
     this._canvasContainer.style.width = value;
+    this.zoomFactorChanged();
   }
   get designerHeight(): string {
     return this._canvasContainer.style.height;
   }
   set designerHeight(value: string) {
     this._canvasContainer.style.height = value;
+    this.zoomFactorChanged();
   }
 
   handleCommand(command: string) {
@@ -306,9 +311,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   connectedCallback() {
     if (!this._firstConnect) {
       this._firstConnect = true;
-      this._canvas.addEventListener(EventNames.PointerDown, event => this._pointerEventHandler(event));
-      this._canvas.addEventListener(EventNames.PointerMove, event => this._pointerEventHandler(event));
-      this._canvas.addEventListener(EventNames.PointerUp, event => this._pointerEventHandler(event));
+      this._outercanvas2.addEventListener(EventNames.PointerDown, event => this._pointerEventHandler(event));
+      this._outercanvas2.addEventListener(EventNames.PointerMove, event => this._pointerEventHandler(event));
+      this._outercanvas2.addEventListener(EventNames.PointerUp, event => this._pointerEventHandler(event));
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
@@ -327,6 +332,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   zoomFactorChanged() {
     this._canvasContainer.style.zoom = <any>this._zoomFactor;
     this._zoomInput.value = (this._zoomFactor * 100).toFixed(0) + '%';
+    this._canvasContainer.style.bottom = this._outercanvas2.offsetHeight >= this._canvasContainer.offsetHeight ? '0' : '';
+    this._canvasContainer.style.right = this._outercanvas2.offsetWidth >= this._canvasContainer.offsetWidth ? '0' : '';
     this.snapLines.clearSnaplines();
   }
 
@@ -446,10 +453,10 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       if (!primarySelection) {
         return;
       }
-      
+
       let moveOffset = 1;
       if (event.shiftKey)
-      moveOffset=10;
+        moveOffset = 10;
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
@@ -457,25 +464,25 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           break;
         case 'ArrowUp':
           {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) - moveOffset + 'px'));
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) - moveOffset + 'px'));
             this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowDown':
           {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) + moveOffset + 'px'));
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) + moveOffset + 'px'));
             this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowLeft':
           {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) - moveOffset + 'px'));
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) - moveOffset + 'px'));
             this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowRight':
           {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x=>x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) + moveOffset + 'px'));
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) + moveOffset + 'px'));
             this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
@@ -492,8 +499,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       let diArray: IDesignItem[] = [];
       for (let e of elements) {
         diArray.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
-        this.instanceServiceContainer.selectionService.setSelectedElements(diArray)
       }
+      this.instanceServiceContainer.selectionService.setSelectedElements(diArray);
     } else {
       this.instanceServiceContainer.selectionService.setSelectedElements(null);
     }
@@ -515,7 +522,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _pointerEventHandler(event: PointerEvent) {
-    const currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+    let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
+    if (currentElement === this._outercanvas2)
+      currentElement = this._canvas;
     this._pointerEventHandlerElement(event, currentElement);
   }
 
@@ -540,6 +549,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._fillCalculationrects();
 
     const currentPoint = this.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
+    const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -547,7 +557,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         this.snapLines.clearSnaplines();
         let composedPath = event.composedPath();
         let rectCurrentElement = currentElement.getBoundingClientRect();
-        if (this._forceMove(currentPoint, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })) {
+        if (currentDesignItem !== this.rootDesignItem && this._forceMove(currentPoint, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })) {
           this._actionType = PointerActionType.Drag;
         } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || currentElement.innerText == '') &&
           currentElement.style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
@@ -562,8 +572,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         }
       }
     }
-
-    let currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
 
     if (event.type === EventNames.PointerMove) {
       if (this._actionType == PointerActionType.DrawSelection)
@@ -580,7 +588,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     if (event.type == EventNames.PointerUp) {
       this.snapLines.clearSnaplines();
       if (this._actionType == PointerActionType.DrawSelection) {
-        if (currentElement !== this.rootDesignItem.element)
+        if (currentDesignItem !== this.rootDesignItem)
           this.setSelectedElements([currentElement]);
       }
       this._actionType = null;
@@ -595,6 +603,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let ox2 = Math.max(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
     let oy1 = Math.min(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
     let oy2 = Math.max(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
+
+    /*let ox1 = Math.min(this._initialPoint.x, currentPoint.x);
+    let ox2 = Math.max(this._initialPoint.x, currentPoint.x);
+    let oy1 = Math.min(this._initialPoint.y, currentPoint.y);
+    let oy2 = Math.max(this._initialPoint.y, currentPoint.y);*/
 
     let selector = this._selector as HTMLDivElement;
     selector.style.left = ox1 / this._zoomFactor + 'px';
@@ -905,6 +918,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
           (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
         }
+        this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
         break;
       case EventNames.PointerUp:
         let cg = this.rootDesignItem.openGroup("Resize Elements", this.instanceServiceContainer.selectionService.selectedElements);

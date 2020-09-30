@@ -119,6 +119,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
   }
 
+  public designItemsChanged(designItems: IDesignItem[]) {
+    for (let m of this._propertyMap) {
+      m[1].editor.designItemsChanged(designItems);
+    }
+  }
+
   public refreshForDesignItems(items: IDesignItem[]) {
     for (let m of this._propertyMap) {
       let s = this._propertiesService.isSet(items, m[0]);

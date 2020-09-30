@@ -17,7 +17,7 @@ export abstract class BasePropertyEditor<T extends Element> implements IProperty
     this.property.service.setValue(this.designItems, this.property, newValue);
   }
 
-  designItemsChanged(designItems: IDesignItem[]) {
+  public designItemsChanged(designItems: IDesignItem[]) {
     this.designItems = designItems;
     //this.property.service.isSet()
   }

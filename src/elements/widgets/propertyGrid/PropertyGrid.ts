@@ -78,9 +78,15 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   }
   set selectedItems(items: IDesignItem[]) {
     this._selectedItems = items;
+    
+    for (const a of this._propertyGridPropertyLists) {
+      a.designItemsChanged(items);
+    }
+
     if (items) {
       if (items.length == 1) {
         for (const a of this._propertyGridPropertyLists) {
+          a.designItemsChanged(items);
           a.refreshForDesignItems(items);
         }
 

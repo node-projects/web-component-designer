@@ -1,6 +1,6 @@
 # web-component-designer
 
-## Caution - this is a preview Version, we hope to release a RC in May/June 2020
+## Caution - this is a preview Version, we hope to release a RC in End of 2020
 
 A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
@@ -21,18 +21,18 @@ repository: https://github.com/node-projects/web-component-designer-demo
 ## What is needed
 
 - constructable-stylesheets-polyfill on browser not yet supporting these
-- optional - ace code editor (if you use code-view-ace)
-- optional - code mirrow code editor (if you use code-view-codemirrow) (todo)
-- optional - monaco code editor (if you use code-view-monaco) (todo)
-- optional - fancytree (if you use tree-view-fancytree) (todo)
+- optional - ace code editor (workin)
+- optional - code mirrow code editor (if you use code-view-codemirrow) (not yet started)
+- optional - monaco code editor (if you use code-view-monaco) (workin)
+- optional - fancytree (if you use tree-view-extened) (partly workin)
 
 ## Features we are workin on
 
- - Refactor as a reusable NPM component (not yet started, (remove app-shell))
+ - Refactor as a reusable NPM component (WIP)
  - Conversation to Typescript (done)
  - Multiselection (WIP)
  - Drag/Move refactoring (WIP)
- - New Property Editor (not yet Started) (planed to inject custom property handling classes)
+ - New Property Editor (WIP)
  - CSS Grid Positioning (planed)
  - Much, much more ...
 
@@ -88,6 +88,8 @@ Your addition to your index.html should look like this:
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
     <script src="/node_modules/@node-projects/web-component-designer/dist/polyfill/mobileDragDrop.js"></script>
 
+Following Text is from Wizzywid, needs to be fixed...
+
 **Disclaimer**: to configure the app to have other elements than the ones it
 already has, you should clone it, build it, and make one of the changes below.
 I don't want to add a "anyone should add any element to this exact deployed app"
@@ -98,6 +100,8 @@ like the steps below to be as easy as possible. ❤️
 Also, start all of the sentences below with "In theory, ...". 😅
 
 ### Adding another native element
+
+Following Text is from Wizzywid, needs to be fixed...
 
 Add another entry to the `elements-native.json` file. If this is a weird
 native element, you might have to do some code changes:
@@ -111,6 +115,8 @@ native element, you might have to do some code changes:
 
 ### Adding another custom element
 
+Following Text is from Wizzywid, needs to be fixed...
+
 Add the element you want to the `devDependencies` section of this
 project's `package.json` file, then run `npm install`. This element needs
 to use HTML Imports for it to work. If the import isn't of the form
@@ -119,13 +125,11 @@ to use HTML Imports for it to work. If the import isn't of the form
 
 ### Adding another sample
 
+Following Text is from Wizzywid, needs to be fixed...
+
 Add the name of the sample in `elements-samples.json`, and create a file in the
 `samples` directory with the same name. This file should contain a `<template>`,
 and in the template the contents of your new sample. Note that this template
 obviously has no shadow DOM (unless you add just a custom element), so if in it
 you add a `<style> div {color: red}</style>`, this will, of course, style
 all the divs in the app, and you'll have a hard time removing that code :(
-
-### Adding a new theme
-To reskin the app, you need to define a set of custom properties. Check the `retheme`
-method in `app.js` for the list. Or see it in [action](https://polymerlabs.github.io/wizzywid/#tufte).

@@ -25,8 +25,8 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
   iframe {
     width: 100%;
     height: 100%;
-  }
-  `;
+    border: none;
+  }`;
 
   constructor() {
     super();
@@ -43,7 +43,6 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
   display(code: string) {
 
     let iframe = document.createElement('iframe');
-    iframe.frameBorder = '0';
     this._placeholder.innerHTML = '';
     this._placeholder.appendChild(iframe);
     this._loading.hidden = false;

@@ -124,6 +124,8 @@ export class DesignItem implements IDesignItem {
         node.style.pointerEvents = 'auto';
       else
         node.style.pointerEvents = 'none';
+
+      //node.style.cursor = 'pointer';
     }
 
     (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
