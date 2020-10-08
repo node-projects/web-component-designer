@@ -33,6 +33,9 @@ export class LitElementPropertiesService implements IPropertiesService {
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
   }
 
+  clearValue(designItems: IDesignItem[], property: IProperty) {
+  }
+
   isSet(designItems: IDesignItem[], property: IProperty): ValueType {
     return ValueType.none;
   }

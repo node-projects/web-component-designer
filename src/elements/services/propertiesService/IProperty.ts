@@ -7,6 +7,7 @@ export interface IProperty {
     default?: any;
     min?: number;
     max?: number;
+    step?: number;
     values?: string[]; // list selectable values
     createEditor?: (property: IProperty) => IPropertyEditor;
     value?: any;

@@ -34,7 +34,8 @@ export class CssPropertiesService implements IPropertiesService {
       name: "opacity",
       type: "number",
       min: 0,
-      max: 0,
+      max: 1,
+      step: 0.1,
       service: this
     }, {
       name: "padding",
@@ -73,11 +74,20 @@ export class CssPropertiesService implements IPropertiesService {
       name: "height",
       type: "css-length",
       service: this
+    }, {
+      name: "font-size",
+      type: "css-length",
+      service: this
+    }, {
+      name: "font-weight",
+      type: "list",
+      values:  ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900", "lighter", "bolder"],
+      service: this
     }
   ];
 
   //@ts-ignore
-  private flex: IProperty[] = [
+  private alignment: IProperty[] = [
     {
       name: "position",
       type: "list",
@@ -196,9 +206,9 @@ export class CssPropertiesService implements IPropertiesService {
     }
   ];
 
-  name: 'flex' | 'styles' | 'grid';
+  name: 'alignment' | 'styles' | 'grid';
 
-  constructor(name: 'flex' | 'styles' | 'grid') {
+  constructor(name: 'alignment' | 'styles' | 'grid') {
     this.name = name;
   }
 
@@ -213,6 +223,12 @@ export class CssPropertiesService implements IPropertiesService {
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     for (let d of designItems) {
       d.setStyle(<keyof CSSStyleDeclaration>property.name, value);
+    }
+  }
+  
+  clearValue(designItems: IDesignItem[], property: IProperty) {
+    for (let d of designItems) {
+      d.removeStyle(<keyof CSSStyleDeclaration>property.name);
     }
   }
 

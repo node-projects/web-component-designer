@@ -424,6 +424,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         this._resetPointerEventsForClickThrough();
         break;
     }
+
+    event.preventDefault();
   }
 
   private _resetPointerEventsForClickThrough() {
@@ -488,6 +490,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           break;
       }
     }
+
+    event.preventDefault();
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
@@ -522,8 +526,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _pointerEventHandler(event: PointerEvent) {
-    let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
-    if (currentElement === this._outercanvas2)
+    let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as Element;
+    if (currentElement === this._outercanvas2 || currentElement === this.svgLayer)
       currentElement = this._canvas;
     this._pointerEventHandlerElement(event, currentElement);
   }
@@ -533,7 +537,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
 
-  private _pointerEventHandlerElement(event: PointerEvent, currentElement: HTMLElement) {
+  private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element) {
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
@@ -559,8 +563,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         let rectCurrentElement = currentElement.getBoundingClientRect();
         if (currentDesignItem !== this.rootDesignItem && this._forceMove(currentPoint, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })) {
           this._actionType = PointerActionType.Drag;
-        } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || currentElement.innerText == '') &&
-          currentElement.style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
+        } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
+        (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
           this.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
         } else if (currentElement === this || currentElement === this._canvas || currentElement == null) {
@@ -579,9 +583,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
 
     if (this._actionType == PointerActionType.DrawSelection || this._actionType == PointerActionType.DrawingSelection) {
-      this._pointerActionTypeDrawSelection(event, currentElement, currentPoint);
+      this._pointerActionTypeDrawSelection(event,  (<HTMLElement>currentElement), currentPoint);
     } else if (this._actionType == PointerActionType.Resize) {
-      this._pointerActionTypeResize(event, currentElement, currentPoint);
+      this._pointerActionTypeResize(event,  (<HTMLElement>currentElement), currentPoint);
     } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
       this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
     }
@@ -589,7 +593,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this.snapLines.clearSnaplines();
       if (this._actionType == PointerActionType.DrawSelection) {
         if (currentDesignItem !== this.rootDesignItem)
-          this.setSelectedElements([currentElement]);
+          this.setSelectedElements([(<HTMLElement>currentElement)]);
       }
       this._actionType = null;
       this._initialPoint = null;

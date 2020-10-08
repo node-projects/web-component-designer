@@ -12,6 +12,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _propertyMap: Map<IProperty, { isSetElement: HTMLElement, editor: IPropertyEditor }> = new Map();
   private _serviceContainer: ServiceContainer;
   private _propertiesService: IPropertiesService;
+  private _designItems: IDesignItem[];
 
   static get style() {
     return css`
@@ -102,7 +103,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         rect.style.border = '1px white solid';
         this._div.appendChild(rect);
         ContextMenuHelper.addContextMenu(rect, [
-          { title: 'clear', action: (e) => /* todo: we do not have the items here, where should we know them? */ p.service.setValue([designItem], p, null) },
+          { title: 'clear', action: (e) => p.service.clearValue(this._designItems, p) },
           { title: 'new binding', action: (e) => alert('new binding() ' + p.name) }
         ]);
 
@@ -120,6 +121,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public designItemsChanged(designItems: IDesignItem[]) {
+    this._designItems = designItems;
     for (let m of this._propertyMap) {
       m[1].editor.designItemsChanged(designItems);
     }

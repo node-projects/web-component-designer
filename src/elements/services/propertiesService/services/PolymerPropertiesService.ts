@@ -67,6 +67,9 @@ export class PolymerPropertiesService implements IPropertiesService {
               old: { value: oldValue }
             });*/
     }
+
+    clearValue(designItems: IDesignItem[], property: IProperty) {
+    }
   
     isSet(designItems: IDesignItem[], property: IProperty): ValueType {
       return ValueType.none;

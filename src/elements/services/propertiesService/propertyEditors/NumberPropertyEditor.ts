@@ -11,6 +11,7 @@ export class NumberPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
     element.type = "number";
     element.min = <string><any>property.min;
     element.max = <string><any>property.max;
+    element.step = <string><any>property.step;
     element.onchange = (e) => this._valueChanged(element.value);
     this.element = element;
   }

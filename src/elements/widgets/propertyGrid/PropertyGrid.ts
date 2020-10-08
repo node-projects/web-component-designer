@@ -54,9 +54,9 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._designerTabControl.appendChild(attributeEditorAttributeList);
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
-    attributeEditorAttributeList = new PropertyGridPropertyList(value, new CssPropertiesService("flex"));
+    attributeEditorAttributeList = new PropertyGridPropertyList(value, new CssPropertiesService("alignment"));
     attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "flex";
+    attributeEditorAttributeList.title = "alignment";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 

@@ -163,7 +163,7 @@ export class DesignItem implements IDesignItem {
     let action = new CssStyleChangeAction(this, name, value, this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);
   }
-  public removeStyle(property: keyof CSSStyleDeclaration) {
+  public removeStyle(name: keyof CSSStyleDeclaration) {
     let action = new CssStyleChangeAction(this, name, '', this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);
   }

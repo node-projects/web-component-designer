@@ -9,6 +9,7 @@ export interface IPropertiesService extends IService {
   getProperties(designItem: IDesignItem): IProperty[];
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any);
+  clearValue(designItems: IDesignItem[], property: IProperty);
   isSet(designItems: IDesignItem[], property: IProperty): ValueType;
   getValue(designItems: IDesignItem[], property: IProperty): any;
   getUnsetValue(designItems: IDesignItem[], property: IProperty): any;
