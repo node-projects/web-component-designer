@@ -281,6 +281,15 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.zoomFactorChanged();
   }
 
+  set additionalStyle(value: CSSStyleSheet) {
+    if (value)
+      //@ts-ignore
+      this.shadowRoot.adoptedStyleSheets = [this.constructor.style, value];
+    else
+      //@ts-ignore
+      this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
+  }
+
   handleCommand(command: string) {
     switch (command) {
       case 'delete':
@@ -342,7 +351,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     return DomConverter.ConvertToString(this.rootDesignItem);
   }
 
-  public parseHTML(html: string) {
+  public async parseHTML(html: string) {
+    //const parserService = this.serviceContainer.htmlParserService;
+    //const parsed = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
+
+
     this.rootDesignItem.element.innerHTML = html;
     this.instanceServiceContainer.undoService.clear();
     this._createDesignItemsRecursive(this.rootDesignItem.element);
@@ -564,7 +577,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         if (currentDesignItem !== this.rootDesignItem && this._forceMove(currentPoint, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })) {
           this._actionType = PointerActionType.Drag;
         } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
-        (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
+          (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
           this.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
         } else if (currentElement === this || currentElement === this._canvas || currentElement == null) {
@@ -583,9 +596,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
 
     if (this._actionType == PointerActionType.DrawSelection || this._actionType == PointerActionType.DrawingSelection) {
-      this._pointerActionTypeDrawSelection(event,  (<HTMLElement>currentElement), currentPoint);
+      this._pointerActionTypeDrawSelection(event, (<HTMLElement>currentElement), currentPoint);
     } else if (this._actionType == PointerActionType.Resize) {
-      this._pointerActionTypeResize(event,  (<HTMLElement>currentElement), currentPoint);
+      this._pointerActionTypeResize(event, (<HTMLElement>currentElement), currentPoint);
     } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
       this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
     }

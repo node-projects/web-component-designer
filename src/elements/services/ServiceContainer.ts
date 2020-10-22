@@ -7,6 +7,7 @@ import { BaseServiceContainer } from './BaseServiceContainer';
 import { IHtmlWriterService } from './serializationService/IHtmlWriterService';
 import { CodeViewMonaco } from "../widgets/codeView/code-view-monaco";
 import { ICodeView } from "../widgets/codeView/ICodeView";
+import { IHtmlParserService } from "./htmlParserService/IHtmlParserService";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -15,6 +16,7 @@ interface ServiceNameMap {
   "instanceService": IInstanceService;
   "editorTypesService": IEditorTypesService;
   "htmlWriterService": IHtmlWriterService;
+  "htmlParserService": IHtmlParserService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -47,5 +49,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get htmlWriterServices(): IHtmlWriterService[] {
     return this.getServices('htmlWriterService');
+  }
+
+  get htmlParserService(): IHtmlParserService {
+    return this.getLastService('htmlParserService');
   }
 }
