@@ -282,9 +282,22 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   set additionalStyle(value: CSSStyleSheet) {
-    if (value)
+    if (value) {
+      for (let r of value.rules) {
+        if (r instanceof CSSStyleRule) {
+          let parts = r.selectorText.split(',');
+          r.selectorText = '';
+          for (let p of parts) {
+            if (r.selectorText)
+              r.selectorText += ',';
+            r.selectorText += '#canvas ' + p;
+          }
+        }
+      }
+
       //@ts-ignore
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style, value];
+    }
     else
       //@ts-ignore
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
