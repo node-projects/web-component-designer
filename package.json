@@ -10,13 +10,13 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "0.0.40",
+    "@node-projects/base-custom-webcomponent": "0.0.60",
     "@webcomponents/webcomponentsjs": "^2.5.0",
     "construct-style-sheets-polyfill": "^2.4.2"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.3",
-    "@types/jquery.fancytree": "0.0.4",
+    "@types/jquery.fancytree": "0.0.5",
     "ace-builds": "^1.4.12",
     "jquery": "^3.5.1",
     "jquery.fancytree": "^2.37.0",
