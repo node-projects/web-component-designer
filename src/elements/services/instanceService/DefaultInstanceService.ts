@@ -55,7 +55,7 @@ export class DefaultInstanceService implements IInstanceService {
       }
     }
 
-    let designItem = DesignItem.GetOrCreateDesignItem(element, serviceContainer, instanceServiceContainer);
+    let designItem = DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
 
     if (definition.defaultProperties) {
       let propertiesService: IPropertiesService = null;

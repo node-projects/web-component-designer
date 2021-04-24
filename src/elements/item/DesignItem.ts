@@ -19,7 +19,7 @@ export class DesignItem implements IDesignItem {
   }
   public styles: Map<string, string>
 
-  private static _designItemSymbol = Symbol('DesignItem');
+  private static _designItemMap = new  WeakMap<Node, IDesignItem>();
 
   public get element(): Element {
     return <Element>this.node;
@@ -95,32 +95,27 @@ export class DesignItem implements IDesignItem {
     }
   }
 
-  constructor(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
-    this.node = node;
-    this.serviceContainer = serviceContainer;
-    this.instanceServiceContainer = instanceServiceContainer;
+  public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
+    let designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
 
-    this.attributes = new Map();
-    this.styles = new Map();
-
-    for (let a of this.element.attributes) {
+    for (let a of designItem.element.attributes) {
       if (a.name !== 'style') {
-        this.attributes.set(a.name, a.value);
+        designItem.attributes.set(a.name, a.value);
         if (a.name === 'node-projects-hide-at-design-time')
-          this._hideAtDesignTime = true;
+          designItem._hideAtDesignTime = true;
         if (a.name === 'node-projects-hide-at-run-time')
-          this._hideAtRunTime = true;
+          designItem._hideAtRunTime = true;
         if (a.name === 'node-projects-lock-at-design-time')
-          this._lockAtDesignTime = true;
+          designItem._lockAtDesignTime = true;
       }
     }
     if (node instanceof HTMLElement || node instanceof SVGElement) {
       for (let s of node.style) {
         let val = node.style[s];
         if (val && typeof val === 'string')
-          this.styles.set(s, node.style[s]);
+          designItem.styles.set(s, node.style[s]);
       }
-      if (!this._lockAtDesignTime)
+      if (!designItem._lockAtDesignTime)
         node.style.pointerEvents = 'auto';
       else
         node.style.pointerEvents = 'none';
@@ -130,8 +125,21 @@ export class DesignItem implements IDesignItem {
 
     (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
 
-    if (this.element.children.length === 0)
-      this.content = this.element.textContent;
+    if (designItem.element.children.length === 0)
+      designItem.content = designItem.element.textContent;
+
+    return designItem;
+  }
+
+  constructor(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+    this.node = node;
+    this.serviceContainer = serviceContainer;
+    this.instanceServiceContainer = instanceServiceContainer;
+
+    this.attributes = new Map();
+    this.styles = new Map();
+
+    DesignItem._designItemMap.set(node, this);
   }
 
   public openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup {
@@ -145,18 +153,11 @@ export class DesignItem implements IDesignItem {
   static GetOrCreateDesignItem(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     if (!node)
       return null;
-    let designItem: IDesignItem = node[DesignItem._designItemSymbol];
+    let designItem: IDesignItem = DesignItem._designItemMap.get(node);
     if (!designItem) {
       designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
-      node[DesignItem._designItemSymbol] = designItem;
     }
     return designItem;
-  }
-
-  static RemoveDesignItemFromElement(element: HTMLElement) {
-    if (!element)
-      return null;
-    delete element[DesignItem._designItemSymbol];
   }
 
   public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {

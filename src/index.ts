@@ -25,6 +25,10 @@ export type { IHtmlWriterService } from "./elements/services/serializationServic
 export type { IHtmlWriterOptions } from "./elements/services/serializationService/IHtmlWriterOptions.js";
 export * from "./elements/services/serializationService/HtmlWriterService.js";
 
+export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
+export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
+export type { IHtmlParserService } from "./elements/services/htmlParserService/IHtmlParserService.js";
+
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";
 

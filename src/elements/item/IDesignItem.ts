@@ -35,4 +35,8 @@ export interface IDesignItem {
 
   setAttribute(name: string, value?: string | null);
   removeAttribute(name: string);
+
+  hideAtDesignTime: boolean;
+  hideAtRunTime: boolean;
+  lockAtDesignTime: boolean;
 }
