@@ -1,8 +1,11 @@
 import { ServiceContainer } from "../services/ServiceContainer";
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
 import { ChangeGroup } from "../services/undoService/ChangeGroup";
+import { NodeType } from './NodeType';
 
 export interface IDesignItem {
+
+  readonly nodeType: NodeType
 
   readonly name: string
   readonly id: string

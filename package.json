@@ -15,7 +15,7 @@
     "construct-style-sheets-polyfill": "^2.4.16"
   },
   "devDependencies": {
-    "@node-projects/node-html-parser-esm": "^2.2.1",
+    "@node-projects/node-html-parser-esm": "^2.2.2",
     "@types/jquery": "^3.5.5",
     "@types/jquery.fancytree": "0.0.6",
     "ace-builds": "^1.4.12",

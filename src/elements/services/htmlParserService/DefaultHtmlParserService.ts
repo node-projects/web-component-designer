@@ -10,7 +10,7 @@ export class DefaultHtmlParserService implements IHtmlParserService {
     const doc = parser.parseFromString(html, 'text/html');
 
     let res: IDesignItem[] = [];
-    for (let el of doc.body.children) {
+    for (let el of doc.body.children) { //todo, use childNodes or textnodes will not work
       res.push(this._createDesignItemsRecursive(el, serviceContainer, instanceServiceContainer))
     }
 
@@ -19,7 +19,7 @@ export class DefaultHtmlParserService implements IHtmlParserService {
 
   private _createDesignItemsRecursive(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     let di = DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
-    for (let e of element.children) {
+    for (let e of element.children) { //todo, use childNodes or textnodes will not work
       this._createDesignItemsRecursive(e, serviceContainer, instanceServiceContainer);
     }
     return di;

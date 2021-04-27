@@ -3,11 +3,20 @@ import { IDesignItem } from './IDesignItem';
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
 import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction';
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
+import { NodeType } from './NodeType';
 
 export class DesignItem implements IDesignItem {
   node: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
+
+  public get nodeType(): NodeType {
+    if (this.node instanceof Comment)
+      return NodeType.Comment;
+    if (this.node instanceof Text)
+      return NodeType.TextNode;
+    return NodeType.Element;
+  }
 
   public get hasAttributes() {
     return this.attributes.size > 0;
@@ -19,7 +28,7 @@ export class DesignItem implements IDesignItem {
   }
   public styles: Map<string, string>
 
-  private static _designItemMap = new  WeakMap<Node, IDesignItem>();
+  private static _designItemMap = new WeakMap<Node, IDesignItem>();
 
   public get element(): Element {
     return <Element>this.node;
@@ -37,10 +46,10 @@ export class DesignItem implements IDesignItem {
   }
 
   public get hasChildren() {
-    return this.element.children.length > 0;
+    return this.element.childNodes.length > 0;
   }
   public *children(): IterableIterator<IDesignItem> {
-    for (const e of this.element.children) {
+    for (const e of this.element.childNodes) {
       yield DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer);
     }
   }
@@ -49,9 +58,14 @@ export class DesignItem implements IDesignItem {
   }
 
   public get hasContent() {
-    return this.element.children.length === 0 && this.content !== null;
+    return this.nodeType == NodeType.TextNode || (this.element.childNodes.length === 0 && this.content !== null);
   }
-  public content: string = null;
+  public get content(): string {
+    return this.node.textContent;
+  }
+  public set content(value: string) {
+    this.node.textContent = value;
+  }
 
   private _hideAtDesignTime: boolean;
   public get hideAtDesignTime() {

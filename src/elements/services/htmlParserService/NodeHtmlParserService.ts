@@ -9,7 +9,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
     //@ts-ignore
     let parser = await import('/node_modules/@node-projects/node-html-parser-esm/dist/index.js');
-    const parsed = parser.parse(html);
+    const parsed = parser.parse(html, { comment: true });
 
     let designItems: IDesignItem[] = [];
     for (let p of parsed.childNodes) {
@@ -22,6 +22,8 @@ export class NodeHtmlParserService implements IHtmlParserService {
     }
     return designItems;
   }
+
+  private _parseDiv = document.createElement("div");
 
   _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     let designItem: IDesignItem = null;
@@ -64,10 +66,18 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
       (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
 
-      if (designItem.element.children.length === 0)
-        designItem.content = designItem.element.textContent;
-    } else  if (item.nodeType == 3) { // TextNode -> what to do...
-
+      for (let c of item.childNodes) {
+        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer);
+        (<Node>element).appendChild(di.node);
+      }
+    } else if (item.nodeType == 3) {
+      this._parseDiv.innerHTML = item.rawText;
+      let element = this._parseDiv.childNodes[0]; //document.createTextNode(item.rawText);
+      designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
+    } else if (item.nodeType == 8) {
+      //this._parseDiv.innerHTML = item.rawText;
+      let element = document.createComment(item.rawText);
+      designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
     }
 
     return designItem;

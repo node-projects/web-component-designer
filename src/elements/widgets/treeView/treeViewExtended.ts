@@ -2,6 +2,7 @@ import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custo
 import { ITreeView } from './ITreeView';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
+import { NodeType } from '../../item/NodeType';
 
 export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implements ITreeView {
   private _treeDiv: HTMLDivElement;
@@ -30,6 +31,11 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
       }
       #tree ul:focus {
         outline: none;
+      }
+      span.fancytree-title {
+        align-items: center;
+        flex-direction: row;
+        display: inline-flex;
       }
     `;
 
@@ -63,13 +69,10 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
   async ready() {
     //this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
-      icon: false, //atm, maybe if we include icons for specific elements
-      extensions: ['dnd5', 'multi', 'filter', 'childcounter'],
+      icon: true, //atm, maybe if we include icons for specific elements
+      extensions: ['childcounter', 'dnd5', 'multi', 'filter'],
       quicksearch: true,
       source: [],
-
-
-
 
       dnd5: {
         dropMarkerParent: this.shadowRoot,
@@ -200,10 +203,11 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
         hideZeros: true,
         hideExpanded: true
       },
-      /*loadChildren: (event, data) => {
+      loadChildren: (event, data) => {
         // update node and parent counters after lazy loading
+        //@ts-ignore
         data.node.updateCounters();
-      }*/
+      }
     });
 
     //@ts-ignore
@@ -238,7 +242,7 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
     }
 
     const newNode = currentNode.addChildren({
-      title: item.name + " " + (item.id ? ('#' + item.id) : ''),
+      title: item.nodeType == NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType == NodeType.TextNode ? 'text' : 'comment' ) + '&nbsp;</small></small></small> ' + item.content,
       folder: item.children.length > 0 ? true : false,
       //@ts-ignore
       ref: item
