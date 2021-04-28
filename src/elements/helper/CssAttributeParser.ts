@@ -30,7 +30,9 @@ export class CssAttributeParser {
       if (token === Token.Name) {
         if (c === ':')
           token = Token.Value;
-        else
+        else if (c === ';') {
+          name = '';
+        } else
           name += c;
       } else if (token === Token.Value) {
         if (c === ';') {
