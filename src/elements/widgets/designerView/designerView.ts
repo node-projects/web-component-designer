@@ -22,6 +22,7 @@ import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
+import { IStringPosition } from '../../services/serializationService/IStringPosition';
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView {
   // Public Properties
@@ -359,9 +360,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.snapLines.clearSnaplines();
   }
 
-  public getHTML() {
+  public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
-    return DomConverter.ConvertToString(this.rootDesignItem);
+    return DomConverter.ConvertToString(this.rootDesignItem, designItemsAssignmentList);
   }
 
   public async parseHTML(html: string) {

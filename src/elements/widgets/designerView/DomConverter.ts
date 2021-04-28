@@ -1,6 +1,7 @@
 import { IDesignItem } from "../../item/IDesignItem";
 import { IndentedTextWriter } from "../../helper/IndentedTextWriter";
 import { IHtmlWriterOptions } from "../../services/serializationService/IHtmlWriterOptions";
+import { IStringPosition } from "../../services/serializationService/IStringPosition";
 
 export class DomConverter {
 
@@ -33,7 +34,7 @@ export class DomConverter {
       tag === 'track';
   }
 
-  public static ConvertToString(designItem: IDesignItem) {
+  public static ConvertToString(designItem: IDesignItem, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     let itw = new IndentedTextWriter();
     let options: IHtmlWriterOptions = { beautifyOutput: true, writeDesignerProperties: true, compressCssToShorthandProperties: true };
 
@@ -41,7 +42,7 @@ export class DomConverter {
       for (let d of designItem.children()) {
         d.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
           if (s.canWrite(d))
-            s.write(itw, d, options);
+            s.write(itw, d, options, designItemsAssignmentList);
         });
       }
     }

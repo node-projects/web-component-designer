@@ -1,6 +1,7 @@
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from "./ICodeView";
 import type { Ace } from "ace-builds";
+import { IStringPosition } from '../../services/serializationService/IStringPosition';
 
 class CodeViewAceCompleter {
   getCompletions(editor, session, pos, prefix, callback) {
@@ -83,6 +84,14 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     return this._aceEditor.getValue();
   }
 
+  setSelection(position: IStringPosition) {
+    let point1 = this._aceEditor.session.getDocument().indexToPosition(position.start, 0);
+    let point2 = this._aceEditor.session.getDocument().indexToPosition(position.start + position.length, 0);
+    //@ts-ignore
+    this._aceEditor.selection.setRange({ start: point1, end: point2 });
+    //@ts-ignore
+    this._aceEditor.scrollToLine(point1.row);
+  }
   //todo reset undo stack, when and why?
   //bind to global und and redo
   //editor.getSession().setUndoManager(new ace.UndoManager())

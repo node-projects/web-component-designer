@@ -5,13 +5,15 @@ import { DomConverter } from '../../widgets/designerView/DomConverter';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter';
 import { CssCombiner } from '../../helper/CssCombiner';
 import { NodeType } from '../../item/NodeType';
+import { IStringPosition } from './IStringPosition';
 
 export class HtmlWriterService implements IHtmlWriterService {
   canWrite(designItem: IDesignItem) {
     return true;
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
+  write(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+    let start = indentedTextWriter.position;
     indentedTextWriter.writeIndent();
 
     if (designItem.nodeType == NodeType.TextNode) {
@@ -48,7 +50,7 @@ export class HtmlWriterService implements IHtmlWriterService {
         for (const c of designItem.children()) {
           c.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
             if (s.canWrite(c))
-              s.write(indentedTextWriter, c, options);
+              s.write(indentedTextWriter, c, options, designItemsAssignmentList);
           });
         }
         indentedTextWriter.levelShrink();
@@ -65,6 +67,11 @@ export class HtmlWriterService implements IHtmlWriterService {
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
     }
+    
+    if (designItemsAssignmentList) {
+      designItemsAssignmentList.set(designItem, { start: start, length: indentedTextWriter.position - start });
+    }
+
     indentedTextWriter.writeNewline();
   }
 }

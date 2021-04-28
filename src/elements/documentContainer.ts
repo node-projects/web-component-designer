@@ -5,6 +5,8 @@ import { ServiceContainer } from "./services/ServiceContainer";
 import { InstanceServiceContainer } from "./services/InstanceServiceContainer";
 import { DemoView } from './widgets/demoView/demoView';
 import { ICodeView } from '../elements/widgets/codeView/ICodeView';
+import { IDesignItem } from '../elements/item/IDesignItem';
+import { IStringPosition } from './services/serializationService/IStringPosition';
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
   public designerView: DesignerView;
@@ -14,6 +16,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
   private _serviceContainer: ServiceContainer;
   private _content: string = '';
   private _tabControl: DesignerTabControl;
+  private _selectionPosition: IStringPosition;
 
   static get style() {
     return css`
@@ -78,16 +81,24 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
 
   ready() {
     this._tabControl.onSelectedTabChanged.on((i) => {
-      if (i.oldIndex === 0)
-        this._content = this.designerView.getHTML();
-      else if (i.oldIndex === 1)
+
+      if (i.oldIndex === 0) {
+        let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
+        let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
+        this._content = this.designerView.getHTML(designItemsAssignmentList);
+        this._selectionPosition = designItemsAssignmentList.get(primarySelection);
+      } else if (i.oldIndex === 1)
         this._content = this.codeView.getText();
 
       if (i.newIndex === 0)
         this.designerView.parseHTML(this._content);
-      else if (i.newIndex === 1)
-        this.codeView.update(this._content)
-      else if (i.newIndex === 2)
+      else if (i.newIndex === 1) {
+        this.codeView.update(this._content);
+        if (this._selectionPosition) {
+          this.codeView.setSelection(this._selectionPosition);
+          this._selectionPosition = null;
+        }
+      } else if (i.newIndex === 2)
         this.demoView.display(this._content);
     });
     if (this._content)

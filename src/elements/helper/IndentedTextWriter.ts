@@ -3,6 +3,10 @@ export class IndentedTextWriter {
   public readonly indent: number = 4;
   public level: number = 0;
 
+  public get position(): number {
+    return this._textHolder.length;
+  }
+
   public levelRaise() {
     this.level++;
   }

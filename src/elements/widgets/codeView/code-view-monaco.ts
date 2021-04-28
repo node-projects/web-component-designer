@@ -2,6 +2,7 @@ import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base
 import { ICodeView } from "./ICodeView";
 import type * as monaco from 'monaco-editor';
 import { IActivateable } from '../../../interfaces/IActivateable';
+import { IStringPosition } from '../../services/serializationService/IStringPosition';
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable {
   canvasElement: HTMLElement;
@@ -61,6 +62,14 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   getText() {
     return this._monacoEditor.getValue();
+  }
+
+  setSelection(position: IStringPosition) {
+    let model = this._monacoEditor.getModel();
+    let point1 = model.getPositionAt(position.start);
+    let point2 = model.getPositionAt(position.start + position.length);
+    this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
+    this._monacoEditor.revealLineInCenter(point1.lineNumber);
   }
 }
 
