@@ -6,6 +6,8 @@ import { DesignItem } from '../../item/DesignItem';
 import { CssAttributeParser } from "../../helper/CssAttributeParser";
 import { newElementFromString } from "../../helper/ElementHelper";
 
+// Alternative Parser, cause when you use the Browser, it instanciates the CusomElements, and some Elemnts remove
+// attributes from their DOM, so you loose Data
 export class NodeHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
     //@ts-ignore
@@ -29,7 +31,9 @@ export class NodeHtmlParserService implements IHtmlParserService {
   _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
-      let element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call //document.createElement(item.rawTagName);
+      let element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call 
+      if (!element)
+        element = document.createElement(item.rawTagName);
       designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
 
       let hideAtDesignTime = false;
