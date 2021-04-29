@@ -4,6 +4,7 @@ import { IHtmlParserService } from "./IHtmlParserService";
 import { IDesignItem } from '../../item/IDesignItem';
 import { DesignItem } from '../../item/DesignItem';
 import { CssAttributeParser } from "../../helper/CssAttributeParser";
+import { newElementFromString } from "../../helper/ElementHelper";
 
 export class NodeHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
@@ -28,7 +29,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
   _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
-      let element = document.createElement(item.rawTagName);
+      let element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call //document.createElement(item.rawTagName);
       designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
 
       let hideAtDesignTime = false;
@@ -39,7 +40,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
       for (let a in item.attributes) {
         if (a !== 'style') {
-          designItem.attributes.set(a, item.attributes[a]);
+          designItem.setAttribute(a, item.attributes[a]);
           if (a === 'node-projects-hide-at-design-time')
             hideAtDesignTime = true;
           if (a === 'node-projects-hide-at-run-time')
