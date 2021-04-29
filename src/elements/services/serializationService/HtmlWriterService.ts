@@ -14,13 +14,20 @@ export class HtmlWriterService implements IHtmlWriterService {
 
   write(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     let start = indentedTextWriter.position;
-    indentedTextWriter.writeIndent();
 
     if (designItem.nodeType == NodeType.TextNode) {
-      indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content).trim());
+      let content = DomConverter.normalizeContentValue(designItem.content).trim();
+      if (content) {
+        indentedTextWriter.writeIndent();
+        indentedTextWriter.write(content);
+        indentedTextWriter.writeNewline();
+      }
     } else if (designItem.nodeType == NodeType.Comment) {
+      indentedTextWriter.writeIndent();
       indentedTextWriter.write('<!--' + designItem.content + '-->');
+      indentedTextWriter.writeNewline();
     } else {
+      indentedTextWriter.writeIndent();
       indentedTextWriter.write('<' + designItem.name);
 
       if (designItem.hasAttributes) {
@@ -68,12 +75,11 @@ export class HtmlWriterService implements IHtmlWriterService {
 
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
+      indentedTextWriter.writeNewline();
     }
 
     if (designItemsAssignmentList) {
-      designItemsAssignmentList.set(designItem, { start: start, length: indentedTextWriter.position - start });
+      designItemsAssignmentList.set(designItem, { start: start, length: indentedTextWriter.position - start - 1 });
     }
-
-    indentedTextWriter.writeNewline();
   }
 }
