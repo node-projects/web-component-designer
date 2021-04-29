@@ -42,17 +42,18 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
       let style = '';
 
-      for (let a in item.attributes) {
+      let attr = item.attributes;
+      for (let a in attr) {
         if (a !== 'style') {
-          designItem.setAttribute(a, item.attributes[a]);
+          designItem.setAttribute(a, attr[a]);
           if (a === 'node-projects-hide-at-design-time')
             hideAtDesignTime = true;
-          if (a === 'node-projects-hide-at-run-time')
+          else if (a === 'node-projects-hide-at-run-time')
             hideAtRunTime = true;
-          if (a === 'node-projects-lock-at-design-time')
+          else if (a === 'node-projects-lock-at-design-time')
             lockAtDesignTime = true;
         } else {
-          style = item.attributes[a];
+          style = attr[a];
         }
       }
 

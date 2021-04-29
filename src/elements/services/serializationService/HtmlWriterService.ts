@@ -28,6 +28,8 @@ export class HtmlWriterService implements IHtmlWriterService {
           indentedTextWriter.write(' ');
           if (a[1])
             indentedTextWriter.write(a[0] + '="' + DomConverter.normalizeAttributeValue(a[1]) + '"');
+          else
+            indentedTextWriter.write(a[0]);
         }
       }
 
@@ -67,7 +69,7 @@ export class HtmlWriterService implements IHtmlWriterService {
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
     }
-    
+
     if (designItemsAssignmentList) {
       designItemsAssignmentList.set(designItem, { start: start, length: indentedTextWriter.position - start });
     }
