@@ -18,6 +18,8 @@ export interface IDesignItem {
 
   readonly hasChildren: boolean;
   children(): IterableIterator<IDesignItem>
+  readonly childCount: number;
+  readonly firstChild: IDesignItem;
   readonly parent: IDesignItem;
 
   readonly hasContent: boolean;

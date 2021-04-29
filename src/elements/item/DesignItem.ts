@@ -53,6 +53,12 @@ export class DesignItem implements IDesignItem {
       yield DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer);
     }
   }
+  public get childCount(): number {
+    return this.element.childNodes.length;
+  }
+  public get firstChild(): IDesignItem {
+    return this.getOrCreateDesignItem(this.element.childNodes[0]);
+  }
   public get parent(): IDesignItem {
     return this.getOrCreateDesignItem(this.element.parentNode);
   }

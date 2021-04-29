@@ -16,12 +16,7 @@ export class HtmlWriterService implements IHtmlWriterService {
     let start = indentedTextWriter.position;
 
     if (designItem.nodeType == NodeType.TextNode) {
-      let content = DomConverter.normalizeContentValue(designItem.content).trim();
-      if (content) {
-        indentedTextWriter.writeIndent();
-        indentedTextWriter.write(content);
-        indentedTextWriter.writeNewline();
-      }
+      this.writeTextNode(indentedTextWriter, designItem, true);
     } else if (designItem.nodeType == NodeType.Comment) {
       indentedTextWriter.writeIndent();
       indentedTextWriter.write('<!--' + designItem.content + '-->');
@@ -54,23 +49,25 @@ export class HtmlWriterService implements IHtmlWriterService {
       indentedTextWriter.write('>');
 
       if (designItem.hasChildren) {
-        indentedTextWriter.writeNewline();
-        indentedTextWriter.levelRaise();
-        for (const c of designItem.children()) {
-          c.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
-            if (s.canWrite(c))
-              s.write(indentedTextWriter, c, options, designItemsAssignmentList);
-          });
+        const children = designItem.children();
+        const singleTextNode = designItem.childCount === 1 && designItem.firstChild.nodeType === NodeType.TextNode;
+        if (singleTextNode) {
+          this.writeTextNode(indentedTextWriter, designItem, false);
+        } else {
+          indentedTextWriter.writeNewline();
+          indentedTextWriter.levelRaise();
+          for (const c of children) {
+            c.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
+              if (s.canWrite(c)) {
+                s.write(indentedTextWriter, c, options, designItemsAssignmentList);
+              }
+            });
+          }
+          indentedTextWriter.levelShrink();
+          indentedTextWriter.writeIndent();
         }
-        indentedTextWriter.levelShrink();
-        indentedTextWriter.writeIndent();
       } else if (designItem.hasContent) {
-        //indentedTextWriter.writeNewline();
-        //indentedTextWriter.levelRaise();
         indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content));
-        //indentedTextWriter.writeNewline();
-        //indentedTextWriter.levelShrink();
-        //indentedTextWriter.writeIndent();
       }
 
       if (!DomConverter.IsSelfClosingElement(designItem.name))
@@ -80,6 +77,17 @@ export class HtmlWriterService implements IHtmlWriterService {
 
     if (designItemsAssignmentList) {
       designItemsAssignmentList.set(designItem, { start: start, length: indentedTextWriter.position - start - 1 });
+    }
+  }
+
+  private writeTextNode(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, indentAndNewline: boolean) {
+    let content = DomConverter.normalizeContentValue(designItem.content).trim();
+    if (content) {
+      if (indentAndNewline)
+        indentedTextWriter.writeIndent();
+      indentedTextWriter.write(content);
+      if (indentAndNewline)
+        indentedTextWriter.writeNewline();
     }
   }
 }
