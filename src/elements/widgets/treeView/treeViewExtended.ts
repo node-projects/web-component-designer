@@ -59,7 +59,7 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
     this.shadowRoot.appendChild(this._filter);
 
     this._treeDiv = document.createElement('div');
-    this._treeDiv.style.height = '100%'
+    this._treeDiv.style.height = 'calc(100% - 21px)'
     this._treeDiv.style.overflow = 'auto';
     this._treeDiv.setAttribute('id', 'tree');
     this.shadowRoot.appendChild(this._treeDiv);
@@ -242,14 +242,16 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
     }
 
     const newNode = currentNode.addChildren({
-      title: item.nodeType == NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType == NodeType.TextNode ? 'text' : 'comment' ) + '&nbsp;</small></small></small> ' + item.content,
+      title: item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment' ) + '&nbsp;</small></small></small> ' + item.content,
       folder: item.children.length > 0 ? true : false,
       //@ts-ignore
       ref: item
     });
 
     for (let i of item.children()) {
-      this._getChildren(i, newNode);
+      if (i.nodeType !== NodeType.TextNode || i.content?.trim()) {
+        this._getChildren(i, newNode);
+      }
     }
   }
 
