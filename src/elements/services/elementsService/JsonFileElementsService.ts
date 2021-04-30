@@ -18,7 +18,7 @@ export class JsonFileElementsService implements IElementsService {
   }
 
   constructor(name: string, file: string) {
-    let prefix = file.lastIndexOf('/') >= 0 ? file.substring(0, file.lastIndexOf('/') + 1) : '';
+    //let prefix = file.lastIndexOf('/') >= 0 ? file.substring(0, file.lastIndexOf('/') + 1) : '';
     this._name = name;
     let request = new XMLHttpRequest();
     request.open('GET', file);
@@ -30,9 +30,9 @@ export class JsonFileElementsService implements IElementsService {
           this._elementList = [];
           parsed.elements.forEach(element => {
             if (this.isIElementDefintion(element)) {
-              if (element.import && element.import[0] == '.') {
+              /*if (element.import && element.import[0] == '.') {
                 element.import = prefix + element.import;
-              }
+              }*/
               this._elementList.push(element)
             }
             else

@@ -13,7 +13,8 @@ export class DefaultInstanceService implements IInstanceService {
     if (definition.import) {
       let importUri = definition.import;
       if (importUri[0] === '.')
-        importUri = '../../../../../../../../' + importUri;
+        importUri = (window.location.origin+window.location.pathname).split('/').slice(0,-1).join('/') + '/' + importUri;
+      //importUri = '../../../../../../../../' + importUri;
       await import(importUri);
     }
     let element = document.createElement(definition.tag);
