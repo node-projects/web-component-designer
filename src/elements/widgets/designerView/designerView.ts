@@ -53,6 +53,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   private _actionType?: PointerActionType;
   private _actionStartedDesignItem?: IDesignItem;
+  private _movedSinceStartedAction: boolean = false;
   private _initialPoint: IDesignerMousePoint;
   private _initialSizes: ISize[];
   private _clickThroughElements: IDesignItem[] = []
@@ -559,13 +560,14 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
 
-  private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType ) {
+  private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType) {
     if (currentElement.parentNode == this.svgLayer)
       return;
 
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
+        this._movedSinceStartedAction = false;
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
@@ -584,12 +586,12 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       if (event.type == EventNames.PointerDown) {
+        this._actionStartedDesignItem = currentDesignItem;
         this.snapLines.clearSnaplines();
         let composedPath = event.composedPath();
         let rectCurrentElement = currentElement.getBoundingClientRect();
         if (currentDesignItem !== this.rootDesignItem && forcedAction == PointerActionType.Drag /* this._forceMove({ x: currentPoint.containerOriginalX, y: currentPoint.containerOriginalY }, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })*/) {
           this._actionType = PointerActionType.Drag;
-          this._actionStartedDesignItem = currentDesignItem;
         } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
           (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
           this.setSelectedElements(null);
@@ -605,6 +607,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
 
     if (event.type === EventNames.PointerMove) {
+      this._movedSinceStartedAction = this._movedSinceStartedAction || currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
       if (this._actionType == PointerActionType.DrawSelection)
         this._actionType = PointerActionType.DrawingSelection;
     }
@@ -624,6 +627,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       }
       this._actionType = null;
       this._actionStartedDesignItem = null;
+      this._movedSinceStartedAction = false;
       this._initialPoint = null;
     }
 
@@ -735,9 +739,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           //if (this._actionType != PointerActionType.Drag)
           //  return;
 
-          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
-          containerService.place(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
-          this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
+          if (this._movedSinceStartedAction) {
+            let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+            containerService.place(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+            this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
+          }
           //todo -> what is if a transform already exists -> backup existing style.?
           /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
             (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
@@ -801,10 +807,12 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
             return;
           }
 
-          let cg = this.rootDesignItem.openGroup("Move Elements", this.instanceServiceContainer.selectionService.selectedElements);
-          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
-          containerService.finishPlace(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
-          cg.commit();
+          if (this._movedSinceStartedAction) {
+            let cg = this.rootDesignItem.openGroup("Move Elements", this.instanceServiceContainer.selectionService.selectedElements);
+            let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+            containerService.finishPlace(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+            cg.commit();
+          }
 
           this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
 
@@ -854,7 +862,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
                   old: { left: oldLeft, top: oldTop, position: oldPosition }
                 });*/
             }
-            cg.commit();
+            //cg.commit();
 
             if (this._dropTarget != null)
               this._dropTarget.classList.remove('over-enter');
@@ -977,11 +985,15 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     return (pointerPoint.x < elementPoint.x && pointerPoint.y < elementPoint.y);
   }*/
 
-  _drawOutlineRects(selectedElements: IDesignItem[], mode: 'none' | 'move' | 'resize' = 'none') {
+  public redrawOverlays(designItems?: IDesignItem[]) {
+
+  }
+
+  _drawOutlineRects(designItems: IDesignItem[], mode: 'none' | 'move' | 'resize' = 'none') {
     DomHelper.removeAllChildnodes(this.svgLayer, 'svg-selection');
 
-    if (selectedElements && selectedElements.length) {
-      let p0 = selectedElements[0].element.getBoundingClientRect();
+    if (designItems && designItems.length) {
+      let p0 = designItems[0].element.getBoundingClientRect();
 
       let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       line.setAttribute('x', <string><any>(p0.x - this._containerBoundingRect.x - 12));
@@ -989,12 +1001,12 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       line.setAttribute('y', <string><any>(p0.y - this._containerBoundingRect.y - 12));
       line.setAttribute('height', <string><any>(10));
       line.setAttribute('class', 'svg-selection svg-primary-selection-move');
-      line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement, PointerActionType.Drag));
-      line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement, PointerActionType.Drag));
-      line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement, PointerActionType.Drag));
+      line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
+      line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
+      line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
       this.svgLayer.appendChild(line);
 
-      for (let i of selectedElements) {
+      for (let i of designItems) {
         let p = i.element.getBoundingClientRect();
 
         let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
