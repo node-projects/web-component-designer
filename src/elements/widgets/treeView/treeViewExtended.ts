@@ -148,7 +148,34 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
         if (node.tr.children[1]) {
           let designItem: IDesignItem = node.data.ref;
+
           if (designItem.nodeType === NodeType.Element) {
+            /*
+            let toolTipImg: HTMLImageElement;
+            (<HTMLElement>node.tr.children[0]).onmouseenter = (e) => {
+              toolTipImg = document.createElement("img");
+              Screenshot.takeScreenshot(designItem.element).then(x => { if (toolTipImg) toolTipImg.src = x; });
+              toolTipImg.style.position = 'absolute';
+              let r = node.tr.children[0].getBoundingClientRect();
+              toolTipImg.style.left = (e.x + 5 - r.left) + 'px';
+              toolTipImg.style.top = (e.y + 5 - r.top) + 'px';
+              (<HTMLElement>node.tr.children[0]).appendChild(toolTipImg);
+            }
+            (<HTMLElement>node.tr.children[0]).onmousemove = (e) => {
+              if (toolTipImg) {
+                let r = node.tr.children[0].getBoundingClientRect();
+                toolTipImg.style.left = (e.x + 5 - r.left) + 'px';
+                toolTipImg.style.top = (e.y + 5 - r.top) + 'px';
+              }
+            }
+            (<HTMLElement>node.tr.children[0]).onmouseout = (e) => {
+              if (toolTipImg) {
+                toolTipImg.parentNode?.removeChild(toolTipImg);
+                toolTipImg = null;
+              }
+            }
+            */
+
             let img = document.createElement('img');
             this._showHideAtDesignTimeState(img, designItem);
             img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
