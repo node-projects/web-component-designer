@@ -5,10 +5,16 @@ import { CssStyleChangeAction } from '../services/undoService/transactionItems/C
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
 import { NodeType } from './NodeType';
 
+const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
+const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
+const lockAtDesignTimeAttributeName = 'node-projects-lock-at-design-time'
+
 export class DesignItem implements IDesignItem {
   node: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
+
+
 
   public get nodeType(): NodeType {
     if (this.node instanceof Comment)
@@ -79,9 +85,13 @@ export class DesignItem implements IDesignItem {
   }
   public set hideAtDesignTime(value: boolean) {
     this._hideAtDesignTime = value;
+    if (value)
+      this.attributes.set(hideAtDesignTimeAttributeName, "");
+    else
+      this.attributes.delete(hideAtDesignTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
-        this.element.style.display = this.styles['display'];
+        this.element.style.display = this.styles['display'] ?? "";
       else
         this.element.style.display = 'none';
     }
@@ -93,9 +103,13 @@ export class DesignItem implements IDesignItem {
   }
   public set hideAtRunTime(value: boolean) {
     this._hideAtRunTime = value;
+    if (value)
+      this.attributes.set(hideAtRunTimeAttributeName, "");
+    else
+      this.attributes.delete(hideAtRunTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
-        this.element.style.opacity = this.styles['opacity'];
+        this.element.style.opacity = this.styles['opacity'] ?? "";
       else
         this.element.style.opacity = '0.3';
     }
@@ -107,6 +121,10 @@ export class DesignItem implements IDesignItem {
   }
   public set lockAtDesignTime(value: boolean) {
     this._lockAtDesignTime = value;
+    if (value)
+      this.attributes.set(lockAtDesignTimeAttributeName, "");
+    else
+      this.attributes.delete(lockAtDesignTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
         this.element.style.pointerEvents = 'auto';
@@ -121,11 +139,11 @@ export class DesignItem implements IDesignItem {
     for (let a of designItem.element.attributes) {
       if (a.name !== 'style') {
         designItem.attributes.set(a.name, a.value);
-        if (a.name === 'node-projects-hide-at-design-time')
+        if (a.name === hideAtDesignTimeAttributeName)
           designItem._hideAtDesignTime = true;
-        if (a.name === 'node-projects-hide-at-run-time')
+        if (a.name === hideAtRunTimeAttributeName)
           designItem._hideAtRunTime = true;
-        if (a.name === 'node-projects-lock-at-design-time')
+        if (a.name === lockAtDesignTimeAttributeName)
           designItem._lockAtDesignTime = true;
       }
     }

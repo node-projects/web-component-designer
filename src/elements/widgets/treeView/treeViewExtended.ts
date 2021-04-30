@@ -1,11 +1,12 @@
-import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { ITreeView } from './ITreeView';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { NodeType } from '../../item/NodeType';
+import { assetsPath } from '../../../Constants';
 
-export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implements ITreeView {
-  private _treeDiv: HTMLDivElement;
+export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
+  private _treeDiv: HTMLTableElement;
   private _tree: Fancytree.Fancytree;
   private _filter: HTMLInputElement;
 
@@ -37,7 +38,36 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
         flex-direction: row;
         display: inline-flex;
       }
+      td:nth-child(n+2) {
+        text-align: center;
+      }
+      td > img {
+        vertical-align: middle;
+      }
     `;
+
+  static readonly template = html`
+  <div style="height: 100%;">
+    <input id="input" style="width: 100%; height:21px;" placeholder="Filter..." autocomplete="off">
+    <div style="height: calc(100% - 23px); overflow: auto;">
+      <table id="treetable" style="min-width: 100%;">
+        <colgroup>
+          <col width="*">
+          <col width="25px">
+          <col width="25px">
+          <col width="25px">
+        </colgroup>
+        <thead style="display: none;">
+          <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>`;
 
   constructor() {
     super();
@@ -46,33 +76,96 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
     externalCss.innerHTML = '@import url("./node_modules/jquery.fancytree/dist/skin-win8/ui.fancytree.css");';
     this.shadowRoot.appendChild(externalCss);
 
-    this._filter = document.createElement('input');
-    this._filter.style.width = '100%'
-    this._filter.placeholder = 'Filter...';
-    this._filter.autocomplete = 'off';
+    this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
       let match = this._filter.value;
       this._tree.filterNodes((node) => {
         return new RegExp(match, "i").test(node.title);
       })
     }
-    this.shadowRoot.appendChild(this._filter);
 
-    this._treeDiv = document.createElement('div');
+    this._treeDiv = this._getDomElement<HTMLTableElement>('treetable');
+
+    /*this._treeDiv = document.createElement('div');
     this._treeDiv.style.height = 'calc(100% - 21px)'
     this._treeDiv.style.overflow = 'auto';
     this._treeDiv.setAttribute('id', 'tree');
-    this.shadowRoot.appendChild(this._treeDiv);
+    this.shadowRoot.appendChild(this._treeDiv);*/
   }
 
+  _showHideAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
+    if (designItem.hideAtDesignTime)
+      img.src = assetsPath + "/images/treeview/eyeclose.png";
+    else
+      img.src = assetsPath + "/images/treeview/eyeopen.png";
+  }
+
+  _switchHideAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
+    designItem.hideAtDesignTime = !designItem.hideAtDesignTime;
+    this._showHideAtDesignTimeState(img, designItem);
+  }
+
+  _showLockAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
+    if (designItem.lockAtDesignTime)
+      img.src = assetsPath + "/images/treeview/lock.png";
+    else
+      img.src = assetsPath + "/images/treeview/dot.png";
+  }
+
+  _switchLockAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
+    designItem.lockAtDesignTime = !designItem.lockAtDesignTime;
+    this._showLockAtDesignTimeState(img, designItem);
+  }
+
+  _showHideAtRunTimeState(img: HTMLImageElement, designItem: IDesignItem) {
+    if (designItem.hideAtRunTime)
+      img.src = assetsPath + "/images/treeview/eyeclose.png";
+    else
+      img.src = assetsPath + "/images/treeview/eyeopen.png";
+  }
+
+  _switchHideAtRunTimeState(img: HTMLImageElement, designItem: IDesignItem) {
+    designItem.hideAtRunTime = !designItem.hideAtRunTime;
+    this._showHideAtRunTimeState(img, designItem);
+  }
 
   async ready() {
     //this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
       icon: true, //atm, maybe if we include icons for specific elements
-      extensions: ['childcounter', 'dnd5', 'multi', 'filter'],
+      extensions: ['childcounter', 'dnd5', 'multi', 'filter', 'table'],
       quicksearch: true,
       source: [],
+
+      table: {
+        indentation: 20,       // indent 20px per node level
+        nodeColumnIdx: 0,      // render the node title into the 2nd column
+        checkboxColumnIdx: 0,  // render the checkboxes into the 1st column
+      },
+
+      createNode: (event, data) => {
+        let node = data.node;
+
+        if (node.tr.children[1]) {
+          let designItem: IDesignItem = node.data.ref;
+          if (designItem.nodeType === NodeType.Element) {
+            let img = document.createElement('img');
+            this._showHideAtDesignTimeState(img, designItem);
+            img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
+            node.tr.children[1].appendChild(img);
+
+            let imgL = document.createElement('img');
+            this._showLockAtDesignTimeState(imgL, designItem);
+            imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, designItem);
+            node.tr.children[2].appendChild(imgL);
+
+            let imgH = document.createElement('img');
+            this._showHideAtRunTimeState(imgH, designItem);
+            imgH.onclick = () => this._switchHideAtRunTimeState(imgH, designItem);
+            node.tr.children[3].appendChild(imgH);
+          }
+        }
+      },
 
       dnd5: {
         dropMarkerParent: this.shadowRoot,
@@ -242,7 +335,7 @@ export class TreeViewExtended extends BaseCustomWebComponentLazyAppend implement
     }
 
     const newNode = currentNode.addChildren({
-      title: item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment' ) + '&nbsp;</small></small></small> ' + item.content,
+      title: item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + item.content,
       folder: item.children.length > 0 ? true : false,
       //@ts-ignore
       ref: item

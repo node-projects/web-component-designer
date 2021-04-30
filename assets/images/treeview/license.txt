@@ -1,0 +1,10 @@
+WPF Designer Icons are taken from
+Fugue Icons Library:
+License: Creative Commons Attribution 3.0 License
+http://p.yusukekamiyamane.com/
+
+Copied from the Fugue Icon Library and left unmodified:
+
+    - Icons.16x16.WpfOutline.Eye.png => eyeopen.png
+    - Icons.16x16.WpfOutline.EyeClosed.png => eyeclosed.png
+    - lock.png
