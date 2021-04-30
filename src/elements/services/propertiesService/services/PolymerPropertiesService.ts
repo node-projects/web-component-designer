@@ -82,8 +82,4 @@ export class PolymerPropertiesService implements IPropertiesService {
     getUnsetValue(designItems: IDesignItem[], property: IProperty) {
       return null;
     }
-
-    /*private _camelToDashCase(text: string){
-        return text.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
-    }*/
 }

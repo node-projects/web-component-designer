@@ -34,6 +34,10 @@ export class DefaultEditorTypesService implements IEditorTypesService {
         {
           return new SelectPropertyEditor(property);
         }
+      case "enum":
+        {
+          return new SelectPropertyEditor(property);
+        }
       case "css-length":
       case "thickness":
       case "string":

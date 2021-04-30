@@ -43,7 +43,7 @@ export class BaseServiceContainer<NameMap> {
     for (let index = services.length - 1; index >= 0; index--) {
       const currentService = services[index];
       let result = callback(currentService);
-      if (result != null)
+      if (result)
         return currentService;
     }
     return null;

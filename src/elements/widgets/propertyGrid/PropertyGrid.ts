@@ -48,19 +48,28 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._serviceContainer = value;
     this._propertyGridPropertyLists = [];
 
-    let attributeEditorAttributeList = new PropertyGridPropertyList(value, new CssPropertiesService("styles"));
+    let elementPropertyEditorAttributeList = new PropertyGridPropertyList(value);
+    elementPropertyEditorAttributeList.setPropertiesService(new CssPropertiesService("styles"))
+    elementPropertyEditorAttributeList.title = "properties";
+    this._designerTabControl.appendChild(elementPropertyEditorAttributeList);
+    this._propertyGridPropertyLists.push(elementPropertyEditorAttributeList);
+
+    let attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("styles"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "styles";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
-    attributeEditorAttributeList = new PropertyGridPropertyList(value, new CssPropertiesService("alignment"));
+    attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("alignment"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "alignment";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
-    attributeEditorAttributeList = new PropertyGridPropertyList(value, new CssPropertiesService("grid"));
+    attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("grid"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "grid";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
@@ -78,7 +87,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   }
   set selectedItems(items: IDesignItem[]) {
     this._selectedItems = items;
-    
+
+    if (this.selectedItems && this.selectedItems.length > 0) {
+      const propService = this._serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this.selectedItems[0]));
+      this._propertyGridPropertyLists[0].setPropertiesService(propService)
+      this._propertyGridPropertyLists[0].createElements(this.selectedItems[0]);
+    }
+
     for (const a of this._propertyGridPropertyLists) {
       a.designItemsChanged(items);
     }

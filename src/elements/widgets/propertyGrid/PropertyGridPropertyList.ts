@@ -1,6 +1,6 @@
 import { IProperty } from '../../services/propertiesService/IProperty';
 import { ServiceContainer } from '../../services/ServiceContainer';
-import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, DomHelper } from '@node-projects/base-custom-webcomponent';
 import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IDesignItem } from '../../item/IDesignItem';
@@ -76,46 +76,53 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     `;
   }
 
-  constructor(serviceContainer: ServiceContainer, propertiesService: IPropertiesService) {
+  constructor(serviceContainer: ServiceContainer) {
     super();
 
     this._serviceContainer = serviceContainer;
-    this._propertiesService = propertiesService;
 
     this._div = document.createElement("div");
     this._div.className = "content-wrapper";
     this.shadowRoot.appendChild(this._div);
   }
 
+  public setPropertiesService(propertiesService: IPropertiesService) {
+    this._propertiesService = propertiesService;
+    DomHelper.removeAllChildnodes(this._div);
+    this._propertyMap.clear();
+  }
+
   public createElements(designItem: IDesignItem) {
     let properties = this._propertiesService.getProperties(designItem);
-    for (const p of properties) {
-      let editor: IPropertyEditor;
-      if (p.createEditor)
-        editor = p.createEditor(p);
-      else {
-        editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
-      }
-      if (editor) {
-        let rect = document.createElement("div")
-        rect.style.width = '5px';
-        rect.style.height = '5px';
-        rect.style.border = '1px white solid';
-        this._div.appendChild(rect);
-        ContextMenuHelper.addContextMenu(rect, [
-          { title: 'clear', action: (e) => p.service.clearValue(this._designItems, p) },
-          { title: 'new binding', action: (e) => alert('new binding() ' + p.name) }
-        ]);
+    if (properties) {
+      for (const p of properties) {
+        let editor: IPropertyEditor;
+        if (p.createEditor)
+          editor = p.createEditor(p);
+        else {
+          editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
+        }
+        if (editor) {
+          let rect = document.createElement("div")
+          rect.style.width = '5px';
+          rect.style.height = '5px';
+          rect.style.border = '1px white solid';
+          this._div.appendChild(rect);
+          ContextMenuHelper.addContextMenu(rect, [
+            { title: 'clear', action: (e) => p.service.clearValue(this._designItems, p) },
+            { title: 'new binding', action: (e) => alert('new binding() ' + p.name) }
+          ]);
 
-        let label = document.createElement("label");
-        label.htmlFor = p.name;
-        label.textContent = p.name;
-        this._div.appendChild(label);
+          let label = document.createElement("label");
+          label.htmlFor = p.name;
+          label.textContent = p.name;
+          this._div.appendChild(label);
 
-        editor.element.id = p.name;
-        this._div.appendChild(editor.element);
+          editor.element.id = p.name;
+          this._div.appendChild(editor.element);
 
-        this._propertyMap.set(p, { isSetElement: rect, editor: editor });
+          this._propertyMap.set(p, { isSetElement: rect, editor: editor });
+        }
       }
     }
   }

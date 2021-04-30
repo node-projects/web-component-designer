@@ -9,6 +9,7 @@ export interface IProperty {
   max?: number;
   step?: number;
   values?: string[]; // list selectable values
+  enumValues?: [name: string, value: string|number][]; // list selectable enum values
   createEditor?: (property: IProperty) => IPropertyEditor;
   value?: any;
   service: IPropertiesService;
