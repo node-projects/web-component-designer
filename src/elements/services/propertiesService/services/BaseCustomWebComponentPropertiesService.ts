@@ -2,7 +2,7 @@ import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
-import { BaseCustomWebComponentLazyAppend, BaseCustomWebComponentConstructorAppend, property } from "@node-projects/base-custom-webcomponent"
+import { BaseCustomWebComponentLazyAppend, BaseCustomWebComponentConstructorAppend } from "@node-projects/base-custom-webcomponent"
 import { PropertiesHelper } from './PropertiesHelper';
 
 export class BaseCustomWebComponentPropertiesService implements IPropertiesService {
