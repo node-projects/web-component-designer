@@ -8,6 +8,7 @@ export interface IPropertyEditor {
   designItems: IDesignItem[];
   designItemsChanged(designItems: IDesignItem[]);
   refreshValue(valueType: ValueType, value: any);
+  refreshValueWithoutNotification(valueType: ValueType, value: any);
 }
 
 export interface IPropertyEditorT<T extends Element> extends IPropertyEditor {
@@ -16,4 +17,5 @@ export interface IPropertyEditorT<T extends Element> extends IPropertyEditor {
   designItems: IDesignItem[];
   designItemsChanged(designItems: IDesignItem[]);
   refreshValue(valueType: ValueType, value: any);
+  refreshValueWithoutNotification(valueType: ValueType, value: any);
 }

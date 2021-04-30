@@ -28,9 +28,6 @@ export class SelectPropertyEditor extends BasePropertyEditor<HTMLSelectElement> 
   }
 
   refreshValue(valueType: ValueType, value: any) {
-    if (valueType == 'none')
-      this.element.value = null;
-    else
-      this.element.value = value;
+    this.element.value = value;
   }
 }

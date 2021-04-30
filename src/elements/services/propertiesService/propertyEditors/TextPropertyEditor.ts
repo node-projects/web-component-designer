@@ -6,7 +6,7 @@ export class TextPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
 
   constructor(property: IProperty) {
     super(property);
-   
+
     let element = document.createElement('input');
     element.type = "text";
     element.onchange = (e) => this._valueChanged(element.value);
@@ -14,8 +14,8 @@ export class TextPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
   }
 
   refreshValue(valueType: ValueType, value: any) {
-    if (valueType == 'none')
-      this.element.value = null;
+    if (value == null)
+      this.element.value = "";
     else
       this.element.value = value;
   }

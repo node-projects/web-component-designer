@@ -46,6 +46,8 @@ export class BaseCustomWebComponentPropertiesService implements IPropertiesServi
     for (let d of designItems) {
       if (property.type === 'object')
         d.setAttribute(attributeName, JSON.stringify(value));
+      else if (property.type == 'boolean' && !value)
+        d.removeAttribute(property.name);
       else
         d.setAttribute(attributeName, value);
       //@ts-ignore
@@ -55,8 +57,7 @@ export class BaseCustomWebComponentPropertiesService implements IPropertiesServi
 
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
-      if (property.type === 'object')
-        d.removeAttribute(property.name);
+      d.removeAttribute(property.name);
       //@ts-ignore
       (<BaseCustomWebComponent>d.element)._parseAttributesToProperties();
     }
@@ -96,6 +97,6 @@ export class BaseCustomWebComponentPropertiesService implements IPropertiesServi
   }
 
   getUnsetValue(designItems: IDesignItem[], property: IProperty) {
-    return null;
+    return property.defaultValue;
   }
 }

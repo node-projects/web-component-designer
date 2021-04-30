@@ -9,12 +9,15 @@ export abstract class BasePropertyEditor<T extends Element> implements IProperty
   public property: IProperty;
   public designItems: IDesignItem[];
 
+  protected disableChangeNotification: boolean = false;
+
   constructor(property: IProperty) {
     this.property = property;
   }
 
   protected _valueChanged(newValue) {
-    this.property.service.setValue(this.designItems, this.property, newValue);
+    if (!this.disableChangeNotification)
+      this.property.service.setValue(this.designItems, this.property, newValue);
   }
 
   public designItemsChanged(designItems: IDesignItem[]) {
@@ -23,4 +26,10 @@ export abstract class BasePropertyEditor<T extends Element> implements IProperty
   }
 
   abstract refreshValue(valueType: ValueType, value: any);
+
+  public refreshValueWithoutNotification(valueType: ValueType, value: any) {
+    this.disableChangeNotification = true;
+    this.refreshValue(valueType, value);
+    this.disableChangeNotification = false;
+  }
 }

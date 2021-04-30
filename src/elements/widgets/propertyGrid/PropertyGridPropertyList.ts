@@ -5,6 +5,7 @@ import { IPropertyEditor } from '../../services/propertiesService/IPropertyEdito
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IDesignItem } from '../../item/IDesignItem';
 import { IPropertiesService } from '../../services/propertiesService/IPropertiesService';
+import { ValueType } from '../../services/propertiesService/ValueType';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -53,7 +54,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       height: 24px;
       border: 1px solid var(--input-border-color, #596c7a);
       border-radius: 0;
-      -webkit-appearance: none;
+      /*-webkit-appearance: none;*/
       box-sizing: border-box;
       font-size: 11px;
       width: 100%;
@@ -138,17 +139,18 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     for (let m of this._propertyMap) {
       let s = this._propertiesService.isSet(items, m[0]);
       let v = this._propertiesService.getValue(items, m[0]);
-      if (s == 'none') {
+      if (s == ValueType.none) {
         m[1].isSetElement.style.background = '';
+        v = this._propertiesService.getUnsetValue(items, m[0]);
       }
-      else if (s == 'all')
+      else if (s == ValueType.all)
         m[1].isSetElement.style.background = 'white';
-      else if (s == 'some')
+      else if (s == ValueType.some)
         m[1].isSetElement.style.background = 'gray';
-      else if (s == 'bound')
+      else if (s == ValueType.bound)
         m[1].isSetElement.style.background = 'orange';
 
-      m[1].editor.refreshValue(s, v);
+      m[1].editor.refreshValueWithoutNotification(s, v);
     }
   }
 }

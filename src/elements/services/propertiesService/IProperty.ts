@@ -13,4 +13,5 @@ export interface IProperty {
   createEditor?: (property: IProperty) => IPropertyEditor;
   value?: any;
   service: IPropertiesService;
+  defaultValue?: any;
 }

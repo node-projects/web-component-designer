@@ -24,9 +24,6 @@ export class JsonPropertyEditor extends BasePropertyEditor<HTMLDivElement> {
   }
 
   refreshValue(valueType: ValueType, value: any) {
-    if (valueType == 'none')
-      this._input.value = null;
-    else
-      this._input.value = value;
+    this._input.value = value;
   }
 }

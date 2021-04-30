@@ -2,21 +2,18 @@ import { IProperty } from "../IProperty";
 import { BasePropertyEditor } from './BasePropertyEditor';
 import { ValueType } from "../ValueType";
 
-export class DatePropertyEditor extends BasePropertyEditor<HTMLInputElement> {
+export class BooleanPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
 
   constructor(property: IProperty) {
     super(property);
-   
+
     let element = document.createElement('input');
-    element.type = "datetime-local"
-    element.onchange = (e) => this._valueChanged(element.value);
+    element.type = "checkbox";
+    element.onchange = (e) => this._valueChanged(element.checked);
     this.element = element;
   }
 
   refreshValue(valueType: ValueType, value: any) {
-    if (!value)
-      this.element.value = null;
-    else
-      this.element.value = value;
+    this.element.checked = value;
   }
 }

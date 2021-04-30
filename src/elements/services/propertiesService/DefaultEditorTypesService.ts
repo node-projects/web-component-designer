@@ -7,6 +7,7 @@ import { JsonPropertyEditor } from "./propertyEditors/JsonPropertyEditor";
 import { NumberPropertyEditor } from "./propertyEditors/NumberPropertyEditor";
 import { SelectPropertyEditor } from "./propertyEditors/SelectPropertyEditor";
 import { TextPropertyEditor } from './propertyEditors/TextPropertyEditor';
+import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor';
 
 export class DefaultEditorTypesService implements IEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
@@ -37,6 +38,10 @@ export class DefaultEditorTypesService implements IEditorTypesService {
       case "enum":
         {
           return new SelectPropertyEditor(property);
+        }
+      case "boolean":
+        {
+          return new BooleanPropertyEditor(property);
         }
       case "css-length":
       case "thickness":
