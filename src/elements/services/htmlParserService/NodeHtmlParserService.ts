@@ -11,7 +11,7 @@ import { newElementFromString } from "../../helper/ElementHelper";
 export class NodeHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
     //@ts-ignore
-    let parser = await import('./node_modules/@node-projects/node-html-parser-esm/dist/index.js');
+    let parser = await import('../../../../../node-html-parser-esm/dist/index.js');
     const parsed = parser.parse(html, { comment: true });
 
     let designItems: IDesignItem[] = [];
