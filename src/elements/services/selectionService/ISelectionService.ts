@@ -3,10 +3,12 @@ import { TypedEvent } from '../../../basic/TypedEvent';
 import { ISelectionChangedEvent } from './ISelectionChangedEvent';
 
 export interface ISelectionService {
-    primarySelection: IDesignItem;
-    selectedElements: IDesignItem[];
+  primarySelection: IDesignItem;
+  selectedElements: IDesignItem[];
 
-    setSelectedElements(designItems: IDesignItem[]);
+  setSelectedElements(designItems: IDesignItem[]): void;
 
-    readonly onSelectionChanged: TypedEvent<ISelectionChangedEvent>;
+  isSelected(designItem: IDesignItem): boolean;
+
+  readonly onSelectionChanged: TypedEvent<ISelectionChangedEvent>;
 }

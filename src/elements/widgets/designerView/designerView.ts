@@ -52,6 +52,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _onContextMenuBound: () => void;
 
   private _actionType?: PointerActionType;
+  private _actionStartedDesignItem?: IDesignItem;
   private _initialPoint: IDesignerMousePoint;
   private _initialSizes: ISize[];
   private _clickThroughElements: IDesignItem[] = []
@@ -558,7 +559,10 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
 
-  private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element) {
+  private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType ) {
+    if (currentElement.parentNode == this.svgLayer)
+      return;
+
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
@@ -575,6 +579,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     const currentPoint = this.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
+    const isCurrentItemSelected = this.instanceServiceContainer.selectionService.isSelected(currentDesignItem);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -582,8 +587,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         this.snapLines.clearSnaplines();
         let composedPath = event.composedPath();
         let rectCurrentElement = currentElement.getBoundingClientRect();
-        if (currentDesignItem !== this.rootDesignItem && this._forceMove(currentPoint, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })) {
+        if (currentDesignItem !== this.rootDesignItem && forcedAction == PointerActionType.Drag /* this._forceMove({ x: currentPoint.containerOriginalX, y: currentPoint.containerOriginalY }, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })*/) {
           this._actionType = PointerActionType.Drag;
+          this._actionStartedDesignItem = currentDesignItem;
         } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
           (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
           this.setSelectedElements(null);
@@ -593,7 +599,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           this._actionType = PointerActionType.DrawSelection;
           return;
         } else {
-          this._actionType = this._shouldResize(currentPoint, { x: rectCurrentElement.right - this._ownBoundingRect.left, y: rectCurrentElement.bottom - this._ownBoundingRect.top }) ? PointerActionType.Resize : PointerActionType.DragOrSelect;
+          this._actionType = isCurrentItemSelected && this._shouldResize(currentPoint, { x: rectCurrentElement.right - this._ownBoundingRect.left, y: rectCurrentElement.bottom - this._ownBoundingRect.top }) ? PointerActionType.Resize : PointerActionType.DragOrSelect;
         }
       }
     }
@@ -617,6 +623,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           this.setSelectedElements([(<HTMLElement>currentElement)]);
       }
       this._actionType = null;
+      this._actionStartedDesignItem = null;
       this._initialPoint = null;
     }
 
@@ -694,6 +701,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     switch (event.type) {
       case EventNames.PointerDown:
         {
+          this._actionStartedDesignItem = currentDesignItem;
+
           this._dropTarget = null;
           if (event.shiftKey || event.ctrlKey) {
             const index = this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
@@ -718,14 +727,16 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         }
       case EventNames.PointerMove:
         {
-          if (currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y)
+          const elementMoved = currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
+          if (this._actionType != PointerActionType.Drag && elementMoved) {
             this._actionType = PointerActionType.Drag;
+          }
 
-          if (this._actionType != PointerActionType.Drag)
-            return;
+          //if (this._actionType != PointerActionType.Drag)
+          //  return;
 
-          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
-          containerService.place(event, this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+          containerService.place(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
           this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           //todo -> what is if a transform already exists -> backup existing style.?
           /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
@@ -790,11 +801,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
             return;
           }
 
-          //this._actionType = null;
-
           let cg = this.rootDesignItem.openGroup("Move Elements", this.instanceServiceContainer.selectionService.selectedElements);
-          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(currentDesignItem.parent))
-          containerService.finishPlace(event, this, currentDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+          let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+          containerService.finishPlace(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
           cg.commit();
 
           this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
@@ -964,9 +973,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     return (right < this._resizeOffset && right >= -4 && bottom < this._resizeOffset && bottom >= -4);
   }
 
-  _forceMove(pointerPoint: IPoint, elementPoint: IPoint) {
+  /*_forceMove(pointerPoint: IPoint, elementPoint: IPoint) { // It is clicked in the Move Addon
     return (pointerPoint.x < elementPoint.x && pointerPoint.y < elementPoint.y);
-  }
+  }*/
 
   _drawOutlineRects(selectedElements: IDesignItem[], mode: 'none' | 'move' | 'resize' = 'none') {
     DomHelper.removeAllChildnodes(this.svgLayer, 'svg-selection');
@@ -980,9 +989,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       line.setAttribute('y', <string><any>(p0.y - this._containerBoundingRect.y - 12));
       line.setAttribute('height', <string><any>(10));
       line.setAttribute('class', 'svg-selection svg-primary-selection-move');
-      line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
-      line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
-      line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement));
+      line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement, PointerActionType.Drag));
+      line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement, PointerActionType.Drag));
+      line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, selectedElements[0].element as HTMLElement, PointerActionType.Drag));
       this.svgLayer.appendChild(line);
 
       for (let i of selectedElements) {
