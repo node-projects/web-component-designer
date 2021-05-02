@@ -2,7 +2,7 @@ import { html, BaseCustomWebComponentConstructorAppend } from '@node-projects/ba
 
 export class JsonPropertyPopupEditor extends BaseCustomWebComponentConstructorAppend {
 
-  static template = html`
+  static override template = html`
     <div style="display: flex;">
       <input id="input" type="text">
       <button style="width: 30px;">...</button>

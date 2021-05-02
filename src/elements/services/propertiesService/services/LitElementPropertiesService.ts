@@ -1,13 +1,12 @@
-import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
-import { ValueType } from "../ValueType";
+import { AbstractBasePropertiesService } from "./AbstractBasePropertiesService";
 
-export class LitElementPropertiesService implements IPropertiesService {
+export class LitElementPropertiesService extends AbstractBasePropertiesService {
 
-  public name = "lit"
+  public override name = "lit"
 
-  isHandledElement(designItem: IDesignItem): boolean {
+  override isHandledElement(designItem: IDesignItem): boolean {
     let proto = (<any>designItem.element.constructor).__proto__;
     while (proto != null) {
       if (proto.name == 'LitElement')
@@ -19,32 +18,6 @@ export class LitElementPropertiesService implements IPropertiesService {
     return false;
   }
 
-  getProperties(designItem: IDesignItem): IProperty[] {
-    if (!this.isHandledElement(designItem))
-      return null;
-
-    let list = (<any>designItem.element.constructor)._classProperties as Map<string, object>;
-    // @ts-ignore
-    for (const litProperty of list) {
-    }
-    return null;
-  }
-
-  setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-  }
-
-  clearValue(designItems: IDesignItem[], property: IProperty) {
-  }
-
-  isSet(designItems: IDesignItem[], property: IProperty): ValueType {
-    return ValueType.none;
-  }
-
-  getValue(designItems: IDesignItem[], property: IProperty) {
-    return null;
-  }
-
-  getUnsetValue(designItems: IDesignItem[], property: IProperty) {
-    return null;
+  protected override _notifyChangedProperty(designItem: IDesignItem, property: IProperty, value: any) {
   }
 }

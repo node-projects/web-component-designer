@@ -50,6 +50,39 @@ export class NativeElementsPropertiesService implements IPropertiesService {
     }
   ];
 
+  private anchorProperties: IProperty[] = [
+    {
+      name: "href",
+      type: "string",
+      service: this
+    }
+  ];
+
+  private divProperties: IProperty[] = [
+    {
+      name: "title",
+      type: "string",
+      service: this
+    }
+  ];
+
+  private imgProperties: IProperty[] = [
+    {
+      name: "src",
+      type: "string",
+      service: this
+    }
+  ];
+
+  private iframeProperties: IProperty[] = [
+    {
+      name: "src",
+      type: "string",
+      service: this
+    }
+  ];
+
+
   public name = "native"
 
   isHandledElement(designItem: IDesignItem): boolean {
@@ -58,6 +91,10 @@ export class NativeElementsPropertiesService implements IPropertiesService {
       case 'button':
       case 'a':
       case 'div':
+      case 'span':
+      case 'br':
+      case 'img':
+      case 'iframe':
         return true;
     }
     return false;
@@ -72,7 +109,13 @@ export class NativeElementsPropertiesService implements IPropertiesService {
       case 'button':
         return this.buttonProperties;
       case 'a':
+        return this.anchorProperties;
       case 'div':
+        return this.divProperties;
+      case 'img':
+        return this.imgProperties;
+      case 'iframe':
+        return this.iframeProperties;
     }
 
     return null;
@@ -80,9 +123,10 @@ export class NativeElementsPropertiesService implements IPropertiesService {
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     for (let d of designItems) {
-      if (property.type == 'boolean' && !value) {
+      if (property.type == 'boolean' && !value)
         d.removeAttribute(property.name);
-      }
+      else if (property.type == 'boolean' && value)
+        d.setAttribute(property.name, "");
       else
         d.setAttribute(property.name, value);
     }
@@ -114,7 +158,10 @@ export class NativeElementsPropertiesService implements IPropertiesService {
   getValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
       let attributeName = property.name;
+      if (property.type == 'boolean')
+        return designItems[0].attributes.has(attributeName);
       let lastValue = designItems[0].attributes.get(attributeName);
+      /*
       for (const x of designItems) {
         let value = x.attributes.get(attributeName);
         if (value != lastValue) {
@@ -122,6 +169,7 @@ export class NativeElementsPropertiesService implements IPropertiesService {
           break;
         }
       }
+      */
       return lastValue;
     }
     return null;

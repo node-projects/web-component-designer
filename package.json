@@ -23,7 +23,7 @@
     "jquery.fancytree": "^2.38.0",
     "monaco-editor": "^0.23.0",
     "node-html-parser": "^3.2.0",
-    "typescript": "^4.2.4",
+    "typescript": "^4.3.0-dev.20210501",
     "typescript-lit-html-plugin": "^0.9.0"
   },
   "repository": {

@@ -10,7 +10,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   private _tree: Fancytree.Fancytree;
   private _filter: HTMLInputElement;
 
-  static readonly style = css`
+  static override readonly style = css`
       span.drag-source {
         border: 1px solid grey;
         border-radius: 3px;
@@ -46,7 +46,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       }
     `;
 
-  static readonly template = html`
+  static override readonly template = html`
   <div style="height: 100%;">
     <input id="input" style="width: 100%; height:21px;" placeholder="Filter..." autocomplete="off">
     <div style="height: calc(100% - 23px); overflow: auto;">

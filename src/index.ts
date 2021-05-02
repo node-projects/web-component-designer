@@ -37,6 +37,7 @@ export type { IEditorTypesService } from "./elements/services/propertiesService/
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
 export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
+export * from "./elements/services/propertiesService/services/ListPropertiesService.js";
 export * from "./elements/services/propertiesService/services/LitElementPropertiesService.js";
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";

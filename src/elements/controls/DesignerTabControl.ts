@@ -12,7 +12,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   private _panels: HTMLDivElement;
   private _headerDiv: HTMLDivElement;
 
-  static readonly style = css`
+  static override readonly style = css`
         :host {
             height: 100%;
         }

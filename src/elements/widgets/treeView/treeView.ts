@@ -17,7 +17,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
 
   //todo, buuton so key events can be transfered to designer Cnvas (so you can move controls with keys)
 
-  static readonly style = css`
+  static override readonly style = css`
     :host {
       --horz-margin: 20px;
       --vert-margin: 0px;

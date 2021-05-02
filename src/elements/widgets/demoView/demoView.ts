@@ -6,7 +6,7 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
   private _placeholder: HTMLDivElement;
   private _loading: HTMLDivElement;
 
-  static readonly style=css`
+  static override readonly style=css`
   :host {
     display: block;
     overflow: hidden;

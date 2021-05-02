@@ -1,6 +1,7 @@
 import { IElementsService } from './IElementsService';
 import { IElementsJson } from './IElementsJson';
 import { IElementDefinition } from './IElementDefinition';
+import { LazyLoader } from '@node-projects/base-custom-webcomponent';
 
 // Reads a Json File and provides the Elements listed there
 export class JsonFileElementsService implements IElementsService {
@@ -18,37 +19,22 @@ export class JsonFileElementsService implements IElementsService {
   }
 
   constructor(name: string, file: string) {
-    //let prefix = file.lastIndexOf('/') >= 0 ? file.substring(0, file.lastIndexOf('/') + 1) : '';
     this._name = name;
-    let request = new XMLHttpRequest();
-    request.open('GET', file);
-    request.onreadystatechange = () => {
-      if (request.readyState == 4) {
-        if (request.status == 200) {
-          let data = request.responseText;
-          let parsed = JSON.parse(data) as IElementsJson;
-          this._elementList = [];
-          parsed.elements.forEach(element => {
-            if (this.isIElementDefintion(element)) {
-              /*if (element.import && element.import[0] == '.') {
-                element.import = prefix + element.import;
-              }*/
-              this._elementList.push(element)
-            }
-            else
-              this._elementList.push({ tag: element })
-          });
-          if (this._resolveStored)
-            this._resolveStored(this._elementList);
-        } else {
-          this._rejectStored(request.status);
-        }
-      }
-    }
-    request.send();
+    LazyLoader.LoadText(file).then(data => {
+      let parsed = JSON.parse(data) as IElementsJson;
+      this._elementList = [];
+      parsed.elements.forEach(element => {
+        if (this.isIElementDefintion(element))
+          this._elementList.push(element)
+        else
+          this._elementList.push({ tag: element })
+      });
+      if (this._resolveStored)
+        this._resolveStored(this._elementList);
+    }).catch(err => { if (this._rejectStored) this._rejectStored(err); })
   }
 
   private isIElementDefintion(object: string | IElementDefinition): object is IElementDefinition {
     return object != null && (<IElementDefinition>object).tag != null;
   }
-} 
+}

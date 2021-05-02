@@ -81,7 +81,7 @@ export class CssPropertiesService implements IPropertiesService {
     }, {
       name: "font-weight",
       type: "list",
-      values:  ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900", "lighter", "bolder"],
+      values: ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900", "lighter", "bolder"],
       service: this
     }
   ];
@@ -225,7 +225,7 @@ export class CssPropertiesService implements IPropertiesService {
       d.setStyle(<keyof CSSStyleDeclaration>property.name, value);
     }
   }
-  
+
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
       d.removeStyle(<keyof CSSStyleDeclaration>property.name);
@@ -263,7 +263,10 @@ export class CssPropertiesService implements IPropertiesService {
   }
 
   getUnsetValue(designItems: IDesignItem[], property: IProperty) {
+    if (designItems != null && designItems.length !== 0) {
+      let v = window.getComputedStyle(designItems[0].element)[property.name];
+      return v;
+    }
     return null;
-    //return window.getComputedStyle(designItem.element)[property.name]; //todo cache the computed style per design item when selction changes
   }
 }

@@ -13,7 +13,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _propertyGridPropertyLists: PropertyGridPropertyList[];
   private _itemsObserver: MutationObserver;
 
-  static readonly style = css`
+  static override readonly style = css`
     :host {
       display: block;
       height: 100%;

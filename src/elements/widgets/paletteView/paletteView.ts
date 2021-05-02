@@ -10,7 +10,7 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
 
   private _designerTabControl: DesignerTabControl;
 
-  static get style() {
+  static override get style() {
     return css`
     :host {
       display: flex;

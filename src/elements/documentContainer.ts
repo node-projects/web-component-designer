@@ -18,7 +18,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
   private _tabControl: DesignerTabControl;
   private _selectionPosition: IStringPosition;
 
-  static get style() {
+  static override get style() {
     return css`
       div {
         height: 100%;

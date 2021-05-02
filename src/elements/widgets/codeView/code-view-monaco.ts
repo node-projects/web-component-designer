@@ -13,7 +13,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   private _monacoEditor: monaco.editor.IStandaloneCodeEditor;
   private _editor: HTMLDivElement;
 
-  static readonly style = css`
+  static override readonly style = css`
     :host {
       display: block;
       height: 100%;
@@ -21,7 +21,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     }
     `;
 
-  static readonly template = html`
+  static override readonly template = html`
       <style>@import "/node_modules/monaco-editor/min/vs/editor/editor.main.css";</style>
       <div id="container" style="width: 100%; height: 100%;"></div>
   `;

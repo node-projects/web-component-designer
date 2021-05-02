@@ -26,7 +26,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   private _aceEditor: Ace.Editor;
   private _editor: HTMLDivElement;
 
-  static readonly style = css`
+  static override readonly style = css`
     :host {
       display: block;
       height: 100%;

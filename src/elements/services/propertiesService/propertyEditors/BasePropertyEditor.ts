@@ -3,7 +3,7 @@ import { IDesignItem } from "../../../..";
 import { IProperty } from "../IProperty";
 import { ValueType } from '../ValueType';
 
-export abstract class BasePropertyEditor<T extends Element> implements IPropertyEditorT<T> {
+export abstract class BasePropertyEditor<T extends HTMLElement> implements IPropertyEditorT<T> {
 
   public element: T;
   public property: IProperty;
@@ -22,12 +22,15 @@ export abstract class BasePropertyEditor<T extends Element> implements IProperty
 
   public designItemsChanged(designItems: IDesignItem[]) {
     this.designItems = designItems;
-    //this.property.service.isSet()
   }
 
   abstract refreshValue(valueType: ValueType, value: any);
 
   public refreshValueWithoutNotification(valueType: ValueType, value: any) {
+    if (valueType == ValueType.none)
+      this.element.style.color = 'lightslategray';
+    else
+      this.element.style.color = 'white';
     this.disableChangeNotification = true;
     this.refreshValue(valueType, value);
     this.disableChangeNotification = false;

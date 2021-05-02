@@ -68,7 +68,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   //private static _designerClassPrefix = 'node-projects-wcdesigner-';
 
-  static readonly style = css`
+  static override readonly style = css`
     :host {
       display: block;
       box-sizing: border-box;
@@ -200,7 +200,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
   }`;
 
-  static readonly template = html`
+  static override  readonly template = html`
         <div class="outer">
           <div id="outercanvas1">
             <div id="outercanvas2">

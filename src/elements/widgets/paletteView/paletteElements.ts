@@ -10,7 +10,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
   private _datalist: HTMLDataListElement;
   private _elementDefintions: IElementDefinition[];
 
-  static get style() {
+  static override get style() {
     return css`
     :host {
       display: block;

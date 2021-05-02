@@ -7,7 +7,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
   private _tree: Fancytree.Fancytree;
   private _filter: HTMLInputElement;
 
-  static readonly style = css`
+  static override readonly style = css`
       span.drag-source {
         border: 1px solid grey;
         border-radius: 3px;
