@@ -7,6 +7,7 @@ export interface IPropertiesService extends IService {
   readonly name: string;
   isHandledElement(designItem: IDesignItem): boolean;
   getProperties(designItem: IDesignItem): IProperty[];
+  getProperty(designItem: IDesignItem, name: string): IProperty;
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any);
   clearValue(designItems: IDesignItem[], property: IProperty);

@@ -4,6 +4,7 @@ import { DesignerTabControl } from '../../controls/DesignerTabControl';
 import { IDesignItem } from '../../item/IDesignItem';
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { CssPropertiesService } from '../../services/propertiesService/services/CssPropertiesService';
+import { CommonPropertiesService } from '../../services/propertiesService/services/CommonPropertiesService';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
@@ -36,6 +37,10 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     super();
     this._designerTabControl = new DesignerTabControl();
     this.shadowRoot.appendChild(this._designerTabControl);
+    this.addEventListener('contextmenu', (e) => {
+      if ((<HTMLElement>e.composedPath()[0]).localName != 'input')
+        e.preventDefault()
+    });
 
     this._itemsObserver = new MutationObserver((m) => {
       for (const a of this._propertyGridPropertyLists) {
@@ -55,6 +60,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._propertyGridPropertyLists.push(elementPropertyEditorAttributeList);
 
     let attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new CommonPropertiesService())
+    attributeEditorAttributeList.createElements(null);
+    attributeEditorAttributeList.title = "common";
+    this._designerTabControl.appendChild(attributeEditorAttributeList);
+    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
+
+    attributeEditorAttributeList = new PropertyGridPropertyList(value);
     attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("styles"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "styles";

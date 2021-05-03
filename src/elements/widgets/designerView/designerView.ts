@@ -23,6 +23,7 @@ import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
+import { NodeType } from '../../item/NodeType';
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView {
   // Public Properties
@@ -369,6 +370,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   public async parseHTML(html: string) {
     this.rootDesignItem.element.innerHTML = null;
+    this.instanceServiceContainer.undoService.clear();
     const parserService = this.serviceContainer.htmlParserService;
     const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
     if (designItems) {
@@ -376,6 +378,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         this.rootDesignItem.element.append(di.element);
       }
     }
+
+    const intializationService = this.serviceContainer.intializationService;
+    if (intializationService) {
+      for (let di of designItems)
+        intializationService.init(di);
+    }
+
     this.snapLines.clearSnaplines();
   }
 
@@ -993,29 +1002,32 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     DomHelper.removeAllChildnodes(this.svgLayer, 'svg-selection');
 
     if (designItems && designItems.length) {
-      let p0 = designItems[0].element.getBoundingClientRect();
-
-      let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      line.setAttribute('x', <string><any>(p0.x - this._containerBoundingRect.x - 12));
-      line.setAttribute('width', <string><any>(10));
-      line.setAttribute('y', <string><any>(p0.y - this._containerBoundingRect.y - 12));
-      line.setAttribute('height', <string><any>(10));
-      line.setAttribute('class', 'svg-selection svg-primary-selection-move');
-      line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
-      line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
-      line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
-      this.svgLayer.appendChild(line);
-
-      for (let i of designItems) {
-        let p = i.element.getBoundingClientRect();
+      if (designItems[0].nodeType == NodeType.Element) {
+        let p0 = designItems[0].element.getBoundingClientRect();
 
         let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        line.setAttribute('x', <string><any>(p.x - this._containerBoundingRect.x));
-        line.setAttribute('width', <string><any>(p.width));
-        line.setAttribute('y', <string><any>(p.y - this._containerBoundingRect.y));
-        line.setAttribute('height', <string><any>(p.height));
-        line.setAttribute('class', 'svg-selection');
+        line.setAttribute('x', <string><any>(p0.x - this._containerBoundingRect.x - 12));
+        line.setAttribute('width', <string><any>(10));
+        line.setAttribute('y', <string><any>(p0.y - this._containerBoundingRect.y - 12));
+        line.setAttribute('height', <string><any>(10));
+        line.setAttribute('class', 'svg-selection svg-primary-selection-move');
+        line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
+        line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
+        line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
         this.svgLayer.appendChild(line);
+      }
+      for (let i of designItems) {
+        if (i.nodeType == NodeType.Element) {
+          let p = i.element.getBoundingClientRect();
+
+          let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          line.setAttribute('x', <string><any>(p.x - this._containerBoundingRect.x));
+          line.setAttribute('width', <string><any>(p.width));
+          line.setAttribute('y', <string><any>(p.y - this._containerBoundingRect.y));
+          line.setAttribute('height', <string><any>(p.height));
+          line.setAttribute('class', 'svg-selection');
+          this.svgLayer.appendChild(line);
+        }
       }
     }
   }

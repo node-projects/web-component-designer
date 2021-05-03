@@ -7,14 +7,12 @@ import { IPropertiesService } from '../propertiesService/IPropertiesService';
 import { IDesignItem } from '../../item/IDesignItem';
 import { DesignItem } from '../../item/DesignItem';
 
-
 export class DefaultInstanceService implements IInstanceService {
   async getElement(definition: IElementDefinition, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem> {
     if (definition.import) {
       let importUri = definition.import;
       if (importUri[0] === '.')
         importUri = (window.location.origin+window.location.pathname).split('/').slice(0,-1).join('/') + '/' + importUri;
-      //importUri = '../../../../../../../../' + importUri;
       await import(importUri);
     }
     let element = document.createElement(definition.tag);

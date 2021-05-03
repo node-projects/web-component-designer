@@ -6,7 +6,9 @@ export class BaseServiceContainer<NameMap> {
 
   getLastService<K extends keyof NameMap>(service: K): NameMap[K] {
     let list: [] = <any>this._services.get(<string>service);
-    return list[list.length - 1];
+    if (list && list.length)
+      return list[list.length - 1];
+    return null;
   }
 
   getServices<K extends keyof NameMap>(service: K): NameMap[K][] {

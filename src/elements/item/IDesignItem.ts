@@ -5,6 +5,8 @@ import { NodeType } from './NodeType';
 
 export interface IDesignItem {
 
+  replaceNode(newNode: Node);
+
   readonly nodeType: NodeType
 
   readonly name: string

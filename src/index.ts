@@ -2,6 +2,15 @@ export * from "./basic/TypedEvent.js";
 
 export * from "./elements/controls/DesignerTabControl.js";
 
+export * from "./elements/helper/CssAttributeParser.js";
+export * from "./elements/helper/CssCombiner.js";
+export * from "./elements/helper/ElementHelper.js";
+export * from "./elements/helper/IndentedTextWriter.js";
+export * from "./elements/helper/Screenshot.js";
+export * from "./elements/helper/w3color.js";
+export * from "./elements/helper/contextMenu/ContextMenuHelper.js";
+export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmenuItem.js";
+
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
 
@@ -29,6 +38,8 @@ export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
 export type { IHtmlParserService } from "./elements/services/htmlParserService/IHtmlParserService.js";
 
+export type { IIntializationService } from "./elements/services/initializationService/IIntializationService.js";
+
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";
 
@@ -36,11 +47,14 @@ export * from "./elements/services/propertiesService/DefaultEditorTypesService.j
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
+export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
+export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
 export * from "./elements/services/propertiesService/services/ListPropertiesService.js";
 export * from "./elements/services/propertiesService/services/LitElementPropertiesService.js";
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
+export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";

@@ -1,9 +1,8 @@
-import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
-import { ValueType } from "../ValueType";
+import { CommonPropertiesService } from "./CommonPropertiesService";
 
-export class NativeElementsPropertiesService implements IPropertiesService {
+export class NativeElementsPropertiesService extends CommonPropertiesService {
 
   //@ts-ignore
   private inputProperties: IProperty[] = [
@@ -82,10 +81,9 @@ export class NativeElementsPropertiesService implements IPropertiesService {
     }
   ];
 
+  public override name = "native"
 
-  public name = "native"
-
-  isHandledElement(designItem: IDesignItem): boolean {
+  override isHandledElement(designItem: IDesignItem): boolean {
     switch (designItem.element.localName) {
       case 'input':
       case 'button':
@@ -100,7 +98,11 @@ export class NativeElementsPropertiesService implements IPropertiesService {
     return false;
   }
 
-  getProperties(designItem: IDesignItem): IProperty[] {
+  override getProperty(designItem: IDesignItem, name: string): IProperty {
+    return this.getProperties(designItem)[name];
+  }
+
+  override getProperties(designItem: IDesignItem): IProperty[] {
     if (!this.isHandledElement(designItem))
       return null;
     switch (designItem.element.localName) {
@@ -119,63 +121,5 @@ export class NativeElementsPropertiesService implements IPropertiesService {
     }
 
     return null;
-  }
-
-  setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-    for (let d of designItems) {
-      if (property.type == 'boolean' && !value)
-        d.removeAttribute(property.name);
-      else if (property.type == 'boolean' && value)
-        d.setAttribute(property.name, "");
-      else
-        d.setAttribute(property.name, value);
-    }
-  }
-
-  clearValue(designItems: IDesignItem[], property: IProperty) {
-    for (let d of designItems) {
-      d.removeAttribute(property.name);
-    }
-  }
-
-  isSet(designItems: IDesignItem[], property: IProperty): ValueType {
-    let all = true;
-    let some = false;
-    if (designItems != null && designItems.length !== 0) {
-      let attributeName = property.name;
-      designItems.forEach((x) => {
-        let has = x.attributes.has(attributeName);
-        all = all && has;
-        some = some || has;
-      });
-    }
-    else
-      return ValueType.none
-
-    return all ? ValueType.all : some ? ValueType.some : ValueType.none;
-  }
-
-  getValue(designItems: IDesignItem[], property: IProperty) {
-    if (designItems != null && designItems.length !== 0) {
-      let attributeName = property.name;
-      if (property.type == 'boolean')
-        return designItems[0].attributes.has(attributeName);
-      let lastValue = designItems[0].attributes.get(attributeName);
-      /*
-      for (const x of designItems) {
-        let value = x.attributes.get(attributeName);
-        if (value != lastValue) {
-          lastValue = null;
-          break;
-        }
-      }
-      */
-      return lastValue;
-    }
-    return null;
-  }
-
-  getUnsetValue(designItems: IDesignItem[], property: IProperty) {
-    return property.defaultValue;
   }
 }

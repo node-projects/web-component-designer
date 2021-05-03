@@ -2,6 +2,7 @@ import { IPropertiesService } from '../IPropertiesService';
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from '../ValueType';
+import { NodeType } from '../../../item/NodeType';
 
 export class CssPropertiesService implements IPropertiesService {
 
@@ -216,19 +217,27 @@ export class CssPropertiesService implements IPropertiesService {
     return true;
   }
 
+  getProperty(designItem: IDesignItem, name: string): IProperty {
+    return this[this.name][name]
+  }
+
   getProperties(designItem: IDesignItem): IProperty[] {
     return this[this.name];
   }
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+    const cg = designItems[0].openGroup("properties changed", designItems);
     for (let d of designItems) {
-      d.setStyle(<keyof CSSStyleDeclaration>property.name, value);
+      d.styles.set(property.name, value);
+      (<HTMLElement>d.element).style[property.name] = value;
     }
+    cg.commit();
   }
 
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
-      d.removeStyle(<keyof CSSStyleDeclaration>property.name);
+      d.styles.delete(property.name);
+      (<HTMLElement>d.element).style[property.name] = '';
     }
   }
 
@@ -262,10 +271,13 @@ export class CssPropertiesService implements IPropertiesService {
     return null;
   }
 
+  //todo: optimize perf, call window.getComputedStyle only once per item, and not per property
   getUnsetValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
-      let v = window.getComputedStyle(designItems[0].element)[property.name];
-      return v;
+      if (designItems[0].nodeType == NodeType.Element) {
+        let v = window.getComputedStyle(designItems[0].element)[property.name];
+        return v;
+      }
     }
     return null;
   }

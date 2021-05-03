@@ -76,6 +76,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     select:focus option {
       color: black;
     }
+    .unset-value {
+      color: lightslategray
+    }
+    .unset-value:focus {
+      color: white
+    }
     `;
   }
 
@@ -107,12 +113,19 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
           }
           if (editor) {
+            let rectContainer = document.createElement("div")
+            rectContainer.style.width = '20px';
+            rectContainer.style.height = '20px';
+            rectContainer.style.display = 'flex';
+            rectContainer.style.alignItems = 'center';
             let rect = document.createElement("div")
             rect.style.width = '5px';
             rect.style.height = '5px';
             rect.style.border = '1px white solid';
-            this._div.appendChild(rect);
-            ContextMenuHelper.addContextMenu(rect, [
+            rectContainer.appendChild(rect);
+            this._div.appendChild(rectContainer);
+
+            ContextMenuHelper.addContextMenu(rectContainer, [
               { title: 'clear', action: (e) => p.service.clearValue(this._designItems, p) },
               { title: 'new binding', action: (e) => alert('new binding() ' + p.name) }
             ]);

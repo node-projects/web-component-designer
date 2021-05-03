@@ -6,6 +6,7 @@ import { PropertiesHelper } from './PropertiesHelper';
 
 export class UnkownElementPropertiesService implements IPropertiesService {
 
+
   public readonly name: string = "unkown";
 
   public isHandledElement(designItem: IDesignItem): boolean {
@@ -15,28 +16,48 @@ export class UnkownElementPropertiesService implements IPropertiesService {
   protected _notifyChangedProperty(designItem: IDesignItem, property: IProperty, value: any) {
   }
 
+  getProperty(designItem: IDesignItem, name: string): IProperty {
+    return null;
+  }
+
   getProperties(designItem: IDesignItem): IProperty[] {
     return null;
   }
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-    let attributeName = PropertiesHelper.camelToDashCase(property.name);
-    for (let d of designItems) {
-      if (property.type === 'object')
-        d.setAttribute(attributeName, JSON.stringify(value));
-      else if (property.type == 'boolean' && !value)
-        d.removeAttribute(attributeName);
-      else if (property.type == 'boolean' && value)
-        d.setAttribute(attributeName, "");
-      else
-        d.setAttribute(attributeName, value);
-      this._notifyChangedProperty(d, property, value);
+    const attributeName = PropertiesHelper.camelToDashCase(property.name);
+    const cg = designItems[0].openGroup("properties changed", designItems);
+    try {
+      for (let d of designItems) {
+        if (property.type === 'object') {
+          const json = JSON.stringify(value);
+          d.attributes.set(attributeName, json);
+          d.element.setAttribute(attributeName, json);
+        } else if (property.type == 'boolean' && !value) {
+          d.attributes.delete(attributeName);
+          d.element.removeAttribute(attributeName);
+        } else if (property.type == 'boolean' && value) {
+          d.attributes.set(attributeName, "");
+          d.element.setAttribute(attributeName, "");
+        } else {
+          d.attributes.set(attributeName, value);
+          d.element.setAttribute(attributeName, value);
+        }
+        this._notifyChangedProperty(d, property, value);
+      }
+      cg.commit();
+    }
+    catch (err) {
+      console.log(err);
+      cg.undo();
     }
   }
 
   clearValue(designItems: IDesignItem[], property: IProperty) {
+    const attributeName = PropertiesHelper.camelToDashCase(property.name);
     for (let d of designItems) {
-      d.removeAttribute(property.name);
+      d.attributes.delete(attributeName);
+      d.element.removeAttribute(attributeName);
       this._notifyChangedProperty(d, property, undefined);
     }
   }

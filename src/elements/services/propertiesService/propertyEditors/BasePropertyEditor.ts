@@ -2,6 +2,7 @@ import { IPropertyEditorT } from "../IPropertyEditor";
 import { IDesignItem } from "../../../..";
 import { IProperty } from "../IProperty";
 import { ValueType } from '../ValueType';
+import { PropertyChangeAction } from "../../undoService/transactionItems/PropertyChangeAction";
 
 export abstract class BasePropertyEditor<T extends HTMLElement> implements IPropertyEditorT<T> {
 
@@ -16,8 +17,17 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
   }
 
   protected _valueChanged(newValue) {
-    if (!this.disableChangeNotification)
-      this.property.service.setValue(this.designItems, this.property, newValue);
+    if (!this.disableChangeNotification) {
+      if (this.designItems && this.designItems.length) {
+        const cg = this.designItems[0].openGroup("set property: " + this.property.name);
+        for (let d of this.designItems) {
+          const oldValue = this.property.service.getValue([d], this.property);
+          const action = new PropertyChangeAction(d, this.property, newValue, oldValue);
+          d.instanceServiceContainer.undoService.execute(action);
+        }
+        cg.commit();
+      }
+    }
   }
 
   public designItemsChanged(designItems: IDesignItem[]) {
@@ -28,9 +38,9 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
 
   public refreshValueWithoutNotification(valueType: ValueType, value: any) {
     if (valueType == ValueType.none)
-      this.element.style.color = 'lightslategray';
+      this.element.classList.add('unset-value');
     else
-      this.element.style.color = 'white';
+      this.element.classList.remove('unset-value');
     this.disableChangeNotification = true;
     this.refreshValue(valueType, value);
     this.disableChangeNotification = false;

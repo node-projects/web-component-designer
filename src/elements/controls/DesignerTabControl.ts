@@ -28,6 +28,11 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             cursor: pointer; 
             height: 30px;
             background-color: var(--dark-grey, #232733);
+            overflow-x: auto;
+            scrollbar-width: none;  /* Firefox */
+        }
+        .header::-webkit-scrollbar { 
+            display: none;  /* Safari and Chrome */
         }
         .tab-header {
             font-family: Arial;
@@ -36,13 +41,14 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             align-items: center;                
             text-transform: uppercase;                
             box-sizing: content-box;                
-            padding-left: 10px;
-            padding-right: 10px;
+            padding-left: 5px;
+            padding-right: 5px;
             color: white;
             font-size: 12px;
             font-weight: 500;
             line-height: 1.5;
             letter-spacing: 1px;
+            
         }
         .tab-header:hover {
             background: var(--light-grey, #383f52);

@@ -13,43 +13,28 @@ export abstract class AbstractBasePropertiesService extends UnkownElementPropert
     let list = (<any>designItem.element.constructor).properties;
     for (const name in list) {
       const polymerProperty = list[name];
-      if (polymerProperty === String) {
+      let type = polymerProperty;
+      if (polymerProperty.type)
+        type = polymerProperty.type;
+
+      if (type === String) {
         let property: IProperty = { name: name, type: "string", service: this };
         properties.push(property);
-      } else if (polymerProperty === Object) {
+      } else if (type === Object) {
         let property: IProperty = { name: name, type: "string", service: this };
         properties.push(property);
-      } else if (polymerProperty === Number) {
+      } else if (type === Number) {
         let property: IProperty = { name: name, type: "number", service: this };
         properties.push(property);
-      } else if (polymerProperty === Date) {
+      } else if (type === Date) {
         let property: IProperty = { name: name, type: "date", service: this };
         properties.push(property);
-
-      } else if (PropertiesHelper.isTypescriptEnum(polymerProperty)) {
-        let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(polymerProperty), service: this };
+      } else if (type === Boolean) {
+        let property: IProperty = { name: name, type: "boolean", service: this };
         properties.push(property);
-      } else {
-        if (polymerProperty.type === String) {
-          let property: IProperty = { name: name, type: "string", service: this };
-          properties.push(property);
-        } else if (polymerProperty.type === Object) {
-          let property: IProperty = { name: name, type: "string", service: this };
-          properties.push(property);
-        } else if (polymerProperty.type === Number) {
-          let property: IProperty = { name: name, type: "number", service: this };
-          properties.push(property);
-        } else if (polymerProperty.type === Date) {
-          let property: IProperty = { name: name, type: "date", service: this };
-          properties.push(property)
-        } else if (PropertiesHelper.isTypescriptEnum(polymerProperty)) {
-          let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(polymerProperty), service: this };
-          properties.push(property);
-        }
-        else {
-          let property: IProperty = { name: name, type: "string", service: this };
-          properties.push(property);
-        }
+      } else if (PropertiesHelper.isTypescriptEnum(type)) {
+        let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(type), service: this };
+        properties.push(property);
       }
     }
     return properties;

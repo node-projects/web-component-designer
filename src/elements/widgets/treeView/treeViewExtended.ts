@@ -95,9 +95,9 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   _showHideAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
     if (designItem.hideAtDesignTime)
-      img.src = assetsPath + "/images/treeview/eyeclose.png";
+      img.src = assetsPath + "images/treeview/eyeclose.png";
     else
-      img.src = assetsPath + "/images/treeview/eyeopen.png";
+      img.src = assetsPath + "images/treeview/eyeopen.png";
   }
 
   _switchHideAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
@@ -107,9 +107,9 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   _showLockAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
     if (designItem.lockAtDesignTime)
-      img.src = assetsPath + "/images/treeview/lock.png";
+      img.src = assetsPath + "images/treeview/lock.png";
     else
-      img.src = assetsPath + "/images/treeview/dot.png";
+      img.src = assetsPath + "images/treeview/dot.png";
   }
 
   _switchLockAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
@@ -119,9 +119,9 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   _showHideAtRunTimeState(img: HTMLImageElement, designItem: IDesignItem) {
     if (designItem.hideAtRunTime)
-      img.src = assetsPath + "/images/treeview/eyeclose.png";
+      img.src = assetsPath + "images/treeview/eyeclose.png";
     else
-      img.src = assetsPath + "/images/treeview/eyeopen.png";
+      img.src = assetsPath + "images/treeview/eyeopen.png";
   }
 
   _switchHideAtRunTimeState(img: HTMLImageElement, designItem: IDesignItem) {
@@ -141,6 +141,13 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         indentation: 20,       // indent 20px per node level
         nodeColumnIdx: 0,      // render the node title into the 2nd column
         checkboxColumnIdx: 0,  // render the checkboxes into the 1st column
+      },
+
+      activate: (event, data) => {
+        let node = data.node;
+        let designItem: IDesignItem = node.data.ref;
+
+        designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
       },
 
       createNode: (event, data) => {

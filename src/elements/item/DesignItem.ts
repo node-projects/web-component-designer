@@ -4,6 +4,8 @@ import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
 import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction';
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
 import { NodeType } from './NodeType';
+import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction';
+import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -14,7 +16,11 @@ export class DesignItem implements IDesignItem {
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
 
-
+  public replaceNode(newNode: Node) {
+    DesignItem._designItemMap.delete(this.node);
+    DesignItem._designItemMap.set(newNode, this);
+    this.node = newNode;
+  }
 
   public get nodeType(): NodeType {
     if (this.node instanceof Comment)
@@ -91,7 +97,7 @@ export class DesignItem implements IDesignItem {
       this.attributes.delete(hideAtDesignTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
-        this.element.style.display = this.styles['display'] ?? "";
+        this.element.style.display = this.styles.get('display') ?? "";
       else
         this.element.style.display = 'none';
     }
@@ -109,7 +115,7 @@ export class DesignItem implements IDesignItem {
       this.attributes.delete(hideAtRunTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
-        this.element.style.opacity = this.styles['opacity'] ?? "";
+        this.element.style.opacity = this.styles.get('opacity') ?? "";
       else
         this.element.style.opacity = '0.3';
     }
@@ -199,24 +205,35 @@ export class DesignItem implements IDesignItem {
   }
 
   public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {
-    let action = new CssStyleChangeAction(this, name, value, this.styles.get(<string>name));
+    const action = new CssStyleChangeAction(this, name, value, this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);
   }
   public removeStyle(name: keyof CSSStyleDeclaration) {
-    let action = new CssStyleChangeAction(this, name, '', this.styles.get(<string>name));
+    const action = new CssStyleChangeAction(this, name, '', this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);
   }
 
   public setAttribute(name: string, value?: string | null) {
-    this.attributes.set(name, value);
-    if (name != "draggable") {
-      this.element.setAttribute(name, value);
-    }
+    const action = new AttributeChangeAction(this, name, value, this.attributes.get(name));
+    this.instanceServiceContainer.undoService.execute(action);
   }
   public removeAttribute(name: string) {
-    this.attributes.delete(name);
-    if (name != "draggable") {
-      this.element.removeAttribute(name);
-    }
+    const action = new AttributeChangeAction(this, name, null, this.attributes.get(name));
+    this.instanceServiceContainer.undoService.execute(action);
+  }
+
+  public setProperty(name: string, value?: string | null) {
+    const propService = this.serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this));
+    const property = propService.getProperty(this, name);
+    const oldValue = propService.getValue([this], property)
+    const action = new PropertyChangeAction(this, property, value, oldValue);
+    this.instanceServiceContainer.undoService.execute(action);
+  }
+  public removeProperty(name: string, value?: string | null) {
+    const propService = this.serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this));
+    const property = propService.getProperty(this, name);
+    const oldValue = propService.getValue([this], property)
+    const action = new PropertyChangeAction(this, property, undefined, oldValue);
+    this.instanceServiceContainer.undoService.execute(action);
   }
 }
