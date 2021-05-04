@@ -38,7 +38,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   public svgLayer: SVGElement;
   public rootDesignItem: IDesignItem;
 
-  private _resizeOffset = 10;
   private _zoomFactor = 1;
 
   // Private Variables
@@ -597,7 +596,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     const currentPoint = this.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-    const isCurrentItemSelected = this.instanceServiceContainer.selectionService.isSelected(currentDesignItem);
+    //const isCurrentItemSelected = this.instanceServiceContainer.selectionService.isSelected(currentDesignItem);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -605,7 +604,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         this._actionStartedDesignItem = currentDesignItem;
         this.snapLines.clearSnaplines();
         let composedPath = event.composedPath();
-        let rectCurrentElement = currentElement.getBoundingClientRect();
+        //let rectCurrentElement = currentElement.getBoundingClientRect();
         if (currentDesignItem !== this.rootDesignItem && forcedAction == PointerActionType.Drag /* this._forceMove({ x: currentPoint.containerOriginalX, y: currentPoint.containerOriginalY }, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })*/) {
           this._actionType = PointerActionType.Drag;
         } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
