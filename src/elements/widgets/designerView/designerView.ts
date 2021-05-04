@@ -1059,7 +1059,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute('x', <string><any>posX);
     text.setAttribute('y', <string><any>(posY + 11));
-    text.textContent = designItem.name.substring(0, 10);
+    text.textContent = designItem.name.substring(0, 10) +  '…';
     text.setAttribute('class', 'svg-selection svg-text');
     this.svgLayer.appendChild(text);
   }

@@ -2,7 +2,6 @@ import type { IDesignItem } from "../../item/IDesignItem";
 import { DomHelper } from '@node-projects/base-custom-webcomponent';
 import type { IPoint } from "../../../interfaces/IPoint";
 import type { ISize } from '../../../interfaces/ISize';
-//import { readyException } from "jquery";
 
 export class Snaplines {
 
@@ -15,7 +14,6 @@ export class Snaplines {
   private _positionsV: [number, DOMRect][] = [];
   private _positionsMiddleV: [number, DOMRect][] = [];
   private _outerRect: DOMRect;
-  //private _lastPh: DOMRect[];
 
   constructor(svg: SVGElement) {
     this._svg = svg;
@@ -103,6 +101,7 @@ export class Snaplines {
       }
     }
 
+    minDiff = this.snapOffset + 1;
     let pV = undefined;
     let posV = undefined;
     for (let i = 0; i < this._positionsV.length; i++) {
