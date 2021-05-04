@@ -2,6 +2,8 @@ import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custo
 import { ICodeView } from "./ICodeView";
 import type { Ace } from "ace-builds";
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
+import { IUiCommand } from '../../../commandHandling/IUiCommand';
+import { CommandType } from '../../../commandHandling/CommandType';
 
 class CodeViewAceCompleter {
   getCompletions(editor, session, pos, prefix, callback) {
@@ -43,6 +45,48 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     this._editor.style.width = '100%';
 
     this.shadowRoot.appendChild(this._editor)
+  }
+
+  executeCommand(command: IUiCommand) {
+    switch (command.type) {
+      case CommandType.undo:
+        this._aceEditor.execCommand('undo');
+        break;
+      case CommandType.redo:
+        this._aceEditor.execCommand('redo');
+        break;
+      case CommandType.copy:
+        let text = this._aceEditor.getCopyText();
+        this._aceEditor.execCommand("copy");
+        navigator.clipboard.writeText(text);
+        break;
+      case CommandType.paste:
+        navigator.clipboard.readText().then(text => {
+          this._aceEditor.execCommand("paste", text)
+        });
+        break;
+      case CommandType.cut:
+        text = this._aceEditor.getCopyText();
+        this._aceEditor.execCommand("cut");
+        navigator.clipboard.writeText(text);
+        break;
+      case CommandType.delete:
+        this._aceEditor.execCommand("delete");
+        break;
+    }
+  }
+
+  canExecuteCommand(command: IUiCommand) {
+    switch (command.type) {
+      case CommandType.undo:
+      case CommandType.redo:
+      case CommandType.copy:
+      case CommandType.paste:
+      case CommandType.cut:
+      case CommandType.delete:
+        return true;
+    }
+    return false;
   }
 
   focusEditor() {

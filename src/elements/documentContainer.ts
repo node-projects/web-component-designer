@@ -3,15 +3,17 @@ import { DesignerTabControl } from "./controls/DesignerTabControl";
 import { DesignerView } from "./widgets/designerView/designerView";
 import { ServiceContainer } from "./services/ServiceContainer";
 import { InstanceServiceContainer } from "./services/InstanceServiceContainer";
-import { DemoView } from './widgets/demoView/demoView';
 import { ICodeView } from '../elements/widgets/codeView/ICodeView';
 import { IDesignItem } from '../elements/item/IDesignItem';
 import { IStringPosition } from './services/serializationService/IStringPosition';
+import { IDemoView } from './widgets/demoView/IDemoView';
+import { IUiCommandHandler } from "../commandHandling/IUiCommandHandler";
+import { IUiCommand } from "../commandHandling/IUiCommand";
 
-export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
+export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler {
   public designerView: DesignerView;
   public codeView: ICodeView & HTMLElement;
-  public demoView: DemoView;
+  public demoView: IDemoView & HTMLElement;
 
   private _serviceContainer: ServiceContainer;
   private _content: string = '';
@@ -47,13 +49,28 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
     this.codeView = new serviceContainer.config.codeViewWidget();
     this.codeView.title = 'Code';
     this._tabControl.appendChild(this.codeView);
-    this.demoView = new DemoView();
+    this.demoView = new serviceContainer.config.demoViewWidget();
     this.demoView.title = 'Preview';
     this._tabControl.appendChild(this.demoView);
     queueMicrotask(() => {
       this.shadowRoot.appendChild(div);
       this._tabControl.selectedIndex = 0;
     });
+  }
+
+  executeCommand(command: IUiCommand) {
+    if (this._tabControl.selectedIndex === 0)
+      this.designerView.executeCommand(command);
+    else if (this._tabControl.selectedIndex === 1)
+      this.codeView.executeCommand(command);
+  }
+
+  canExecuteCommand(command: IUiCommand) {
+    if (this._tabControl.selectedIndex === 0)
+      return this.designerView.canExecuteCommand(command);
+    else if (this._tabControl.selectedIndex === 1)
+      return this.codeView.canExecuteCommand(command);
+    return false;
   }
 
   set content(value: string) {

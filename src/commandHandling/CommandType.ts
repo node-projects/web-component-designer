@@ -1,4 +1,4 @@
-export enum Commands {
+export enum CommandType {
   'copy' = 'copy',
   'paste' = 'paste',
   'cut' = 'cut',
@@ -11,10 +11,12 @@ export enum Commands {
   'moveBackward' = 'moveBackward',
   'moveToBack' = 'moveToBack',
 
-  'alignLeft' = 'alignLeft',
-  'alignTop' = 'alignTop',
-  'alignRight' = 'alignRight',
-  'alignBottom' = 'alignBottom',
+  arrangeLeft = 'arrangeLeft',
+  arrangeCenter = 'arrangeCenter',
+  arrangeRigtht = 'arrangeRigtht',
+  arrangeTop = 'arrangeTop',
+  arrangeMiddle = 'arrangeMiddle',
+  arrangeBottom = 'arrangeBottom',
 
   'adjustWidth' = 'adjustWidth',
   'adjustHeight' = 'adjustHeight',

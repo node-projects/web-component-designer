@@ -9,6 +9,8 @@ import { CodeViewMonaco } from "../widgets/codeView/code-view-monaco";
 import { ICodeView } from "../widgets/codeView/ICodeView";
 import { IHtmlParserService } from "./htmlParserService/IHtmlParserService";
 import { IIntializationService } from "./initializationService/IIntializationService";
+import { IDemoView } from '../widgets/demoView/IDemoView';
+import { DemoView } from '../widgets/demoView/demoView';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -24,9 +26,11 @@ interface ServiceNameMap {
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   readonly config: {
-    codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement
+    codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
+    demoViewWidget: new (...args: any[]) => IDemoView & HTMLElement;
   } = {
-      codeViewWidget: CodeViewMonaco
+      codeViewWidget: CodeViewMonaco,
+      demoViewWidget: DemoView
     };
 
   get propertiesServices(): IPropertiesService[] {

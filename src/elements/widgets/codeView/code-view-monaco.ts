@@ -3,8 +3,11 @@ import { ICodeView } from "./ICodeView";
 import type * as monaco from 'monaco-editor';
 import { IActivateable } from '../../../interfaces/IActivateable';
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
+import { IUiCommand } from '../../../commandHandling/IUiCommand';
+import { CommandType } from '../../../commandHandling/CommandType';
 
-export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable {
+export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 
@@ -25,6 +28,41 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       <style>@import "/node_modules/monaco-editor/min/vs/editor/editor.main.css";</style>
       <div id="container" style="width: 100%; height: 100%;"></div>
   `;
+
+  executeCommand(command: IUiCommand) {
+    switch (command.type) {
+      case CommandType.undo:
+        this._monacoEditor.trigger('source', 'undo', null);
+        break;
+      case CommandType.redo:
+        this._monacoEditor.trigger('source', 'redo', null);
+        break;
+      case CommandType.copy:
+        this._monacoEditor.trigger('source', 'editor.action.clipboardCopyAction', null);
+        break;
+      case CommandType.paste:
+        this._monacoEditor.trigger('source', 'editor.action.clipboardPasteAction', null);
+        break;
+      case CommandType.cut:
+        break;
+      case CommandType.delete:
+        break;
+    }
+  }
+
+  canExecuteCommand(command: IUiCommand) {
+    switch (command.type) {
+      case CommandType.undo:
+      case CommandType.redo:
+      case CommandType.copy:
+      case CommandType.paste:
+      case CommandType.cut:
+      case CommandType.delete:
+        return true;
+    }
+    return false;
+  }
+
   async ready() {
     this._editor = this._getDomElement<HTMLDivElement>('container')
 
@@ -47,7 +85,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       this._monacoEditor.layout();
     });
   }
-  
+
   focusEditor() {
     this.focus();
     this._monacoEditor.focus();

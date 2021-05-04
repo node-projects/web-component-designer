@@ -24,10 +24,12 @@ import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
 import { NodeType } from '../../item/NodeType';
-import { Commands } from '../../Commands';
+import { CommandType } from '../../../commandHandling/CommandType';
 import { MoveElementInDomAction } from '../../services/undoService/transactionItems/MoveElementInDomAction';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
+import { IUiCommand } from '../../../commandHandling/IUiCommand';
 
-export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView {
+export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
@@ -312,25 +314,39 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
   }
 
-  handleCommand(command: Commands) {
-    switch (command) {
-      case Commands.delete:
+  /* --- start IUiCommandHandler --- */
+
+  executeCommand(command: IUiCommand) {
+    switch (command.type) {
+      case CommandType.delete:
         this.handleDeleteCommand();
         break;
-      case Commands.undo:
+      case CommandType.undo:
         this.instanceServiceContainer.undoService.undo();
         break;
-      case Commands.redo:
+      case CommandType.redo:
         this.instanceServiceContainer.undoService.redo();
         break;
-      case Commands.moveToFront:
-      case Commands.moveForward:
-      case Commands.moveBackward:
-      case Commands.moveToBack:
-        this.handleMoveCommand(command);
+      case CommandType.moveToFront:
+      case CommandType.moveForward:
+      case CommandType.moveBackward:
+      case CommandType.moveToBack:
+        this.handleMoveCommand(command.type);
         break;
     }
   }
+  canExecuteCommand(command: IUiCommand) {
+    if (command.type === CommandType.undo) {
+      return this.instanceServiceContainer.undoService.canUndo();
+    }
+    if (command.type === CommandType.redo) {
+      return this.instanceServiceContainer.undoService.canRedo();
+    }
+    return true;
+  }
+
+  /* --- end IUiCommandHandler --- */
+
 
   handleDeleteCommand() {
     let items = this.instanceServiceContainer.selectionService.selectedElements;
@@ -338,16 +354,16 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
   }
 
-  handleMoveCommand(command: Commands) {
+  handleMoveCommand(command: CommandType) {
     //todo -> via undo redo service
     let sel = this.instanceServiceContainer.selectionService.primarySelection;
-    if (command == Commands.moveBackward)
+    if (command == CommandType.moveBackward)
       this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
-    else if (command == Commands.moveForward)
+    else if (command == CommandType.moveForward)
       this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'afterend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
-    else if (command == Commands.moveToBack)
+    else if (command == CommandType.moveToBack)
       this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'afterbegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
-    else if (command == Commands.moveToFront)
+    else if (command == CommandType.moveToFront)
       this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'beforeend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
   }
 
@@ -465,12 +481,12 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       { title: 'cut', action: () => { } },
       { title: 'paste', action: () => { } },
       { title: '-' },
-      { title: 'delete', action: () => { this.handleCommand(Commands.delete); } },
+      { title: 'delete', action: () => { this.executeCommand({ type: CommandType.delete }); } },
       { title: '-' },
-      { title: 'to front', action: () => { this.handleCommand(Commands.moveToFront); } },
-      { title: 'move forward', action: () => { this.handleCommand(Commands.moveForward); } },
-      { title: 'move backward', action: () => { this.handleCommand(Commands.moveBackward); } },
-      { title: 'to back', action: () => { this.handleCommand(Commands.moveToBack); } },
+      { title: 'to front', action: () => { this.executeCommand({ type: CommandType.moveToFront }); } },
+      { title: 'move forward', action: () => { this.executeCommand({ type: CommandType.moveForward }); } },
+      { title: 'move backward', action: () => { this.executeCommand({ type: CommandType.moveBackward }); } },
+      { title: 'to back', action: () => { this.executeCommand({ type: CommandType.moveToBack }); } },
 
     ];
     if (designItem.length > 1) {
@@ -509,11 +525,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     */
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
-      this.handleCommand(Commands.undo);
+      this.executeCommand({ type: CommandType.undo });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
-      this.handleCommand(Commands.redo);
+      this.executeCommand({ type: CommandType.redo });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'y')
-      this.handleCommand(Commands.redo);
+      this.executeCommand({ type: CommandType.redo });
     else {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (!primarySelection) {
@@ -526,7 +542,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
-          this.handleCommand(Commands.delete);
+          this.executeCommand({ type: CommandType.delete });
           break;
         case 'ArrowUp':
           {
