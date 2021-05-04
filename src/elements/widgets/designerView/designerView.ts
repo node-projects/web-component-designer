@@ -54,6 +54,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   private _actionType?: PointerActionType;
   private _actionStartedDesignItem?: IDesignItem;
+  private _actionModeStarted: string;
   private _movedSinceStartedAction: boolean = false;
   private _initialPoint: IDesignerMousePoint;
   private _initialSizes: ISize[];
@@ -110,8 +111,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       overflow: visible;
     }
     .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
-    .svg-selection { stroke: blue; fill: transparent; stroke-width: 2; }
-    .svg-primary-selection-move { fill: blue; pointer-events: all }
+    .svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; }
+    .svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: all }
+    .svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
+    .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
+    
   
   
     #canvas * {
@@ -339,7 +343,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._firstConnect = true;
       this._outercanvas2.addEventListener(EventNames.PointerDown, event => this._pointerEventHandler(event));
       this._outercanvas2.addEventListener(EventNames.PointerMove, event => this._pointerEventHandler(event));
-      this._outercanvas2.addEventListener(EventNames.PointerUp, event => this._pointerEventHandler(event));
+      window.addEventListener(EventNames.PointerUp, event => this._pointerEventHandler(event));
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
@@ -569,9 +573,12 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
 
-  private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType) {
-    if (currentElement.parentNode == this.svgLayer)
+  private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType, actionMode?: string) {
+    if (event.type != EventNames.PointerUp && currentElement.parentNode == this.svgLayer)
       return;
+    if (currentElement.parentNode == this.svgLayer)
+      currentElement = this.instanceServiceContainer.selectionService.primarySelection.element ?? this._canvas;
+
 
     switch (event.type) {
       case EventNames.PointerDown:
@@ -610,7 +617,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           this._actionType = PointerActionType.DrawSelection;
           return;
         } else {
-          this._actionType = isCurrentItemSelected && this._shouldResize(currentPoint, { x: rectCurrentElement.right - this._ownBoundingRect.left, y: rectCurrentElement.bottom - this._ownBoundingRect.top }) ? PointerActionType.Resize : PointerActionType.DragOrSelect;
+          this._actionType = forcedAction ?? PointerActionType.DragOrSelect;
         }
       }
     }
@@ -624,7 +631,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     if (this._actionType == PointerActionType.DrawSelection || this._actionType == PointerActionType.DrawingSelection) {
       this._pointerActionTypeDrawSelection(event, (<HTMLElement>currentElement), currentPoint);
     } else if (this._actionType == PointerActionType.Resize) {
-      this._pointerActionTypeResize(event, (<HTMLElement>currentElement), currentPoint);
+      this._pointerActionTypeResize(event, (<HTMLElement>currentElement), currentPoint, actionMode);
     } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
       this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
     }
@@ -948,10 +955,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     //todo this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
   }
 
-  _pointerActionTypeResize(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint) {
+  _pointerActionTypeResize(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint, actionMode: string = 'se-resize') {
     switch (event.type) {
       case EventNames.PointerDown:
         this._initialSizes = [];
+        this._actionModeStarted = actionMode;
         for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
           let rect = designItem.element.getBoundingClientRect();
           this._initialSizes.push({ width: rect.width, height: rect.height });
@@ -965,10 +973,26 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           trackY = Math.round(trackY / this.gridSize) * this.gridSize;
         }
         let i = 0;
-        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
-          (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
+        switch (this._actionModeStarted) {
+          case 'se-resize':
+            for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+              (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
+              (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
+            }
+            break;
+          case 's-resize':
+            for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+              (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
+            }
+            break;
+          case 'e-resize':
+            for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+              (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
+            }
+            break;
+          //for other resize modes we need a replacement
         }
+
         this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
         break;
       case EventNames.PointerUp:
@@ -984,16 +1008,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
   }
 
-  _shouldResize(pointerPoint: IPoint, bottomPoint: IPoint) {
-    const right = bottomPoint.x - pointerPoint.x;
-    const bottom = bottomPoint.y - pointerPoint.y;
-    return (right < this._resizeOffset && right >= -4 && bottom < this._resizeOffset && bottom >= -4);
-  }
-
-  /*_forceMove(pointerPoint: IPoint, elementPoint: IPoint) { // It is clicked in the Move Addon
-    return (pointerPoint.x < elementPoint.x && pointerPoint.y < elementPoint.y);
-  }*/
-
   public redrawOverlays(designItems?: IDesignItem[]) {
 
   }
@@ -1002,20 +1016,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     DomHelper.removeAllChildnodes(this.svgLayer, 'svg-selection');
 
     if (designItems && designItems.length) {
-      if (designItems[0].nodeType == NodeType.Element) {
-        let p0 = designItems[0].element.getBoundingClientRect();
-
-        let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        line.setAttribute('x', <string><any>(p0.x - this._containerBoundingRect.x - 12));
-        line.setAttribute('width', <string><any>(10));
-        line.setAttribute('y', <string><any>(p0.y - this._containerBoundingRect.y - 12));
-        line.setAttribute('height', <string><any>(10));
-        line.setAttribute('class', 'svg-selection svg-primary-selection-move');
-        line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
-        line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
-        line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItems[0].element as HTMLElement, PointerActionType.Drag));
-        this.svgLayer.appendChild(line);
-      }
       for (let i of designItems) {
         if (i.nodeType == NodeType.Element) {
           let p = i.element.getBoundingClientRect();
@@ -1029,7 +1029,53 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           this.svgLayer.appendChild(line);
         }
       }
+
+      if (designItems[0].nodeType == NodeType.Element) {
+        let p0 = designItems[0].element.getBoundingClientRect();
+
+        this._drawMoveOverlay(p0.x - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y - 16, 60, 15, designItems[0]);
+        this._drawResizerOverlay(p0.x - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'nw-resize', designItems[0])
+        this._drawResizerOverlay(p0.x + (p0.width / 2) - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'n-resize', designItems[0])
+        this._drawResizerOverlay(p0.x + p0.width - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'ne-resize', designItems[0])
+        this._drawResizerOverlay(p0.x - this._containerBoundingRect.x, p0.y + p0.height - this._containerBoundingRect.y, 'sw-resize', designItems[0])
+        this._drawResizerOverlay(p0.x + (p0.width / 2) - this._containerBoundingRect.x, p0.y + p0.height - this._containerBoundingRect.y, 's-resize', designItems[0])
+        this._drawResizerOverlay(p0.x + p0.width - this._containerBoundingRect.x, p0.y + p0.height - this._containerBoundingRect.y, 'se-resize', designItems[0])
+        this._drawResizerOverlay(p0.x - this._containerBoundingRect.x, p0.y + (p0.height / 2) - this._containerBoundingRect.y, 'w-resize', designItems[0])
+        this._drawResizerOverlay(p0.x + p0.width - this._containerBoundingRect.x, p0.y + (p0.height / 2) - this._containerBoundingRect.y, 'e-resize', designItems[0])
+      }
     }
+  }
+
+  _drawMoveOverlay(posX: number, posY: number, w: number, h: number, designItem: IDesignItem) {
+    let line = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    line.setAttribute('x', <string><any>posX);
+    line.setAttribute('y', <string><any>posY);
+    line.setAttribute('width', <string><any>w);
+    line.setAttribute('height', <string><any>h);
+    line.setAttribute('class', 'svg-selection svg-primary-selection-move');
+    line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Drag));
+    line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Drag));
+    line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Drag));
+    this.svgLayer.appendChild(line);
+    let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute('x', <string><any>posX);
+    text.setAttribute('y', <string><any>(posY + 11));
+    text.textContent = designItem.name.substring(0, 10);
+    text.setAttribute('class', 'svg-selection svg-text');
+    this.svgLayer.appendChild(text);
+  }
+
+  _drawResizerOverlay(posX: number, posY: number, cursor: string, designItem: IDesignItem) {
+    let line = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    line.setAttribute('cx', <string><any>posX);
+    line.setAttribute('cy', <string><any>posY);
+    line.setAttribute('r', <string><any>(3));
+    line.setAttribute('class', 'svg-selection svg-primary-resizer');
+    line.setAttribute('style', 'cursor: ' + cursor);
+    line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
+    line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
+    line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
+    this.svgLayer.appendChild(line);
   }
 
   deepTargetFind(x, y, notThis) {
