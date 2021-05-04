@@ -25,7 +25,7 @@ import { DeleteAction } from '../../services/undoService/transactionItems/Delete
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
 import { NodeType } from '../../item/NodeType';
 import { Commands } from '../../Commands';
-import { MoveElementAction } from '../../services/undoService/transactionItems/MoveElementAction';
+import { MoveElementInDomAction } from '../../services/undoService/transactionItems/MoveElementInDomAction';
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView {
   // Public Properties
@@ -342,13 +342,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     //todo -> via undo redo service
     let sel = this.instanceServiceContainer.selectionService.primarySelection;
     if (command == Commands.moveBackward)
-      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
+      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
     else if (command == Commands.moveForward)
-      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'afterend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
+      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'afterend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
     else if (command == Commands.moveToBack)
-      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'afterbegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
+      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'afterbegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
     else if (command == Commands.moveToFront)
-      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'beforeend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
+      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'beforeend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
   }
 
   initialize(serviceContainer: ServiceContainer) {

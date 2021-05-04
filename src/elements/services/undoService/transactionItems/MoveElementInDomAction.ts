@@ -1,7 +1,7 @@
 import { ITransactionItem } from '../ITransactionItem';
 import { IDesignItem } from '../../../item/IDesignItem';
 
-export class MoveElementAction implements ITransactionItem {
+export class MoveElementInDomAction implements ITransactionItem {
 
   constructor(designItem: IDesignItem, newTarget: IDesignItem, newPosition: InsertPosition, oldTarget: IDesignItem, oldPosition: InsertPosition) {
     this.title = "Move Item";
