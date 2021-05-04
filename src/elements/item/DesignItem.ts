@@ -204,6 +204,13 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
+  static GetDesignItem(node: Node): IDesignItem {
+    if (!node)
+      return null;
+    let designItem: IDesignItem = DesignItem._designItemMap.get(node);
+    return designItem;
+  }
+
   public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {
     const action = new CssStyleChangeAction(this, name, value, this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);

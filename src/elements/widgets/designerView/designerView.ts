@@ -24,6 +24,8 @@ import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
 import { NodeType } from '../../item/NodeType';
+import { Commands } from '../../Commands';
+import { MoveElementAction } from '../../services/undoService/transactionItems/MoveElementAction';
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView {
   // Public Properties
@@ -310,16 +312,22 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
   }
 
-  handleCommand(command: string) {
+  handleCommand(command: Commands) {
     switch (command) {
-      case 'delete':
+      case Commands.delete:
         this.handleDeleteCommand();
         break;
-      case 'undo':
+      case Commands.undo:
         this.instanceServiceContainer.undoService.undo();
         break;
-      case 'redo':
+      case Commands.redo:
         this.instanceServiceContainer.undoService.redo();
+        break;
+      case Commands.moveToFront:
+      case Commands.moveForward:
+      case Commands.moveBackward:
+      case Commands.moveToBack:
+        this.handleMoveCommand(command);
         break;
     }
   }
@@ -328,6 +336,19 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let items = this.instanceServiceContainer.selectionService.selectedElements;
     this.instanceServiceContainer.undoService.execute(new DeleteAction(items));
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
+  }
+
+  handleMoveCommand(command: Commands) {
+    //todo -> via undo redo service
+    let sel = this.instanceServiceContainer.selectionService.primarySelection;
+    if (command == Commands.moveBackward)
+      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
+    else if (command == Commands.moveForward)
+      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'afterend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
+    else if (command == Commands.moveToBack)
+      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'afterbegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
+    else if (command == Commands.moveToFront)
+      this.instanceServiceContainer.undoService.execute(new MoveElementAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'beforeend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
   }
 
   initialize(serviceContainer: ServiceContainer) {
@@ -444,7 +465,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       { title: 'cut', action: () => { } },
       { title: 'paste', action: () => { } },
       { title: '-' },
-      { title: 'delete', action: () => { this.handleCommand('delete'); } },
+      { title: 'delete', action: () => { this.handleCommand(Commands.delete); } },
+      { title: '-' },
+      { title: 'to front', action: () => { this.handleCommand(Commands.moveToFront); } },
+      { title: 'move forward', action: () => { this.handleCommand(Commands.moveForward); } },
+      { title: 'move backward', action: () => { this.handleCommand(Commands.moveBackward); } },
+      { title: 'to back', action: () => { this.handleCommand(Commands.moveToBack); } },
+
     ];
     if (designItem.length > 1) {
       //todo: special menu for multiple items?
@@ -1059,7 +1086,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute('x', <string><any>posX);
     text.setAttribute('y', <string><any>(posY + 11));
-    text.textContent = designItem.name.substring(0, 10) +  '…';
+    text.textContent = designItem.name.substring(0, 10) + '…';
     text.setAttribute('class', 'svg-selection svg-text');
     this.svgLayer.appendChild(text);
   }
