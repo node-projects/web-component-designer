@@ -2,7 +2,7 @@ import { BaseCustomWebComponentLazyAppend, css } from "@node-projects/base-custo
 import { TypedEvent } from '../../basic/TypedEvent';
 import { IActivateable } from '../../interfaces/IActivateable';
 
-export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number };
+export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number, changedViaClick?: boolean };
 
 export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
 
@@ -120,7 +120,10 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       tabHeaderDiv.className = 'tab-header';
       let j = i;
       tabHeaderDiv.onpointerdown = () => {
-        this.selectedIndex = j;
+        let old = this._selectedIndex;
+        this._selectedIndex = j;
+        if (this._headerDiv.children.length)
+          this._selectedIndexChanged(old, true);
       }
       this._headerDiv.appendChild(tabHeaderDiv);
       i++;
@@ -129,7 +132,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
     this._selectedIndexChanged();
   }
 
-  private _selectedIndexChanged(oldIndex?: number) {
+  private _selectedIndexChanged(oldIndex?: number, viaClick = false) {
     for (let index = 0; index < this.children.length; index++) {
       const element = this.children[index];
       if (index == this._selectedIndex) {
@@ -148,7 +151,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
         this._headerDiv.children[index].classList.remove('selected');
       }
     }
-    this.onSelectedTabChanged.emit({ newIndex: this._selectedIndex, oldIndex: oldIndex });
+    this.onSelectedTabChanged.emit({ newIndex: this._selectedIndex, oldIndex: oldIndex, changedViaClick: viaClick });
   }
 
   private _bugfixNotShownContent(element: HTMLElement, oldDisplay: string) {

@@ -47,6 +47,11 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       this._monacoEditor.layout();
     });
   }
+  
+  focusEditor() {
+    this.focus();
+    this._monacoEditor.focus();
+  }
 
   activated() {
     if (this._monacoEditor)

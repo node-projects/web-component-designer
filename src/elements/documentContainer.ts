@@ -80,7 +80,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
   }
 
   ready() {
-    this._tabControl.onSelectedTabChanged.on((i) => {
+    this._tabControl.onSelectedTabChanged.on(i => {
 
       if (i.oldIndex === 0) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
@@ -97,6 +97,9 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend {
         if (this._selectionPosition) {
           this.codeView.setSelection(this._selectionPosition);
           this._selectionPosition = null;
+        }
+        if (i.changedViaClick) {
+          this.codeView.focusEditor();
         }
       } else if (i.newIndex === 2)
         this.demoView.display(this._content);

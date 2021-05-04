@@ -45,6 +45,11 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     this.shadowRoot.appendChild(this._editor)
   }
 
+  focusEditor() {
+    this.focus();
+    this._aceEditor.focus();
+  }
+
   oneTimeSetup() {
     //@ts-ignore
     let langTools = ace.require("ace/ext/language_tools");

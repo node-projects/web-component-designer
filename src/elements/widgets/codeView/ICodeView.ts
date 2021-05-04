@@ -4,4 +4,5 @@ export interface ICodeView {
   update(code: string);
   getText();
   setSelection(position: IStringPosition);
+  focusEditor();
 }
