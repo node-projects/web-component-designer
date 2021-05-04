@@ -509,9 +509,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     */
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
-      this.handleCommand('undo');
+      this.handleCommand(Commands.undo);
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
-      this.handleCommand('redo');
+      this.handleCommand(Commands.redo);
+    else if ((event.ctrlKey || event.metaKey) && event.key === 'y')
+      this.handleCommand(Commands.redo);
     else {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (!primarySelection) {
@@ -524,7 +526,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
-          this.handleCommand('delete');
+          this.handleCommand(Commands.delete);
           break;
         case 'ArrowUp':
           {
