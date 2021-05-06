@@ -42,6 +42,32 @@ export class DefaultPlacementService implements IContainerService {
         }
       }
     }
+    return { x: trackX, y: trackY };
+  }
+
+  placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]): IPoint {
+    let trackX = newPoint.x; 
+    let trackY = newPoint.y; 
+
+    if (!event.ctrlKey) {
+      if (placementView.alignOnGrid) {
+        trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize;
+        trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize;
+      }
+      else if (placementView.alignOnSnap) {
+        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.controlOffsetX, y: newPoint.originalY - startPoint.controlOffsetY }, null, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        if (newPos.x !== null) {
+          trackX = newPos.x;
+        } else {
+          trackX = Math.round(trackX);
+        }
+        if (newPos.y !== null) {
+          trackY = newPos.y;
+        } else {
+          trackY = Math.round(trackY);
+        }
+      }
+    }
 
     return { x: trackX, y: trackY };
   }

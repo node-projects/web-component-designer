@@ -4,6 +4,7 @@ import type { Ace } from "ace-builds";
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
 import { CommandType } from '../../../commandHandling/CommandType';
+import { IDisposable } from 'monaco-editor';
 
 class CodeViewAceCompleter {
   getCompletions(editor, session, pos, prefix, callback) {
@@ -19,7 +20,7 @@ class CodeViewAceCompleter {
   }
 }
 
-export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICodeView {
+export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICodeView, IDisposable {
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 
@@ -45,6 +46,9 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     this._editor.style.width = '100%';
 
     this.shadowRoot.appendChild(this._editor)
+  }
+  dispose(): void {
+    this._aceEditor.destroy();
   }
 
   executeCommand(command: IUiCommand) {

@@ -9,8 +9,9 @@ import { IStringPosition } from './services/serializationService/IStringPosition
 import { IDemoView } from './widgets/demoView/IDemoView';
 import { IUiCommandHandler } from "../commandHandling/IUiCommandHandler";
 import { IUiCommand } from "../commandHandling/IUiCommand";
+import { IDisposable } from "monaco-editor";
 
-export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler {
+export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;
   public codeView: ICodeView & HTMLElement;
   public demoView: IDemoView & HTMLElement;
@@ -56,6 +57,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this.shadowRoot.appendChild(div);
       this._tabControl.selectedIndex = 0;
     });
+  }
+
+  dispose(): void {
+    this.codeView.dispose();
   }
 
   executeCommand(command: IUiCommand) {

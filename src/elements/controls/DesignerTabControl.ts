@@ -1,5 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css } from "@node-projects/base-custom-webcomponent"
-import { TypedEvent } from '../../basic/TypedEvent';
+import { BaseCustomWebComponentLazyAppend, css, TypedEvent } from "@node-projects/base-custom-webcomponent"
 import { IActivateable } from '../../interfaces/IActivateable';
 
 export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number, changedViaClick?: boolean };
@@ -140,27 +139,12 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
         this._headerDiv.children[index].classList.add('selected');
         if ((<IActivateable><unknown>element).activated)
           (<IActivateable><unknown>element).activated();
-
-        //bugfix sometimes not shown content
-        if (!(<HTMLElement>element).clientWidth) {
-          let oldDisplay = (<HTMLElement>element).style.display;
-          this._bugfixNotShownContent((<HTMLElement>element), oldDisplay);
-        }
       } else {
         element.removeAttribute("slot");
         this._headerDiv.children[index].classList.remove('selected');
       }
     }
     this.onSelectedTabChanged.emit({ newIndex: this._selectedIndex, oldIndex: oldIndex, changedViaClick: viaClick });
-  }
-
-  private _bugfixNotShownContent(element: HTMLElement, oldDisplay: string) {
-    /*requestAnimationFrame(() => {
-      element.style.display = 'none';
-      element.style.display = oldDisplay;
-      if (!(<HTMLElement>element).clientWidth)
-        this._bugfixNotShownContent(element, oldDisplay);
-    });*/
   }
 
   public readonly onSelectedTabChanged = new TypedEvent<DesignerTabControlIndexChangedEventArgs>();

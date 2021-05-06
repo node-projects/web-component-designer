@@ -1,5 +1,5 @@
+import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IDesignItem } from '../../item/IDesignItem';
-import { TypedEvent } from '../../../basic/TypedEvent';
 import { ISelectionChangedEvent } from './ISelectionChangedEvent';
 
 export interface ISelectionService {

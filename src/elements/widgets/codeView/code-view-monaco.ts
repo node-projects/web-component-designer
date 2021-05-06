@@ -8,6 +8,11 @@ import { IUiCommand } from '../../../commandHandling/IUiCommand';
 import { CommandType } from '../../../commandHandling/CommandType';
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
+
+  dispose(): void {
+    this._monacoEditor.dispose();
+  }
+
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 

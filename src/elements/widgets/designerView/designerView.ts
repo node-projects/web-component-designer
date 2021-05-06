@@ -1,5 +1,3 @@
-//import '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
-import { IPoint } from '../../../interfaces/IPoint';
 import { PointerActionType } from "../../../enums/PointerActionType";
 import { EventNames } from "../../../enums/EventNames";
 import { ISize } from '../../../interfaces/ISize';
@@ -12,7 +10,7 @@ import { ISelectionChangedEvent } from '../../services/selectionService/ISelecti
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
 import { BaseCustomWebComponentLazyAppend, css, html, DomHelper } from '@node-projects/base-custom-webcomponent';
-import { dragDropFormatName } from '../../../Constants';
+import { assetsPath, dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
 import { DomConverter } from './DomConverter';
@@ -118,6 +116,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     .svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: all }
     .svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
     .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
+    .svg-primary-rotate { stroke: #3899ec; fill: #3899ec; pointer-events: all }
     
   
   
@@ -606,6 +605,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _pointerEventHandler(event: PointerEvent) {
+    if (event.button == 2)
+      return;
     let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as Element;
     if (currentElement === this._outercanvas2 || currentElement === this.svgLayer)
       currentElement = this._canvas;
@@ -618,9 +619,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType, actionMode?: string) {
-    if (event.type != EventNames.PointerUp && currentElement.parentNode == this.svgLayer)
+    if (event.type != EventNames.PointerUp && currentElement && currentElement.parentNode == this.svgLayer)
       return;
-    if (currentElement.parentNode == this.svgLayer)
+    if (currentElement && currentElement.parentNode == this.svgLayer)
       currentElement = this.instanceServiceContainer.selectionService.primarySelection.element ?? this._canvas;
 
 
@@ -638,6 +639,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._resetPointerEventsForClickThrough();
 
     this._fillCalculationrects();
+
+    if (!currentElement)
+      return;
 
     const currentPoint = this.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
@@ -676,6 +680,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._pointerActionTypeDrawSelection(event, (<HTMLElement>currentElement), currentPoint);
     } else if (this._actionType == PointerActionType.Resize) {
       this._pointerActionTypeResize(event, (<HTMLElement>currentElement), currentPoint, actionMode);
+     } else if (this._actionType == PointerActionType.Rotate) {
+        this._pointerActionTypeRotate(event, (<HTMLElement>currentElement), currentPoint, actionMode);
     } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
       this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
     }
@@ -800,7 +806,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           //  return;
 
           if (this._movedSinceStartedAction) {
-            let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+            const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
             containerService.place(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
             this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
           }
@@ -999,7 +1005,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     //todo this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
   }
 
-  _pointerActionTypeResize(event: MouseEvent, currentElement: HTMLElement, currentPoint: IPoint, actionMode: string = 'se-resize') {
+  _pointerActionTypeResize(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint, actionMode: string = 'se-resize') {
     switch (event.type) {
       case EventNames.PointerDown:
         this._initialSizes = [];
@@ -1008,15 +1014,21 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           let rect = designItem.element.getBoundingClientRect();
           this._initialSizes.push({ width: rect.width, height: rect.height });
         }
+        if (this.alignOnSnap)
+          this.snapLines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
         break;
       case EventNames.PointerMove:
-        let trackX = currentPoint.x - this._initialPoint.x;
-        let trackY = currentPoint.y - this._initialPoint.y;
-        if (this.alignOnGrid) {
-          trackX = Math.round(trackX / this.gridSize) * this.gridSize;
-          trackY = Math.round(trackY / this.gridSize) * this.gridSize;
-        }
+
+        this._initialPoint.controlOffsetX = 0;
+        this._initialPoint.controlOffsetY = 0;
+        const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+        const diff = containerService.placePoint(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
+
+        let trackX = diff.x - this._initialPoint.x;
+        let trackY = diff.y - this._initialPoint.y;
+
         let i = 0;
+
         switch (this._actionModeStarted) {
           case 'se-resize':
             for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
@@ -1052,6 +1064,42 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
   }
 
+  _pointerActionTypeRotate(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint, actionMode: string = 'se-resize') {
+    switch (event.type) {
+      case EventNames.PointerDown:
+        this._actionModeStarted = actionMode;
+        break;
+      case EventNames.PointerMove:
+        let trackX = currentPoint.x - this._initialPoint.x;
+        let trackY = currentPoint.y - this._initialPoint.y;
+
+        let i = 0;
+
+
+/*
+        var center_x = (offset.left) + (img.width() / 2);
+    var center_y = (offset.top) + (img.height() / 2);
+    var mouse_x = evt.pageX;
+    var mouse_y = evt.pageY;
+    var radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
+    var degree = (radians * (180 / Math.PI) * -1) + 90;
+    img.css('-moz-transform', 'rotate(' + degree + 'deg)');*/
+
+        this._drawOutlineRects(this.instanceServiceContainer.selectionService.selectedElements);
+        break;
+      case EventNames.PointerUp:
+        let cg = this.rootDesignItem.openGroup("Resize Elements", this.instanceServiceContainer.selectionService.selectedElements);
+
+        /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
+          designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
+          designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
+        }*/
+        cg.commit();
+        this._initialSizes = null;
+        break;
+    }
+  }
+
   public redrawOverlays(designItems?: IDesignItem[]) {
 
   }
@@ -1078,6 +1126,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         let p0 = designItems[0].element.getBoundingClientRect();
 
         this._drawMoveOverlay(p0.x - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y - 16, 60, 15, designItems[0]);
+        //this._drawRotateOverlay(p0.x - this._containerBoundingRect.x - 13, p0.y - this._containerBoundingRect.y - 8.5, designItems[0])
         this._drawResizerOverlay(p0.x - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'nw-resize', designItems[0])
         this._drawResizerOverlay(p0.x + (p0.width / 2) - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'n-resize', designItems[0])
         this._drawResizerOverlay(p0.x + p0.width - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'ne-resize', designItems[0])
@@ -1120,6 +1169,28 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
     line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
     this.svgLayer.appendChild(line);
+  }
+
+  _drawRotateOverlay(posX: number, posY: number, designItem: IDesignItem) {
+    let line = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    line.setAttribute('cx', <string><any>posX);
+    line.setAttribute('cy', <string><any>posY);
+    line.setAttribute('r', <string><any>(7.5));
+    line.setAttribute('class', 'svg-selection svg-primary-rotate');
+    line.setAttribute('style', 'cursor: grabbing');
+    let p = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    p.setAttribute('href', assetsPath +'images/designer/rotate.svg');
+    p.setAttribute('x', <string><any>(posX - 6.5));
+    p.setAttribute('y', <string><any>(posY - 6.5));
+    p.setAttribute('width', '12');
+    p.setAttribute('height', '12');
+    p.setAttribute('class', 'svg-selection');
+    p.setAttribute('style', 'pointer-events: none');
+    line.addEventListener(EventNames.PointerDown, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Rotate));
+    line.addEventListener(EventNames.PointerMove, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Rotate));
+    line.addEventListener(EventNames.PointerUp, event => this._pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Rotate));
+    this.svgLayer.appendChild(line);
+    this.svgLayer.appendChild(p);
   }
 
   deepTargetFind(x, y, notThis) {

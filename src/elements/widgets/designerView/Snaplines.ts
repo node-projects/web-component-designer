@@ -71,33 +71,40 @@ export class Snaplines {
     let posH = undefined;
     for (let i = 0; i < this._positionsH.length; i++) {
       let akDiff1 = Math.abs(this._positionsH[i][0] - position.x);
-      let akDiff2 = Math.abs(position.x + size.width - this._positionsH[i][0]);
       if (akDiff1 < minDiff || (akDiff1 === minDiff && pH === undefined)) {
         minDiff = akDiff1;
         pH = [];
         posH = this._positionsH[i][0];
       }
-      if (akDiff2 < minDiff || (akDiff2 === minDiff && pH === undefined)) {
-        minDiff = akDiff2;
-        pH = [];
-        posH = this._positionsH[i][0] - size.width;
+      let akDiff2: number;
+      if (size) {
+        akDiff2 = Math.abs(position.x + size.width - this._positionsH[i][0]);
+        if (akDiff2 < minDiff || (akDiff2 === minDiff && pH === undefined)) {
+          minDiff = akDiff2;
+          pH = [];
+          posH = this._positionsH[i][0] - size.width;
+        }
       }
       if (akDiff1 === minDiff) {
         pH.push(this._positionsH[i][1]);
       }
-      if (akDiff2 === minDiff && akDiff1 !== minDiff) {
-        pH.push(this._positionsH[i][1]);
+      if (size) {
+        if (akDiff2 === minDiff && akDiff1 !== minDiff) {
+          pH.push(this._positionsH[i][1]);
+        }
       }
     }
-    for (let i = 0; i < this._positionsMiddleH.length; i++) {
-      let akDiff1 = Math.abs(this._positionsMiddleH[i][0] - (position.x + size.width / 2));
-      if (akDiff1 < minDiff || (akDiff1 === minDiff && pH === undefined)) {
-        minDiff = akDiff1;
-        pH = [];
-        posH = this._positionsMiddleH[i][0] - size.width / 2;
-      }
-      if (akDiff1 === minDiff) {
-        pH.push(this._positionsMiddleH[i][1]);
+    if (size) {
+      for (let i = 0; i < this._positionsMiddleH.length; i++) {
+        let akDiff1 = Math.abs(this._positionsMiddleH[i][0] - (position.x + size.width / 2));
+        if (akDiff1 < minDiff || (akDiff1 === minDiff && pH === undefined)) {
+          minDiff = akDiff1;
+          pH = [];
+          posH = this._positionsMiddleH[i][0] - size.width / 2;
+        }
+        if (akDiff1 === minDiff) {
+          pH.push(this._positionsMiddleH[i][1]);
+        }
       }
     }
 
@@ -106,33 +113,40 @@ export class Snaplines {
     let posV = undefined;
     for (let i = 0; i < this._positionsV.length; i++) {
       let akDiff1 = Math.abs(this._positionsV[i][0] - position.y);
-      let akDiff2 = Math.abs(position.y + size.height - this._positionsV[i][0]);
       if (akDiff1 < minDiff || (akDiff1 === minDiff && pV === undefined)) {
         minDiff = akDiff1;
         pV = [];
         posV = this._positionsV[i][0];
       }
-      if (akDiff2 < minDiff || (akDiff2 === minDiff && pV === undefined)) {
-        minDiff = akDiff2;
-        pV = [];
-        posV = this._positionsV[i][0] - size.height;
+      let akDiff2: number;
+      if (size) {
+        akDiff2 = Math.abs(position.y + size.height - this._positionsV[i][0]);
+        if (akDiff2 < minDiff || (akDiff2 === minDiff && pV === undefined)) {
+          minDiff = akDiff2;
+          pV = [];
+          posV = this._positionsV[i][0] - size.height;
+        }
       }
       if (akDiff1 === minDiff) {
         pV.push(this._positionsV[i][1]);
       }
-      if (akDiff2 === minDiff && akDiff1 !== minDiff) {
-        pV.push(this._positionsV[i][1]);
+      if (size) {
+        if (akDiff2 === minDiff && akDiff1 !== minDiff) {
+          pV.push(this._positionsV[i][1]);
+        }
       }
     }
-    for (let i = 0; i < this._positionsMiddleV.length; i++) {
-      let akDiff1 = Math.abs(this._positionsMiddleV[i][0] - (position.y + size.height / 2));
-      if (akDiff1 < minDiff || (akDiff1 === minDiff && pV === undefined)) {
-        minDiff = akDiff1;
-        pV = [];
-        posV = this._positionsMiddleV[i][0] - size.height / 2;
-      }
-      if (akDiff1 === minDiff) {
-        pV.push(this._positionsMiddleV[i][1]);
+    if (size) {
+      for (let i = 0; i < this._positionsMiddleV.length; i++) {
+        let akDiff1 = Math.abs(this._positionsMiddleV[i][0] - (position.y + size.height / 2));
+        if (akDiff1 < minDiff || (akDiff1 === minDiff && pV === undefined)) {
+          minDiff = akDiff1;
+          pV = [];
+          posV = this._positionsMiddleV[i][0] - size.height / 2;
+        }
+        if (akDiff1 === minDiff) {
+          pV.push(this._positionsMiddleV[i][1]);
+        }
       }
     }
 
@@ -157,7 +171,7 @@ export class Snaplines {
         maxY = maxY > ry ? maxY : ry;
       }
       for (const r of rectsH) {
-        if (r.x - this._outerRect.left == position.x || r.x - this._outerRect.left == position.x + size.width) {
+        if (r.x - this._outerRect.left == position.x || (size && r.x - this._outerRect.left == position.x + size.width)) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
           line.setAttribute('x1', <string><any>(r.x - this._outerRect.x));
           line.setAttribute('x2', <string><any>(r.x - this._outerRect.x));
@@ -167,7 +181,7 @@ export class Snaplines {
           this._svg.appendChild(line);
         }
 
-        if (r.x - this._outerRect.left + r.width == position.x || r.x - this._outerRect.left + r.width == position.x + size.width) {
+        if (r.x - this._outerRect.left + r.width == position.x || (size && r.x - this._outerRect.left + r.width == position.x + size.width)) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
           line.setAttribute('x1', <string><any>(r.x - this._outerRect.x + r.width));
           line.setAttribute('x2', <string><any>(r.x - this._outerRect.x + r.width));
@@ -177,7 +191,7 @@ export class Snaplines {
           this._svg.appendChild(line);
         }
 
-        if (r.x - this._outerRect.left + r.width / 2 == position.x + size.width / 2) {
+        if (size && r.x - this._outerRect.left + r.width / 2 == position.x + size.width / 2) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
           line.setAttribute('x1', <string><any>(r.x - this._outerRect.x + r.width / 2));
           line.setAttribute('x2', <string><any>(r.x - this._outerRect.x + r.width / 2));
@@ -206,7 +220,7 @@ export class Snaplines {
         maxX = maxX > rx ? maxX : rx;
       }
       for (const r of rectsV) {
-        if (r.y - this._outerRect.top == position.y || r.y - this._outerRect.top == position.y + size.height) {
+        if (r.y - this._outerRect.top == position.y || (size && r.y - this._outerRect.top == position.y + size.height)) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
           line.setAttribute('x1', <string><any>(minX));
           line.setAttribute('x2', <string><any>(maxX));
@@ -216,7 +230,7 @@ export class Snaplines {
           this._svg.appendChild(line);
         }
 
-        if (r.y - this._outerRect.top + r.height == position.y || r.y - this._outerRect.top + r.height == position.y + size.height) {
+        if (r.y - this._outerRect.top + r.height == position.y || (size && r.y - this._outerRect.top + r.height == position.y + size.height)) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
           line.setAttribute('x1', <string><any>(minX));
           line.setAttribute('x2', <string><any>(maxX));
@@ -226,7 +240,7 @@ export class Snaplines {
           this._svg.appendChild(line);
         }
 
-        if (r.y - this._outerRect.top + r.height / 2 == position.y + size.height / 2) {
+        if (size && r.y - this._outerRect.top + r.height / 2 == position.y + size.height / 2) {
           let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
           line.setAttribute('x1', <string><any>(minX));
           line.setAttribute('x2', <string><any>(maxX));

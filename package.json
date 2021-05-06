@@ -10,11 +10,12 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.0.180",
+    "@node-projects/base-custom-webcomponent": "^0.0.200",
     "@webcomponents/webcomponentsjs": "^2.5.0",
     "construct-style-sheets-polyfill": "^2.4.16"
   },
   "devDependencies": {
+    "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^2.2.2",
     "@types/jquery": "^3.5.5",
     "@types/jquery.fancytree": "0.0.6",

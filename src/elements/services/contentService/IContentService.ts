@@ -1,6 +1,6 @@
-import { TypedEvent } from '../../../basic/TypedEvent';
 import { IContentChanged } from './IContentChanged';
 import { IDesignItem } from '../../item/IDesignItem';
+import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 
 export interface IContentService {
     readonly onContentChanged: TypedEvent<IContentChanged>;

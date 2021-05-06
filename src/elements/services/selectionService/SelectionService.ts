@@ -1,7 +1,7 @@
 import { ISelectionService } from './ISelectionService';
 import { IDesignItem } from '../../item/IDesignItem';
-import { TypedEvent } from '../../../basic/TypedEvent';
 import { ISelectionChangedEvent } from './ISelectionChangedEvent';
+import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 
 export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;
@@ -28,7 +28,6 @@ export class SelectionService implements ISelectionService {
   isSelected(designItem: IDesignItem) {
     return this.selectedElements.indexOf(designItem) >= 0;
   }
-
-
+  
   readonly onSelectionChanged = new TypedEvent<ISelectionChangedEvent>();
 }

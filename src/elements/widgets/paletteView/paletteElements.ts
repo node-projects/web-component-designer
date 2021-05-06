@@ -75,6 +75,10 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
     this.namesToPackages = new Map();
   }
 
+  disconnectedCallback() {
+    console.log('Custom square element removed from page.');
+  }
+
   loadElements(elementDefintions: IElementDefinition[]) {
     this._elementDefintions = elementDefintions;
 

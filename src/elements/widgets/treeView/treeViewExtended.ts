@@ -38,6 +38,9 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         flex-direction: row;
         display: inline-flex;
       }
+      td {
+        white-space: nowrap;
+      }
       td:nth-child(n+2) {
         text-align: center;
       }

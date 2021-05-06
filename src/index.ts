@@ -1,5 +1,3 @@
-export * from "./basic/TypedEvent.js";
-
 export * from "./elements/controls/DesignerTabControl.js";
 
 export * from "./elements/helper/CssAttributeParser.js";
@@ -55,6 +53,8 @@ export * from "./elements/services/propertiesService/services/LitElementProperti
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
+export * from "./elements/services/propertiesService/ValueType.js";
+
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";

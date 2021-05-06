@@ -7,7 +7,7 @@ export class ContextMenuHelper {
   .context-menu {
     display: none;
     position: absolute;
-    z-index: 10;
+    z-index: 999999;
     padding: 0px 0;
     background-color: #fff;
     border: solid 1px #dfdfdf;
