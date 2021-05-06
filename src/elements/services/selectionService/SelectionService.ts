@@ -2,6 +2,7 @@ import { ISelectionService } from './ISelectionService';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from './ISelectionChangedEvent';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { NodeType } from '../../item/NodeType';
 
 export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;
@@ -16,9 +17,16 @@ export class SelectionService implements ISelectionService {
       this.selectedElements = [];
       this.primarySelection = null
     } else {
-      this.selectedElements = designItems;
-      if (designItems && designItems.length > 0)
-        this.primarySelection = designItems[0];
+      let newSelection: IDesignItem[] = []
+      for (let d of designItems) {
+        while (d && d.nodeType == NodeType.TextNode)
+          d = d.parent;
+        if (d && d.nodeType == NodeType.Element && d != d.instanceServiceContainer.contentService.rootDesignItem)
+          newSelection.push(d)
+      }
+      this.selectedElements = newSelection;
+      if (newSelection && newSelection.length > 0)
+        this.primarySelection = newSelection[0];
       else
         this.primarySelection = null;
     }
@@ -28,6 +36,6 @@ export class SelectionService implements ISelectionService {
   isSelected(designItem: IDesignItem) {
     return this.selectedElements.indexOf(designItem) >= 0;
   }
-  
+
   readonly onSelectionChanged = new TypedEvent<ISelectionChangedEvent>();
 }

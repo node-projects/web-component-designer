@@ -34,17 +34,15 @@ export class DomConverter {
       tag === 'track';
   }
 
-  public static ConvertToString(designItem: IDesignItem, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+  public static ConvertToString(designItems: IDesignItem[], designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     let itw = new IndentedTextWriter();
     let options: IHtmlWriterOptions = { beautifyOutput: true, writeDesignerProperties: true, compressCssToShorthandProperties: true };
 
-    if (designItem.hasChildren) {
-      for (let d of designItem.children()) {
-        d.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
-          if (s.canWrite(d))
-            s.write(itw, d, options, designItemsAssignmentList);
-        });
-      }
+    for (let d of designItems) {
+      d.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
+        if (s.canWrite(d))
+          s.write(itw, d, options, designItemsAssignmentList);
+      });
     }
 
     return itw.getString();
