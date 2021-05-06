@@ -1070,10 +1070,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         this._actionModeStarted = actionMode;
         break;
       case EventNames.PointerMove:
-        let trackX = currentPoint.x - this._initialPoint.x;
-        let trackY = currentPoint.y - this._initialPoint.y;
-
-        let i = 0;
+        //let trackX = currentPoint.x - this._initialPoint.x;
+        //let trackY = currentPoint.y - this._initialPoint.y;
+        //let i = 0;
 
 
 /*
