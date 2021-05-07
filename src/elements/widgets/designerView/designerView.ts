@@ -26,6 +26,7 @@ import { CommandType } from '../../../commandHandling/CommandType';
 import { MoveElementInDomAction } from '../../services/undoService/transactionItems/MoveElementInDomAction';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
+import { DefaultHtmlParserService } from "../../services/htmlParserService/DefaultHtmlParserService";
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -410,8 +411,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.snapLines.initialize(this.rootDesignItem);
 
     if (this.children) {
-      this.parseHTML(this.innerHTML);
-      this.innerHTML = '';
+      const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
+      this._addDesignItems(parser.createDesignItems(this.children, this.serviceContainer, this.instanceServiceContainer))
     }
   }
 
@@ -454,6 +455,10 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.instanceServiceContainer.undoService.clear();
     const parserService = this.serviceContainer.htmlParserService;
     const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
+    this._addDesignItems(designItems);
+  }
+
+  private _addDesignItems(designItems: IDesignItem[]) {
     if (designItems) {
       for (let di of designItems) {
         this.rootDesignItem.element.append(di.element);

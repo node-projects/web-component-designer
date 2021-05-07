@@ -8,9 +8,12 @@ export class DefaultHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
+    return this.createDesignItems(doc.body.children, serviceContainer, instanceServiceContainer);
+  }
 
+  public createDesignItems(elements: HTMLCollection, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     let res: IDesignItem[] = [];
-    for (let el of doc.body.children) { //todo, use childNodes or textnodes will not work
+    for (let el of elements) { //todo, use childNodes or textnodes will not work
       res.push(this._createDesignItemsRecursive(el, serviceContainer, instanceServiceContainer))
     }
 
