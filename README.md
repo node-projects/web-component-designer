@@ -10,7 +10,7 @@ Based on PolymerLabs Wizzywid
 
 This is a Designer Framework wich could easily be included in your own Software..
 
-<img width="985" alt="screenshot of wizzywid" src="https://user-images.githubusercontent.com/1369170/28957547-22175752-78a7-11e7-8770-49df35698e55.png">
+![image](https://user-images.githubusercontent.com/364896/117482820-358e2d80-af65-11eb-97fd-9d15ebf1966f.png)
 
 ## Demo
 
