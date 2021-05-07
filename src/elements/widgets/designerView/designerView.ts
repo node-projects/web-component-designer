@@ -254,9 +254,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     zoomFit.onclick = () => { this._zoomFactor = 7.7; this.zoomFactorChanged(); }
 
     let alignSnap = this._getDomElement<HTMLDivElement>('alignSnap');
-    alignSnap.onclick = () => { this.alignOnSnap = !this.alignOnSnap; }
+    alignSnap.onclick = () => { this.alignOnSnap = !this.alignOnSnap; alignSnap.style.backgroundColor = this.alignOnSnap ? 'deepskyblue' : ''; }
+    alignSnap.style.backgroundColor = this.alignOnSnap ? 'deepskyblue' : '';
     let alignGrid = this._getDomElement<HTMLDivElement>('alignGrid');
-    alignGrid.onclick = () => { this.alignOnGrid = !this.alignOnGrid; }
+    alignGrid.onclick = () => { this.alignOnGrid = !this.alignOnGrid; alignGrid.style.backgroundColor = this.alignOnGrid ? 'deepskyblue' : ''; }
+    alignGrid.style.backgroundColor = this.alignOnGrid ? 'deepskyblue' : '';
 
     this.instanceServiceContainer = new InstanceServiceContainer();
     this.instanceServiceContainer.register("undoService", new UndoService);
