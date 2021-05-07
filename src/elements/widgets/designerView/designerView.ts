@@ -55,6 +55,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _zoomInput: HTMLInputElement;
   private _onContextMenuBound: () => void;
 
+  private _pointerEventHandlerBound: (event: PointerEvent) => void;
+
   private _actionType?: PointerActionType;
   private _actionStartedDesignItem?: IDesignItem;
   private _actionModeStarted: string;
@@ -268,6 +270,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
     this._onContextMenuBound = this._onContextMenu.bind(this);
+    this._pointerEventHandlerBound = this._pointerEventHandler.bind(this);
 
     this._canvas.oncontextmenu = this._onContextMenuBound;
 
@@ -419,22 +422,20 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   connectedCallback() {
     if (!this._firstConnect) {
       this._firstConnect = true;
-      this._outercanvas2.addEventListener(EventNames.PointerDown, event => this._pointerEventHandler(event));
-      this._outercanvas2.addEventListener(EventNames.PointerMove, event => this._pointerEventHandler(event));
-      window.addEventListener(EventNames.PointerUp, event => this._pointerEventHandler(event));
+      this._outercanvas2.addEventListener(EventNames.PointerDown, this._pointerEventHandlerBound);
+      this._outercanvas2.addEventListener(EventNames.PointerMove, this._pointerEventHandlerBound);
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
+      this._canvas.addEventListener('keydown', this._onKeyDownBound, true);
+      this._canvas.addEventListener('keyup', this._onKeyUpBound, true);
       this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
     }
-    //todo change these event handlers maybe???
-    this._canvas.addEventListener('keydown', this._onKeyDownBound, true); //we need to find a way to check wich events are for our control
-    this._canvas.addEventListener('keyup', this._onKeyUpBound, true);
+    window.addEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
   }
 
   disconnectedCallback() {
-    this._canvas.removeEventListener('keydown', this._onKeyDownBound, true);
-    this._canvas.removeEventListener('keyup', this._onKeyUpBound, true);
+    window.removeEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
   }
 
   zoomFactorChanged() {
