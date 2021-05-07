@@ -31,6 +31,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
+  public containerBoundingRect: DOMRect;
 
   // IPlacementView
   public gridSize = 10;
@@ -64,12 +65,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   private _firstConnect: boolean;
   private _ownBoundingRect: DOMRect;
-  private _containerBoundingRect: DOMRect;
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
-
-  //private static _designerClassPrefix = 'node-projects-wcdesigner-';
 
   static override readonly style = css`
     :host {
@@ -489,8 +487,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let grp = di.openGroup("Insert");
     di.setStyle('position', 'absolute')
     const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-    di.setStyle('top', event.offsetY + targetRect.top - this._containerBoundingRect.y + 'px')
-    di.setStyle('left', event.offsetX + targetRect.left - this._containerBoundingRect.x + 'px')
+    di.setStyle('top', event.offsetY + targetRect.top - this.containerBoundingRect.y + 'px')
+    di.setStyle('left', event.offsetX + targetRect.left - this.containerBoundingRect.x + 'px')
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
     grp.commit();
     this.instanceServiceContainer.selectionService.setSelectedElements([di]);
@@ -630,12 +628,12 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
     let targetRect = target.getBoundingClientRect();
     return {
-      originalX: event.x - this._containerBoundingRect.x,
+      originalX: event.x - this.containerBoundingRect.x,
       containerOriginalX: event.x - this._ownBoundingRect.x,
-      x: (event.x - this._containerBoundingRect.x) / this._zoomFactor,
-      originalY: event.y - this._containerBoundingRect.y,
+      x: (event.x - this.containerBoundingRect.x) / this._zoomFactor,
+      originalY: event.y - this.containerBoundingRect.y,
       containerOriginalY: event.y - this._ownBoundingRect.y,
-      y: (event.y - this._containerBoundingRect.y) / this._zoomFactor,
+      y: (event.y - this.containerBoundingRect.y) / this._zoomFactor,
       controlOffsetX: (startPoint ? startPoint.controlOffsetX : event.x - targetRect.x),
       controlOffsetY: (startPoint ? startPoint.controlOffsetY : event.y - targetRect.y),
       zoom: this._zoomFactor
@@ -648,12 +646,20 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as Element;
     if (currentElement === this._outercanvas2 || currentElement === this.svgLayer)
       currentElement = this._canvas;
-    this._pointerEventHandlerElement(event, currentElement);
+
+    if (this.serviceContainer.tool) {
+      this._canvas.style.cursor = this.serviceContainer.tool.cursor;
+      this.serviceContainer.tool.pointerEventHandler(this, event, currentElement);
+    }
+    else {
+      this._canvas.style.cursor = '';
+      this._pointerEventHandlerElement(event, currentElement);
+    }
   }
 
   private _fillCalculationrects() {
     this._ownBoundingRect = this.getBoundingClientRect();
-    this._containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+    this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
 
   private _pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType, actionMode?: string) {
@@ -762,10 +768,10 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       let inSelectionElements: HTMLElement[] = [];
       for (let e of elements) {
         let elementRect = e.getBoundingClientRect();
-        if (elementRect.top - this._containerBoundingRect.top >= oy1 + this._outercanvas2.scrollTop &&
-          elementRect.left - this._containerBoundingRect.left >= ox1 + this._outercanvas2.scrollLeft &&
-          elementRect.top - this._containerBoundingRect.top + elementRect.height <= oy2 + this._outercanvas2.scrollTop &&
-          elementRect.left - this._containerBoundingRect.left + elementRect.width <= ox2 + this._outercanvas2.scrollLeft) {
+        if (elementRect.top - this.containerBoundingRect.top >= oy1 + this._outercanvas2.scrollTop &&
+          elementRect.left - this.containerBoundingRect.left >= ox1 + this._outercanvas2.scrollLeft &&
+          elementRect.top - this.containerBoundingRect.top + elementRect.height <= oy2 + this._outercanvas2.scrollTop &&
+          elementRect.left - this.containerBoundingRect.left + elementRect.width <= ox2 + this._outercanvas2.scrollLeft) {
           inSelectionElements.push(e as HTMLElement);
         }
       }
@@ -1150,9 +1156,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           let p = i.element.getBoundingClientRect();
 
           let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-          rect.setAttribute('x', <string><any>(p.x - this._containerBoundingRect.x));
+          rect.setAttribute('x', <string><any>(p.x - this.containerBoundingRect.x));
           rect.setAttribute('width', <string><any>(p.width));
-          rect.setAttribute('y', <string><any>(p.y - this._containerBoundingRect.y));
+          rect.setAttribute('y', <string><any>(p.y - this.containerBoundingRect.y));
           rect.setAttribute('height', <string><any>(p.height));
           rect.setAttribute('class', 'svg-selection');
           this.svgLayer.appendChild(rect);
@@ -1162,16 +1168,16 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       if (designItems[0].nodeType == NodeType.Element) {
         let p0 = designItems[0].element.getBoundingClientRect();
 
-        this._drawMoveOverlay(p0.x - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y - 16, 60, 15, designItems[0]);
-        this._drawRotateOverlay(p0.x - this._containerBoundingRect.x - 13, p0.y - this._containerBoundingRect.y - 8.5, designItems[0]);
-        this._drawResizerOverlay(p0.x - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'nw-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + (p0.width / 2) - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'n-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + p0.width - this._containerBoundingRect.x, p0.y - this._containerBoundingRect.y, 'ne-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x - this._containerBoundingRect.x, p0.y + p0.height - this._containerBoundingRect.y, 'sw-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + (p0.width / 2) - this._containerBoundingRect.x, p0.y + p0.height - this._containerBoundingRect.y, 's-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + p0.width - this._containerBoundingRect.x, p0.y + p0.height - this._containerBoundingRect.y, 'se-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x - this._containerBoundingRect.x, p0.y + (p0.height / 2) - this._containerBoundingRect.y, 'w-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + p0.width - this._containerBoundingRect.x, p0.y + (p0.height / 2) - this._containerBoundingRect.y, 'e-resize', designItems[0]);
+        this._drawMoveOverlay(p0.x - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y - 16, 60, 15, designItems[0]);
+        this._drawRotateOverlay(p0.x - this.containerBoundingRect.x - 13, p0.y - this.containerBoundingRect.y - 8.5, designItems[0]);
+        this._drawResizerOverlay(p0.x - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y, 'nw-resize', designItems[0]);
+        this._drawResizerOverlay(p0.x + (p0.width / 2) - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y, 'n-resize', designItems[0]);
+        this._drawResizerOverlay(p0.x + p0.width - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y, 'ne-resize', designItems[0]);
+        this._drawResizerOverlay(p0.x - this.containerBoundingRect.x, p0.y + p0.height - this.containerBoundingRect.y, 'sw-resize', designItems[0]);
+        this._drawResizerOverlay(p0.x + (p0.width / 2) - this.containerBoundingRect.x, p0.y + p0.height - this.containerBoundingRect.y, 's-resize', designItems[0]);
+        this._drawResizerOverlay(p0.x + p0.width - this.containerBoundingRect.x, p0.y + p0.height - this.containerBoundingRect.y, 'se-resize', designItems[0]);
+        this._drawResizerOverlay(p0.x - this.containerBoundingRect.x, p0.y + (p0.height / 2) - this.containerBoundingRect.y, 'w-resize', designItems[0]);
+        this._drawResizerOverlay(p0.x + p0.width - this.containerBoundingRect.x, p0.y + (p0.height / 2) - this.containerBoundingRect.y, 'e-resize', designItems[0]);
       }
     }
   }

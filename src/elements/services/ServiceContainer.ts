@@ -11,6 +11,7 @@ import { IHtmlParserService } from "./htmlParserService/IHtmlParserService";
 import { IIntializationService } from "./initializationService/IIntializationService";
 import { IDemoView } from '../widgets/demoView/IDemoView';
 import { DemoView } from '../widgets/demoView/demoView';
+import { ITool } from "../widgets/designerView/tools/ITool";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -32,6 +33,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
       codeViewWidget: CodeViewMonaco,
       demoViewWidget: DemoView
     };
+
+  public tool: ITool;
 
   get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');

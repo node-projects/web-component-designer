@@ -3,6 +3,7 @@ import { IElementsService } from '../../services/elementsService/IElementsServic
 import { PaletteElements } from './paletteElements';
 import { DesignerTabControl } from '../../controls/DesignerTabControl';
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { ServiceContainer } from '../../services/ServiceContainer';
 
 export class PaletteView extends BaseCustomWebComponentLazyAppend {
 
@@ -27,13 +28,13 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
     this.shadowRoot.appendChild(this._designerTabControl);
   }
 
-  public async loadControls(elementsServices : IElementsService[]) {
+  public async loadControls(serviceContainer: ServiceContainer, elementsServices : IElementsService[]) {
     for (const s of elementsServices) {
       let elements = await s.getElements();
       let paletteElement = new PaletteElements();
       paletteElement.title = s.name;
       this._designerTabControl.appendChild(paletteElement);
-      paletteElement.loadElements(elements);
+      paletteElement.loadElements(serviceContainer, elements);
     }
   }
 }
