@@ -4,7 +4,7 @@ import type { Ace } from "ace-builds";
 import { IStringPosition } from '../../services/serializationService/IStringPosition';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
 import { CommandType } from '../../../commandHandling/CommandType';
-import { IDisposable } from 'monaco-editor';
+import { IDisposable } from '../../../interfaces/IDisposable';
 
 class CodeViewAceCompleter {
   getCompletions(editor, session, pos, prefix, callback) {

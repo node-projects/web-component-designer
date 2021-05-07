@@ -9,7 +9,7 @@ import { IStringPosition } from './services/serializationService/IStringPosition
 import { IDemoView } from './widgets/demoView/IDemoView';
 import { IUiCommandHandler } from "../commandHandling/IUiCommandHandler";
 import { IUiCommand } from "../commandHandling/IUiCommand";
-import { IDisposable } from "monaco-editor";
+import { IDisposable } from "../interfaces/IDisposable";
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;

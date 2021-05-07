@@ -1,5 +1,5 @@
-import { IDisposable } from "monaco-editor";
 import { IUiCommandHandler } from "../../../commandHandling/IUiCommandHandler";
+import { IDisposable } from "../../../interfaces/IDisposable";
 import { IStringPosition } from "../../services/serializationService/IStringPosition";
 
 export interface ICodeView extends IUiCommandHandler, IDisposable {

@@ -17,9 +17,11 @@
   "devDependencies": {
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^2.2.2",
+    "@types/codemirror": "^5.60.0",
     "@types/jquery": "^3.5.5",
     "@types/jquery.fancytree": "0.0.6",
     "ace-builds": "^1.4.12",
+    "codemirror": "^5.61.0",
     "jquery": "^3.6.0",
     "jquery.fancytree": "^2.38.0",
     "monaco-editor": "^0.23.0",
