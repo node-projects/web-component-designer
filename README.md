@@ -20,20 +20,17 @@ repository: https://github.com/node-projects/web-component-designer-demo
 
 ## What is needed
 
-- constructable-stylesheets-polyfill on browser not yet supporting these
+- @node-projects/base-custom-webcomponent
+- constructable-stylesheets-polyfill on browser not yet supporting these (for Safari & Firefox)
 - optional - ace code editor (workin)
-- optional - code mirrow code editor (if you use code-view-codemirrow) (not yet started)
 - optional - monaco code editor (if you use code-view-monaco) (workin)
-- optional - fancytree (if you use tree-view-extened) (partly workin)
+- optional - code mirror code editor (if you use code-view-codemirror) (workin but buggy)
+- optional - fancytree (if you use tree-view-extened) (workin)
 
 ## Features we are workin on
 
- - Refactor as a reusable NPM component (WIP)
- - Conversation to Typescript (done)
- - Multiselection (WIP)
- - Drag/Move refactoring (WIP)
- - New Property Editor (WIP)
  - CSS Grid Positioning (planed)
+ - look at the issues
  - Much, much more ...
 
 ## Developing
@@ -54,13 +51,6 @@ repository: https://github.com/node-projects/web-component-designer-demo
 ```
 
   * Navigate Chrome to [localhost:8000]() to see the app.
-
-  * To build GitHub Page run
-```
-  $ polymer build
-```
-
-
 
 ## Using
 
