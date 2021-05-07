@@ -15,8 +15,10 @@ This is a Designer Framework wich could easily be included in your own Software.
 ## Demo
 
 look at: https://node-projects.github.io/web-component-designer-demo/index.html
-
 repository: https://github.com/node-projects/web-component-designer-demo
+
+or a simple one: https://node-projects.github.io/web-component-designer-simple-demo/index.html
+repository: https://github.com/node-projects/web-component-designer-simple-demo
 
 ## What is needed
 
@@ -44,13 +46,6 @@ repository: https://github.com/node-projects/web-component-designer-demo
 ```
   $ npm run build
 ```
-
-  * Run the app in a local server
-```
-  $ polymer serve --port 8000 --open
-```
-
-  * Navigate Chrome to [localhost:8000]() to see the app.
 
 ## Using
 

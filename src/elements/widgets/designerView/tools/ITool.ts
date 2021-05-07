@@ -1,4 +1,4 @@
-import { IDisposable } from "monaco-editor";
+import { IDisposable } from "../../../../interfaces/IDisposable";
 import { IDesignerView } from "../IDesignerView";
 
 export interface ITool extends IDisposable {

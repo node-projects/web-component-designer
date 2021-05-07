@@ -408,6 +408,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
     this.snapLines.initialize(this.rootDesignItem);
+
+    if (this.children) {
+      this.parseHTML(this.innerHTML);
+      this.innerHTML = '';
+    }
   }
 
   connectedCallback() {
