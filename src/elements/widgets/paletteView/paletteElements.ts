@@ -125,6 +125,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
         }
       }
       button.ondragend = (e) => {
+        elementDefintion.import = null;
         (<HTMLElement>e.currentTarget).style.outline = "none";
       }
       button.ontouchstart = (e) => {

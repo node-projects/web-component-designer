@@ -488,8 +488,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
     let grp = di.openGroup("Insert");
     di.setStyle('position', 'absolute')
-    di.setStyle('top', event.offsetY + 'px')
-    di.setStyle('left', event.offsetX + 'px')
+    const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+    di.setStyle('top', event.offsetY + targetRect.top - this._containerBoundingRect.y + 'px')
+    di.setStyle('left', event.offsetX + targetRect.left - this._containerBoundingRect.x + 'px')
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
     grp.commit();
     this.instanceServiceContainer.selectionService.setSelectedElements([di]);
@@ -749,8 +750,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let oy2 = Math.max(this._initialPoint.y, currentPoint.y);*/
 
     let selector = this._selector as HTMLDivElement;
-    selector.style.left = ox1 / this._zoomFactor + 'px';
-    selector.style.top = oy1 / this._zoomFactor + 'px';
+    selector.style.left = (ox1 + this._outercanvas2.scrollLeft) / this._zoomFactor + 'px';
+    selector.style.top = (oy1 + this._outercanvas2.scrollTop) / this._zoomFactor + 'px';
     selector.style.width = (ox2 - ox1) / this._zoomFactor + 'px';
     selector.style.height = (oy2 - oy1) / this._zoomFactor + 'px';
     selector.hidden = false;
@@ -761,10 +762,10 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       let inSelectionElements: HTMLElement[] = [];
       for (let e of elements) {
         let elementRect = e.getBoundingClientRect();
-        if (elementRect.top - this._containerBoundingRect.top >= oy1 &&
-          elementRect.left - this._containerBoundingRect.left >= ox1 &&
-          elementRect.top - this._containerBoundingRect.top + elementRect.height <= oy2 &&
-          elementRect.left - this._containerBoundingRect.left + elementRect.width <= ox2) {
+        if (elementRect.top - this._containerBoundingRect.top >= oy1 + this._outercanvas2.scrollTop &&
+          elementRect.left - this._containerBoundingRect.left >= ox1 + this._outercanvas2.scrollLeft &&
+          elementRect.top - this._containerBoundingRect.top + elementRect.height <= oy2 + this._outercanvas2.scrollTop &&
+          elementRect.left - this._containerBoundingRect.left + elementRect.width <= ox2 + this._outercanvas2.scrollLeft) {
           inSelectionElements.push(e as HTMLElement);
         }
       }

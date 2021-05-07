@@ -159,7 +159,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         if (node.tr.children[1]) {
           let designItem: IDesignItem = node.data.ref;
 
-          if (designItem.nodeType === NodeType.Element) {
+          if (designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
             /*
             let toolTipImg: HTMLImageElement;
             (<HTMLElement>node.tr.children[0]).onmouseenter = (e) => {
