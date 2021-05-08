@@ -419,6 +419,14 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
   }
 
+  static wrapInDesigner(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer): DesignerView {
+    let designerView = new DesignerView();
+    designerView.initialize(serviceContainer);
+    const parser = designerView.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
+    designerView._addDesignItems(parser.createDesignItems(elements, designerView.serviceContainer, designerView.instanceServiceContainer))
+    return designerView;
+  }
+
   connectedCallback() {
     if (!this._firstConnect) {
       this._firstConnect = true;

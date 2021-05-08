@@ -11,7 +11,7 @@ export class DefaultHtmlParserService implements IHtmlParserService {
     return this.createDesignItems(doc.body.children, serviceContainer, instanceServiceContainer);
   }
 
-  public createDesignItems(elements: HTMLCollection, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+  public createDesignItems(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     let res: IDesignItem[] = [];
     for (let el of elements) { //todo, use childNodes or textnodes will not work
       res.push(this._createDesignItemsRecursive(el, serviceContainer, instanceServiceContainer))

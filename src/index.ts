@@ -80,6 +80,7 @@ export * from "./elements/widgets/designerView/designerView.js";
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";
 export * from "./elements/widgets/paletteView/paletteView.js";
+export * from "./elements/widgets/paletteView/paletteTreeView.js";
 
 export type { ITreeView } from "./elements/widgets/treeView/ITreeView.js";
 export * from "./elements/widgets/treeView/treeView.js";
