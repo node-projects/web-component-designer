@@ -8,9 +8,11 @@ export abstract class AbstractBasePropertiesService extends UnkownElementPropert
   public override getProperties(designItem: IDesignItem): IProperty[] {
     if (!this.isHandledElement(designItem))
       return null;
+    return this.parseProperties((<any>designItem.element.constructor).properties);
+  }
 
+  protected parseProperties(list: any): IProperty[] {
     let properties: IProperty[] = [];
-    let list = (<any>designItem.element.constructor).properties;
     for (const name in list) {
       const polymerProperty = list[name];
       let type = polymerProperty;

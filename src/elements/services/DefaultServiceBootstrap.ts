@@ -9,12 +9,14 @@ import { BaseCustomWebComponentPropertiesService } from './propertiesService/ser
 import { DefaultPlacementService } from './placementService/DefaultPlacementService';
 import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserService';
 //import { NodeHtmlParserService } from './htmlParserService/NodeHtmlParserService';
+import { Lit2PropertiesService } from './propertiesService/services/Lit2PropertiesService';
 
 let serviceContainer = new ServiceContainer();
 
 serviceContainer.register("propertyService", new PolymerPropertiesService());
 serviceContainer.register("propertyService", new LitElementPropertiesService());
 serviceContainer.register("propertyService", new NativeElementsPropertiesService());
+serviceContainer.register("propertyService", new Lit2PropertiesService());
 serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
 serviceContainer.register("instanceService", new DefaultInstanceService());
 serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
