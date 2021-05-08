@@ -12,8 +12,10 @@ export class DefaultInstanceService implements IInstanceService {
     if (definition.import) {
       let importUri = definition.import;
       if (importUri[0] === '.')
-        importUri = (window.location.origin+window.location.pathname).split('/').slice(0,-1).join('/') + '/' + importUri;
+        importUri = (window.location.origin + window.location.pathname).split('/').slice(0, -1).join('/') + '/' + importUri;
       await import(importUri);
+      if (instanceServiceContainer.designContext.imports.indexOf(importUri) <= 0)
+        instanceServiceContainer.designContext.imports.push(importUri);
     }
     let element = document.createElement(definition.tag);
     if (!definition.doNotSetInNodeProjectsDesignerViewOnInstance)

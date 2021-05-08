@@ -87,7 +87,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       else if (this._tabControl.selectedIndex === 1)
         this.codeView.update(this._content);
       else if (this._tabControl.selectedIndex === 2)
-        this.demoView.display(this._content);
+        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
     }
   }
   get content() {
@@ -124,7 +124,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
           this.codeView.focusEditor();
         }
       } else if (i.newIndex === 2)
-        this.demoView.display(this._content);
+        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
     });
     if (this._content)
       this.content = this._content;

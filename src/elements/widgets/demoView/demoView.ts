@@ -1,15 +1,18 @@
 import { IDemoView } from "./IDemoView";
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { ServiceContainer } from "../../services/ServiceContainer";
+import { InstanceServiceContainer } from "../../services/InstanceServiceContainer";
 
 export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoView {
 
   private _placeholder: HTMLDivElement;
   private _loading: HTMLDivElement;
 
-  static override readonly style=css`
+  static override readonly style = css`
   :host {
     display: block;
     overflow: hidden;
+    background: white;
     height: 100%;
     width: 100%;
   }
@@ -30,7 +33,7 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
 
   constructor() {
     super();
-    
+
     this._placeholder = document.createElement('div');
     this._placeholder.id = 'placeholder';
     this.shadowRoot.appendChild(this._placeholder)
@@ -40,8 +43,7 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     this.shadowRoot.appendChild(this._loading)
   }
 
-  display(code: string) {
-
+  display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string) {
     let iframe = document.createElement('iframe');
     this._placeholder.innerHTML = '';
     this._placeholder.appendChild(iframe);
@@ -53,7 +55,13 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
 
     let doc = iframe.contentWindow.document;
     doc.open();
-    doc.write(code);
+    doc.write('<script type="module">');
+    for (let i of instanceServiceContainer.designContext.imports) {
+      doc.write("import '" + i + "';");
+    }
+    doc.write("document.body.style.display='';");
+    doc.write('</script>');
+    doc.write('<body style="display:none">' + code + '</body>');
     doc.close();
   }
 }
