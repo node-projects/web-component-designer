@@ -10,6 +10,10 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _filter: HTMLInputElement;
 
   static override readonly style = css`
+      * {
+          touch-action: none;
+      }
+
       span.drag-source {
         border: 1px solid grey;
         border-radius: 3px;

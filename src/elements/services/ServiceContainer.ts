@@ -12,6 +12,8 @@ import { IIntializationService } from "./initializationService/IIntializationSer
 import { IDemoView } from '../widgets/demoView/IDemoView';
 import { DemoView } from '../widgets/demoView/demoView';
 import { ITool } from "../widgets/designerView/tools/ITool";
+import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType";
+import { IDesignerExtensionProvider } from "../widgets/designerView/extensions/IDesignerExtensionProvider";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -35,6 +37,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     };
 
   public tool: ITool;
+
+  public designerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
 
   get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');

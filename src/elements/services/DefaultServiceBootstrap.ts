@@ -10,6 +10,10 @@ import { DefaultPlacementService } from './placementService/DefaultPlacementServ
 import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserService';
 //import { NodeHtmlParserService } from './htmlParserService/NodeHtmlParserService';
 import { Lit2PropertiesService } from './propertiesService/services/Lit2PropertiesService';
+import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
+import { PrimarySelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/PrimarySelectionDefaultExtensionProvider';
+import { SelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/SelectionDefaultExtensionProvider';
+import { GridExtensionProvider } from '../widgets/designerView/extensions/GridExtensionProvider';
 
 let serviceContainer = new ServiceContainer();
 
@@ -24,5 +28,9 @@ serviceContainer.register("htmlWriterService", new HtmlWriterService());
 serviceContainer.register("containerService", new DefaultPlacementService());
 serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
 //serviceContainer.register("htmlParserService", new NodeHtmlParserService());
+
+serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [new PrimarySelectionDefaultExtensionProvider()]);
+serviceContainer.designerExtensions.set(ExtensionType.Selection, [new SelectionDefaultExtensionProvider()]);
+serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [new GridExtensionProvider()]);
 
 export default serviceContainer;

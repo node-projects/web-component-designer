@@ -2,6 +2,8 @@ import { ServiceContainer } from "../services/ServiceContainer";
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
 import { ChangeGroup } from "../services/undoService/ChangeGroup";
 import { NodeType } from './NodeType';
+import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType";
+import { IDesignerExtension } from "../widgets/designerView/extensions/IDesignerExtension";
 
 export interface IDesignItem {
 
@@ -32,6 +34,7 @@ export interface IDesignItem {
 
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
+  appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]>
 
   getOrCreateDesignItem(node: Node);
 

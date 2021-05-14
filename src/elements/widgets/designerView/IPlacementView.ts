@@ -6,6 +6,6 @@ export interface IPlacementView {
   alignOnGrid: boolean;
   gridSize: number;
   rootDesignItem: IDesignItem;
-  svgLayer: SVGElement;
+  overlayLayer: SVGElement;
   snapLines: Snaplines;
 }

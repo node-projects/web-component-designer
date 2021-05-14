@@ -10,9 +10,6 @@ export class SelectionService implements ISelectionService {
 
   setSelectedElements(designItems: IDesignItem[]) {
     let oldSelectedElements = this.selectedElements;
-
-    //f (oldSelectedElements && oldSelectedElements.length==2 && designItems!=null && designItems.length<2)
-    //debugger;
     if (!designItems) {
       this.selectedElements = [];
       this.primarySelection = null

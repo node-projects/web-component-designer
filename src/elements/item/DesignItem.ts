@@ -6,6 +6,8 @@ import { ChangeGroup } from '../services/undoService/ChangeGroup';
 import { NodeType } from './NodeType';
 import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction';
 import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction';
+import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
+import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -15,6 +17,7 @@ export class DesignItem implements IDesignItem {
   node: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
+  appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]> = new Map();
 
   public replaceNode(newNode: Node) {
     DesignItem._designItemMap.delete(this.node);
