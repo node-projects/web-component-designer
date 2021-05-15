@@ -150,29 +150,35 @@ export class CssPropertiesService implements IPropertiesService {
   //@ts-ignore
   private grid: IProperty[] = [
     {
-      name: "position",
-      type: "list",
-      values: ["static", "relative", "absolute"],
-      service: this
-    }, {
       name: "display",
       type: "list",
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
       service: this
     }, {
-      name: "flex-direction",
-      type: "list",
-      values: ["row", "row-reverse", "column", "column-reverse"],
+      name: "grid-template-columns",
+      type: "string",
       service: this
     }, {
-      name: "flex-wrap",
-      type: "list",
-      values: ["nowrap", "wrap", "warp-reverse"],
+      name: "grid-template-rows",
+      type: "string",
       service: this
     }, {
-      name: "justify-self",
+      name: "column-gap",
+      type: "css-length",
+      service: this
+    }, {
+      name: "row-gap",
+      type: "css-length",
+      service: this
+    }, {
+      name: "justify-content",
       type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
+      values: ["space-evenly", "space-around", "space-between", "center", "start", "end"],
+      service: this
+    }, {
+      name: "align-content",
+      type: "list",
+      values: ["space-evenly", "space-around", "space-between", "center", "start", "end"],
       service: this
     }, {
       name: "justify-items",
@@ -180,29 +186,9 @@ export class CssPropertiesService implements IPropertiesService {
       values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
       service: this
     }, {
-      name: "justify-content",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "align-self",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
       name: "align-items",
       type: "list",
       values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "align-content",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "flex",
-      type: "string",
-      default: "0 1 auto",
       service: this
     }
   ];

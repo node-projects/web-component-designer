@@ -352,8 +352,8 @@ if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathDa
     var setAttribute = SVGPathElement.prototype.setAttribute;
     var removeAttribute = SVGPathElement.prototype.removeAttribute;
 
-    var $cachedPathData = window.Symbol ? Symbol() : "__cachedPathData";
-    var $cachedNormalizedPathData = window.Symbol ? Symbol() : "__cachedNormalizedPathData";
+    //var $cachedPathData = window.Symbol ? Symbol() : "__cachedPathData";
+    //var $cachedNormalizedPathData = window.Symbol ? Symbol() : "__cachedNormalizedPathData";
 
     // @info
     //   Get an array of corresponding cubic bezier curve parameters for given arc curve paramters.
@@ -498,11 +498,11 @@ if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathDa
       }
     };
 
-    var clonePathData = function (pathData) {
+    /*var clonePathData = function (pathData) {
       return pathData.map(function (seg) {
         return { type: seg.type, values: Array.prototype.slice.call(seg.values) }
       });
-    };
+    };*/
 
     // @info
     //   Takes any path data, returns path data that consists only from absolute commands.
@@ -912,51 +912,51 @@ if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathDa
     };
 
     SVGPathElement.prototype.setAttribute = function (name, value) {
-      if (name === "d") {
+      /*if (name === "d") {
         this[$cachedPathData] = null;
         this[$cachedNormalizedPathData] = null;
-      }
+      }*/
 
       setAttribute.call(this, name, value);
     };
 
     SVGPathElement.prototype.removeAttribute = function (name, value) {
-      if (name === "d") {
+      /*if (name === "d") {
         this[$cachedPathData] = null;
-        this[$cachedNormalizedPathData] = null;
-      }
+        //this[$cachedNormalizedPathData] = null;
+      }*/
 
       removeAttribute.call(this, name);
     };
 
     SVGPathElement.prototype.getPathData = function (options) {
       if (options && options.normalize) {
-        if (this[$cachedNormalizedPathData]) {
+        /*if (this[$cachedNormalizedPathData]) {
           return clonePathData(this[$cachedNormalizedPathData]);
         }
-        else {
+        else */ {
           let pathData;
 
-          if (this[$cachedPathData]) {
+          /*if (this[$cachedPathData]) {
             pathData = clonePathData(this[$cachedPathData]);
           }
-          else {
+          else */{
             pathData = parsePathDataString(this.getAttribute("d") || "");
-            this[$cachedPathData] = clonePathData(pathData);
+            //this[$cachedPathData] = clonePathData(pathData);
           }
 
           let normalizedPathData = reducePathData(absolutizePathData(pathData));
-          this[$cachedNormalizedPathData] = clonePathData(normalizedPathData);
+          //this[$cachedNormalizedPathData] = clonePathData(normalizedPathData);
           return normalizedPathData;
         }
       }
       else {
-        if (this[$cachedPathData]) {
+        /*if (this[$cachedPathData]) {
           return clonePathData(this[$cachedPathData]);
         }
-        else {
+        else*/ {
           let pathData = parsePathDataString(this.getAttribute("d") || "");
-          this[$cachedPathData] = clonePathData(pathData);
+          //this[$cachedPathData] = clonePathData(pathData);
           return pathData;
         }
       }
@@ -1148,12 +1148,12 @@ declare global {
     getPathData(options?: { normalize?: boolean }): PathData[]
   }
   interface SVGLineElement {
-    getPathData(): PathData[]
+    getPathData(options?: { normalize?: boolean }): PathData[]
 
   }interface SVGPolylineElement {
-    getPathData(): PathData[]
+    getPathData(options?: { normalize?: boolean }): PathData[]
   }
   interface SVGPolygonElement {
-    getPathData(): PathData[]
+    getPathData(options?: { normalize?: boolean }): PathData[]
   }
 }

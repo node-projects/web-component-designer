@@ -18,6 +18,7 @@ import { TransformOriginExtensionProvider } from '../widgets/designerView/extens
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider';
 import { PathExtensionProvider } from '../widgets/designerView/extensions/PathExtensionProvider';
+import { MouseOverExtensionProvider } from '../widgets/designerView/extensions/MouseOverExtensionProvider';
 
 let serviceContainer = new ServiceContainer();
 
@@ -43,5 +44,6 @@ serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
 ]);
 serviceContainer.designerExtensions.set(ExtensionType.Selection, [new SelectionDefaultExtensionProvider()]);
 serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [new GridExtensionProvider()]);
+serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [new MouseOverExtensionProvider()]);
 
 export default serviceContainer;

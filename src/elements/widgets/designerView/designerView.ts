@@ -50,6 +50,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _outercanvas2: HTMLDivElement;
   private _selector: HTMLDivElement;
 
+  private _lastHoverDesignItem: IDesignItem;
+
   private _dropTarget: Element;
 
   private _zoomInput: HTMLInputElement;
@@ -116,31 +118,28 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       overflow: visible;
       z-index: 999999999999;
     }
-    #svg > .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
-    #svg > .svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; }
-    #svg > .svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: all }
-    #svg > .svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
-    #svg > .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
-    #svg > .svg-primary-rotate { stroke: #3899ec; fill: #3899ec; pointer-events: all }
-    #svg > .svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
-    #svg > .svg-grid-area { font-size: 8px; }
-    #svg > .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
-    #svg > .svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
-    #svg > .svg-margin { fill: #ff944722; }
-    #svg > .svg-position  { stroke: black; stroke-dasharray: 2; }
-    #svg > .svg-path { stroke: #3899ec; fill: orange; pointer-events: all }
+
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: all }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-rotate { stroke: #3899ec; fill: #3899ec; pointer-events: all }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-grid-area { font-size: 8px; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-margin { fill: #ff944722; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-position  { stroke: black; stroke-dasharray: 2; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-path { stroke: #3899ec; fill: orange; pointer-events: all }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-path-line { stroke: #3899ec; stroke-dasharray: 2; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-hover { stroke: #90caf9; fill: none; }
   
     #canvas * {
       cursor: pointer;
       user-select: none;
     }
-    #canvas *:not(.node-projects-wcdesigner-active):hover {
-      outline: solid 2px #90CAF9 !important;
-      outline-offset: 2px;
-    }
-    :host(.node-projects-wcdesigner-active) {
-      outline-offset: -3px;
-    }
+
     #selector {
       border: 1px dotted #000;
       position: absolute;
@@ -694,8 +693,20 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     if (event.button == 2)
       return;
     let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as Element;
-    if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer)
+    if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer) {
       currentElement = this._canvas;
+    }
+
+    //todo remove duplication when tool refactoring starts
+    this._fillCalculationrects();
+    const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
+    if (this._lastHoverDesignItem != currentDesignItem) {
+      if (this._lastHoverDesignItem)
+        this._extensionManger.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
+      if (currentDesignItem && currentDesignItem != this.rootDesignItem && currentElement.parentNode !== this.overlayLayer)
+        this._extensionManger.applyExtension(currentDesignItem, ExtensionType.MouseOver);
+      this._lastHoverDesignItem = currentDesignItem;
+    }
 
     if (this.serviceContainer.tool) {
       this._canvas.style.cursor = this.serviceContainer.tool.cursor;

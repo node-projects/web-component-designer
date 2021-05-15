@@ -24,10 +24,10 @@ export class GridExtension extends AbstractExtension {
     let gridA: string[] = null;
     if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')
       gridA = computedStyle.gridTemplateAreas.split('\"');
-    if (computedStyle.gridColumnGap) {
-      xGap = Number.parseInt(computedStyle.gridColumnGap.replace('px', ''));
-      if (computedStyle.gridRowGap) {
-        yGap = Number.parseInt(computedStyle.gridColumnGap.replace('px', ''));
+    if (computedStyle.columnGap) {
+      xGap = Number.parseInt(computedStyle.columnGap.replace('px', ''));
+      if (computedStyle.rowGap) {
+        yGap = Number.parseInt(computedStyle.rowGap.replace('px', ''));
         for (let r of rows) {
           let areas: string[] = null;
           if (gridA) {

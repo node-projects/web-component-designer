@@ -2,21 +2,26 @@ import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { AbstractExtension } from "./AbstractExtension";
 import "../../../helper/PathDataPolyfill";
+import { IPoint } from "../../../../interfaces/IPoint";
 
 export class PathExtension extends AbstractExtension {
-  private _itemRect: DOMRect;
+  //private _itemRect: DOMRect;
+  private _svgRect: DOMRect;
+  private _lastPos: IPoint
 
   constructor(designerView: IDesignerView, extendedItem: IDesignItem) {
     super(designerView, extendedItem);
   }
 
   override extend() {
-    this._itemRect = this.extendedItem.element.getBoundingClientRect();
-    const pathdata: any = (<SVGGraphicsElement>this.extendedItem.node).getPathData();
+    //this._itemRect = this.extendedItem.element.getBoundingClientRect();
+    this._svgRect = (<SVGGeometryElement>this.extendedItem.element).ownerSVGElement.getBoundingClientRect();
+    const pathdata: any = (<SVGGraphicsElement>this.extendedItem.node).getPathData({normalize: true});
     for (let p of pathdata) {
       switch (p.type) {
         case 'M':
           this._drawPathCircle(p.values[0], p.values[1]);
+          this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
         case 'L':
           this._drawPathCircle(p.values[0], p.values[1]);
@@ -28,9 +33,20 @@ export class PathExtension extends AbstractExtension {
         case 'Z':
           break;
         case 'C':
+          this._drawPathLine(this._lastPos.x, this._lastPos.y, p.values[0], p.values[1]);
+          this._drawPathLine(p.values[4], p.values[5], p.values[2], p.values[3]);
           this._drawPathCircle(p.values[0], p.values[1]);
           this._drawPathCircle(p.values[2], p.values[3]);
           this._drawPathCircle(p.values[4], p.values[5]);
+          this._lastPos = { x: p.values[4], y: p.values[5] };
+          break;
+        case 'c':
+          this._drawPathLine(this._lastPos.x, this._lastPos.y, p.values[0], p.values[1]);
+          this._drawPathLine(this._lastPos.x + p.values[4], this._lastPos.y + p.values[5], p.values[2], p.values[3]);
+          this._drawPathCircle(p.values[0], p.values[1]);
+          this._drawPathCircle(p.values[2], p.values[3]);
+          this._drawPathCircle(this._lastPos.x + p.values[4], this._lastPos.y + p.values[5]);
+          this._lastPos = { x: p.values[4], y: p.values[5] };
           break;
         case 'S':
           this._drawPathCircle(p.values[0], p.values[1]);
@@ -52,7 +68,11 @@ export class PathExtension extends AbstractExtension {
   }
 
   _drawPathCircle(x: number, y: number) {
-    this._drawCircleOverlay(this._itemRect.x - this.designerView.containerBoundingRect.x + x, this._itemRect.y - this.designerView.containerBoundingRect.y + y, 3, 'svg-path');
+    this._drawCircleOverlay(this._svgRect.x - this.designerView.containerBoundingRect.x + x, this._svgRect.y - this.designerView.containerBoundingRect.y + y, 3, 'svg-path');
+  }
+
+  _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
+    this._drawLineOverlay(this._svgRect.x - this.designerView.containerBoundingRect.x + x1, this._svgRect.y - this.designerView.containerBoundingRect.y + y1, this._svgRect.x - this.designerView.containerBoundingRect.x + x2, this._svgRect.y - this.designerView.containerBoundingRect.y + y2, 'svg-path-line');
   }
 
   override refresh() {
