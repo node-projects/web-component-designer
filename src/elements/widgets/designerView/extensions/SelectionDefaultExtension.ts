@@ -9,7 +9,7 @@ export class SelectionDefaultExtension extends AbstractExtension {
   }
 
   override extend() {
-    let itemRect = this.extendedItem.element.getBoundingClientRect();
+    const itemRect = this.extendedItem.element.getBoundingClientRect();
     this._drawRect(itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y, itemRect.width, itemRect.height, 'svg-selection');
   }
 

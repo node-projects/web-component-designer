@@ -13,25 +13,54 @@ export class GridExtension extends AbstractExtension {
     const computedStyle = getComputedStyle(this.extendedItem.element);
     const rows = computedStyle.gridTemplateRows.split(' ');
     const columns = computedStyle.gridTemplateColumns.split(' ');
-    this._drawLineOverlay(itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y, itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y + itemRect.height, 'svg-grid')
-    this._drawLineOverlay(itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y, itemRect.x - this.designerView.containerBoundingRect.x + itemRect.width, itemRect.y - this.designerView.containerBoundingRect.y, 'svg-grid')
+
     let y = 0;
-    for (let r of rows) {
-      if (y > 0 && computedStyle.gridRowGap) {
-        y += Number.parseInt(computedStyle.gridRowGap.replace('px', ''));
-        this._drawLineOverlay(itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y + y, itemRect.x - this.designerView.containerBoundingRect.x + itemRect.width, itemRect.y - this.designerView.containerBoundingRect.y + y, 'svg-grid');
+    let xGap = 0;
+    let yGap = 0;
+    let rw = 0;
+    const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
+    const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
+
+    let gridA: string[] = null;
+    if (computedStyle.gridTemplateAreas)
+      gridA = computedStyle.gridTemplateAreas.split('\"');
+    if (computedStyle.gridColumnGap) {
+      xGap = Number.parseInt(computedStyle.gridColumnGap.replace('px', ''));
+      if (computedStyle.gridRowGap) {
+        yGap = Number.parseInt(computedStyle.gridColumnGap.replace('px', ''));
+        for (let r of rows) {
+          let areas: string[] = null;
+          if (gridA) {
+            areas = gridA[rw + 1].split(' ');
+          }
+          let x = 0;
+          let cl = 0;
+          const currY = Number.parseInt(r.replace('px', ''));
+          for (let c of columns) {
+
+            if (x > 0 && xGap) {
+              this._drawRect(x + xOffset, y + yOffset, xGap, currY, 'svg-grid-gap');
+              x += xGap
+            }
+            const currX = Number.parseInt(c.replace('px', ''));
+            if (y > 0 && yGap) {
+              this._drawRect(x + xOffset, y + yOffset - yGap, currX, yGap, 'svg-grid-gap');
+            }
+            if (areas) {
+              const nm = areas[cl].trim();
+              if (nm != '.') {
+                const text = this._drawText(nm, x + xOffset, y + yOffset, 'svg-grid-area');
+                text.setAttribute("dominant-baseline", "hanging");
+              }
+            }
+            this._drawRect(x + xOffset, y + yOffset, currX, currY, 'svg-grid');
+            x += currX;
+            cl++;
+          }
+          y += currY + yGap;
+          rw += 2;
+        }
       }
-      y += Number.parseInt(r.replace('px', ''));
-      this._drawLineOverlay(itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y + y, itemRect.x - this.designerView.containerBoundingRect.x + itemRect.width, itemRect.y - this.designerView.containerBoundingRect.y + y, 'svg-grid');
-    }
-    let x = 0;
-    for (let c of columns) {
-      if (x > 0 && computedStyle.gridColumnGap) {
-        x += Number.parseInt(computedStyle.gridColumnGap.replace('px', ''));
-        this._drawLineOverlay(itemRect.x - this.designerView.containerBoundingRect.x + x, itemRect.y - this.designerView.containerBoundingRect.y, itemRect.x - this.designerView.containerBoundingRect.x + x, itemRect.y - this.designerView.containerBoundingRect.y + itemRect.height, 'svg-grid');
-      }
-      x += Number.parseInt(c.replace('px', ''));
-      this._drawLineOverlay(itemRect.x - this.designerView.containerBoundingRect.x + x, itemRect.y - this.designerView.containerBoundingRect.y, itemRect.x - this.designerView.containerBoundingRect.x + x, itemRect.y - this.designerView.containerBoundingRect.y + itemRect.height, 'svg-grid');
     }
   }
 

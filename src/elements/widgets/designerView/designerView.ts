@@ -121,7 +121,10 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     .svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
     .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
     .svg-primary-rotate { stroke: #3899ec; fill: #3899ec; pointer-events: all }
-    .svg-grid { stroke: orange; stroke-dasharray: 5; fill: transparent; }
+    .svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
+    .svg-grid-area { font-size: 8px; }
+    .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
+    .svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
   
     #canvas * {
       cursor: pointer;
@@ -1185,98 +1188,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         break;
     }
   }
-
-  /*_drawOutlineRects(designItems: IDesignItem[], mode: 'none' | 'move' | 'resize' = 'none') {
-    DomHelper.removeAllChildnodes(this.overlayLayer, 'svg-selection');
-
-    if (designItems && designItems.length) {
-      for (let i of designItems) {
-        if (i.nodeType == NodeType.Element) {
-          let p = i.element.getBoundingClientRect();
-
-          let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-          rect.setAttribute('x', <string><any>(p.x - this.containerBoundingRect.x));
-          rect.setAttribute('width', <string><any>(p.width));
-          rect.setAttribute('y', <string><any>(p.y - this.containerBoundingRect.y));
-          rect.setAttribute('height', <string><any>(p.height));
-          rect.setAttribute('class', 'svg-selection');
-          this.overlayLayer.appendChild(rect);
-        }
-      }
-
-      
-      if (designItems[0].nodeType == NodeType.Element) {
-        let p0 = designItems[0].element.getBoundingClientRect();
-
-        this._drawMoveOverlay(p0.x - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y - 16, 60, 15, designItems[0]);
-        this._drawRotateOverlay(p0.x - this.containerBoundingRect.x - 13, p0.y - this.containerBoundingRect.y - 8.5, designItems[0]);
-        this._drawResizerOverlay(p0.x - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y, 'nw-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + (p0.width / 2) - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y, 'n-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + p0.width - this.containerBoundingRect.x, p0.y - this.containerBoundingRect.y, 'ne-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x - this.containerBoundingRect.x, p0.y + p0.height - this.containerBoundingRect.y, 'sw-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + (p0.width / 2) - this.containerBoundingRect.x, p0.y + p0.height - this.containerBoundingRect.y, 's-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + p0.width - this.containerBoundingRect.x, p0.y + p0.height - this.containerBoundingRect.y, 'se-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x - this.containerBoundingRect.x, p0.y + (p0.height / 2) - this.containerBoundingRect.y, 'w-resize', designItems[0]);
-        this._drawResizerOverlay(p0.x + p0.width - this.containerBoundingRect.x, p0.y + (p0.height / 2) - this.containerBoundingRect.y, 'e-resize', designItems[0]);
-      }
-      
-    }
-  }*/
-
-  /*_drawMoveOverlay(posX: number, posY: number, w: number, h: number, designItem: IDesignItem) {
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute('x', <string><any>posX);
-    rect.setAttribute('y', <string><any>posY);
-    rect.setAttribute('width', <string><any>w);
-    rect.setAttribute('height', <string><any>h);
-    rect.setAttribute('class', 'svg-selection svg-primary-selection-move');
-    rect.addEventListener(EventNames.PointerDown, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Drag));
-    rect.addEventListener(EventNames.PointerMove, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Drag));
-    rect.addEventListener(EventNames.PointerUp, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Drag));
-    this.overlayLayer.appendChild(rect);
-    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute('x', <string><any>posX);
-    text.setAttribute('y', <string><any>(posY + 11));
-    text.textContent = designItem.name.substring(0, 10) + '…';
-    text.setAttribute('class', 'svg-selection svg-text');
-    this.overlayLayer.appendChild(text);
-  }
-
-  _drawResizerOverlay(posX: number, posY: number, cursor: string, designItem: IDesignItem) {
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute('cx', <string><any>posX);
-    circle.setAttribute('cy', <string><any>posY);
-    circle.setAttribute('r', <string><any>(3));
-    circle.setAttribute('class', 'svg-selection svg-primary-resizer');
-    circle.setAttribute('style', 'cursor: ' + cursor);
-    circle.addEventListener(EventNames.PointerDown, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
-    circle.addEventListener(EventNames.PointerMove, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
-    circle.addEventListener(EventNames.PointerUp, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Resize, cursor));
-    this.overlayLayer.appendChild(circle);
-  }
-
-  _drawRotateOverlay(posX: number, posY: number, designItem: IDesignItem) {
-    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    line.setAttribute('r', <string><any>(7.5));
-    line.setAttribute('class', 'svg-selection svg-primary-rotate');
-    line.setAttribute('style', 'cursor: grabbing');
-    g.appendChild(line)
-    const g2 = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    g2.setAttribute('transform', 'translate(-8,0) scale(0.0015,-0.0015)');
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute('style', 'fill: white');
-    path.setAttribute('d', 'M5260,4367.9c-1803.6-157-3329.6-1457-3771.9-3212.8c-34.5-135.9-72.7-331.2-86.2-430.8c-11.5-99.6-24.9-201-30.6-224l-7.7-44H731.8c-528.4,0-631.8-3.8-631.8-26.8c0-42.1,2029.5-2042.9,2104.2-2073.6c36.4-15.3,86.2-21.1,118.7-15.3c40.2,9.6,346.6,300.6,1089.4,1037.7C3981-58.8,4446.3,414.2,4446.3,429.5c0,23-103.4,26.8-620.3,26.8c-342.7,0-626.1,5.7-629.9,15.3c-13.4,21.1,38.3,245.1,93.8,415.5c114.9,348.5,319.7,681.6,582.1,947.8c478.7,484.4,1062.6,731.4,1742.3,735.2c317.8,0,482.5-23,765.9-114.9c402.1-128.3,725.7-331.2,1022.4-641.4c455.7-474.8,687.4-1047.3,687.4-1702.1c-1.9-693.1-254.6-1284.7-754.4-1771c-396.3-384.9-882.7-614.6-1430.3-679.7c-141.7-17.2-195.3-32.6-227.9-63.2l-44-38.3v-811.8v-811.8l49.8-49.8c49.8-47.9,53.6-49.8,243.2-36.4c1606.4,105.3,3048.1,1146.9,3658.9,2646c453.8,1112.4,415.5,2379.9-105.3,3463.6c-360,752.5-953.5,1397.7-1677.3,1828.5c-515,308.3-1139.2,513.1-1746.2,574.4C5872.7,4379.4,5438.1,4383.3,5260,4367.9z');
-    g2.appendChild(path)
-    g.appendChild(g2)
-    g.addEventListener(EventNames.PointerDown, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Rotate));
-    g.addEventListener(EventNames.PointerMove, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Rotate));
-    g.addEventListener(EventNames.PointerUp, event => this.pointerEventHandlerElement(event, designItem.element as HTMLElement, PointerActionType.Rotate));
-    g.setAttribute('class', 'svg-selection svg-primary-rotate');
-    g.setAttribute('transform', 'translate(' + posX + ',' + posY + ')');
-    this.overlayLayer.appendChild(g);
-  }*/
 }
 
 customElements.define('node-projects-designer-view', DesignerView);

@@ -26,7 +26,7 @@ export abstract class AbstractExtension implements IDesignerExtension {
     this.overlays = [];
   }
 
-  _drawLineOverlay(x1: number, y1: number, x2: number, y2: number, className: string) {
+  _drawLineOverlay(x1: number, y1: number, x2: number, y2: number, className?: string) {
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute('x1', <string><any>x1);
     line.setAttribute('y1', <string><any>y1);
@@ -39,7 +39,7 @@ export abstract class AbstractExtension implements IDesignerExtension {
     return line;
   }
 
-  _drawCircleOverlay(x: number, y: number, radius: number, className: string) {
+  _drawCircleOverlay(x: number, y: number, radius: number, className?: string) {
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     circle.setAttribute('cx', <string><any>x);
     circle.setAttribute('cy', <string><any>y);
@@ -51,7 +51,7 @@ export abstract class AbstractExtension implements IDesignerExtension {
     return circle;
   }
 
-  _drawRect(x: number, y: number, w: number, h: number, className: string) {
+  _drawRect(x: number, y: number, w: number, h: number, className?: string) {
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     rect.setAttribute('x', <string><any>x);
     rect.setAttribute('y', <string><any>y);
@@ -64,7 +64,7 @@ export abstract class AbstractExtension implements IDesignerExtension {
     return rect;
   }
 
-  _drawText(text: string, x: number, y: number, className: string) {
+  _drawText(text: string, x: number, y: number, className?: string) {
     const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
     textEl.setAttribute('x', <string><any>x);
     textEl.setAttribute('y', <string><any>y);

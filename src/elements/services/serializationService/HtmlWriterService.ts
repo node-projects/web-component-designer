@@ -6,6 +6,7 @@ import { IndentedTextWriter } from '../../helper/IndentedTextWriter';
 import { CssCombiner } from '../../helper/CssCombiner';
 import { NodeType } from '../../item/NodeType';
 import { IStringPosition } from './IStringPosition';
+import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper';
 
 export class HtmlWriterService implements IHtmlWriterService {
   canWrite(designItem: IDesignItem) {
@@ -42,7 +43,7 @@ export class HtmlWriterService implements IHtmlWriterService {
           styles = CssCombiner.combine(styles);
         for (const s of styles) {
           if (s[0])
-            indentedTextWriter.write(s[0] + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+            indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
         }
         indentedTextWriter.write('"');
       }

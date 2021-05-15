@@ -2,16 +2,14 @@ import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { IDesignerExtension } from "./IDesignerExtension";
-import { GridExtension } from './GridExtension';
+import { TransformOriginExtension } from "./TransformOriginExtension";
 
-export class GridExtensionProvider implements IDesignerExtensionProvider {
+export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(designItem: IDesignItem): boolean {
-    if (getComputedStyle((<HTMLElement>designItem.element)).display == 'grid')
-      return true;
-    return false;
+    return true;
   }
 
   getExtension(designerView: IDesignerView, designItem: IDesignItem): IDesignerExtension {
-    return new GridExtension(designerView, designItem);
+    return new TransformOriginExtension(designerView, designItem);
   }
 }
