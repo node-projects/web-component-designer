@@ -11,7 +11,7 @@ export class CanvasExtension extends AbstractExtension {
   override extend() {
     let itemRect = this.extendedItem.element.getBoundingClientRect();
     const computedStyle = getComputedStyle(this.extendedItem.element);
-    if (computedStyle.margin === '0px') {
+    if (computedStyle.margin !== '0px') {
       const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
       const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
 
