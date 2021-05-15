@@ -10,7 +10,12 @@ export class SelectionDefaultExtension extends AbstractExtension {
 
   override extend() {
     const itemRect = this.extendedItem.element.getBoundingClientRect();
-    this._drawRect(itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y, itemRect.width, itemRect.height, 'svg-selection');
+    const computedStyle = getComputedStyle(this.extendedItem.element);
+    const left = Number.parseInt(computedStyle.marginLeft.replace('px', ''));
+    const top = Number.parseInt(computedStyle.marginTop.replace('px', ''));
+    const right = Number.parseInt(computedStyle.marginRight.replace('px', ''));
+    const bottom = Number.parseInt(computedStyle.marginBottom.replace('px', ''));
+    this._drawRect(itemRect.x - this.designerView.containerBoundingRect.x - left, itemRect.y - this.designerView.containerBoundingRect.y - top, left + itemRect.width + right, top + itemRect.height + bottom, 'svg-selection');
   }
 
   override refresh() {

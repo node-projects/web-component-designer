@@ -125,6 +125,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     .svg-grid-area { font-size: 8px; }
     .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
     .svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
+    .svg-margin { fill: #ff944722; }
+    .svg-position  { stroke: black; stroke-dasharray: 2; }
   
     #canvas * {
       cursor: pointer;

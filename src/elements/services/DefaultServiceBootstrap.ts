@@ -15,6 +15,8 @@ import { PrimarySelectionDefaultExtensionProvider } from '../widgets/designerVie
 import { SelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/SelectionDefaultExtensionProvider';
 import { GridExtensionProvider } from '../widgets/designerView/extensions/GridExtensionProvider';
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider';
+import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider';
+import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider';
 
 let serviceContainer = new ServiceContainer();
 
@@ -30,7 +32,12 @@ serviceContainer.register("containerService", new DefaultPlacementService());
 serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
 //serviceContainer.register("htmlParserService", new NodeHtmlParserService());
 
-serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [new PrimarySelectionDefaultExtensionProvider(), new GridExtensionProvider(), new TransformOriginExtensionProvider()]);
+serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
+  new PrimarySelectionDefaultExtensionProvider(),
+  new GridExtensionProvider(),
+  new TransformOriginExtensionProvider(),
+  new CanvasExtensionProvider(),
+  new PositionExtensionProvider()]);
 serviceContainer.designerExtensions.set(ExtensionType.Selection, [new SelectionDefaultExtensionProvider()]);
 serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [new GridExtensionProvider()]);
 
