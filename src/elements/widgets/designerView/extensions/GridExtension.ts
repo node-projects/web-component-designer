@@ -22,7 +22,7 @@ export class GridExtension extends AbstractExtension {
     const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
 
     let gridA: string[] = null;
-    if (computedStyle.gridTemplateAreas)
+    if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')
       gridA = computedStyle.gridTemplateAreas.split('\"');
     if (computedStyle.gridColumnGap) {
       xGap = Number.parseInt(computedStyle.gridColumnGap.replace('px', ''));

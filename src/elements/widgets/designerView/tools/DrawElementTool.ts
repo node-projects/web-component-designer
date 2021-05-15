@@ -49,6 +49,7 @@ export class DrawElementTool implements ITool {
     (<HTMLElement>this._createdItem.element).style.overflow = 'hidden';
 
     designerView.rootDesignItem.element.appendChild(this._createdItem.element);
+    //todo insert via undo framework - maybe remove upper setstyle calls
     //this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
     //grp.commit();
     //this.instanceServiceContainer.selectionService.setSelectedElements([di]);

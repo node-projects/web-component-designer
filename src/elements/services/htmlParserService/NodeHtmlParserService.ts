@@ -16,7 +16,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
     let designItems: IDesignItem[] = [];
     for (let p of parsed.childNodes) {
-      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer);
+      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null);
 
       if (di != null)
         designItems.push(di)
@@ -28,12 +28,18 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
   private _parseDiv = document.createElement("div");
 
-  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
+  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string): IDesignItem {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
-      let element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call 
-      if (!element)
-        element = document.createElement(item.rawTagName);
+      let element: Element;
+      if (!namespace)
+        element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call 
+      if (!element) {
+        if (namespace)
+          element = document.createElementNS(namespace, item.rawTagName);
+        else
+          element = document.createElement(item.rawTagName);
+      }
       designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
 
       let hideAtDesignTime = false;
@@ -73,7 +79,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
       (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
 
       for (let c of item.childNodes) {
-        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer);
+        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null);
         (<Node>element).appendChild(di.node);
       }
     } else if (item.nodeType == 3) {

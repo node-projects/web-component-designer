@@ -17,6 +17,7 @@ import { GridExtensionProvider } from '../widgets/designerView/extensions/GridEx
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider';
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider';
+import { PathExtensionProvider } from '../widgets/designerView/extensions/PathExtensionProvider';
 
 let serviceContainer = new ServiceContainer();
 
@@ -37,7 +38,9 @@ serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
   new GridExtensionProvider(),
   new TransformOriginExtensionProvider(),
   new CanvasExtensionProvider(),
-  new PositionExtensionProvider()]);
+  new PositionExtensionProvider(),
+  new PathExtensionProvider()
+]);
 serviceContainer.designerExtensions.set(ExtensionType.Selection, [new SelectionDefaultExtensionProvider()]);
 serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [new GridExtensionProvider()]);
 
