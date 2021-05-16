@@ -65,7 +65,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _movedSinceStartedAction: boolean = false;
   private _initialPoint: IDesignerMousePoint;
   private _initialSizes: ISize[];
-  private _clickThroughElements: IDesignItem[] = []
+  private _clickThroughElements: [designItem: IDesignItem, backupPointerEvents: string][] = []
   private _previousEventName: EventNames;
 
   private _firstConnect: boolean;
@@ -186,7 +186,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       overflow: auto;
     }
 
-    .over {
+    /*.over {
       outline: dashed 3px var(--highlight-green, #99ff33) !important;
       outline-offset: 2px;
     }
@@ -200,7 +200,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     .over-enter {
       outline: solid 3px var(--highlight-green, #99ff33) !important;
       outline-offset: 2px;
-    }
+    }*/
   
     .zoom-in {
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAn9JREFUeNqkU11o01AUTtI06U/6tzHWbnNVS+k67FAG/gwfZEOcCrpNEBwEH2Q+Otqxh+5VEaHYV18UwQd9sk4Q+6CUKogbtSoM10qftJS2iGuT/iRpshvvDZu4DHHggY+TnHu+795zz7m4qqrYxfA6pjerlcHMZvMQQRCL8Hccoh+iBJECAMQEQci3Wk2MxP5iqgqmJUmIB3xkdTRoKgQG6Wr1JxBX1oTQx3UxCdcjMO2ZJiCK4g4y3HUIACV+bsL5dSRAWfwe636z0WBzWEFzn5vku5xyIZGsx2UF5AhEaDYbO8Dz3KLPi1X9B2iTy0pRiDx5/Z2bJgmGwDH8WMhuDxzEf6A8TYDneT3GR4JMzcVQThNlcCtANaM48pICutodxXTkkI1HeVslSPor6B/wWL7B3Z1n2KR3O3h05rkDOkd2eYoSxM025PVrAgAQeoFSuSLI3Q66jpJNRsIWPLvM5JJTTUkGGsqVtgJ5JU3AaLTqBVKZT9xh7yDT2Gh05G4bNQBzGETkBbkMVAxbzdadMJbSBDzCHXgKgKGZQJCp0IP32dnEaKhd6nOZAay7mXk6UUGeIHDDh88NKb0qumjaHiN391/1GjtrJ6ZPSb33H9eJYomuTJ601Qf7SKVYVlqplZblxRvOThrtEaC28qSOPAwncCYSWbzJsrO3XP4br9KZa1fTmcaOSTQYLDFFaeURh/yDfLynp/fCwkI0yrKX79ZqG49sUr2A44a3u+d08/fXVhfAeZ8vcDocjs6z7KV7xeL3JzBcwPZgmoAkScGlpdvzc3NXHuZyXxIwlMX2aJoAfFkvx8aGnRzH5WEpr7cXuerKPwVw1Lb/sV8CDACbf0U37X3NqwAAAABJRU5ErkJggg==);
@@ -574,8 +574,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _resetPointerEventsForClickThrough() {
-    if (this._clickThroughElements.length == 0)
+    if (!this._clickThroughElements.length)
       return;
+    for (const e of this._clickThroughElements) {
+      (<HTMLElement>e[0].element).style.pointerEvents = e[1];
+    }
     this._clickThroughElements = [];
   }
 
@@ -842,36 +845,16 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IDesignerMousePoint) {
     if (event.altKey) {
-      let backup: string[] = [];
-      if (event.type == EventNames.PointerDown)
-        this._clickThroughElements.push(currentDesignItem);
-      for (const e of this._clickThroughElements) {
-        backup.push((<HTMLElement>e.element).style.pointerEvents);
-        (<HTMLElement>e.element).style.pointerEvents = 'none';
+      if (event.type == EventNames.PointerDown) {
+        this._clickThroughElements.push([currentDesignItem, (<HTMLElement>currentDesignItem.element).style.pointerEvents]);
+        (<HTMLElement>currentDesignItem.element).style.pointerEvents = 'none';
       }
       let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
-      currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-      for (const e of this._clickThroughElements) {
-        (<HTMLElement>e.element).style.pointerEvents = backup.shift();
-      }
+      if (currentElement.parentNode !== this.overlayLayer)
+        currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
     } else {
-      this._clickThroughElements = []
+      this._resetPointerEventsForClickThrough();
     }
-
-    /*let trackX = currentPoint.x - this._initialPoint.x;
-    let trackY = currentPoint.y - this._initialPoint.y;
-    if (event.type !== EventNames.PointerDown) {
-      if (this._alignOnGrid) {
-        trackX = Math.round(trackX / this._gridSize) * this._gridSize;
-        trackY = Math.round(trackY / this._gridSize) * this._gridSize;
-      }
-      else if (this._alignOnSnap) {
-        //let rect = this.instanceServiceContainer.selectionService.primarySelection.element.getBoundingClientRect();
-        let newPos = this._snaplines.snapToPosition({ x: currentPoint.x, y: currentPoint.y }, { x: 0, y: 0 })
-        trackX = newPos.x - this._initialPoint.x;
-        trackY = newPos.y - this._initialPoint.y;
-      }
-    }*/
 
     switch (event.type) {
       case EventNames.PointerDown:

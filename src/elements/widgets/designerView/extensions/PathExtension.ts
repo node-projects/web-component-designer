@@ -6,8 +6,9 @@ import { IPoint } from "../../../../interfaces/IPoint";
 
 export class PathExtension extends AbstractExtension {
   //private _itemRect: DOMRect;
-  private _svgRect: DOMRect;
+  //private _svgRect: DOMRect;
   private _lastPos: IPoint
+  private _parentRect: DOMRect;
 
   constructor(designerView: IDesignerView, extendedItem: IDesignItem) {
     super(designerView, extendedItem);
@@ -15,7 +16,8 @@ export class PathExtension extends AbstractExtension {
 
   override extend() {
     //this._itemRect = this.extendedItem.element.getBoundingClientRect();
-    this._svgRect = (<SVGGeometryElement>this.extendedItem.element).ownerSVGElement.getBoundingClientRect();
+    //this._svgRect = (<SVGGeometryElement>this.extendedItem.element).ownerSVGElement.getBoundingClientRect();
+    this._parentRect = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
     const pathdata: any = (<SVGGraphicsElement>this.extendedItem.node).getPathData({normalize: true});
     for (let p of pathdata) {
       switch (p.type) {
@@ -68,11 +70,11 @@ export class PathExtension extends AbstractExtension {
   }
 
   _drawPathCircle(x: number, y: number) {
-    this._drawCircleOverlay(this._svgRect.x - this.designerView.containerBoundingRect.x + x, this._svgRect.y - this.designerView.containerBoundingRect.y + y, 3, 'svg-path');
+    this._drawCircleOverlay(this._parentRect.x - this.designerView.containerBoundingRect.x + x, this._parentRect.y - this.designerView.containerBoundingRect.y + y, 3, 'svg-path');
   }
 
   _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
-    this._drawLineOverlay(this._svgRect.x - this.designerView.containerBoundingRect.x + x1, this._svgRect.y - this.designerView.containerBoundingRect.y + y1, this._svgRect.x - this.designerView.containerBoundingRect.x + x2, this._svgRect.y - this.designerView.containerBoundingRect.y + y2, 'svg-path-line');
+    this._drawLineOverlay(this._parentRect.x - this.designerView.containerBoundingRect.x + x1, this._parentRect.y - this.designerView.containerBoundingRect.y + y1, this._parentRect.x - this.designerView.containerBoundingRect.x + x2, this._parentRect.y - this.designerView.containerBoundingRect.y + y2, 'svg-path-line');
   }
 
   override refresh() {

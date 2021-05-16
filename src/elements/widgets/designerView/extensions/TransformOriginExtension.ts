@@ -20,6 +20,7 @@ export class TransformOriginExtension extends AbstractExtension {
     this._circle = this._drawCircleOverlay(rect.x - this.designerView.containerBoundingRect.x + Number.parseInt(to[0].replace('px', '')), rect.y - this.designerView.containerBoundingRect.y + Number.parseInt(to[1].replace('px', '')), 5, 'svg-transform-origin');
     this._circle.setAttribute('style', 'cursor: pointer');
     this._circle2 = this._drawCircleOverlay(rect.x - this.designerView.containerBoundingRect.x + Number.parseInt(to[0].replace('px', '')), rect.y - this.designerView.containerBoundingRect.y + Number.parseInt(to[1].replace('px', '')), 1, 'svg-transform-origin');
+    this._circle2.setAttribute('style', 'pointer-events: none');
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //todo -> assign to window
@@ -46,18 +47,21 @@ export class TransformOriginExtension extends AbstractExtension {
         }
         break;
       case EventNames.PointerUp:
-        this._circle.releasePointerCapture(event.pointerId);
-        const dx = event.x - this._startPos.x;
-        const dy = event.y - this._startPos.y;
-        const x = Number.parseInt(to[0].replace('px', ''));
-        const y = Number.parseInt(to[1].replace('px', ''));
-        const newX = (dx + x);
-        const newY = (dy + y);
-        const przX = Math.round(newX / rect.width * 10000) / 100; //round to 2 decimal places
-        const przY = Math.round(newY / rect.height * 10000) / 100;
-        //this.extendedItem.setStyle('transformOrigin',newX + 'px ' + newY + 'px');
-        this.extendedItem.setStyle('transformOrigin', przX + '% ' + przY + '%');
-        this.refresh();
+        if (this._startPos) {
+          this._circle.releasePointerCapture(event.pointerId);
+          const dx = event.x - this._startPos.x;
+          const dy = event.y - this._startPos.y;
+          const x = Number.parseInt(to[0].replace('px', ''));
+          const y = Number.parseInt(to[1].replace('px', ''));
+          const newX = (dx + x);
+          const newY = (dy + y);
+          const przX = Math.round(newX / rect.width * 10000) / 100; //round to 2 decimal places
+          const przY = Math.round(newY / rect.height * 10000) / 100;
+          //this.extendedItem.setStyle('transformOrigin',newX + 'px ' + newY + 'px');
+          this.extendedItem.setStyle('transformOrigin', przX + '% ' + przY + '%');
+          this.refresh();
+          this._startPos = null;
+        }
         break;
     }
   }
