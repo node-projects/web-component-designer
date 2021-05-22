@@ -20,6 +20,7 @@ export class ListPropertiesService extends UnkownElementPropertiesService {
         parr.push(
           {
             name: pdef.name,
+            description: pdef.description,
             type: pdef.type,
             default: pdef.default,
             min: pdef.min,

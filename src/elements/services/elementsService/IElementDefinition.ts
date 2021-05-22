@@ -1,6 +1,7 @@
 export interface IElementDefinition {
   tag: string;
   name?: string;
+  description?: string;
   import?: string;
   type?: string;
   defaultContent?: any;

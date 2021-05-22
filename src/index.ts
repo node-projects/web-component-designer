@@ -5,6 +5,8 @@ export * from "./elements/helper/CssCombiner.js";
 export * from "./elements/helper/ElementHelper.js";
 export * from "./elements/helper/IndentedTextWriter.js";
 export * from "./elements/helper/Screenshot.js";
+export * from "./elements/loader/OldCustomElementsManifestLoader.js"
+
 export * from "./elements/helper/w3color.js";
 export * from "./elements/helper/contextMenu/ContextMenuHelper.js";
 export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmenuItem.js";
@@ -13,15 +15,15 @@ export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
 
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
-export type { IBindableObject }  from "./elements/services/bindableObjectsService/IBindableObject.js";
-export type { IBindableObjectsService }  from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
+export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
+export type { IBindableObjectsService } from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
 
 export * from "./elements/services/placementService/DefaultPlacementService.js";
-export type { IContainerService }  from "./elements/services/placementService/IContainerService.js";
+export type { IContainerService } from "./elements/services/placementService/IContainerService.js";
 
 export * from "./elements/services/contentService/ContentService.js";
-export type { IContentChanged }  from "./elements/services/contentService/IContentChanged.js";
-export type { IContentService }  from "./elements/services/contentService/IContentService.js";
+export type { IContentChanged } from "./elements/services/contentService/IContentChanged.js";
+export type { IContentService } from "./elements/services/contentService/IContentService.js";
 
 export type { IElementDefinition } from "./elements/services/elementsService/IElementDefinition.js";
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";

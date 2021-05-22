@@ -1,5 +1,6 @@
 export interface IJsonPropertyDefinition {
   name: string;
+  description?: string;
   type?: string; // -> string, number, list, color, thickness, css-length
   default?: any;
   min?: number;
