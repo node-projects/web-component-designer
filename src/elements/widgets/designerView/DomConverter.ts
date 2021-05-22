@@ -1,7 +1,7 @@
 import { IDesignItem } from "../../item/IDesignItem";
 import { IndentedTextWriter } from "../../helper/IndentedTextWriter";
-import { IHtmlWriterOptions } from "../../services/serializationService/IHtmlWriterOptions";
-import { IStringPosition } from "../../services/serializationService/IStringPosition";
+import { IHtmlWriterOptions } from "../../services/htmlWriterService/IHtmlWriterOptions";
+import { IStringPosition } from "../../services/htmlWriterService/IStringPosition";
 
 export class DomConverter {
 

@@ -4,7 +4,7 @@ import { IElementsService } from './elementsService/IElementsService';
 import { IInstanceService } from './instanceService/IInstanceService';
 import { IEditorTypesService } from './propertiesService/IEditorTypesService';
 import { BaseServiceContainer } from './BaseServiceContainer';
-import { IHtmlWriterService } from './serializationService/IHtmlWriterService';
+import { IHtmlWriterService } from './htmlWriterService/IHtmlWriterService';
 import { CodeViewMonaco } from "../widgets/codeView/code-view-monaco";
 import { ICodeView } from "../widgets/codeView/ICodeView";
 import { IHtmlParserService } from "./htmlParserService/IHtmlParserService";

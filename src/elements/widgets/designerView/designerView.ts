@@ -20,7 +20,7 @@ import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
-import { IStringPosition } from '../../services/serializationService/IStringPosition';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
 import { CommandType } from '../../../commandHandling/CommandType';
 import { MoveElementInDomAction } from '../../services/undoService/transactionItems/MoveElementInDomAction';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
@@ -1110,6 +1110,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         this._initialPoint.controlOffsetX = 0;
         this._initialPoint.controlOffsetY = 0;
         const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+
         const diff = containerService.placePoint(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
 
         let trackX = diff.x - this._initialPoint.x;

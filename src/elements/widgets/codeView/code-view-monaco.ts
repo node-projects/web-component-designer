@@ -2,7 +2,7 @@ import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base
 import { ICodeView } from "./ICodeView";
 import type * as monaco from 'monaco-editor';
 import { IActivateable } from '../../../interfaces/IActivateable';
-import { IStringPosition } from '../../services/serializationService/IStringPosition';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
 import { CommandType } from '../../../commandHandling/CommandType';

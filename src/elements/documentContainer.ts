@@ -5,7 +5,7 @@ import { ServiceContainer } from "./services/ServiceContainer";
 import { InstanceServiceContainer } from "./services/InstanceServiceContainer";
 import { ICodeView } from '../elements/widgets/codeView/ICodeView';
 import { IDesignItem } from '../elements/item/IDesignItem';
-import { IStringPosition } from './services/serializationService/IStringPosition';
+import { IStringPosition } from './services/htmlWriterService/IStringPosition';
 import { IDemoView } from './widgets/demoView/IDemoView';
 import { IUiCommandHandler } from "../commandHandling/IUiCommandHandler";
 import { IUiCommand } from "../commandHandling/IUiCommand";

@@ -1,7 +1,7 @@
 import { PointerActionType } from "../../../enums/PointerActionType";
 import { IDesignItem } from "../../item/IDesignItem";
 import { InstanceServiceContainer } from "../../services/InstanceServiceContainer";
-import { IStringPosition } from "../../services/serializationService/IStringPosition";
+import { IStringPosition } from "../../services/htmlWriterService/IStringPosition";
 import { ServiceContainer } from "../../services/ServiceContainer";
 
 export interface IDesignerView {

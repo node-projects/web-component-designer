@@ -4,7 +4,7 @@ import { LitElementPropertiesService } from './propertiesService/services/LitEle
 import { NativeElementsPropertiesService } from './propertiesService/services/NativeElementsPropertiesService';
 import { DefaultInstanceService } from './instanceService/DefaultInstanceService';
 import { DefaultEditorTypesService } from './propertiesService/DefaultEditorTypesService';
-import { HtmlWriterService } from './serializationService/HtmlWriterService';
+import { HtmlWriterService } from './htmlWriterService/HtmlWriterService';
 import { BaseCustomWebComponentPropertiesService } from './propertiesService/services/BaseCustomWebComponentPropertiesService';
 import { DefaultPlacementService } from './placementService/DefaultPlacementService';
 import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserService';

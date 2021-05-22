@@ -28,9 +28,9 @@ export type { IElementsJson } from "./elements/services/elementsService/IElement
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
 export * from "./elements/services/elementsService/JsonFileElementsService.js";
 
-export type { IHtmlWriterService } from "./elements/services/serializationService/IHtmlWriterService.js";
-export type { IHtmlWriterOptions } from "./elements/services/serializationService/IHtmlWriterOptions.js";
-export * from "./elements/services/serializationService/HtmlWriterService.js";
+export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
+export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
+export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
 
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";

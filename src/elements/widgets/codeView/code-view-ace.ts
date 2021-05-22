@@ -1,7 +1,7 @@
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from "./ICodeView";
 import type { Ace } from "ace-builds";
-import { IStringPosition } from '../../services/serializationService/IStringPosition';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
 import { CommandType } from '../../../commandHandling/CommandType';
 import { IDisposable } from '../../../interfaces/IDisposable';
