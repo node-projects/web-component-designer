@@ -1,6 +1,6 @@
 # web-component-designer
 
-## Caution - this is a preview Version, a RC in Q3/2021
+## Caution - this is a preview Version, a RC is planed for Q3/2021
 
 A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
