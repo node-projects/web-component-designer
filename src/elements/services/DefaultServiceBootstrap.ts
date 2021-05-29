@@ -57,9 +57,15 @@ serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
   new ResizeExtensionProvider(true),
   new RotateExtensionProvider(),
 ]);
-serviceContainer.designerExtensions.set(ExtensionType.Selection, [new SelectionDefaultExtensionProvider()]);
-serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [new GridExtensionProvider()]);
-serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [new MouseOverExtensionProvider()]);
+serviceContainer.designerExtensions.set(ExtensionType.Selection, [
+  new SelectionDefaultExtensionProvider()
+]);
+serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
+  new GridExtensionProvider()
+]);
+serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
+  new MouseOverExtensionProvider()
+]);
 
 serviceContainer.designerTools.set(NamedTools.PointerTool, new PointerTool());
 serviceContainer.designerTools.set(NamedTools.DrawPathTool, new DrawPathTool());

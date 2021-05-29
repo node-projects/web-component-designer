@@ -1137,6 +1137,8 @@ declare global {
     removeAttribute(name: string, value?: string)
     getPathData(options?: { normalize?: boolean }): PathData[]
     setPathData(pathData: PathData[])
+    isPointInStroke(point: { x: number, y: number })
+    isPointInFill(point: { x: number, y: number })
   }
   interface SVGRectElement {
     getPathData(options?: { normalize?: boolean }): PathData[]

@@ -122,6 +122,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-selector { stroke: black; fill: transparent; stroke-width: 1; stroke-dasharray: 2; }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: all }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
@@ -141,11 +142,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       user-select: none;
     }
 
-    #selector {
-      border: 1px dotted #000;
-      position: absolute;
-      pointer-events: none;
-    }
     .lowertoolbar {
       height: 16px;
       background: #787f82;
@@ -186,22 +182,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       position: relative;
       overflow: auto;
     }
-
-    /*.over {
-      outline: dashed 3px var(--highlight-green, #99ff33) !important;
-      outline-offset: 2px;
-    }
-    .over::before {
-      content: 'press "alt" to enter container';
-      top: 5px;
-      left: 5px;
-      position: absolute;
-      opacity: 0.5;
-    }
-    .over-enter {
-      outline: solid 3px var(--highlight-green, #99ff33) !important;
-      outline-offset: 2px;
-    }*/
   
     .zoom-in {
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAn9JREFUeNqkU11o01AUTtI06U/6tzHWbnNVS+k67FAG/gwfZEOcCrpNEBwEH2Q+Otqxh+5VEaHYV18UwQd9sk4Q+6CUKogbtSoM10qftJS2iGuT/iRpshvvDZu4DHHggY+TnHu+795zz7m4qqrYxfA6pjerlcHMZvMQQRCL8Hccoh+iBJECAMQEQci3Wk2MxP5iqgqmJUmIB3xkdTRoKgQG6Wr1JxBX1oTQx3UxCdcjMO2ZJiCK4g4y3HUIACV+bsL5dSRAWfwe636z0WBzWEFzn5vku5xyIZGsx2UF5AhEaDYbO8Dz3KLPi1X9B2iTy0pRiDx5/Z2bJgmGwDH8WMhuDxzEf6A8TYDneT3GR4JMzcVQThNlcCtANaM48pICutodxXTkkI1HeVslSPor6B/wWL7B3Z1n2KR3O3h05rkDOkd2eYoSxM025PVrAgAQeoFSuSLI3Q66jpJNRsIWPLvM5JJTTUkGGsqVtgJ5JU3AaLTqBVKZT9xh7yDT2Gh05G4bNQBzGETkBbkMVAxbzdadMJbSBDzCHXgKgKGZQJCp0IP32dnEaKhd6nOZAay7mXk6UUGeIHDDh88NKb0qumjaHiN391/1GjtrJ6ZPSb33H9eJYomuTJ601Qf7SKVYVlqplZblxRvOThrtEaC28qSOPAwncCYSWbzJsrO3XP4br9KZa1fTmcaOSTQYLDFFaeURh/yDfLynp/fCwkI0yrKX79ZqG49sUr2A44a3u+d08/fXVhfAeZ8vcDocjs6z7KV7xeL3JzBcwPZgmoAkScGlpdvzc3NXHuZyXxIwlMX2aJoAfFkvx8aGnRzH5WEpr7cXuerKPwVw1Lb/sV8CDACbf0U37X3NqwAAAABJRU5ErkJggg==);
@@ -254,7 +234,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._canvasContainer = this._getDomElement<HTMLDivElement>('canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('outercanvas2');
 
-    //this._selector = this._getDomElement<HTMLDivElement>('selector');
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     this._zoomInput.onchange = () => { this._zoomFactor = parseInt(this._zoomInput.value) / 100; this.zoomFactorChanged(); }
     this._zoomInput.onclick = this._zoomInput.select
