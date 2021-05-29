@@ -28,14 +28,16 @@ export class TransformOriginExtension extends AbstractExtension {
   }
 
   pointerEvent(event: PointerEvent) {
+    event.stopPropagation();
+
     const rect = this.extendedItem.element.getBoundingClientRect();
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' ');
 
     switch (event.type) {
       case EventNames.PointerDown:
+        (<Element>event.target).setPointerCapture(event.pointerId);
         this._startPos = { x: event.x, y: event.y };
-        this._circle.setPointerCapture(event.pointerId);
         break;
       case EventNames.PointerMove:
         if (this._startPos && event.buttons > 0) {
@@ -48,8 +50,8 @@ export class TransformOriginExtension extends AbstractExtension {
         }
         break;
       case EventNames.PointerUp:
+        (<Element>event.target).releasePointerCapture(event.pointerId);
         if (this._startPos) {
-          this._circle.releasePointerCapture(event.pointerId);
           const dx = event.x - this._startPos.x;
           const dy = event.y - this._startPos.y;
           const x = Number.parseInt(to[0].replace('px', ''));
@@ -66,7 +68,6 @@ export class TransformOriginExtension extends AbstractExtension {
         break;
     }
   }
-
 
   override refresh() {
     this._removeAllOverlays();

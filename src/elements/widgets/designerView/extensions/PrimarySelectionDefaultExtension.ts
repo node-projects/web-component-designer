@@ -6,30 +6,30 @@ import { AbstractExtension } from './AbstractExtension';
 import { IExtensionManager } from "./IExtensionManger";
 
 export class PrimarySelectionDefaultExtension extends AbstractExtension {
+  private _rect: SVGRectElement;
+  private _text: SVGTextElement;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 
   override extend() {
-    const rect = this.extendedItem.element.getBoundingClientRect();
-    this._drawMoveOverlay(rect);
+    this.refresh();
   }
 
   _drawMoveOverlay(itemRect: DOMRect) {
-    const rect = this._drawRect(itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y - 16, 60, 15, 'svg-primary-selection-move');
-    
-    //TODO: -> how to move elemnt now???
-    
-    //rect.addEventListener(EventNames.PointerDown, event => this.designerView.pointerEventHandlerElement(event, this.extendedItem.element as HTMLElement, PointerActionType.Drag));
-    //rect.addEventListener(EventNames.PointerMove, event => this.designerView.pointerEventHandlerElement(event, this.extendedItem.element as HTMLElement, PointerActionType.Drag));
-    //rect.addEventListener(EventNames.PointerUp, event => this.designerView.pointerEventHandlerElement(event, this.extendedItem.element as HTMLElement, PointerActionType.Drag));
-    this._drawText(this.extendedItem.name.substring(0, 10) + '…', itemRect.x - this.designerView.containerBoundingRect.x, itemRect.y - this.designerView.containerBoundingRect.y - 5, 'svg-text');
   }
 
   override refresh() {
-    this._removeAllOverlays();
-    this.extend();
+    const boundRect = this.extendedItem.element.getBoundingClientRect();
+    this._rect = this._drawRect(boundRect.x - this.designerView.containerBoundingRect.x, boundRect.y - this.designerView.containerBoundingRect.y - 16, 60, 15, 'svg-primary-selection-move', this._rect);
+
+    //TODO: -> how to move elemnt now???
+
+    //rect.addEventListener(EventNames.PointerDown, event => this.designerView.pointerEventHandlerElement(event, this.extendedItem.element as HTMLElement, PointerActionType.Drag));
+    //rect.addEventListener(EventNames.PointerMove, event => this.designerView.pointerEventHandlerElement(event, this.extendedItem.element as HTMLElement, PointerActionType.Drag));
+    //rect.addEventListener(EventNames.PointerUp, event => this.designerView.pointerEventHandlerElement(event, this.extendedItem.element as HTMLElement, PointerActionType.Drag));
+    this._text = this._drawText(this.extendedItem.name.substring(0, 10) + '…', boundRect.x - this.designerView.containerBoundingRect.x, boundRect.y - this.designerView.containerBoundingRect.y - 5, 'svg-text', this._text);
   }
 
   override dispose() {

@@ -38,7 +38,9 @@ export class RotateExtension extends AbstractExtension {
     this.overlays.push(g);
   }
 
-  _pointerActionTypeRotate(event: MouseEvent) {
+  _pointerActionTypeRotate(event: PointerEvent) {
+    event.stopPropagation();
+
     switch (event.type) {
       case EventNames.PointerDown:
         //his._actionModeStarted = actionMode;

@@ -11,6 +11,11 @@ export interface IElementDefinition {
   defaultWidth?: string;
   defaultHeight?: string;
   ghostElement?: Element;
+  /**
+   * every component normal get's the property '_inNodeProjectsDesignerView' set. if it should not be the case on this component set this to true
+   * a component could have special logic when this is true
+   * TODO: maybe remove this, if someone needs such a function, he could use it's own instance provider... 
+   */
   doNotSetInNodeProjectsDesignerViewOnInstance?: boolean;
   /**
    * Name of the Tool activated when selecting the element.
