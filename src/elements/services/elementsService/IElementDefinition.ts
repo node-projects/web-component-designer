@@ -10,6 +10,11 @@ export interface IElementDefinition {
   defaultProperties?: { [key: string]: any; };
   defaultWidth?: string;
   defaultHeight?: string;
-  ghostElement ?: Element;
-  doNotSetInNodeProjectsDesignerViewOnInstance ?: boolean;
+  ghostElement?: Element;
+  doNotSetInNodeProjectsDesignerViewOnInstance?: boolean;
+  /**
+   * Name of the Tool activated when selecting the element.
+   * If none, the DrawElementTool is used
+   */
+  tool?: string;
 }

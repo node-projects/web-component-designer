@@ -14,6 +14,8 @@ import { DemoView } from '../widgets/demoView/demoView';
 import { ITool } from "../widgets/designerView/tools/ITool";
 import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType";
 import { IDesignerExtensionProvider } from "../widgets/designerView/extensions/IDesignerExtensionProvider";
+import { NamedTools } from "../widgets/designerView/tools/NamedTools";
+import { IContextMenuExtension } from "../widgets/designerView/extensions/contextMenu/IContextMenuExtension";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -36,9 +38,13 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
       demoViewWidget: DemoView
     };
 
+  public readonly designerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
+
+  public designerContextMenuExtensions: IContextMenuExtension[];
+
   public tool: ITool;
 
-  public designerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
+  public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
 
   get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');

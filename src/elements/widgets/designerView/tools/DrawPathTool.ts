@@ -9,6 +9,7 @@ export class DrawPathTool implements ITool {
 
   constructor() {
   }
+  
   dispose(): void {
     if (this._createdItem)
       this._createdItem.element.parentElement.removeChild(this._createdItem.element);

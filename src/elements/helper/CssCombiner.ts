@@ -106,12 +106,12 @@ export class CssCombiner {
     let e = CssCombiner._helperElement;
     styles.delete('background-image');
     styles.delete('background-position');
-    styles.delete('background-position-x'); //todo
-    styles.delete('background-position-y'); //todo
+    styles.delete('background-position-x'); //TODO
+    styles.delete('background-position-y'); //TODO
     styles.delete('background-size');
     styles.delete('background-repeat');
-    styles.delete('background-repeat-x'); //todo
-    styles.delete('background-repeat-y'); //todo
+    styles.delete('background-repeat-x'); //TODO
+    styles.delete('background-repeat-y'); //TODO
     styles.delete('background-attachment');
     styles.delete('background-origin');
     styles.delete('background-clip');

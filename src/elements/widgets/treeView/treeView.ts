@@ -15,7 +15,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
 
   private _rootItem: IDesignItem
 
-  //todo, buuton so key events can be transfered to designer Cnvas (so you can move controls with keys)
+  //TODO, buuton so key events can be transfered to designer Cnvas (so you can move controls with keys)
 
   static override readonly style = css`
     :host {

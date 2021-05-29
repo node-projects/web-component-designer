@@ -1,11 +1,12 @@
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { AbstractExtension } from "./AbstractExtension";
+import { IExtensionManager } from "./IExtensionManger";
 
 export class GridExtension extends AbstractExtension {
 
-  constructor(designerView: IDesignerView, extendedItem: IDesignItem) {
-    super(designerView, extendedItem);
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+    super(extensionManager, designerView, extendedItem);
   }
 
   override extend() {

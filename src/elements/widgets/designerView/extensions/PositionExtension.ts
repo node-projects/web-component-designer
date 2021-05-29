@@ -1,14 +1,15 @@
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { AbstractExtension } from "./AbstractExtension";
+import { IExtensionManager } from "./IExtensionManger";
 
 export class PositionExtension extends AbstractExtension {
 
-  constructor(designerView: IDesignerView, extendedItem: IDesignItem) {
-    super(designerView, extendedItem);
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+    super(extensionManager, designerView, extendedItem);
   }
 
-  override extend() { // todo - extension only when draging arround (maybe?)
+  override extend() { // TODO: - extension only when draging arround (maybe?)
     const computedStyle = getComputedStyle(this.extendedItem.element);
 
     let itemRect = this.extendedItem.element.getBoundingClientRect();

@@ -3,14 +3,15 @@ import { IPoint } from "../../../../interfaces/IPoint";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { AbstractExtension } from './AbstractExtension';
+import { IExtensionManager } from "./IExtensionManger";
 
 export class TransformOriginExtension extends AbstractExtension {
   private _startPos: IPoint;
   private _circle: SVGCircleElement;
   private _circle2: SVGCircleElement;
 
-  constructor(designerView: IDesignerView, extendedItem: IDesignItem) {
-    super(designerView, extendedItem);
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+    super(extensionManager, designerView, extendedItem);
   }
 
   override extend() {
@@ -23,7 +24,7 @@ export class TransformOriginExtension extends AbstractExtension {
     this._circle2.setAttribute('style', 'pointer-events: none');
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
-    this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //todo -> assign to window
+    this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
   }
 
   pointerEvent(event: PointerEvent) {

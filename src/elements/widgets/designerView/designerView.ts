@@ -1,6 +1,6 @@
-import { PointerActionType } from "../../../enums/PointerActionType";
+//import { PointerActionType } from "../../../enums/PointerActionType";
 import { EventNames } from "../../../enums/EventNames";
-import { ISize } from '../../../interfaces/ISize';
+//import { ISize } from '../../../interfaces/ISize';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
@@ -27,7 +27,9 @@ import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
 import { DefaultHtmlParserService } from "../../services/htmlParserService/DefaultHtmlParserService";
 import { ExtensionType } from "./extensions/ExtensionType";
-import { ExtensionManager } from './extensions/ExtensionManager';
+import { IExtensionManager } from "./extensions/IExtensionManger";
+import { ExtensionManager } from "./extensions/ExtensionManager";
+import { NamedTools } from "./tools/NamedTools";
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -48,25 +50,24 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _canvas: HTMLDivElement;
   private _canvasContainer: HTMLDivElement;
   private _outercanvas2: HTMLDivElement;
-  private _selector: HTMLDivElement;
+  //private _selector: HTMLDivElement;
 
   private _lastHoverDesignItem: IDesignItem;
 
-  private _dropTarget: Element;
+  //private _dropTarget: Element;
 
   private _zoomInput: HTMLInputElement;
   private _onContextMenuBound: () => void;
 
   private _pointerEventHandlerBound: (event: PointerEvent) => void;
 
-  private _actionType?: PointerActionType;
+  /*private _actionType?: PointerActionType;
   private _actionStartedDesignItem?: IDesignItem;
   private _actionModeStarted: string;
   private _movedSinceStartedAction: boolean = false;
   private _initialPoint: IDesignerMousePoint;
   private _initialSizes: ISize[];
-  private _clickThroughElements: [designItem: IDesignItem, backupPointerEvents: string][] = []
-  private _previousEventName: EventNames;
+  private _previousEventName: EventNames;*/
 
   private _firstConnect: boolean;
   private _ownBoundingRect: DOMRect;
@@ -116,6 +117,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       left: 0;
       pointer-events: none;
       overflow: visible;
+      user-select: none;
       z-index: 999999999999;
     }
 
@@ -216,14 +218,14 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
   }`;
 
-  static override  readonly template = html`
+  static override readonly template = html`
         <div class="outer">
           <div id="outercanvas1">
             <div id="outercanvas2">
               <div id="canvasContainer">
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="canvas" tabindex="0"></div>
-                <div id="selector" hidden></div>
+                <!--<div id="selector" hidden></div>-->
                 <svg id="svg" style="pointer-events: none;"></svg>
               </div>
             </div>
@@ -243,7 +245,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           </div>
         </div>
           `;
-  private _extensionManger: ExtensionManager;
+
+  public extensionManager: IExtensionManager;
 
   constructor() {
     super();
@@ -252,7 +255,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._canvasContainer = this._getDomElement<HTMLDivElement>('canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('outercanvas2');
 
-    this._selector = this._getDomElement<HTMLDivElement>('selector');
+    //this._selector = this._getDomElement<HTMLDivElement>('selector');
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     this._zoomInput.onchange = () => { this._zoomFactor = parseInt(this._zoomInput.value) / 100; this.zoomFactorChanged(); }
     this._zoomInput.onclick = this._zoomInput.select
@@ -276,7 +279,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.instanceServiceContainer.register("undoService", new UndoService);
     this.instanceServiceContainer.register("selectionService", new SelectionService);
 
-    this._extensionManger = new ExtensionManager(this);
+    this.extensionManager = new ExtensionManager(this);
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
@@ -284,8 +287,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._pointerEventHandlerBound = this._pointerEventHandler.bind(this);
 
     this._canvas.oncontextmenu = this._onContextMenuBound;
-
-    this.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
 
     this.overlayLayer = this._getDomElement<SVGElement>('svg')
     this.snapLines = new Snaplines(this.overlayLayer);
@@ -406,7 +407,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   handleMoveCommand(command: CommandType) {
-    //todo -> via undo redo service
+    //TODO: -> via undo redo service
     let sel = this.instanceServiceContainer.selectionService.primarySelection;
     if (command == CommandType.moveBackward)
       this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
@@ -430,6 +431,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
   }
 
+  elementFromPoint(x: number, y: number): Element {
+    return this.shadowRoot.elementFromPoint(x, y);
+  }
   static wrapInDesigner(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer): DesignerView {
     let designerView = new DesignerView();
     designerView.initialize(serviceContainer);
@@ -502,7 +506,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     event.preventDefault();
     /*if (this.alignOnSnap) {
       this.snapLines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
-      //todo fix this following code...
+      //TODO: fix this following code...
       const currentPoint = this.getDesignerMousepoint(event);
       let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.rootDesignItem))
       containerService.finishPlace(this, this.rootDesignItem, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
@@ -533,7 +537,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       if (this._zoomFactor < 0.1)
         this._zoomFactor = 0.1;
       this.zoomFactorChanged();
-      //todo: scroll so we zoom on mouse position
+      //TODO: we should zoom on the current cursor position, so it stays the center
     }
   }
 
@@ -557,7 +561,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     ];
     if (designItem.length > 1) {
-      //todo: special menu for multiple items?
+      //TODO: special menu for multiple items?
     }
     let ctxMnu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
     return ctxMnu;
@@ -566,21 +570,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private onKeyUp(event: KeyboardEvent) {
     switch (event.key) {
       case 'ArrowUp':
-        this._resetPointerEventsForClickThrough();
+        //this._resetPointerEventsForClickThrough();
         break;
     }
 
     event.preventDefault();
   }
 
-  private _resetPointerEventsForClickThrough() {
-    if (!this._clickThroughElements.length)
-      return;
-    for (const e of this._clickThroughElements) {
-      (<HTMLElement>e[0].element).style.pointerEvents = e[1];
-    }
-    this._clickThroughElements = [];
-  }
 
   private onKeyDown(event: KeyboardEvent) {
     // This is a global window handler, so clicks can come from anywhere
@@ -617,25 +613,25 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         case 'ArrowUp':
           {
             this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) - moveOffset + 'px'));
-            this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
+            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowDown':
           {
             this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) + moveOffset + 'px'));
-            this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
+            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowLeft':
           {
             this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) - moveOffset + 'px'));
-            this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
+            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
         case 'ArrowRight':
           {
             this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) + moveOffset + 'px'));
-            this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
+            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
           }
           break;
       }
@@ -644,40 +640,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     event.preventDefault();
   }
 
-  applyExtension() {
-
-  }
-
-  private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
-    if (selectionChangedEvent.oldSelectedElements && selectionChangedEvent.oldSelectedElements.length) {
-      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, this.serviceContainer, this.instanceServiceContainer)
-      this._extensionManger.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
-      this._extensionManger.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
-      this._extensionManger.removeExtensions(selectionChangedEvent.oldSelectedElements, ExtensionType.Selection);
-    }
-    if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
-      this._extensionManger.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
-      this._extensionManger.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
-      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, this.serviceContainer, this.instanceServiceContainer)
-      this._extensionManger.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
-    }
-
-    this._extensionManger.refreshExtensions(selectionChangedEvent.selectedElements);
-  }
-
-  private setSelectedElements(elements: HTMLElement[]) {
-    if (elements) {
-      let diArray: IDesignItem[] = [];
-      for (let e of elements) {
-        diArray.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
-      }
-      this.instanceServiceContainer.selectionService.setSelectedElements(diArray);
-    } else {
-      this.instanceServiceContainer.selectionService.setSelectedElements(null);
-    }
-  }
-
-  private getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
+  public getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
     let targetRect = target.getBoundingClientRect();
     return {
       originalX: event.x - this.containerBoundingRect.x,
@@ -700,25 +663,30 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       currentElement = this._canvas;
     }
 
-    //todo remove duplication when tool refactoring starts
+    //TODO: remove duplication when tool refactoring starts
     this._fillCalculationrects();
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
     if (this._lastHoverDesignItem != currentDesignItem) {
       if (this._lastHoverDesignItem)
-        this._extensionManger.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
+        this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
       if (currentDesignItem && currentDesignItem != this.rootDesignItem && currentElement.parentNode !== this.overlayLayer)
-        this._extensionManger.applyExtension(currentDesignItem, ExtensionType.MouseOver);
+        this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
       this._lastHoverDesignItem = currentDesignItem;
     }
 
-    if (this.serviceContainer.tool) {
-      this._canvas.style.cursor = this.serviceContainer.tool.cursor;
-      this.serviceContainer.tool.pointerEventHandler(this, event, currentElement);
-    }
-    else {
+    if (currentElement && currentElement.parentNode == this.overlayLayer)
+      currentElement = this.instanceServiceContainer.selectionService.primarySelection.element ?? this._canvas;
+
+    this._fillCalculationrects();
+
+    let tool = this.serviceContainer.tool ?? this.serviceContainer.designerTools.get(NamedTools.PointerTool);
+    this._canvas.style.cursor = tool.cursor;
+    tool.pointerEventHandler(this, event, currentElement);
+
+    /*else {
       this._canvas.style.cursor = '';
       this.pointerEventHandlerElement(event, currentElement);
-    }
+    }*/
   }
 
   private _fillCalculationrects() {
@@ -726,467 +694,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
 
-  public pointerEventHandlerElement(event: PointerEvent, currentElement: Element, forcedAction?: PointerActionType, actionMode?: string) {
-    if (event.type != EventNames.PointerUp && currentElement && currentElement.parentNode == this.overlayLayer)
-      return;
-    if (currentElement && currentElement.parentNode == this.overlayLayer)
-      currentElement = this.instanceServiceContainer.selectionService.primarySelection.element ?? this._canvas;
-
-
-    switch (event.type) {
-      case EventNames.PointerDown:
-        (<Element>event.target).setPointerCapture(event.pointerId);
-        this._movedSinceStartedAction = false;
-        break;
-      case EventNames.PointerUp:
-        (<Element>event.target).releasePointerCapture(event.pointerId);
-        break;
-    }
-
-    if (!event.altKey)
-      this._resetPointerEventsForClickThrough();
-
-    this._fillCalculationrects();
-
-    if (!currentElement)
-      return;
-
-    const currentPoint = this.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
-    const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-    //const isCurrentItemSelected = this.instanceServiceContainer.selectionService.isSelected(currentDesignItem);
-
-    if (this._actionType == null) {
-      this._initialPoint = currentPoint;
-      if (event.type == EventNames.PointerDown) {
-        this._actionStartedDesignItem = currentDesignItem;
-        this.snapLines.clearSnaplines();
-        let composedPath = event.composedPath();
-        //let rectCurrentElement = currentElement.getBoundingClientRect();
-        if (currentDesignItem !== this.rootDesignItem && forcedAction == PointerActionType.Drag /* this._forceMove({ x: currentPoint.containerOriginalX, y: currentPoint.containerOriginalY }, { x: rectCurrentElement.left - this._ownBoundingRect.left, y: rectCurrentElement.top - this._ownBoundingRect.top })*/) {
-          this._actionType = PointerActionType.Drag;
-        } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
-          (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // todo: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
-          this.setSelectedElements(null);
-          this._actionType = PointerActionType.DrawSelection;
-        } else if (currentElement === this || currentElement === this._canvas || currentElement == null) {
-          this.setSelectedElements(null);
-          this._actionType = PointerActionType.DrawSelection;
-          return;
-        } else {
-          this._actionType = forcedAction ?? PointerActionType.DragOrSelect;
-        }
-      }
-    }
-
-    if (event.type === EventNames.PointerMove) {
-      this._movedSinceStartedAction = this._movedSinceStartedAction || currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
-      if (this._actionType == PointerActionType.DrawSelection)
-        this._actionType = PointerActionType.DrawingSelection;
-    }
-
-    if (this._actionType == PointerActionType.DrawSelection || this._actionType == PointerActionType.DrawingSelection) {
-      this._pointerActionTypeDrawSelection(event, (<HTMLElement>currentElement), currentPoint);
-    } else if (this._actionType == PointerActionType.Resize) {
-      this._pointerActionTypeResize(event, (<HTMLElement>currentElement), currentPoint, actionMode);
-    } else if (this._actionType == PointerActionType.Rotate) {
-      this._pointerActionTypeRotate(event, (<HTMLElement>currentElement), currentPoint, actionMode);
-    } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
-      this._pointerActionTypeDragOrSelect(event, currentDesignItem, currentPoint);
-    }
-    if (event.type == EventNames.PointerUp) {
-      this.snapLines.clearSnaplines();
-      if (this._actionType == PointerActionType.DrawSelection) {
-        if (currentDesignItem !== this.rootDesignItem)
-          this.setSelectedElements([(<HTMLElement>currentElement)]);
-      }
-      this._actionType = null;
-      this._actionStartedDesignItem = null;
-      this._movedSinceStartedAction = false;
-      this._initialPoint = null;
-    }
-
-    this._previousEventName = <EventNames>event.type;
-  }
-
-  private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint) {
-    let ox1 = Math.min(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
-    let ox2 = Math.max(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
-    let oy1 = Math.min(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
-    let oy2 = Math.max(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
-
-    /*let ox1 = Math.min(this._initialPoint.x, currentPoint.x);
-    let ox2 = Math.max(this._initialPoint.x, currentPoint.x);
-    let oy1 = Math.min(this._initialPoint.y, currentPoint.y);
-    let oy2 = Math.max(this._initialPoint.y, currentPoint.y);*/
-
-    let selector = this._selector as HTMLDivElement;
-    selector.style.left = (ox1 + this._outercanvas2.scrollLeft) / this._zoomFactor + 'px';
-    selector.style.top = (oy1 + this._outercanvas2.scrollTop) / this._zoomFactor + 'px';
-    selector.style.width = (ox2 - ox1) / this._zoomFactor + 'px';
-    selector.style.height = (oy2 - oy1) / this._zoomFactor + 'px';
-    selector.hidden = false;
-
-    if (event.type == EventNames.PointerUp) {
-      selector.hidden = true;
-      let elements = this._canvas.querySelectorAll('*');
-      let inSelectionElements: HTMLElement[] = [];
-      for (let e of elements) {
-        let elementRect = e.getBoundingClientRect();
-        if (elementRect.top - this.containerBoundingRect.top >= oy1 + this._outercanvas2.scrollTop &&
-          elementRect.left - this.containerBoundingRect.left >= ox1 + this._outercanvas2.scrollLeft &&
-          elementRect.top - this.containerBoundingRect.top + elementRect.height <= oy2 + this._outercanvas2.scrollTop &&
-          elementRect.left - this.containerBoundingRect.left + elementRect.width <= ox2 + this._outercanvas2.scrollLeft) {
-          inSelectionElements.push(e as HTMLElement);
-        }
-      }
-      this.setSelectedElements(inSelectionElements);
-    }
-  }
-
-  _pointerActionTypeDragOrSelect(event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IDesignerMousePoint) {
-    if (event.altKey) {
-      if (event.type == EventNames.PointerDown) {
-        this._clickThroughElements.push([currentDesignItem, (<HTMLElement>currentDesignItem.element).style.pointerEvents]);
-        (<HTMLElement>currentDesignItem.element).style.pointerEvents = 'none';
-      }
-      let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as HTMLElement;
-      if (currentElement.parentNode !== this.overlayLayer)
-        currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-    } else {
-      this._resetPointerEventsForClickThrough();
-    }
-
-    switch (event.type) {
-      case EventNames.PointerDown:
-        {
-          this._actionStartedDesignItem = currentDesignItem;
-
-          this._dropTarget = null;
-          if (event.shiftKey || event.ctrlKey) {
-            const index = this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
-            if (index >= 0) {
-              let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
-              newSelectedList.splice(index, 1);
-              this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
-            }
-            else {
-              let newSelectedList = this.instanceServiceContainer.selectionService.selectedElements.slice(0);
-              newSelectedList.push(currentDesignItem);
-              this.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
-            }
-          } else {
-            if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
-              this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
-          }
-          if (this.alignOnSnap)
-            this.snapLines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
-
-          break;
-        }
-      case EventNames.PointerMove:
-        {
-          const elementMoved = currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
-          if (this._actionType != PointerActionType.Drag && elementMoved) {
-            this._actionType = PointerActionType.Drag;
-          }
-
-          //if (this._actionType != PointerActionType.Drag)
-          //  return;
-
-          if (this._movedSinceStartedAction) {
-            const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
-            containerService.place(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
-            this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-          }
-          //todo -> what is if a transform already exists -> backup existing style.?
-          /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-            (<HTMLElement>designItem.element).style.transform = 'translate(' + trackX + 'px, ' + trackY + 'px)';
-          }
-  
-          // See if it's over anything.
-          this._dropTarget = null;
-          let targets = this._canvas.querySelectorAll('*');
-          for (let i = 0; i < targets.length; i++) {
-            let possibleTarget = targets[i] as HTMLElement;
-            possibleTarget.classList.remove('over');
-  
-            let possibleTargetDesignItem = DesignItem.GetOrCreateDesignItem(possibleTarget, this.serviceContainer, this.instanceServiceContainer);
-            if (this.instanceServiceContainer.selectionService.selectedElements.indexOf(possibleTargetDesignItem) >= 0)
-              continue;
-  
-            // todo put following a extenable function ...
-            // in IContainerHandler ...
-  
-            // Only some native elements and things with slots can be drop targets.
-            let slots = possibleTarget ? possibleTarget.querySelectorAll('slot') : [];
-            // input is the only native in this app that doesn't have a slot
-            let canDrop = (possibleTarget.localName.indexOf('-') === -1 && possibleTarget.localName !== 'input') || possibleTarget.localName === 'dom-repeat' || slots.length !== 0;
-  
-            if (!canDrop) {
-              continue;
-            }
-  
-            // Do we actually intersect this child?
-            const possibleTargetRect = possibleTarget.getBoundingClientRect();
-            if (possibleTargetRect.top - this._ownBoundingRect.top <= currentPoint.y &&
-              possibleTargetRect.left - this._ownBoundingRect.left <= currentPoint.x &&
-              possibleTargetRect.top - this._ownBoundingRect.top + possibleTargetRect.height >= currentPoint.y &&
-              possibleTargetRect.left - this._ownBoundingRect.left + possibleTargetRect.width >= currentPoint.x) {
-  
-              // New target! Remove the other target indicators.
-              var previousTargets = this._canvas.querySelectorAll('.over');
-              for (var j = 0; j < previousTargets.length; j++) {
-                previousTargets[j].classList.remove('over');
-              }
-              if (currentDesignItem != possibleTargetDesignItem && this._dropTarget != possibleTarget) {
-                possibleTarget.classList.add('over');
-  
-                if (event.altKey) {
-                  if (this._dropTarget != null)
-                    this._dropTarget.classList.remove('over-enter');
-                  this._dropTarget = possibleTarget;
-                  this._dropTarget.classList.remove('over');
-                  this._dropTarget.classList.add('over-enter');
-                }
-              }
-            }
-          }*/
-          break;
-        }
-      case EventNames.PointerUp:
-        {
-          if (this._actionType == PointerActionType.DragOrSelect) {
-            if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey)
-              this.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
-            return;
-          }
-
-          if (this._movedSinceStartedAction) {
-            let cg = this.rootDesignItem.openGroup("Move Elements", this.instanceServiceContainer.selectionService.selectedElements);
-            let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
-            containerService.finishPlace(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
-            cg.commit();
-          }
-
-          this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-
-          break;
-          //todo this needs also to get info from container handler, cause position is dependent of container
-          for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-            let movedElement = designItem.element;
-            if (this._dropTarget && this._dropTarget != movedElement.parentElement) {
-              //let oldParent = movedElement.parentElement;
-              movedElement.parentElement.removeChild(currentDesignItem.element);
-
-              // If there was a textContent nuke it, or else you'll
-              // never be able to again.
-              /*if (this._dropTarget.children.length === 0) {
-                this._dropTarget.textContent = '';
-              }
-              this._dropTarget.appendChild(currentElement);
-  
-              this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
-                {
-                  new: {
-                    parent: this._dropTarget,
-                    left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
-                  },
-                  old: {
-                    parent: oldParent,
-                    left: oldLeft, top: oldTop, position: oldPosition
-                  }
-                });*/
-            } else {
-              let oldLeft = parseInt((<HTMLElement>movedElement).style.left);
-              oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
-              let oldTop = parseInt((<HTMLElement>movedElement).style.top);
-              oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
-              //let oldPosition = movedElement.style.position;
-
-              //todo: move this to handler wich is specific depeding on the container (e.g. canvasHandler, gridHandler, flexboxHandler...)
-              //todo: designitem set properties undo...
-              (<HTMLElement>designItem.element).style.transform = null;
-              designItem.setStyle('position', 'absolute');
-              //designItem.setStyle('left', (trackX + oldLeft) + "px");
-              //designItem.setStyle('top', (trackY + oldTop) + "px");
-              //todo
-              /*this.serviceContainer.UndoService.add(UndoItemType.Move, movedElement,
-                {
-                  new: { left: movedElement.style.left, top: movedElement.style.top, position: movedElement.style.position },
-                  old: { left: oldLeft, top: oldTop, position: oldPosition }
-                });*/
-            }
-            //cg.commit();
-
-            if (this._dropTarget != null)
-              this._dropTarget.classList.remove('over-enter');
-            this._dropTarget = null;
-          }
-
-
-
-
-
-          /* let oldParent = currentElement.parentElement;
-           let newParent;
-           // Does this need to be added to a new parent?
-           if (this._dropTarget) {
-             reparented = true;
-             oldParent.removeChild(currentElement);
-   
-             // If there was a textContent nuke it, or else you'll
-             // never be able to again.
-             if (this._dropTarget.children.length === 0) {
-               this._dropTarget.textContent = '';
-             }
-             this._dropTarget.appendChild(currentElement);
-             newParent = this._dropTarget;
-             this._dropTarget = null;
-           } else if (currentElement.parentElement && (currentElement.parentElement !== this._canvas)) {
-             reparented = true;
-             // If there's no drop target and the el used to be in a different
-             // parent, move it to the main view.
-             newParent = this._canvas;
-             currentElement.parentElement.removeChild(currentElement);
-             this.add(currentElement);
-           }
-           let parent = currentElement.parentElement.getBoundingClientRect();
-   
-           let oldLeft = currentElement.style.left;
-           let oldTop = currentElement.style.top;
-           let oldPosition = currentElement.style.position;
-           if (reparented) {
-             currentElement.style.position = 'relative';
-             currentElement.style.left = currentElement.style.top = '0px';
-             this.actionHistory.add(ActionHistoryType.Reparent, currentElement,
-               {
-                 new: {
-                   parent: newParent,
-                   left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position
-                 },
-                 old: {
-                   parent: oldParent,
-                   left: oldLeft, top: oldTop, position: oldPosition
-                 }
-               });
-           } else {
-             currentElement.style.position = 'absolute';
-             currentElement.style.left = rekt.left - parent.left + 'px';
-             currentElement.style.top = rekt.top - parent.top + 'px';
-             this.actionHistory.add(ActionHistoryType.Move, el,
-               {
-                 new: { left: currentElement.style.left, top: currentElement.style.top, position: currentElement.style.position },
-                 old: { left: oldLeft, top: oldTop, position: oldPosition }
-               });
-           }
-   
-           if (newParent)
-             newParent.classList.remove('over');
-           if (oldParent)
-             oldParent.classList.remove('over');
-           currentElement.classList.remove('dragging');
-           currentElement.classList.remove('resizing');
-           currentElement.style.transform = 'none'; */
-          break;
-        }
-    }
-    //todo this.dispatchEvent(new CustomEvent('refresh-view', { bubbles: true, composed: true, detail: { whileTracking: true, node: this } }));
-  }
-
-  _pointerActionTypeResize(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint, actionMode: string = 'se-resize') {
-    switch (event.type) {
-      case EventNames.PointerDown:
-        this._initialSizes = [];
-        this._actionModeStarted = actionMode;
-        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          let rect = designItem.element.getBoundingClientRect();
-          this._initialSizes.push({ width: rect.width, height: rect.height });
-        }
-        if (this.alignOnSnap)
-          this.snapLines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
-        break;
-      case EventNames.PointerMove:
-
-        this._initialPoint.controlOffsetX = 0;
-        this._initialPoint.controlOffsetY = 0;
-        const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
-
-        const diff = containerService.placePoint(event, this, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
-
-        let trackX = diff.x - this._initialPoint.x;
-        let trackY = diff.y - this._initialPoint.y;
-
-        let i = 0;
-
-        switch (this._actionModeStarted) {
-          case 'se-resize':
-            for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-              (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
-              (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
-            }
-            break;
-          case 's-resize':
-            for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-              (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
-            }
-            break;
-          case 'e-resize':
-            for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-              (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
-            }
-            break;
-          //for other resize modes we need a replacement
-        }
-
-        this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-        break;
-      case EventNames.PointerUp:
-        let cg = this.rootDesignItem.openGroup("Resize Elements", this.instanceServiceContainer.selectionService.selectedElements);
-
-        for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
-          designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
-        }
-        cg.commit();
-        this._initialSizes = null;
-        break;
-    }
-  }
-
-  _pointerActionTypeRotate(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint, actionMode: string = 'se-resize') {
-    switch (event.type) {
-      case EventNames.PointerDown:
-        this._actionModeStarted = actionMode;
-        break;
-      case EventNames.PointerMove:
-        //let trackX = currentPoint.x - this._initialPoint.x;
-        //let trackY = currentPoint.y - this._initialPoint.y;
-        //let i = 0;
-
-
-        /*
-                var center_x = (offset.left) + (img.width() / 2);
-            var center_y = (offset.top) + (img.height() / 2);
-            var mouse_x = evt.pageX;
-            var mouse_y = evt.pageY;
-            var radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
-            var degree = (radians * (180 / Math.PI) * -1) + 90;
-            img.css('-moz-transform', 'rotate(' + degree + 'deg)');*/
-
-        this._extensionManger.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-        break;
-      case EventNames.PointerUp:
-        let cg = this.rootDesignItem.openGroup("Resize Elements", this.instanceServiceContainer.selectionService.selectedElements);
-
-        /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
-          designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
-          designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
-        }*/
-        cg.commit();
-        this._initialSizes = null;
-        break;
-    }
-  }
 }
 
 customElements.define('node-projects-designer-view', DesignerView);

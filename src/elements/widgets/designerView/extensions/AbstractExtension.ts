@@ -1,14 +1,17 @@
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { IDesignerExtension } from "./IDesignerExtension";
+import { IExtensionManager } from "./IExtensionManger";
 
 export abstract class AbstractExtension implements IDesignerExtension {
   protected overlays: SVGGraphicsElement[] = [];
   protected overlayLayer: SVGElement;
+  protected extensionManager: IExtensionManager;
   protected designerView: IDesignerView;
   protected extendedItem: IDesignItem;
 
-  constructor(designerView: IDesignerView, extendedItem: IDesignItem) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+    this.extensionManager = extensionManager;
     this.designerView = designerView;
     this.extendedItem = extendedItem;
 

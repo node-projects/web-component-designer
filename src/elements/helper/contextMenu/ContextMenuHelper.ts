@@ -9,15 +9,19 @@ export class ContextMenuHelper {
     position: absolute;
     z-index: 999999;
     padding: 0px 0;
-    background-color: #fff;
+    background-color: rgb(255 255 255 / 93%);
     border: solid 1px #dfdfdf;
     box-shadow: 1px 1px 2px #cfcfcf;
     cursor: default;
     user-select: none;
+    border-radius: 12px;
   }
 
   .context-menu hr {
-    margin: 3px;
+    margin: 0 0 5px 5%;
+    height: 1px;
+    width: 90%;
+    background-color: #e2e2e2;
   }
   
   .context-menu--active {
@@ -97,7 +101,7 @@ export class ContextMenuHelper {
   }
 
   public close() {
-    setTimeout(() => {
+    //setTimeout(() => {
       window.removeEventListener('keyup', this._keyUpBound);
       window.removeEventListener('resize', this._closeBound);
       window.removeEventListener('mousedown', this._closeBound);
@@ -106,7 +110,7 @@ export class ContextMenuHelper {
         document.body.removeChild(this._element);
       else
         this._shadowRoot.removeChild(this._element);
-    }, 200);
+    //}, 10);
   }
 
   public show() {

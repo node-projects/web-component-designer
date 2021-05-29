@@ -3,9 +3,10 @@ import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { IDesignerExtension } from "./IDesignerExtension";
 import { PathExtension } from "./PathExtension";
+import { IExtensionManager } from "./IExtensionManger";
 
 export class PathExtensionProvider implements IDesignerExtensionProvider {
-  shouldExtend(designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): boolean {
     if (designItem.node instanceof SVGPathElement ||
       designItem.node instanceof SVGRectElement ||
       designItem.node instanceof SVGCircleElement ||
@@ -17,7 +18,7 @@ export class PathExtensionProvider implements IDesignerExtensionProvider {
     return false;
   }
 
-  getExtension(designerView: IDesignerView, designItem: IDesignItem): IDesignerExtension {
-    return new PathExtension(designerView, designItem);
+  getExtension(extensionManager: IExtensionManager, designerView: IDesignerView,  designItem: IDesignItem): IDesignerExtension {
+    return new PathExtension(extensionManager, designerView, designItem);
   }
 }
