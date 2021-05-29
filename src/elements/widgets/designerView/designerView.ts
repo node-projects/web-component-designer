@@ -6,7 +6,6 @@ import { IElementDefinition } from '../../services/elementsService/IElementDefin
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
 import { UndoService } from '../../services/undoService/UndoService';
 import { SelectionService } from '../../services/selectionService/SelectionService';
-import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
 import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
