@@ -29,6 +29,7 @@ import { PanTool } from '../widgets/designerView/tools/PanTool';
 import { CopyPasteContextMenu } from '../widgets/designerView/extensions/contextMenu/CopyPasteContextMenu';
 import { ZMoveContextMenu } from '../widgets/designerView/extensions/contextMenu/ZMoveContextMenu';
 import { MultipleItemsSelectedContextMenu } from '../widgets/designerView/extensions/contextMenu/MultipleItemsSelectedContextMenu';
+import { RectangleSelectorTool } from '../widgets/designerView/tools/RectangleSelectorTool';
 
 let serviceContainer = new ServiceContainer();
 
@@ -71,6 +72,7 @@ serviceContainer.designerTools.set(NamedTools.PointerTool, new PointerTool());
 serviceContainer.designerTools.set(NamedTools.DrawPathTool, new DrawPathTool());
 serviceContainer.designerTools.set(NamedTools.ZoomTool, new ZoomTool());
 serviceContainer.designerTools.set(NamedTools.PanTool, new PanTool());
+serviceContainer.designerTools.set(NamedTools.DrawSelectionTool, new RectangleSelectorTool());
 
 serviceContainer.designerContextMenuExtensions = [new CopyPasteContextMenu(), new ZMoveContextMenu(), new MultipleItemsSelectedContextMenu()];
 

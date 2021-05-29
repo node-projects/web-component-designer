@@ -349,12 +349,6 @@ if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathDa
       return pathData;
     }
 
-    var setAttribute = SVGPathElement.prototype.setAttribute;
-    var removeAttribute = SVGPathElement.prototype.removeAttribute;
-
-    //var $cachedPathData = window.Symbol ? Symbol() : "__cachedPathData";
-    //var $cachedNormalizedPathData = window.Symbol ? Symbol() : "__cachedNormalizedPathData";
-
     // @info
     //   Get an array of corresponding cubic bezier curve parameters for given arc curve paramters.
     var arcToCubicCurves = function (x1, y1, x2, y2, r1, r2, angle, largeArcFlag, sweepFlag, _recursive?) {
@@ -911,24 +905,6 @@ if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathDa
       return reducedPathData;
     };
 
-    SVGPathElement.prototype.setAttribute = function (name, value) {
-      /*if (name === "d") {
-        this[$cachedPathData] = null;
-        this[$cachedNormalizedPathData] = null;
-      }*/
-
-      setAttribute.call(this, name, value);
-    };
-
-    SVGPathElement.prototype.removeAttribute = function (name, value) {
-      /*if (name === "d") {
-        this[$cachedPathData] = null;
-        //this[$cachedNormalizedPathData] = null;
-      }*/
-
-      removeAttribute.call(this, name);
-    };
-
     SVGPathElement.prototype.getPathData = function (options) {
       if (options && options.normalize) {
         /*if (this[$cachedNormalizedPathData]) {
@@ -1128,17 +1104,16 @@ declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: number, x: 
 declare type PathDataT = { type: 'T' | 't', values: [x: number, y: number] }
 declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
 declare type PathData = (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
+
 declare global {
   interface SVGGraphicsElement {
     getPathData(options?: { normalize?: boolean }): PathData[]
-  }
-  interface SVGPathElement {
-    setAttribute(name: string, value: string)
-    removeAttribute(name: string, value?: string)
-    getPathData(options?: { normalize?: boolean }): PathData[]
-    setPathData(pathData: PathData[])
     isPointInStroke(point: { x: number, y: number })
     isPointInFill(point: { x: number, y: number })
+  }
+  interface SVGPathElement {
+    getPathData(options?: { normalize?: boolean }): PathData[]
+    setPathData(pathData: PathData[])
   }
   interface SVGRectElement {
     getPathData(options?: { normalize?: boolean }): PathData[]

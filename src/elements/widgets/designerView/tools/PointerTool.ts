@@ -5,9 +5,10 @@ import { DesignItem } from "../../../item/DesignItem";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { ITool } from "./ITool";
+import { NamedTools } from './NamedTools';
 
 export class PointerTool implements ITool {
-  
+
   readonly cursor: string = 'default';
 
   private _movedSinceStartedAction: boolean = false;
@@ -27,9 +28,6 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
-    //if (event.type != EventNames.PointerUp && currentElement && currentElement.parentNode == this.overlayLayer)
-    //  return;
-
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
@@ -78,7 +76,7 @@ export class PointerTool implements ITool {
     }
 
     if (this._actionType == PointerActionType.DrawSelection || this._actionType == PointerActionType.DrawingSelection) {
-      this._pointerActionTypeDrawSelection(event, (<HTMLElement>currentElement), currentPoint);
+      this._pointerActionTypeDrawSelection(designerView, event, (<HTMLElement>currentElement));
       //} else if (this._actionType == PointerActionType.Resize) {
       //  this._pointerActionTypeResize(event, (<HTMLElement>currentElement), currentPoint, actionMode);
       //} else if (this._actionType == PointerActionType.Rotate) {
@@ -101,34 +99,11 @@ export class PointerTool implements ITool {
     this._previousEventName = <EventNames>event.type;
   }
 
-  private _pointerActionTypeDrawSelection(event: MouseEvent, currentElement: HTMLElement, currentPoint: IDesignerMousePoint) {
-    /*let ox1 = Math.min(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
-    let ox2 = Math.max(this._initialPoint.containerOriginalX, currentPoint.containerOriginalX);
-    let oy1 = Math.min(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
-    let oy2 = Math.max(this._initialPoint.containerOriginalY, currentPoint.containerOriginalY);
-
-    let selector = this._selector as HTMLDivElement;
-    selector.style.left = (ox1 + this._outercanvas2.scrollLeft) / this._zoomFactor + 'px';
-    selector.style.top = (oy1 + this._outercanvas2.scrollTop) / this._zoomFactor + 'px';
-    selector.style.width = (ox2 - ox1) / this._zoomFactor + 'px';
-    selector.style.height = (oy2 - oy1) / this._zoomFactor + 'px';
-    selector.hidden = false;
-
-    if (event.type == EventNames.PointerUp) {
-      selector.hidden = true;
-      let elements = this._canvas.querySelectorAll('*');
-      let inSelectionElements: HTMLElement[] = [];
-      for (let e of elements) {
-        let elementRect = e.getBoundingClientRect();
-        if (elementRect.top - this.containerBoundingRect.top >= oy1 + this._outercanvas2.scrollTop &&
-          elementRect.left - this.containerBoundingRect.left >= ox1 + this._outercanvas2.scrollLeft &&
-          elementRect.top - this.containerBoundingRect.top + elementRect.height <= oy2 + this._outercanvas2.scrollTop &&
-          elementRect.left - this.containerBoundingRect.left + elementRect.width <= ox2 + this._outercanvas2.scrollLeft) {
-          inSelectionElements.push(e as HTMLElement);
-        }
-      }
-      this.setSelectedElements(inSelectionElements);
-    }*/
+  private _pointerActionTypeDrawSelection(designerView: IDesignerView, event: PointerEvent, currentElement: HTMLElement) {
+    const drawSelectionTool = designerView.serviceContainer.designerTools.get(NamedTools.DrawSelectionTool);
+    if (drawSelectionTool) {
+      drawSelectionTool.pointerEventHandler(designerView, event, currentElement);
+    }
   }
 
 
@@ -141,7 +116,7 @@ export class PointerTool implements ITool {
     this._clickThroughElements = [];
   }
 
-  private _pointerActionTypeDragOrSelect(designerView: IDesignerView, event: MouseEvent, currentDesignItem: IDesignItem, currentPoint: IDesignerMousePoint) {
+  private _pointerActionTypeDragOrSelect(designerView: IDesignerView, event: PointerEvent, currentDesignItem: IDesignItem, currentPoint: IDesignerMousePoint) {
     if (event.altKey) {
       if (event.type == EventNames.PointerDown) {
         this._clickThroughElements.push([currentDesignItem, (<HTMLElement>currentDesignItem.element).style.pointerEvents]);

@@ -425,6 +425,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._firstConnect = true;
       this._outercanvas2.addEventListener(EventNames.PointerDown, this._pointerEventHandlerBound);
       this._outercanvas2.addEventListener(EventNames.PointerMove, this._pointerEventHandlerBound);
+      this._outercanvas2.addEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
       this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
@@ -432,11 +433,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._canvas.addEventListener('keyup', this._onKeyUpBound, true);
       this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
     }
-    window.addEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
-  }
-
-  disconnectedCallback() {
-    window.removeEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
   }
 
   zoomFactorChanged() {

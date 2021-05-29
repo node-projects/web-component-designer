@@ -2,5 +2,6 @@ export enum NamedTools {
   PointerTool = 'PointerTool',
   DrawPathTool = 'DrawPathTool',
   ZoomTool = 'ZoomTool',
-  PanTool = 'PanTool'
+  PanTool = 'PanTool',
+  DrawSelectionTool = 'DrawSelectionTool',
 }

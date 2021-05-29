@@ -1,5 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames';
 import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
+import { DesignItem } from '../../../item/DesignItem';
+import { IDesignItem } from '../../../item/IDesignItem';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 
@@ -48,9 +50,37 @@ export class RectangleSelectorTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+
+        const elements = designerView.rootDesignItem.element.querySelectorAll('*');
+        const inSelectionElements: IDesignItem[] = [];
+
+        //@ts-ignore
+        let point: { x: number, y: number } = designerView.overlayLayer.createSVGPoint();
+        for (let e of elements) {
+          let elementRect = e.getBoundingClientRect();
+          point.x = elementRect.left - designerView.containerBoundingRect.left;
+          point.y = elementRect.top - designerView.containerBoundingRect.top;
+          const p1 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
+          point.x = elementRect.left - designerView.containerBoundingRect.left + elementRect.width;
+          point.y = elementRect.top - designerView.containerBoundingRect.top;
+          const p2 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
+          point.x = elementRect.left - designerView.containerBoundingRect.left;
+          point.y = elementRect.top - designerView.containerBoundingRect.top + elementRect.height;
+          const p3 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
+          point.x = elementRect.left - designerView.containerBoundingRect.left + elementRect.width;
+          point.y = elementRect.top - designerView.containerBoundingRect.top + elementRect.height;
+          const p4 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
+          if (p1 && p2 && p3 && p4) {
+            const desItem = DesignItem.GetOrCreateDesignItem(e, designerView.serviceContainer, designerView.instanceServiceContainer)
+            inSelectionElements.push(desItem);
+          }
+        }
+
         designerView.overlayLayer.removeChild(this._rect);
         this._rect = null;
         this._initialPoint = null;
+
+        designerView.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
         break;
     }
   }

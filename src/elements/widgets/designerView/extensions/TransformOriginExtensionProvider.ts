@@ -7,10 +7,12 @@ import { IExtensionManager } from "./IExtensionManger";
 
 export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): boolean {
-    return true;
+    if (designItem.node instanceof HTMLElement || (designItem.node instanceof SVGElement && designItem.node.localName === 'svg'))
+      return true;
+    return false;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerView,  designItem: IDesignItem): IDesignerExtension {
+  getExtension(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): IDesignerExtension {
     return new TransformOriginExtension(extensionManager, designerView, designItem);
   }
 }
