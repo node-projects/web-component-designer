@@ -1,45 +1,55 @@
 import { EventNames } from '../../../../enums/EventNames';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 
 export class DrawPathTool implements ITool {
-  private _createdItem: IDesignItem;
-  //private _startPosition: IPoint;
+
+  readonly cursor = 'crosshair';
+
+  private _pathD: string;
+  private _path: SVGPathElement;
+  private _initialPoint: IDesignerMousePoint;
 
   constructor() {
   }
-  dispose(): void {
-    if (this._createdItem)
-      this._createdItem.element.parentElement.removeChild(this._createdItem.element);
-  }
 
-  get cursor() {
-    return 'crosshair';
+  dispose(): void {
   }
 
   pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
+    const currentPoint = designerView.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
+
     switch (event.type) {
       case EventNames.PointerDown:
-        this._onPointerDown(designerView, event);
+        (<Element>event.target).setPointerCapture(event.pointerId);
+        this._initialPoint = currentPoint;
+        this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
+        this._path.setAttribute("D", this._pathD);
+        designerView.overlayLayer.appendChild(this._path);
         break;
+
       case EventNames.PointerMove:
-        this._onPointerMove(designerView, event);
+        if (this._path) {
+          this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
+          this._path.setAttribute("d", this._pathD);
+        }
         break;
+
       case EventNames.PointerUp:
-        this._onPointerUp(designerView, event);
+        (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerView.overlayLayer.removeChild(this._path);
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        this._path.setAttribute("d", this._pathD);
+        svg.appendChild(this._path);
+        designerView.rootDesignItem.element.appendChild(svg);
+        this._path = null;
+        this._pathD = null;
+
+        //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
+        
         break;
     }
-  }
-
-  private async _onPointerDown(designerView: IDesignerView, event: PointerEvent) {
-    event.preventDefault();
-    //this._startPosition = { x: event.x, y: event.y };
-  }
-
-  private async _onPointerMove(designerView: IDesignerView, event: PointerEvent) {
-  }
-
-  private async _onPointerUp(designerView: IDesignerView, event: PointerEvent) {
   }
 }

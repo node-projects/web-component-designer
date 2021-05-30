@@ -2,17 +2,21 @@ import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { IDesignerExtension } from "./IDesignerExtension";
-import { GridExtension } from './GridExtension';
+import { ResizeExtension } from "./ResizeExtension";
 import { IExtensionManager } from "./IExtensionManger";
 
-export class GridExtensionProvider implements IDesignerExtensionProvider {
+export class ResizeExtensionProvider implements IDesignerExtensionProvider {
+  private resizeAllSelected: boolean;
+
+  constructor(resizeAllSelected: boolean = false) {
+    this.resizeAllSelected = resizeAllSelected;
+  }
+
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): boolean {
-    if (getComputedStyle((<HTMLElement>designItem.element)).display == 'grid')
-      return true;
-    return false;
+    return true;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): IDesignerExtension {
-    return new GridExtension(extensionManager, designerView, designItem);
+    return new ResizeExtension(extensionManager, designerView, designItem, this.resizeAllSelected);
   }
 }

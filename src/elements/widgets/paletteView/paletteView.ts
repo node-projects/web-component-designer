@@ -11,15 +11,13 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
 
   private _designerTabControl: DesignerTabControl;
 
-  static override get style() {
-    return css`
+  static override readonly style = css`
     :host {
       display: flex;
       flex-direction: column;
       flex: 1;
       height: 100%;
     }`;
-  }
 
   constructor() {
     super();
@@ -28,7 +26,7 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
     this.shadowRoot.appendChild(this._designerTabControl);
   }
 
-  public async loadControls(serviceContainer: ServiceContainer, elementsServices : IElementsService[]) {
+  public async loadControls(serviceContainer: ServiceContainer, elementsServices: IElementsService[]) {
     for (const s of elementsServices) {
       let elements = await s.getElements();
       let paletteElement = new PaletteElements();

@@ -73,12 +73,12 @@ export class DefaultPlacementService implements IContainerService {
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {
-    //todo, this should revert all undo actions while active
+    //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
 
     let track = this.calculateTrack(event, placementView, startPoint, newPoint, items[0]);
 
-    //todo -> what is if a transform already exists -> backup existing style.?
+    //TODO: -> what is if a transform already exists -> backup existing style.?
     for (const designItem of items) {
       (<HTMLElement>designItem.element).style.transform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
     }

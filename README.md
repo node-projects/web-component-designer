@@ -22,12 +22,12 @@ repository: https://github.com/node-projects/web-component-designer-simple-demo
 
 ## What is needed
 
-- @node-projects/base-custom-webcomponent
+- @node-projects/base-custom-webcomponent a very small basic webcomponent library (maybe this will be included directly later, to be dependecy free)
 - constructable-stylesheets-polyfill on browser not yet supporting these (for Safari & Firefox)
-- optional - ace code editor (workin)
-- optional - monaco code editor (if you use code-view-monaco) (workin)
+- optional - ace code editor
+- optional - monaco code editor (if you use code-view-monaco)
 - optional - code mirror code editor (if you use code-view-codemirror) (workin but buggy)
-- optional - fancytree (if you use tree-view-extened) (workin)
+- optional - fancytree (if you use tree-view-extended, palette-tree-view or bindable-objects-browser)
 
 ## Features we are workin on
 
@@ -72,49 +72,3 @@ Your addition to your index.html should look like this:
     <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
     <script src="/node_modules/@node-projects/web-component-designer/dist/polyfill/mobileDragDrop.js"></script>
-
-Following Text is from Wizzywid, needs to be fixed...
-
-**Disclaimer**: to configure the app to have other elements than the ones it
-already has, you should clone it, build it, and make one of the changes below.
-I don't want to add a "anyone should add any element to this exact deployed app"
-feature because that invites a database and a bunch of XSS opportunities in the
-house, and that's not really the point of this project. That being said, I would
-like the steps below to be as easy as possible. ❤️
-
-Also, start all of the sentences below with "In theory, ...". 😅
-
-### Adding another native element
-
-Following Text is from Wizzywid, needs to be fixed...
-
-Add another entry to the `elements-native.json` file. If this is a weird
-native element, you might have to do some code changes:
-  - if it doesn't have a closing tag (like `<input>` or `<img>`), update `dumpElementEndTag`
-  in `code-view.html`
-  - if it doesn't have a "slot", i.e. you shouldn't be able to drop children
-  in it (like `<input>`), you need to make 1 change each in `app-shell.html`.
-  `designer-view.html` (just search for `input`, you'll find it.).
-  Yes I should probably make this only exist in one place, but you know what,
-  communicating between siblings is hard.
-
-### Adding another custom element
-
-Following Text is from Wizzywid, needs to be fixed...
-
-Add the element you want to the `devDependencies` section of this
-project's `package.json` file, then run `npm install`. This element needs
-to use HTML Imports for it to work. If the import isn't of the form
-`element-name/element-name.html`, you'll have to hand craft `dumpImports()` in
-`code-view.html`.
-
-### Adding another sample
-
-Following Text is from Wizzywid, needs to be fixed...
-
-Add the name of the sample in `elements-samples.json`, and create a file in the
-`samples` directory with the same name. This file should contain a `<template>`,
-and in the template the contents of your new sample. Note that this template
-obviously has no shadow DOM (unless you add just a custom element), so if in it
-you add a `<style> div {color: red}</style>`, this will, of course, style
-all the divs in the app, and you'll have a hard time removing that code :(

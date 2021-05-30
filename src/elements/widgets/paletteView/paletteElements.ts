@@ -1,15 +1,12 @@
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
 import { dragDropFormatName } from '../../../Constants';
-import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { DrawElementTool } from '../designerView/tools/DrawElementTool';
 
 export class PaletteElements extends BaseCustomWebComponentLazyAppend {
 
-  namesToPackages: Map<string, string>;
-
-  static override get style() {
-    return css`
+  static override readonly style = css`
     :host {
       display: block;
       box-sizing: border-box;
@@ -32,6 +29,15 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       background: var(--light-grey, #383f52);
     }
 
+    table {
+      width: 100%
+    }
+
+    td {
+      color: white;
+      font-size: 13px;
+    }
+
     div {
       text-transform: uppercase;
       font-size: 12px;
@@ -39,16 +45,18 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       padding: 4px 14px;
     }
     `;
-  }
+
+  static override readonly template = html`
+    <table id="table">
+    </table>
+  `;
+
+  private _table: HTMLTableElement;
 
   constructor() {
     super();
 
-    this.namesToPackages = new Map();
-  }
-
-  disconnectedCallback() {
-    console.log('Custom square element removed from page.');
+    this._table = this._getDomElement<HTMLTableElement>('table');
   }
 
   loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[]) {
@@ -56,10 +64,13 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       let option = document.createElement("option");
       option.value = elementDefintion.tag;
 
-      let button = document.createElement("button");
+      const tr = document.createElement("tr");
+
+      const tdEl = document.createElement("td");
+
+      const button = document.createElement("button");
       button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
       button.draggable = true;
-      //todo: onclick set tool to draw new element
       button.ondragstart = (e) => {
         e.dataTransfer.setData(dragDropFormatName, JSON.stringify(elementDefintion));
         (<HTMLElement>e.currentTarget).style.outline = "dashed";
@@ -103,8 +114,14 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       button.onclick = (x) => {
         serviceContainer.tool = new DrawElementTool(elementDefintion);
       }
+      tdEl.appendChild(button);
+      tr.appendChild(tdEl);
 
-      this.shadowRoot.appendChild(button);
+      const tdDesc = document.createElement("td");
+      tdDesc.innerText = elementDefintion.description ?? "";
+      tr.appendChild(tdDesc);
+
+      this._table.appendChild(tr);
     }
   }
 }

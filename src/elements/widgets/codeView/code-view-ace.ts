@@ -11,7 +11,7 @@ class CodeViewAceCompleter {
     if (prefix.length === 0) { callback(null, []); return }
 
 
-    let wordList = ['t-t', 'visu-conveyor']; //todo: get word list from custom elements 
+    let wordList = ['t-t', 'visu-conveyor']; //TODO: get word list from custom elements 
     {
       callback(null, wordList.map((w) => {
         return { name: w, value: w, score: 1, meta: "tag" }
@@ -145,7 +145,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     //@ts-ignore
     this._aceEditor.scrollToLine(point1.row);
   }
-  //todo reset undo stack, when and why?
+  //TODO: reset undo stack, when and why?
   //bind to global und and redo
   //editor.getSession().setUndoManager(new ace.UndoManager())
 }

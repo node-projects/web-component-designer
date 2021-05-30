@@ -3,16 +3,17 @@ import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { IDesignerExtension } from "./IDesignerExtension";
 import { PositionExtension } from "./PositionExtension";
+import { IExtensionManager } from "./IExtensionManger";
 
 export class PositionExtensionProvider implements IDesignerExtensionProvider {
-  shouldExtend(designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): boolean {
     const cs = getComputedStyle((<HTMLElement>designItem.element));
     if (cs.position === 'relative' || cs.position === 'absolute')
       return true;
     return false;
   }
 
-  getExtension(designerView: IDesignerView, designItem: IDesignItem): IDesignerExtension {
-    return new PositionExtension(designerView, designItem);
+  getExtension(extensionManager: IExtensionManager, designerView: IDesignerView,  designItem: IDesignItem): IDesignerExtension {
+    return new PositionExtension(extensionManager, designerView, designItem);
   }
 }
