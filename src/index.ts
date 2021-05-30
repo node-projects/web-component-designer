@@ -9,6 +9,7 @@ export * from "./elements/loader/OldCustomElementsManifestLoader.js"
 
 export * from "./elements/helper/w3color.js";
 export * from "./elements/helper/contextMenu/ContextMenuHelper.js";
+export * from "./elements/helper/Helper.js";
 export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmenuItem.js";
 
 export * from "./elements/item/DesignItem.js";

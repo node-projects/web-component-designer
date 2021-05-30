@@ -24,5 +24,6 @@ export enum CommandType {
   'distributeHorizontal' = 'distributeHorizontaly',
   'distributeVertical' = 'distributeVertical',
 
-  'setTool' = 'setTool'
+  'setTool' = 'setTool',
+  'screenshot' = 'screenshot',
 }

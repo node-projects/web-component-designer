@@ -29,6 +29,8 @@ import { ExtensionType } from "./extensions/ExtensionType";
 import { IExtensionManager } from "./extensions/IExtensionManger";
 import { ExtensionManager } from "./extensions/ExtensionManager";
 import { NamedTools } from "./tools/NamedTools";
+import { Screenshot } from '../../helper/Screenshot';
+import { dataURItoBlob, exportData } from "../../helper/Helper";
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -309,8 +311,24 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   /* --- start IUiCommandHandler --- */
 
-  executeCommand(command: IUiCommand) {
+  async executeCommand(command: IUiCommand) {
     switch (command.type) {
+      case CommandType.screenshot: {
+        if (!this.instanceServiceContainer.selectionService.primarySelection)
+          alert("you need to select an elment!")
+        else {
+          if (!Screenshot.screenshotsEnabled) {
+            alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
+          }
+          const el = this.instanceServiceContainer.selectionService.primarySelection.element;
+          const sel = this.instanceServiceContainer.selectionService.selectedElements;
+          this.instanceServiceContainer.selectionService.setSelectedElements(null);
+          const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
+          await exportData(dataURItoBlob(screenshot), "screenshot.png");
+          this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+        }
+      }
+        break;
       case CommandType.setTool: {
         this.serviceContainer.globalContext.tool = this.serviceContainer.designerTools.get(command.parameter);
       }

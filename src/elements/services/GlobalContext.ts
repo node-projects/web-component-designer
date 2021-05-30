@@ -7,8 +7,8 @@ import { ITool } from "../widgets/designerView/tools/ITool";
 
 export class GlobalContext {
   private _tool: ITool;
-  private _strokeColor: string;
-  private _fillBrush: string;
+  private _strokeColor: string = 'black';
+  private _fillBrush: string = 'transparent';
 
   public set tool(tool: ITool) {
     if (this._tool !== tool) {

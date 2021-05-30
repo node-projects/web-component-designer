@@ -27,6 +27,8 @@ export class DrawPathTool implements ITool {
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
         this._path.setAttribute("D", this._pathD);
+        this._path.setAttribute("stroke", designerView.serviceContainer.globalContext.strokeColor);
+        this._path.setAttribute("fill", designerView.serviceContainer.globalContext.fillBrush);
         designerView.overlayLayer.appendChild(this._path);
         break;
 
