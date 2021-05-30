@@ -11,16 +11,18 @@ export enum CommandType {
   'moveBackward' = 'moveBackward',
   'moveToBack' = 'moveToBack',
 
-  arrangeLeft = 'arrangeLeft',
-  arrangeCenter = 'arrangeCenter',
-  arrangeRigtht = 'arrangeRigtht',
-  arrangeTop = 'arrangeTop',
-  arrangeMiddle = 'arrangeMiddle',
-  arrangeBottom = 'arrangeBottom',
+  'arrangeLeft' = 'arrangeLeft',
+  'arrangeCenter' = 'arrangeCenter',
+  'arrangeRigtht' = 'arrangeRigtht',
+  'arrangeTop' = 'arrangeTop',
+  'arrangeMiddle' = 'arrangeMiddle',
+  'arrangeBottom' = 'arrangeBottom',
 
   'adjustWidth' = 'adjustWidth',
   'adjustHeight' = 'adjustHeight',
 
   'distributeHorizontal' = 'distributeHorizontaly',
-  'distributeVertical' = 'distributeVertical'
+  'distributeVertical' = 'distributeVertical',
+
+  'setTool' = 'setTool'
 }

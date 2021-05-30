@@ -1,7 +1,12 @@
 export enum NamedTools {
-  PointerTool = 'PointerTool',
-  DrawPathTool = 'DrawPathTool',
-  ZoomTool = 'ZoomTool',
-  PanTool = 'PanTool',
-  DrawSelectionTool = 'DrawSelectionTool',
+  Pointer = 'Pointer',
+  DrawSelection = 'DrawSelection',
+
+  DrawPath = 'DrawPath',
+  Zoom = 'Zoom',
+  Pan = 'Pan',
+  MagicWandSelector = 'MagicWandSelector',
+  RectangleSelector = 'RectangleSelector',
+  PickColor = 'PickColor',
+  Text = 'Text',
 }

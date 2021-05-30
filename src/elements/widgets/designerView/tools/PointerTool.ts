@@ -24,7 +24,6 @@ export class PointerTool implements ITool {
   }
 
   dispose(): void {
-    throw new Error("Method not implemented.");
   }
 
   pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
@@ -53,7 +52,7 @@ export class PointerTool implements ITool {
         this._actionStartedDesignItem = currentDesignItem;
         designerView.snapLines.clearSnaplines();
         let composedPath = event.composedPath();
-        if (currentDesignItem !== designerView.rootDesignItem /*&& forcedAction == PointerActionType.Drag*/) {
+        if (currentDesignItem !== designerView.rootDesignItem) {
           this._actionType = PointerActionType.Drag;
         } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
           (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // TODO: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
@@ -64,7 +63,7 @@ export class PointerTool implements ITool {
           this._actionType = PointerActionType.DrawSelection;
           return;
         } else {
-          this._actionType = /*forcedAction ??*/ PointerActionType.DragOrSelect;
+          this._actionType = PointerActionType.DragOrSelect;
         }
       }
     }
@@ -77,10 +76,6 @@ export class PointerTool implements ITool {
 
     if (this._actionType == PointerActionType.DrawSelection || this._actionType == PointerActionType.DrawingSelection) {
       this._pointerActionTypeDrawSelection(designerView, event, (<HTMLElement>currentElement));
-      //} else if (this._actionType == PointerActionType.Resize) {
-      //  this._pointerActionTypeResize(event, (<HTMLElement>currentElement), currentPoint, actionMode);
-      //} else if (this._actionType == PointerActionType.Rotate) {
-      //  this._pointerActionTypeRotate(event, (<HTMLElement>currentElement), currentPoint, actionMode);
     } else if (this._actionType == PointerActionType.DragOrSelect || this._actionType == PointerActionType.Drag) {
       this._pointerActionTypeDragOrSelect(designerView, event, currentDesignItem, currentPoint);
     }
@@ -100,12 +95,11 @@ export class PointerTool implements ITool {
   }
 
   private _pointerActionTypeDrawSelection(designerView: IDesignerView, event: PointerEvent, currentElement: HTMLElement) {
-    const drawSelectionTool = designerView.serviceContainer.designerTools.get(NamedTools.DrawSelectionTool);
+    const drawSelectionTool = designerView.serviceContainer.designerTools.get(NamedTools.DrawSelection);
     if (drawSelectionTool) {
       drawSelectionTool.pointerEventHandler(designerView, event, currentElement);
     }
   }
-
 
   private _resetPointerEventsForClickThrough() {
     if (!this._clickThroughElements.length)
@@ -134,7 +128,6 @@ export class PointerTool implements ITool {
         {
           this._actionStartedDesignItem = currentDesignItem;
 
-          //this._dropTarget = null;
           if (event.shiftKey || event.ctrlKey) {
             const index = designerView.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
             if (index >= 0) {
@@ -162,9 +155,6 @@ export class PointerTool implements ITool {
           if (this._actionType != PointerActionType.Drag && elementMoved) {
             this._actionType = PointerActionType.Drag;
           }
-
-          //if (this._actionType != PointerActionType.Drag)
-          //  return;
 
           if (this._movedSinceStartedAction) {
             const containerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))

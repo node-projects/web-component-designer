@@ -10,16 +10,15 @@ export class DrawElementTool implements ITool {
   private _createdItem: IDesignItem;
   private _startPosition: IPoint;
 
+  readonly cursor = 'crosshair';
+
   constructor(elementDefinition: IElementDefinition) {
     this._elementDefinition = elementDefinition;
   }
+
   dispose(): void {
     if (this._createdItem)
       this._createdItem.element.parentElement.removeChild(this._createdItem.element);
-  }
-
-  get cursor() {
-    return 'crosshair';
   }
 
   pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
