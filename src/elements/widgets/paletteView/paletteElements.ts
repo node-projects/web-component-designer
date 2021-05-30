@@ -112,7 +112,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
         e.preventDefault();
       }
       button.onclick = (x) => {
-        serviceContainer.tool = new DrawElementTool(elementDefintion);
+        serviceContainer.globalContext.tool = new DrawElementTool(elementDefintion);
       }
       tdEl.appendChild(button);
       tr.appendChild(tdEl);

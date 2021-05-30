@@ -79,6 +79,23 @@ export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";
 export type { IDesignerView } from "./elements/widgets/designerView/IDesignerView.js";
 export * from "./elements/widgets/designerView/designerView.js";
 
+export type { ITool } from "./elements/widgets/designerView/tools/ITool.js";
+export * from "./elements/widgets/designerView/tools/NamedTools.js";
+export * from "./elements/widgets/designerView/tools/DrawElementTool.js";
+export * from "./elements/widgets/designerView/tools/DrawPathTool.js";
+export * from "./elements/widgets/designerView/tools/MagicWandSelectorTool.js";
+export * from "./elements/widgets/designerView/tools/PanTool.js";
+export * from "./elements/widgets/designerView/tools/PickColorTool.js";
+export * from "./elements/widgets/designerView/tools/PointerTool.js";
+export * from "./elements/widgets/designerView/tools/RectangleSelectorTool.js";
+export * from "./elements/widgets/designerView/tools/TextTool.js";
+export * from "./elements/widgets/designerView/tools/ZoomTool.js";
+
+export type { IDesignerExtension } from "./elements/widgets/designerView/extensions/IDesignerExtension.js";
+export type { IDesignerExtensionProvider } from "./elements/widgets/designerView/extensions/IDesignerExtensionProvider.js";
+export type { IExtensionManager } from "./elements/widgets/designerView/extensions/IExtensionManger.js";
+//TODO: extension exports
+
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";
 export * from "./elements/widgets/paletteView/paletteView.js";

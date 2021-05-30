@@ -66,6 +66,6 @@ export class DrawElementTool implements ITool {
   private async _onPointerUp(designerView: IDesignerView, event: PointerEvent) {
     this._createdItem = null;
     this._startPosition = null;
-    designerView.serviceContainer.tool = null;
+    designerView.serviceContainer.globalContext.tool = null;
   }
 }

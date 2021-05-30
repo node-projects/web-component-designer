@@ -10,7 +10,7 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.0.210",
+    "@node-projects/base-custom-webcomponent": "^0.0.230",
     "construct-style-sheets-polyfill": "^2.4.16"
   },
   "devDependencies": {

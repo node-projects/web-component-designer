@@ -312,7 +312,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   executeCommand(command: IUiCommand) {
     switch (command.type) {
       case CommandType.setTool: {
-        this.serviceContainer.tool = this.serviceContainer.designerTools.get(command.parameter);
+        this.serviceContainer.globalContext.tool = this.serviceContainer.designerTools.get(command.parameter);
       }
         break;
       case CommandType.delete:
@@ -657,7 +657,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     this._fillCalculationrects();
 
-    let tool = this.serviceContainer.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
+    let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._canvas.style.cursor = tool.cursor;
     tool.pointerEventHandler(this, event, currentElement);
 

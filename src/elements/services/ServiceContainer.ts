@@ -16,6 +16,7 @@ import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType"
 import { IDesignerExtensionProvider } from "../widgets/designerView/extensions/IDesignerExtensionProvider";
 import { NamedTools } from "../widgets/designerView/tools/NamedTools";
 import { IContextMenuExtension } from "../widgets/designerView/extensions/contextMenu/IContextMenuExtension";
+import { GlobalContext } from './GlobalContext';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -42,7 +43,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public designerContextMenuExtensions: IContextMenuExtension[];
 
-  public tool: ITool;
+  public readonly globalContext: GlobalContext = new GlobalContext();
 
   public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
 

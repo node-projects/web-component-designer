@@ -24,7 +24,7 @@ import { DrawPathTool } from '../widgets/designerView/tools/DrawPathTool';
 import { SelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/SelectionDefaultExtensionProvider';
 import { ResizeExtensionProvider } from '../widgets/designerView/extensions/ResizeExtensionProvider';
 import { RotateExtensionProvider } from '../widgets/designerView/extensions/RotateExtensionProvider';
-import { ZoomTool } from '../widgets/designerView/tools/ZoomTool.';
+import { ZoomTool } from '../widgets/designerView/tools/ZoomTool';
 import { PanTool } from '../widgets/designerView/tools/PanTool';
 import { CopyPasteContextMenu } from '../widgets/designerView/extensions/contextMenu/CopyPasteContextMenu';
 import { ZMoveContextMenu } from '../widgets/designerView/extensions/contextMenu/ZMoveContextMenu';
