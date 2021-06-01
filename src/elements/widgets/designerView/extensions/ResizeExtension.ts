@@ -40,6 +40,20 @@ export class ResizeExtension extends AbstractExtension {
     this._circle6 = this._drawResizerOverlay(rect.x + rect.width - this.designerView.containerBoundingRect.x, rect.y + rect.height - this.designerView.containerBoundingRect.y, 'se-resize', this._circle6);
     this._circle7 = this._drawResizerOverlay(rect.x - this.designerView.containerBoundingRect.x, rect.y + (rect.height / 2) - this.designerView.containerBoundingRect.y, 'w-resize', this._circle7);
     this._circle8 = this._drawResizerOverlay(rect.x + rect.width - this.designerView.containerBoundingRect.x, rect.y + (rect.height / 2) - this.designerView.containerBoundingRect.y, 'e-resize', this._circle8);
+    if (rect.width < 12) {
+      this._circle2.style.display = 'none';
+      this._circle5.style.display = 'none';
+    } else {
+      this._circle2.style.display = '';
+      this._circle5.style.display = '';
+    }
+    if (rect.height < 12) {
+      this._circle7.style.display = 'none';
+      this._circle8.style.display = 'none';
+    } else {
+      this._circle8.style.display = '';
+      this._circle8.style.display = '';
+    }
   }
 
 

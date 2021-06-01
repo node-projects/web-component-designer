@@ -3,6 +3,7 @@ import { PointerActionType } from "../../../../enums/PointerActionType";
 import { IDesignerMousePoint } from "../../../../interfaces/IDesignerMousePoint";
 import { DesignItem } from "../../../item/DesignItem";
 import { IDesignItem } from "../../../item/IDesignItem";
+import { ExtensionType } from "../extensions/ExtensionType";
 import { IDesignerView } from "../IDesignerView";
 import { ITool } from "./ITool";
 import { NamedTools } from './NamedTools';
@@ -19,6 +20,9 @@ export class PointerTool implements ITool {
   private _previousEventName: EventNames;
 
   private _clickThroughElements: [designItem: IDesignItem, backupPointerEvents: string][] = []
+
+  private _dragOverExtensionItem: IDesignItem;
+  private _dragExtensionItem: IDesignItem;
 
   constructor() {
   }
@@ -157,9 +161,89 @@ export class PointerTool implements ITool {
           }
 
           if (this._movedSinceStartedAction) {
-            const containerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
-            containerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, designerView.instanceServiceContainer.selectionService.selectedElements);
-            designerView.extensionManager.refreshExtensions(designerView.instanceServiceContainer.selectionService.selectedElements);
+            const currentContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent));
+            if (currentContainerService.canLeave(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem])) {
+              const dragItem = this._actionStartedDesignItem.parent;
+              if (this._dragExtensionItem != dragItem) {
+                designerView.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
+                designerView.extensionManager.applyExtension(dragItem, ExtensionType.ContainerDrag);
+                this._dragExtensionItem = dragItem;
+              }
+              else {
+                designerView.extensionManager.refreshExtension(dragItem, ExtensionType.ContainerDrag);
+              }
+
+              //search for containers below mouse cursor.
+              //to do this, we need to disable pointer events for each in a loop and search wich element is there
+              let backupPEventsMap: Map<HTMLElement, string> = new Map();
+              let newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+              try {
+                checkAgain: while (newContainerElement != null) {
+                  if (newContainerElement == this._actionStartedDesignItem.parent.element) {
+                    newContainerElement = null;
+                  } else if (newContainerElement == designerView.rootDesignItem.element) {
+                    break;
+                  } else if (<any>newContainerElement == designerView.overlayLayer || <any>newContainerElement.parentElement == designerView.overlayLayer) {
+                    backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                    newContainerElement.style.pointerEvents = 'none';
+                    newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                  }
+                  else if (newContainerElement == this._actionStartedDesignItem.element) {
+                    backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                    newContainerElement.style.pointerEvents = 'none';
+                    newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                  }
+                  else {
+                    //check we don't try to move a item over one of its children...
+                    let par = newContainerElement.parentElement;
+                    while (par) {
+                      if (par == this._actionStartedDesignItem.element) {
+                        backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                        newContainerElement.style.pointerEvents = 'none';
+                        newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                        continue checkAgain;
+                      }
+                      par = par.parentElement;
+                    }
+                    //end check
+                    const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
+                    const newContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
+                    if (newContainerService.canEnter)
+                      break;
+                    backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                    newContainerElement.style.pointerEvents = 'none';
+                    newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                  }
+                }
+              }
+              finally {
+                for (let e of backupPEventsMap.entries()) {
+                  e[0].style.pointerEvents = e[1];
+                }
+              }
+
+              //if we found a new enterable container create extensions 
+              if (newContainerElement != null) {
+                const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
+                if (this._dragOverExtensionItem != newContainerElementDesignItem) {
+                  designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
+                  designerView.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
+                  this._dragOverExtensionItem = newContainerElementDesignItem;
+                }
+                else {
+                  designerView.extensionManager.refreshExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
+                }
+              } else {
+                if (this._dragOverExtensionItem) {
+                  designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
+                  this._dragOverExtensionItem = null;
+                }
+              }
+
+              const containerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent));
+              containerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, designerView.instanceServiceContainer.selectionService.selectedElements);
+              designerView.extensionManager.refreshExtensions(designerView.instanceServiceContainer.selectionService.selectedElements);
+            }
           }
           break;
         }
@@ -176,6 +260,11 @@ export class PointerTool implements ITool {
             let containerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
             containerService.finishPlace(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, designerView.instanceServiceContainer.selectionService.selectedElements);
             cg.commit();
+
+            designerView.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
+            this._dragExtensionItem = null;
+            designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
+            this._dragOverExtensionItem = null;
           }
 
           designerView.extensionManager.refreshExtensions(designerView.instanceServiceContainer.selectionService.selectedElements);

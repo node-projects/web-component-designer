@@ -6,4 +6,12 @@ export enum ExtensionType {
   MouseOver = 16,
   OnlyOneItemSelected = 32,
   MultipleItemsSelected = 64,
+  /**
+   * Extension for the Container wich the dragged element is draged over.
+   */
+  ContainerDragOver = 128,
+  /**
+   * Extension for the Current Container wich the dragged element is contained.
+   */
+  ContainerDrag = 256,
 }

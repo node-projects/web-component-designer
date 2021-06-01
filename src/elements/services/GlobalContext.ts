@@ -13,6 +13,8 @@ export class GlobalContext {
   public set tool(tool: ITool) {
     if (this._tool !== tool) {
       const oldTool = this._tool;
+      if (oldTool)
+        oldTool.dispose();
       this._tool = tool;
       this.onToolChanged.emit(new PropertyChangedArgs<ITool>(tool, oldTool));
     }

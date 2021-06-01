@@ -18,20 +18,22 @@ export class DomConverter {
   }
 
   public static IsSelfClosingElement(tag: string) {
-    return tag === 'area' ||
-      tag === 'base' ||
-      tag === 'br' ||
-      tag === 'col' ||
-      tag === 'embed' ||
-      tag === 'hr' ||
-      tag === 'iframe' ||
-      tag === 'img' ||
-      tag === 'input' ||
-      tag === 'link' ||
-      tag === 'meta' ||
-      tag === 'param' ||
-      tag === 'source' ||
-      tag === 'track';
+    return tag === 'area'   ||
+           tag === 'base'   ||
+           tag === 'br'     ||
+           tag === 'col'    ||
+           tag === 'embed'  ||
+           tag === 'hr'     ||
+           tag === 'iframe' ||
+           tag === 'img'    ||
+           tag === 'input'  ||
+           tag === 'keygen' ||
+           tag === 'link'   ||
+           tag === 'meta'   ||
+           tag === 'param'  ||
+           tag === 'source' ||
+           tag === 'track'  ||
+           tag === 'wbr';
   }
 
   public static ConvertToString(designItems: IDesignItem[], designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {

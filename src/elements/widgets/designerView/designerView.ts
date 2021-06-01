@@ -138,6 +138,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-path { stroke: #3899ec; fill: orange; pointer-events: all }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-path-line { stroke: #3899ec; stroke-dasharray: 2; }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-hover { stroke: #90caf9; fill: none; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-gray-out { stroke: transparent; fill: rgba(211, 211, 211, 0.8); pointer-events: none }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-text-enter-container { stroke: none; fill: black; stroke-width: 1; font-size: 14px; font-weight:800; font-family: monospace; }
   
     #canvas * {
       cursor: pointer;
@@ -371,7 +373,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   /* --- end IUiCommandHandler --- */
-
 
   handleCopyCommand() {
     const copyText = DomConverter.ConvertToString(this.instanceServiceContainer.selectionService.selectedElements, null);

@@ -3,14 +3,20 @@ import type { IContainerService } from './IContainerService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
+import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 
 export class DefaultPlacementService implements IContainerService {
 
+
   serviceForContainer(container: IDesignItem) {
+    if ((<HTMLElement>container.element).style.display === 'grid' || (<HTMLElement>container.element).style.display === 'flex')
+      return false;
     return true;
   }
 
   canEnter(container: IDesignItem, items: IDesignItem[]) {
+    if (DomConverter.IsSelfClosingElement(container.element.localName))
+      return false;
     return true;
   }
 
@@ -46,8 +52,8 @@ export class DefaultPlacementService implements IContainerService {
   }
 
   placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]): IPoint {
-    let trackX = newPoint.x; 
-    let trackY = newPoint.y; 
+    let trackX = newPoint.x;
+    let trackY = newPoint.y;
 
     if (!event.ctrlKey) {
       if (placementView.alignOnGrid) {

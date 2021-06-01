@@ -33,6 +33,8 @@ import { RectangleSelectorTool } from '../widgets/designerView/tools/RectangleSe
 import { MagicWandSelectorTool } from '../widgets/designerView/tools/MagicWandSelectorTool';
 import { PickColorTool } from '../widgets/designerView/tools/PickColorTool';
 import { TextTool } from '../widgets/designerView/tools/TextTool';
+import { GrayOutExtensionProvider } from '../widgets/designerView/extensions/GrayOutExtensionProvider';
+import { AltToEnterContainerExtensionProvider } from '../widgets/designerView/extensions/AltToEnterContainerExtensionProvider';
 
 let serviceContainer = new ServiceContainer();
 
@@ -69,6 +71,12 @@ serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer,
 ]);
 serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
   new MouseOverExtensionProvider()
+]);
+serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
+  new GrayOutExtensionProvider()
+]);
+serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
+  new AltToEnterContainerExtensionProvider()
 ]);
 
 serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());
