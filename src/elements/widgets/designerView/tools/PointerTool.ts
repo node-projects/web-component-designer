@@ -55,17 +55,11 @@ export class PointerTool implements ITool {
       if (event.type == EventNames.PointerDown) {
         this._actionStartedDesignItem = currentDesignItem;
         designerView.snapLines.clearSnaplines();
-        //let composedPath = event.composedPath();
         if (currentDesignItem !== designerView.rootDesignItem) {
           this._actionType = PointerActionType.Drag;
-        } /*else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
-          (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // TODO: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
+        } else if (currentElement === <any>designerView || currentElement === designerView.rootDesignItem.element || currentElement == null) {
           designerView.instanceServiceContainer.selectionService.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
-        }*/ else if (currentElement === <any>designerView || currentElement === designerView.rootDesignItem.element || currentElement == null) {
-          designerView.instanceServiceContainer.selectionService.setSelectedElements(null);
-          this._actionType = PointerActionType.DrawSelection;
-          //return;
         } else {
           this._actionType = PointerActionType.DragOrSelect;
         }
@@ -162,7 +156,7 @@ export class PointerTool implements ITool {
 
           if (this._movedSinceStartedAction) {
             const currentContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent));
-            if (currentContainerService.canLeave(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem])) {
+            if (currentContainerService && currentContainerService.canLeave(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem])) {
               const dragItem = this._actionStartedDesignItem.parent;
               if (this._dragExtensionItem != dragItem) {
                 designerView.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
@@ -208,7 +202,7 @@ export class PointerTool implements ITool {
                     //end check
                     const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
                     const newContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
-                    if (newContainerService && newContainerService.canEnter(newContainerElementDesignItem,[this._actionStartedDesignItem]))
+                    if (newContainerService && newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem]))
                       break;
                     backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                     newContainerElement.style.pointerEvents = 'none';
@@ -256,10 +250,12 @@ export class PointerTool implements ITool {
           }
 
           if (this._movedSinceStartedAction) {
-            let cg = designerView.rootDesignItem.openGroup("Move Elements", designerView.instanceServiceContainer.selectionService.selectedElements);
             let containerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
-            containerService.finishPlace(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, designerView.instanceServiceContainer.selectionService.selectedElements);
-            cg.commit();
+            if (containerService) {
+              let cg = designerView.rootDesignItem.openGroup("Move Elements", designerView.instanceServiceContainer.selectionService.selectedElements);
+              containerService.finishPlace(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, designerView.instanceServiceContainer.selectionService.selectedElements);
+              cg.commit();
+            }
 
             designerView.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
             this._dragExtensionItem = null;

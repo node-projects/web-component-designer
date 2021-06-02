@@ -88,55 +88,14 @@ export class DefaultPlacementService implements IContainerService {
     for (const designItem of items) {
       (<HTMLElement>designItem.element).style.transform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
     }
+  }
 
-    /*
-    // See if it's over anything.
-    let targets = this._rootContainer.element.querySelectorAll('*');
-    for (let i = 0; i < targets.length; i++) {
-      let possibleTarget = targets[i] as HTMLElement;
-      possibleTarget.classList.remove('over');
+  enterContainer() {
 
-      let possibleTargetDesignItem = this._rootContainer.getOrCreateDesignItem(possibleTarget);
-      if (this._rootContainer.instanceServiceContainer.selectionService.selectedElements.indexOf(possibleTargetDesignItem) >= 0)
-        continue;
+  }
 
-      // todo put following a extenable function ...
-      // in IContainerHandler ...
+  leaveContainer() {
 
-      // Only some native elements and things with slots can be drop targets.
-      let slots = possibleTarget ? possibleTarget.querySelectorAll('slot') : [];
-      // input is the only native in this app that doesn't have a slot
-      let canDrop = (possibleTarget.localName.indexOf('-') === -1 && possibleTarget.localName !== 'input') || possibleTarget.localName === 'dom-repeat' || slots.length !== 0;
-
-      if (!canDrop) {
-        continue;
-      }
-
-      // Do we actually intersect this child?
-      const possibleTargetRect = possibleTarget.getBoundingClientRect();
-      if (possibleTargetRect.top - this._ownBoundingRect.top <= currentPoint.y &&
-        possibleTargetRect.left - this._ownBoundingRect.left <= currentPoint.x &&
-        possibleTargetRect.top - this._ownBoundingRect.top + possibleTargetRect.height >= currentPoint.y &&
-        possibleTargetRect.left - this._ownBoundingRect.left + possibleTargetRect.width >= currentPoint.x) {
-
-        // New target! Remove the other target indicators.
-        var previousTargets = this._canvas.querySelectorAll('.over');
-        for (var j = 0; j < previousTargets.length; j++) {
-          previousTargets[j].classList.remove('over');
-        }
-        if (currentDesignItem != possibleTargetDesignItem && this._dropTarget != possibleTarget) {
-          possibleTarget.classList.add('over');
-
-          if (event.altKey) {
-            if (this._dropTarget != null)
-              this._dropTarget.classList.remove('over-enter');
-            this._dropTarget = possibleTarget;
-            this._dropTarget.classList.remove('over');
-            this._dropTarget.classList.add('over-enter');
-          }
-        }
-      }
-    }*/
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {
