@@ -51,24 +51,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _canvas: HTMLDivElement;
   private _canvasContainer: HTMLDivElement;
   private _outercanvas2: HTMLDivElement;
-  //private _selector: HTMLDivElement;
 
   private _lastHoverDesignItem: IDesignItem;
-
-  //private _dropTarget: Element;
 
   private _zoomInput: HTMLInputElement;
   private _onContextMenuBound: () => void;
 
   private _pointerEventHandlerBound: (event: PointerEvent) => void;
-
-  /*private _actionType?: PointerActionType;
-  private _actionStartedDesignItem?: IDesignItem;
-  private _actionModeStarted: string;
-  private _movedSinceStartedAction: boolean = false;
-  private _initialPoint: IDesignerMousePoint;
-  private _initialSizes: ISize[];
-  private _previousEventName: EventNames;*/
 
   private _firstConnect: boolean;
   private _ownBoundingRect: DOMRect;
@@ -97,6 +86,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       /* bottom: 0; does not work with fixed sized when size is bigger then view */
       left: 0;
       /* right: 0; */
+      user-select: none;
     }
     #canvas {
       background-color: var(--canvas-background, white);
@@ -140,6 +130,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-hover { stroke: #90caf9; fill: none; }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-gray-out { stroke: transparent; fill: rgba(211, 211, 211, 0.8); pointer-events: none }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-text-enter-container { stroke: none; fill: black; stroke-width: 1; font-size: 14px; font-weight:800; font-family: monospace; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-rect-enter-container { stroke: none; fill: #aa00ff2e; }
   
     #canvas * {
       cursor: pointer;

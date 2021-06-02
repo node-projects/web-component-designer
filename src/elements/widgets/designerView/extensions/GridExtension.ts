@@ -25,44 +25,43 @@ export class GridExtension extends AbstractExtension {
     let gridA: string[] = null;
     if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')
       gridA = computedStyle.gridTemplateAreas.split('\"');
-    if (computedStyle.columnGap) {
+    if (computedStyle.columnGap && computedStyle.columnGap != 'normal')
       xGap = Number.parseInt(computedStyle.columnGap.replace('px', ''));
-      if (computedStyle.rowGap) {
-        yGap = Number.parseInt(computedStyle.rowGap.replace('px', ''));
-        for (let r of rows) {
-          let areas: string[] = null;
-          if (gridA) {
-            areas = gridA[rw + 1].split(' ');
-          }
-          let x = 0;
-          let cl = 0;
-          const currY = Number.parseInt(r.replace('px', ''));
-          for (let c of columns) {
-
-            if (x > 0 && xGap) {
-              this._drawRect(x + xOffset, y + yOffset, xGap, currY, 'svg-grid-gap');
-              x += xGap
-            }
-            const currX = Number.parseInt(c.replace('px', ''));
-            if (y > 0 && yGap) {
-              this._drawRect(x + xOffset, y + yOffset - yGap, currX, yGap, 'svg-grid-gap');
-            }
-            if (areas) {
-              const nm = areas[cl].trim();
-              if (nm != '.') {
-                const text = this._drawText(nm, x + xOffset, y + yOffset, 'svg-grid-area');
-                text.setAttribute("dominant-baseline", "hanging");
-              }
-            }
-            this._drawRect(x + xOffset, y + yOffset, currX, currY, 'svg-grid');
-            x += currX;
-            cl++;
-          }
-          y += currY + yGap;
-          rw += 2;
-        }
+    if (computedStyle.rowGap && computedStyle.rowGap != 'normal')
+      yGap = Number.parseInt(computedStyle.rowGap.replace('px', ''));
+    for (let r of rows) {
+      let areas: string[] = null;
+      if (gridA) {
+        areas = gridA[rw + 1].split(' ');
       }
+      let x = 0;
+      let cl = 0;
+      const currY = Number.parseInt(r.replace('px', ''));
+      for (let c of columns) {
+
+        if (x > 0 && xGap) {
+          this._drawRect(x + xOffset, y + yOffset, xGap, currY, 'svg-grid-gap');
+          x += xGap
+        }
+        const currX = Number.parseInt(c.replace('px', ''));
+        if (y > 0 && yGap) {
+          this._drawRect(x + xOffset, y + yOffset - yGap, currX, yGap, 'svg-grid-gap');
+        }
+        if (areas) {
+          const nm = areas[cl].trim();
+          if (nm != '.') {
+            const text = this._drawText(nm, x + xOffset, y + yOffset, 'svg-grid-area');
+            text.setAttribute("dominant-baseline", "hanging");
+          }
+        }
+        this._drawRect(x + xOffset, y + yOffset, currX, currY, 'svg-grid');
+        x += currX;
+        cl++;
+      }
+      y += currY + yGap;
+      rw += 2;
     }
+
   }
 
   override refresh() {

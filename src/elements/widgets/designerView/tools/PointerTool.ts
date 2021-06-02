@@ -55,17 +55,17 @@ export class PointerTool implements ITool {
       if (event.type == EventNames.PointerDown) {
         this._actionStartedDesignItem = currentDesignItem;
         designerView.snapLines.clearSnaplines();
-        let composedPath = event.composedPath();
+        //let composedPath = event.composedPath();
         if (currentDesignItem !== designerView.rootDesignItem) {
           this._actionType = PointerActionType.Drag;
-        } else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
+        } /*else if (composedPath && composedPath[0] === currentElement && (currentElement.children.length > 0 || (<HTMLElement>currentElement).innerText == '') &&
           (<HTMLElement>currentElement).style.background == '' && (currentElement.localName === 'div')) { // TODO: maybe check if some element in the composedPath till the designer div has a background. If not, selection mode
           designerView.instanceServiceContainer.selectionService.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
-        } else if (currentElement === <any>designerView || currentElement === designerView.rootDesignItem.element || currentElement == null) {
+        }*/ else if (currentElement === <any>designerView || currentElement === designerView.rootDesignItem.element || currentElement == null) {
           designerView.instanceServiceContainer.selectionService.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
-          return;
+          //return;
         } else {
           this._actionType = PointerActionType.DragOrSelect;
         }
@@ -208,7 +208,7 @@ export class PointerTool implements ITool {
                     //end check
                     const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
                     const newContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
-                    if (newContainerService.canEnter)
+                    if (newContainerService && newContainerService.canEnter(newContainerElementDesignItem,[this._actionStartedDesignItem]))
                       break;
                     backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                     newContainerElement.style.pointerEvents = 'none';

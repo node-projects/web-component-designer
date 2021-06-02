@@ -6,5 +6,6 @@ export enum EventNames {
     DragOver = 'dragover',
     Drop = 'drop',
     Scroll = 'scroll',
-    Wheel = 'wheel'
+    Wheel = 'wheel',
+    ContextMenu = 'contextmenu'
 }

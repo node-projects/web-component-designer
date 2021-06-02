@@ -18,7 +18,8 @@ export class RectangleSelectorTool implements ITool {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._initialPoint = currentPoint;
-        this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        if (!this._rect)
+          this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this._rect.setAttribute('class', 'svg-selector');
         this._rect.setAttribute('x', <string><any>this._initialPoint.x);
         this._rect.setAttribute('y', <string><any>this._initialPoint.y);
