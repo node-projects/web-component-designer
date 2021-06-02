@@ -1,8 +1,8 @@
 import { CommandType } from "../../../../../commandHandling/CommandType";
+import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerView } from "../../IDesignerView";
 import { IContextMenuExtension } from "./IContextMenuExtension";
-import { IContextMenuItem } from "./IContextMenuItem";
 
 export class CopyPasteContextMenu implements IContextMenuExtension{
   public shouldProvideContextmenu(designerView: IDesignerView, designItem: IDesignItem) {

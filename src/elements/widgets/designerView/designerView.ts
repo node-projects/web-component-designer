@@ -1,6 +1,4 @@
-//import { PointerActionType } from "../../../enums/PointerActionType";
 import { EventNames } from "../../../enums/EventNames";
-//import { ISize } from '../../../interfaces/ISize';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
@@ -31,6 +29,7 @@ import { ExtensionManager } from "./extensions/ExtensionManager";
 import { NamedTools } from "./tools/NamedTools";
 import { Screenshot } from '../../helper/Screenshot';
 import { dataURItoBlob, exportData } from "../../helper/Helper";
+import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItem";
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -199,7 +198,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
               <div id="canvasContainer">
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="canvas" tabindex="0"></div>
-                <!--<div id="selector" hidden></div>-->
                 <svg id="svg" style="pointer-events: none;"></svg>
               </div>
             </div>
@@ -217,8 +215,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
             <div title="snap to grid" id="alignGrid" class="toolbar-control snap-grid"></div>
             <div title="snap to elements" id="alignSnap" class="toolbar-control snap-guide"></div>
           </div>
-        </div>
-          `;
+        </div>`;
 
   public extensionManager: IExtensionManager;
 
@@ -294,11 +291,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         }
       }
 
-      //@ts-ignore
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style, value];
     }
     else
-      //@ts-ignore
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
   }
 
@@ -531,25 +526,19 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   private _onContextMenu(event: MouseEvent) {
     event.preventDefault();
-    this.showDesignItemContextMenu([], event);
+    const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, this.serviceContainer, this.instanceServiceContainer);
+    if (!this.instanceServiceContainer.selectionService.isSelected(designItem)) {
+      this.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+    }
+    this.showDesignItemContextMenu(designItem, event);
   }
 
-  public showDesignItemContextMenu(designItem: IDesignItem[], event: MouseEvent) {
-    let mnuItems = [
-      { title: 'copy', action: () => { this.executeCommand({ type: CommandType.copy }); } },
-      { title: 'cut', action: () => { this.executeCommand({ type: CommandType.cut }); } },
-      { title: 'paste', action: () => { this.executeCommand({ type: CommandType.paste }); } },
-      { title: '-' },
-      { title: 'delete', action: () => { this.executeCommand({ type: CommandType.delete }); } },
-      { title: '-' },
-      { title: 'to front', action: () => { this.executeCommand({ type: CommandType.moveToFront }); } },
-      { title: 'move forward', action: () => { this.executeCommand({ type: CommandType.moveForward }); } },
-      { title: 'move backward', action: () => { this.executeCommand({ type: CommandType.moveBackward }); } },
-      { title: 'to back', action: () => { this.executeCommand({ type: CommandType.moveToBack }); } },
-
-    ];
-    if (designItem.length > 1) {
-      //TODO: special menu for multiple items?
+  public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
+    const mnuItems: IContextMenuItem[] = [];
+    for (let cme of this.serviceContainer.designerContextMenuExtensions) {
+      if (cme.shouldProvideContextmenu(this, designItem)) {
+        mnuItems.push(...cme.provideContextMenuItems(this, designItem));
+      }
     }
     let ctxMnu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
     return ctxMnu;
@@ -567,17 +556,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
 
   private onKeyDown(event: KeyboardEvent) {
-    // This is a global window handler, so clicks can come from anywhere
-    // We only care about keys that come after you've clicked on an element,
-    // or keys after you've selected something from the tree view.
-    // TODO: can this be less bad since it's p horrid?
-    /*let isOk =
-      //@ts-ignore
-      (event.composedPath()[0].localName === 'button' && event.composedPath()[2].localName == 'tree-view') ||
-      //@ts-ignore
-      (event.composedPath()[0].localName == 'body') || event.composedPath()[0].classList.contains(DesignerView._activeClassName);
-    */
-
+    //TODO: keyboard events maybe should also be handeled by tools 
+    
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
       this.executeCommand({ type: CommandType.undo });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
@@ -670,11 +650,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._canvas.style.cursor = tool.cursor;
     tool.pointerEventHandler(this, event, currentElement);
-
-    /*else {
-      this._canvas.style.cursor = '';
-      this.pointerEventHandlerElement(event, currentElement);
-    }*/
   }
 
   private _fillCalculationrects() {
