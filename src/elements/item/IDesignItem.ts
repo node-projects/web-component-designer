@@ -4,6 +4,7 @@ import { ChangeGroup } from "../services/undoService/ChangeGroup";
 import { NodeType } from './NodeType';
 import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType";
 import { IDesignerExtension } from "../widgets/designerView/extensions/IDesignerExtension";
+import { IBinding } from "../services/bindingsService/IBinding";
 
 export interface IDesignItem {
 
@@ -15,10 +16,10 @@ export interface IDesignItem {
   readonly id: string
 
   readonly hasAttributes: boolean;
-  readonly attributes: Map<string, string>
+  readonly attributes: Map<string, string|IBinding>
 
   readonly hasStyles: boolean;
-  readonly styles: Map<string, string>
+  readonly styles: Map<string, string|IBinding>
 
   readonly hasChildren: boolean;
   children(): IterableIterator<IDesignItem>

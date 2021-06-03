@@ -8,6 +8,8 @@ export interface ISelectionService {
 
   setSelectedElements(designItems: IDesignItem[]): void;
 
+  clearSelectedElements(): void;
+
   isSelected(designItem: IDesignItem): boolean;
 
   readonly onSelectionChanged: TypedEvent<ISelectionChangedEvent>;

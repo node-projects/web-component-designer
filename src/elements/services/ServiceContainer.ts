@@ -17,6 +17,7 @@ import { IDesignerExtensionProvider } from "../widgets/designerView/extensions/I
 import { NamedTools } from "../widgets/designerView/tools/NamedTools";
 import { IContextMenuExtension } from "../widgets/designerView/extensions/contextMenu/IContextMenuExtension";
 import { GlobalContext } from './GlobalContext';
+import { IBindingService } from "./bindingsService/IBindingService";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -27,6 +28,7 @@ interface ServiceNameMap {
   "htmlWriterService": IHtmlWriterService;
   "htmlParserService": IHtmlParserService;
   "intializationService": IIntializationService;
+  'bindingService': IBindingService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -46,6 +48,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   public readonly globalContext: GlobalContext = new GlobalContext();
 
   public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
+
+  get bindingServices(): IBindingService[] {
+    return this.getServices('bindingService');
+  }
 
   get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');

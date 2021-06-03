@@ -130,7 +130,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-gray-out { stroke: transparent; fill: rgba(211, 211, 211, 0.8); pointer-events: none }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-text-enter-container { stroke: none; fill: black; stroke-width: 1; font-size: 14px; font-weight:800; font-family: monospace; }
     #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-rect-enter-container { stroke: none; fill: #aa00ff2e; }
-  
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-draw-new-element { stroke: black; fill: transparent; stroke-width: 1; }
+    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-invisible-div { stroke: lightgray; fill: transparent; stroke-width: 1; }
+    
     #canvas * {
       cursor: pointer;
       user-select: none;
@@ -510,7 +512,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     di.setStyle('left', event.offsetX + targetRect.left - this.containerBoundingRect.x + 'px')
     this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
     grp.commit();
-    this.instanceServiceContainer.selectionService.setSelectedElements([di]);
+    requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
   }
 
   private _onWheel(event: WheelEvent) {
@@ -557,7 +559,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   private onKeyDown(event: KeyboardEvent) {
     //TODO: keyboard events maybe should also be handeled by tools 
-    
+
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
       this.executeCommand({ type: CommandType.undo });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)

@@ -1,6 +1,0 @@
-/*
-data-bind   attribute
-
-
-
-*/

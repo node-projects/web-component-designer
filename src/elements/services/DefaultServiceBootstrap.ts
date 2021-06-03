@@ -35,6 +35,8 @@ import { PickColorTool } from '../widgets/designerView/tools/PickColorTool';
 import { TextTool } from '../widgets/designerView/tools/TextTool';
 import { GrayOutExtensionProvider } from '../widgets/designerView/extensions/GrayOutExtensionProvider';
 import { AltToEnterContainerExtensionProvider } from '../widgets/designerView/extensions/AltToEnterContainerExtensionProvider';
+import { InvisibleDivExtensionProvider } from '../widgets/designerView/extensions/InvisibleDivExtensionProvider';
+import { PolymerBindingsService } from './bindingsService/PolymerBindingsService';
 
 let serviceContainer = new ServiceContainer();
 
@@ -49,9 +51,11 @@ serviceContainer.register("htmlWriterService", new HtmlWriterService());
 serviceContainer.register("containerService", new DefaultPlacementService());
 serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
 //serviceContainer.register("htmlParserService", new NodeHtmlParserService());
+serviceContainer.register("bindingService", new PolymerBindingsService());
 
 serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
-  new ResizeExtensionProvider(false)
+  new ResizeExtensionProvider(false),
+  new InvisibleDivExtensionProvider()
 ]);
 serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
   new PrimarySelectionDefaultExtensionProvider(),

@@ -1,7 +1,9 @@
+import { IBinding } from "../services/bindingsService/IBinding";
+
 export class CssCombiner {
   private static _helperElement = document.createElement('div');
 
-  static combine(styles: Map<string, string>, globalStyles?: Map<string, string>) {
+  static combine(styles: Map<string, string | IBinding>, globalStyles?: Map<string, string>) {
     let e = CssCombiner._helperElement;
     e.setAttribute('style', '');
     for (let s of styles) {
@@ -24,7 +26,7 @@ export class CssCombiner {
     return styles;
   }
 
-  private static combineBorder(styles: Map<string, string>) {
+  private static combineBorder(styles: Map<string, string | IBinding>) {
     let e = CssCombiner._helperElement;
     let bls = e.style.borderLeftStyle;
     let blc = e.style.borderLeftColor;
@@ -80,7 +82,7 @@ export class CssCombiner {
       styles.delete('border-image-repeat');
   }
 
-  private static combineMargin(styles: Map<string, string>) {
+  private static combineMargin(styles: Map<string, string | IBinding>) {
     let e = CssCombiner._helperElement;
     if (e.style.marginTop && e.style.marginRight && e.style.marginBottom && e.style.marginLeft) {
       styles.delete('margin-top');
@@ -91,7 +93,7 @@ export class CssCombiner {
     }
   }
 
-  private static combinePadding(styles: Map<string, string>) {
+  private static combinePadding(styles: Map<string, string | IBinding>) {
     let e = CssCombiner._helperElement;
     if (e.style.paddingTop && e.style.paddingRight && e.style.paddingBottom && e.style.paddingLeft) {
       styles.delete('padding-top');
@@ -102,7 +104,7 @@ export class CssCombiner {
     }
   }
 
-  private static combineBackground(styles: Map<string, string>) {
+  private static combineBackground(styles: Map<string, string | IBinding>) {
     let e = CssCombiner._helperElement;
     styles.delete('background-image');
     styles.delete('background-position');
@@ -119,28 +121,28 @@ export class CssCombiner {
     styles.delete('background');
 
     let background = '';
-    if (e.style.backgroundImage && e.style.backgroundImage  !== 'initial')
+    if (e.style.backgroundImage && e.style.backgroundImage !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundImage;
-    if (e.style.backgroundPosition && e.style.backgroundPosition  !== 'initial')
+    if (e.style.backgroundPosition && e.style.backgroundPosition !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundPosition;
-    if (e.style.backgroundSize && e.style.backgroundSize  !== 'initial')
+    if (e.style.backgroundSize && e.style.backgroundSize !== 'initial')
       background += (background === '' ? '' : ' / ') + e.style.backgroundSize;
-    if (e.style.backgroundRepeat && e.style.backgroundRepeat  !== 'initial')
+    if (e.style.backgroundRepeat && e.style.backgroundRepeat !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundRepeat;
-    if (e.style.backgroundAttachment && e.style.backgroundAttachment  !== 'initial')
+    if (e.style.backgroundAttachment && e.style.backgroundAttachment !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundAttachment;
-    if (e.style.backgroundOrigin && e.style.backgroundOrigin  !== 'initial')
+    if (e.style.backgroundOrigin && e.style.backgroundOrigin !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundOrigin;
-    if (e.style.backgroundClip && e.style.backgroundClip  !== 'initial')
+    if (e.style.backgroundClip && e.style.backgroundClip !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundClip;
-    if (e.style.backgroundColor && e.style.backgroundColor  !== 'initial')
+    if (e.style.backgroundColor && e.style.backgroundColor !== 'initial')
       background += (background === '' ? '' : ' ') + e.style.backgroundColor;
 
     if (background)
       styles.set('background', background);
   }
 
-  private static combineFont(styles: Map<string, string>) {
+  private static combineFont(styles: Map<string, string | IBinding>) {
     let e = CssCombiner._helperElement;
     if (e.style.fontFamily) {
       styles.delete('font-style');

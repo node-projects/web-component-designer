@@ -21,6 +21,7 @@
     "@types/jquery.fancytree": "0.0.6",
     "ace-builds": "^1.4.12",
     "codemirror": "^5.61.1",
+    "html2canvas": "*",
     "jquery": "^3.6.0",
     "jquery.fancytree": "^2.38.0",
     "monaco-editor": "^0.24.0",

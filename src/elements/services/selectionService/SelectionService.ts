@@ -30,6 +30,10 @@ export class SelectionService implements ISelectionService {
     this.onSelectionChanged.emit({ selectedElements: this.selectedElements, oldSelectedElements: oldSelectedElements });
   }
 
+  clearSelectedElements() {
+    this.setSelectedElements([]);
+  }
+
   isSelected(designItem: IDesignItem) {
     return this.selectedElements.indexOf(designItem) >= 0;
   }

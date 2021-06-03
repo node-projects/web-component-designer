@@ -13,7 +13,9 @@ export class DefaultInstanceService implements IInstanceService {
       let importUri = definition.import;
       if (importUri[0] === '.')
         importUri = (window.location.origin + window.location.pathname).split('/').slice(0, -1).join('/') + '/' + importUri;
-      await import(importUri);
+      import(importUri).then(() => {
+        //TODO: refresh all extensions
+      }); //removed await here, feels better to not wait for the elemnt is loaded, maybe this needs to be configurable
       if (instanceServiceContainer.designContext.imports.indexOf(importUri) <= 0)
         instanceServiceContainer.designContext.imports.push(importUri);
     }
@@ -27,8 +29,6 @@ export class DefaultInstanceService implements IInstanceService {
     element.style.position = 'absolute'
 
     switch (definition.tag) {
-      case "div":
-        break;
       case "input":
         (<HTMLInputElement>element).type = "text";
     }

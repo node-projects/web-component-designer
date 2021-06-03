@@ -30,7 +30,7 @@ export class ContextMenuHelper {
   
   .context-menu__items {
     list-style: none;
-    margin: 0;
+    margin: 8px;
     padding: 0;
   }
   

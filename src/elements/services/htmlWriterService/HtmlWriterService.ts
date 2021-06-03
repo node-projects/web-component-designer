@@ -29,10 +29,13 @@ export class HtmlWriterService implements IHtmlWriterService {
       if (designItem.hasAttributes) {
         for (const a of designItem.attributes) {
           indentedTextWriter.write(' ');
-          if (a[1])
+          if (typeof a[1] === 'string')
             indentedTextWriter.write(a[0] + '="' + DomConverter.normalizeAttributeValue(a[1]) + '"');
-          else
+          else if (!a[1])
             indentedTextWriter.write(a[0]);
+          else {
+            //TODO: writing of bindings
+          }
         }
       }
 
@@ -42,8 +45,13 @@ export class HtmlWriterService implements IHtmlWriterService {
         if (options.compressCssToShorthandProperties)
           styles = CssCombiner.combine(styles);
         for (const s of styles) {
-          if (s[0])
-            indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+          if (s[0]) {
+            if (typeof s[1] === 'string') {
+              indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+            } else {
+              //TODO: writing of bindings
+            }
+          }
         }
         indentedTextWriter.write('"');
       }

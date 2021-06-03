@@ -1,9 +1,0 @@
-/*
-script in html 
-
-as a sample for own bindings 
-
-
-
-
-*/
