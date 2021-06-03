@@ -37,6 +37,7 @@ import { GrayOutExtensionProvider } from '../widgets/designerView/extensions/Gra
 import { AltToEnterContainerExtensionProvider } from '../widgets/designerView/extensions/AltToEnterContainerExtensionProvider';
 import { InvisibleDivExtensionProvider } from '../widgets/designerView/extensions/InvisibleDivExtensionProvider';
 import { PolymerBindingsService } from './bindingsService/PolymerBindingsService';
+import { ItemsBelowContextMenu } from '../widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu';
 
 let serviceContainer = new ServiceContainer();
 
@@ -93,6 +94,11 @@ serviceContainer.designerTools.set(NamedTools.MagicWandSelector, new MagicWandSe
 serviceContainer.designerTools.set(NamedTools.PickColor, new PickColorTool());
 serviceContainer.designerTools.set(NamedTools.Text, new TextTool());
 
-serviceContainer.designerContextMenuExtensions = [new CopyPasteContextMenu(), new ZMoveContextMenu(), new MultipleItemsSelectedContextMenu()];
+serviceContainer.designerContextMenuExtensions = [
+  new CopyPasteContextMenu(),
+  new ZMoveContextMenu(),
+  new MultipleItemsSelectedContextMenu(),
+  new ItemsBelowContextMenu()
+];
 
 export default serviceContainer;

@@ -5,11 +5,11 @@ import { IDesignerView } from "../../IDesignerView";
 import { IContextMenuExtension } from "./IContextMenuExtension";
 
 export class CopyPasteContextMenu implements IContextMenuExtension{
-  public shouldProvideContextmenu(designerView: IDesignerView, designItem: IDesignItem) {
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem) {
     return true;
   }
 
-  public provideContextMenuItems(designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
+  public provideContextMenuItems(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
     return [
       { title: 'copy', action: () => { designerView.executeCommand({ type: CommandType.copy }); } },
       { title: 'cut', action: () => { designerView.executeCommand({ type: CommandType.cut }); } },

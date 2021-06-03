@@ -59,6 +59,7 @@ export class ContextMenuHelper {
   private _element: HTMLElement;
   private _closeBound: () => void;
   private _keyUpBound: () => void;
+  private _closeOnDownBound: () => void;
 
   static addContextMenu(element: HTMLElement, items: IContextMenuItem[]) {
     element.oncontextmenu = (event) => {
@@ -91,26 +92,29 @@ export class ContextMenuHelper {
       this._shadowRoot.appendChild(this._element);
 
     this._closeBound = this.close.bind(this);
+    this._closeOnDownBound = this._closeOnDown.bind(this);
     this._keyUpBound = this._keyUp.bind(this);
 
     window.addEventListener('keyup', this._keyUpBound);
     window.addEventListener('resize', this._closeBound);
-    window.addEventListener('mousedown', this._closeBound);
+    window.addEventListener('mousedown', this._closeOnDownBound);
+    window.addEventListener('mouseup', this._closeBound);
 
     this._element.classList.add('context-menu--active');
   }
 
   public close() {
-    //setTimeout(() => {
+    requestAnimationFrame(() => {
       window.removeEventListener('keyup', this._keyUpBound);
       window.removeEventListener('resize', this._closeBound);
-      window.removeEventListener('mousedown', this._closeBound);
+      window.removeEventListener('mousedown', this._closeOnDownBound);
+      window.removeEventListener('mouseup', this._closeBound);
 
       if (this._shadowRoot === document)
         document.body.removeChild(this._element);
       else
         this._shadowRoot.removeChild(this._element);
-    //}, 10);
+    });
   }
 
   public show() {
@@ -125,6 +129,12 @@ export class ContextMenuHelper {
     if (e.keyCode === 27) {
       this.close();
     }
+  }
+
+  private _closeOnDown(e: MouseEvent) {
+    const p = e.composedPath();
+    if (p.indexOf(this._element) < 0)
+      this.close();
   }
 
   static createMenu(items: IContextMenuItem[]) {
@@ -146,7 +156,9 @@ export class ContextMenuHelper {
         div.textContent = i.title;
         li.appendChild(div);
         ul.appendChild(li);
-        li.onclick = (e) => i.action(null, e);
+        li.onclick = (e) => {
+          i.action(null, e);
+        }
       }
     }
     return nav;

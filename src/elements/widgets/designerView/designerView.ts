@@ -538,8 +538,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
     const mnuItems: IContextMenuItem[] = [];
     for (let cme of this.serviceContainer.designerContextMenuExtensions) {
-      if (cme.shouldProvideContextmenu(this, designItem)) {
-        mnuItems.push(...cme.provideContextMenuItems(this, designItem));
+      if (cme.shouldProvideContextmenu(event, this, designItem)) {
+        mnuItems.push(...cme.provideContextMenuItems(event, this, designItem));
       }
     }
     let ctxMnu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);

@@ -1,19 +1,20 @@
 import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerView } from "../../IDesignerView";
+import { IContextMenuExtension } from "./IContextMenuExtension";
 
-export class MultipleItemsSelectedContextMenu {
+export class MultipleItemsSelectedContextMenu implements IContextMenuExtension {
 
   public orderIndex: number = 60;
 
-  public shouldProvideContextmenu(designerView: IDesignerView, designItem: IDesignItem) {
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem) {
     if (designItem.instanceServiceContainer.selectionService.selectedElements.length > 1) {
       return true;
     }
     return false;
   }
 
-  public provideContextMenuItems(designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
+  public provideContextMenuItems(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
     return [
       {
         title: 'wrap in',

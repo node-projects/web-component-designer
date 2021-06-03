@@ -6,11 +6,11 @@ import { IContextMenuExtension } from "./IContextMenuExtension";
 
 export class ZMoveContextMenu implements IContextMenuExtension{
 
-  public shouldProvideContextmenu(designerView: IDesignerView, designItem: IDesignItem) {
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem) {
     return true;
   }
 
-  public provideContextMenuItems(designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
+  public provideContextMenuItems(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
     return [
       { title: 'to front', action: () => { designerView.executeCommand({ type: CommandType.moveToFront }); } },
       { title: 'move forward', action: () => { designerView.executeCommand({ type: CommandType.moveForward }); } },
