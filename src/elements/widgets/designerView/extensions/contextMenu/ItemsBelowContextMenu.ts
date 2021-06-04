@@ -38,7 +38,7 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
         while (el != null) {
           if (el === designerView.rootDesignItem.element)
             break;
-          if (el !== <any>designerView.overlayLayer && el.parentElement !== <any>designerView.overlayLayer)
+          if (el !== <any>designerView.overlayLayer && el.parentElement !== <any>designerView.overlayLayer && el.getRootNode() === designerView.shadowRoot)
             lstEl.push(el);
           backupPEventsMap.set(el, el.style.pointerEvents);
           el.style.pointerEvents = 'none';

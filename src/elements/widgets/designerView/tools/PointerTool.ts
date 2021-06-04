@@ -177,7 +177,7 @@ export class PointerTool implements ITool {
                     newContainerElement = null;
                   } else if (newContainerElement == designerView.rootDesignItem.element) {
                     break;
-                  } else if (<any>newContainerElement == designerView.overlayLayer || <any>newContainerElement.parentElement == designerView.overlayLayer) {
+                  } else if (newContainerElement.getRootNode() !== designerView.shadowRoot || <any>newContainerElement === designerView.overlayLayer || <any>newContainerElement.parentElement === designerView.overlayLayer) {
                     backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                     newContainerElement.style.pointerEvents = 'none';
                     newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
@@ -185,7 +185,10 @@ export class PointerTool implements ITool {
                   else if (newContainerElement == this._actionStartedDesignItem.element) {
                     backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                     newContainerElement.style.pointerEvents = 'none';
+                    const old = newContainerElement;
                     newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                    if (old === newContainerElement)
+                      break;
                   }
                   else {
                     //check we don't try to move a item over one of its children...
@@ -194,7 +197,10 @@ export class PointerTool implements ITool {
                       if (par == this._actionStartedDesignItem.element) {
                         backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                         newContainerElement.style.pointerEvents = 'none';
+                        const old = newContainerElement;
                         newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                        if (old === newContainerElement)
+                          break;
                         continue checkAgain;
                       }
                       par = par.parentElement;

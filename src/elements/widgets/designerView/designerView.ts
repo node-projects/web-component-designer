@@ -30,6 +30,7 @@ import { NamedTools } from "./tools/NamedTools";
 import { Screenshot } from '../../helper/Screenshot';
 import { dataURItoBlob, exportData } from "../../helper/Helper";
 import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItem";
+import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -460,11 +461,15 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   public async parseHTML(html: string) {
-    this.rootDesignItem.element.innerHTML = null;
     this.instanceServiceContainer.undoService.clear();
     const parserService = this.serviceContainer.htmlParserService;
-    const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
-    this._addDesignItems(designItems);
+    if (!html)
+      DomHelper.removeAllChildnodes(this.rootDesignItem.element);
+    else {
+      const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
+      DomHelper.removeAllChildnodes(this.rootDesignItem.element);
+      this._addDesignItems(designItems);
+    }
   }
 
   private _addDesignItems(designItems: IDesignItem[]) {

@@ -19,6 +19,8 @@ export interface IDesignerView extends IPlacementView, IUiCommandHandler {
 
   readonly snapLines: Snaplines;
 
+  readonly shadowRoot: ShadowRoot;
+
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;
 
