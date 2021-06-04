@@ -29,8 +29,12 @@ export class HtmlWriterService implements IHtmlWriterService {
       if (designItem.hasAttributes) {
         for (const a of designItem.attributes) {
           indentedTextWriter.write(' ');
-          if (typeof a[1] === 'string')
-            indentedTextWriter.write(a[0] + '="' + DomConverter.normalizeAttributeValue(a[1]) + '"');
+          if (typeof a[1] === 'string') {
+            if (a[1] === "")
+              indentedTextWriter.write(a[0]);
+            else
+              indentedTextWriter.write(a[0] + '="' + DomConverter.normalizeAttributeValue(a[1]) + '"');
+          }
           else if (!a[1])
             indentedTextWriter.write(a[0]);
           else {
