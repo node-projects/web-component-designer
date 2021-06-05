@@ -20,6 +20,11 @@ export class DefaultPlacementService implements IPlacementService {
     return true;
   }
 
+  getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint {
+    //TODO: offset could be bigger, when it was in a other cell???
+    return container.element.getBoundingClientRect();
+  }
+
   placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]): IPoint {
     return null;
   }

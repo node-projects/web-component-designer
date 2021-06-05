@@ -620,10 +620,10 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     let targetRect = target.getBoundingClientRect();
     return {
       originalX: event.x - this.containerBoundingRect.x,
-      containerOriginalX: event.x - this._ownBoundingRect.x,
+      //containerOriginalX: event.x - this._ownBoundingRect.x,
       x: (event.x - this.containerBoundingRect.x) / this._zoomFactor,
       originalY: event.y - this.containerBoundingRect.y,
-      containerOriginalY: event.y - this._ownBoundingRect.y,
+      //containerOriginalY: event.y - this._ownBoundingRect.y,
       y: (event.y - this.containerBoundingRect.y) / this._zoomFactor,
       controlOffsetX: (startPoint ? startPoint.controlOffsetX : event.x - targetRect.x),
       controlOffsetY: (startPoint ? startPoint.controlOffsetY : event.y - targetRect.y),

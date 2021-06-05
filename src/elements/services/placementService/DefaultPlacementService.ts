@@ -7,7 +7,6 @@ import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
-
   serviceForContainer(container: IDesignItem) {
     if ((<HTMLElement>container.element).style.display === 'grid' || (<HTMLElement>container.element).style.display === 'flex')
       return false;
@@ -22,6 +21,10 @@ export class DefaultPlacementService implements IPlacementService {
 
   canLeave(container: IDesignItem, items: IDesignItem[]) {
     return true;
+  }
+
+  getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint {
+    return container.element.getBoundingClientRect();
   }
 
   private calculateTrack(event: MouseEvent, placementView: IPlacementView, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, item: IDesignItem): IPoint {

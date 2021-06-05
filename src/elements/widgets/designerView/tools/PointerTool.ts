@@ -1,8 +1,10 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { PointerActionType } from "../../../../enums/PointerActionType";
 import { IDesignerMousePoint } from "../../../../interfaces/IDesignerMousePoint";
+import { IPoint } from "../../../../interfaces/IPoint";
 import { DesignItem } from "../../../item/DesignItem";
 import { IDesignItem } from "../../../item/IDesignItem";
+import { IPlacementService } from "../../../services/placementService/IPlacementService";
 import { ExtensionType } from "../extensions/ExtensionType";
 import { IDesignerView } from "../IDesignerView";
 import { ITool } from "./ITool";
@@ -23,6 +25,8 @@ export class PointerTool implements ITool {
 
   private _dragOverExtensionItem: IDesignItem;
   private _dragExtensionItem: IDesignItem;
+
+  private _moveItemsOffset: IPoint;
 
   constructor() {
   }
@@ -125,6 +129,7 @@ export class PointerTool implements ITool {
       case EventNames.PointerDown:
         {
           this._actionStartedDesignItem = currentDesignItem;
+          this._moveItemsOffset = null;
 
           if (event.shiftKey || event.ctrlKey) {
             const index = designerView.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
@@ -156,7 +161,7 @@ export class PointerTool implements ITool {
 
           if (this._movedSinceStartedAction) {
             const currentContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent));
-            if (currentContainerService && currentContainerService.canLeave(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem])) {
+            if (currentContainerService) {
               const dragItem = this._actionStartedDesignItem.parent;
               if (this._dragExtensionItem != dragItem) {
                 designerView.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
@@ -167,81 +172,104 @@ export class PointerTool implements ITool {
                 designerView.extensionManager.refreshExtension(dragItem, ExtensionType.ContainerDrag);
               }
 
-              //search for containers below mouse cursor.
-              //to do this, we need to disable pointer events for each in a loop and search wich element is there
-              let backupPEventsMap: Map<HTMLElement, string> = new Map();
-              let newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
-              try {
-                checkAgain: while (newContainerElement != null) {
-                  if (newContainerElement == this._actionStartedDesignItem.parent.element) {
-                    newContainerElement = null;
-                  } else if (newContainerElement == designerView.rootDesignItem.element) {
-                    break;
-                  } else if (newContainerElement.getRootNode() !== designerView.shadowRoot || <any>newContainerElement === designerView.overlayLayer || <any>newContainerElement.parentElement === designerView.overlayLayer) {
-                    backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                    newContainerElement.style.pointerEvents = 'none';
-                    newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
-                  }
-                  else if (newContainerElement == this._actionStartedDesignItem.element) {
-                    backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                    newContainerElement.style.pointerEvents = 'none';
-                    const old = newContainerElement;
-                    newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
-                    if (old === newContainerElement)
+              const canLeave = currentContainerService.canLeave(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem]);
+
+              let newContainerElementDesignItem: IDesignItem = null;
+              let newContainerService: IPlacementService = null;
+
+              if (canLeave) {
+                //search for containers below mouse cursor.
+                //to do this, we need to disable pointer events for each in a loop and search wich element is there
+                let backupPEventsMap: Map<HTMLElement, string> = new Map();
+                let newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                try {
+                  checkAgain: while (newContainerElement != null) {
+                    if (newContainerElement == this._actionStartedDesignItem.parent.element) {
+                      newContainerElement = null;
+                    } else if (newContainerElement == designerView.rootDesignItem.element) {
+                      newContainerElementDesignItem = designerView.rootDesignItem;
+                      newContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
                       break;
+                    } else if (newContainerElement.getRootNode() !== designerView.shadowRoot || <any>newContainerElement === designerView.overlayLayer || <any>newContainerElement.parentElement === designerView.overlayLayer) {
+                      backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                      newContainerElement.style.pointerEvents = 'none';
+                      newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                    }
+                    else if (newContainerElement == this._actionStartedDesignItem.element) {
+                      backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                      newContainerElement.style.pointerEvents = 'none';
+                      const old = newContainerElement;
+                      newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                      if (old === newContainerElement)
+                        break;
+                    }
+                    else {
+                      //check we don't try to move a item over one of its children...
+                      let par = newContainerElement.parentElement;
+                      while (par) {
+                        if (par == this._actionStartedDesignItem.element) {
+                          backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                          newContainerElement.style.pointerEvents = 'none';
+                          const old = newContainerElement;
+                          newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                          if (old === newContainerElement)
+                            break;
+                          continue checkAgain;
+                        }
+                        par = par.parentElement;
+                      }
+                      //end check
+                      newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
+                      newContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
+                      if (newContainerService && newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem]))
+                        break;
+                      backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
+                      newContainerElement.style.pointerEvents = 'none';
+                      newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                    }
+                  }
+                }
+                finally {
+                  for (let e of backupPEventsMap.entries()) {
+                    e[0].style.pointerEvents = e[1];
+                  }
+                }
+
+                //if we found a new enterable container create extensions 
+                if (newContainerElement != null) {
+                  const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
+                  if (this._dragOverExtensionItem != newContainerElementDesignItem) {
+                    designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
+                    designerView.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
+                    this._dragOverExtensionItem = newContainerElementDesignItem;
                   }
                   else {
-                    //check we don't try to move a item over one of its children...
-                    let par = newContainerElement.parentElement;
-                    while (par) {
-                      if (par == this._actionStartedDesignItem.element) {
-                        backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                        newContainerElement.style.pointerEvents = 'none';
-                        const old = newContainerElement;
-                        newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
-                        if (old === newContainerElement)
-                          break;
-                        continue checkAgain;
-                      }
-                      par = par.parentElement;
-                    }
-                    //end check
-                    const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
-                    const newContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
-                    if (newContainerService && newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem]))
-                      break;
-                    backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                    newContainerElement.style.pointerEvents = 'none';
-                    newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                    designerView.extensionManager.refreshExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
+                  }
+                } else {
+                  if (this._dragOverExtensionItem) {
+                    designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
+                    this._dragOverExtensionItem = null;
                   }
                 }
               }
-              finally {
-                for (let e of backupPEventsMap.entries()) {
-                  e[0].style.pointerEvents = e[1];
-                }
-              }
 
-              //if we found a new enterable container create extensions 
-              if (newContainerElement != null) {
-                const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
-                if (this._dragOverExtensionItem != newContainerElementDesignItem) {
-                  designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
-                  designerView.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
-                  this._dragOverExtensionItem = newContainerElementDesignItem;
-                }
-                else {
-                  designerView.extensionManager.refreshExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
-                }
-              } else {
-                if (this._dragOverExtensionItem) {
-                  designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
-                  this._dragOverExtensionItem = null;
-                }
-              }
+              if (newContainerService && event.altKey) {
+                //TODO: all items, fix position
+                const oldOffset = currentContainerService.getElementOffset(this._actionStartedDesignItem.parent, this._actionStartedDesignItem);
+                const newOffset = newContainerService.getElementOffset(newContainerElementDesignItem, this._actionStartedDesignItem);
+                this._moveItemsOffset = { x: newOffset.x - oldOffset.x, y: newOffset.y - oldOffset.y };
 
-              const containerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent));
-              containerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, designerView.instanceServiceContainer.selectionService.selectedElements);
+                newContainerElementDesignItem.insertChild(this._actionStartedDesignItem);
+                const cp: IDesignerMousePoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, controlOffsetX: currentPoint.controlOffsetX, controlOffsetY: currentPoint.controlOffsetY, zoom: currentPoint.zoom };
+                newContainerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, cp, designerView.instanceServiceContainer.selectionService.selectedElements);
+              }
+              else {
+                let cp: IDesignerMousePoint = currentPoint;
+                if (this._moveItemsOffset)
+                  cp = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, controlOffsetX: currentPoint.controlOffsetX, controlOffsetY: currentPoint.controlOffsetY, zoom: currentPoint.zoom };
+                currentContainerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, cp, designerView.instanceServiceContainer.selectionService.selectedElements);
+              }
               designerView.extensionManager.refreshExtensions(designerView.instanceServiceContainer.selectionService.selectedElements);
             }
           }
@@ -267,6 +295,7 @@ export class PointerTool implements ITool {
             this._dragExtensionItem = null;
             designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
             this._dragOverExtensionItem = null;
+            this._moveItemsOffset = null;
           }
 
           designerView.extensionManager.refreshExtensions(designerView.instanceServiceContainer.selectionService.selectedElements);

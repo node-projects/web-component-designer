@@ -80,6 +80,9 @@ export class DesignItem implements IDesignItem {
     return this.getOrCreateDesignItem(this.element.parentNode);
   }
   public insertChild(designItem: IDesignItem, index?: number) {
+    if (designItem.parent) {
+      designItem.parent.removeChild(designItem);
+    }
     this.removeChild(designItem);
     if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
       this._childArray.push(designItem);
