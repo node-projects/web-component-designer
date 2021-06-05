@@ -88,8 +88,8 @@ export class ResizeExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          this._initialPoint.controlOffsetX = 0;
-          this._initialPoint.controlOffsetY = 0;
+          this._initialPoint.offsetInControlX = 0;
+          this._initialPoint.offsetInControlY = 0;
           const containerService = this.designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent))
 
           const diff = containerService.placePoint(event, <IPlacementView><any>this.designerView, this.extendedItem.parent, this._initialPoint, currentPoint, this.designerView.instanceServiceContainer.selectionService.selectedElements);

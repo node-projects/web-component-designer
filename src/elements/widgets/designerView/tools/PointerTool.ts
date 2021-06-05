@@ -26,7 +26,7 @@ export class PointerTool implements ITool {
   private _dragOverExtensionItem: IDesignItem;
   private _dragExtensionItem: IDesignItem;
 
-  private _moveItemsOffset: IPoint;
+  private _moveItemsOffset: IPoint = { x: 0, y: 0 };
 
   constructor() {
   }
@@ -129,7 +129,7 @@ export class PointerTool implements ITool {
       case EventNames.PointerDown:
         {
           this._actionStartedDesignItem = currentDesignItem;
-          this._moveItemsOffset = null;
+          this._moveItemsOffset = { x: 0, y: 0 };
 
           if (event.shiftKey || event.ctrlKey) {
             const index = designerView.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
@@ -258,16 +258,14 @@ export class PointerTool implements ITool {
                 //TODO: all items, fix position
                 const oldOffset = currentContainerService.getElementOffset(this._actionStartedDesignItem.parent, this._actionStartedDesignItem);
                 const newOffset = newContainerService.getElementOffset(newContainerElementDesignItem, this._actionStartedDesignItem);
-                this._moveItemsOffset = { x: newOffset.x - oldOffset.x, y: newOffset.y - oldOffset.y };
+                this._moveItemsOffset = { x: newOffset.x - oldOffset.x + this._moveItemsOffset.x, y: newOffset.y - oldOffset.y + this._moveItemsOffset.y };
 
                 newContainerElementDesignItem.insertChild(this._actionStartedDesignItem);
-                const cp: IDesignerMousePoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, controlOffsetX: currentPoint.controlOffsetX, controlOffsetY: currentPoint.controlOffsetY, zoom: currentPoint.zoom };
+                const cp: IDesignerMousePoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, offsetInControlX: currentPoint.offsetInControlX, offsetInControlY: currentPoint.offsetInControlY, zoom: currentPoint.zoom };
                 newContainerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, cp, designerView.instanceServiceContainer.selectionService.selectedElements);
               }
               else {
-                let cp: IDesignerMousePoint = currentPoint;
-                if (this._moveItemsOffset)
-                  cp = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, controlOffsetX: currentPoint.controlOffsetX, controlOffsetY: currentPoint.controlOffsetY, zoom: currentPoint.zoom };
+                const cp: IDesignerMousePoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, offsetInControlX: currentPoint.offsetInControlX, offsetInControlY: currentPoint.offsetInControlY, zoom: currentPoint.zoom };
                 currentContainerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, cp, designerView.instanceServiceContainer.selectionService.selectedElements);
               }
               designerView.extensionManager.refreshExtensions(designerView.instanceServiceContainer.selectionService.selectedElements);
@@ -285,9 +283,11 @@ export class PointerTool implements ITool {
 
           if (this._movedSinceStartedAction) {
             let containerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+            const cp = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, offsetInControlX: currentPoint.offsetInControlX, offsetInControlY: currentPoint.offsetInControlY, zoom: currentPoint.zoom };
+
             if (containerService) {
               let cg = designerView.rootDesignItem.openGroup("Move Elements", designerView.instanceServiceContainer.selectionService.selectedElements);
-              containerService.finishPlace(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, currentPoint, designerView.instanceServiceContainer.selectionService.selectedElements);
+              containerService.finishPlace(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, cp, designerView.instanceServiceContainer.selectionService.selectedElements);
               cg.commit();
             }
 
@@ -295,7 +295,7 @@ export class PointerTool implements ITool {
             this._dragExtensionItem = null;
             designerView.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
             this._dragOverExtensionItem = null;
-            this._moveItemsOffset = null;
+            this._moveItemsOffset = { x: 0, y: 0 };
           }
 
           designerView.extensionManager.refreshExtensions(designerView.instanceServiceContainer.selectionService.selectedElements);

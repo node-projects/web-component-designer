@@ -625,8 +625,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       originalY: event.y - this.containerBoundingRect.y,
       //containerOriginalY: event.y - this._ownBoundingRect.y,
       y: (event.y - this.containerBoundingRect.y) / this._zoomFactor,
-      controlOffsetX: (startPoint ? startPoint.controlOffsetX : event.x - targetRect.x),
-      controlOffsetY: (startPoint ? startPoint.controlOffsetY : event.y - targetRect.y),
+      offsetInControlX: (startPoint ? startPoint.offsetInControlX : event.x - targetRect.x),
+      offsetInControlY: (startPoint ? startPoint.offsetInControlY : event.y - targetRect.y),
       zoom: this._zoomFactor
     };
   }

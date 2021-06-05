@@ -38,14 +38,14 @@ export class DefaultPlacementService implements IPlacementService {
       }
       else if (placementView.alignOnSnap) {
         let rect = item.element.getBoundingClientRect();
-        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.controlOffsetX, y: newPoint.originalY - startPoint.controlOffsetY }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.offsetInControlX, y: newPoint.originalY - startPoint.offsetInControlY }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
-          trackX = newPos.x - Math.round(startPoint.originalX) + Math.round(startPoint.controlOffsetX);
+          trackX = newPos.x - Math.round(startPoint.originalX) + Math.round(startPoint.offsetInControlX);
         } else {
           trackX = Math.round(trackX);
         }
         if (newPos.y !== null) {
-          trackY = newPos.y - Math.round(startPoint.originalY) + Math.round(startPoint.controlOffsetY);
+          trackY = newPos.y - Math.round(startPoint.originalY) + Math.round(startPoint.offsetInControlY);
         } else {
           trackY = Math.round(trackY);
         }
@@ -64,7 +64,7 @@ export class DefaultPlacementService implements IPlacementService {
         trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize;
       }
       else if (placementView.alignOnSnap) {
-        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.controlOffsetX, y: newPoint.originalY - startPoint.controlOffsetY }, null, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.originalX - startPoint.offsetInControlX, y: newPoint.originalY - startPoint.offsetInControlY }, null, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x;
         } else {

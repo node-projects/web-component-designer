@@ -5,7 +5,7 @@ export interface IDesignerMousePoint {
   originalX: number // Mouse Position inside of Designer Canvas
   //containerOriginalY: number
   originalY: number
-  controlOffsetX: number //Offset of MousePointer in Primary Design Item
-  controlOffsetY: number
+  offsetInControlX: number //Offset of MousePointer in Primary Design Item
+  offsetInControlY: number
   zoom?: number 
 }
