@@ -193,15 +193,24 @@ export class PointerTool implements ITool {
                     } else if (newContainerElement.getRootNode() !== designerView.shadowRoot || <any>newContainerElement === designerView.overlayLayer || <any>newContainerElement.parentElement === designerView.overlayLayer) {
                       backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                       newContainerElement.style.pointerEvents = 'none';
+                      const old = newContainerElement;
                       newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                      if (old === newContainerElement) {
+                        newContainerElementDesignItem = null;
+                        newContainerService = null;
+                        break;
+                      }
                     }
                     else if (newContainerElement == this._actionStartedDesignItem.element) {
                       backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                       newContainerElement.style.pointerEvents = 'none';
                       const old = newContainerElement;
                       newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
-                      if (old === newContainerElement)
+                      if (old === newContainerElement) {
+                        newContainerElementDesignItem = null;
+                        newContainerService = null;
                         break;
+                      }
                     }
                     else {
                       //check we don't try to move a item over one of its children...
