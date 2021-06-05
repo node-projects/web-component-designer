@@ -20,7 +20,7 @@ export type { IBindableObject } from "./elements/services/bindableObjectsService
 export type { IBindableObjectsService } from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
 
 export * from "./elements/services/placementService/DefaultPlacementService.js";
-export type { IContainerService } from "./elements/services/placementService/IContainerService.js";
+export type { IPlacementService as IContainerService } from "./elements/services/placementService/IPlacementService.js";
 
 export * from "./elements/services/contentService/ContentService.js";
 export type { IContentChanged } from "./elements/services/contentService/IContentChanged.js";

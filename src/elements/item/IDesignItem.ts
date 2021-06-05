@@ -27,6 +27,10 @@ export interface IDesignItem {
   readonly firstChild: IDesignItem;
   readonly parent: IDesignItem;
 
+  insertChild(designItem: IDesignItem, index?: number);
+  removeChild(designItem: IDesignItem);
+  clearChildren();
+
   readonly hasContent: boolean;
   content: string
 

@@ -1,6 +1,5 @@
 import { ITransactionItem } from '../ITransactionItem';
 import { IDesignItem } from '../../../item/IDesignItem';
-import { NodeType } from '../../../item/NodeType';
 
 export class InsertAction implements ITransactionItem {
 
@@ -23,16 +22,7 @@ export class InsertAction implements ITransactionItem {
   }
 
   do() {
-    if (this.index == 0)
-      (<Element><unknown>this.designItem.element).insertAdjacentElement('afterbegin', this.newItem.element);
-    else {
-      let el = (<Element><unknown>this.designItem.element).children[this.index - 1];
-      if (this.newItem.nodeType == NodeType.Element)
-        el.insertAdjacentElement('afterend', this.newItem.element);
-      else if (this.newItem.nodeType == NodeType.TextNode) {
-        el.insertAdjacentText('afterend', this.newItem.node.textContent);
-      }
-    }
+    this.designItem.insertChild(this.newItem, this.index);
   }
 
   public designItem: IDesignItem;

@@ -1,5 +1,5 @@
 import { IPropertiesService } from "./propertiesService/IPropertiesService";
-import { IContainerService } from './placementService/IContainerService';
+import { IPlacementService } from './placementService/IPlacementService';
 import { IElementsService } from './elementsService/IElementsService';
 import { IInstanceService } from './instanceService/IInstanceService';
 import { IEditorTypesService } from './propertiesService/IEditorTypesService';
@@ -21,7 +21,7 @@ import { IBindingService } from "./bindingsService/IBindingService";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
-  "containerService": IContainerService;
+  "containerService": IPlacementService;
   "elementsService": IElementsService;
   "instanceService": IInstanceService;
   "editorTypesService": IEditorTypesService;
@@ -57,7 +57,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getServices('propertyService');
   }
 
-  get containerServices(): IContainerService[] {
+  get containerServices(): IPlacementService[] {
     return this.getServices('containerService');
   }
 

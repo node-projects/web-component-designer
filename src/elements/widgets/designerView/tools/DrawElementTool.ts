@@ -2,6 +2,7 @@ import { EventNames } from '../../../../enums/EventNames';
 import { IPoint } from '../../../../interfaces/IPoint';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { IElementDefinition } from '../../../services/elementsService/IElementDefinition';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 
@@ -12,7 +13,7 @@ export class DrawElementTool implements ITool {
 
   readonly cursor = 'crosshair';
   private _rect: any;
-
+ 
   constructor(elementDefinition: IElementDefinition) {
     this._elementDefinition = elementDefinition;
   }
@@ -39,6 +40,7 @@ export class DrawElementTool implements ITool {
   private async _onPointerDown(designerView: IDesignerView, event: PointerEvent) {
     event.preventDefault();
     this._startPosition = { x: event.x, y: event.y };
+   
     this._createdItem = await designerView.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(this._elementDefinition, designerView.serviceContainer, designerView.instanceServiceContainer));
     const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
     this._createdItem.setStyle('position', 'absolute');
@@ -49,13 +51,11 @@ export class DrawElementTool implements ITool {
     this._createdItem.setStyle('height', '0');
     (<HTMLElement>this._createdItem.element).style.overflow = 'hidden';
 
-    designerView.rootDesignItem.element.appendChild(this._createdItem.element);
+    //TODO: add items as last, with all properties set
+    //draw via containerService??? how to draw into a grid, a stackpanel???
+    designerView.instanceServiceContainer.undoService.execute(new InsertAction(designerView.rootDesignItem, designerView.rootDesignItem.childCount, this._createdItem));
 
     designerView.instanceServiceContainer.selectionService.clearSelectedElements();
-    //TODO: insert via undo framework - maybe remove upper setstyle calls
-    //this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
-    //grp.commit();
-    //this.instanceServiceContainer.selectionService.setSelectedElements([di]);
   }
 
   private async _onPointerMove(designerView: IDesignerView, event: PointerEvent) {

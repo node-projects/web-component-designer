@@ -1,11 +1,11 @@
 import type { IPoint } from '../../../interfaces/IPoint.js';
-import type { IContainerService } from './IContainerService.js';
+import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 
-export class DefaultPlacementService implements IContainerService {
+export class DefaultPlacementService implements IPlacementService {
 
 
   serviceForContainer(container: IDesignItem) {

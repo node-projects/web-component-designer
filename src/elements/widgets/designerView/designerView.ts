@@ -375,7 +375,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     const designItems = await parserService.parse(text, this.serviceContainer, this.instanceServiceContainer);
     if (designItems) {
       for (let di of designItems) {
-        this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
+        this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
       }
 
       const intializationService = this.serviceContainer.intializationService;
@@ -462,12 +462,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   public async parseHTML(html: string) {
     this.instanceServiceContainer.undoService.clear();
+    DomHelper.removeAllChildnodes(this.overlayLayer);
     const parserService = this.serviceContainer.htmlParserService;
     if (!html)
-      DomHelper.removeAllChildnodes(this.rootDesignItem.element);
+      this.rootDesignItem.clearChildren();
     else {
       const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
-      DomHelper.removeAllChildnodes(this.rootDesignItem.element);
+      this.rootDesignItem.clearChildren();
       this._addDesignItems(designItems);
     }
   }
@@ -475,7 +476,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _addDesignItems(designItems: IDesignItem[]) {
     if (designItems) {
       for (let di of designItems) {
-        this.rootDesignItem.element.append(di.element);
+        this.rootDesignItem.insertChild(di);
       }
     }
 
@@ -515,7 +516,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
     di.setStyle('top', event.offsetY + targetRect.top - this.containerBoundingRect.y + 'px')
     di.setStyle('left', event.offsetX + targetRect.left - this.containerBoundingRect.x + 'px')
-    this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this._canvas.children.length, di));
+    this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
     grp.commit();
     requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
   }
@@ -663,7 +664,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._ownBoundingRect = this.getBoundingClientRect();
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
-
 }
 
 customElements.define('node-projects-designer-view', DesignerView);

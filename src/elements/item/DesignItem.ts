@@ -8,6 +8,7 @@ import { AttributeChangeAction } from '../services/undoService/transactionItems/
 import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
+import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -60,26 +61,57 @@ export class DesignItem implements IDesignItem {
     this.element.id = value;
   }
 
+  private _childArray: IDesignItem[] = [];
   public get hasChildren() {
-    return this.element.childNodes.length > 0;
+    return this._childArray.length > 0;
   }
   public *children(): IterableIterator<IDesignItem> {
-    for (const e of this.element.childNodes) {
-      yield DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer);
+    for (const e of this._childArray) {
+      yield e;
     }
   }
   public get childCount(): number {
-    return this.element.childNodes.length;
+    return this._childArray.length;
   }
   public get firstChild(): IDesignItem {
-    return this.getOrCreateDesignItem(this.element.childNodes[0]);
+    return this._childArray[0];
   }
   public get parent(): IDesignItem {
     return this.getOrCreateDesignItem(this.element.parentNode);
   }
+  public insertChild(designItem: IDesignItem, index?: number) {
+    this.removeChild(designItem);
+    if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
+      this._childArray.push(designItem);
+      this.element.appendChild(designItem.node);
+    } else {
+      let el = this._childArray[index];
+      this._childArray.splice(index, 0, designItem);
+      if (el) {
+        if (el.nodeType === NodeType.Element)
+          el.element.insertAdjacentElement('beforebegin', designItem.element);
+        else if (el.nodeType === NodeType.TextNode)
+          el.element.insertAdjacentText('beforebegin', designItem.node.textContent);
+      } else {
+        throw "no element at index!";
+      }
+    }
+  }
+  public removeChild(designItem: IDesignItem) {
+    const index = this._childArray.indexOf(designItem);
+    if (index > -1) {
+      this._childArray.splice(index, 1);
+      designItem.element.remove();
+    }
+  }
+  public clearChildren() {
+    this._childArray = [];
+    DomHelper.removeAllChildnodes(this.element);
+  }
+
 
   public get hasContent() {
-    return this.nodeType == NodeType.TextNode || (this.element.childNodes.length === 0 && this.content !== null);
+    return this.nodeType == NodeType.TextNode || (this._childArray.length === 0 && this.content !== null);
   }
   public get content(): string {
     return this.node.textContent;
@@ -174,6 +206,10 @@ export class DesignItem implements IDesignItem {
 
     if (designItem.element.children.length === 0)
       designItem.content = designItem.element.textContent;
+    else {
+      for (const c of designItem.element.children)
+        designItem._childArray.push(DesignItem.createDesignItemFromInstance(c, serviceContainer, instanceServiceContainer));
+    }
 
     return designItem;
   }

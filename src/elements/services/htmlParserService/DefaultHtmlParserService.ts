@@ -13,18 +13,13 @@ export class DefaultHtmlParserService implements IHtmlParserService {
 
   public createDesignItems(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     let res: IDesignItem[] = [];
-    for (let el of elements) { //TODO:, use childNodes or textnodes will not work
+    for (let el of elements) {
       res.push(this._createDesignItemsRecursive(el, serviceContainer, instanceServiceContainer))
     }
-
     return res;
   }
 
   private _createDesignItemsRecursive(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
-    let di = DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
-    for (let e of element.children) { //TODO:, use childNodes or textnodes will not work
-      this._createDesignItemsRecursive(e, serviceContainer, instanceServiceContainer);
-    }
-    return di;
+    return DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
   }
 }

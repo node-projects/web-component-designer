@@ -4,7 +4,7 @@ import { IPlacementView } from "../../widgets/designerView/IPlacementView";
 import { IDesignerMousePoint } from "../../../interfaces/IDesignerMousePoint";
 import { IPoint } from "../../../interfaces/IPoint";
 
-export interface IContainerService extends IService {
+export interface IPlacementService extends IService {
   serviceForContainer(container: IDesignItem)
   canEnter(container: IDesignItem, items: IDesignItem[])
   canLeave(container: IDesignItem, items: IDesignItem[])
