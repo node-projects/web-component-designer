@@ -1,8 +1,10 @@
 import { EventNames } from '../../../../enums/EventNames';
 import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
 import { movePathData } from '../../../helper/PathDataPolyfill';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
+import { DesignItem } from '../../../item/DesignItem';
 
 export class DrawPathTool implements ITool {
 
@@ -59,9 +61,12 @@ export class DrawPathTool implements ITool {
         svg.style.position = 'absolute';
         svg.style.width = (rect.width + 2 * offset) + 'px';
         svg.style.height = (rect.height + 2 * offset) + 'px';
-        designerView.rootDesignItem.element.appendChild(svg);
+        //designerView.rootDesignItem.element.appendChild(svg);
         this._path = null;
         this._pathD = null;
+
+        const di = DesignItem.createDesignItemFromInstance(svg, designerView.serviceContainer, designerView.instanceServiceContainer);
+        designerView.instanceServiceContainer.undoService.execute(new InsertAction(designerView.rootDesignItem, designerView.rootDesignItem.childCount, di));
 
         designerView.serviceContainer.globalContext.finishedWithTool(this);
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
