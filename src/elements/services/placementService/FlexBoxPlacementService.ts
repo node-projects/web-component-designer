@@ -1,13 +1,14 @@
-import type { IPoint } from '../../../interfaces/IPoint.js';
-import type { IPlacementService } from './IPlacementService.js';
-import type { IDesignItem } from '../../item/IDesignItem.js';
-import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint.js';
-import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 
-export class GridPlacementService implements IPlacementService {
+import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint.js';
+import { IPoint } from '../../../interfaces/IPoint.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
+import { IPlacementService } from './IPlacementService.js';
+
+export class FlexBoxPlacementService implements IPlacementService {
 
   serviceForContainer(container: IDesignItem) {
-    if ((<HTMLElement>container.element).style.display == 'grid' || (<HTMLElement>container.element).style.display == 'inline-grid')
+    if ((<HTMLElement>container.element).style.display == 'flex' || (<HTMLElement>container.element).style.display == 'inline-flex')
       return true;
     return false;
   }

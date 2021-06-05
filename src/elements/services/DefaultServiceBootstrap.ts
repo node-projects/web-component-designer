@@ -38,6 +38,7 @@ import { AltToEnterContainerExtensionProvider } from '../widgets/designerView/ex
 import { InvisibleDivExtensionProvider } from '../widgets/designerView/extensions/InvisibleDivExtensionProvider';
 import { PolymerBindingsService } from './bindingsService/PolymerBindingsService';
 import { ItemsBelowContextMenu } from '../widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu';
+import { GridPlacementService } from './placementService/GridPlacementService';
 
 let serviceContainer = new ServiceContainer();
 
@@ -50,6 +51,7 @@ serviceContainer.register("instanceService", new DefaultInstanceService());
 serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
 serviceContainer.register("htmlWriterService", new HtmlWriterService());
 serviceContainer.register("containerService", new DefaultPlacementService());
+serviceContainer.register("containerService", new GridPlacementService());
 serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
 //serviceContainer.register("htmlParserService", new NodeHtmlParserService());
 serviceContainer.register("bindingService", new PolymerBindingsService());
