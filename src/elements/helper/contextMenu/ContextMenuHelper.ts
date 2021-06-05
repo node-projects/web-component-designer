@@ -60,6 +60,7 @@ export class ContextMenuHelper {
   private _closeBound: () => void;
   private _keyUpBound: () => void;
   private _closeOnDownBound: () => void;
+  private _closeOnUpBound: () => void;
 
   static addContextMenu(element: HTMLElement, items: IContextMenuItem[]) {
     element.oncontextmenu = (event) => {
@@ -92,13 +93,14 @@ export class ContextMenuHelper {
       this._shadowRoot.appendChild(this._element);
 
     this._closeBound = this.close.bind(this);
+    this._closeOnUpBound = this._closeOnUp.bind(this);
     this._closeOnDownBound = this._closeOnDown.bind(this);
     this._keyUpBound = this._keyUp.bind(this);
 
     window.addEventListener('keyup', this._keyUpBound);
     window.addEventListener('resize', this._closeBound);
     window.addEventListener('mousedown', this._closeOnDownBound);
-    window.addEventListener('mouseup', this._closeBound);
+    window.addEventListener('mouseup', this._closeOnUpBound);
 
     this._element.classList.add('context-menu--active');
   }
@@ -108,7 +110,7 @@ export class ContextMenuHelper {
       window.removeEventListener('keyup', this._keyUpBound);
       window.removeEventListener('resize', this._closeBound);
       window.removeEventListener('mousedown', this._closeOnDownBound);
-      window.removeEventListener('mouseup', this._closeBound);
+      window.removeEventListener('mouseup', this._closeOnUpBound);
 
       if (this._shadowRoot === document)
         document.body.removeChild(this._element);
@@ -134,6 +136,11 @@ export class ContextMenuHelper {
   private _closeOnDown(e: MouseEvent) {
     const p = e.composedPath();
     if (p.indexOf(this._element) < 0)
+      this.close();
+  }
+
+  private _closeOnUp(e: MouseEvent) {
+    if (e.button == 1)
       this.close();
   }
 
