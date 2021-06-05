@@ -24,7 +24,12 @@ export abstract class AbstractExtension implements IDesignerExtension {
 
   protected _removeAllOverlays() {
     for (let o of this.overlays) {
-      this.overlayLayer.removeChild(o);
+      try {
+        this.overlayLayer.removeChild(o);
+      }
+      catch (err) {
+        console.error(err);
+      }
     }
     this.overlays = [];
   }

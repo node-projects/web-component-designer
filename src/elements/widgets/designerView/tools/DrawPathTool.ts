@@ -1,5 +1,6 @@
 import { EventNames } from '../../../../enums/EventNames';
 import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
+import { movePathData } from '../../../helper/PathDataPolyfill';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 
@@ -19,6 +20,8 @@ export class DrawPathTool implements ITool {
 
   pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerView.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
+
+    const offset = 50;
 
     switch (event.type) {
       case EventNames.PointerDown:
@@ -41,16 +44,27 @@ export class DrawPathTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        const rect = this._path.getBoundingClientRect();
+
         designerView.overlayLayer.removeChild(this._path);
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        this._path.setAttribute("d", this._pathD);
+
+        const mvX = rect.x - designerView.containerBoundingRect.x - offset;
+        const mvY = rect.y - designerView.containerBoundingRect.y - offset;
+        const d = movePathData(this._path, mvX, mvY);
+        this._path.setAttribute("d", d);
         svg.appendChild(this._path);
+        svg.style.left = (mvX) + 'px';
+        svg.style.top = (mvY) + 'px';
+        svg.style.position = 'absolute';
+        svg.style.width = (rect.width + 2 * offset) + 'px';
+        svg.style.height = (rect.height + 2 * offset) + 'px';
         designerView.rootDesignItem.element.appendChild(svg);
         this._path = null;
         this._pathD = null;
 
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
-        
+
         break;
     }
   }

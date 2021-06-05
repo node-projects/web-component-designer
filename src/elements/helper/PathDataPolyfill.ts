@@ -1095,15 +1095,53 @@ export { }
 
 declare type PathDataM = { type: 'M' | 'm', values: [x: number, y: number] }
 declare type PathDataL = { type: 'L' | 'l', values: [x: number, y: number] }
+declare type PathDataT = { type: 'T' | 't', values: [x: number, y: number] }
 declare type PathDataH = { type: 'H' | 'h', values: [x: number] }
 declare type PathDataV = { type: 'V' | 'v', values: [y: number] }
 declare type PathDataZ = { type: 'Z' | 'z', values?: [] }
 declare type PathDataC = { type: 'C' | 'c', values: [x1: number, y1: number, x2: number, y2: number, x: number, y: number] }
 declare type PathDataS = { type: 'S' | 's', values: [x2: number, y2: number, x: number, y: number] }
 declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: number, x: number, y: number] }
-declare type PathDataT = { type: 'T' | 't', values: [x: number, y: number] }
 declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
-declare type PathData = (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
+declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
+
+export function movePathData(path: SVGPathElement, xFactor: number, yFactor: number): string {
+  let newPathData = "";
+  let pd = path.getPathData({ normalize: true });
+  {
+    for (let p of pd) {
+      switch (p.type) {
+        case ('M'):
+        case ('m'):
+        case ('L'):
+        case ('l'):
+        case ('T'):
+        case ('t'):
+          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor);
+          break;
+        case ('Z'):
+        case ('z'):
+          newPathData += p.type;
+          break;
+        case ('C'):
+        case ('c'):
+          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " " + (p.values[4] - xFactor) + " " + (p.values[5] - yFactor);
+          break;
+        case ('S'):
+        case ('s'):
+        case ('Q'):
+        case ('q'):
+          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor);
+          break;
+        case ('A'):
+        case ('a'):
+          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + (p.values[5] - xFactor) + " " + (p.values[6] - yFactor);
+          break;
+      }
+    }
+  }
+  return newPathData;
+}
 
 declare global {
   interface SVGGraphicsElement {
