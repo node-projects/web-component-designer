@@ -250,6 +250,18 @@ export class PointerTool implements ITool {
                   }
                 }
 
+                if (newContainerElement != null) {
+                  let p = newContainerElement
+                  while (p != null) {
+                    if (p === designerView.rootDesignItem.element)
+                      break;
+                    p = p.parentElement;
+                  }
+                  if (p == null) {
+                    newContainerService = null;
+                    newContainerElement = null;
+                  }
+                }
                 //if we found a new enterable container create extensions 
                 if (newContainerElement != null) {
                   const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
