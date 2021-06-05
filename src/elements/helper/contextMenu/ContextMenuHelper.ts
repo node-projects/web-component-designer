@@ -78,13 +78,17 @@ export class ContextMenuHelper {
       //@ts-ignore
       shadowRoot.adoptedStyleSheets = [...shadowRoot.adoptedStyleSheets, ContextMenuHelper._contextMenuCss];
     }
-    let menu = ContextMenuHelper.createMenu(items);
-    let ctxMenu = new ContextMenuHelper(shadowRoot, menu);
+    let ctxMenu = new ContextMenuHelper();
+    let menu = ContextMenuHelper.createMenu(ctxMenu, items);
+    ctxMenu.init(shadowRoot, menu);
     ctxMenu.positionMenu(e)
     return ctxMenu;
   }
 
-  private constructor(shadowRoot: ShadowRoot | Document, element: HTMLElement) {
+  private constructor() {
+  }
+
+  private init(shadowRoot: ShadowRoot | Document, element: HTMLElement) {
     this._shadowRoot = shadowRoot;
     this._element = element;
     if (this._shadowRoot === document)
@@ -144,7 +148,7 @@ export class ContextMenuHelper {
       this.close();
   }
 
-  static createMenu(items: IContextMenuItem[]) {
+  static createMenu(helper: ContextMenuHelper, items: IContextMenuItem[]) {
     let nav = document.createElement('nav');
     nav.className = 'context-menu';
     let ul = document.createElement('ul');
@@ -164,6 +168,7 @@ export class ContextMenuHelper {
         li.appendChild(div);
         ul.appendChild(li);
         li.onclick = (e) => {
+          helper.close();
           i.action(null, e);
         }
       }
