@@ -6,11 +6,14 @@ A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
 Based on PolymerLabs Wizzywid
 
-[![Build Status](https://github.com/node-projects/web-component-designer/workflows/Node%20CI/badge.svg?branch=master)](https://github.com/node-projects/web-component-designer/actions?query=workflow%3A%22Node+CI%22+branch%3Amaster)
-
 This is a Designer Framework wich could easily be included in your own Software..
 
 ![image](https://user-images.githubusercontent.com/364896/117482820-358e2d80-af65-11eb-97fd-9d15ebf1966f.png)
+
+## NPM Package
+
+At the moment there is no NPM Package.
+But there will be one when project is in Release Candidate state.
 
 ## Demo
 
