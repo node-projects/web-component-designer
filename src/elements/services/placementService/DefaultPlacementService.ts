@@ -16,6 +16,8 @@ export class DefaultPlacementService implements IPlacementService {
   canEnter(container: IDesignItem, items: IDesignItem[]) {
     if (DomConverter.IsSelfClosingElement(container.element.localName))
       return false;
+    if (container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
+      return false;
     return true;
   }
 

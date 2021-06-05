@@ -221,8 +221,14 @@ export class PointerTool implements ITool {
                       //end check
                       newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerView.serviceContainer, designerView.instanceServiceContainer);
                       newContainerService = designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
-                      if (newContainerService && newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem]))
-                        break;
+                      if (newContainerService) {
+                        if (newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem])) {
+                          break;
+                        } else {
+                          newContainerElementDesignItem = null;
+                          newContainerService = null;
+                        }
+                      }
                       backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                       newContainerElement.style.pointerEvents = 'none';
                       newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
