@@ -60,7 +60,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   private _pointerEventHandlerBound: (event: PointerEvent) => void;
 
   private _firstConnect: boolean;
-  private _ownBoundingRect: DOMRect;
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
@@ -661,7 +660,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _fillCalculationrects() {
-    this._ownBoundingRect = this.getBoundingClientRect();
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
   }
 }
