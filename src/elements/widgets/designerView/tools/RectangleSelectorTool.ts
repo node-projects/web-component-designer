@@ -82,6 +82,8 @@ export class RectangleSelectorTool implements ITool {
         this._initialPoint = null;
 
         designerView.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
+
+        designerView.serviceContainer.globalContext.finishedWithTool(this);
         break;
     }
   }

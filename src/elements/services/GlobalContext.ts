@@ -24,6 +24,7 @@ export class GlobalContext {
   }
   readonly onToolChanged = new TypedEvent<PropertyChangedArgs<ITool>>();
 
+  finishedWithTool: (tool: ITool) => void = () => this.tool = null;
 
   public set strokeColor(strokeColor: string) {
     if (this._strokeColor !== strokeColor) {

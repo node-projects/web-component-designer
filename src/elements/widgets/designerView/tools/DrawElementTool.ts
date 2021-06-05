@@ -83,6 +83,7 @@ export class DrawElementTool implements ITool {
     this._startPosition = null;
     this._rect = null;
     this._createdItem = null;
-    designerView.serviceContainer.globalContext.tool = null;
+    
+    designerView.serviceContainer.globalContext.finishedWithTool(this);
   }
 }

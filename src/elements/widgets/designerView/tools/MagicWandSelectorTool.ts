@@ -66,6 +66,8 @@ export class MagicWandSelectorTool implements ITool {
         this._pathD = null;
 
         designerView.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
+
+        designerView.serviceContainer.globalContext.finishedWithTool(this);
         break;
     }
   }

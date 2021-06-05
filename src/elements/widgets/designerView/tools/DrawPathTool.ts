@@ -63,6 +63,7 @@ export class DrawPathTool implements ITool {
         this._path = null;
         this._pathD = null;
 
+        designerView.serviceContainer.globalContext.finishedWithTool(this);
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
 
         break;
