@@ -84,20 +84,15 @@ export class DesignItem implements IDesignItem {
       designItem.parent.removeChild(designItem);
     }
     this.removeChild(designItem);
+
+
     if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
       this._childArray.push(designItem);
       this.element.appendChild(designItem.node);
     } else {
       let el = this._childArray[index];
+      this.node.insertBefore(designItem.node, el.element)
       this._childArray.splice(index, 0, designItem);
-      if (el) {
-        if (el.nodeType === NodeType.Element)
-          el.element.insertAdjacentElement('beforebegin', designItem.element);
-        else if (el.nodeType === NodeType.TextNode)
-          el.element.insertAdjacentText('beforebegin', designItem.node.textContent);
-      } else {
-        throw "no element at index!";
-      }
     }
   }
   public removeChild(designItem: IDesignItem) {
@@ -106,6 +101,9 @@ export class DesignItem implements IDesignItem {
       this._childArray.splice(index, 1);
       designItem.element.remove();
     }
+  }
+  public remove() {
+    this.parent.removeChild(this);
   }
   public clearChildren() {
     this._childArray = [];

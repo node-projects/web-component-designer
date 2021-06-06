@@ -51,6 +51,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       td > img {
         vertical-align: middle;
       }
+
+      table.fancytree-ext-table tbody tr.fancytree-selected {
+        background-color: #bebebe;
+      }
     `;
 
   static override readonly template = html`

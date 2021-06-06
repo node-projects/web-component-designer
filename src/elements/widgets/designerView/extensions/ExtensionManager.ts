@@ -19,10 +19,12 @@ export class ExtensionManager implements IExtensionManager {
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
     if (selectionChangedEvent.oldSelectedElements && selectionChangedEvent.oldSelectedElements.length) {
-      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerView.serviceContainer, this.designerView.instanceServiceContainer)
-      this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
-      this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
-      this.removeExtensions(selectionChangedEvent.oldSelectedElements, ExtensionType.Selection);
+      if (selectionChangedEvent.oldSelectedElements[0].parent) {
+        const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerView.serviceContainer, this.designerView.instanceServiceContainer)
+        this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
+        this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
+        this.removeExtensions(selectionChangedEvent.oldSelectedElements, ExtensionType.Selection);
+      }
     }
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
@@ -115,7 +117,7 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  removeExtensions(designItems: IDesignItem[], extensionType: ExtensionType) {
+  removeExtensions(designItems: IDesignItem[], extensionType?: ExtensionType) {
     if (designItems) {
       if (extensionType) {
         for (let i of designItems) {

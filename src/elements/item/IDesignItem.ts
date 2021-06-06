@@ -29,6 +29,7 @@ export interface IDesignItem {
 
   insertChild(designItem: IDesignItem, index?: number);
   removeChild(designItem: IDesignItem);
+  remove();
   clearChildren();
 
   readonly hasContent: boolean;

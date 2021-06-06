@@ -391,7 +391,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   handleDeleteCommand() {
     let items = this.instanceServiceContainer.selectionService.selectedElements;
-    this.instanceServiceContainer.undoService.execute(new DeleteAction(items));
+    this.instanceServiceContainer.undoService.execute(new DeleteAction(items, this.extensionManager));
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
   }
 
