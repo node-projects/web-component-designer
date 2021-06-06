@@ -4,7 +4,7 @@
 
 A HTML WebComponent for Designing Webcomponents and HTML Pages.
 
-Based on PolymerLabs Wizzywid
+Based on PolymerLabs Wizzywid (but it does not use Polymer any more.)
 
 This is a Designer Framework wich could easily be included in your own Software..
 
