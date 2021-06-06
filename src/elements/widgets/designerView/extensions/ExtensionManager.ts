@@ -44,7 +44,12 @@ export class ExtensionManager implements IExtensionManager {
             if (!appE)
               appE = [];
             const ext = e.getExtension(this, this.designerView, designItem);
-            ext.extend();
+            try {
+              ext.extend();
+            }
+            catch (err) {
+              console.error(err);
+            }
             appE.push(ext);
             designItem.appliedDesignerExtensions.set(extensionType, appE);
           }
@@ -64,7 +69,12 @@ export class ExtensionManager implements IExtensionManager {
               if (!appE)
                 appE = [];
               const ext = e.getExtension(this, this.designerView, i);
-              ext.extend();
+              try {
+                ext.extend();
+              }
+              catch (err) {
+                console.error(err);
+              }
               appE.push(ext);
               i.appliedDesignerExtensions.set(extensionType, appE);
             }
@@ -80,14 +90,24 @@ export class ExtensionManager implements IExtensionManager {
         let exts = designItem.appliedDesignerExtensions.get(extensionType);
         if (exts) {
           for (let e of exts) {
-            e.dispose();
+            try {
+              e.dispose();
+            }
+            catch (err) {
+              console.error(err);
+            }
           }
           designItem.appliedDesignerExtensions.delete(extensionType);
         }
       } else {
         for (let appE of designItem.appliedDesignerExtensions) {
           for (let e of appE[1]) {
-            e.dispose();
+            try {
+              e.dispose();
+            }
+            catch (err) {
+              console.error(err);
+            }
           }
         }
         designItem.appliedDesignerExtensions.clear();
@@ -102,7 +122,12 @@ export class ExtensionManager implements IExtensionManager {
           let exts = i.appliedDesignerExtensions.get(extensionType);
           if (exts) {
             for (let e of exts) {
-              e.dispose();
+              try {
+                e.dispose();
+              }
+              catch (err) {
+                console.error(err);
+              }
             }
             i.appliedDesignerExtensions.delete(extensionType);
           }
@@ -111,7 +136,12 @@ export class ExtensionManager implements IExtensionManager {
         for (let i of designItems) {
           for (let appE of i.appliedDesignerExtensions) {
             for (let e of appE[1]) {
-              e.refresh();
+              try {
+                e.dispose();
+              }
+              catch (err) {
+                console.error(err);
+              }
             }
           }
           i.appliedDesignerExtensions.clear();
@@ -126,13 +156,23 @@ export class ExtensionManager implements IExtensionManager {
         let exts = designItem.appliedDesignerExtensions.get(extensionType);
         if (exts) {
           for (let e of exts) {
-            e.refresh();
+            try {
+              e.refresh();
+            }
+            catch (err) {
+              console.error(err);
+            }
           }
         }
       } else {
         for (let appE of designItem.appliedDesignerExtensions) {
           for (let e of appE[1]) {
-            e.refresh();
+            try {
+              e.refresh();
+            }
+            catch (err) {
+              console.error(err);
+            }
           }
         }
       }
@@ -146,7 +186,12 @@ export class ExtensionManager implements IExtensionManager {
           let exts = i.appliedDesignerExtensions.get(extensionType);
           if (exts) {
             for (let e of exts) {
-              e.refresh();
+              try {
+                e.refresh();
+              }
+              catch (err) {
+                console.error(err);
+              }
             }
           }
         }
@@ -154,7 +199,12 @@ export class ExtensionManager implements IExtensionManager {
         for (let i of designItems) {
           for (let appE of i.appliedDesignerExtensions) {
             for (let e of appE[1]) {
-              e.refresh();
+              try {
+                e.refresh();
+              }
+              catch (err) {
+                console.error(err);
+              }
             }
           }
         }
