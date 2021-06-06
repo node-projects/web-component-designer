@@ -63,12 +63,12 @@ serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
 serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
   new PrimarySelectionDefaultExtensionProvider(),
   new GridExtensionProvider(),
-  //new TransformOriginExtensionProvider(),
+  new TransformOriginExtensionProvider(),
   new CanvasExtensionProvider(),
   new PositionExtensionProvider(),
   new PathExtensionProvider(),
   new ResizeExtensionProvider(true),
-  //new RotateExtensionProvider(),
+  new RotateExtensionProvider(),
 ]);
 serviceContainer.designerExtensions.set(ExtensionType.Selection, [
   new SelectionDefaultExtensionProvider()
