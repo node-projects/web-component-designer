@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "scripts": {
     "tsc": "tsc"
   },
