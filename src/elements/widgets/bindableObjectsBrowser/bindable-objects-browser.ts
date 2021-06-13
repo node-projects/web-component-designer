@@ -60,12 +60,12 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
 
 
   async ready() {
-    //this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
       icon: false, //atm, maybe if we include icons for specific elements
       extensions: ['filter'],
       quicksearch: true,
       source: [],
+      lazyLoad: this.lazyLoad,
       filter: {
         autoApply: true,   // Re-apply last filter if lazy data is loaded
         autoExpand: false, // Expand all branches that contain matches while filtered
@@ -78,15 +78,17 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
         nodata: true,      // Display a 'no data' status node if result is empty
         mode: "hide"       // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
       }
-      /*loadChildren: (event, data) => {
-        // update node and parent counters after lazy loading
-        data.node.updateCounters();
-      }*/
     });
 
     //@ts-ignore
     this._tree = $.ui.fancytree.getTree(this._treeDiv);
     this._treeDiv.children[0].classList.add('fancytree-connectors');
+  }
+
+  lazyLoad(event: JQueryEventObject, data: Fancytree.EventData) {
+    data.result = new Promise(resolve => {
+
+    });
   }
 
   public createTree(rootItem: IDesignItem): void {

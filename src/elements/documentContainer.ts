@@ -16,6 +16,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public codeView: ICodeView & HTMLElement;
   public demoView: IDemoView & HTMLElement;
 
+  public additionalData: any;
+
   private _serviceContainer: ServiceContainer;
   private _content: string = '';
   private _tabControl: DesignerTabControl;

@@ -16,10 +16,10 @@ export class CanvasExtension extends AbstractExtension {
       const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
       const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
 
-      const left = Number.parseInt(computedStyle.marginLeft.replace('px', ''));
-      const top = Number.parseInt(computedStyle.marginTop.replace('px', ''));
-      const right = Number.parseInt(computedStyle.marginRight.replace('px', ''));
-      const bottom = Number.parseInt(computedStyle.marginBottom.replace('px', ''));
+      const left = Number.parseFloat(computedStyle.marginLeft.replace('px', ''));
+      const top = Number.parseFloat(computedStyle.marginTop.replace('px', ''));
+      const right = Number.parseFloat(computedStyle.marginRight.replace('px', ''));
+      const bottom = Number.parseFloat(computedStyle.marginBottom.replace('px', ''));
 
       this._drawRect(xOffset - left, yOffset - top, left + itemRect.width + right, top, 'svg-margin');
       this._drawRect(xOffset - left, yOffset, left, itemRect.height, 'svg-margin');

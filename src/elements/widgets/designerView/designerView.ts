@@ -229,7 +229,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('outercanvas2');
 
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
-    this._zoomInput.onchange = () => { this._zoomFactor = parseInt(this._zoomInput.value) / 100; this.zoomFactorChanged(); }
+    this._zoomInput.onchange = () => { this._zoomFactor = parseFloat(this._zoomInput.value) / 100; this.zoomFactorChanged(); }
     this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
     zoomIncrease.onclick = () => { this._zoomFactor += 0.1; this.zoomFactorChanged(); }

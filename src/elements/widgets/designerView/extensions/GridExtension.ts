@@ -19,31 +19,78 @@ export class GridExtension extends AbstractExtension {
     let xGap = 0;
     let yGap = 0;
     let rw = 0;
-    const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
-    const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
+    let xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
+    let yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
 
     let gridA: string[] = null;
     if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')
       gridA = computedStyle.gridTemplateAreas.split('\"');
     if (computedStyle.columnGap && computedStyle.columnGap != 'normal')
-      xGap = Number.parseInt(computedStyle.columnGap.replace('px', ''));
+      xGap = Number.parseFloat(computedStyle.columnGap.replace('px', ''));
     if (computedStyle.rowGap && computedStyle.rowGap != 'normal')
-      yGap = Number.parseInt(computedStyle.rowGap.replace('px', ''));
+      yGap = Number.parseFloat(computedStyle.rowGap.replace('px', ''));
+
+    let gesX = 0;
+    let gesY = 0;
+    for (let c of columns) {
+      const currX = Number.parseFloat(c.replace('px', ''));
+      gesX += currX + xGap;
+    }
+    gesX -= xGap;
     for (let r of rows) {
+      const currY = Number.parseFloat(r.replace('px', ''));
+      gesY += currY + yGap;
+    }
+    gesY -= yGap;
+
+    if (computedStyle.justifyContent == 'center') {
+      xOffset += (itemRect.width - gesX) / 2;
+    } else if (computedStyle.justifyContent == 'end') {
+      xOffset += itemRect.width - gesX;
+    } else if (computedStyle.justifyContent == 'space-between') {
+      xGap += (itemRect.width - gesX) / (columns.length - 1);
+    } else if (computedStyle.justifyContent == 'space-around') {
+      let gp = (itemRect.width - gesX) / (columns.length * 2);
+      xGap += gp * 2;
+      xOffset += gp;
+    } else if (computedStyle.justifyContent == 'space-evenly') {
+      let gp = (itemRect.width - gesX) / (columns.length + 1);
+      xGap += gp;
+      xOffset += gp;
+    }
+
+    if (computedStyle.alignContent == 'center') {
+      xOffset += (itemRect.height - gesY) / 2;
+    } else if (computedStyle.alignContent == 'end') {
+      xOffset += itemRect.height - gesY;
+    } else if (computedStyle.alignContent == 'space-between') {
+      yGap += (itemRect.height - gesY) / (rows.length - 1);
+    } else if (computedStyle.alignContent == 'space-around') {
+      let gp = (itemRect.height - gesY) / (rows.length * 2);
+      yGap += gp * 2;
+      yOffset += gp;
+    } else if (computedStyle.alignContent == 'space-evenly') {
+      let gp = (itemRect.height - gesY) / (rows.length + 1);
+      yGap += gp;
+      yOffset += gp;
+    }
+
+    for (let xIdx = 0; xIdx < rows.length; xIdx++) {
+      const r = rows[xIdx];
       let areas: string[] = null;
       if (gridA) {
         areas = gridA[rw + 1].split(' ');
       }
       let x = 0;
       let cl = 0;
-      const currY = Number.parseInt(r.replace('px', ''));
-      for (let c of columns) {
-
+      const currY = Number.parseFloat(r.replace('px', ''));
+      for (let yIdx = 0; yIdx < columns.length; yIdx++) {
+        const c = columns[yIdx];
         if (x > 0 && xGap) {
           this._drawRect(x + xOffset, y + yOffset, xGap, currY, 'svg-grid-gap');
           x += xGap
         }
-        const currX = Number.parseInt(c.replace('px', ''));
+        const currX = Number.parseFloat(c.replace('px', ''));
         if (y > 0 && yGap) {
           this._drawRect(x + xOffset, y + yOffset - yGap, currX, yGap, 'svg-grid-gap');
         }
@@ -61,7 +108,6 @@ export class GridExtension extends AbstractExtension {
       y += currY + yGap;
       rw += 2;
     }
-
   }
 
   override refresh() {

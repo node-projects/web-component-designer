@@ -25,17 +25,17 @@ export class PositionExtension extends AbstractExtension {
     const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
     const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
 
-    const left = Number.parseInt(computedStyle.left.replace('px', ''));
-    const top = Number.parseInt(computedStyle.top.replace('px', ''));
-    const right = Number.parseInt(computedStyle.right.replace('px', ''));
-    const bottom = Number.parseInt(computedStyle.bottom.replace('px', ''));
+    const left = Number.parseFloat(computedStyle.left.replace('px', ''));
+    const top = Number.parseFloat(computedStyle.top.replace('px', ''));
+    const right = Number.parseFloat(computedStyle.right.replace('px', ''));
+    const bottom = Number.parseFloat(computedStyle.bottom.replace('px', ''));
 
     let tx = 0;
     let ty = 0;
     if (computedStyle.transform !== 'none') {
       const transforms = computedStyle.transform.replace('matrix(', '').split(',');
-      tx = Number.parseInt(transforms[4]);
-      ty = Number.parseInt(transforms[5].replace(')', ''));
+      tx = Number.parseFloat(transforms[4]);
+      ty = Number.parseFloat(transforms[5].replace(')', ''));
     }
 
     this._line1 = this._drawLineOverlay(xOffset - left - tx, yOffset + itemRect.height / 2, xOffset, yOffset + itemRect.height / 2, 'svg-position', this._line1);
