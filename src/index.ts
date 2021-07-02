@@ -67,6 +67,12 @@ export * from "./elements/services/undoService/ChangeGroup.js";
 export type { ITransactionItem } from "./elements/services/undoService/ITransactionItem.js";
 export type { IUndoService } from "./elements/services/undoService/IUndoService.js";
 export * from "./elements/services/undoService/UndoService.js";
+export * from "./elements/services/undoService/transactionItems/AttributeChangeAction.js";
+export * from "./elements/services/undoService/transactionItems/CssStyleChangeAction.js";
+export * from "./elements/services/undoService/transactionItems/DeleteAction.js";
+export * from "./elements/services/undoService/transactionItems/InsertAction.js";
+export * from "./elements/services/undoService/transactionItems/MoveElementInDomAction.js";
+export * from "./elements/services/undoService/transactionItems/PropertyChangeAction.js";
 
 export * from "./elements/services/BaseServiceContainer.js";
 export * from "./elements/services/InstanceServiceContainer.js";
