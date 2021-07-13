@@ -240,7 +240,10 @@ export class PointerTool implements ITool {
                       }
                       backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                       newContainerElement.style.pointerEvents = 'none';
-                      newContainerElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                      const newC = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
+                      if (newContainerElement === newC)
+                        break;
+                      newContainerElement = newC;
                     }
                   }
                 }
