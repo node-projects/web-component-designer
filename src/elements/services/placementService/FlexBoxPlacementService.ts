@@ -6,6 +6,12 @@ import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { IPlacementService } from './IPlacementService.js';
 
 export class FlexBoxPlacementService implements IPlacementService {
+ 
+  enterContainer(container: IDesignItem, items: IDesignItem[]) {
+  }
+ 
+  leaveContainer(container: IDesignItem, items: IDesignItem[]) {
+  }
 
   serviceForContainer(container: IDesignItem) {
     if ((<HTMLElement>container.element).style.display == 'flex' || (<HTMLElement>container.element).style.display == 'inline-flex')

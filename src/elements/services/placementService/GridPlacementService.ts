@@ -6,6 +6,12 @@ import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 
 export class GridPlacementService implements IPlacementService {
 
+  enterContainer(container: IDesignItem, items: IDesignItem[]) {
+  }
+  
+  leaveContainer(container: IDesignItem, items: IDesignItem[]) {
+  }
+
   serviceForContainer(container: IDesignItem) {
     if ((<HTMLElement>container.element).style.display == 'grid' || (<HTMLElement>container.element).style.display == 'inline-grid')
       return true;
