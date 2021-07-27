@@ -95,12 +95,10 @@ export class DefaultPlacementService implements IPlacementService {
     }
   }
 
-  enterContainer() {
-
+  enterContainer(container: IDesignItem, items: IDesignItem[]) {
   }
 
-  leaveContainer() {
-
+  leaveContainer(container: IDesignItem, items: IDesignItem[]) {
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IDesignerMousePoint, newPoint: IDesignerMousePoint, items: IDesignItem[]) {

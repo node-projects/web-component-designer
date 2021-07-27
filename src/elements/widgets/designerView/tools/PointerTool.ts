@@ -289,9 +289,10 @@ export class PointerTool implements ITool {
                 const oldOffset = currentContainerService.getElementOffset(this._actionStartedDesignItem.parent, this._actionStartedDesignItem);
                 const newOffset = newContainerService.getElementOffset(newContainerElementDesignItem, this._actionStartedDesignItem);
                 this._moveItemsOffset = { x: newOffset.x - oldOffset.x + this._moveItemsOffset.x, y: newOffset.y - oldOffset.y + this._moveItemsOffset.y };
-
+                currentContainerService.leaveContainer(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem]);
                 newContainerElementDesignItem.insertChild(this._actionStartedDesignItem);
                 const cp: IDesignerMousePoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y, originalX: currentPoint.originalX - this._moveItemsOffset.x, originalY: currentPoint.originalY - this._moveItemsOffset.y, offsetInControlX: currentPoint.offsetInControlX, offsetInControlY: currentPoint.offsetInControlY, zoom: currentPoint.zoom };
+                newContainerService.enterContainer(newContainerElementDesignItem, [this._actionStartedDesignItem]);
                 newContainerService.place(event, designerView, this._actionStartedDesignItem.parent, this._initialPoint, cp, designerView.instanceServiceContainer.selectionService.selectedElements);
               }
               else {
