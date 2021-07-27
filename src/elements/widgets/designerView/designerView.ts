@@ -460,16 +460,23 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   public async parseHTML(html: string) {
-    this.instanceServiceContainer.undoService.clear();
-    DomHelper.removeAllChildnodes(this.overlayLayer);
     const parserService = this.serviceContainer.htmlParserService;
-    if (!html)
+    if (!html) {
+      this.instanceServiceContainer.undoService.clear();
+      DomHelper.removeAllChildnodes(this.overlayLayer);
       this.rootDesignItem.clearChildren();
+    }
     else {
       const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
-      this.rootDesignItem.clearChildren();
-      this._addDesignItems(designItems);
+      this.setDesignItems(designItems)
     }
+  }
+
+  public setDesignItems(designItems: IDesignItem[]) {
+    this.instanceServiceContainer.undoService.clear();
+    DomHelper.removeAllChildnodes(this.overlayLayer);
+    this.rootDesignItem.clearChildren();
+    this._addDesignItems(designItems);
   }
 
   private _addDesignItems(designItems: IDesignItem[]) {

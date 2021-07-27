@@ -8,7 +8,6 @@ import { HtmlWriterService } from './htmlWriterService/HtmlWriterService';
 import { BaseCustomWebComponentPropertiesService } from './propertiesService/services/BaseCustomWebComponentPropertiesService';
 import { DefaultPlacementService } from './placementService/DefaultPlacementService';
 import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserService';
-//import { NodeHtmlParserService } from './htmlParserService/NodeHtmlParserService';
 import { Lit2PropertiesService } from './propertiesService/services/Lit2PropertiesService';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
 import { PrimarySelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/PrimarySelectionDefaultExtensionProvider';
@@ -40,67 +39,70 @@ import { PolymerBindingsService } from './bindingsService/PolymerBindingsService
 import { ItemsBelowContextMenu } from '../widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu';
 import { GridPlacementService } from './placementService/GridPlacementService';
 
-let serviceContainer = new ServiceContainer();
+export function createDefaultServiceContainer() {
+  let serviceContainer = new ServiceContainer();
 
-serviceContainer.register("propertyService", new PolymerPropertiesService());
-serviceContainer.register("propertyService", new LitElementPropertiesService());
-serviceContainer.register("propertyService", new NativeElementsPropertiesService());
-serviceContainer.register("propertyService", new Lit2PropertiesService());
-serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
-serviceContainer.register("instanceService", new DefaultInstanceService());
-serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
-serviceContainer.register("htmlWriterService", new HtmlWriterService());
-serviceContainer.register("containerService", new DefaultPlacementService());
-serviceContainer.register("containerService", new GridPlacementService());
-serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
-//serviceContainer.register("htmlParserService", new NodeHtmlParserService());
-serviceContainer.register("bindingService", new PolymerBindingsService());
+  serviceContainer.register("propertyService", new PolymerPropertiesService());
+  serviceContainer.register("propertyService", new LitElementPropertiesService());
+  serviceContainer.register("propertyService", new NativeElementsPropertiesService());
+  serviceContainer.register("propertyService", new Lit2PropertiesService());
+  serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
+  serviceContainer.register("instanceService", new DefaultInstanceService());
+  serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
+  serviceContainer.register("htmlWriterService", new HtmlWriterService());
+  serviceContainer.register("containerService", new DefaultPlacementService());
+  serviceContainer.register("containerService", new GridPlacementService());
+  serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
+  serviceContainer.register("bindingService", new PolymerBindingsService());
 
-serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
-  new ResizeExtensionProvider(false),
-  new InvisibleDivExtensionProvider()
-]);
-serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
-  new PrimarySelectionDefaultExtensionProvider(),
-  new GridExtensionProvider(),
-  new TransformOriginExtensionProvider(),
-  new CanvasExtensionProvider(),
-  new PositionExtensionProvider(),
-  new PathExtensionProvider(),
-  new ResizeExtensionProvider(true),
-  new RotateExtensionProvider(),
-]);
-serviceContainer.designerExtensions.set(ExtensionType.Selection, [
-  new SelectionDefaultExtensionProvider()
-]);
-serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
-  new GridExtensionProvider()
-]);
-serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
-  new MouseOverExtensionProvider()
-]);
-serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
-  new GrayOutExtensionProvider()
-]);
-serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
-  new AltToEnterContainerExtensionProvider()
-]);
+  serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
+    new ResizeExtensionProvider(false),
+    new InvisibleDivExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
+    new PrimarySelectionDefaultExtensionProvider(),
+    new GridExtensionProvider(),
+    new TransformOriginExtensionProvider(),
+    new CanvasExtensionProvider(),
+    new PositionExtensionProvider(),
+    new PathExtensionProvider(),
+    new ResizeExtensionProvider(true),
+    new RotateExtensionProvider(),
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.Selection, [
+    new SelectionDefaultExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
+    new GridExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
+    new MouseOverExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
+    new GrayOutExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
+    new AltToEnterContainerExtensionProvider()
+  ]);
 
-serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());
-serviceContainer.designerTools.set(NamedTools.DrawSelection, new RectangleSelectorTool());
-serviceContainer.designerTools.set(NamedTools.DrawPath, new DrawPathTool());
-serviceContainer.designerTools.set(NamedTools.Zoom, new ZoomTool());
-serviceContainer.designerTools.set(NamedTools.Pan, new PanTool());
-serviceContainer.designerTools.set(NamedTools.RectangleSelector, new RectangleSelectorTool());
-serviceContainer.designerTools.set(NamedTools.MagicWandSelector, new MagicWandSelectorTool());
-serviceContainer.designerTools.set(NamedTools.PickColor, new PickColorTool());
-serviceContainer.designerTools.set(NamedTools.Text, new TextTool());
+  serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());
+  serviceContainer.designerTools.set(NamedTools.DrawSelection, new RectangleSelectorTool());
+  serviceContainer.designerTools.set(NamedTools.DrawPath, new DrawPathTool());
+  serviceContainer.designerTools.set(NamedTools.Zoom, new ZoomTool());
+  serviceContainer.designerTools.set(NamedTools.Pan, new PanTool());
+  serviceContainer.designerTools.set(NamedTools.RectangleSelector, new RectangleSelectorTool());
+  serviceContainer.designerTools.set(NamedTools.MagicWandSelector, new MagicWandSelectorTool());
+  serviceContainer.designerTools.set(NamedTools.PickColor, new PickColorTool());
+  serviceContainer.designerTools.set(NamedTools.Text, new TextTool());
 
-serviceContainer.designerContextMenuExtensions = [
-  new CopyPasteContextMenu(),
-  new ZMoveContextMenu(),
-  new MultipleItemsSelectedContextMenu(),
-  new ItemsBelowContextMenu()
-];
+  serviceContainer.designerContextMenuExtensions = [
+    new CopyPasteContextMenu(),
+    new ZMoveContextMenu(),
+    new MultipleItemsSelectedContextMenu(),
+    new ItemsBelowContextMenu()
+  ];
 
-export default serviceContainer;
+  return serviceContainer;
+}
+
+export default createDefaultServiceContainer;

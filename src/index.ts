@@ -1,5 +1,7 @@
 export * from "./elements/controls/DesignerTabControl.js";
 
+export * from "./elements/services/DefaultServiceBootstrap.js";
+
 export * from "./elements/helper/CssAttributeParser.js";
 export * from "./elements/helper/CssCombiner.js";
 export * from "./elements/helper/ElementHelper.js";
@@ -102,7 +104,42 @@ export * from "./elements/widgets/designerView/tools/ZoomTool.js";
 export type { IDesignerExtension } from "./elements/widgets/designerView/extensions/IDesignerExtension.js";
 export type { IDesignerExtensionProvider } from "./elements/widgets/designerView/extensions/IDesignerExtensionProvider.js";
 export type { IExtensionManager } from "./elements/widgets/designerView/extensions/IExtensionManger.js";
-//TODO: extension exports
+export * from "./elements/widgets/designerView/extensions/ExtensionType.js";
+export * from "./elements/widgets/designerView/extensions/AbstractExtension.js";
+export * from "./elements/widgets/designerView/extensions/AltToEnterContainerExtension.js";
+export * from "./elements/widgets/designerView/extensions/AltToEnterContainerExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/CanvasExtension.js";
+export * from "./elements/widgets/designerView/extensions/CanvasExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/GridExtension.js";
+export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.js";
+export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/MouseOverExtension.js";
+export * from "./elements/widgets/designerView/extensions/MouseOverExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/PathExtension.js";
+export * from "./elements/widgets/designerView/extensions/PathExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/PositionExtension.js";
+export * from "./elements/widgets/designerView/extensions/PositionExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/PrimarySelectionDefaultExtension.js";
+export * from "./elements/widgets/designerView/extensions/PrimarySelectionDefaultExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/ResizeExtension.js";
+export * from "./elements/widgets/designerView/extensions/ResizeExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/RotateExtension.js";
+export * from "./elements/widgets/designerView/extensions/RotateExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtension.js";
+export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";
+export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
+
+export type { IContextMenuExtension } from "./elements/widgets/designerView/extensions/contextMenu/IContextMenuExtension.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/MultipleItemsSelectedContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveContextMenu.js";
+
 
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";
