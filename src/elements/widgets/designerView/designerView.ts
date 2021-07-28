@@ -357,6 +357,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     if (command.type === CommandType.redo) {
       return this.instanceServiceContainer.undoService.canRedo();
     }
+    if (command.type === CommandType.setTool) {
+      return this.serviceContainer.designerTools.has(command.parameter);
+    }
     return true;
   }
 

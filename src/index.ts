@@ -6,6 +6,7 @@ export * from "./elements/helper/CssAttributeParser.js";
 export * from "./elements/helper/CssCombiner.js";
 export * from "./elements/helper/ElementHelper.js";
 export * from "./elements/helper/IndentedTextWriter.js";
+export * from "./elements/helper/PathDataPolyfill.js";
 export * from "./elements/helper/Screenshot.js";
 export * from "./elements/loader/OldCustomElementsManifestLoader.js"
 
@@ -156,3 +157,13 @@ export * from "./elements/widgets/codeView/code-view-ace.js";
 export * from "./elements/widgets/codeView/code-view-code-mirror.js";
 
 export * from "./elements/documentContainer.js";
+
+export * from "./enums/EventNames.js";
+export * from "./enums/PointerActionType.js";
+
+export type { IActivateable } from "./interfaces/IActivateable.js";
+export type { IDesignerMousePoint } from "./interfaces/IDesignerMousePoint.js";
+export type { IDisposable } from "./interfaces/IDisposable.js";
+export type { IPoint } from "./interfaces/IPoint.js";
+export type { IRect } from "./interfaces/IRect.js";
+export type { ISize } from "./interfaces/ISize.js";
