@@ -675,7 +675,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       return;
 
     let currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
-    if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer) {
+    if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer || !currentElement) {
       currentElement = this._canvas;
     }
 
