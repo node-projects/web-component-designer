@@ -18,6 +18,7 @@ import { NamedTools } from "../widgets/designerView/tools/NamedTools";
 import { IContextMenuExtension } from "../widgets/designerView/extensions/contextMenu/IContextMenuExtension";
 import { GlobalContext } from './GlobalContext';
 import { IBindingService } from "./bindingsService/IBindingService";
+import { IElementAtPointService } from './elementAtPointService/IElementAtPointService';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -28,7 +29,8 @@ interface ServiceNameMap {
   "htmlWriterService": IHtmlWriterService;
   "htmlParserService": IHtmlParserService;
   "intializationService": IIntializationService;
-  'bindingService': IBindingService;
+  "bindingService": IBindingService;
+  "elementAtPointService": IElementAtPointService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -41,7 +43,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
       demoViewWidget: DemoView
     };
 
-  public readonly designerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
+  public readonly designerExtensions: Map<(ExtensionType | string), IDesignerExtensionProvider[]> = new Map();
 
   public designerContextMenuExtensions: IContextMenuExtension[];
 
@@ -83,5 +85,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get intializationService(): IIntializationService {
     return this.getLastService('intializationService');
+  }
+
+  get elementAtPointService(): IElementAtPointService {
+    return this.getLastService('elementAtPointService');
   }
 }

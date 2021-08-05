@@ -25,6 +25,9 @@ export type { IBindableObjectsService } from "./elements/services/bindableObject
 export * from "./elements/services/placementService/DefaultPlacementService.js";
 export type { IPlacementService } from "./elements/services/placementService/IPlacementService.js";
 
+export * from "./elements/services/elementAtPointService/ElementAtPointService.js";
+export type { IElementAtPointService } from "./elements/services/elementAtPointService/IElementAtPointService.js";
+
 export * from "./elements/services/contentService/ContentService.js";
 export type { IContentChanged } from "./elements/services/contentService/IContentChanged.js";
 export type { IContentService } from "./elements/services/contentService/IContentService.js";

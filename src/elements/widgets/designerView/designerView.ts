@@ -31,6 +31,7 @@ import { Screenshot } from '../../helper/Screenshot';
 import { dataURItoBlob, exportData } from "../../helper/Helper";
 import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItem";
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
+import { IPoint } from "../../../interfaces/IPoint";
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -640,10 +641,40 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     };
   }
 
+  public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
+    let backupPEventsMap: Map<HTMLElement, string> = new Map();
+    let currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
+    let lastElement: HTMLElement = null;
+    try {
+      while (currentElement != null) {
+        if (currentElement == lastElement) {
+          currentElement = null;
+          break;
+        }
+        lastElement = currentElement;
+        if (currentElement.parentNode !== this.overlayLayer &&
+          (!ignoreElementCallback || !ignoreElementCallback(currentElement))) {
+          break;
+        }
+        backupPEventsMap.set(currentElement, currentElement.style.pointerEvents);
+        currentElement.style.pointerEvents = 'none';
+        currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
+      }
+    }
+    finally {
+      for (let e of backupPEventsMap.entries()) {
+        e[0].style.pointerEvents = e[1];
+      }
+    }
+
+    return currentElement;
+  }
+
   private _pointerEventHandler(event: PointerEvent) {
     if (event.button == 2)
       return;
-    let currentElement = this.shadowRoot.elementFromPoint(event.x, event.y) as Element;
+
+    let currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
     if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer) {
       currentElement = this._canvas;
     }
