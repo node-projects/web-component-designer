@@ -1,6 +1,6 @@
 import { IElementAtPointService } from './IElementAtPointService';
 import { IDesignerView } from '../../..';
-import { IPoint } from '../../../../dist/interfaces/IPoint';
+import { IPoint } from '../../../interfaces/IPoint';
 
 export class ElementAtPointService implements IElementAtPointService {
   getElementAtPoint(designerView: IDesignerView, point: IPoint) {
