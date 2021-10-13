@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css, DomHelper, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { OverlayLayer } from './extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../services/ServiceContainer';
 
@@ -81,10 +81,13 @@ export class OverlayLayerView extends BaseCustomWebComponentLazyAppend {
   }
 
   public removeAllNodesWithClass(className: string) {
-    DomHelper.removeAllChildnodes(this._svg, className);
+    const nodes = this._svg.querySelectorAll('.' + className);
+    for (const e of nodes) {
+      e.parentNode.removeChild(e);
+    }
   }
 
-  public createPoint() : DOMPointInit {
+  public createPoint(): DOMPointInit {
     //@ts-ignore
     return this._svg.createSVGPoint();
   }
