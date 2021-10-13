@@ -2,6 +2,7 @@ import { EventNames } from '../../../../enums/EventNames';
 import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
 import { DesignItem } from '../../../item/DesignItem';
 import { IDesignItem } from '../../../item/IDesignItem';
+import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 
@@ -25,7 +26,7 @@ export class RectangleSelectorTool implements ITool {
         this._rect.setAttribute('y', <string><any>this._initialPoint.y);
         this._rect.setAttribute('width', <string><any>0);
         this._rect.setAttribute('height', <string><any>0);
-        designerView.overlayLayer.appendChild(this._rect);
+        designerView.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
         break;
 
       case EventNames.PointerMove:
@@ -55,8 +56,7 @@ export class RectangleSelectorTool implements ITool {
         const elements = designerView.rootDesignItem.element.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];
 
-        //@ts-ignore
-        let point: { x: number, y: number } = designerView.overlayLayer.createSVGPoint();
+        let point = designerView.overlayLayer.createPoint();
         for (let e of elements) {
           let elementRect = e.getBoundingClientRect();
           point.x = elementRect.left - designerView.containerBoundingRect.left;
@@ -77,7 +77,7 @@ export class RectangleSelectorTool implements ITool {
           }
         }
 
-        designerView.overlayLayer.removeChild(this._rect);
+        designerView.overlayLayer.removeOverlay(this._rect);
         this._rect = null;
         this._initialPoint = null;
 

@@ -34,7 +34,7 @@ export class RotateExtension extends AbstractExtension {
     g.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeRotate(event));
     g.setAttribute('class', 'svg-selection svg-primary-rotate');
     g.setAttribute('transform', 'translate(' + (itemRect.x - this.designerView.containerBoundingRect.x - 13) + ',' + (itemRect.y - this.designerView.containerBoundingRect.y - 8.5) + ')');
-    this.overlayLayer.appendChild(g);
+    this.overlayLayerView.appendChild(g);
     this.overlays.push(g);
   }
 

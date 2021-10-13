@@ -91,6 +91,7 @@ export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";
 
 export type { IDesignerView } from "./elements/widgets/designerView/IDesignerView.js";
 export * from "./elements/widgets/designerView/designerView.js";
+export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";
 
 export type { ITool } from "./elements/widgets/designerView/tools/ITool.js";

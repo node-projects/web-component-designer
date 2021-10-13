@@ -2,10 +2,12 @@ import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { IDesignerExtension } from "./IDesignerExtension";
 import { IExtensionManager } from "./IExtensionManger";
+import { OverlayLayerView } from '../overlayLayerView';
+import { OverlayLayer } from './OverlayLayer';
 
 export abstract class AbstractExtension implements IDesignerExtension {
   protected overlays: SVGGraphicsElement[] = [];
-  protected overlayLayer: SVGElement;
+  protected overlayLayerView: OverlayLayerView;
   protected extensionManager: IExtensionManager;
   protected designerView: IDesignerView;
   protected extendedItem: IDesignItem;
@@ -15,7 +17,7 @@ export abstract class AbstractExtension implements IDesignerExtension {
     this.designerView = designerView;
     this.extendedItem = extendedItem;
 
-    this.overlayLayer = designerView.overlayLayer;
+    this.overlayLayerView = designerView.overlayLayer;
   }
 
   abstract extend();
@@ -25,7 +27,7 @@ export abstract class AbstractExtension implements IDesignerExtension {
   protected _removeAllOverlays() {
     for (let o of this.overlays) {
       try {
-        this.overlayLayer.removeChild(o);
+        this.overlayLayerView.removeOverlay(o);
       }
       catch (err) {
         console.error(err);
@@ -34,10 +36,10 @@ export abstract class AbstractExtension implements IDesignerExtension {
     this.overlays = [];
   }
 
-  _drawLineOverlay(x1: number, y1: number, x2: number, y2: number, className?: string, line?: SVGLineElement) {
+  _drawLineOverlay(x1: number, y1: number, x2: number, y2: number, className?: string, line?: SVGLineElement, overlayLayer?: OverlayLayer) {
     if (!line) {
       line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      this.overlayLayer.appendChild(line);
+      this.overlayLayerView.addOverlay(line, overlayLayer);
       this.overlays.push(line);
     }
     line.setAttribute('x1', <string><any>x1);
@@ -50,10 +52,10 @@ export abstract class AbstractExtension implements IDesignerExtension {
     return line;
   }
 
-  _drawCircleOverlay(x: number, y: number, radius: number, className?: string, circle?: SVGCircleElement) {
+  _drawCircleOverlay(x: number, y: number, radius: number, className?: string, circle?: SVGCircleElement, overlayLayer?: OverlayLayer) {
     if (!circle) {
       circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      this.overlayLayer.appendChild(circle);
+      this.overlayLayerView.addOverlay(circle, overlayLayer);
       this.overlays.push(circle);
     }
     circle.setAttribute('cx', <string><any>x);
@@ -64,10 +66,10 @@ export abstract class AbstractExtension implements IDesignerExtension {
     return circle;
   }
 
-  _drawRect(x: number, y: number, w: number, h: number, className?: string, rect?: SVGRectElement) {
+  _drawRect(x: number, y: number, w: number, h: number, className?: string, rect?: SVGRectElement, overlayLayer?: OverlayLayer) {
     if (!rect) {
       rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      this.overlayLayer.appendChild(rect);
+      this.overlayLayerView.addOverlay(rect, overlayLayer);
       this.overlays.push(rect);
     }
     rect.setAttribute('x', <string><any>x);
@@ -79,10 +81,10 @@ export abstract class AbstractExtension implements IDesignerExtension {
     return rect;
   }
 
-  _drawText(text: string, x: number, y: number, className?: string, textEl?: SVGTextElement) {
+  _drawText(text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {
     if (!textEl) {
       textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      this.overlayLayer.appendChild(textEl);
+      this.overlayLayerView.addOverlay(textEl, overlayLayer);
       this.overlays.push(textEl);
     }
     textEl.setAttribute('x', <string><any>x);

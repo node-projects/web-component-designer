@@ -32,6 +32,8 @@ import { dataURItoBlob, exportData } from "../../helper/Helper";
 import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItem";
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 import { IPoint } from "../../../interfaces/IPoint";
+import { OverlayLayer } from "./extensions/OverlayLayer";
+import { OverlayLayerView } from './overlayLayerView';
 
 export class DesignerView extends BaseCustomWebComponentLazyAppend implements IDesignerView, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -44,7 +46,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   public alignOnGrid = false;
   public alignOnSnap = true;
   public snapLines: Snaplines;
-  public overlayLayer: SVGElement;
+  public overlayLayer: OverlayLayerView;
   public rootDesignItem: IDesignItem;
   private _zoomFactor = 1;
 
@@ -99,7 +101,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       transform-origin: 0 0;
     }
 
-    #svg {
+    node-projects-overlay-layer-view {
       box-sizing: border-box;
       width: 100%;
       height: 100%;
@@ -111,28 +113,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       user-select: none;
       z-index: 999999999999;
     }
-
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-selector { stroke: black; fill: transparent; stroke-width: 1; stroke-dasharray: 2; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: all }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-primary-rotate { stroke: #3899ec; fill: #3899ec; pointer-events: all }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-grid-area { font-size: 8px; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-margin { fill: #ff944722; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-position  { stroke: black; stroke-dasharray: 2; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-path { stroke: #3899ec; fill: orange; pointer-events: all }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-path-line { stroke: #3899ec; stroke-dasharray: 2; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-hover { stroke: #90caf9; fill: none; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-gray-out { stroke: transparent; fill: rgba(211, 211, 211, 0.8); pointer-events: none }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-text-enter-container { stroke: none; fill: black; stroke-width: 1; font-size: 14px; font-weight:800; font-family: monospace; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-rect-enter-container { stroke: none; fill: #aa00ff2e; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-draw-new-element { stroke: black; fill: transparent; stroke-width: 1; }
-    #outercanvas1>#outercanvas2>#canvasContainer>#svg>.svg-invisible-div { stroke: lightgray; fill: transparent; stroke-width: 1; }
     
     #canvas * {
       cursor: pointer;
@@ -201,7 +181,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
               <div id="canvasContainer">
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="canvas" tabindex="0"></div>
-                <svg id="svg" style="pointer-events: none;"></svg>
               </div>
             </div>
           </div>
@@ -260,9 +239,6 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this._pointerEventHandlerBound = this._pointerEventHandler.bind(this);
 
     this._canvas.oncontextmenu = this._onContextMenuBound;
-
-    this.overlayLayer = this._getDomElement<SVGElement>('svg')
-    this.snapLines = new Snaplines(this.overlayLayer);
   }
 
   get designerWidth(): string {
@@ -416,15 +392,21 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.serviceContainer = serviceContainer;
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
+    
+    this.overlayLayer = new OverlayLayerView(serviceContainer);
+    this.overlayLayer.style.pointerEvents = 'none';
+    this._canvasContainer.appendChild(this.overlayLayer);
+    this.snapLines = new Snaplines(this.overlayLayer);
     this.snapLines.initialize(this.rootDesignItem);
 
     if (this.children) {
       const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
-      this._addDesignItems(parser.createDesignItems(this.children, this.serviceContainer, this.instanceServiceContainer))
+      this._addDesignItems(parser.createDesignItems(this.children, this.serviceContainer, this.instanceServiceContainer));
     }
   }
 
   elementFromPoint(x: number, y: number): Element {
+    //@ts-ignore
     return this.shadowRoot.elementFromPoint(x, y);
   }
   static wrapInDesigner(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer): DesignerView {
@@ -451,6 +433,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   zoomFactorChanged() {
+    //@ts-ignore
     this._canvasContainer.style.zoom = <any>this._zoomFactor;
     this._zoomInput.value = (this._zoomFactor * 100).toFixed(0) + '%';
     this._canvasContainer.style.bottom = this._outercanvas2.offsetHeight >= this._canvasContainer.offsetHeight ? '0' : '';
@@ -658,7 +641,15 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         }
         backupPEventsMap.set(currentElement, currentElement.style.pointerEvents);
         currentElement.style.pointerEvents = 'none';
+        if (currentElement.shadowRoot) {
+          for (let e of currentElement.shadowRoot.querySelectorAll('*')) {
+            if ((<HTMLElement>e).style)
+              backupPEventsMap.set((<HTMLElement>e), (<HTMLElement>e).style.pointerEvents);
+            (<HTMLElement>e).style.pointerEvents = 'none';
+          }
+        }
         currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
+
       }
     }
     finally {
@@ -702,6 +693,14 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
   private _fillCalculationrects() {
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+  }
+
+  public addOverlay(element: SVGGraphicsElement, overlayLayer: OverlayLayer = OverlayLayer.Normal) {
+    this.overlayLayer.addOverlay(element, overlayLayer);
+  }
+
+  public removeOverlay(element: SVGGraphicsElement) {
+    this.overlayLayer.removeOverlay(element);
   }
 }
 

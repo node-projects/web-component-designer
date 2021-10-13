@@ -9,13 +9,14 @@ import { IPlacementView } from './IPlacementView';
 import { IExtensionManager } from "./extensions/IExtensionManger";
 import { IUiCommandHandler } from "../../../commandHandling/IUiCommandHandler";
 import { IPoint } from "../../../interfaces/IPoint";
+import { OverlayLayerView } from "./overlayLayerView";
 
 export interface IDesignerView extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
   readonly instanceServiceContainer: InstanceServiceContainer;
   readonly containerBoundingRect: DOMRect;
   readonly rootDesignItem: IDesignItem;
-  readonly overlayLayer: SVGElement;
+  readonly overlayLayer: OverlayLayerView;
   readonly extensionManager: IExtensionManager;
 
   readonly snapLines: Snaplines;

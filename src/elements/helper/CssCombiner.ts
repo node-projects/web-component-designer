@@ -3,6 +3,8 @@ import { IBinding } from "../services/bindingsService/IBinding";
 export class CssCombiner {
   private static _helperElement = document.createElement('div');
 
+  //todo: inset, 
+  
   static combine(styles: Map<string, string | IBinding>, globalStyles?: Map<string, string>) {
     let e = CssCombiner._helperElement;
     e.setAttribute('style', '');

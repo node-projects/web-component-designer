@@ -11,26 +11,26 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.0.230",
-    "construct-style-sheets-polyfill": "^2.4.16"
+    "@node-projects/base-custom-webcomponent": "^0.1.2",
+    "construct-style-sheets-polyfill": "^3.0.3"
   },
   "devDependencies": {
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^2.2.2",
-    "@types/codemirror": "^5.60.2",
+    "@types/codemirror": "^5.60.4",
     "@types/jquery": "^3.5.6",
     "@types/jquery.fancytree": "0.0.7",
-    "ace-builds": "^1.4.12",
-    "codemirror": "^5.62.2",
-    "esprima-next": "^5.6.3",
+    "ace-builds": "^1.4.13",
+    "codemirror": "^5.63.1",
+    "esprima-next": "^5.7.0",
     "html2canvas": "*",
-    "jest": "^27.0.6",
+    "jest": "^27.2.5",
     "jquery": "^3.6.0",
     "jquery.fancytree": "^2.38.0",
-    "monaco-editor": "^0.26.1",
-    "node-html-parser": "^4.1.2",
-    "ts-jest": "^27.0.4",
-    "typescript": "^4.3.5",
+    "monaco-editor": "^0.29.0",
+    "node-html-parser": "^5.0.0",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.3",
     "typescript-lit-html-plugin": "^0.9.0"
   },
   "repository": {

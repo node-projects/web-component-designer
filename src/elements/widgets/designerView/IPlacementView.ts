@@ -1,4 +1,5 @@
 import { IDesignItem } from "../../item/IDesignItem";
+import { OverlayLayerView } from "./overlayLayerView";
 import { Snaplines } from './Snaplines';
 
 export interface IPlacementView {
@@ -6,6 +7,6 @@ export interface IPlacementView {
   alignOnGrid: boolean;
   gridSize: number;
   rootDesignItem: IDesignItem;
-  overlayLayer: SVGElement;
+  overlayLayer: OverlayLayerView;
   snapLines: Snaplines;
 }
