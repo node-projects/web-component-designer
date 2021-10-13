@@ -3,6 +3,7 @@ import { IPoint } from '../../../../interfaces/IPoint';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { IElementDefinition } from '../../../services/elementsService/IElementDefinition';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
+import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 
@@ -63,7 +64,7 @@ export class DrawElementTool implements ITool {
       if (!this._rect) {
         designerView.rootDesignItem.element.appendChild(this._createdItem.element);
         this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        designerView.overlayLayer.appendChild(this._rect);
+        designerView.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
         this._rect.setAttribute('class', 'svg-draw-new-element');
         this._rect.setAttribute('x', <string><any>(this._startPosition.x - designerView.containerBoundingRect.x));
         this._rect.setAttribute('y', <string><any>(this._startPosition.y - designerView.containerBoundingRect.y));
@@ -78,7 +79,7 @@ export class DrawElementTool implements ITool {
   }
 
   private async _onPointerUp(designerView: IDesignerView, event: PointerEvent) {
-    designerView.overlayLayer.removeChild(this._rect);
+    designerView.overlayLayer.removeOverlay(this._rect);
     designerView.instanceServiceContainer.selectionService.setSelectedElements([this._createdItem]);
     this._startPosition = null;
     this._rect = null;

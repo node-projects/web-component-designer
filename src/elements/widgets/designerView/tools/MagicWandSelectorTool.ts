@@ -2,6 +2,7 @@ import { EventNames } from '../../../../enums/EventNames';
 import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
 import { DesignItem } from '../../../item/DesignItem';
 import { IDesignItem } from '../../../item/IDesignItem';
+import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 
@@ -23,7 +24,7 @@ export class MagicWandSelectorTool implements ITool {
         this._path.setAttribute('class', 'svg-selector');
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
         this._path.setAttribute("D", this._pathD);
-        designerView.overlayLayer.appendChild(this._path);
+        designerView.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
         break;
 
       case EventNames.PointerMove:
@@ -61,7 +62,7 @@ export class MagicWandSelectorTool implements ITool {
           }
         }
 
-        designerView.overlayLayer.removeChild(this._path);
+        designerView.overlayLayer.removeOverlay(this._path);
         this._path = null;
         this._pathD = null;
 

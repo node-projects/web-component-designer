@@ -5,6 +5,7 @@ import { InsertAction } from '../../../services/undoService/transactionItems/Ins
 import { IDesignerView } from '../IDesignerView';
 import { ITool } from './ITool';
 import { DesignItem } from '../../../item/DesignItem';
+import { OverlayLayer } from '../extensions/OverlayLayer.js';
 
 export class DrawPathTool implements ITool {
 
@@ -34,7 +35,7 @@ export class DrawPathTool implements ITool {
         this._path.setAttribute("D", this._pathD);
         this._path.setAttribute("stroke", designerView.serviceContainer.globalContext.strokeColor);
         this._path.setAttribute("fill", designerView.serviceContainer.globalContext.fillBrush);
-        designerView.overlayLayer.appendChild(this._path);
+        designerView.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
         break;
 
       case EventNames.PointerMove:
@@ -48,7 +49,7 @@ export class DrawPathTool implements ITool {
         (<Element>event.target).releasePointerCapture(event.pointerId);
         const rect = this._path.getBoundingClientRect();
 
-        designerView.overlayLayer.removeChild(this._path);
+        designerView.overlayLayer.removeOverlay(this._path);
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
         const mvX = rect.x - designerView.containerBoundingRect.x - offset;
