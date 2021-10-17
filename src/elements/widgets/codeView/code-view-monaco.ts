@@ -92,8 +92,10 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   focusEditor() {
-    this.focus();
-    this._monacoEditor.focus();
+    requestAnimationFrame(() => {
+      this.focus();
+      this._monacoEditor.focus();
+    });
   }
 
   activated() {
@@ -114,10 +116,10 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   setSelection(position: IStringPosition) {
     let model = this._monacoEditor.getModel();
-    let point1 = model.getPositionAt(position.start);
-    let point2 = model.getPositionAt(position.start + position.length);
+    let point2 = model.getPositionAt(position.start);
+    let point1 = model.getPositionAt(position.start + position.length);
     this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
-    this._monacoEditor.revealLineInCenter(point1.lineNumber);
+    this._monacoEditor.revealLineInCenter(point2.lineNumber);
   }
 }
 

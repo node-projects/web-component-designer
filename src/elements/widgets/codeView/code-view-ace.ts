@@ -94,8 +94,10 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   }
 
   focusEditor() {
-    this.focus();
-    this._aceEditor.focus();
+    requestAnimationFrame(() => {
+      this.focus();
+      this._aceEditor.focus();
+    });
   }
 
   oneTimeSetup() {

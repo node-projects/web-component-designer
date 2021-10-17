@@ -81,8 +81,10 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
   }
 
   focusEditor() {
-    this.focus();
-    this._codeMirrorEditor.focus();
+    requestAnimationFrame(() => {
+      this.focus();
+      this._codeMirrorEditor.focus();
+    });
   }
 
   ready() {
