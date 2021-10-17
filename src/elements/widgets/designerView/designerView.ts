@@ -261,12 +261,13 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       for (let r of value.rules) {
         if (r instanceof CSSStyleRule) {
           let parts = r.selectorText.split(',');
-          r.selectorText = '';
+          let t = '';
           for (let p of parts) {
             if (r.selectorText)
-              r.selectorText += ',';
-            r.selectorText += '#canvas ' + p;
+              t += ',';
+            t += '#canvas ' + p;
           }
+          r.selectorText = t;
         }
       }
 
@@ -282,7 +283,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     switch (command.type) {
       case CommandType.screenshot: {
         if (!this.instanceServiceContainer.selectionService.primarySelection)
-          alert("you need to select an elment!")
+          alert("you need to select an element!")
         else {
           if (!Screenshot.screenshotsEnabled) {
             alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
@@ -392,7 +393,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     this.serviceContainer = serviceContainer;
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
-    
+
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
     this._canvasContainer.appendChild(this.overlayLayer);
@@ -409,6 +410,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     //@ts-ignore
     return this.shadowRoot.elementFromPoint(x, y);
   }
+
   static wrapInDesigner(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer): DesignerView {
     let designerView = new DesignerView();
     designerView.initialize(serviceContainer);
@@ -480,6 +482,23 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
 
     this.snapLines.clearSnaplines();
+
+    requestAnimationFrame(() => this._removeDraggableOnImages());
+  }
+
+  private _removeDraggableOnImages() {
+    this._removeDraggableOnImagesInner(this.rootDesignItem.element.querySelectorAll('*'));
+  }
+
+  private _removeDraggableOnImagesInner(elements: NodeListOf<Node>) {
+    for (let e of elements) {
+      if ((<HTMLElement>e).shadowRoot) {
+        this._removeDraggableOnImagesInner(((<HTMLElement>e).shadowRoot).querySelectorAll('*'));
+      }
+      if ((<HTMLElement>e).localName == 'img') {
+        (<HTMLElement>e).draggable = false;
+      }
+    }
   }
 
   private _onDragEnter(event: DragEvent) {
@@ -624,6 +643,15 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     };
   }
 
+  //todo remove, is in base custom webcomp domhelper
+  static getHost(node: Node) {
+    while (node.parentElement)
+      node = node.parentElement;
+    if ((<ShadowRoot>node).host)
+      return (<ShadowRoot>node).host
+    return (<ShadowRoot>node.parentNode).host;
+  }
+
   public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
     let backupPEventsMap: Map<HTMLElement, string> = new Map();
     let currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
@@ -635,17 +663,25 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           break;
         }
         lastElement = currentElement;
-        if (currentElement.parentNode !== this.overlayLayer &&
-          (!ignoreElementCallback || !ignoreElementCallback(currentElement))) {
+        if (currentElement == this._canvas){
+          break;
+        }
+        if (currentElement === this.overlayLayer) {
+          currentElement = this.overlayLayer.elementFromPoint(point.x, point.y) as HTMLElement;
+          break;
+        }
+        if (!ignoreElementCallback || !ignoreElementCallback(currentElement)) {
           break;
         }
         backupPEventsMap.set(currentElement, currentElement.style.pointerEvents);
         currentElement.style.pointerEvents = 'none';
         if (currentElement.shadowRoot) {
           for (let e of currentElement.shadowRoot.querySelectorAll('*')) {
-            if ((<HTMLElement>e).style)
-              backupPEventsMap.set((<HTMLElement>e), (<HTMLElement>e).style.pointerEvents);
-            (<HTMLElement>e).style.pointerEvents = 'none';
+            if (!backupPEventsMap.has((<HTMLElement>e))) {
+              if ((<HTMLElement>e).style)
+                backupPEventsMap.set((<HTMLElement>e), (<HTMLElement>e).style.pointerEvents);
+              (<HTMLElement>e).style.pointerEvents = 'none';
+            }
           }
         }
         currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
@@ -676,12 +712,12 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     if (this._lastHoverDesignItem != currentDesignItem) {
       if (this._lastHoverDesignItem)
         this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
-      if (currentDesignItem && currentDesignItem != this.rootDesignItem && currentElement.parentNode !== this.overlayLayer)
+      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DesignerView.getHost(currentElement.parentNode) !== this.overlayLayer)
         this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
       this._lastHoverDesignItem = currentDesignItem;
     }
 
-    if (currentElement && currentElement.parentNode == this.overlayLayer)
+    if (currentElement && DesignerView.getHost(currentElement.parentNode) === this.overlayLayer)
       currentElement = this.instanceServiceContainer.selectionService.primarySelection.element ?? this._canvas;
 
     this._fillCalculationrects();

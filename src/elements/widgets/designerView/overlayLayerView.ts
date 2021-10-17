@@ -91,6 +91,11 @@ export class OverlayLayerView extends BaseCustomWebComponentLazyAppend {
     //@ts-ignore
     return this._svg.createSVGPoint();
   }
+
+  public elementFromPoint(x: number, y: number): Element {
+    //@ts-ignore
+    return this.shadowRoot.elementFromPoint(x, y);
+  }
 }
 
 customElements.define(OverlayLayerView.is, OverlayLayerView);
