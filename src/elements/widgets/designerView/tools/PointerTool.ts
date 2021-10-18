@@ -9,6 +9,7 @@ import { ExtensionType } from "../extensions/ExtensionType";
 import { IDesignerView } from "../IDesignerView";
 import { ITool } from "./ITool";
 import { NamedTools } from './NamedTools';
+import { DesignerView } from '../designerView';
 
 export class PointerTool implements ITool {
 
@@ -119,7 +120,7 @@ export class PointerTool implements ITool {
         (<HTMLElement>currentDesignItem.element).style.pointerEvents = 'none';
       }
       let currentElement = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
-      if (currentElement.parentNode !== designerView.overlayLayer)
+      if (DesignerView.getHost(currentElement) !== designerView.overlayLayer)
         currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, designerView.serviceContainer, designerView.instanceServiceContainer);
     } else {
       this._resetPointerEventsForClickThrough();
