@@ -23,7 +23,7 @@ export abstract class AbstractBasePropertiesService extends UnkownElementPropert
         let property: IProperty = { name: name, type: "string", service: this };
         properties.push(property);
       } else if (type === Object) {
-        let property: IProperty = { name: name, type: "string", service: this };
+        let property: IProperty = { name: name, type: "object", service: this };
         properties.push(property);
       } else if (type === Number) {
         let property: IProperty = { name: name, type: "number", service: this };
