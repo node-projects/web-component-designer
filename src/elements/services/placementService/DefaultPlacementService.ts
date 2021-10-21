@@ -8,7 +8,8 @@ import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 export class DefaultPlacementService implements IPlacementService {
 
   serviceForContainer(container: IDesignItem) {
-    if ((<HTMLElement>container.element).style.display === 'grid' || (<HTMLElement>container.element).style.display === 'flex')
+    if ((<HTMLElement>container.element).style.display === 'grid' || (<HTMLElement>container.element).style.display === 'inline-grid' || 
+        (<HTMLElement>container.element).style.display === 'flex' || (<HTMLElement>container.element).style.display === 'inline-flex')
       return false;
     return true;
   }
