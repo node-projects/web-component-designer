@@ -19,10 +19,12 @@ import { IContextMenuExtension } from "../widgets/designerView/extensions/contex
 import { GlobalContext } from './GlobalContext';
 import { IBindingService } from "./bindingsService/IBindingService";
 import { IElementAtPointService } from './elementAtPointService/IElementAtPointService';
+import { ISnaplinesProviderService } from "./placementService/ISnaplinesProviderService.js";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
   "containerService": IPlacementService;
+  "snaplinesProviderService": ISnaplinesProviderService;
   "elementsService": IElementsService;
   "instanceService": IInstanceService;
   "editorTypesService": IEditorTypesService;
@@ -61,6 +63,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get containerServices(): IPlacementService[] {
     return this.getServices('containerService');
+  }
+
+  get snaplinesProviderService(): ISnaplinesProviderService {
+    return this.getLastService('snaplinesProviderService');
   }
 
   get elementsServices(): IElementsService[] {

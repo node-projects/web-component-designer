@@ -23,7 +23,11 @@ export type { IBindableObject } from "./elements/services/bindableObjectsService
 export type { IBindableObjectsService } from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
 
 export * from "./elements/services/placementService/DefaultPlacementService.js";
+export * from "./elements/services/placementService/FlexBoxPlacementService.js";
+export * from "./elements/services/placementService/GridPlacementService.js";
 export type { IPlacementService } from "./elements/services/placementService/IPlacementService.js";
+export * from "./elements/services/placementService/SnaplinesProviderService.js";
+export type { ISnaplinesProviderService } from "./elements/services/placementService/ISnaplinesProviderService.js";
 
 export * from "./elements/services/elementAtPointService/ElementAtPointService.js";
 export type { IElementAtPointService } from "./elements/services/elementAtPointService/IElementAtPointService.js";

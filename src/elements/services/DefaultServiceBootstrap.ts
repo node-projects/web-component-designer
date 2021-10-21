@@ -39,6 +39,8 @@ import { PolymerBindingsService } from './bindingsService/PolymerBindingsService
 import { ItemsBelowContextMenu } from '../widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js';
 import { GridPlacementService } from './placementService/GridPlacementService.js';
 import { ElementAtPointService } from './elementAtPointService/ElementAtPointService';
+import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementService';
+import { SnaplinesProviderService } from './placementService/SnaplinesProviderService';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -53,6 +55,8 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("htmlWriterService", new HtmlWriterService());
   serviceContainer.register("containerService", new DefaultPlacementService());
   serviceContainer.register("containerService", new GridPlacementService());
+  serviceContainer.register("containerService", new FlexBoxPlacementService());
+  serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
   serviceContainer.register("bindingService", new PolymerBindingsService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());

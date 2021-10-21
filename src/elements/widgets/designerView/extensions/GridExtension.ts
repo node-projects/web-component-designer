@@ -2,6 +2,7 @@ import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerView } from "../IDesignerView";
 import { AbstractExtension } from "./AbstractExtension";
 import { IExtensionManager } from "./IExtensionManger";
+import { OverlayLayer } from "./OverlayLayer.js";
 
 export class GridExtension extends AbstractExtension {
 
@@ -87,21 +88,21 @@ export class GridExtension extends AbstractExtension {
       for (let yIdx = 0; yIdx < columns.length; yIdx++) {
         const c = columns[yIdx];
         if (x > 0 && xGap) {
-          this._drawRect(x + xOffset, y + yOffset, xGap, currY, 'svg-grid-gap');
+          this._drawRect(x + xOffset, y + yOffset, xGap, currY, 'svg-grid-gap', null, OverlayLayer.Background);
           x += xGap
         }
         const currX = Number.parseFloat(c.replace('px', ''));
         if (y > 0 && yGap) {
-          this._drawRect(x + xOffset, y + yOffset - yGap, currX, yGap, 'svg-grid-gap');
+          this._drawRect(x + xOffset, y + yOffset - yGap, currX, yGap, 'svg-grid-gap', null, OverlayLayer.Background);
         }
         if (areas) {
           const nm = areas[cl].trim();
           if (nm != '.') {
-            const text = this._drawText(nm, x + xOffset, y + yOffset, 'svg-grid-area');
+            const text = this._drawText(nm, x + xOffset, y + yOffset, 'svg-grid-area', null, OverlayLayer.Background);
             text.setAttribute("dominant-baseline", "hanging");
           }
         }
-        this._drawRect(x + xOffset, y + yOffset, currX, currY, 'svg-grid');
+        this._drawRect(x + xOffset, y + yOffset, currX, currY, 'svg-grid', null, OverlayLayer.Background);
         x += currX;
         cl++;
       }

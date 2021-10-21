@@ -1,5 +1,4 @@
 import type { IDesignItem } from "../../item/IDesignItem";
-import { DomHelper } from '@node-projects/base-custom-webcomponent';
 import type { IPoint } from "../../../interfaces/IPoint";
 import type { ISize } from '../../../interfaces/ISize';
 import { OverlayLayerView } from "./overlayLayerView";
@@ -39,34 +38,12 @@ export class Snaplines {
 
   calculateSnaplines(ignoredItems: IDesignItem[]) {
     this.clearSnaplines();
-    let ignMap = new Map<Element, IDesignItem>(ignoredItems.map(i => [i.element, i]));
-    this._outerRect = this._containerItem.element.getBoundingClientRect();
-
-    let ignoreElements = ignoredItems.map(x => x.element);
-    for (let n of DomHelper.getAllChildNodes(this._containerItem.element, false, ignoreElements)) {
-      if (!ignMap.has(<Element>n)) {
-        let p = (<Element>n).getBoundingClientRect();
-
-        let pLeft = p.x - this._outerRect.x;
-        let pMidH = p.x - this._outerRect.x + p.width / 2;
-        let pRight = p.x - this._outerRect.x + p.width;
-        this._positionsH.push([pLeft, p])
-        this._positionsMiddleH.push([pMidH, p])
-        this._positionsH.push([pRight, p])
-
-
-        let pTop = p.y - this._outerRect.y;
-        let pMidV = p.y - this._outerRect.y + p.height / 2;
-        let pBottom = p.y - this._outerRect.y + p.height;
-        this._positionsV.push([pTop, p])
-        this._positionsMiddleV.push([pMidV, p])
-        this._positionsV.push([pBottom, p])
-      }
-    }
-    this._positionsH.sort((a, b) => a[0] - b[0]);
-    this._positionsMiddleH.sort((a, b) => a[0] - b[0]);
-    this._positionsV.sort((a, b) => a[0] - b[0]);
-    this._positionsMiddleV.sort((a, b) => a[0] - b[0]);
+    const providedSnaplines = this._containerItem.serviceContainer.snaplinesProviderService.provideSnaplines(this._containerItem, ignoredItems);
+    this._outerRect = providedSnaplines.outerRect;
+    this._positionsH = providedSnaplines.positionsH;
+    this._positionsMiddleH = providedSnaplines.positionsMiddleH;
+    this._positionsV = providedSnaplines.positionsV;
+    this._positionsMiddleV = providedSnaplines.positionsMiddleV;
   }
 
   //return the snapped position
