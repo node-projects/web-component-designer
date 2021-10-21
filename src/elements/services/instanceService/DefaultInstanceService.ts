@@ -6,6 +6,8 @@ import type { InstanceServiceContainer } from '../InstanceServiceContainer';
 import { IPropertiesService } from '../propertiesService/IPropertiesService';
 import { IDesignItem } from '../../item/IDesignItem';
 import { DesignItem } from '../../item/DesignItem';
+import { encodeXMLChars } from '../../helper/XmlHelper';
+import { newElementFromString } from '../../helper/ElementHelper';
 
 export class DefaultInstanceService implements IInstanceService {
   async getElement(definition: IElementDefinition, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem> {
@@ -19,29 +21,32 @@ export class DefaultInstanceService implements IInstanceService {
       if (instanceServiceContainer.designContext.imports.indexOf(importUri) <= 0)
         instanceServiceContainer.designContext.imports.push(importUri);
     }
-    let element = document.createElement(definition.tag);
-    if (!definition.doNotSetInNodeProjectsDesignerViewOnInstance)
-      (<IDesignerInstance><any>element)._inNodeProjectsDesignerView = true;
-    if (definition.defaultWidth)
-      element.style.width = definition.defaultWidth; // '60px';
-    if (definition.defaultHeight)
-      element.style.height = definition.defaultHeight; '20px';
-    element.style.position = 'absolute'
 
-    switch (definition.tag) {
-      case "input":
-        (<HTMLInputElement>element).type = "text";
-    }
-
+    let attr = '';
     if (definition.defaultAttributes) {
       for (let a in definition.defaultAttributes) {
         let value = definition.defaultAttributes[a];
-        if (typeof value === 'object')
-          element.setAttribute(a, JSON.stringify(definition.defaultAttributes[a]));
-        else
-          element.setAttribute(a, definition.defaultAttributes[a]);
+        try {
+          if (typeof value === 'object')
+            attr += ' ' + a + '="' + encodeXMLChars(JSON.stringify(definition.defaultAttributes[a])) + '"';
+          else
+            attr += ' ' + a + '="' + encodeXMLChars(definition.defaultAttributes[a]) + '"';
+        } catch (e) {
+          console.warn(e);
+        }
       }
     }
+
+    const elementString = '<' + definition.tag + attr + '></' + definition.tag + '>';
+
+    const element = <HTMLElement>newElementFromString(elementString);
+    if (!definition.doNotSetInNodeProjectsDesignerViewOnInstance)
+      (<IDesignerInstance><any>element)._inNodeProjectsDesignerView = true;
+    if (definition.defaultWidth)
+      element.style.width = definition.defaultWidth;
+    if (definition.defaultHeight)
+      element.style.height = definition.defaultHeight;
+    element.style.position = 'absolute'
 
     if (definition.defaultStyles) {
       for (let s in definition.defaultStyles)
