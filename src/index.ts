@@ -36,6 +36,9 @@ export * from "./elements/services/contentService/ContentService.js";
 export type { IContentChanged } from "./elements/services/contentService/IContentChanged.js";
 export type { IContentService } from "./elements/services/contentService/IContentService.js";
 
+export * from "./elements/services/dragDropService/DragDropService.js";
+export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";
+
 export type { IElementDefinition } from "./elements/services/elementsService/IElementDefinition.js";
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
@@ -53,6 +56,8 @@ export type { IIntializationService } from "./elements/services/initializationSe
 
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";
+export * from "./elements/services/instanceService/PrepareElementsForDesignerService.js";
+export type { IPrepareElementsForDesignerService } from "./elements/services/instanceService/IPrepareElementsForDesignerService.js";
 
 export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";

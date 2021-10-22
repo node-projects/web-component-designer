@@ -41,6 +41,8 @@ import { GridPlacementService } from './placementService/GridPlacementService.js
 import { ElementAtPointService } from './elementAtPointService/ElementAtPointService';
 import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementService';
 import { SnaplinesProviderService } from './placementService/SnaplinesProviderService';
+import { PrepareElementsForDesignerService } from './instanceService/PrepareElementsForDesignerService';
+import { DragDropService } from './dragDropService/DragDropService';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -60,6 +62,8 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
   serviceContainer.register("bindingService", new PolymerBindingsService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
+  serviceContainer.register("prepareElementsForDesignerService", new PrepareElementsForDesignerService());
+  serviceContainer.register("dragDropService", new DragDropService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     new ResizeExtensionProvider(false),

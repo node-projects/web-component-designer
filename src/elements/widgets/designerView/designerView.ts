@@ -101,6 +101,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       transform-origin: 0 0;
     }
 
+    #canvas.dragFileActive {
+      outline: blue 4px solid;
+      outline-offset: -4px;
+    }
+
     node-projects-overlay-layer-view {
       box-sizing: border-box;
       width: 100%;
@@ -425,7 +430,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._outercanvas2.addEventListener(EventNames.PointerDown, this._pointerEventHandlerBound);
       this._outercanvas2.addEventListener(EventNames.PointerMove, this._pointerEventHandlerBound);
       this._outercanvas2.addEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
-      this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event))
+      this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event));
+      this._canvas.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
       this._canvas.addEventListener('keydown', this._onKeyDownBound, true);
@@ -483,26 +489,18 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     this.snapLines.clearSnaplines();
 
-    requestAnimationFrame(() => this._removeDraggableOnImages());
-  }
-
-  private _removeDraggableOnImages() {
-    this._removeDraggableOnImagesInner(this.rootDesignItem.element.querySelectorAll('*'));
-  }
-
-  private _removeDraggableOnImagesInner(elements: NodeListOf<Node>) {
-    for (let e of elements) {
-      if ((<HTMLElement>e).shadowRoot) {
-        this._removeDraggableOnImagesInner(((<HTMLElement>e).shadowRoot).querySelectorAll('*'));
-      }
-      if ((<HTMLElement>e).localName == 'img') {
-        (<HTMLElement>e).draggable = false;
-      }
-    }
+    const prepService = this.serviceContainer.prepareElementsForDesignerService;
+    if (prepService)
+      requestAnimationFrame(() => prepService.prepareElementsForDesigner(this.rootDesignItem));
   }
 
   private _onDragEnter(event: DragEvent) {
     event.preventDefault();
+  }
+
+  private _onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    this._canvas.classList.remove('dragFileActive');
   }
 
   private _onDragOver(event: DragEvent) {
@@ -514,23 +512,41 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.rootDesignItem))
       containerService.finishPlace(this, this.rootDesignItem, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
     }*/
+    if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
+      const ddService = this.serviceContainer.dragDropService;
+      if (ddService) {
+        const effect = ddService.dragOver(event);
+        event.dataTransfer.dropEffect = effect;
+        if (effect !== 'none')
+          this._canvas.classList.add('dragFileActive');
+      }
+    }
   }
 
   private async _onDrop(event: DragEvent) {
     event.preventDefault();
+    this._canvas.classList.remove('dragFileActive');
 
-    this._fillCalculationrects();
-    let transferData = event.dataTransfer.getData(dragDropFormatName);
-    let elementDefinition = <IElementDefinition>JSON.parse(transferData);
-    let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
-    let grp = di.openGroup("Insert");
-    di.setStyle('position', 'absolute')
-    const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-    di.setStyle('top', event.offsetY + targetRect.top - this.containerBoundingRect.y + 'px')
-    di.setStyle('left', event.offsetX + targetRect.left - this.containerBoundingRect.x + 'px')
-    this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
-    grp.commit();
-    requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
+    if (event.dataTransfer.files.length > 0) {
+      const ddService = this.serviceContainer.dragDropService;
+      if (ddService) {
+        ddService.drop(this, event);
+      }
+    }
+    else {
+      this._fillCalculationrects();
+      let transferData = event.dataTransfer.getData(dragDropFormatName);
+      let elementDefinition = <IElementDefinition>JSON.parse(transferData);
+      let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
+      let grp = di.openGroup("Insert");
+      di.setStyle('position', 'absolute')
+      const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+      di.setStyle('top', event.offsetY + targetRect.top - this.containerBoundingRect.y + 'px')
+      di.setStyle('left', event.offsetX + targetRect.left - this.containerBoundingRect.x + 'px')
+      this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
+      grp.commit();
+      requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
+    }
   }
 
   private _onWheel(event: WheelEvent) {
@@ -663,7 +679,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
           break;
         }
         lastElement = currentElement;
-        if (currentElement == this._canvas){
+        if (currentElement == this._canvas) {
           break;
         }
         if (currentElement === this.overlayLayer) {

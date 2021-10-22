@@ -1,0 +1,33 @@
+import { IDesignerView } from "../../widgets/designerView/IDesignerView.js";
+import { IDragDropService } from "./IDragDropService.js";
+import { DesignItem } from '../../item/DesignItem';
+import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
+
+export class DragDropService implements IDragDropService {
+
+  public dragOver(event: DragEvent): 'none' | 'copy' | 'link' | 'move' {
+    if (event.dataTransfer.items[0].type.startsWith('image/'))
+      return 'copy';
+    return 'none';
+  }
+
+  drop(designerView: IDesignerView, event: DragEvent) {
+    if (event.dataTransfer.files[0].type.startsWith('image/')) {
+      let reader = new FileReader();
+      reader.onloadend = () => {
+        const img = document.createElement('img');
+        img.src = <string>reader.result;
+        const di = DesignItem.createDesignItemFromInstance(img, designerView.serviceContainer, designerView.instanceServiceContainer);
+        let grp = di.openGroup("Insert");
+        di.setStyle('position', 'absolute')
+        const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+        di.setStyle('top', event.offsetY + targetRect.top - designerView.containerBoundingRect.y + 'px')
+        di.setStyle('left', event.offsetX + targetRect.left - designerView.containerBoundingRect.x + 'px')
+        designerView.instanceServiceContainer.undoService.execute(new InsertAction(designerView.rootDesignItem, designerView.rootDesignItem.childCount, di));
+        grp.commit();
+        requestAnimationFrame(() => designerView.instanceServiceContainer.selectionService.setSelectedElements([di]));
+      }
+      reader.readAsDataURL(event.dataTransfer.files[0]);
+    }
+  }
+}

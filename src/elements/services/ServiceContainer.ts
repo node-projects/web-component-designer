@@ -20,6 +20,8 @@ import { GlobalContext } from './GlobalContext';
 import { IBindingService } from "./bindingsService/IBindingService";
 import { IElementAtPointService } from './elementAtPointService/IElementAtPointService';
 import { ISnaplinesProviderService } from "./placementService/ISnaplinesProviderService.js";
+import { IPrepareElementsForDesignerService } from './instanceService/IPrepareElementsForDesignerService';
+import { IDragDropService } from './dragDropService/IDragDropService';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -33,6 +35,8 @@ interface ServiceNameMap {
   "intializationService": IIntializationService;
   "bindingService": IBindingService;
   "elementAtPointService": IElementAtPointService;
+  "prepareElementsForDesignerService": IPrepareElementsForDesignerService;
+  "dragDropService": IDragDropService
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -95,5 +99,13 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get elementAtPointService(): IElementAtPointService {
     return this.getLastService('elementAtPointService');
+  }
+
+  get prepareElementsForDesignerService(): IPrepareElementsForDesignerService {
+    return this.getLastService('prepareElementsForDesignerService');
+  }
+
+  get dragDropService(): IDragDropService {
+    return this.getLastService('dragDropService');
   }
 }
