@@ -8,15 +8,20 @@ export class PrepareElementsForDesignerService implements IPrepareElementsForDes
   }
 
   private _prepareElementsForDesigner(elements: NodeListOf<Node> | Node[]) {
-    for (let e of elements) {
-      if ((<HTMLElement>e).shadowRoot) {
-        this._prepareElementsForDesigner(((<HTMLElement>e).shadowRoot).querySelectorAll('*'));
+    for (let el of elements) {
+      if ((<HTMLElement>el).shadowRoot) {
+        this._prepareElementsForDesigner(((<HTMLElement>el).shadowRoot).querySelectorAll('*'));
       }
-      if (e instanceof HTMLImageElement) {
-        e.draggable = false;
+      if (el instanceof HTMLImageElement) {
+        el.draggable = false;
       }
-      else if (e instanceof HTMLInputElement) {
-        e.onmousedown = (e) => e.preventDefault();
+      else if (el instanceof HTMLInputElement) {
+        el.onmousedown = (e) => e.preventDefault();
+        //const ip = el;
+        //el.onclick = (e) => { if (ip.type == 'checkbox') ip.checked = !ip.checked };
+      }
+      else if (el instanceof HTMLSelectElement) {
+        el.onmousedown = (e) => e.preventDefault();
       }
     }
   }

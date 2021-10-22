@@ -185,7 +185,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
             <div id="outercanvas2">
               <div id="canvasContainer">
                 <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
-                <div id="canvas" tabindex="0"></div>
+                <div id="canvas" part="canvas" tabindex="0"></div>
               </div>
             </div>
           </div>

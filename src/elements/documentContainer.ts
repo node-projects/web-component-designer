@@ -46,6 +46,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._tabControl = new DesignerTabControl();
     div.appendChild(this._tabControl);
     this.designerView = new DesignerView();
+    this.designerView.setAttribute('exportparts', 'canvas');
     this.designerView.title = 'Designer';
     this._tabControl.appendChild(this.designerView);
     this.designerView.initialize(this._serviceContainer);
