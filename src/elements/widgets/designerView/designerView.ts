@@ -48,6 +48,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   public snapLines: Snaplines;
   public overlayLayer: OverlayLayerView;
   public rootDesignItem: IDesignItem;
+  public disableKeyboardEvents: boolean;
+
   private _zoomFactor = 1;
 
   // Private Variables
@@ -205,6 +207,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
         </div>`;
 
   public extensionManager: IExtensionManager;
+  private _onDblClickBound: any;
 
   constructor() {
     super();
@@ -240,6 +243,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
+    this._onDblClickBound = this._onDblClick.bind(this);
     this._onContextMenuBound = this._onContextMenu.bind(this);
     this._pointerEventHandlerBound = this._pointerEventHandler.bind(this);
 
@@ -434,8 +438,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._canvas.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
       this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
-      this._canvas.addEventListener('keydown', this._onKeyDownBound, true);
-      this._canvas.addEventListener('keyup', this._onKeyUpBound, true);
+      this._canvas.addEventListener(EventNames.KeyDown, this._onKeyDownBound, true);
+      this._canvas.addEventListener(EventNames.KeyUp, this._onKeyUpBound, true);
+      this._canvas.addEventListener(EventNames.DblClick, this._onDblClickBound, true);
       this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
     }
   }
@@ -580,7 +585,14 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     return ctxMnu;
   }
 
+  private _onDblClick(event: KeyboardEvent) {
+    event.preventDefault();
+    this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick);
+  }
+
   private onKeyUp(event: KeyboardEvent) {
+    if (this.disableKeyboardEvents) return;
+
     switch (event.key) {
       case 'ArrowUp':
         //this._resetPointerEventsForClickThrough();
@@ -591,7 +603,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
 
+
   private onKeyDown(event: KeyboardEvent) {
+    if (this.disableKeyboardEvents) return;
     //TODO: keyboard events maybe should also be handeled by tools 
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)

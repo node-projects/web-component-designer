@@ -43,6 +43,7 @@ import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementServ
 import { SnaplinesProviderService } from './placementService/SnaplinesProviderService';
 import { PrepareElementsForDesignerService } from './instanceService/PrepareElementsForDesignerService';
 import { DragDropService } from './dragDropService/DragDropService';
+import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditTextExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -93,6 +94,9 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
     new AltToEnterContainerExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
+    new EditTextExtensionProvider()
   ]);
 
   serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());

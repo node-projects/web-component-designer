@@ -26,6 +26,8 @@ export interface IDesignerView extends IPlacementView, IUiCommandHandler {
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;
 
+  disableKeyboardEvents: boolean;
+
   initialize(serviceContainer: ServiceContainer);
 
   getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint;
