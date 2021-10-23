@@ -16,6 +16,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     svg {
       width: 100%;
       height: 100%;
+      overflow: visible;
     }
 
     .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
