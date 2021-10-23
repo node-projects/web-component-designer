@@ -43,7 +43,7 @@ import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementServ
 import { SnaplinesProviderService } from './placementService/SnaplinesProviderService';
 import { PrepareElementsForDesignerService } from './instanceService/PrepareElementsForDesignerService';
 import { DragDropService } from './dragDropService/DragDropService';
-import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditTextExtensionProvider.js';
+import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();

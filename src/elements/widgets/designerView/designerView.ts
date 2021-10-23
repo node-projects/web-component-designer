@@ -48,7 +48,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   public snapLines: Snaplines;
   public overlayLayer: OverlayLayerView;
   public rootDesignItem: IDesignItem;
-  public disableKeyboardEvents: boolean;
+  public eatEvents: Element;
 
   private _zoomFactor = 1;
 
@@ -591,7 +591,8 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private onKeyUp(event: KeyboardEvent) {
-    if (this.disableKeyboardEvents) return;
+    if (event.composedPath().indexOf(this.eatEvents) >= 0)
+      return;
 
     switch (event.key) {
       case 'ArrowUp':
@@ -602,10 +603,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     event.preventDefault();
   }
 
-
-
   private onKeyDown(event: KeyboardEvent) {
-    if (this.disableKeyboardEvents) return;
+    if (event.composedPath().indexOf(this.eatEvents) >= 0)
+      return;
     //TODO: keyboard events maybe should also be handeled by tools 
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
@@ -728,6 +728,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _pointerEventHandler(event: PointerEvent) {
+    if (event.composedPath().indexOf(this.eatEvents)>=0)
+     return;
+     
     if (event.button == 2)
       return;
 

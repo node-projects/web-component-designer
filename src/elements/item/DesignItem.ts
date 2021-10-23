@@ -110,7 +110,7 @@ export class DesignItem implements IDesignItem {
     DomHelper.removeAllChildnodes(this.element);
   }
 
-
+  //abstract text content to own property. so only chnage via designer api will use it.
   public get hasContent() {
     return this.nodeType == NodeType.TextNode || (this._childArray.length === 0 && this.content !== null);
   }
@@ -178,41 +178,51 @@ export class DesignItem implements IDesignItem {
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
     let designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
 
-    for (let a of designItem.element.attributes) {
-      if (a.name !== 'style') {
-        designItem.attributes.set(a.name, a.value);
-        if (a.name === hideAtDesignTimeAttributeName)
-          designItem._hideAtDesignTime = true;
-        if (a.name === hideAtRunTimeAttributeName)
-          designItem._hideAtRunTime = true;
-        if (a.name === lockAtDesignTimeAttributeName)
-          designItem._lockAtDesignTime = true;
+    if (designItem.nodeType == NodeType.Element) {
+      for (let a of designItem.element.attributes) {
+        if (a.name !== 'style') {
+          designItem.attributes.set(a.name, a.value);
+          if (a.name === hideAtDesignTimeAttributeName)
+            designItem._hideAtDesignTime = true;
+          if (a.name === hideAtRunTimeAttributeName)
+            designItem._hideAtRunTime = true;
+          if (a.name === lockAtDesignTimeAttributeName)
+            designItem._lockAtDesignTime = true;
+        }
+
+        if (node instanceof HTMLElement || node instanceof SVGElement) {
+          for (let s of node.style) {
+            let val = node.style[s];
+            if (val && typeof val === 'string')
+              designItem.styles.set(s, node.style[s]);
+          }
+          if (!designItem._lockAtDesignTime)
+            node.style.pointerEvents = 'auto';
+          else
+            node.style.pointerEvents = 'none';
+
+          //node.style.cursor = 'pointer';
+        }
+
+        (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
       }
     }
-    if (node instanceof HTMLElement || node instanceof SVGElement) {
-      for (let s of node.style) {
-        let val = node.style[s];
-        if (val && typeof val === 'string')
-          designItem.styles.set(s, node.style[s]);
-      }
-      if (!designItem._lockAtDesignTime)
-        node.style.pointerEvents = 'auto';
-      else
-        node.style.pointerEvents = 'none';
 
-      //node.style.cursor = 'pointer';
-    }
-
-    (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
-
-    if (designItem.element.children.length === 0)
-      designItem.content = designItem.element.textContent;
-    else {
-      for (const c of designItem.element.children)
-        designItem._childArray.push(DesignItem.createDesignItemFromInstance(c, serviceContainer, instanceServiceContainer));
-    }
+    designItem.updateChildrenFromNodesChildren();
 
     return designItem;
+  }
+
+  updateChildrenFromNodesChildren() {
+    this._childArray = [];
+    if (this.nodeType == NodeType.Element) {
+      if (this.element.children && this.element.children.length === 0 && this.element.childNodes.length <= 1)
+        this.content = this.element.textContent; //was soll das bringen???
+      else {
+        for (const c of this.element.childNodes)
+          this._childArray.push(DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer));
+      }
+    }
   }
 
   constructor(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {

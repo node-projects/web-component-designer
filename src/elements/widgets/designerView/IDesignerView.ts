@@ -26,7 +26,7 @@ export interface IDesignerView extends IPlacementView, IUiCommandHandler {
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;
 
-  disableKeyboardEvents: boolean;
+  eatEvents: Element;
 
   initialize(serviceContainer: ServiceContainer);
 

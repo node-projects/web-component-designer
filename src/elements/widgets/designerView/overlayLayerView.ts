@@ -1,8 +1,8 @@
-import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
+import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { OverlayLayer } from './extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../services/ServiceContainer';
 
-export class OverlayLayerView extends BaseCustomWebComponentLazyAppend {
+export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
 
   static override readonly template = html`
     <svg id="svg" style="pointer-events: none;">

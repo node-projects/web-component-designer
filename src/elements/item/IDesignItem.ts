@@ -31,6 +31,7 @@ export interface IDesignItem {
   removeChild(designItem: IDesignItem);
   remove();
   clearChildren();
+  updateChildrenFromNodesChildren();
 
   readonly hasContent: boolean;
   content: string
