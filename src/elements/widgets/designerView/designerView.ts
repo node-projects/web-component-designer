@@ -728,9 +728,9 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
   }
 
   private _pointerEventHandler(event: PointerEvent) {
-    if (event.composedPath().indexOf(this.eatEvents)>=0)
-     return;
-     
+    if (event.composedPath().indexOf(this.eatEvents) >= 0)
+      return;
+
     if (event.button == 2)
       return;
 
@@ -750,8 +750,11 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
       this._lastHoverDesignItem = currentDesignItem;
     }
 
-    if (currentElement && DesignerView.getHost(currentElement.parentNode) === this.overlayLayer)
+    if (currentElement && DesignerView.getHost(currentElement.parentNode) === this.overlayLayer) {
+      if (this.eatEvents)
+        return;
       currentElement = this.instanceServiceContainer.selectionService.primarySelection?.element ?? this._canvas;
+    }
 
     this._fillCalculationrects();
 
