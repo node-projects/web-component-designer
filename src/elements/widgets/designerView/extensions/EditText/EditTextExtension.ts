@@ -77,6 +77,8 @@ export class EditTextExtension extends AbstractExtension {
   _blur() {
     if (!this._blurTimeout) {
       this._blurTimeout = setTimeout(() => {
+        //todo, don't remove doubleclick extension (another type could be used), remove extension itself
+        //maybe also configureable when when to remove the extension
         this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Doubleclick);
       }, 150);
     }
