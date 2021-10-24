@@ -12,11 +12,11 @@ export class EditTextExtension extends AbstractExtension {
   private _blurBound: any;
 
   private static template = html`
-    <div style="height: 24px;">
+    <div style="height: 24px; display: flex;">
       <button data-command="bold" style="pointer-events: all; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
       <button data-command="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
-      <button data-command="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
-      <button data-command="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
+      <button data-command="underlined" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
+      <button data-command="strikethrough" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
     </div>
   `;
   private _blurTimeout: NodeJS.Timeout;

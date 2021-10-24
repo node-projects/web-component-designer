@@ -19,7 +19,7 @@ export class RotateExtension extends AbstractExtension {
     const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     const line = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     line.setAttribute('r', <string><any>(7.5));
-    line.setAttribute('class', 'svg-selection svg-primary-rotate');
+    line.setAttribute('class', 'svg-primary-rotate');
     line.setAttribute('style', 'cursor: grabbing');
     g.appendChild(line)
     const g2 = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -32,7 +32,7 @@ export class RotateExtension extends AbstractExtension {
     g.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeRotate(event));
     g.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeRotate(event));
     g.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeRotate(event));
-    g.setAttribute('class', 'svg-selection svg-primary-rotate');
+    g.setAttribute('class', 'svg-primary-rotate');
     g.setAttribute('transform', 'translate(' + (itemRect.x - this.designerView.containerBoundingRect.x - 13) + ',' + (itemRect.y - this.designerView.containerBoundingRect.y - 8.5) + ')');
     this.overlayLayerView.addOverlay(g);
     this.overlays.push(g);

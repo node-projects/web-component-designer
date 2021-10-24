@@ -1,7 +1,7 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
@@ -11,12 +11,12 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.1.4",
+    "@node-projects/base-custom-webcomponent": "^0.1.6",
     "construct-style-sheets-polyfill": "^3.0.4"
   },
   "devDependencies": {
     "@node-projects/lean-he-esm": "^3.3.0",
-    "@node-projects/node-html-parser-esm": "^2.2.2",
+    "@node-projects/node-html-parser-esm": "^2.3.0",
     "@types/codemirror": "^5.60.5",
     "@types/jquery": "^3.5.8",
     "@types/jquery.fancytree": "0.0.7",
