@@ -15,8 +15,8 @@ export class EditTextExtension extends AbstractExtension {
     <div style="height: 24px; display: flex;">
       <button data-command="bold" style="pointer-events: all; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
       <button data-command="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
-      <button data-command="underlined" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
-      <button data-command="strikethrough" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
+      <button data-command="underline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
+      <button data-command="strikeThrough" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
     </div>
   `;
   private _blurTimeout: NodeJS.Timeout;
@@ -47,9 +47,9 @@ export class EditTextExtension extends AbstractExtension {
 
     let foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     foreignObject.setAttribute('x', '' + (itemRect.x - this.designerView.containerBoundingRect.x));
-    foreignObject.setAttribute('y', '' + (itemRect.y - this.designerView.containerBoundingRect.y - 32));
-    foreignObject.setAttribute('width', '50');
-    foreignObject.setAttribute('height', '32');
+    foreignObject.setAttribute('y', '' + (itemRect.y - this.designerView.containerBoundingRect.y - 30));
+    foreignObject.setAttribute('width', '96');
+    foreignObject.setAttribute('height', '24');
     foreignObject.appendChild(elements)
     this.overlayLayerView.addOverlay(foreignObject, OverlayLayer.Foregorund);
     this.overlays.push(foreignObject);
@@ -86,14 +86,8 @@ export class EditTextExtension extends AbstractExtension {
     if (this._blurTimeout)
       clearTimeout(this._blurTimeout);
     this._blurTimeout = null;
-
-    const selection = <Selection>(<any>this.designerView.shadowRoot).getSelection()
-    console.log(selection);
-    switch (type) {
-      case 'bold':
-        document.execCommand('bold',false,null);
-        break;
-    }
+    //const selection = <Selection>(<any>this.designerView.shadowRoot).getSelection()
+    document.execCommand(type, false, null);
     (<HTMLElement>this.extendedItem.element).focus()
   }
 }
