@@ -14,7 +14,7 @@ export class DrawElementTool implements ITool {
 
   readonly cursor = 'crosshair';
   private _rect: any;
- 
+
   constructor(elementDefinition: IElementDefinition) {
     this._elementDefinition = elementDefinition;
   }
@@ -41,7 +41,7 @@ export class DrawElementTool implements ITool {
   private async _onPointerDown(designerView: IDesignerView, event: PointerEvent) {
     event.preventDefault();
     this._startPosition = { x: event.x, y: event.y };
-   
+
     this._createdItem = await designerView.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(this._elementDefinition, designerView.serviceContainer, designerView.instanceServiceContainer));
     const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
     this._createdItem.setStyle('position', 'absolute');
@@ -70,11 +70,16 @@ export class DrawElementTool implements ITool {
         this._rect.setAttribute('y', <string><any>(this._startPosition.y - designerView.containerBoundingRect.y));
       }
 
-      this._rect.setAttribute('width', event.x - this._startPosition.x);
-      this._rect.setAttribute('height', event.y - this._startPosition.y);
-
-      this._createdItem.setStyle('width', event.x - this._startPosition.x + 'px')
-      this._createdItem.setStyle('height', event.y - this._startPosition.y + 'px')
+      const w = event.x - this._startPosition.x;
+      const h = event.y - this._startPosition.y;
+      if (w >= 0) {
+        this._rect.setAttribute('width', w);
+        this._createdItem.setStyle('width', w + 'px');
+      }
+      if (h >= 0) {
+        this._rect.setAttribute('height', h);
+        this._createdItem.setStyle('height', h + 'px');
+      }
     }
   }
 
@@ -84,7 +89,7 @@ export class DrawElementTool implements ITool {
     this._startPosition = null;
     this._rect = null;
     this._createdItem = null;
-    
+
     designerView.serviceContainer.globalContext.finishedWithTool(this);
   }
 }

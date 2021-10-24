@@ -751,7 +751,7 @@ export class DesignerView extends BaseCustomWebComponentLazyAppend implements ID
     }
 
     if (currentElement && DesignerView.getHost(currentElement.parentNode) === this.overlayLayer)
-      currentElement = this.instanceServiceContainer.selectionService.primarySelection.element ?? this._canvas;
+      currentElement = this.instanceServiceContainer.selectionService.primarySelection?.element ?? this._canvas;
 
     this._fillCalculationrects();
 
