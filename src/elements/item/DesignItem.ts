@@ -9,6 +9,7 @@ import { PropertyChangeAction } from '../services/undoService/transactionItems/P
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
+import { CssAttributeParser } from '../helper/CssAttributeParser.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -188,24 +189,27 @@ export class DesignItem implements IDesignItem {
             designItem._hideAtRunTime = true;
           if (a.name === lockAtDesignTimeAttributeName)
             designItem._lockAtDesignTime = true;
-        }
-
-        if (node instanceof HTMLElement || node instanceof SVGElement) {
-          for (let s of node.style) {
-            let val = node.style[s];
-            if (val && typeof val === 'string')
-              designItem.styles.set(s, node.style[s]);
-          }
-          if (!designItem._lockAtDesignTime)
-            node.style.pointerEvents = 'auto';
-          else
-            node.style.pointerEvents = 'none';
-
-          //node.style.cursor = 'pointer';
-        }
-
-        (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
+        }        
       }
+
+      if (node instanceof HTMLElement || node instanceof SVGElement) {
+        const cssParser = new CssAttributeParser();
+        const st = node.getAttribute("style");
+        if (st) {
+          cssParser.parse(st);
+          for (let e of cssParser.entries) {
+            designItem.styles.set(e.name, e.value);
+          }
+        }
+        if (!designItem._lockAtDesignTime)
+          node.style.pointerEvents = 'auto';
+        else
+          node.style.pointerEvents = 'none';
+
+        //node.style.cursor = 'pointer';
+      }
+
+      (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
     }
 
     designItem.updateChildrenFromNodesChildren();

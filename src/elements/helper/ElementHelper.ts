@@ -4,3 +4,7 @@ export function newElementFromString(text): Element {
   const fragment = range.createContextualFragment(text);
   return fragment.firstChild as Element;
 }
+
+export function isInline(element: HTMLElement): boolean {
+  return element != null && window.getComputedStyle(element).display.startsWith('inline');
+}

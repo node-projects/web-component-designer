@@ -4,7 +4,7 @@ export class CssCombiner {
   private static _helperElement = document.createElement('div');
 
   //todo: inset, 
-  
+
   static combine(styles: Map<string, string | IBinding>, globalStyles?: Map<string, string>) {
     let e = CssCombiner._helperElement;
     e.setAttribute('style', '');
@@ -29,6 +29,27 @@ export class CssCombiner {
   }
 
   private static combineBorder(styles: Map<string, string | IBinding>) {
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-left-style')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-right-style')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-top-style')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-bottom-style')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-left-color')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-right-color')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-top-color')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-bottom-color')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-left-width')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-right-width')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-top-width')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-bottom-width')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-width')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-style')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-color')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-top')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-right')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-left')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-bottom')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-width')) return;
+
     let e = CssCombiner._helperElement;
     let bls = e.style.borderLeftStyle;
     let blc = e.style.borderLeftColor;
@@ -85,6 +106,12 @@ export class CssCombiner {
   }
 
   private static combineMargin(styles: Map<string, string | IBinding>) {
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin-top')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin-right')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin-bottom')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin-left')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin')) return;
+
     let e = CssCombiner._helperElement;
     if (e.style.marginTop && e.style.marginRight && e.style.marginBottom && e.style.marginLeft) {
       styles.delete('margin-top');
@@ -96,6 +123,12 @@ export class CssCombiner {
   }
 
   private static combinePadding(styles: Map<string, string | IBinding>) {
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-top')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-right')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-bottom')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-left')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding')) return;
+         
     let e = CssCombiner._helperElement;
     if (e.style.paddingTop && e.style.paddingRight && e.style.paddingBottom && e.style.paddingLeft) {
       styles.delete('padding-top');
@@ -107,6 +140,20 @@ export class CssCombiner {
   }
 
   private static combineBackground(styles: Map<string, string | IBinding>) {
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-image')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-position')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-position-x')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-position-y')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-size')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-repeat')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-repeat-x')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-repeat-y')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-attachment')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-origin')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-clip')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-color')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background')) return;
+     
     let e = CssCombiner._helperElement;
     styles.delete('background-image');
     styles.delete('background-position');
@@ -145,6 +192,13 @@ export class CssCombiner {
   }
 
   private static combineFont(styles: Map<string, string | IBinding>) {
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-style')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-weight')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-size')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'line-height')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-family')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font')) return;
+         
     let e = CssCombiner._helperElement;
     if (e.style.fontFamily) {
       styles.delete('font-style');
@@ -167,5 +221,18 @@ export class CssCombiner {
         font += (font === '' ? '' : ' ') + e.style.fontFamily;
       styles.set('font', font);
     }
+  }
+
+  private static checkIfStyleIsCombinable(styles: Map<string, string | IBinding>, name: string) {
+    if (styles.has(name)) {
+      const st = styles.get(name);
+      if (typeof st == 'string') {
+        if (st.startsWith('var('))
+          return false;
+        return true;
+      }
+      return false;
+    }
+    return true;
   }
 }

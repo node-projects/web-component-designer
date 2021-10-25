@@ -7,10 +7,25 @@ import { CssCombiner } from '../../helper/CssCombiner';
 import { NodeType } from '../../item/NodeType';
 import { IStringPosition } from './IStringPosition';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper';
+import { isInline } from '../../helper/ElementHelper.js';
 
 export class HtmlWriterService implements IHtmlWriterService {
   canWrite(designItem: IDesignItem) {
     return true;
+  }
+
+  private _conditionalyWriteIndent(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
+    if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
+      (designItem.element.previousSibling instanceof HTMLElement && !isInline(designItem.element.previousSibling))
+    )
+      indentedTextWriter.writeIndent();
+  }
+
+  private _conditionalyWriteNewline(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
+    if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
+      (designItem.element.nextSibling instanceof HTMLElement && !isInline(designItem.element.nextSibling))
+    )
+      indentedTextWriter.writeNewline();
   }
 
   write(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
@@ -19,11 +34,11 @@ export class HtmlWriterService implements IHtmlWriterService {
     if (designItem.nodeType == NodeType.TextNode) {
       this.writeTextNode(indentedTextWriter, designItem, true);
     } else if (designItem.nodeType == NodeType.Comment) {
-      indentedTextWriter.writeIndent();
+      this._conditionalyWriteIndent(indentedTextWriter, designItem);
       indentedTextWriter.write('<!--' + designItem.content + '-->');
-      indentedTextWriter.writeNewline();
+      this._conditionalyWriteNewline(indentedTextWriter, designItem);
     } else {
-      indentedTextWriter.writeIndent();
+      this._conditionalyWriteIndent(indentedTextWriter, designItem);
       indentedTextWriter.write('<' + designItem.name);
 
       if (designItem.hasAttributes) {
@@ -85,7 +100,7 @@ export class HtmlWriterService implements IHtmlWriterService {
 
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
-      indentedTextWriter.writeNewline();
+      this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
 
     if (designItemsAssignmentList) {
@@ -97,10 +112,10 @@ export class HtmlWriterService implements IHtmlWriterService {
     let content = DomConverter.normalizeContentValue(designItem.content).trim();
     if (content) {
       if (indentAndNewline)
-        indentedTextWriter.writeIndent();
+        this._conditionalyWriteIndent(indentedTextWriter, designItem);
       indentedTextWriter.write(content);
       if (indentAndNewline)
-        indentedTextWriter.writeNewline();
+        this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
   }
 }
