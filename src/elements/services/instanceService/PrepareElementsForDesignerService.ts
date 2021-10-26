@@ -4,13 +4,22 @@ import { IPrepareElementsForDesignerService } from "./IPrepareElementsForDesigne
 export class PrepareElementsForDesignerService implements IPrepareElementsForDesignerService {
 
   prepareElementsForDesigner(designItem: IDesignItem) {
-    this._prepareElementsForDesigner([designItem.element]);
+    if (designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem)
+      this._prepareElementsForDesigner([designItem.element], true);
+    this._prepareElementsForDesigner(designItem.element.querySelectorAll('*'), true);
   }
 
-  private _prepareElementsForDesigner(elements: NodeListOf<Node> | Node[]) {
+  private _prepareElementsForDesigner(elements: NodeListOf<Node> | Node[], rootElements: boolean) {
     for (let el of elements) {
       if ((<HTMLElement>el).shadowRoot) {
-        this._prepareElementsForDesigner(((<HTMLElement>el).shadowRoot).querySelectorAll('*'));
+        this._prepareElementsForDesigner(((<HTMLElement>el).shadowRoot).querySelectorAll('*'), false);
+      }
+      if (el instanceof HTMLElement) {
+        el.onclick = null;
+        el.onmousedown = null;
+        el.onmouseup = null;
+        if (!rootElements)
+          el.style.pointerEvents = 'none';
       }
       if (el instanceof HTMLImageElement) {
         el.draggable = false;

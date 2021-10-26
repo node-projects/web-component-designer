@@ -4,7 +4,7 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { IElementDefinition } from '../../../services/elementsService/IElementDefinition';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
-import { IDesignerView } from '../IDesignerView';
+import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 
 export class DrawElementTool implements ITool {
@@ -24,7 +24,7 @@ export class DrawElementTool implements ITool {
       this._createdItem.element.parentElement.removeChild(this._createdItem.element);
   }
 
-  pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
+  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     switch (event.type) {
       case EventNames.PointerDown:
         this._onPointerDown(designerView, event);
@@ -38,7 +38,7 @@ export class DrawElementTool implements ITool {
     }
   }
 
-  private async _onPointerDown(designerView: IDesignerView, event: PointerEvent) {
+  private async _onPointerDown(designerView: IDesignerCanvas, event: PointerEvent) {
     event.preventDefault();
     this._startPosition = { x: event.x, y: event.y };
 
@@ -59,7 +59,7 @@ export class DrawElementTool implements ITool {
     designerView.instanceServiceContainer.selectionService.clearSelectedElements();
   }
 
-  private async _onPointerMove(designerView: IDesignerView, event: PointerEvent) {
+  private async _onPointerMove(designerView: IDesignerCanvas, event: PointerEvent) {
     if (this._createdItem) {
       if (!this._rect) {
         designerView.rootDesignItem.element.appendChild(this._createdItem.element);
@@ -83,7 +83,7 @@ export class DrawElementTool implements ITool {
     }
   }
 
-  private async _onPointerUp(designerView: IDesignerView, event: PointerEvent) {
+  private async _onPointerUp(designerView: IDesignerCanvas, event: PointerEvent) {
     designerView.overlayLayer.removeOverlay(this._rect);
     designerView.instanceServiceContainer.selectionService.setSelectedElements([this._createdItem]);
     this._startPosition = null;

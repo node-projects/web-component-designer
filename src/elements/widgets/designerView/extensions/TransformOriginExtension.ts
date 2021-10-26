@@ -1,7 +1,7 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
 import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
 import { IExtensionManager } from "./IExtensionManger";
 
@@ -10,7 +10,7 @@ export class TransformOriginExtension extends AbstractExtension {
   private _circle: SVGCircleElement;
   private _circle2: SVGCircleElement;
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 

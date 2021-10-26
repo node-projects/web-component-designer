@@ -1,12 +1,12 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
 import { IExtensionManager } from "./IExtensionManger";
 
 export class RotateExtension extends AbstractExtension {
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 

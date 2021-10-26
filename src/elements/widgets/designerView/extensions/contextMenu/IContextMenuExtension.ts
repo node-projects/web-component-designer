@@ -1,8 +1,8 @@
 import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerView } from "../../IDesignerView";
+import { IDesignerCanvas } from "../../IDesignerCanvas";
 
 export interface IContextMenuExtension {
-  shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem);
-  provideContextMenuItems(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[];
+  shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem);
+  provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[];
 }

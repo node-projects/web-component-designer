@@ -1,4 +1,4 @@
-import { IDesignerView } from "../../widgets/designerView/IDesignerView.js";
+import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { IDragDropService } from "./IDragDropService.js";
 import { DesignItem } from '../../item/DesignItem';
 import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
@@ -11,7 +11,7 @@ export class DragDropService implements IDragDropService {
     return 'none';
   }
 
-  drop(designerView: IDesignerView, event: DragEvent) {
+  drop(designerView: IDesignerCanvas, event: DragEvent) {
     if (event.dataTransfer.files[0].type.startsWith('image/')) {
       let reader = new FileReader();
       reader.onloadend = () => {

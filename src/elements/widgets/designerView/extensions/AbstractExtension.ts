@@ -1,5 +1,5 @@
 import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IDesignerExtension } from "./IDesignerExtension";
 import { IExtensionManager } from "./IExtensionManger";
 import { OverlayLayerView } from '../overlayLayerView';
@@ -9,10 +9,10 @@ export abstract class AbstractExtension implements IDesignerExtension {
   protected overlays: SVGGraphicsElement[] = [];
   protected overlayLayerView: OverlayLayerView;
   protected extensionManager: IExtensionManager;
-  protected designerView: IDesignerView;
+  protected designerView: IDesignerCanvas;
   protected extendedItem: IDesignItem;
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     this.extensionManager = extensionManager;
     this.designerView = designerView;
     this.extendedItem = extendedItem;

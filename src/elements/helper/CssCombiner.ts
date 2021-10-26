@@ -14,6 +14,7 @@ export class CssCombiner {
     CssCombiner.combineBorder(styles);
     CssCombiner.combineMargin(styles);
     CssCombiner.combinePadding(styles);
+    CssCombiner.combineInset(styles);
     CssCombiner.combineBackground(styles);
     CssCombiner.combineFont(styles);
 
@@ -136,6 +137,23 @@ export class CssCombiner {
       styles.delete('padding-bottom');
       styles.delete('padding-left');
       styles.set('padding', e.style.paddingTop + ' ' + e.style.paddingRight + ' ' + e.style.paddingBottom + ' ' + e.style.paddingLeft);
+    }
+  }
+
+  private static combineInset(styles: Map<string, string | IBinding>) {
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'top')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'right')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'bottom')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'left')) return;
+    if (!CssCombiner.checkIfStyleIsCombinable(styles, 'inset')) return;
+         
+    let e = CssCombiner._helperElement;
+    if (e.style.top && e.style.right && e.style.bottom && e.style.left) {
+      styles.delete('top');
+      styles.delete('right');
+      styles.delete('bottom');
+      styles.delete('left');
+      styles.set('inset', e.style.top + ' ' + e.style.right + ' ' + e.style.bottom + ' ' + e.style.left);
     }
   }
 

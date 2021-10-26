@@ -1,7 +1,7 @@
 import { IService } from "../IService";
-import { IDesignerView } from '../../widgets/designerView/IDesignerView';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas';
 import { IPoint } from "../../../interfaces/IPoint";
 
 export interface IElementAtPointService extends IService {
-  getElementAtPoint(designerView: IDesignerView, point: IPoint);
+  getElementAtPoint(designerView: IDesignerCanvas, point: IPoint);
 }

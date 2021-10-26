@@ -3,7 +3,7 @@ import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint'
 import { DesignItem } from '../../../item/DesignItem';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
-import { IDesignerView } from '../IDesignerView';
+import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 
 export class MagicWandSelectorTool implements ITool {
@@ -13,7 +13,7 @@ export class MagicWandSelectorTool implements ITool {
   private _path: SVGPathElement;
   private _initialPoint: IDesignerMousePoint;
 
-  pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
+  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerView.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
 
     switch (event.type) {

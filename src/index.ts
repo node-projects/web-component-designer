@@ -98,7 +98,7 @@ export * from "./elements/services/ServiceContainer.js";
 export * from "./elements/widgets/propertyGrid/PropertyGrid.js";
 export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";
 
-export type { IDesignerView } from "./elements/widgets/designerView/IDesignerView.js";
+export type { IDesignerCanvas as IDesignerView } from "./elements/widgets/designerView/IDesignerCanvas.js";
 export * from "./elements/widgets/designerView/designerView.js";
 export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";

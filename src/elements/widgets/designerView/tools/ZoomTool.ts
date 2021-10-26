@@ -1,11 +1,11 @@
-import { IDesignerView } from '../IDesignerView';
+import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 
 export class ZoomTool implements ITool {
 
   readonly cursor: string = 'zoom-in';
   
-  pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
+  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
   }
   
   dispose(): void {

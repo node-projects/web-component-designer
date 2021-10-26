@@ -2,7 +2,7 @@ import { EventNames } from '../../../../enums/EventNames';
 import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
 import { movePathData } from '../../../helper/PathDataPolyfill';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
-import { IDesignerView } from '../IDesignerView';
+import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 import { DesignItem } from '../../../item/DesignItem';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
@@ -21,7 +21,7 @@ export class DrawPathTool implements ITool {
   dispose(): void {
   }
 
-  pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
+  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerView.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
 
     const offset = 50;

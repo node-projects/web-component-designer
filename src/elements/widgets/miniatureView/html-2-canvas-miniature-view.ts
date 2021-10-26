@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentLazyAppend, css, html, DomHelper } from '@node-projects/base-custom-webcomponent';
-import { IDesignerView } from "../designerView/IDesignerView";
+import { IDesignerCanvas } from "../designerView/IDesignerCanvas";
 import { IMiniatureView } from "./IMiniatureView";
 
 export class Html2CanvasMiniatureView extends BaseCustomWebComponentLazyAppend implements IMiniatureView {
@@ -17,7 +17,7 @@ export class Html2CanvasMiniatureView extends BaseCustomWebComponentLazyAppend i
     this._imgdiv = this._getDomElement<HTMLDivElement>('imgdiv');
   }
 
-  reRender(designerView: IDesignerView) {
+  reRender(designerView: IDesignerCanvas) {
     //@ts-ignore
     html2canvas(designerView.rootDesignItem.element).then(canvas => {
       DomHelper.removeAllChildnodes(this._imgdiv);

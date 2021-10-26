@@ -1,5 +1,5 @@
 import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from "./AbstractExtension";
 import "../../../helper/PathDataPolyfill";
 import { IPoint } from "../../../../interfaces/IPoint";
@@ -11,7 +11,7 @@ export class PathExtension extends AbstractExtension {
   private _lastPos: IPoint
   private _parentRect: DOMRect;
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 

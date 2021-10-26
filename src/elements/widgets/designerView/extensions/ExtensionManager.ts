@@ -1,15 +1,15 @@
 import { DesignItem } from "../../../item/DesignItem";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { ISelectionChangedEvent } from "../../../services/selectionService/ISelectionChangedEvent";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { ExtensionType } from './ExtensionType';
 import { IExtensionManager } from "./IExtensionManger";
 
 export class ExtensionManager implements IExtensionManager {
 
-  designerView: IDesignerView;
+  designerView: IDesignerCanvas;
 
-  constructor(designerView: IDesignerView) {
+  constructor(designerView: IDesignerCanvas) {
     this.designerView = designerView;
 
     designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));

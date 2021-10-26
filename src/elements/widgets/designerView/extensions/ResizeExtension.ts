@@ -2,7 +2,7 @@ import { EventNames } from "../../../../enums/EventNames";
 import { IDesignerMousePoint } from "../../../../interfaces/IDesignerMousePoint";
 import { ISize } from "../../../../interfaces/ISize";
 import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
 import { AbstractExtension } from './AbstractExtension';
 import { IExtensionManager } from "./IExtensionManger";
@@ -22,7 +22,7 @@ export class ResizeExtension extends AbstractExtension {
   private _circle7: SVGCircleElement;
   private _circle8: SVGCircleElement;
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerView, extendedItem: IDesignItem, resizeAllSelected: boolean) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
     super(extensionManager, designerView, extendedItem);
     this.resizeAllSelected = resizeAllSelected;
   }

@@ -1,13 +1,13 @@
 import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
 import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IDesignerExtension } from "./IDesignerExtension";
 import { IExtensionManager } from "./IExtensionManger";
 import { InvisibleDivExtension } from "./InvisibleDivExtension";
 import { css } from "@node-projects/base-custom-webcomponent";
 
 export class InvisibleDivExtensionProvider implements IDesignerExtensionProvider {
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.name == 'div') {
       const st = window.getComputedStyle(designItem.element);
       return st.backgroundColor == 'rgba(0, 0, 0, 0)' && st.borderStyle == 'none'
@@ -15,7 +15,7 @@ export class InvisibleDivExtensionProvider implements IDesignerExtensionProvider
     return false;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): IDesignerExtension {
+  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
     return new InvisibleDivExtension(extensionManager, designerView, designItem);
   }
 

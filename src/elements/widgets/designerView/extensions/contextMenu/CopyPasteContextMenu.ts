@@ -1,15 +1,15 @@
 import { CommandType } from "../../../../../commandHandling/CommandType";
 import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerView } from "../../IDesignerView";
+import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { IContextMenuExtension } from "./IContextMenuExtension";
 
 export class CopyPasteContextMenu implements IContextMenuExtension{
-  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem) {
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem) {
     return true;
   }
 
-  public provideContextMenuItems(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
+  public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
       { title: 'copy', action: () => { designerView.executeCommand({ type: CommandType.copy }); } },
       { title: 'cut', action: () => { designerView.executeCommand({ type: CommandType.cut }); } },

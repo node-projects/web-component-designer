@@ -1,4 +1,4 @@
-import { IDesignerView } from '../IDesignerView';
+import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 
 export class TextTool implements ITool {
@@ -10,7 +10,7 @@ export class TextTool implements ITool {
 
   readonly cursor = 'text';
 
-  pointerEventHandler(designerView: IDesignerView, event: PointerEvent, currentElement: Element) {
+  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
    
   }
 }

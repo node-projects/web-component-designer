@@ -1,16 +1,16 @@
 import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
 import { DesignItem } from "../../../../item/DesignItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerView } from "../../IDesignerView";
+import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { IContextMenuExtension } from "./IContextMenuExtension";
 
 export class ItemsBelowContextMenu implements IContextMenuExtension {
 
-  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem) {
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem) {
     return true;
   }
 
-  public provideContextMenuItems(event: MouseEvent, designerView: IDesignerView, designItem: IDesignItem): IContextMenuItem[] {
+  public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
 
     const lstItems = this._searchForItemsBelow(event, designerView);
     if (lstItems.length > 0) {
@@ -19,12 +19,12 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
     }
     return [];
   }
-  private _select(designerView: IDesignerView, element: Element) {
+  private _select(designerView: IDesignerCanvas, element: Element) {
     const item = DesignItem.GetOrCreateDesignItem(element, designerView.serviceContainer, designerView.instanceServiceContainer);
     designerView.instanceServiceContainer.selectionService.setSelectedElements([item]);
   }
 
-  private _searchForItemsBelow(event: MouseEvent, designerView: IDesignerView): Element[] {
+  private _searchForItemsBelow(event: MouseEvent, designerView: IDesignerCanvas): Element[] {
     const lstEl: HTMLElement[] = [];
     //search for containers below mouse cursor.
     //to do this, we need to disable pointer events for each in a loop and search wich element is there

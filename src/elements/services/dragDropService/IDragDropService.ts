@@ -1,6 +1,6 @@
-import { IDesignerView } from "../../widgets/designerView/IDesignerView.js";
+import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 
 export interface IDragDropService {
   dragOver(event: DragEvent): 'none' | 'copy' | 'link' | 'move';
-  drop(designerView: IDesignerView, event: DragEvent);
+  drop(designerView: IDesignerCanvas, event: DragEvent);
 }

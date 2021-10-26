@@ -1,6 +1,6 @@
 import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
 import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerView } from "../IDesignerView";
+import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IDesignerExtension } from "./IDesignerExtension";
 import { ResizeExtension } from "./ResizeExtension";
 import { IExtensionManager } from "./IExtensionManger";
@@ -12,11 +12,11 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
     this.resizeAllSelected = resizeAllSelected;
   }
 
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     return true;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerView, designItem: IDesignItem): IDesignerExtension {
+  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
     return new ResizeExtension(extensionManager, designerView, designItem, this.resizeAllSelected);
   }
 }
