@@ -9,4 +9,7 @@ export interface IBinding {
     invert?: boolean;
     converter?: string;
     changedEvent?: string;
+    nullSafe?:boolean;
+    rawName?: string;
+    rawValue?: string;
 }

@@ -16,10 +16,10 @@ export interface IDesignItem {
   readonly id: string
 
   readonly hasAttributes: boolean;
-  readonly attributes: Map<string, string|IBinding>
+  readonly attributes: Map<string, string | IBinding>
 
   readonly hasStyles: boolean;
-  readonly styles: Map<string, string|IBinding>
+  readonly styles: Map<string, string | IBinding>
 
   readonly hasChildren: boolean;
   children(): IterableIterator<IDesignItem>
@@ -46,11 +46,11 @@ export interface IDesignItem {
   getOrCreateDesignItem(node: Node);
 
   openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup
-  
-  setStyle(name: keyof CSSStyleDeclaration, value?: string | null);
+
+  setStyle(name: keyof CSSStyleDeclaration, value?: string | IBinding | null);
   removeStyle(name: keyof CSSStyleDeclaration);
 
-  setAttribute(name: string, value?: string | null);
+  setAttribute(name: string, value?: string | IBinding | null);
   removeAttribute(name: string);
 
   hideAtDesignTime: boolean;

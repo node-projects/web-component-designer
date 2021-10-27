@@ -57,8 +57,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
 
-  get bindingServices(): IBindingService[] {
-    return this.getServices('bindingService');
+  get bindingService(): IBindingService {
+    return this.getLastService('bindingService');
   }
 
   get propertiesServices(): IPropertiesService[] {

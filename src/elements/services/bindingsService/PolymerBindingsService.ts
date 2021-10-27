@@ -1,4 +1,4 @@
-import { IndentedTextWriter } from "../../helper/IndentedTextWriter";
+/*import { IndentedTextWriter } from "../../helper/IndentedTextWriter";
 import { IDesignItem } from "../../item/IDesignItem";
 import { DomConverter } from "../../widgets/designerView/DomConverter";
 import { IBinding } from "./IBinding";
@@ -34,4 +34,4 @@ export class PolymerBindingsService implements IBindingService {
     indentedTextWriter.write(keyValuePair[0] + '="' + (keyValuePair[1].mode == BindingMode.oneWay ? '[[' : '{{') + DomConverter.normalizeAttributeValue(keyValuePair[1].expression) + (keyValuePair[1].mode == BindingMode.oneWay ? ']]' : ']]') + '"');
     return true;
   }
-}
+}*/

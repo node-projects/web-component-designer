@@ -1,9 +1,10 @@
 import { ITransactionItem } from '../ITransactionItem';
 import { IDesignItem } from '../../../item/IDesignItem';
+import { IBinding } from '../../bindingsService/IBinding.js';
 
 export class AttributeChangeAction implements ITransactionItem {
 
-  constructor(designItem: IDesignItem, name: string, newValue: any, oldValue: any) {
+  constructor(designItem: IDesignItem, name: string, newValue: string | IBinding | null, oldValue: string | IBinding | null) {
     this.title = "Change Attribute";
 
     this.designItem = designItem;
@@ -32,7 +33,8 @@ export class AttributeChangeAction implements ITransactionItem {
       this.designItem.attributes.set(<string>this.name, this.oldValue);
       if (this.name != "draggable") {
         try {
-          this.designItem.element.setAttribute(this.name, this.oldValue);
+          if (typeof this.oldValue === 'string')
+            this.designItem.element.setAttribute(this.name, this.oldValue);
         }
         catch (e) {
           console.warn(e)
@@ -55,7 +57,8 @@ export class AttributeChangeAction implements ITransactionItem {
       this.designItem.attributes.set(<string>this.name, this.newValue);
       if (this.name != "draggable") {
         try {
-          this.designItem.element.setAttribute(this.name, this.newValue);
+          if (typeof this.newValue === 'string')
+            this.designItem.element.setAttribute(this.name, this.newValue);
         }
         catch (e) {
           console.warn(e)

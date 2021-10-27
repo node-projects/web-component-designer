@@ -9,6 +9,7 @@ import { IBinding } from "./IBinding";
  */
 export interface IBindingService {
   writeBindingMode: 'none' | 'direct' | 'afterElement';
-  parseBindings(designItem: IDesignItem);
+  parseBindingAttribute(attributeName:string, value:string) : IBinding;
+  parseBindingCss(attributeName:string, value:string) : IBinding;
   writeBinding(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, type: 'style' | 'attribute', keyValuePair: [key: string, value: IBinding]): boolean;
 }

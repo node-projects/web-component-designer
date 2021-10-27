@@ -102,6 +102,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public createElements(designItem: IDesignItem) {
+    DomHelper.removeAllChildnodes(this._div);
+    this._propertyMap.clear();
     if (this._propertiesService) {
       let properties = this._propertiesService.getProperties(designItem);
       if (properties) {
@@ -119,8 +121,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             rectContainer.style.display = 'flex';
             rectContainer.style.alignItems = 'center';
             let rect = document.createElement("div")
-            rect.style.width = '5px';
-            rect.style.height = '5px';
+            rect.style.width = '7px';
+            rect.style.height = '7px';
             rect.style.border = '1px white solid';
             rectContainer.appendChild(rect);
             this._div.appendChild(rectContainer);

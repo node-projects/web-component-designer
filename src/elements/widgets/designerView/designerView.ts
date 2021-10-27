@@ -10,7 +10,7 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 
 export class DesignerView extends BaseCustomWebComponentConstructorAppend implements IUiCommandHandler {
-  
+
   public get serviceContainer(): ServiceContainer {
     return this._designerCanvas.serviceContainer;
   }
@@ -148,6 +148,10 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   set additionalStyle(value: CSSStyleSheet) {
     this._designerCanvas.additionalStyle = value;
+  }
+
+  public setDesignItems(designItems: IDesignItem[]) {
+    this._designerCanvas.setDesignItems(designItems);
   }
 
   /* --- start IUiCommandHandler --- */

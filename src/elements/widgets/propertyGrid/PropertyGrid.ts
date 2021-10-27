@@ -5,6 +5,7 @@ import { IDesignItem } from '../../item/IDesignItem';
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { CssPropertiesService } from '../../services/propertiesService/services/CssPropertiesService';
 import { CommonPropertiesService } from '../../services/propertiesService/services/CommonPropertiesService';
+import { AttributesPropertiesService } from '../../services/propertiesService/services/AttributesPropertiesService';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
@@ -54,12 +55,19 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._propertyGridPropertyLists = [];
 
     let elementPropertyEditorAttributeList = new PropertyGridPropertyList(value);
-    elementPropertyEditorAttributeList.setPropertiesService(new CssPropertiesService("styles"))
+    elementPropertyEditorAttributeList.setPropertiesService(new CssPropertiesService("styles")) //This is replace in selectedItems
     elementPropertyEditorAttributeList.title = "properties";
     this._designerTabControl.appendChild(elementPropertyEditorAttributeList);
     this._propertyGridPropertyLists.push(elementPropertyEditorAttributeList);
 
     let attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new AttributesPropertiesService())
+    attributeEditorAttributeList.createElements(null);
+    attributeEditorAttributeList.title = "attributes";
+    this._designerTabControl.appendChild(attributeEditorAttributeList);
+    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
+
+    attributeEditorAttributeList = new PropertyGridPropertyList(value);
     attributeEditorAttributeList.setPropertiesService(new CommonPropertiesService())
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "common";
@@ -104,6 +112,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
       const propService = this._serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this.selectedItems[0]));
       this._propertyGridPropertyLists[0].setPropertiesService(propService)
       this._propertyGridPropertyLists[0].createElements(this.selectedItems[0]);
+      this._propertyGridPropertyLists[1].createElements(this.selectedItems[0]);
     }
 
     for (const a of this._propertyGridPropertyLists) {
