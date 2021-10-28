@@ -21,8 +21,8 @@ export class DrawPathTool implements ITool {
   dispose(): void {
   }
 
-  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    const currentPoint = designerView.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
+  pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    const currentPoint = designerCanvas.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
 
     const offset = 50;
 
@@ -33,9 +33,9 @@ export class DrawPathTool implements ITool {
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
         this._path.setAttribute("D", this._pathD);
-        this._path.setAttribute("stroke", designerView.serviceContainer.globalContext.strokeColor);
-        this._path.setAttribute("fill", designerView.serviceContainer.globalContext.fillBrush);
-        designerView.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
+        this._path.setAttribute("stroke", designerCanvas.serviceContainer.globalContext.strokeColor);
+        this._path.setAttribute("fill", designerCanvas.serviceContainer.globalContext.fillBrush);
+        designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
         break;
 
       case EventNames.PointerMove:
@@ -49,11 +49,11 @@ export class DrawPathTool implements ITool {
         (<Element>event.target).releasePointerCapture(event.pointerId);
         const rect = this._path.getBoundingClientRect();
 
-        designerView.overlayLayer.removeOverlay(this._path);
+        designerCanvas.overlayLayer.removeOverlay(this._path);
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
-        const mvX = rect.x - designerView.containerBoundingRect.x - offset;
-        const mvY = rect.y - designerView.containerBoundingRect.y - offset;
+        const mvX = rect.x - designerCanvas.containerBoundingRect.x - offset;
+        const mvY = rect.y - designerCanvas.containerBoundingRect.y - offset;
         const d = movePathData(this._path, mvX, mvY);
         this._path.setAttribute("d", d);
         svg.appendChild(this._path);
@@ -66,10 +66,10 @@ export class DrawPathTool implements ITool {
         this._path = null;
         this._pathD = null;
 
-        const di = DesignItem.createDesignItemFromInstance(svg, designerView.serviceContainer, designerView.instanceServiceContainer);
-        designerView.instanceServiceContainer.undoService.execute(new InsertAction(designerView.rootDesignItem, designerView.rootDesignItem.childCount, di));
+        const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+        designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
 
-        designerView.serviceContainer.globalContext.finishedWithTool(this);
+        designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
 
         break;

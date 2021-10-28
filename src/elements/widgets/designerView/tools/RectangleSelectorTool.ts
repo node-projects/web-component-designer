@@ -12,8 +12,8 @@ export class RectangleSelectorTool implements ITool {
   private _rect: SVGRectElement;
   private _initialPoint: IDesignerMousePoint;
 
-  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    const currentPoint = designerView.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
+  pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    const currentPoint = designerCanvas.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
 
     switch (event.type) {
       case EventNames.PointerDown:
@@ -26,7 +26,7 @@ export class RectangleSelectorTool implements ITool {
         this._rect.setAttribute('y', <string><any>this._initialPoint.y);
         this._rect.setAttribute('width', <string><any>0);
         this._rect.setAttribute('height', <string><any>0);
-        designerView.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
+        designerCanvas.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
         break;
 
       case EventNames.PointerMove:
@@ -53,37 +53,37 @@ export class RectangleSelectorTool implements ITool {
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
 
-        const elements = designerView.rootDesignItem.element.querySelectorAll('*');
+        const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];
 
-        let point = designerView.overlayLayer.createPoint();
+        let point = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
           let elementRect = e.getBoundingClientRect();
-          point.x = elementRect.left - designerView.containerBoundingRect.left;
-          point.y = elementRect.top - designerView.containerBoundingRect.top;
+          point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
+          point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
           const p1 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
-          point.x = elementRect.left - designerView.containerBoundingRect.left + elementRect.width;
-          point.y = elementRect.top - designerView.containerBoundingRect.top;
+          point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
+          point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
           const p2 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
-          point.x = elementRect.left - designerView.containerBoundingRect.left;
-          point.y = elementRect.top - designerView.containerBoundingRect.top + elementRect.height;
+          point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
+          point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
           const p3 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
-          point.x = elementRect.left - designerView.containerBoundingRect.left + elementRect.width;
-          point.y = elementRect.top - designerView.containerBoundingRect.top + elementRect.height;
+          point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
+          point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
           const p4 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
           if (p1 && p2 && p3 && p4) {
-            const desItem = DesignItem.GetOrCreateDesignItem(e, designerView.serviceContainer, designerView.instanceServiceContainer)
+            const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
             inSelectionElements.push(desItem);
           }
         }
 
-        designerView.overlayLayer.removeOverlay(this._rect);
+        designerCanvas.overlayLayer.removeOverlay(this._rect);
         this._rect = null;
         this._initialPoint = null;
 
-        designerView.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
 
-        designerView.serviceContainer.globalContext.finishedWithTool(this);
+        designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
         break;
     }
   }

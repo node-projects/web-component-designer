@@ -10,7 +10,7 @@ export class TextTool implements ITool {
 
   readonly cursor = 'text';
 
-  pointerEventHandler(designerView: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+  pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
    
   }
 }

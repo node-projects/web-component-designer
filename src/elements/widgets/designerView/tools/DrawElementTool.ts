@@ -59,15 +59,15 @@ export class DrawElementTool implements ITool {
     designerView.instanceServiceContainer.selectionService.clearSelectedElements();
   }
 
-  private async _onPointerMove(designerView: IDesignerCanvas, event: PointerEvent) {
+  private async _onPointerMove(designerCanvas: IDesignerCanvas, event: PointerEvent) {
     if (this._createdItem) {
       if (!this._rect) {
-        designerView.rootDesignItem.element.appendChild(this._createdItem.element);
+        designerCanvas.rootDesignItem.element.appendChild(this._createdItem.element);
         this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        designerView.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
+        designerCanvas.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
         this._rect.setAttribute('class', 'svg-draw-new-element');
-        this._rect.setAttribute('x', <string><any>(this._startPosition.x - designerView.containerBoundingRect.x));
-        this._rect.setAttribute('y', <string><any>(this._startPosition.y - designerView.containerBoundingRect.y));
+        this._rect.setAttribute('x', <string><any>(this._startPosition.x - designerCanvas.containerBoundingRect.x));
+        this._rect.setAttribute('y', <string><any>(this._startPosition.y - designerCanvas.containerBoundingRect.y));
       }
 
       const w = event.x - this._startPosition.x;
