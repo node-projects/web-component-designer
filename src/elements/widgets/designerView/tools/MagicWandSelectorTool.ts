@@ -40,8 +40,7 @@ export class MagicWandSelectorTool implements ITool {
         const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];
 
-        //@ts-ignore
-        let point: { x: number, y: number } = designerCanvas.overlayLayer.createSVGPoint();
+        let point: DOMPointInit = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
           let elementRect = e.getBoundingClientRect();
           point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
