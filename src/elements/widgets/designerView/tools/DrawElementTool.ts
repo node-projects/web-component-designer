@@ -2,6 +2,7 @@ import { EventNames } from '../../../../enums/EventNames';
 import { IPoint } from '../../../../interfaces/IPoint';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { IElementDefinition } from '../../../services/elementsService/IElementDefinition';
+import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { IDesignerCanvas } from '../IDesignerCanvas';
@@ -17,6 +18,9 @@ export class DrawElementTool implements ITool {
 
   constructor(elementDefinition: IElementDefinition) {
     this._elementDefinition = elementDefinition;
+  }
+
+  activated(serviceContainer: ServiceContainer) {
   }
 
   dispose(): void {

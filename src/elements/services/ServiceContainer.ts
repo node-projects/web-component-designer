@@ -53,7 +53,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public designerContextMenuExtensions: IContextMenuExtension[];
 
-  public readonly globalContext: GlobalContext = new GlobalContext();
+  public readonly globalContext: GlobalContext = new GlobalContext(this);
 
   public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
 

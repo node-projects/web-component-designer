@@ -10,6 +10,7 @@ import { IDesignerCanvas } from "../IDesignerCanvas";
 import { ITool } from "./ITool";
 import { NamedTools } from './NamedTools';
 import { DesignerCanvas } from '../designerCanvas';
+import { ServiceContainer } from "../../../services/ServiceContainer.js";
 
 export class PointerTool implements ITool {
 
@@ -32,6 +33,9 @@ export class PointerTool implements ITool {
   constructor() {
   }
 
+  activated(serviceContainer: ServiceContainer) {
+  }
+  
   dispose(): void {
   }
 

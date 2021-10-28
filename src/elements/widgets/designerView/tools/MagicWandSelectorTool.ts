@@ -2,6 +2,7 @@ import { EventNames } from '../../../../enums/EventNames';
 import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
 import { DesignItem } from '../../../item/DesignItem';
 import { IDesignItem } from '../../../item/IDesignItem';
+import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
@@ -70,6 +71,9 @@ export class MagicWandSelectorTool implements ITool {
         designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
         break;
     }
+  }
+
+  activated(serviceContainer: ServiceContainer) {
   }
 
   dispose(): void {

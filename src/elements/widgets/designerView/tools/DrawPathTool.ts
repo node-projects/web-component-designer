@@ -6,6 +6,7 @@ import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 import { DesignItem } from '../../../item/DesignItem';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
+import { ServiceContainer } from '../../../services/ServiceContainer.js';
 
 export class DrawPathTool implements ITool {
 
@@ -16,6 +17,9 @@ export class DrawPathTool implements ITool {
   private _initialPoint: IDesignerMousePoint;
 
   constructor() {
+  }
+
+  activated(serviceContainer: ServiceContainer) {
   }
 
   dispose(): void {
