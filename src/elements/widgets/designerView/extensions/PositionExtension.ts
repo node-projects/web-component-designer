@@ -25,10 +25,18 @@ export class PositionExtension extends AbstractExtension {
     const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
     const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
 
-    const left = Number.parseFloat(computedStyle.left.replace('px', ''));
-    const top = Number.parseFloat(computedStyle.top.replace('px', ''));
-    const right = Number.parseFloat(computedStyle.right.replace('px', ''));
-    const bottom = Number.parseFloat(computedStyle.bottom.replace('px', ''));
+    let left = Number.parseFloat(computedStyle.left.replace('px', ''));
+    if (isNaN(left))
+      left = 0;
+    let top = Number.parseFloat(computedStyle.top.replace('px', ''));
+    if (isNaN(top))
+      top = 0;
+    let right = Number.parseFloat(computedStyle.right.replace('px', ''));
+    if (isNaN(right))
+      right = 0;
+    let bottom = Number.parseFloat(computedStyle.bottom.replace('px', ''));
+    if (isNaN(bottom))
+      bottom = 0;
 
     let tx = 0;
     let ty = 0;

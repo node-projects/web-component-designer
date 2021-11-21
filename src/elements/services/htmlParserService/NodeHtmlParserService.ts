@@ -5,14 +5,20 @@ import { IDesignItem } from '../../item/IDesignItem';
 import { DesignItem } from '../../item/DesignItem';
 import { CssAttributeParser } from "../../helper/CssAttributeParser";
 import { newElementFromString } from "../../helper/ElementHelper";
-import { IBinding } from "../bindingsService/IBinding.js";
 
 // Alternative Parser, cause when you use the Browser, it instanciates the CusomElements, and some Elemnts remove
 // attributes from their DOM, so you loose Data
 export class NodeHtmlParserService implements IHtmlParserService {
+
+  private _parserUrl: string;
+
+  constructor(parserUrl = '../../../../../node-html-parser-esm/dist/index.js') {
+    this._parserUrl = parserUrl;
+  }
+
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
     //@ts-ignore
-    let parser = await import('../../../../../node-html-parser-esm/dist/index.js');
+    let parser: parser = await import(this._parserUrl);
     const parsed = parser.parse(html, { comment: true });
 
     let designItems: IDesignItem[] = [];
@@ -51,13 +57,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
       let attr = item.attributes;
       for (let a in attr) {
-        let bnd: IBinding;
-        if (serviceContainer.bindingService) {
-          bnd = serviceContainer.bindingService.parseBindingAttribute(a, attr[a]);
-        }
-        if (bnd) {
-          designItem.setAttribute(a, bnd);
-        } else if (a !== 'style') {
+        if (a !== 'style') {
           designItem.setAttribute(a, attr[a]);
           if (a === 'node-projects-hide-at-design-time')
             hideAtDesignTime = true;
@@ -74,16 +74,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
         let styleParser = new CssAttributeParser();
         styleParser.parse(style);
         for (let s of styleParser.entries) {
-          let bnd: IBinding;
-          if (serviceContainer.bindingService) {
-            bnd = serviceContainer.bindingService.parseBindingAttribute(s.name, s.value);
-          }
-          if (bnd) {
-            designItem.setStyle(<keyof CSSStyleDeclaration>s.name, bnd);
-          } else {
-            designItem.setStyle(<keyof CSSStyleDeclaration>s.name, s.value);
-          }
-          //designItem.styles.set(s.name, s.value);
+          designItem.setStyle(<keyof CSSStyleDeclaration>s.name, s.value);
         }
       }
 
@@ -105,7 +96,6 @@ export class NodeHtmlParserService implements IHtmlParserService {
       let element = document.createComment(item.rawText);
       designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
     }
-
     return designItem;
   }
 }

@@ -4,7 +4,6 @@ import { ChangeGroup } from "../services/undoService/ChangeGroup";
 import { NodeType } from './NodeType';
 import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType";
 import { IDesignerExtension } from "../widgets/designerView/extensions/IDesignerExtension";
-import { IBinding } from "../services/bindingsService/IBinding";
 
 export interface IDesignItem {
 
@@ -16,10 +15,10 @@ export interface IDesignItem {
   readonly id: string
 
   readonly hasAttributes: boolean;
-  readonly attributes: Map<string, string | IBinding>
+  readonly attributes: Map<string, string>
 
   readonly hasStyles: boolean;
-  readonly styles: Map<string, string | IBinding>
+  readonly styles: Map<string, string>
 
   readonly hasChildren: boolean;
   children(): IterableIterator<IDesignItem>
@@ -47,10 +46,10 @@ export interface IDesignItem {
 
   openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup
 
-  setStyle(name: keyof CSSStyleDeclaration, value?: string | IBinding | null);
+  setStyle(name: keyof CSSStyleDeclaration, value?: string | null);
   removeStyle(name: keyof CSSStyleDeclaration);
 
-  setAttribute(name: string, value?: string | IBinding | null);
+  setAttribute(name: string, value?: string | null);
   removeAttribute(name: string);
 
   hideAtDesignTime: boolean;

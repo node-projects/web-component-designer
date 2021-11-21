@@ -35,7 +35,6 @@ import { TextTool } from '../widgets/designerView/tools/TextTool.js';
 import { GrayOutExtensionProvider } from '../widgets/designerView/extensions/GrayOutExtensionProvider.js';
 import { AltToEnterContainerExtensionProvider } from '../widgets/designerView/extensions/AltToEnterContainerExtensionProvider.js';
 import { InvisibleDivExtensionProvider } from '../widgets/designerView/extensions/InvisibleDivExtensionProvider.js';
-//import { PolymerBindingsService } from './bindingsService/PolymerBindingsService.js';
 import { ItemsBelowContextMenu } from '../widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js';
 import { GridPlacementService } from './placementService/GridPlacementService.js';
 import { ElementAtPointService } from './elementAtPointService/ElementAtPointService';
@@ -44,7 +43,6 @@ import { SnaplinesProviderService } from './placementService/SnaplinesProviderSe
 import { PrepareElementsForDesignerService } from './instanceService/PrepareElementsForDesignerService';
 import { DragDropService } from './dragDropService/DragDropService';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
-import { BaseCustomeWebcomponentBindingsService } from './bindingsService/BaseCustomeWebcomponentBindingsService';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -62,7 +60,6 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("containerService", new FlexBoxPlacementService());
   serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
-  serviceContainer.register("bindingService", new BaseCustomeWebcomponentBindingsService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
   serviceContainer.register("prepareElementsForDesignerService", new PrepareElementsForDesignerService());
   serviceContainer.register("dragDropService", new DragDropService());

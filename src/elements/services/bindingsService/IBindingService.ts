@@ -1,6 +1,5 @@
-import { IndentedTextWriter } from "../../helper/IndentedTextWriter";
 import { IDesignItem } from "../../item/IDesignItem";
-import { IBinding } from "./IBinding";
+import { IBinding } from "../../item/IBinding";
 
 /**
  * Can be used to parse bindings wich are done via special HTML Attributes or special Elements
@@ -8,8 +7,6 @@ import { IBinding } from "./IBinding";
  * htmlParserService
  */
 export interface IBindingService {
-  writeBindingMode: 'none' | 'direct' | 'afterElement';
-  parseBindingAttribute(attributeName:string, value:string) : IBinding;
-  parseBindingCss(attributeName:string, value:string) : IBinding;
-  writeBinding(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, type: 'style' | 'attribute', keyValuePair: [key: string, value: IBinding]): boolean;
+  getBindings(designItem: IDesignItem): IBinding[];
+  setBinding(designItem: IDesignItem, binding: IBinding): boolean
 }

@@ -1,6 +1,6 @@
 import { ITransactionItem } from '../ITransactionItem';
 import { IDesignItem } from '../../../item/IDesignItem';
-import { IBinding } from '../../bindingsService/IBinding.js';
+import { IBinding } from '../../../item/IBinding.js';
 
 export class AttributeChangeAction implements ITransactionItem {
 

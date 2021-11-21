@@ -2,7 +2,7 @@ import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
-import { IBinding } from "../../bindingsService/IBinding.js";
+import { IBinding } from "../../../item/IBinding.js";
 
 export class AttributesPropertiesService implements IPropertiesService {
 

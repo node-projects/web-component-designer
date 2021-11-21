@@ -5,12 +5,11 @@ import { CssStyleChangeAction } from '../services/undoService/transactionItems/C
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
 import { NodeType } from './NodeType';
 import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction';
-import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction';
+//import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 import { CssAttributeParser } from '../helper/CssAttributeParser.js';
-import { IBinding } from '../services/bindingsService/IBinding.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -39,12 +38,12 @@ export class DesignItem implements IDesignItem {
   public get hasAttributes() {
     return this.attributes.size > 0;
   }
-  public attributes: Map<string, string | IBinding>
+  public attributes: Map<string, string>
 
   public get hasStyles() {
     return this.styles.size > 0;
   }
-  public styles: Map<string, string | IBinding>
+  public styles: Map<string, string>
 
   private static _designItemMap = new WeakMap<Node, IDesignItem>();
 
@@ -266,7 +265,7 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
-  public setStyle(name: keyof CSSStyleDeclaration, value?: string | IBinding | null) {
+  public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {
     const action = new CssStyleChangeAction(this, name, value, this.styles.get(<string>name));
     this.instanceServiceContainer.undoService.execute(action);
   }
@@ -275,7 +274,7 @@ export class DesignItem implements IDesignItem {
     this.instanceServiceContainer.undoService.execute(action);
   }
 
-  public setAttribute(name: string, value?: string | IBinding | null) {
+  public setAttribute(name: string, value?: string | null) {
     const action = new AttributeChangeAction(this, name, value, this.attributes.get(name));
     this.instanceServiceContainer.undoService.execute(action);
   }
@@ -284,6 +283,7 @@ export class DesignItem implements IDesignItem {
     this.instanceServiceContainer.undoService.execute(action);
   }
 
+  /*
   public setProperty(name: string, value?: string | null) {
     const propService = this.serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this));
     const property = propService.getProperty(this, name);
@@ -298,4 +298,5 @@ export class DesignItem implements IDesignItem {
     const action = new PropertyChangeAction(this, property, undefined, oldValue);
     this.instanceServiceContainer.undoService.execute(action);
   }
+  */
 }

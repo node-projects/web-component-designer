@@ -22,6 +22,10 @@ export * from "./elements/services/bindableObjectsService/BindableObjectType.js"
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
 export type { IBindableObjectsService } from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
 
+export type { IBindingService } from "./elements/services/bindingsService/IBindingService.js";
+export * from "./elements/services/bindingsService/BaseCustomWebcomponentBindingsService.js";
+export * from "./elements/services/bindingsService/SpecialTagsBindingService.js";
+
 export * from "./elements/services/placementService/DefaultPlacementService.js";
 export * from "./elements/services/placementService/FlexBoxPlacementService.js";
 export * from "./elements/services/placementService/GridPlacementService.js";
@@ -99,6 +103,7 @@ export * from "./elements/widgets/propertyGrid/PropertyGrid.js";
 export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";
 
 export type { IDesignerCanvas } from "./elements/widgets/designerView/IDesignerCanvas.js";
+export type { IPlacementView } from "./elements/widgets/designerView/IPlacementView.js";
 export * from "./elements/widgets/designerView/designerView.js";
 export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";

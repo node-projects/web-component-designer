@@ -1,0 +1,10 @@
+Todo -> unfiy Properties & Attributes.
+
+DesignItem should only store Attributes, not Properties.
+Maybe setAttribute should set Attribute directly, setProperty should use PropertiesService??
+or do we always use properties PropertiesService?
+
+Attributes List in Properties shows all set attributes and you could also add one,
+but they show no binding etc information cause they are only the real attributes
+
+how should we serialize bindings?? if they are binding objects, like in tagbinding?
