@@ -3,7 +3,6 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from '../ValueType';
 import { NodeType } from '../../../item/NodeType';
-import { ServiceContainer } from '../../ServiceContainer';
 import { BindingTarget } from '../../../item/BindingTarget.js';
 
 export class CssPropertiesService implements IPropertiesService {
@@ -238,6 +237,7 @@ export class CssPropertiesService implements IPropertiesService {
         all = all && has;
         some = some || has;
       });
+      //todo: optimize perf, do not call bindings service for each property. 
       const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.getBindings(designItems[0]);
       });
