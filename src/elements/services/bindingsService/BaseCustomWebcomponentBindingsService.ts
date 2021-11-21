@@ -4,17 +4,18 @@ import { IBindingService } from "./IBindingService";
 import { BindingMode } from '../../item/BindingMode';
 import { BindingTarget } from "../../item/BindingTarget.js";
 
-
 export class BaseCustomWebcomponentBindingsService implements IBindingService {
 
   public static type = 'base-custom-webcomponent-binding'
 
   getBindings(designItem: IDesignItem): IBinding[] {
-    const bindings = [];
+    let bindings: IBinding[] = null;
     for (let a of designItem.attributes) {
       const name = a[0];
       const value = a[1];
       if ((value.startsWith('[[') || value.startsWith('{{')) && (value.endsWith('}}') || value.endsWith(']]'))) {
+        if (!bindings)
+          bindings = [];
         let bnd: IBinding = { rawName: name, rawValue: value };
         if (a[0].startsWith('css:')) {
           bnd.targetName = name.substring(4);
@@ -42,14 +43,13 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
         bindings.push(bnd);
       }
     }
-
-    return null;
+    return bindings;
   }
 
   setBinding(designItem: IDesignItem, binding: IBinding): boolean {
     if (binding.type !== BaseCustomWebcomponentBindingsService.type)
       return false;
-      
+
     let nm = '';
     switch (binding.target) {
       case BindingTarget.css:

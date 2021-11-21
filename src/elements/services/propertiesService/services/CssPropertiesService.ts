@@ -3,6 +3,8 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from '../ValueType';
 import { NodeType } from '../../../item/NodeType';
+import { ServiceContainer } from '../../ServiceContainer';
+import { BindingTarget } from '../../../item/BindingTarget.js';
 
 export class CssPropertiesService implements IPropertiesService {
 
@@ -230,12 +232,18 @@ export class CssPropertiesService implements IPropertiesService {
   isSet(designItems: IDesignItem[], property: IProperty): ValueType {
     let all = true;
     let some = false;
-    if (designItems != null && designItems.length !== 0)
+    if (designItems != null && designItems.length !== 0) {
       designItems.forEach((x) => {
         let has = x.styles.has(property.name);
         all = all && has;
         some = some || has;
       });
+      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.getBindings(designItems[0]);
+      });
+      if (bindings && bindings.find(x => x.target == BindingTarget.css && x.targetName == property.name))
+        return ValueType.bound;
+    }
     else
       return ValueType.none
 
