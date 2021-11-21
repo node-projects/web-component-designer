@@ -317,8 +317,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.snapLines.initialize(this.rootDesignItem);
 
     if (this.children) {
+      let children = this.children;
+      if (this.children.length == 1 && this.children[0] instanceof HTMLSlotElement) {
+        children = <any>this.children[0].assignedElements();
+      }
       const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
-      this.addDesignItems(parser.createDesignItems(this.children, this.serviceContainer, this.instanceServiceContainer));
+      this.addDesignItems(parser.createDesignItems(children, this.serviceContainer, this.instanceServiceContainer));
     }
   }
 

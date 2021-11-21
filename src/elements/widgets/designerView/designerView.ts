@@ -111,6 +111,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     const outer = this._getDomElement<DesignerCanvas>('outer');
     this._designerCanvas = new DesignerCanvas();
     this._designerCanvas.id = "canvas";
+    this._designerCanvas.appendChild(document.createElement("slot"));
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
 
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
