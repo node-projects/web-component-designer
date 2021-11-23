@@ -22,6 +22,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             display: flex; 
             flex-direction: column; 
             height: 100%;
+            position: relative;
         }
         .header {
             display: inline-flex; 
