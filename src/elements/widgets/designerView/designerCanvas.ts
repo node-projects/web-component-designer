@@ -300,7 +300,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   handleMoveCommand(command: CommandType) {
-    //TODO: -> via undo redo service
     let sel = this.instanceServiceContainer.selectionService.primarySelection;
     if (command == CommandType.moveBackward)
       this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
@@ -344,10 +343,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this._outercanvas2.addEventListener(EventNames.PointerDown, this._pointerEventHandlerBound);
       this._outercanvas2.addEventListener(EventNames.PointerMove, this._pointerEventHandlerBound);
       this._outercanvas2.addEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
-      this._canvas.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event));
-      this._canvas.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
-      this._canvas.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
-      this._canvas.addEventListener(EventNames.Drop, event => this._onDrop(event));
+      this._outercanvas2.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event));
+      this._outercanvas2.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
+      this._outercanvas2.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
+      this._outercanvas2.addEventListener(EventNames.Drop, event => this._onDrop(event));
       this._canvas.addEventListener(EventNames.KeyDown, this._onKeyDownBound, true);
       this._canvas.addEventListener(EventNames.KeyUp, this._onKeyUpBound, true);
       this._canvas.addEventListener(EventNames.DblClick, this._onDblClickBound, true);
@@ -436,9 +435,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
       let grp = di.openGroup("Insert");
       di.setStyle('position', 'absolute')
-      const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-      di.setStyle('top', ((event.offsetY - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top) + 'px')
-      di.setStyle('left', ((event.offsetX - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left) + 'px')
+
+      const canvasRect = this._canvasContainer.getBoundingClientRect();
+      di.setStyle('top', ((event.offsetY + (<HTMLElement>event.target).scrollTop - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + canvasRect.top) + 'px')
+      di.setStyle('left', ((event.offsetX + (<HTMLElement>event.target).scrollLeft - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + canvasRect.left) + 'px')
       this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
       grp.commit();
       requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
@@ -558,12 +558,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       offsetInControlX: (startPoint ? startPoint.offsetInControlX : event.x - targetRect.x),
       offsetInControlY: (startPoint ? startPoint.offsetInControlY : event.y - targetRect.y),
       zoom: this._zoomFactor,
-      normalizedX:  ((event.offsetX - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left),
-      normalizedY: ((event.offsetY - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top)
+      normalizedX: ((event.offsetX+ (<HTMLElement>event.target).scrollLeft - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left),
+      normalizedY: ((event.offsetY+ (<HTMLElement>event.target).scrollTop - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top)
     };
-
-
-   
   }
 
   //todo remove, is in base custom webcomp domhelper
