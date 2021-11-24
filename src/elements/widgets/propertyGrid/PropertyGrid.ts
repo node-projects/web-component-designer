@@ -19,6 +19,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     :host {
       display: block;
       height: 100%;
+      user-select: none;
     }
     iron-pages {
       overflow: hidden;
@@ -75,6 +76,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
     attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("set-styles"))
+    attributeEditorAttributeList.createElements(null);
+    attributeEditorAttributeList.title = "set-styles";
+    this._designerTabControl.appendChild(attributeEditorAttributeList);
+    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
+
+    attributeEditorAttributeList = new PropertyGridPropertyList(value);
     attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("styles"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "styles";
@@ -92,6 +100,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("grid"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "grid";
+    this._designerTabControl.appendChild(attributeEditorAttributeList);
+    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
+
+    attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("flex"))
+    attributeEditorAttributeList.createElements(null);
+    attributeEditorAttributeList.title = "flex";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
@@ -113,6 +128,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
       this._propertyGridPropertyLists[0].setPropertiesService(propService)
       this._propertyGridPropertyLists[0].createElements(this.selectedItems[0]);
       this._propertyGridPropertyLists[1].createElements(this.selectedItems[0]);
+      this._propertyGridPropertyLists[3].createElements(this.selectedItems[0]);
     }
 
     for (const a of this._propertyGridPropertyLists) {

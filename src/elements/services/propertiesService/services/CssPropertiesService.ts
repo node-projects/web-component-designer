@@ -91,59 +91,26 @@ export class CssPropertiesService implements IPropertiesService {
   //@ts-ignore
   private alignment: IProperty[] = [
     {
-      name: "position",
-      type: "list",
-      values: ["static", "relative", "absolute"],
-      service: this
-    }, {
       name: "display",
       type: "list",
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
       service: this
     }, {
-      name: "flex-direction",
+      name: "position",
       type: "list",
-      values: ["row", "row-reverse", "column", "column-reverse"],
+      values: ["static", "relative", "absolute"],
       service: this
     }, {
-      name: "flex-wrap",
-      type: "list",
-      values: ["nowrap", "wrap", "warp-reverse"],
+      name: "inset",
+      type: "thickness",
       service: this
     }, {
-      name: "justify-self",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
+      name: "margin",
+      type: "thickness",
       service: this
     }, {
-      name: "justify-items",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "justify-content",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "align-self",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "align-items",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "align-content",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
-      service: this
-    }, {
-      name: "flex",
-      type: "string",
-      default: "0 1 auto",
+      name: "padding",
+      type: "thickness",
       service: this
     }
   ];
@@ -172,31 +139,66 @@ export class CssPropertiesService implements IPropertiesService {
       type: "css-length",
       service: this
     }, {
-      name: "justify-content",
-      type: "list",
-      values: ["space-evenly", "space-around", "space-between", "center", "start", "end"],
-      service: this
-    }, {
       name: "align-content",
-      type: "list",
-      values: ["space-evenly", "space-around", "space-between", "center", "start", "end"],
+      type: "img-list",
+      values: ["center", "space-between", "space-around", "space-evenly", "stretch"],
       service: this
     }, {
-      name: "justify-items",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
+      name: "justify-content",
+      type: "img-list",
+      values: ["center", "start", "end", "space-between", "space-around", "space-evenly"],
       service: this
     }, {
       name: "align-items",
-      type: "list",
-      values: ["flex-start", "center", "flex-end", "space-between", "space-around"],
+      type: "img-list",
+      values: ["center", "start", "end", "stretch", "baseline"],
+      service: this
+    }, {
+      name: "justify-items",
+      type: "img-list",
+      values: ["center", "start", "end", "stretch"],
       service: this
     }
   ];
 
-  name: 'alignment' | 'styles' | 'grid';
+  //@ts-ignore
+  private flex: IProperty[] = [
+    {
+      name: "display",
+      type: "list",
+      values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
+      service: this
+    }, {
+      name: "flex-direction",
+      type: "img-list",
+      values: ["row", "column"],
+      service: this
+    }, {
+      name: "flex-wrap",
+      type: "img-list",
+      values: ["nowrap", "wrap"],
+      service: this
+    }, {
+      name: "align-content",
+      type: "img-list",
+      values: ["center", "flex-start", "flex-end", "space-between", "space-around", "stretch"],
+      service: this
+    }, {
+      name: "justify-content",
+      type: "img-list",
+      values: ["center", "flex-start", "flex-end", "space-between", "space-around", "space-evenly"],
+      service: this
+    }, {
+      name: "align-items",
+      type: "img-list",
+      values: ["center", "flex-start", "flex-end", "stretch", "baseline"],
+      service: this
+    }
+  ];
 
-  constructor(name: 'alignment' | 'styles' | 'grid') {
+  name: 'set-styles' | 'alignment' | 'styles' | 'grid' | 'flex';
+
+  constructor(name: 'set-styles' | 'alignment' | 'styles' | 'grid' | 'flex') {
     this.name = name;
   }
 
@@ -205,10 +207,18 @@ export class CssPropertiesService implements IPropertiesService {
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
+    if (this.name == 'set-styles') {
+      return { name: name, type: 'string', service: this };
+    }
     return this[this.name][name]
   }
 
   getProperties(designItem: IDesignItem): IProperty[] {
+    if (this.name == 'set-styles') {
+      if (!designItem)
+        return [];
+      return Array.from(designItem.styles.keys(), x => ({ name: x, type: 'string', service: this }));
+    }
     return this[this.name];
   }
 
