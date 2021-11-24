@@ -8,6 +8,7 @@ import { DomConverter } from './DomConverter.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
+import { EventNames } from '../../../enums/EventNames.js';
 
 export class DesignerView extends BaseCustomWebComponentConstructorAppend implements IUiCommandHandler {
 
@@ -115,16 +116,37 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
 
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
-    this._zoomInput.onchange = () => { this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100; }
+    this._zoomInput.onkeydown = (e) => {
+      if (e.key == 'Enter')
+        this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    }
+    this._zoomInput.onblur = () => {
+      this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    }
     this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
-    zoomIncrease.onclick = () => { this._designerCanvas.zoomFactor += 0.1; }
+    zoomIncrease.onclick = () => {
+      this._designerCanvas.zoomFactor += 0.1;
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    }
     let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
-    zoomDecrease.onclick = () => { this._designerCanvas.zoomFactor -= 0.1; }
+    zoomDecrease.onclick = () => {
+      this._designerCanvas.zoomFactor -= 0.1;
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    }
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
-    zoomReset.onclick = () => { this._designerCanvas.zoomFactor = 1; }
+    zoomReset.onclick = () => {
+      this._designerCanvas.zoomFactor = 1;
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    }
     let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
-    zoomFit.onclick = () => { this._designerCanvas.zoomFactor = 7.7; }
+    zoomFit.onclick = () => {
+      this._designerCanvas.zoomFactor = 7.7;
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    }
+    this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
 
     let alignSnap = this._getDomElement<HTMLDivElement>('alignSnap');
     alignSnap.onclick = () => { this._designerCanvas.alignOnSnap = !this._designerCanvas.alignOnSnap; alignSnap.style.backgroundColor = this._designerCanvas.alignOnSnap ? 'deepskyblue' : ''; }
@@ -132,6 +154,19 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     let alignGrid = this._getDomElement<HTMLDivElement>('alignGrid');
     alignGrid.onclick = () => { this._designerCanvas.alignOnGrid = !this._designerCanvas.alignOnGrid; alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : ''; }
     alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : '';
+  }
+
+  private _onWheel(event: WheelEvent) {
+    if (event.ctrlKey) {
+      event.preventDefault();
+      let zf = this._designerCanvas.zoomFactor
+      zf += event.deltaY * -0.001; //deltamode = 0
+      if (zf < 0.02)
+        zf = 0.02;
+      this._designerCanvas.zoomFactor = zf;
+      this._zoomInput.value = Math.round(zf * 100) + '%';
+      //TODO: we should zoom on the current cursor position, so it stays the center
+    }
   }
 
   get designerWidth(): string {

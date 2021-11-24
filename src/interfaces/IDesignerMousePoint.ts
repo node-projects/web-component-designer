@@ -7,5 +7,7 @@ export interface IDesignerMousePoint {
   originalY: number
   offsetInControlX: number //Offset of MousePointer in Primary Design Item
   offsetInControlY: number
-  zoom?: number 
+  zoom?: number
+  normalizedX?: number
+  normalizedY?: number
 }

@@ -23,6 +23,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             flex-direction: column; 
             height: 100%;
             position: relative;
+            overflow: hidden;
         }
         .header {
             display: inline-flex; 
@@ -83,6 +84,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             font-weight: 500;
             line-height: 1.5;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
         .tab-header:hover {
             background: var(--light-grey, #383f52);
@@ -188,6 +190,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       let htmlItem = item as HTMLElement;
       let tabHeaderDiv = document.createElement("div")
       tabHeaderDiv.innerText = htmlItem.title;
+      tabHeaderDiv.title = htmlItem.title;
       tabHeaderDiv.className = 'tab-header';
       let j = i;
       tabHeaderDiv.onpointerdown = () => {

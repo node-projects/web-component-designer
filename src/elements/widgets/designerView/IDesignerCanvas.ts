@@ -25,6 +25,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;
 
+  zoomFactor: number;
+
   eatEvents: Element;
 
   initialize(serviceContainer: ServiceContainer);

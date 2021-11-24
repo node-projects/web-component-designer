@@ -242,6 +242,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       case CommandType.paste:
         this.handlePasteCommand();
         break;
+      case CommandType.selectAll:
+        this.handleSelectAll();
+        break;
     }
   }
   canExecuteCommand(command: IUiCommand) {
@@ -258,6 +261,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   /* --- end IUiCommandHandler --- */
+
+  handleSelectAll() {
+    this.instanceServiceContainer.selectionService.setSelectedElements(Array.from(this.rootDesignItem.children()));
+  }
 
   handleCopyCommand() {
     const copyText = DomConverter.ConvertToString(this.instanceServiceContainer.selectionService.selectedElements, null);
@@ -344,7 +351,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this._canvas.addEventListener(EventNames.KeyDown, this._onKeyDownBound, true);
       this._canvas.addEventListener(EventNames.KeyUp, this._onKeyUpBound, true);
       this._canvas.addEventListener(EventNames.DblClick, this._onDblClickBound, true);
-      this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
     }
   }
 
@@ -356,7 +362,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer.style.right = this._outercanvas2.offsetWidth >= this._canvasContainer.offsetWidth ? '0' : '';
     this.snapLines.clearSnaplines();
   }
-
 
   public setDesignItems(designItems: IDesignItem[]) {
     this.instanceServiceContainer.undoService.clear();
@@ -432,22 +437,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       let grp = di.openGroup("Insert");
       di.setStyle('position', 'absolute')
       const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-      di.setStyle('top', event.offsetY + targetRect.top - this.containerBoundingRect.y + 'px')
-      di.setStyle('left', event.offsetX + targetRect.left - this.containerBoundingRect.x + 'px')
+      di.setStyle('top', ((event.offsetY - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top) + 'px')
+      di.setStyle('left', ((event.offsetX - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left) + 'px')
       this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
       grp.commit();
       requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
-    }
-  }
-
-  private _onWheel(event: WheelEvent) {
-    if (event.ctrlKey) {
-      event.preventDefault();
-      this._zoomFactor += event.deltaY * -0.001; //deltamode = 0
-      if (this._zoomFactor < 0.1)
-        this._zoomFactor = 0.1;
-      this.zoomFactorChanged();
-      //TODO: we should zoom on the current cursor position, so it stays the center
     }
   }
 
@@ -500,6 +494,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.executeCommand({ type: CommandType.redo });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'y')
       this.executeCommand({ type: CommandType.redo });
+    else if ((event.ctrlKey || event.metaKey) && event.key === 'a')
+      this.executeCommand({ type: CommandType.selectAll });
+    else if ((event.ctrlKey || event.metaKey) && event.key === 'c')
+      this.executeCommand({ type: CommandType.copy });
+    else if ((event.ctrlKey || event.metaKey) && event.key === 'v')
+      this.executeCommand({ type: CommandType.paste });
+    else if ((event.ctrlKey || event.metaKey) && event.key === 'x')
+      this.executeCommand({ type: CommandType.cut });
     else {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (!primarySelection) {
@@ -555,8 +557,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       y: (event.y - this.containerBoundingRect.y) / this._zoomFactor,
       offsetInControlX: (startPoint ? startPoint.offsetInControlX : event.x - targetRect.x),
       offsetInControlY: (startPoint ? startPoint.offsetInControlY : event.y - targetRect.y),
-      zoom: this._zoomFactor
+      zoom: this._zoomFactor,
+      normalizedX:  ((event.offsetX - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left),
+      normalizedY: ((event.offsetY - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top)
     };
+
+
+   
   }
 
   //todo remove, is in base custom webcomp domhelper

@@ -26,8 +26,8 @@ export class RectangleSelectorTool implements ITool {
         if (!this._rect)
           this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this._rect.setAttribute('class', 'svg-selector');
-        this._rect.setAttribute('x', <string><any>this._initialPoint.x);
-        this._rect.setAttribute('y', <string><any>this._initialPoint.y);
+        this._rect.setAttribute('x', <string><any>this._initialPoint.normalizedX);
+        this._rect.setAttribute('y', <string><any>this._initialPoint.normalizedY);
         this._rect.setAttribute('width', <string><any>0);
         this._rect.setAttribute('height', <string><any>0);
         designerCanvas.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
@@ -38,17 +38,17 @@ export class RectangleSelectorTool implements ITool {
           let w = currentPoint.x - this._initialPoint.x;
           let h = currentPoint.y - this._initialPoint.y;
           if (w >= 0) {
-            this._rect.setAttribute('x', <string><any>this._initialPoint.x);
+            this._rect.setAttribute('x', <string><any>this._initialPoint.normalizedX);
             this._rect.setAttribute('width', <string><any>w);
           } else {
-            this._rect.setAttribute('x', <string><any>currentPoint.x);
+            this._rect.setAttribute('x', <string><any>currentPoint.normalizedX);
             this._rect.setAttribute('width', <string><any>(-1 * w));
           }
           if (h >= 0) {
-            this._rect.setAttribute('y', <string><any>this._initialPoint.y);
+            this._rect.setAttribute('y', <string><any>this._initialPoint.normalizedY);
             this._rect.setAttribute('height', <string><any>h);
           } else {
-            this._rect.setAttribute('y', <string><any>currentPoint.y);
+            this._rect.setAttribute('y', <string><any>currentPoint.normalizedY);
             this._rect.setAttribute('height', <string><any>(-1 * h));
           }
         }
