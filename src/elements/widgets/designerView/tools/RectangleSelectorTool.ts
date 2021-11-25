@@ -65,17 +65,17 @@ export class RectangleSelectorTool implements ITool {
           let elementRect = e.getBoundingClientRect();
           point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
           point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
-          const p1 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
+          const p1 = this._rect.isPointInFill(point);
           point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
           point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
-          const p2 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
+          const p2 = p1 && this._rect.isPointInFill(point);
           point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
           point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
-          const p3 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
+          const p3 = p2 && this._rect.isPointInFill(point);
           point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
           point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
-          const p4 = this._rect.isPointInFill(point) || this._rect.isPointInStroke(point);
-          if (p1 && p2 && p3 && p4) {
+          const p4 = p3 && this._rect.isPointInFill(point);
+          if (p4) {
             const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
             inSelectionElements.push(desItem);
           }
