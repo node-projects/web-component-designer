@@ -10,7 +10,6 @@ import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base
 import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
-import { DomConverter } from './DomConverter';
 import { IDesignerCanvas } from './IDesignerCanvas';
 import { Snaplines } from './Snaplines';
 import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint';
@@ -266,16 +265,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.instanceServiceContainer.selectionService.setSelectedElements(Array.from(this.rootDesignItem.children()));
   }
 
-  handleCopyCommand() {
-    const copyText = DomConverter.ConvertToString(this.instanceServiceContainer.selectionService.selectedElements, null);
-    navigator.clipboard.writeText(copyText);
+  async handleCopyCommand() {
+    await this.serviceContainer.copyPasteService.copyItems(this.instanceServiceContainer.selectionService.selectedElements);    
   }
 
   async handlePasteCommand() {
-    const text = await navigator.clipboard.readText()
-    const parserService = this.serviceContainer.htmlParserService;
+    const designItems = await this.serviceContainer.copyPasteService.getPasteItems(this.serviceContainer, this.instanceServiceContainer);
+
     let grp = this.rootDesignItem.openGroup("Insert");
-    const designItems = await parserService.parse(text, this.serviceContainer, this.instanceServiceContainer);
     if (designItems) {
       for (let di of designItems) {
         this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
@@ -558,8 +555,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       offsetInControlX: (startPoint ? startPoint.offsetInControlX : event.x - targetRect.x),
       offsetInControlY: (startPoint ? startPoint.offsetInControlY : event.y - targetRect.y),
       zoom: this._zoomFactor,
-      normalizedX: ((event.offsetX+ (<HTMLElement>event.target).scrollLeft - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left),
-      normalizedY: ((event.offsetY+ (<HTMLElement>event.target).scrollTop - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top)
+      normalizedX: ((event.offsetX + (<HTMLElement>event.target).scrollLeft - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left),
+      normalizedY: ((event.offsetY + (<HTMLElement>event.target).scrollTop - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top)
     };
   }
 
