@@ -75,3 +75,10 @@ Your addition to your index.html should look like this:
     <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
     <script src="/node_modules/@node-projects/web-component-designer/dist/polyfill/mobileDragDrop.js"></script>
+
+## Copyright notice:
+
+The Library uses Images from the Chrome Dev Tools, see
+https://github.com/ChromeDevTools/devtools-frontend/tree/main/front_end/Images/src
+and
+https://github.com/ChromeDevTools/devtools-frontend/blob/main/LICENSE

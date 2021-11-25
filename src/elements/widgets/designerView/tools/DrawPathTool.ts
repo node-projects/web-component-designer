@@ -1,5 +1,4 @@
 import { EventNames } from '../../../../enums/EventNames';
-import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
 import { movePathData } from '../../../helper/PathDataPolyfill';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { IDesignerCanvas } from '../IDesignerCanvas';
@@ -14,8 +13,7 @@ export class DrawPathTool implements ITool {
 
   private _pathD: string;
   private _path: SVGPathElement;
-  private _initialPoint: IDesignerMousePoint;
-
+  
   constructor() {
   }
 
@@ -26,14 +24,13 @@ export class DrawPathTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    const currentPoint = designerCanvas.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
+    const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
 
     const offset = 50;
 
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
-        this._initialPoint = currentPoint;
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
         this._path.setAttribute("D", this._pathD);

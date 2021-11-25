@@ -183,7 +183,6 @@ export * from "./enums/EventNames.js";
 export * from "./enums/PointerActionType.js";
 
 export type { IActivateable } from "./interfaces/IActivateable.js";
-export type { IDesignerMousePoint } from "./interfaces/IDesignerMousePoint.js";
 export type { IDisposable } from "./interfaces/IDisposable.js";
 export type { IPoint } from "./interfaces/IPoint.js";
 export type { IRect } from "./interfaces/IRect.js";

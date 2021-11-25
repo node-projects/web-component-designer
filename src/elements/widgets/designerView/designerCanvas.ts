@@ -12,7 +12,6 @@ import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
 import { IDesignerCanvas } from './IDesignerCanvas';
 import { Snaplines } from './Snaplines';
-import { IDesignerMousePoint } from '../../../interfaces/IDesignerMousePoint';
 import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
@@ -38,6 +37,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
   public containerBoundingRect: DOMRect;
+  public outerRect: DOMRect;
 
   // IPlacementView
   public gridSize = 10;
@@ -266,7 +266,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   async handleCopyCommand() {
-    await this.serviceContainer.copyPasteService.copyItems(this.instanceServiceContainer.selectionService.selectedElements);    
+    await this.serviceContainer.copyPasteService.copyItems(this.instanceServiceContainer.selectionService.selectedElements);
   }
 
   async handlePasteCommand() {
@@ -353,7 +353,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   zoomFactorChanged() {
     //@ts-ignore
     this._canvasContainer.style.zoom = <any>this._zoomFactor;
-    //this._zoomInput.value = (this._zoomFactor * 100).toFixed(0) + '%';
+    //this._canvasContainer.style.transform = 'scale(' + this._zoomFactor+')';
+    //this._canvasContainer.style.transformOrigin = '0 0';
     this._canvasContainer.style.bottom = this._outercanvas2.offsetHeight >= this._canvasContainer.offsetHeight ? '0' : '';
     this._canvasContainer.style.right = this._outercanvas2.offsetWidth >= this._canvasContainer.offsetWidth ? '0' : '';
     this.snapLines.clearSnaplines();
@@ -427,15 +428,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     else {
       this._fillCalculationrects();
-      let transferData = event.dataTransfer.getData(dragDropFormatName);
-      let elementDefinition = <IElementDefinition>JSON.parse(transferData);
-      let di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
-      let grp = di.openGroup("Insert");
-      di.setStyle('position', 'absolute')
+      const position = this.getNormalizedEventCoordinates(event);
 
-      const canvasRect = this._canvasContainer.getBoundingClientRect();
-      di.setStyle('top', ((event.offsetY + (<HTMLElement>event.target).scrollTop - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + canvasRect.top) + 'px')
-      di.setStyle('left', ((event.offsetX + (<HTMLElement>event.target).scrollLeft - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + canvasRect.left) + 'px')
+      const transferData = event.dataTransfer.getData(dragDropFormatName);
+      const elementDefinition = <IElementDefinition>JSON.parse(transferData);
+      const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
+      const grp = di.openGroup("Insert");
+      di.setStyle('position', 'absolute');
+      di.setStyle('left', position.x + 'px');
+      di.setStyle('top', position.y + 'px');
       this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
       grp.commit();
       requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
@@ -543,20 +544,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     event.preventDefault();
   }
 
-  public getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint {
-    let targetRect = target.getBoundingClientRect();
+  public getNormalizedEventCoordinates(event: MouseEvent): IPoint {
+    const offsetOfOuterX = (event.clientX - this.outerRect.x) / this.zoomFactor;
+    const offsetOfCanvasX = this.containerBoundingRect.x - this.outerRect.x / this.zoomFactor;
+
+    const offsetOfOuterY = (event.clientY - this.outerRect.y) / this.zoomFactor;
+    const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y / this.zoomFactor;
+
     return {
-      originalX: event.x - this.containerBoundingRect.x,
-      //containerOriginalX: event.x - this._ownBoundingRect.x,
-      x: (event.x - this.containerBoundingRect.x) / this._zoomFactor,
-      originalY: event.y - this.containerBoundingRect.y,
-      //containerOriginalY: event.y - this._ownBoundingRect.y,
-      y: (event.y - this.containerBoundingRect.y) / this._zoomFactor,
-      offsetInControlX: (startPoint ? startPoint.offsetInControlX : event.x - targetRect.x),
-      offsetInControlY: (startPoint ? startPoint.offsetInControlY : event.y - targetRect.y),
-      zoom: this._zoomFactor,
-      normalizedX: ((event.offsetX + (<HTMLElement>event.target).scrollLeft - (this.containerBoundingRect.x * this._zoomFactor)) / this._zoomFactor + targetRect.left),
-      normalizedY: ((event.offsetY + (<HTMLElement>event.target).scrollTop - (this.containerBoundingRect.y * this._zoomFactor)) / this._zoomFactor + targetRect.top)
+      x: offsetOfOuterX - offsetOfCanvasX,
+      y: offsetOfOuterY - offsetOfCanvasY
     };
   }
 
@@ -614,7 +611,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return currentElement;
   }
 
+  _rect: SVGRectElement
   private _pointerEventHandler(event: PointerEvent) {
+    this._fillCalculationrects();
+
     if (event.composedPath().indexOf(this.eatEvents) >= 0)
       return;
 
@@ -652,6 +652,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _fillCalculationrects() {
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+    this.outerRect = this._outercanvas2.getBoundingClientRect();
   }
 
   public addOverlay(element: SVGGraphicsElement, overlayLayer: OverlayLayer = OverlayLayer.Normal) {

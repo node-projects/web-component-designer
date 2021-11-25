@@ -1,5 +1,5 @@
 import { EventNames } from "../../../../enums/EventNames";
-import { IDesignerMousePoint } from "../../../../interfaces/IDesignerMousePoint";
+import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from "../../../../interfaces/ISize";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
@@ -12,7 +12,7 @@ export class ResizeExtension extends AbstractExtension {
   private resizeAllSelected: boolean;
   private _initialSizes: ISize[];
   private _actionModeStarted: string;
-  private _initialPoint: IDesignerMousePoint;
+  private _initialPoint: IPoint;
   private _circle1: SVGCircleElement;
   private _circle2: SVGCircleElement;
   private _circle3: SVGCircleElement;
@@ -70,7 +70,7 @@ export class ResizeExtension extends AbstractExtension {
 
   _pointerActionTypeResize(event: PointerEvent, actionMode: string = 'se-resize') {
     event.stopPropagation();
-    const currentPoint = this.designerView.getDesignerMousepoint(event, this.extendedItem.element, event.type === 'pointerdown' ? null : this._initialPoint);
+    const currentPoint = this.designerView.getNormalizedEventCoordinates(event) //, this.extendedItem.element, event.type === 'pointerdown' ? null : this._initialPoint);
 
     switch (event.type) {
       case EventNames.PointerDown:
@@ -88,11 +88,9 @@ export class ResizeExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          this._initialPoint.offsetInControlX = 0;
-          this._initialPoint.offsetInControlY = 0;
           const containerService = this.designerView.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent))
 
-          const diff = containerService.placePoint(event, <IPlacementView><any>this.designerView, this.extendedItem.parent, this._initialPoint, currentPoint, this.designerView.instanceServiceContainer.selectionService.selectedElements);
+          const diff = containerService.placePoint(event, <IPlacementView><any>this.designerView, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerView.instanceServiceContainer.selectionService.selectedElements);
 
           let trackX = diff.x - this._initialPoint.x;
           let trackY = diff.y - this._initialPoint.y;

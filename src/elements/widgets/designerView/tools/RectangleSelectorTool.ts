@@ -1,5 +1,5 @@
 import { EventNames } from '../../../../enums/EventNames';
-import { IDesignerMousePoint } from '../../../../interfaces/IDesignerMousePoint';
+import { IPoint } from '../../../../interfaces/IPoint.js';
 import { DesignItem } from '../../../item/DesignItem';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
@@ -11,13 +11,13 @@ export class RectangleSelectorTool implements ITool {
   cursor: string = 'progress';
 
   private _rect: SVGRectElement;
-  private _initialPoint: IDesignerMousePoint;
+  private _initialPoint: IPoint;
 
   activated(serviceContainer: ServiceContainer) {
   }
   
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    const currentPoint = designerCanvas.getDesignerMousepoint(event, currentElement, event.type === 'pointerdown' ? null : this._initialPoint);
+    const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
 
     switch (event.type) {
       case EventNames.PointerDown:
@@ -26,8 +26,8 @@ export class RectangleSelectorTool implements ITool {
         if (!this._rect)
           this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this._rect.setAttribute('class', 'svg-selector');
-        this._rect.setAttribute('x', <string><any>this._initialPoint.normalizedX);
-        this._rect.setAttribute('y', <string><any>this._initialPoint.normalizedY);
+        this._rect.setAttribute('x', <string><any>this._initialPoint.x);
+        this._rect.setAttribute('y', <string><any>this._initialPoint.y);
         this._rect.setAttribute('width', <string><any>0);
         this._rect.setAttribute('height', <string><any>0);
         designerCanvas.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
@@ -35,20 +35,21 @@ export class RectangleSelectorTool implements ITool {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
+          console.warn(currentPoint)
           let w = currentPoint.x - this._initialPoint.x;
           let h = currentPoint.y - this._initialPoint.y;
           if (w >= 0) {
-            this._rect.setAttribute('x', <string><any>this._initialPoint.normalizedX);
+            this._rect.setAttribute('x', <string><any>this._initialPoint.x);
             this._rect.setAttribute('width', <string><any>w);
           } else {
-            this._rect.setAttribute('x', <string><any>currentPoint.normalizedX);
+            this._rect.setAttribute('x', <string><any>currentPoint.x);
             this._rect.setAttribute('width', <string><any>(-1 * w));
           }
           if (h >= 0) {
-            this._rect.setAttribute('y', <string><any>this._initialPoint.normalizedY);
+            this._rect.setAttribute('y', <string><any>this._initialPoint.y);
             this._rect.setAttribute('height', <string><any>h);
           } else {
-            this._rect.setAttribute('y', <string><any>currentPoint.normalizedY);
+            this._rect.setAttribute('y', <string><any>currentPoint.y);
             this._rect.setAttribute('height', <string><any>(-1 * h));
           }
         }

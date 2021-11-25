@@ -3,7 +3,6 @@ import { IDesignItem } from "../../item/IDesignItem";
 import { InstanceServiceContainer } from "../../services/InstanceServiceContainer";
 import { ServiceContainer } from "../../services/ServiceContainer";
 import { Snaplines } from "./Snaplines";
-import { IDesignerMousePoint } from "../../../interfaces/IDesignerMousePoint";
 import { IPlacementView } from './IPlacementView';
 import { IExtensionManager } from "./extensions/IExtensionManger";
 import { IUiCommandHandler } from "../../../commandHandling/IUiCommandHandler";
@@ -31,7 +30,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   initialize(serviceContainer: ServiceContainer);
 
-  getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint;
+  getNormalizedEventCoordinates(event: MouseEvent): IPoint
+  //getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
   elementFromPoint(x: number, y: number): Element;
 }

@@ -1,0 +1,2 @@
+Images from
+https://github.com/ChromeDevTools/devtools-frontend/tree/main/front_end/Images/src
