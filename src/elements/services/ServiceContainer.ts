@@ -22,6 +22,7 @@ import { IElementAtPointService } from './elementAtPointService/IElementAtPointS
 import { ISnaplinesProviderService } from "./placementService/ISnaplinesProviderService.js";
 import { IPrepareElementsForDesignerService } from './instanceService/IPrepareElementsForDesignerService';
 import { IDragDropService } from './dragDropService/IDragDropService';
+import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -36,7 +37,8 @@ interface ServiceNameMap {
   "bindingService": IBindingService;
   "elementAtPointService": IElementAtPointService;
   "prepareElementsForDesignerService": IPrepareElementsForDesignerService;
-  "dragDropService": IDragDropService
+  "dragDropService": IDragDropService;
+  "copyPasteService": ICopyPasteService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -107,5 +109,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get dragDropService(): IDragDropService {
     return this.getLastService('dragDropService');
+  }
+
+  get copyPasteService(): ICopyPasteService {
+    return this.getLastService('copyPasteService');
   }
 }

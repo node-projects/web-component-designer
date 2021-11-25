@@ -43,6 +43,7 @@ import { SnaplinesProviderService } from './placementService/SnaplinesProviderSe
 import { PrepareElementsForDesignerService } from './instanceService/PrepareElementsForDesignerService';
 import { DragDropService } from './dragDropService/DragDropService';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
+import { CopyPasteService } from './copyPasteService/CopyPasteService';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -63,6 +64,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
   serviceContainer.register("prepareElementsForDesignerService", new PrepareElementsForDesignerService());
   serviceContainer.register("dragDropService", new DragDropService());
+  serviceContainer.register("copyPasteService", new CopyPasteService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     new ResizeExtensionProvider(false),

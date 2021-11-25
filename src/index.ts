@@ -40,6 +40,9 @@ export * from "./elements/services/contentService/ContentService.js";
 export type { IContentChanged } from "./elements/services/contentService/IContentChanged.js";
 export type { IContentService } from "./elements/services/contentService/IContentService.js";
 
+export * from "./elements/services/copyPasteService/CopyPasteService.js";
+export type { ICopyPasteService } from "./elements/services/copyPasteService/ICopyPasteService.js";
+
 export * from "./elements/services/dragDropService/DragDropService.js";
 export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";
 
