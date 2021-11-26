@@ -557,6 +557,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
+  public getNormalizedElementCoordinates(element: Element): IPoint {
+    const targetRect = element.getBoundingClientRect();
+    return { x: targetRect.x - this.containerBoundingRect.x, y: targetRect.y - this.containerBoundingRect.y };
+  }
+
+  public getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint {
+    const normEvt = this.getNormalizedEventCoordinates(event);
+    const normEl = this.getNormalizedElementCoordinates(element);
+    return { x: normEvt.x - normEl.x, y: normEvt.y - normEl.y };
+  }
+
   //todo remove, is in base custom webcomp domhelper
   static getHost(node: Node) {
     while (node.parentElement)

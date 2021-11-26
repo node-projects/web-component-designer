@@ -123,6 +123,11 @@ export class CssPropertiesService implements IPropertiesService {
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
       service: this
     }, {
+      name: "position",
+      type: "list",
+      values: ["static", "relative", "absolute"],
+      service: this
+    }, {
       name: "grid-template-columns",
       type: "string",
       service: this
@@ -167,6 +172,11 @@ export class CssPropertiesService implements IPropertiesService {
       name: "display",
       type: "list",
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
+      service: this
+    }, {
+      name: "position",
+      type: "list",
+      values: ["static", "relative", "absolute"],
       service: this
     }, {
       name: "flex-direction",

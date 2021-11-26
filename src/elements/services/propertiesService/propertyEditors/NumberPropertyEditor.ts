@@ -17,6 +17,6 @@ export class NumberPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
   }
 
   refreshValue(valueType: ValueType, value: any) {
-    this.element.value = value;
+    this.element.value = value === undefined ? null : value;
   }
 }

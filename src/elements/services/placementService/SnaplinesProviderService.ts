@@ -25,7 +25,6 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
           positionsMiddleH.push([pMidH, p])
           positionsH.push([pRight, p])
 
-
           let pTop = p.y - outerRect.y;
           let pMidV = p.y - outerRect.y + p.height / 2;
           let pBottom = p.y - outerRect.y + p.height;
@@ -42,6 +41,4 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
       return { outerRect, positionsH, positionsMiddleH, positionsV, positionsMiddleV }
     }
   }
-
-
 }

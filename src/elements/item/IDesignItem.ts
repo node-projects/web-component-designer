@@ -11,8 +11,9 @@ export interface IDesignItem {
 
   readonly nodeType: NodeType
 
-  readonly name: string
-  readonly id: string
+  readonly name: string;
+  readonly id: string;
+  readonly isRootItem: boolean;
 
   readonly hasAttributes: boolean;
   readonly attributes: Map<string, string>

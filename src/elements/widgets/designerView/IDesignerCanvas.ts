@@ -30,8 +30,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   initialize(serviceContainer: ServiceContainer);
 
-  getNormalizedEventCoordinates(event: MouseEvent): IPoint
-  //getDesignerMousepoint(event: MouseEvent, target: Element, startPoint?: IDesignerMousePoint): IDesignerMousePoint;
+  getNormalizedEventCoordinates(event: MouseEvent): IPoint;
+  getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
   elementFromPoint(x: number, y: number): Element;
 }

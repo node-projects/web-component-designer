@@ -62,6 +62,10 @@ export class DesignItem implements IDesignItem {
     this.element.id = value;
   }
 
+  public get isRootItem(): boolean {
+    return this.instanceServiceContainer.contentService.rootDesignItem === this;
+  }
+  
   private _childArray: IDesignItem[] = [];
   public get hasChildren() {
     return this._childArray.length > 0;

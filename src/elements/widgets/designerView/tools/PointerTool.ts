@@ -61,12 +61,7 @@ export class PointerTool implements ITool {
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
-
-      const targetRect = currentElement.getBoundingClientRect();
-      this._initialOffset = {
-        x: event.x - targetRect.x,
-        y: event.y - targetRect.y
-      }
+      this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, currentElement);
       if (event.type == EventNames.PointerDown) {
         this._actionStartedDesignItem = currentDesignItem;
         designerCanvas.snapLines.clearSnaplines();
