@@ -42,7 +42,11 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
     else
       this.element.classList.remove('unset-value');
     this.disableChangeNotification = true;
-    this.refreshValue(valueType, value);
+    try {
+      this.refreshValue(valueType, value);
+    } catch (err) {
+      console.error(err);
+    }
     this.disableChangeNotification = false;
   }
 }

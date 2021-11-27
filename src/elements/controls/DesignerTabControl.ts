@@ -151,7 +151,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       let htmlItem = item as HTMLElement;
       const tabHeaderDiv = this._elementMap.get(htmlItem);
       this._moreContainer.appendChild(tabHeaderDiv);
-      if (w < this._headerDiv.clientWidth) {
+      if (this._headerDiv.children.length == 0 || (w + (tabHeaderDiv.clientWidth / 2)) < this._headerDiv.clientWidth) {
         this._headerDiv.appendChild(tabHeaderDiv);
         w += tabHeaderDiv.clientWidth;
       }
