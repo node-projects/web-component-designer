@@ -2,6 +2,7 @@ import { ITransactionItem } from './ITransactionItem.js';
 import { ChangeGroup } from "./ChangeGroup.js";
 import { IUndoService } from './IUndoService.js';
 import { IDesignItem } from '../../item/IDesignItem';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 /*
  * Manages a stack of available undo/redo actions
@@ -10,6 +11,11 @@ export class UndoService implements IUndoService {
   private _undoStack: ITransactionItem[] = [];
   private _redoStack: ITransactionItem[] = [];
   private _transactionStack: ChangeGroup[] = [];
+  private _designerCanvas: IDesignerCanvas;
+
+  constructor(designerCanvas?: IDesignerCanvas) {
+    this._designerCanvas = designerCanvas;
+  }
 
   openGroup(title: string, affectedItems: IDesignItem[]): ChangeGroup {
     let t = new ChangeGroup(title, affectedItems, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t));
@@ -44,6 +50,7 @@ export class UndoService implements IUndoService {
     } else {
       this._transactionStack[this._transactionStack.length - 1].execute(item);
     }
+    this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
   }
 
   clear() {
@@ -66,6 +73,7 @@ export class UndoService implements IUndoService {
       this.clear();
       throw err;
     }
+    this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
   }
 
   redo() {
@@ -82,6 +90,7 @@ export class UndoService implements IUndoService {
       this.clear();
       throw err;
     }
+    this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
   }
 
   canUndo(): boolean {

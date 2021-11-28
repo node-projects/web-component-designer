@@ -16,14 +16,14 @@ export class HtmlWriterService implements IHtmlWriterService {
 
   private _conditionalyWriteIndent(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
     if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
-      (designItem.element.previousSibling instanceof HTMLElement && !isInline(designItem.element.previousSibling))
+      (designItem.element.previousElementSibling instanceof HTMLElement && !isInline(designItem.element.previousElementSibling))
     )
       indentedTextWriter.writeIndent();
   }
 
   private _conditionalyWriteNewline(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
     if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
-      (designItem.element.nextSibling instanceof HTMLElement && !isInline(designItem.element.nextSibling))
+      (designItem.element.nextElementSibling instanceof HTMLElement && !isInline(designItem.element.nextElementSibling))
     )
       indentedTextWriter.writeNewline();
   }

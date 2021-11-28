@@ -21,7 +21,7 @@ export class PrimarySelectionDefaultExtension extends AbstractExtension {
   override refresh() {
     const boundRect = this.extendedItem.element.getBoundingClientRect();
     this._rect = this._drawRect(boundRect.x - this.designerCanvas.containerBoundingRect.x, boundRect.y - this.designerCanvas.containerBoundingRect.y - 16, 60, 15, 'svg-primary-selection-move', this._rect);
-    this._text = this._drawText(this.extendedItem.name.substring(0, 10) + '…', boundRect.x - this.designerCanvas.containerBoundingRect.x, boundRect.y - this.designerCanvas.containerBoundingRect.y - 5, 'svg-text', this._text);
+    this._text = this._drawText(this.extendedItem.name.substring(0, 10) + '…', boundRect.x - this.designerCanvas.containerBoundingRect.x, boundRect.y - this.designerCanvas.containerBoundingRect.y - 5, 'svg-text-primary', this._text);
   }
 
   override dispose() {

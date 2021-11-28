@@ -7,13 +7,13 @@ export class DomConverter {
 
   public static normalizeAttributeValue(value: string) {
     if (value)
-      return value.replace(/"/g, '&quot;');
+      return value.replaceAll('"', '&quot;');
     return value;
   }
 
   public static normalizeContentValue(value: string) {
     if (value)
-      return value.replace(/</g, '&lt;');
+      return value.replaceAll('<', '&lt;').replaceAll(' ', '&nbsp;');  // !caution! -> this is not normal space, it's nbsp
     return value;
   }
 

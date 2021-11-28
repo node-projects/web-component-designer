@@ -22,8 +22,6 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
     .svg-selector { stroke: black; fill: #3899ec55; stroke-width: 1; stroke-dasharray: 2; }
     .svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: all }
-    .svg-text { stroke: none; fill: white; stroke-width: 1; font-size: 10px; font-family: monospace; }
-    .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
     .svg-position  { stroke: black; stroke-dasharray: 2; }
     .svg-path { stroke: #3899ec; fill: orange; pointer-events: all }
     .svg-path-line { stroke: #3899ec; stroke-dasharray: 2; }

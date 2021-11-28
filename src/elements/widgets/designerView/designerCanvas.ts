@@ -142,7 +142,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
 
     this.instanceServiceContainer = new InstanceServiceContainer();
-    this.instanceServiceContainer.register("undoService", new UndoService);
+    this.instanceServiceContainer.register("undoService", new UndoService(this));
     this.instanceServiceContainer.register("selectionService", new SelectionService);
 
     this.extensionManager = new ExtensionManager(this);

@@ -34,7 +34,7 @@ export interface IDesignItem {
   updateChildrenFromNodesChildren();
 
   readonly hasContent: boolean;
-  content: string
+  content: string;
 
   readonly node: Node;
   readonly element: Element;
