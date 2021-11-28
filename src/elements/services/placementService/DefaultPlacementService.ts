@@ -107,9 +107,9 @@ export class DefaultPlacementService implements IPlacementService {
     for (const designItem of items) {
       let movedElement = designItem.element;
 
-      let oldLeft = parseInt((<HTMLElement>movedElement).style.left);
+      let oldLeft = parseFloat((<HTMLElement>movedElement).style.left);
       oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
-      let oldTop = parseInt((<HTMLElement>movedElement).style.top);
+      let oldTop = parseFloat((<HTMLElement>movedElement).style.top);
       oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
       //let oldPosition = movedElement.style.position;
 
