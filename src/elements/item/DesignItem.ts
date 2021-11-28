@@ -202,7 +202,7 @@ export class DesignItem implements IDesignItem {
         if (st) {
           cssParser.parse(st);
           for (let e of cssParser.entries) {
-            designItem.styles.set(e.name, e.value);
+            designItem.styles.set(<string>e.name, e.value);
           }
         }
         if (!designItem._lockAtDesignTime)

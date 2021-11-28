@@ -15,13 +15,13 @@ export enum CommandType {
 
   'arrangeLeft' = 'arrangeLeft',
   'arrangeCenter' = 'arrangeCenter',
-  'arrangeRigtht' = 'arrangeRigtht',
+  'arrangeRight' = 'arrangeRight',
   'arrangeTop' = 'arrangeTop',
   'arrangeMiddle' = 'arrangeMiddle',
   'arrangeBottom' = 'arrangeBottom',
 
-  'adjustWidth' = 'adjustWidth',
-  'adjustHeight' = 'adjustHeight',
+  'unifyWidth' = 'unifyWidth',
+  'unifyHeight' = 'unifyHeight',
 
   'distributeHorizontal' = 'distributeHorizontaly',
   'distributeVertical' = 'distributeVertical',

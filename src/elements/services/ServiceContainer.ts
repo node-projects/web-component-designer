@@ -24,6 +24,7 @@ import { IPrepareElementsForDesignerService } from './instanceService/IPrepareEl
 import { IDragDropService } from './dragDropService/IDragDropService';
 import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
 import { IDesignerPointerExtensionProvider } from "../widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
+import { IModelCommandService } from "./modelCommandService/IModelCommandService.js";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -40,6 +41,7 @@ interface ServiceNameMap {
   "prepareElementsForDesignerService": IPrepareElementsForDesignerService;
   "dragDropService": IDragDropService;
   "copyPasteService": ICopyPasteService;
+  "modelCommandService": IModelCommandService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -116,5 +118,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get copyPasteService(): ICopyPasteService {
     return this.getLastService('copyPasteService');
+  }
+
+  get modelCommandService(): IModelCommandService {
+    return this.getLastService('modelCommandService');
   }
 }

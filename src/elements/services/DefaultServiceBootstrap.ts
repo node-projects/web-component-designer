@@ -44,6 +44,7 @@ import { PrepareElementsForDesignerService } from './instanceService/PrepareElem
 import { DragDropService } from './dragDropService/DragDropService';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
 import { CopyPasteService } from './copyPasteService/CopyPasteService';
+import { DefaultModelCommandService } from './modelCommandService/DefaultModelCommandService';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -65,6 +66,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("prepareElementsForDesignerService", new PrepareElementsForDesignerService());
   serviceContainer.register("dragDropService", new DragDropService());
   serviceContainer.register("copyPasteService", new CopyPasteService());
+  serviceContainer.register("modelCommandService", new DefaultModelCommandService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     new ResizeExtensionProvider(false),

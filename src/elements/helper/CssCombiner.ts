@@ -1,5 +1,3 @@
-import { IBinding } from "../item/IBinding";
-
 export class CssCombiner {
   private static _helperElement = document.createElement('div');
 
@@ -29,7 +27,7 @@ export class CssCombiner {
     return styles;
   }
 
-  private static combineBorder(styles: Map<string, string | IBinding>) {
+  private static combineBorder(styles: Map<string, string>) {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-left-style')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-right-style')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'border-top-style')) return;
@@ -106,7 +104,7 @@ export class CssCombiner {
       styles.delete('border-image-repeat');
   }
 
-  private static combineMargin(styles: Map<string, string | IBinding>) {
+  private static combineMargin(styles: Map<string, string>) {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin-top')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin-right')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'margin-bottom')) return;
@@ -123,7 +121,7 @@ export class CssCombiner {
     }
   }
 
-  private static combinePadding(styles: Map<string, string | IBinding>) {
+  private static combinePadding(styles: Map<string, string>) {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-top')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-right')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-bottom')) return;
@@ -140,7 +138,7 @@ export class CssCombiner {
     }
   }
 
-  private static combineInset(styles: Map<string, string | IBinding>) {
+  private static combineInset(styles: Map<string, string>) {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'top')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'right')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'bottom')) return;
@@ -157,7 +155,7 @@ export class CssCombiner {
     }
   }
 
-  private static combineBackground(styles: Map<string, string | IBinding>) {
+  private static combineBackground(styles: Map<string, string>) {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-image')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-position')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-position-x')) return;
@@ -209,7 +207,7 @@ export class CssCombiner {
       styles.set('background', background);
   }
 
-  private static combineFont(styles: Map<string, string | IBinding>) {
+  private static combineFont(styles: Map<string, string>) {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-style')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-weight')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-size')) return;
@@ -241,7 +239,7 @@ export class CssCombiner {
     }
   }
 
-  private static checkIfStyleIsCombinable(styles: Map<string, string | IBinding>, name: string) {
+  private static checkIfStyleIsCombinable(styles: Map<string, string>, name: string) {
     if (styles.has(name)) {
       const st = styles.get(name);
       if (typeof st == 'string') {

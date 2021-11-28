@@ -16,7 +16,6 @@ import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
 import { CommandType } from '../../../commandHandling/CommandType';
-import { MoveElementInDomAction } from '../../services/undoService/transactionItems/MoveElementInDomAction';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
 import { DefaultHtmlParserService } from "../../services/htmlParserService/DefaultHtmlParserService";
@@ -196,6 +195,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   /* --- start IUiCommandHandler --- */
 
   async executeCommand(command: IUiCommand) {
+    let handeled = this.serviceContainer.modelCommandService.executeCommand(this, command)
+    if (handeled != null)
+      return;
     switch (command.type) {
       case CommandType.screenshot: {
         if (!this.instanceServiceContainer.selectionService.primarySelection)
@@ -226,12 +228,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       case CommandType.redo:
         this.instanceServiceContainer.undoService.redo();
         break;
-      case CommandType.moveToFront:
-      case CommandType.moveForward:
-      case CommandType.moveBackward:
-      case CommandType.moveToBack:
-        this.handleMoveCommand(command.type);
-        break;
       case CommandType.copy:
         this.handleCopyCommand();
         break;
@@ -248,6 +244,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
   canExecuteCommand(command: IUiCommand) {
+    let handeled = this.serviceContainer.modelCommandService.canExecuteCommand(this, command)
+    if (handeled !== null)
+      return handeled;
+
     if (command.type === CommandType.undo) {
       return this.instanceServiceContainer.undoService.canUndo();
     }
@@ -257,6 +257,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (command.type === CommandType.setTool) {
       return this.serviceContainer.designerTools.has(command.parameter);
     }
+
+
     return true;
   }
 
@@ -295,18 +297,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     let items = this.instanceServiceContainer.selectionService.selectedElements;
     this.instanceServiceContainer.undoService.execute(new DeleteAction(items, this.extensionManager));
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
-  }
-
-  handleMoveCommand(command: CommandType) {
-    let sel = this.instanceServiceContainer.selectionService.primarySelection;
-    if (command == CommandType.moveBackward)
-      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
-    else if (command == CommandType.moveForward)
-      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'afterend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
-    else if (command == CommandType.moveToBack)
-      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'afterbegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
-    else if (command == CommandType.moveToFront)
-      this.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'beforeend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
   }
 
   initialize(serviceContainer: ServiceContainer) {
