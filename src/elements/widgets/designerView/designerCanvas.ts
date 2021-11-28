@@ -195,9 +195,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   /* --- start IUiCommandHandler --- */
 
   async executeCommand(command: IUiCommand) {
-    let handeled = this.serviceContainer.modelCommandService.executeCommand(this, command)
-    if (handeled != null)
-      return;
+    const modelCommandService = this.serviceContainer.modelCommandService;
+    if (modelCommandService) {
+      let handeled = modelCommandService.executeCommand(this, command)
+      if (handeled != null)
+        return;
+    }
     switch (command.type) {
       case CommandType.screenshot: {
         if (!this.instanceServiceContainer.selectionService.primarySelection)
@@ -244,9 +247,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
   canExecuteCommand(command: IUiCommand) {
-    let handeled = this.serviceContainer.modelCommandService.canExecuteCommand(this, command)
-    if (handeled !== null)
-      return handeled;
+    const modelCommandService = this.serviceContainer.modelCommandService;
+    if (modelCommandService) {
+      let handeled = modelCommandService.canExecuteCommand(this, command)
+      if (handeled !== null)
+        return handeled;
+    }
 
     if (command.type === CommandType.undo) {
       return this.instanceServiceContainer.undoService.canUndo();
