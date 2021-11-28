@@ -35,12 +35,12 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   public valueChanged = new TypedEvent<ImageButtonListSelectorValueChangedEventArgs>();
 
   private _input: HTMLInputElement;
-  private _select: HTMLSelectElement;
+  //private _select: HTMLSelectElement;
 
   constructor() {
     super();
     this._input = this._getDomElement<HTMLInputElement>('input');
-    this._select = this._getDomElement<HTMLSelectElement>('select');
+    //this._select = this._getDomElement<HTMLSelectElement>('select');
 
     let oldX: number = null;
     this._input.onpointerdown = (e) => {
