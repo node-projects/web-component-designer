@@ -20,8 +20,8 @@ export class MouseOverExtension extends AbstractExtension {
   override refresh() {
     let itemRect = this.extendedItem.element.getBoundingClientRect();
 
-    const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
-    const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
+    const xOffset = itemRect.x - this.designerCanvas.containerBoundingRect.x;
+    const yOffset = itemRect.y - this.designerCanvas.containerBoundingRect.y;
 
     this._rect = this._drawRect(xOffset - offset, yOffset - offset, itemRect.width + offset + offset, itemRect.height + offset + offset, 'svg-hover', this._rect);
   }

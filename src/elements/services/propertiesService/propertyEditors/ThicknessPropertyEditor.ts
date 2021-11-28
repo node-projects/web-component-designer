@@ -11,11 +11,11 @@ export class ThicknessPropertyEditor extends BasePropertyEditor<ThicknessEditor>
     const selector = new ThicknessEditor()
     selector.property = property.name;
     
-    selector.valueChanged.on((e) => this._valueChanged(e.newValue));
+    selector.valueLeftChanged.on((e) => this._valueChanged(e.newValue));
     this.element = selector;
   }
 
   refreshValue(valueType: ValueType, value: any) {
-    this.element.value = value;
+    this.element.valueLeft = value;
   }
 }

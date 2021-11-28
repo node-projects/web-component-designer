@@ -31,6 +31,7 @@ import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelpe
 import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayer } from "./extensions/OverlayLayer";
 import { OverlayLayerView } from './overlayLayerView';
+import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -124,7 +125,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           <div style="width: 100%;height: 100%;">
             <div id="node-projects-designer-canvas-outercanvas2" style="width: 100%;height: 100%;position: relative;overflow: auto;">
               <div id="node-projects-designer-canvas-canvasContainer" style="width: 100%;height: 100%;margin: auto;position: absolute;top: 0;/* bottom: 0; does not work with fixed sized when size is bigger then view */left: 0;user-select: none;">
-                <!-- <div id="zoomHelper" style="width: 10px; height: 10px; position: absolute; top: 0; left: 0; pointer-events: none;"></div> -->
                 <div id="node-projects-designer-canvas-canvas" part="canvas" tabindex="0"></div>
               </div>
             </div>
@@ -132,6 +132,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         </div>`;
 
   public extensionManager: IExtensionManager;
+  private _pointerextensions: IDesignerPointerExtension[];
   private _onDblClickBound: any;
 
   constructor() {
@@ -318,6 +319,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer.appendChild(this.overlayLayer);
     this.snapLines = new Snaplines(this.overlayLayer);
     this.snapLines.initialize(this.rootDesignItem);
+
+    if (this.serviceContainer.designerPointerExtensions)
+      for (let pe of this.serviceContainer.designerPointerExtensions) {
+        if (!this._pointerextensions)
+          this._pointerextensions = [];
+        this._pointerextensions.push(pe.getExtension(this));
+      }
 
     if (this.children) {
       let children = this.children;
@@ -625,6 +633,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   _rect: SVGRectElement
   private _pointerEventHandler(event: PointerEvent) {
     this._fillCalculationrects();
+    if (this._pointerextensions) {
+      for (let pe of this._pointerextensions)
+        pe.refresh(event);
+    }
 
     if (event.composedPath().indexOf(this.eatEvents) >= 0)
       return;

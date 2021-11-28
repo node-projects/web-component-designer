@@ -63,27 +63,94 @@ export class ThicknessEditor extends BaseCustomWebComponentConstructorAppend {
     </div>
   `;
 
-  private _value: string;
-  public get value() {
-    return this._value;
+  private _leftInput: HTMLInputElement;
+  private _topInput: HTMLInputElement;
+  private _rightInput: HTMLInputElement;
+  private _bottomInput: HTMLInputElement;
+
+  private _valueLeft: string;
+  public get valueLeft() {
+    return this._valueLeft;
   }
-  public set value(value) {
-    const oldValue = this._value;
-    this._value = value;
-    this._updateValue();
-    this.valueChanged.emit({ newValue: this._value, oldValue: oldValue });
+  public set valueLeft(value) {
+    const oldValue = this._valueLeft;
+    this._valueLeft = value;
+    if (oldValue !== value) {
+      this._updateValue();
+      this.valueLeftChanged.emit({ newValue: value, oldValue: oldValue });
+    }
   }
-  public valueChanged = new TypedEvent<ThicknessEditorValueChangedEventArgs>();
+  public valueLeftChanged = new TypedEvent<ThicknessEditorValueChangedEventArgs>();
+
+  private _valueTop: string;
+  public get valueTop() {
+    return this._valueTop;
+  }
+  public set valueTop(value) {
+    const oldValue = this._valueTop;
+    this._valueTop = value;
+    if (oldValue !== value) {
+      this._updateValue();
+      this.valueTopChanged.emit({ newValue: value, oldValue: oldValue });
+    }
+  }
+  public valueTopChanged = new TypedEvent<ThicknessEditorValueChangedEventArgs>();
+
+  private _valueRight: string;
+  public get valueRight() {
+    return this._valueRight;
+  }
+  public set valueRight(value) {
+    const oldValue = this._valueRight;
+    this._valueRight = value;
+    if (oldValue !== value) {
+      this._updateValue();
+      this.valueRightChanged.emit({ newValue: value, oldValue: oldValue });
+    }
+  }
+  public valueRightChanged = new TypedEvent<ThicknessEditorValueChangedEventArgs>();
+
+  private _valueBottom: string;
+  public get valueBottom() {
+    return this._valueBottom;
+  }
+  public set valueBottom(value) {
+    const oldValue = this._valueBottom;
+    this._valueBottom = value;
+    if (oldValue !== value) {
+      this._updateValue();
+      this.valueBottomChanged.emit({ newValue: value, oldValue: oldValue });
+    }
+  }
+  public valueBottomChanged = new TypedEvent<ThicknessEditorValueChangedEventArgs>();
 
   public property: string;
   public unsetValue: string;
 
   _updateValue() {
-    
+    this._leftInput.value = this.valueLeft;
+    this._topInput.value = this.valueTop;
+    this._rightInput.value = this.valueRight;
+    this._bottomInput.value = this._valueBottom;
   }
 
   ready() {
     this._parseAttributesToProperties();
+
+    this._leftInput = this._getDomElement<HTMLInputElement>('left');
+    this._topInput = this._getDomElement<HTMLInputElement>('top');
+    this._rightInput = this._getDomElement<HTMLInputElement>('right');
+    this._bottomInput = this._getDomElement<HTMLInputElement>('bottom');
+
+    this._leftInput.onkeyup = (e) => { if (e.key === 'Enter') this._valueLeft = this._leftInput.value };
+    this._topInput.onkeyup = (e) => { if (e.key === 'Enter') this._valueTop = this._topInput.value };
+    this._rightInput.onkeyup = (e) => { if (e.key === 'Enter') this._valueRight = this._rightInput.value };
+    this._bottomInput.onkeyup = (e) => { if (e.key === 'Enter') this._valueBottom = this._bottomInput.value };
+
+    this._leftInput.onblur = (e) => this._valueLeft = this._leftInput.value;
+    this._topInput.onblur = (e) => this._valueTop = this._topInput.value;
+    this._rightInput.onblur = (e) => this._valueRight = this._rightInput.value;
+    this._bottomInput.onblur = (e) => this._valueBottom = this._bottomInput.value;
 
     this._updateValue();
   }

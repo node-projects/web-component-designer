@@ -162,6 +162,11 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/ItemsBelow
 export * from "./elements/widgets/designerView/extensions/contextMenu/MultipleItemsSelectedContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveContextMenu.js";
 
+export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
+export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/pointerExtensions/AbstractDesignerPointerExtension.js";
+export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtension.js";
+export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js";
 
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";

@@ -14,8 +14,5 @@ export enum ExtensionType {
    * Extension for the Current Container wich the dragged element is contained.
    */
   ContainerDrag = 256,
-  /**
-   * Extension for the Current Container wich the dragged element is contained.
-   */
-   Doubleclick = 512,
+  Doubleclick = 512,
 }

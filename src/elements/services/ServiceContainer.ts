@@ -23,6 +23,7 @@ import { ISnaplinesProviderService } from "./placementService/ISnaplinesProvider
 import { IPrepareElementsForDesignerService } from './instanceService/IPrepareElementsForDesignerService';
 import { IDragDropService } from './dragDropService/IDragDropService';
 import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
+import { IDesignerPointerExtensionProvider } from "../widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -52,6 +53,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     };
 
   public readonly designerExtensions: Map<(ExtensionType | string), IDesignerExtensionProvider[]> = new Map();
+
+  public readonly designerPointerExtensions: IDesignerPointerExtensionProvider[] = [];
 
   public designerContextMenuExtensions: IContextMenuExtension[];
 

@@ -20,8 +20,8 @@ export class GridExtension extends AbstractExtension {
     let xGap = 0;
     let yGap = 0;
     let rw = 0;
-    let xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
-    let yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
+    let xOffset = itemRect.x - this.designerCanvas.containerBoundingRect.x;
+    let yOffset = itemRect.y - this.designerCanvas.containerBoundingRect.y;
 
     let gridA: string[] = null;
     if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')

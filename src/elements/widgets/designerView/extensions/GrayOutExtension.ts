@@ -29,11 +29,11 @@ export class GrayOutExtension extends AbstractExtension {
   }
 
   drawGrayOut(rect: IRect) {
-    let r = { x: rect.x - this.designerView.containerBoundingRect.x, y: rect.y - this.designerView.containerBoundingRect.y, width: rect.width, height: rect.height };
-    const pathPoints = "M0 0 L0 " + this.designerView.containerBoundingRect.height + "L" + r.x + " " + this.designerView.containerBoundingRect.height + "L" + r.x + " 0" + " L0 0" +
-      "M" + r.x + " 0 L" + r.x + " " + r.y + "L" + this.designerView.containerBoundingRect.width + " " + r.y + "L" + this.designerView.containerBoundingRect.width + " 0" + "L" + r.x + " 0" +
-      "M" + r.x + " " + (r.y + r.height) + "L" + r.x + " " + this.designerView.containerBoundingRect.height + "L" + this.designerView.containerBoundingRect.width + " " + this.designerView.containerBoundingRect.height + "L" + this.designerView.containerBoundingRect.width + " " + (r.y + r.height) + "L" + r.x + " " + (r.y + r.height) +
-      "M" + (r.x + r.width) + " " + r.y + "L" + (r.x + r.width) + " " + (r.y + r.height) + "L" + this.designerView.containerBoundingRect.width + " " + (r.y + r.height) + "L" + this.designerView.containerBoundingRect.width + " " + (r.y) + "L" + (r.x + r.width) + " " + r.y;
+    let r = { x: rect.x - this.designerCanvas.containerBoundingRect.x, y: rect.y - this.designerCanvas.containerBoundingRect.y, width: rect.width, height: rect.height };
+    const pathPoints = "M0 0 L0 " + this.designerCanvas.containerBoundingRect.height + "L" + r.x + " " + this.designerCanvas.containerBoundingRect.height + "L" + r.x + " 0" + " L0 0" +
+      "M" + r.x + " 0 L" + r.x + " " + r.y + "L" + this.designerCanvas.containerBoundingRect.width + " " + r.y + "L" + this.designerCanvas.containerBoundingRect.width + " 0" + "L" + r.x + " 0" +
+      "M" + r.x + " " + (r.y + r.height) + "L" + r.x + " " + this.designerCanvas.containerBoundingRect.height + "L" + this.designerCanvas.containerBoundingRect.width + " " + this.designerCanvas.containerBoundingRect.height + "L" + this.designerCanvas.containerBoundingRect.width + " " + (r.y + r.height) + "L" + r.x + " " + (r.y + r.height) +
+      "M" + (r.x + r.width) + " " + r.y + "L" + (r.x + r.width) + " " + (r.y + r.height) + "L" + this.designerCanvas.containerBoundingRect.width + " " + (r.y + r.height) + "L" + this.designerCanvas.containerBoundingRect.width + " " + (r.y) + "L" + (r.x + r.width) + " " + r.y;
     this._path.setAttribute("d", pathPoints);
   }
 

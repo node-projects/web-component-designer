@@ -213,4 +213,19 @@ export class ExtensionManager implements IExtensionManager {
       }
     }
   }
+
+  refreshAllExtensions(designItems: IDesignItem[]) {
+    if (designItems) {
+        this.refreshExtensions(designItems, ExtensionType.Permanent);
+        this.refreshExtensions(designItems, ExtensionType.Selection);
+        this.refreshExtensions(designItems, ExtensionType.PrimarySelection);
+        this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer);
+        this.refreshExtensions(designItems, ExtensionType.MouseOver);
+        this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected);
+        this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected);
+        this.refreshExtensions(designItems, ExtensionType.ContainerDragOver);
+        this.refreshExtensions(designItems, ExtensionType.ContainerDrag);
+        this.refreshExtensions(designItems, ExtensionType.Doubleclick);
+    }
+  }
 }

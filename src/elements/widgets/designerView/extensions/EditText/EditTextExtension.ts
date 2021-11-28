@@ -38,7 +38,7 @@ export class EditTextExtension extends AbstractExtension {
     this.extendedItem.element.addEventListener('input', this._contentEditedBound);
     this.extendedItem.element.addEventListener('blur', this._blurBound);
     (<HTMLElement>this.extendedItem.element).focus();
-    this.designerView.eatEvents = this.extendedItem.element;
+    this.designerCanvas.eatEvents = this.extendedItem.element;
 
     let itemRect = this.extendedItem.element.getBoundingClientRect();
 
@@ -46,8 +46,8 @@ export class EditTextExtension extends AbstractExtension {
     elements.querySelectorAll('button').forEach(x => x.onclick = () => this._formatSelection(x.dataset['command']));
 
     let foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    foreignObject.setAttribute('x', '' + (itemRect.x - this.designerView.containerBoundingRect.x));
-    foreignObject.setAttribute('y', '' + (itemRect.y - this.designerView.containerBoundingRect.y - 30));
+    foreignObject.setAttribute('x', '' + (itemRect.x - this.designerCanvas.containerBoundingRect.x));
+    foreignObject.setAttribute('y', '' + (itemRect.y - this.designerCanvas.containerBoundingRect.y - 30));
     foreignObject.setAttribute('width', '96');
     foreignObject.setAttribute('height', '24');
     foreignObject.appendChild(elements)
@@ -64,7 +64,7 @@ export class EditTextExtension extends AbstractExtension {
     this.extendedItem.element.removeAttribute('contenteditable');
     this.extendedItem.element.removeEventListener('input', this._contentEditedBound);
     this.extendedItem.element.removeEventListener('blur', this._blurBound);
-    this.designerView.eatEvents = null;
+    this.designerCanvas.eatEvents = null;
     this.extendedItem.updateChildrenFromNodesChildren();
   }
 

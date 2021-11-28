@@ -22,8 +22,8 @@ export class PositionExtension extends AbstractExtension {
 
     let itemRect = this.extendedItem.element.getBoundingClientRect();
 
-    const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
-    const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
+    const xOffset = itemRect.x - this.designerCanvas.containerBoundingRect.x;
+    const yOffset = itemRect.y - this.designerCanvas.containerBoundingRect.y;
 
     let left = Number.parseFloat(computedStyle.left.replace('px', ''));
     if (isNaN(left))
@@ -46,10 +46,10 @@ export class PositionExtension extends AbstractExtension {
       ty = Number.parseFloat(transforms[5].replace(')', ''));
     }
 
-    this._line1 = this._drawLineOverlay(xOffset - left - tx, yOffset + itemRect.height / 2, xOffset, yOffset + itemRect.height / 2, 'svg-position', this._line1);
-    this._line2 = this._drawLineOverlay(xOffset + itemRect.width / 2, yOffset - top - ty, xOffset + itemRect.width / 2, yOffset, 'svg-position', this._line2);
-    this._line3 = this._drawLineOverlay(xOffset + itemRect.width, yOffset + itemRect.height / 2, xOffset + itemRect.width + right + -1 * tx, yOffset + itemRect.height / 2, 'svg-position', this._line3);
-    this._line4 = this._drawLineOverlay(xOffset + itemRect.width / 2, yOffset + itemRect.height, xOffset + itemRect.width / 2, yOffset + itemRect.height + bottom + -1 * ty, 'svg-position', this._line4);
+    this._line1 = this._drawLine(xOffset - left - tx, yOffset + itemRect.height / 2, xOffset, yOffset + itemRect.height / 2, 'svg-position', this._line1);
+    this._line2 = this._drawLine(xOffset + itemRect.width / 2, yOffset - top - ty, xOffset + itemRect.width / 2, yOffset, 'svg-position', this._line2);
+    this._line3 = this._drawLine(xOffset + itemRect.width, yOffset + itemRect.height / 2, xOffset + itemRect.width + right + -1 * tx, yOffset + itemRect.height / 2, 'svg-position', this._line3);
+    this._line4 = this._drawLine(xOffset + itemRect.width / 2, yOffset + itemRect.height, xOffset + itemRect.width / 2, yOffset + itemRect.height + bottom + -1 * ty, 'svg-position', this._line4);
   }
 
 

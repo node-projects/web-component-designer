@@ -59,6 +59,12 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
       }
     }
 
+    for (const ext of this._serviceContainer.designerPointerExtensions) {
+      if (ext.style) {
+        styles.push(ext.style);
+      }
+    }
+
     this.shadowRoot.adoptedStyleSheets = styles;
   }
 
@@ -100,6 +106,61 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
   public elementFromPoint(x: number, y: number): Element {
     //@ts-ignore
     return this.shadowRoot.elementFromPoint(x, y);
+  }
+
+  drawLine(x1: number, y1: number, x2: number, y2: number, className?: string, line?: SVGLineElement, overlayLayer?: OverlayLayer) {
+    if (!line) {
+      line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      this.addOverlay(line, overlayLayer);
+    }
+    line.setAttribute('x1', <string><any>x1);
+    line.setAttribute('y1', <string><any>y1);
+    line.setAttribute('x2', <string><any>x2);
+    line.setAttribute('y2', <string><any>y2);
+    if (className)
+      line.setAttribute('class', className);
+
+    return line;
+  }
+
+  drawCircle(x: number, y: number, radius: number, className?: string, circle?: SVGCircleElement, overlayLayer?: OverlayLayer) {
+    if (!circle) {
+      circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      this.addOverlay(circle, overlayLayer);
+    }
+    circle.setAttribute('cx', <string><any>x);
+    circle.setAttribute('cy', <string><any>y);
+    circle.setAttribute('r', <string><any>radius);
+    if (className)
+      circle.setAttribute('class', className);
+    return circle;
+  }
+
+  drawRect(x: number, y: number, w: number, h: number, className?: string, rect?: SVGRectElement, overlayLayer?: OverlayLayer) {
+    if (!rect) {
+      rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      this.addOverlay(rect, overlayLayer);
+    }
+    rect.setAttribute('x', <string><any>x);
+    rect.setAttribute('y', <string><any>y);
+    rect.setAttribute('width', <string><any>w);
+    rect.setAttribute('height', <string><any>h);
+    if (className)
+      rect.setAttribute('class', className);
+    return rect;
+  }
+
+  drawText(text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {
+    if (!textEl) {
+      textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      this.addOverlay(textEl, overlayLayer);
+    }
+    textEl.setAttribute('x', <string><any>x);
+    textEl.setAttribute('y', <string><any>y);
+    textEl.textContent = text;
+    if (className)
+      textEl.setAttribute('class', className);
+    return textEl;
   }
 }
 

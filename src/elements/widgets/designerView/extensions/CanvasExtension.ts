@@ -13,8 +13,8 @@ export class CanvasExtension extends AbstractExtension {
     let itemRect = this.extendedItem.element.getBoundingClientRect();
     const computedStyle = getComputedStyle(this.extendedItem.element);
     if (computedStyle.margin !== '0px') {
-      const xOffset = itemRect.x - this.designerView.containerBoundingRect.x;
-      const yOffset = itemRect.y - this.designerView.containerBoundingRect.y;
+      const xOffset = itemRect.x - this.designerCanvas.containerBoundingRect.x;
+      const yOffset = itemRect.y - this.designerCanvas.containerBoundingRect.y;
 
       const left = Number.parseFloat(computedStyle.marginLeft.replace('px', ''));
       const top = Number.parseFloat(computedStyle.marginTop.replace('px', ''));

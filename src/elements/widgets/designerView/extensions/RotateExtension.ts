@@ -33,7 +33,7 @@ export class RotateExtension extends AbstractExtension {
     g.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeRotate(event));
     g.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeRotate(event));
     g.setAttribute('class', 'svg-primary-rotate');
-    g.setAttribute('transform', 'translate(' + (itemRect.x - this.designerView.containerBoundingRect.x - 13) + ',' + (itemRect.y - this.designerView.containerBoundingRect.y - 8.5) + ')');
+    g.setAttribute('transform', 'translate(' + (itemRect.x - this.designerCanvas.containerBoundingRect.x - 13) + ',' + (itemRect.y - this.designerCanvas.containerBoundingRect.y - 8.5) + ')');
     this.overlayLayerView.addOverlay(g);
     this.overlays.push(g);
   }
@@ -60,10 +60,10 @@ export class RotateExtension extends AbstractExtension {
             var degree = (radians * (180 / Math.PI) * -1) + 90;
             img.css('-moz-transform', 'rotate(' + degree + 'deg)');*/
 
-        this.extensionManager.refreshExtensions(this.designerView.instanceServiceContainer.selectionService.selectedElements);
+        this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         break;
       case EventNames.PointerUp:
-        let cg = this.extendedItem.openGroup("Rotate Elements", this.designerView.instanceServiceContainer.selectionService.selectedElements);
+        let cg = this.extendedItem.openGroup("Rotate Elements", this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
         /*for (const designItem of this.instanceServiceContainer.selectionService.selectedElements) {
           designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);

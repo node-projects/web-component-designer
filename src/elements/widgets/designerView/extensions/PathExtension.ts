@@ -71,11 +71,11 @@ export class PathExtension extends AbstractExtension {
   }
 
   _drawPathCircle(x: number, y: number) {
-    this._drawCircleOverlay(this._parentRect.x - this.designerView.containerBoundingRect.x + x, this._parentRect.y - this.designerView.containerBoundingRect.y + y, 3, 'svg-path');
+    this._drawCircle(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y, 3, 'svg-path');
   }
 
   _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
-    this._drawLineOverlay(this._parentRect.x - this.designerView.containerBoundingRect.x + x1, this._parentRect.y - this.designerView.containerBoundingRect.y + y1, this._parentRect.x - this.designerView.containerBoundingRect.x + x2, this._parentRect.y - this.designerView.containerBoundingRect.y + y2, 'svg-path-line');
+    this._drawLine(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x1, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y1, this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x2, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y2, 'svg-path-line');
   }
 
   override refresh() {
