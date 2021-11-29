@@ -1,8 +1,9 @@
-import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { IDesignItem } from '../../item/IDesignItem';
 import { DesignItem } from '../../item/DesignItem';
 import { ITreeView } from './ITreeView';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 
 export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeView {
 
@@ -10,6 +11,9 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
   private _index: number;
   private _previouslySelected: Element[];
   private _treeDiv: HTMLDivElement;
+  private _instanceServiceContainer: InstanceServiceContainer;
+  private _selectionChangedHandler: Disposable;
+  private _contentChangedHandler: Disposable;
 
   private _mapElementTreeitem: Map<Element, HTMLElement>;
 
@@ -128,6 +132,19 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
   }
 
   // this.instanceServiceContainer.selectionService.setSelectedElements(null);
+
+  public set instanceServiceContainer(value: InstanceServiceContainer) {
+    this._instanceServiceContainer = value;
+    this._selectionChangedHandler?.dispose()
+    this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
+      this.selectionChanged(e);
+    });
+    this._contentChangedHandler?.dispose()
+    this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
+      this.createTree(value.contentService.rootDesignItem);
+    });
+    this.createTree(value.contentService.rootDesignItem);
+  }
 
   public selectionChanged(event: ISelectionChangedEvent) {
     if (event.selectedElements.length > 0) {

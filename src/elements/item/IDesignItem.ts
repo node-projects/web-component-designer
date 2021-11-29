@@ -12,7 +12,7 @@ export interface IDesignItem {
   readonly nodeType: NodeType
 
   readonly name: string;
-  readonly id: string;
+  id: string;
   readonly isRootItem: boolean;
 
   readonly hasAttributes: boolean;

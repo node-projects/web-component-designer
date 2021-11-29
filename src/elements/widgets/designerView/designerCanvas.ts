@@ -369,6 +369,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     DomHelper.removeAllChildnodes(this.overlayLayer);
     this.rootDesignItem.clearChildren();
     this.addDesignItems(designItems);
+    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
   }
 
   public addDesignItems(designItems: IDesignItem[]) {

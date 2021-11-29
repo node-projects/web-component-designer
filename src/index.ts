@@ -107,6 +107,7 @@ export * from "./elements/services/ServiceContainer.js";
 
 export * from "./elements/widgets/propertyGrid/PropertyGrid.js";
 export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";
+export * from "./elements/widgets/propertyGrid/PropertyGridWithHeader.js";
 
 export type { IDesignerCanvas } from "./elements/widgets/designerView/IDesignerCanvas.js";
 export type { IPlacementView } from "./elements/widgets/designerView/IPlacementView.js";

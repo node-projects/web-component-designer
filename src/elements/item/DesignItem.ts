@@ -60,6 +60,7 @@ export class DesignItem implements IDesignItem {
   }
   public set id(value: string) {
     this.element.id = value;
+    this.setAttribute("id", value);
   }
 
   public get isRootItem(): boolean {

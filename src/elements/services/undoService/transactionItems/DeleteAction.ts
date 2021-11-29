@@ -21,6 +21,7 @@ export class DeleteAction implements ITransactionItem {
     for (let n = 0; n < this.deletedItems.length; n++) {
       this._parentItems[n].insertChild(this.deletedItems[n], this._parentIndexes[n]);
     }
+    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'added', designItems: this.deletedItems});
   }
 
   do() {
@@ -34,6 +35,7 @@ export class DeleteAction implements ITransactionItem {
       this.deletedItems[n].remove();
     }
     this.extensionManager.removeExtensions(this.deletedItems);
+    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'removed', designItems: this.deletedItems});
   }
 
   public deletedItems: IDesignItem[];

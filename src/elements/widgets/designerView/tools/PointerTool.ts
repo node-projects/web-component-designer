@@ -247,8 +247,10 @@ export class PointerTool implements ITool {
                       backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                       newContainerElement.style.pointerEvents = 'none';
                       const newC = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-                      if (newContainerElement === newC)
+                      if (newContainerElement === newC) {
+                        newContainerElement = null;
                         break;
+                      }
                       newContainerElement = newC;
                     }
                   }
@@ -259,7 +261,7 @@ export class PointerTool implements ITool {
                   }
                 }
 
-                if (newContainerElement != null) {
+                if (newContainerElement != null) { //Check if container is in designer canvas....
                   let p = newContainerElement
                   while (p != null) {
                     if (p === designerCanvas.rootDesignItem.element)

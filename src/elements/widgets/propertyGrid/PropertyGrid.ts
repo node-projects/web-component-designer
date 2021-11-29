@@ -2,10 +2,11 @@ import { ServiceContainer } from '../../services/ServiceContainer';
 import { PropertyGridPropertyList } from './PropertyGridPropertyList';
 import { DesignerTabControl } from '../../controls/DesignerTabControl';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
 import { CssPropertiesService } from '../../services/propertiesService/services/CssPropertiesService';
 import { CommonPropertiesService } from '../../services/propertiesService/services/CommonPropertiesService';
 import { AttributesPropertiesService } from '../../services/propertiesService/services/AttributesPropertiesService';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
@@ -14,18 +15,14 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _selectedItems: IDesignItem[];
   private _propertyGridPropertyLists: PropertyGridPropertyList[];
   private _itemsObserver: MutationObserver;
+  private _instanceServiceContainer: InstanceServiceContainer;
+  private _selectionChangedHandler: Disposable;
 
   static override readonly style = css`
     :host {
       display: block;
       height: 100%;
       user-select: none;
-    }
-    iron-pages {
-      overflow: hidden;
-      height: 250px;
-      background: var(--medium-grey, #2f3545);
-      color: white;
     }
     button:hover {
       box-shadow: inset 0 3px 0 var(--light-grey);
@@ -112,9 +109,18 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
     this._designerTabControl.selectedIndex = 0;
   }
-
   public get serviceContainer(): ServiceContainer {
     return this._serviceContainer;
+  }
+
+  public set instanceServiceContainer(value: InstanceServiceContainer) {
+    this._instanceServiceContainer = value;
+    this._selectionChangedHandler?.dispose()
+    this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
+      this.selectedItems = e.selectedElements;
+
+    });
+    this.selectedItems = this._instanceServiceContainer.selectionService.selectedElements;
   }
 
   get selectedItems() {
@@ -143,15 +149,6 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
         }
 
         this._observeItems();
-        /*let properties = serviceContainer.forSomeServicesTillResult("propertyService", x => x.getProperties(element));
-
-        if (properties) {
-          let attributeEditorAttributeList = new PropertyGridPropertyList();
-          attributeEditorAttributeList.serviceContainer = this.serviceContainer;
-          // attributeEditorAttributeList.title = 
-          attributeEditorAttributeList.createElements(properties);
-          this._designerTabControl.appendChild(attributeEditorAttributeList);
-        }*/
       }
     } else {
       this._itemsObserver.disconnect();
@@ -162,19 +159,6 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._itemsObserver.disconnect();
     this._itemsObserver.observe(this._selectedItems[0].element, { attributes: true, childList: false, characterData: false });
   }
-
-  /*
-    display(el) {
-      let computedStyle = window.getComputedStyle(el);
-      (this.$.propertiesContainer as ElementProperties).display(el);
-      (this.$.stylesContainer as ElementStyles).display(computedStyle, el);
-      (this.$.flexContainer as ElementFlex).display(computedStyle);
-    }
-  
-    displayPosition(top, left) {
-      (this.$.stylesContainer as ElementStyles).display('', { top: top + 'px', left: left + 'px' });
-    }
-  */
 }
 
 customElements.define('node-projects-property-grid', PropertyGrid);

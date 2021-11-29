@@ -19,6 +19,7 @@ export class InsertAction implements ITransactionItem {
 
   undo() {
     (<Element><unknown>this.newItem.element).remove();
+    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'removed', designItems: [this.newItem] });
   }
 
   do() {
@@ -26,6 +27,7 @@ export class InsertAction implements ITransactionItem {
     const prepService = this.designItem.serviceContainer.prepareElementsForDesignerService;
     if (prepService)
       requestAnimationFrame(() => prepService.prepareElementsForDesigner(this.newItem));
+    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'added', designItems: [this.newItem] });
   }
 
   public designItem: IDesignItem;

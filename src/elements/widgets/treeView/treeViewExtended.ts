@@ -1,14 +1,19 @@
-import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
+import { css, html, BaseCustomWebComponentConstructorAppend, Disposable } from '@node-projects/base-custom-webcomponent';
 import { ITreeView } from './ITreeView';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
 import { NodeType } from '../../item/NodeType';
 import { assetsPath } from '../../../Constants';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
+
   private _treeDiv: HTMLTableElement;
   private _tree: Fancytree.Fancytree;
   private _filter: HTMLInputElement;
+  private _instanceServiceContainer: InstanceServiceContainer;
+  private _selectionChangedHandler: Disposable;
+  private _contentChangedHandler: Disposable;
 
   static override readonly style = css`
       * {
@@ -44,12 +49,18 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       }
       td {
         white-space: nowrap;
-      }
-      td:nth-child(n+2) {
-        text-align: center;
+        display: flex;
       }
       td > img {
         vertical-align: middle;
+      }
+
+      .cmd {
+        display: flex;
+        position: sticky;
+        right: 4px;
+        align-items: center;
+        gap: 2px;
       }
 
       table.fancytree-ext-table tbody tr.fancytree-selected {
@@ -64,16 +75,16 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       <table id="treetable" style="min-width: 100%;">
         <colgroup>
           <col width="*">
+          <!--<col width="25px">
           <col width="25px">
-          <col width="25px">
-          <col width="25px">
+          <col width="25px">-->
         </colgroup>
         <thead style="display: none;">
           <tr>
             <th></th>
+            <!--<th></th>
             <th></th>
-            <th></th>
-            <th></th>
+            <th></th>-->
           </tr>
         </thead>
       </table>
@@ -164,50 +175,31 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       createNode: (event, data) => {
         let node = data.node;
 
-        if (node.tr.children[1]) {
+        if (node.tr.children[0]) {
           let designItem: IDesignItem = node.data.ref;
 
-          if (designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
-            /*
-            let toolTipImg: HTMLImageElement;
-            (<HTMLElement>node.tr.children[0]).onmouseenter = (e) => {
-              toolTipImg = document.createElement("img");
-              Screenshot.takeScreenshot(designItem.element).then(x => { if (toolTipImg) toolTipImg.src = x; });
-              toolTipImg.style.position = 'absolute';
-              let r = node.tr.children[0].getBoundingClientRect();
-              toolTipImg.style.left = (e.x + 5 - r.left) + 'px';
-              toolTipImg.style.top = (e.y + 5 - r.top) + 'px';
-              (<HTMLElement>node.tr.children[0]).appendChild(toolTipImg);
-            }
-            (<HTMLElement>node.tr.children[0]).onmousemove = (e) => {
-              if (toolTipImg) {
-                let r = node.tr.children[0].getBoundingClientRect();
-                toolTipImg.style.left = (e.x + 5 - r.left) + 'px';
-                toolTipImg.style.top = (e.y + 5 - r.top) + 'px';
-              }
-            }
-            (<HTMLElement>node.tr.children[0]).onmouseout = (e) => {
-              if (toolTipImg) {
-                toolTipImg.parentNode?.removeChild(toolTipImg);
-                toolTipImg = null;
-              }
-            }
-            */
-
+          if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
+            let d = document.createElement("div");
+            d.className = "cmd"
             let img = document.createElement('img');
             this._showHideAtDesignTimeState(img, designItem);
             img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
-            node.tr.children[1].appendChild(img);
+            img.title = 'hide in designer';
+            d.appendChild(img);
 
             let imgL = document.createElement('img');
             this._showLockAtDesignTimeState(imgL, designItem);
             imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, designItem);
-            node.tr.children[2].appendChild(imgL);
+            imgL.title = 'lock';
+            d.appendChild(imgL);
 
             let imgH = document.createElement('img');
             this._showHideAtRunTimeState(imgH, designItem);
             imgH.onclick = () => this._switchHideAtRunTimeState(imgH, designItem);
-            node.tr.children[3].appendChild(imgH);
+            imgH.title = 'hide at runtime';
+            d.appendChild(imgH);
+
+            node.tr.children[0].appendChild(d)
           }
         }
       },
@@ -357,6 +349,19 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     if (this._tree) {
       this._recomputeTree(rootItem);
     }
+  }
+
+  public set instanceServiceContainer(value: InstanceServiceContainer) {
+    this._instanceServiceContainer = value;
+    this._selectionChangedHandler?.dispose()
+    this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
+      this.selectionChanged(e);
+    });
+    this._contentChangedHandler?.dispose()
+    this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
+      this.createTree(value.contentService.rootDesignItem);
+    });
+    this.createTree(value.contentService.rootDesignItem);
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {

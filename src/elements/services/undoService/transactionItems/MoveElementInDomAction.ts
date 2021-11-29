@@ -21,10 +21,12 @@ export class MoveElementInDomAction implements ITransactionItem {
 
   undo() {
     (<HTMLElement>this.oldTarget.element).insertAdjacentElement(this.oldPosition, this.designItem.element);
+    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'moved', designItems: [this.designItem]});
   }
 
   do() {
     (<HTMLElement>this.newTarget.element).insertAdjacentElement(this.newPosition, this.designItem.element);
+    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'moved', designItems: [this.designItem]});
   }
 
   public designItem: IDesignItem;
