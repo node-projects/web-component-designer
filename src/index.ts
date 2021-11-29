@@ -66,6 +66,9 @@ export type { IInstanceService } from "./elements/services/instanceService/IInst
 export * from "./elements/services/instanceService/PrepareElementsForDesignerService.js";
 export type { IPrepareElementsForDesignerService } from "./elements/services/instanceService/IPrepareElementsForDesignerService.js";
 
+export type { IModelCommandService } from "./elements/services/modelCommandService/IModelCommandService.js";
+export * from "./elements/services/modelCommandService/DefaultModelCommandService.js";
+
 export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
