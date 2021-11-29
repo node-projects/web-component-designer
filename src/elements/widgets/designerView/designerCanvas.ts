@@ -141,7 +141,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
 
-    this.instanceServiceContainer = new InstanceServiceContainer();
+    this.instanceServiceContainer = new InstanceServiceContainer(this);
     this.instanceServiceContainer.register("undoService", new UndoService(this));
     this.instanceServiceContainer.register("selectionService", new SelectionService);
 
@@ -197,7 +197,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   async executeCommand(command: IUiCommand) {
     const modelCommandService = this.serviceContainer.modelCommandService;
     if (modelCommandService) {
-      let handeled = modelCommandService.executeCommand(this, command)
+      let handeled = await modelCommandService.executeCommand(this, command)
       if (handeled != null)
         return;
     }

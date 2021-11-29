@@ -35,7 +35,6 @@ export class RectangleSelectorTool implements ITool {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          console.warn(currentPoint)
           let w = currentPoint.x - this._initialPoint.x;
           let h = currentPoint.y - this._initialPoint.y;
           if (w >= 0) {

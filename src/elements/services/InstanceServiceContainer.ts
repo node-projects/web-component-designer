@@ -4,6 +4,7 @@ import { BaseServiceContainer } from './BaseServiceContainer';
 import { IContentService } from './contentService/IContentService';
 import { DesignContext } from '../widgets/designerView/DesignContext';
 import { IDesignContext } from '../widgets/designerView/IDesignContext';
+import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 interface InstanceServiceNameMap {
   "undoService": IUndoService;
@@ -13,7 +14,13 @@ interface InstanceServiceNameMap {
 
 export class InstanceServiceContainer extends BaseServiceContainer<InstanceServiceNameMap> {
   public designContext: IDesignContext = new DesignContext();
+  public readonly designerCanvas: IDesignerCanvas;
 
+  constructor(designerCanvas: IDesignerCanvas) {
+    super();
+    this.designerCanvas = designerCanvas;
+  }
+  
   get undoService(): IUndoService {
     return this.getLastService('undoService');
   }

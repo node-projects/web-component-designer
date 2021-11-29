@@ -65,7 +65,7 @@ export class DesignItem implements IDesignItem {
   public get isRootItem(): boolean {
     return this.instanceServiceContainer.contentService.rootDesignItem === this;
   }
-  
+
   private _childArray: IDesignItem[] = [];
   public get hasChildren() {
     return this._childArray.length > 0;
@@ -85,6 +85,10 @@ export class DesignItem implements IDesignItem {
     return this.getOrCreateDesignItem(this.element.parentNode);
   }
   public insertChild(designItem: IDesignItem, index?: number) {
+    //todo... via undoredo system....
+    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+
     if (designItem.parent) {
       designItem.parent.removeChild(designItem);
     }
@@ -99,8 +103,16 @@ export class DesignItem implements IDesignItem {
       this.node.insertBefore(designItem.node, el.element)
       this._childArray.splice(index, 0, designItem);
     }
+
+    if (this.instanceServiceContainer.selectionService.primarySelection == designItem)
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
   }
   public removeChild(designItem: IDesignItem) {
+    //todo... via undoredo system....
+
+    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+
     const index = this._childArray.indexOf(designItem);
     if (index > -1) {
       this._childArray.splice(index, 1);
