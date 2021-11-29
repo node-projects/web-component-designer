@@ -58,9 +58,13 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       .cmd {
         display: flex;
         position: sticky;
-        right: 4px;
+        right: 0;
+        padding-right: 4px;
         align-items: center;
         gap: 2px;
+        background: #ffffffc9;
+        width: 70px;
+        justify-content: flex-end;
       }
 
       table.fancytree-ext-table tbody tr.fancytree-selected {
