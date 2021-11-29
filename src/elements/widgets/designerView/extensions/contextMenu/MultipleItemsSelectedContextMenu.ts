@@ -1,13 +1,13 @@
 import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { IContextMenuExtension } from "./IContextMenuExtension";
+import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";
 
 export class MultipleItemsSelectedContextMenu implements IContextMenuExtension {
 
   public orderIndex: number = 60;
 
-  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem) {
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
     if (designItem.instanceServiceContainer.selectionService.selectedElements.length > 1) {
       return true;
     }

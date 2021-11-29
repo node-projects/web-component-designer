@@ -460,7 +460,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
     const mnuItems: IContextMenuItem[] = [];
     for (let cme of this.serviceContainer.designerContextMenuExtensions) {
-      if (cme.shouldProvideContextmenu(event, this, designItem)) {
+      if (cme.shouldProvideContextmenu(event, this, designItem, 'designer')) {
         mnuItems.push(...cme.provideContextMenuItems(event, this, designItem));
       }
     }

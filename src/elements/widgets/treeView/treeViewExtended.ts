@@ -5,6 +5,8 @@ import { ISelectionChangedEvent } from '../../services/selectionService/ISelecti
 import { NodeType } from '../../item/NodeType';
 import { assetsPath } from '../../../Constants';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextmenuItem.js';
+import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper.js';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
@@ -155,6 +157,18 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._showHideAtRunTimeState(img, designItem);
   }
 
+  public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
+    event.preventDefault();
+    const mnuItems: IContextMenuItem[] = [];
+    for (let cme of designItem.serviceContainer.designerContextMenuExtensions) {
+      if (cme.shouldProvideContextmenu(event, designItem.instanceServiceContainer.designerCanvas, designItem, 'treeView')) {
+        mnuItems.push(...cme.provideContextMenuItems(event, designItem.instanceServiceContainer.designerCanvas, designItem));
+      }
+    }
+    let ctxMnu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
+    return ctxMnu;
+  }
+
   async ready() {
     //this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
@@ -183,6 +197,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           let designItem: IDesignItem = node.data.ref;
 
           if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
+            node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
+
             let d = document.createElement("div");
             d.className = "cmd"
             let img = document.createElement('img');

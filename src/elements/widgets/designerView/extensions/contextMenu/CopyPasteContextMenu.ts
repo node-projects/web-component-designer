@@ -2,10 +2,10 @@ import { CommandType } from "../../../../../commandHandling/CommandType";
 import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { IContextMenuExtension } from "./IContextMenuExtension";
+import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";
 
 export class CopyPasteContextMenu implements IContextMenuExtension{
-  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem) {
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
     return true;
   }
 

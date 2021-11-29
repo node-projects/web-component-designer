@@ -2,12 +2,12 @@ import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuIte
 import { DesignItem } from "../../../../item/DesignItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { IContextMenuExtension } from "./IContextMenuExtension";
+import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";
 
 export class ItemsBelowContextMenu implements IContextMenuExtension {
 
-  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem) {
-    return true;
+  public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
+    return initiator == 'designer';
   }
 
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
@@ -40,7 +40,8 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
             break;
           if (el !== <any>designerView.overlayLayer && el.parentElement !== <any>designerView.overlayLayer && el.getRootNode() === designerView.shadowRoot)
             lstEl.push(el);
-          backupPEventsMap.set(el, el.style.pointerEvents);
+          if (!backupPEventsMap.has(el))
+            backupPEventsMap.set(el, el.style.pointerEvents);
           el.style.pointerEvents = 'none';
           const oldEl = el;
           el = designerView.elementFromPoint(event.x, event.y) as HTMLElement;
