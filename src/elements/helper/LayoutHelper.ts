@@ -52,10 +52,9 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
     }
 
     if (!hasPositionedLayout)
-      (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
-    designItem.setStyle('position', 'absolute');
-    designItem.setStyle('left', (offset.x + oldLeft + containerLeft) + "px");
-    designItem.setStyle('top', (offset.y + oldTop + containerTop) + "px");
+      designItem.setStyle('position', 'absolute');
+    designItem.setStyle('left', (offset.x + (oldLeft ?? 0) + containerLeft) + "px");
+    designItem.setStyle('top', (offset.y + (oldTop ?? 0) + containerTop) + "px");
   }
 }
 

@@ -116,17 +116,8 @@ export class DefaultPlacementService implements IPlacementService {
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
     for (const designItem of items) {
-      /*let movedElement = designItem.element;
-      let oldLeft = parseFloat((<HTMLElement>movedElement).style.left);
-      oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
-      let oldTop = parseFloat((<HTMLElement>movedElement).style.top);
-      oldTop = Number.isNaN(oldTop) ? 0 : oldTop;*/
-      //let oldPosition = movedElement.style.position;
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
       placeDesignItem(container, designItem, track, 'position');
-      /*designItem.setStyle('position', 'absolute');
-      designItem.setStyle('left', (track.x + oldLeft) + "px");
-      designItem.setStyle('top', (track.y + oldTop) + "px");*/
     }
   }
 }
