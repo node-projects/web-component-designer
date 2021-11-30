@@ -3,8 +3,8 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { CalculateGridInformation } from '../../helper/GridHelper.js';
-import { IDesignerCanvas } from '../../../../dist/elements/widgets/designerView/IDesignerCanvas';
 import { pointInRect } from '../../helper/Helper.js';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 export class GridPlacementService implements IPlacementService {
 

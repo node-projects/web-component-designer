@@ -74,7 +74,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
         let styleParser = new CssAttributeParser();
         styleParser.parse(style);
         for (let s of styleParser.entries) {
-          designItem.setStyle(<keyof CSSStyleDeclaration>s.name, s.value);
+          designItem.setStyle(s.name, s.value);
         }
       }
 
