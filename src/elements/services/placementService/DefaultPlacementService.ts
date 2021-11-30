@@ -3,6 +3,8 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
+import { combineTransforms } from '../../helper/TransformHelper.js';
+import { placeDesignItem } from '../../helper/LayoutHelper.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -91,15 +93,18 @@ export class DefaultPlacementService implements IPlacementService {
 
     //TODO: -> what is if a transform already exists -> backup existing style.?
     for (const designItem of items) {
-      (<HTMLElement>designItem.element).style.transform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
+      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
+      combineTransforms(<HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
     }
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
     for (let i of items) {
       if (i.lastContainerSize) {
-        i.setStyle('width', i.lastContainerSize.width + 'px');
-        i.setStyle('height', i.lastContainerSize.height + 'px');
+        if (!i.styles.has('width'))
+          i.setStyle('width', i.lastContainerSize.width + 'px');
+        if (!i.styles.has('height'))
+          i.setStyle('height', i.lastContainerSize.height + 'px');
       }
     }
   }
@@ -111,18 +116,17 @@ export class DefaultPlacementService implements IPlacementService {
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
     for (const designItem of items) {
-      let movedElement = designItem.element;
-
+      /*let movedElement = designItem.element;
       let oldLeft = parseFloat((<HTMLElement>movedElement).style.left);
       oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
       let oldTop = parseFloat((<HTMLElement>movedElement).style.top);
-      oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
+      oldTop = Number.isNaN(oldTop) ? 0 : oldTop;*/
       //let oldPosition = movedElement.style.position;
-
-      (<HTMLElement>designItem.element).style.transform = null;
-      designItem.setStyle('position', 'absolute');
+      (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
+      placeDesignItem(container, designItem, track, 'position');
+      /*designItem.setStyle('position', 'absolute');
       designItem.setStyle('left', (track.x + oldLeft) + "px");
-      designItem.setStyle('top', (track.y + oldTop) + "px");
+      designItem.setStyle('top', (track.y + oldTop) + "px");*/
     }
   }
 }
