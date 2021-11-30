@@ -5,6 +5,22 @@
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 
+export function filterChildPlaceItems(items: IDesignItem[]) {
+  const filterdPlaceItems: IDesignItem[] = [];
+  next:
+  for (let i of items) {
+    let par = i.parent;
+    while (par != null && !par.isRootItem) {
+      if (items.indexOf(par) >= 0)
+        continue next;
+      par = par.parent;
+    }
+    filterdPlaceItems.push(i);
+
+  }
+  return filterdPlaceItems;
+}
+
 export function placeDesignItem(container: IDesignItem, designItem: IDesignItem, offset: IPoint, mode: 'position' | 'transform' | 'margin' | 'padding') {
   const movedElement = designItem.element;
   const computedStyleMovedElement = getComputedStyle(movedElement);

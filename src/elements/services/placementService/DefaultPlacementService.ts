@@ -4,7 +4,7 @@ import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { combineTransforms } from '../../helper/TransformHelper.js';
-import { placeDesignItem } from '../../helper/LayoutHelper.js';
+import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -88,18 +88,19 @@ export class DefaultPlacementService implements IPlacementService {
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
-
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
+    let filterdItems = filterChildPlaceItems(items);
     //TODO: -> what is if a transform already exists -> backup existing style.?
-    for (const designItem of items) {
+    for (const designItem of filterdItems) {
       const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
       combineTransforms(<HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
     }
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
-    for (let i of items) {
+    let filterdItems = filterChildPlaceItems(items);
+    for (let i of filterdItems) {
       if (i.lastContainerSize) {
         if (!i.styles.has('width'))
           i.setStyle('width', i.lastContainerSize.width + 'px');
@@ -115,7 +116,8 @@ export class DefaultPlacementService implements IPlacementService {
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
-    for (const designItem of items) {
+    let filterdItems = filterChildPlaceItems(items);
+    for (const designItem of filterdItems) {
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
       placeDesignItem(container, designItem, track, 'position');
     }
