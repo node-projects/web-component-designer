@@ -23,8 +23,10 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
     let oldBottom = null;
 
     let containerLeft = 0;
+     //@ts-ignore
     let containerRight = 0;
     let containerTop = 0;
+    //@ts-ignore
     let containerBottom = 0;
 
     if (computedStyleMovedElement.position === 'relative' || computedStyleMovedElement.position === 'absolute') {
