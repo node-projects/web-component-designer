@@ -60,8 +60,8 @@ export class TransformOriginExtension extends AbstractExtension {
           const newY = (dy + y);
           const przX = Math.round(newX / rect.width * 10000) / 100; //round to 2 decimal places
           const przY = Math.round(newY / rect.height * 10000) / 100;
-          //this.extendedItem.setStyle('transformOrigin',newX + 'px ' + newY + 'px');
-          this.extendedItem.setStyle('transformOrigin', przX + '% ' + przY + '%');
+          //this.extendedItem.setStyle('transform-origin',newX + 'px ' + newY + 'px');
+          this.extendedItem.setStyle('transform-origin', przX + '% ' + przY + '%');
           this.refresh();
           this._startPos = null;
         }

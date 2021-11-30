@@ -1,4 +1,7 @@
-export function sleep(ms) {
+import { IPoint } from "../../interfaces/IPoint.js";
+import { IRect } from "../../interfaces/IRect.js";
+
+export function sleep(ms): Promise<unknown> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -20,8 +23,11 @@ export function dataURItoBlob(dataURI) {
   var binary = atob(dataURI.split(',')[1]);
   var array = [];
   for (var i = 0; i < binary.length; i++) {
-     array.push(binary.charCodeAt(i));
+    array.push(binary.charCodeAt(i));
   }
-  return new Blob([new Uint8Array(array)], {type: mime});
+  return new Blob([new Uint8Array(array)], { type: mime });
 }
 
+export function pointInRect(point: IPoint, rect: IRect) {
+  return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
+}

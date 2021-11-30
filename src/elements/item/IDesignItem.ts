@@ -4,9 +4,12 @@ import { ChangeGroup } from "../services/undoService/ChangeGroup";
 import { NodeType } from './NodeType';
 import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType";
 import { IDesignerExtension } from "../widgets/designerView/extensions/IDesignerExtension";
+import { ISize } from "../../interfaces/ISize.js";
 
 export interface IDesignItem {
 
+  lastContainerSize: ISize;
+  
   replaceNode(newNode: Node);
 
   readonly nodeType: NodeType
@@ -47,8 +50,8 @@ export interface IDesignItem {
 
   openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup
 
-  setStyle(name: keyof CSSStyleDeclaration, value?: string | null);
-  removeStyle(name: keyof CSSStyleDeclaration);
+  setStyle(name: string, value?: string | null);
+  removeStyle(name: string);
 
   setAttribute(name: string, value?: string | null);
   removeAttribute(name: string);

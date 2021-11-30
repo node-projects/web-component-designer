@@ -65,11 +65,7 @@ export class HtmlWriterService implements IHtmlWriterService {
           styles = CssCombiner.combine(styles);
         for (const s of styles) {
           if (s[0]) {
-            if (typeof s[1] === 'string') {
-              indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
-            } else {
-              //TODO: writing of bindings
-            }
+            indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
           }
         }
         indentedTextWriter.write('"');

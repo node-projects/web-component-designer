@@ -5,17 +5,21 @@ import { CssStyleChangeAction } from '../services/undoService/transactionItems/C
 import { ChangeGroup } from '../services/undoService/ChangeGroup';
 import { NodeType } from './NodeType';
 import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction';
-//import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 import { CssAttributeParser } from '../helper/CssAttributeParser.js';
+import { ISize } from '../../interfaces/ISize.js';
+import { PropertiesHelper } from '../services/propertiesService/services/PropertiesHelper.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
 const lockAtDesignTimeAttributeName = 'node-projects-lock-at-design-time'
 
 export class DesignItem implements IDesignItem {
+
+  public lastContainerSize: ISize;
+
   node: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
@@ -282,12 +286,14 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
-  public setStyle(name: keyof CSSStyleDeclaration, value?: string | null) {
-    const action = new CssStyleChangeAction(this, name, value, this.styles.get(<string>name));
+  public setStyle(name: string, value?: string | null) {
+    let nm = PropertiesHelper.camelToDashCase(name);
+    const action = new CssStyleChangeAction(this, nm, value, this.styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
-  public removeStyle(name: keyof CSSStyleDeclaration) {
-    const action = new CssStyleChangeAction(this, name, '', this.styles.get(<string>name));
+  public removeStyle(name: string) {
+    let nm = PropertiesHelper.camelToDashCase(name);
+    const action = new CssStyleChangeAction(this, nm, '', this.styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
 

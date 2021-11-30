@@ -8,6 +8,7 @@ import { IExtensionManager } from "./extensions/IExtensionManger";
 import { IUiCommandHandler } from "../../../commandHandling/IUiCommandHandler";
 import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayerView } from "./overlayLayerView";
+import { IRect } from "../../../interfaces/IRect.js";
 
 export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
@@ -31,6 +32,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   initialize(serviceContainer: ServiceContainer);
 
   getNormalizedEventCoordinates(event: MouseEvent): IPoint;
+  getNormalizedElementCoordinates(element: Element): IRect;
   getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
   elementFromPoint(x: number, y: number): Element;

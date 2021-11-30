@@ -31,6 +31,7 @@ import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayer } from "./extensions/OverlayLayer";
 import { OverlayLayerView } from './overlayLayerView';
 import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
+import { IRect } from "../../../interfaces/IRect.js";
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -562,9 +563,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
-  public getNormalizedElementCoordinates(element: Element): IPoint {
+  public getNormalizedElementCoordinates(element: Element): IRect {
     const targetRect = element.getBoundingClientRect();
-    return { x: targetRect.x - this.containerBoundingRect.x, y: targetRect.y - this.containerBoundingRect.y };
+    return { x: targetRect.x - this.containerBoundingRect.x, y: targetRect.y - this.containerBoundingRect.y, width: targetRect.width, height: targetRect.height };
   }
 
   public getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint {

@@ -96,6 +96,12 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
+    for (let i of items) {
+      if (i.lastContainerSize) {
+        i.setStyle('width', i.lastContainerSize.width + 'px');
+        i.setStyle('height', i.lastContainerSize.height + 'px');
+      }
+    }
   }
 
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {

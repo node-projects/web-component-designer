@@ -3,7 +3,7 @@ import { IDesignItem } from '../../../item/IDesignItem';
 
 export class CssStyleChangeAction implements ITransactionItem {
 
-  constructor(designItem: IDesignItem, name: keyof CSSStyleDeclaration, newValue: any, oldValue: any) {
+  constructor(designItem: IDesignItem, name: string, newValue: any, oldValue: any) {
     this.title = "Change CSS Style";
 
     this.designItem = designItem;
@@ -38,7 +38,7 @@ export class CssStyleChangeAction implements ITransactionItem {
   }
 
   public designItem: IDesignItem;
-  public name: keyof CSSStyleDeclaration;
+  public name: string;
   public newValue: any;
   public oldValue: any;
 

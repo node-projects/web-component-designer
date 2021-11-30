@@ -5,7 +5,9 @@ import { IStringPosition } from "../../services/htmlWriterService/IStringPositio
 
 export class DomConverter {
 
-  public static normalizeAttributeValue(value: string) {
+  public static normalizeAttributeValue(value: string | number) {
+    if (typeof value === 'number')
+      value = value.toString();
     if (value)
       return value.replaceAll('"', '&quot;');
     return value;
@@ -18,22 +20,22 @@ export class DomConverter {
   }
 
   public static IsSelfClosingElement(tag: string) {
-    return tag === 'area'   ||
-           tag === 'base'   ||
-           tag === 'br'     ||
-           tag === 'col'    ||
-           tag === 'embed'  ||
-           tag === 'hr'     ||
-           tag === 'iframe' ||
-           tag === 'img'    ||
-           tag === 'input'  ||
-           tag === 'keygen' ||
-           tag === 'link'   ||
-           tag === 'meta'   ||
-           tag === 'param'  ||
-           tag === 'source' ||
-           tag === 'track'  ||
-           tag === 'wbr';
+    return tag === 'area' ||
+      tag === 'base' ||
+      tag === 'br' ||
+      tag === 'col' ||
+      tag === 'embed' ||
+      tag === 'hr' ||
+      tag === 'iframe' ||
+      tag === 'img' ||
+      tag === 'input' ||
+      tag === 'keygen' ||
+      tag === 'link' ||
+      tag === 'meta' ||
+      tag === 'param' ||
+      tag === 'source' ||
+      tag === 'track' ||
+      tag === 'wbr';
   }
 
   public static ConvertToString(designItems: IDesignItem[], designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
