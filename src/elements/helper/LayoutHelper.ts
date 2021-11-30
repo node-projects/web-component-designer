@@ -23,12 +23,13 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
     let oldBottom = null;
 
     let containerLeft = 0;
-     //@ts-ignore
+    //@ts-ignore
     let containerRight = 0;
     let containerTop = 0;
     //@ts-ignore
     let containerBottom = 0;
 
+    let hasPositionedLayout = false;
     if (computedStyleMovedElement.position === 'relative' || computedStyleMovedElement.position === 'absolute') {
       oldLeft = parseFloat((<HTMLElement>movedElement).style.left);
       oldLeft = Number.isNaN(oldLeft) ? null : oldLeft;
@@ -38,6 +39,7 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
       oldRight = Number.isNaN(oldRight) ? null : oldRight;
       oldBottom = parseFloat((<HTMLElement>movedElement).style.bottom);
       oldBottom = Number.isNaN(oldBottom) ? null : oldBottom;
+      hasPositionedLayout = true;
     } else {
       if (positionedContainerElement !== container.element) {
         let posContainerRect = positionedContainerElement.getBoundingClientRect();
@@ -49,7 +51,8 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
       }
     }
 
-    (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
+    if (!hasPositionedLayout)
+      (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
     designItem.setStyle('position', 'absolute');
     designItem.setStyle('left', (offset.x + oldLeft + containerLeft) + "px");
     designItem.setStyle('top', (offset.y + oldTop + containerTop) + "px");
