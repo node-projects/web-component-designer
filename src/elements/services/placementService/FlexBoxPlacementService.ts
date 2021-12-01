@@ -18,8 +18,8 @@ export class FlexBoxPlacementService implements IPlacementService {
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {
   }
 
-  serviceForContainer(container: IDesignItem) {
-    if ((<HTMLElement>container.element).style.display == 'flex' || (<HTMLElement>container.element).style.display == 'inline-flex')
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
+    if (containerStyle.display == 'flex' || containerStyle.display == 'inline-flex')
       return true;
     return false;
   }

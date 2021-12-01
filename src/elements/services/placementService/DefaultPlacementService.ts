@@ -8,9 +8,9 @@ import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelpe
 
 export class DefaultPlacementService implements IPlacementService {
 
-  serviceForContainer(container: IDesignItem) {
-    if ((<HTMLElement>container.element).style.display === 'grid' || (<HTMLElement>container.element).style.display === 'inline-grid' ||
-      (<HTMLElement>container.element).style.display === 'flex' || (<HTMLElement>container.element).style.display === 'inline-flex')
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
+    if (containerStyle.display === 'grid' || containerStyle.display === 'inline-grid' ||
+        containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
       return false;
     return true;
   }
