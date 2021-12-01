@@ -40,6 +40,9 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       font-size: 12px;
       height: 20px;
     }
+    #pg {
+      height: calc(100% - 45px);
+    }
     `;
 
   static override readonly template = html`

@@ -5,6 +5,7 @@ import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { CalculateGridInformation } from '../../helper/GridHelper.js';
 import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
+import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 
 export class GridPlacementService implements IPlacementService {
 
@@ -72,6 +73,8 @@ export class GridPlacementService implements IPlacementService {
         row++;
       }
     }
+
+    (<DesignerCanvas> placementView).extensionManager.refreshAllExtensions([container]);
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
@@ -92,5 +95,6 @@ export class GridPlacementService implements IPlacementService {
       }
       row++;
     }
+    (<DesignerCanvas> placementView).extensionManager.refreshAllExtensions([container]);
   }
 }
