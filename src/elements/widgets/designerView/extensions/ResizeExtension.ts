@@ -134,7 +134,10 @@ export class ResizeExtension extends AbstractExtension {
             //for other resize modes we need a replacement
           }
 
-          this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+          const resizedElements = [this.extendedItem, this.extendedItem.parent];
+          if (this.resizeAllSelected)
+            resizedElements.push(...this.designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+          this.extensionManager.refreshExtensions(resizedElements);
         }
         break;
       case EventNames.PointerUp:
