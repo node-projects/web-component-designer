@@ -8,7 +8,6 @@ import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { IPoint } from '../../../..';
 
-let lastPoint: IPoint = { x: 0, y: 0 };
 
 
 export class DrawPathTool implements ITool {
@@ -22,7 +21,8 @@ export class DrawPathTool implements ITool {
   private _dragMode = false;
   private _pointerMoved = false;
   private _eventStarted = false;
-
+  private _lastPoint: IPoint = { x: 0, y: 0 };
+  
   constructor() {
   }
 
@@ -51,11 +51,11 @@ export class DrawPathTool implements ITool {
           designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
         }
 
-        if (lastPoint.x === currentPoint.x && lastPoint.y === currentPoint.y && !this._samePoint) {
+        if (this._lastPoint.x === currentPoint.x && this._lastPoint.y === currentPoint.y && !this._samePoint) {
           this._samePoint = true;
         }
 
-        lastPoint = currentPoint;
+        this._lastPoint = currentPoint;
         break;
 
 
@@ -82,6 +82,7 @@ export class DrawPathTool implements ITool {
           if (this._path) {
             if(event.shiftKey){
               console.log("Clicked with Shift Down");
+
               this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
               this._path.setAttribute("d", this._pathD);
             }
