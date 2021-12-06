@@ -3,12 +3,14 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
+import { combineTransforms } from '../../helper/TransformHelper.js';
+import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
-  serviceForContainer(container: IDesignItem) {
-    if ((<HTMLElement>container.element).style.display === 'grid' || (<HTMLElement>container.element).style.display === 'inline-grid' ||
-      (<HTMLElement>container.element).style.display === 'flex' || (<HTMLElement>container.element).style.display === 'inline-flex')
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
+    if (containerStyle.display === 'grid' || containerStyle.display === 'inline-grid' ||
+        containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
       return false;
     return true;
   }
@@ -86,20 +88,24 @@ export class DefaultPlacementService implements IPlacementService {
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
-
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
+    let filterdItems = filterChildPlaceItems(items);
     //TODO: -> what is if a transform already exists -> backup existing style.?
-    for (const designItem of items) {
-      (<HTMLElement>designItem.element).style.transform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
+    for (const designItem of filterdItems) {
+      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
+      combineTransforms(<HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
     }
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
-    for (let i of items) {
+    let filterdItems = filterChildPlaceItems(items);
+    for (let i of filterdItems) {
       if (i.lastContainerSize) {
-        i.setStyle('width', i.lastContainerSize.width + 'px');
-        i.setStyle('height', i.lastContainerSize.height + 'px');
+        if (!i.styles.has('width'))
+          i.setStyle('width', i.lastContainerSize.width + 'px');
+        if (!i.styles.has('height'))
+          i.setStyle('height', i.lastContainerSize.height + 'px');
       }
     }
   }
@@ -110,19 +116,10 @@ export class DefaultPlacementService implements IPlacementService {
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
-    for (const designItem of items) {
-      let movedElement = designItem.element;
-
-      let oldLeft = parseFloat((<HTMLElement>movedElement).style.left);
-      oldLeft = Number.isNaN(oldLeft) ? 0 : oldLeft;
-      let oldTop = parseFloat((<HTMLElement>movedElement).style.top);
-      oldTop = Number.isNaN(oldTop) ? 0 : oldTop;
-      //let oldPosition = movedElement.style.position;
-
-      (<HTMLElement>designItem.element).style.transform = null;
-      designItem.setStyle('position', 'absolute');
-      designItem.setStyle('left', (track.x + oldLeft) + "px");
-      designItem.setStyle('top', (track.y + oldTop) + "px");
+    let filterdItems = filterChildPlaceItems(items);
+    for (const designItem of filterdItems) {
+      (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
+      placeDesignItem(container, designItem, track, 'position');
     }
   }
 }

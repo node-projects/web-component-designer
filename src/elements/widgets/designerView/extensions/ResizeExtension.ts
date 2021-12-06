@@ -88,7 +88,8 @@ export class ResizeExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent))
+          const containerStyle = getComputedStyle(this.extendedItem.parent.element);
+          const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
           const diff = containerService.placePoint(event, <IPlacementView><any>this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
@@ -133,7 +134,10 @@ export class ResizeExtension extends AbstractExtension {
             //for other resize modes we need a replacement
           }
 
-          this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+          const resizedElements = [this.extendedItem, this.extendedItem.parent];
+          if (this.resizeAllSelected)
+            resizedElements.push(...this.designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+          this.extensionManager.refreshExtensions(resizedElements);
         }
         break;
       case EventNames.PointerUp:

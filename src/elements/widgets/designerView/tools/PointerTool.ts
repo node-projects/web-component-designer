@@ -166,7 +166,8 @@ export class PointerTool implements ITool {
           }
 
           if (this._movedSinceStartedAction) {
-            const currentContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent));
+            const containerStyle = getComputedStyle(this._actionStartedDesignItem.parent.element);
+            const currentContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent, containerStyle));
             if (currentContainerService) {
               const dragItem = this._actionStartedDesignItem.parent;
               if (this._dragExtensionItem != dragItem) {
@@ -194,7 +195,8 @@ export class PointerTool implements ITool {
                       newContainerElement = null;
                     } else if (newContainerElement == designerCanvas.rootDesignItem.element) {
                       newContainerElementDesignItem = designerCanvas.rootDesignItem;
-                      newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
+                      const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+                      newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
                       break;
                     } else if (newContainerElement.getRootNode() !== designerCanvas.shadowRoot || <any>newContainerElement === designerCanvas.overlayLayer || <any>newContainerElement.parentElement === designerCanvas.overlayLayer) {
                       backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
@@ -235,7 +237,8 @@ export class PointerTool implements ITool {
                       }
                       //end check
                       newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-                      newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem));
+                      const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+                      newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
                       if (newContainerService) {
                         if (newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem])) {
                           break;
@@ -321,7 +324,8 @@ export class PointerTool implements ITool {
           }
 
           if (this._movedSinceStartedAction) {
-            let containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent))
+            const containerStyle = getComputedStyle(this._actionStartedDesignItem.parent.element);
+            let containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent, containerStyle))
             const cp = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
 
             if (containerService) {

@@ -15,12 +15,12 @@ export class CssEntry {
 }
 
 export class CssAttributeParser {
-  
+
   entries: CssEntry[] = [];
-  
-  public parse(text: string) {
+
+  public parse(text: string, quoteType: string = '\'') {
     this.entries = [];
-    
+
     let name = '';
     let value = '';
     let token = Token.Name;
@@ -41,7 +41,7 @@ export class CssAttributeParser {
           value = '';
           token = Token.Name;
         } else {
-          if (c === '\'') {
+          if (c === quoteType) {
             token = Token.InQuote;
           }
           value += c;
@@ -52,9 +52,11 @@ export class CssAttributeParser {
           n++;
           c = text[n];
           value += c;
-        } if (c === '\'') {
+        } else if (c === quoteType) {
           value += c;
           token = Token.Value;
+        } else {
+          value += c;
         }
       }
     }

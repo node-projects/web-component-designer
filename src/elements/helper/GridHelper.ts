@@ -1,10 +1,17 @@
 import { IDesignItem } from "../item/IDesignItem.js";
 
 export function CalculateGridInformation(designItem: IDesignItem) {
+
+  //todo:
+  //same name should combine columns/rows
+
   let itemRect = designItem.element.getBoundingClientRect();
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');
   const columns = computedStyle.gridTemplateColumns.split(' ');
+
+  const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
+  const paddingTop = Number.parseFloat(computedStyle.paddingTop);
 
   let y = 0;
   let xGap = 0;
@@ -85,12 +92,12 @@ export function CalculateGridInformation(designItem: IDesignItem) {
     for (let yIdx = 0; yIdx < columns.length; yIdx++) {
       const c = columns[yIdx];
       if (x > 0 && xGap) {
-        retVal.gaps.push({ x: x + xOffset, y: y + yOffset, width: xGap, height: currY });
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY });
         x += xGap
       }
       const currX = Number.parseFloat(c.replace('px', ''));
       if (y > 0 && yGap) {
-        retVal.gaps.push({ x: x + xOffset, y: y + yOffset - yGap, width: currX, height: yGap });
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap });
       }
       let name = null;
       if (areas) {
@@ -99,7 +106,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
           name = nm;
         }
       }
-      const cell = { x: x + xOffset, y: y + yOffset, width: currX, height: currY, name: name };
+      const cell = { x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: currX, height: currY, name: name };
       cellList.push(cell);
       x += currX;
       cl++;

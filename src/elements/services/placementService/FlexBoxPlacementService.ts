@@ -6,13 +6,20 @@ import { IPlacementService } from './IPlacementService.js';
 export class FlexBoxPlacementService implements IPlacementService {
  
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
+    for (let i of items) {
+      i.removeStyle("position");
+      i.removeStyle("left");
+      i.removeStyle("top");
+      i.removeStyle("right");
+      i.removeStyle("transform");
+    }
   }
  
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {
   }
 
-  serviceForContainer(container: IDesignItem) {
-    if ((<HTMLElement>container.element).style.display == 'flex' || (<HTMLElement>container.element).style.display == 'inline-flex')
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
+    if (containerStyle.display == 'flex' || containerStyle.display == 'inline-flex')
       return true;
     return false;
   }
@@ -26,7 +33,6 @@ export class FlexBoxPlacementService implements IPlacementService {
   }
 
   getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint {
-    //TODO: offset could be bigger, when it was in a other cell???
     return container.element.getBoundingClientRect();
   }
 
@@ -35,7 +41,14 @@ export class FlexBoxPlacementService implements IPlacementService {
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    /*let direction = getComputedStyle(container.element).flexDirection;
+    
+    const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
+    const posElement = (<IDesignerCanvas><unknown>placementView).getNormalizedElementCoordinates(items[0].element)
 
+    for (let e of container.element.children) {
+
+    }*/
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {

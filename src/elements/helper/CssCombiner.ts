@@ -1,7 +1,7 @@
 export class CssCombiner {
   private static _helperElement = document.createElement('div');
 
-  //todo: inset, 
+  //todo: inset, flex flow, place content...
 
   static combine(styles: Map<string, string>, globalStyles?: Map<string, string>) {
     let e = CssCombiner._helperElement;
