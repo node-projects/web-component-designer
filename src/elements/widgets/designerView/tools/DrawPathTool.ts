@@ -11,9 +11,9 @@ import { IPoint } from '../../../..';
 
 
 export class DrawPathTool implements ITool {
-  
+
   readonly cursor = 'crosshair';
-  
+
   private _pathD: string;
   private _path: SVGPathElement;
   private _samePoint = false;
@@ -22,7 +22,8 @@ export class DrawPathTool implements ITool {
   private _pointerMoved = false;
   private _eventStarted = false;
   private _lastPoint: IPoint = { x: 0, y: 0 };
-  
+  private _savedPoint: IPoint = { x: 0, y: 0 };
+
   constructor() {
   }
 
@@ -70,8 +71,16 @@ export class DrawPathTool implements ITool {
             this._path.setAttribute("d", this._pathD);
           }
         }
+        else {  // shows line preview
+          if (this._path) {
+            let straightLine = currentPoint;
+            if (event.shiftKey)
+              straightLine = this.straightenLine(this._savedPoint, currentPoint);
+            this._path.setAttribute("d", this._pathD + "L" + straightLine.x + " " + straightLine.y);
+          }
+        }
         break;
-        
+
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
@@ -80,16 +89,16 @@ export class DrawPathTool implements ITool {
         }
         if (this._p2pMode && !this._samePoint) {
           if (this._path) {
-            if(event.shiftKey){
-              console.log("Clicked with Shift Down");
-
-              this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
+            if (event.shiftKey) {
+              let straightLine = this.straightenLine(this._savedPoint, currentPoint);
+              this._pathD += "L" + straightLine.x + " " + straightLine.y;
               this._path.setAttribute("d", this._pathD);
             }
             else {
               this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
               this._path.setAttribute("d", this._pathD);
             }
+            this._savedPoint = currentPoint;
           }
         }
 
@@ -124,5 +133,21 @@ export class DrawPathTool implements ITool {
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
         break;
     }
+  }
+
+
+  straightenLine(p1: IPoint, p2: IPoint): IPoint {
+    let newP: IPoint = { x: 0, y: 0 };
+    let alpha = - 1 * Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+    if (alpha < 0)
+      alpha += 360;
+    if (alpha > 0 && alpha < 45 || alpha > 315 && alpha < 360 || alpha > 135 && alpha < 225)   // right or left
+      newP = { x: p2.x, y: p1.y }
+    else if (alpha > 45 && alpha < 135 || alpha > 225 && alpha < 315)   // up or down
+      newP = { x: p1.x, y: p2.y }
+    else    // something else
+      newP = { x: p2.x, y: p2.y }
+
+    return newP;
   }
 }
