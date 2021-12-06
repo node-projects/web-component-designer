@@ -9,19 +9,19 @@ import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { IPoint } from '../../../..';
 
 let lastPoint: IPoint = { x: 0, y: 0 };
-let samePoint = false;
-let p2pMode = false;
-let dragMode = false;
-let pointerMoved = false;
-let eventStarted = false;
 
 
 export class DrawPathTool implements ITool {
-
+  
   readonly cursor = 'crosshair';
-
+  
   private _pathD: string;
   private _path: SVGPathElement;
+  private _samePoint = false;
+  private _p2pMode = false;
+  private _dragMode = false;
+  private _pointerMoved = false;
+  private _eventStarted = false;
 
   constructor() {
   }
@@ -39,9 +39,9 @@ export class DrawPathTool implements ITool {
 
     switch (event.type) {
       case EventNames.PointerDown:
-        eventStarted = true;
+        this._eventStarted = true;
 
-        if (!p2pMode) {
+        if (!this._p2pMode) {
           (<Element>event.target).setPointerCapture(event.pointerId);
           this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
@@ -51,8 +51,8 @@ export class DrawPathTool implements ITool {
           designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
         }
 
-        if (lastPoint.x === currentPoint.x && lastPoint.y === currentPoint.y && !samePoint) {
-          samePoint = true;
+        if (lastPoint.x === currentPoint.x && lastPoint.y === currentPoint.y && !this._samePoint) {
+          this._samePoint = true;
         }
 
         lastPoint = currentPoint;
@@ -60,37 +60,44 @@ export class DrawPathTool implements ITool {
 
 
       case EventNames.PointerMove:
-        if (eventStarted) {
-          pointerMoved = true;
+        if (this._eventStarted) {
+          this._pointerMoved = true;
         }
-        if (!p2pMode) {
-          dragMode = true;
+        if (!this._p2pMode) {
+          this._dragMode = true;
           if (this._path) {
             this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
             this._path.setAttribute("d", this._pathD);
           }
         }
         break;
-
+        
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        if (eventStarted && !pointerMoved) {
-          p2pMode = true;
+        if (this._eventStarted && !this._pointerMoved) {
+          this._p2pMode = true;
         }
-        if (p2pMode && !samePoint) {
+        if (this._p2pMode && !this._samePoint) {
           if (this._path) {
-            this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
-            this._path.setAttribute("d", this._pathD);
+            if(event.shiftKey){
+              console.log("Clicked with Shift Down");
+              this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
+              this._path.setAttribute("d", this._pathD);
+            }
+            else {
+              this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
+              this._path.setAttribute("d", this._pathD);
+            }
           }
         }
 
-        if (samePoint && p2pMode || dragMode && !p2pMode) {
-          eventStarted = false;
-          p2pMode = false;
-          pointerMoved = false;
-          samePoint = false;
-          dragMode = false;
+        if (this._samePoint && this._p2pMode || this._dragMode && !this._p2pMode) {
+          this._eventStarted = false;
+          this._p2pMode = false;
+          this._pointerMoved = false;
+          this._samePoint = false;
+          this._dragMode = false;
 
           const rect = this._path.getBoundingClientRect();
           designerCanvas.overlayLayer.removeOverlay(this._path);
