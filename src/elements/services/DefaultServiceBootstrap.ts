@@ -45,6 +45,9 @@ import { DragDropService } from './dragDropService/DragDropService';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
 import { CopyPasteService } from './copyPasteService/CopyPasteService';
 import { DefaultModelCommandService } from './modelCommandService/DefaultModelCommandService';
+import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperatorProvider';
+import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons';
+import { DemoProviderService } from './demoProviderService/DemoProviderService';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -67,6 +70,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("dragDropService", new DragDropService());
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
+  serviceContainer.register("demoProviderService", new DemoProviderService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     new ResizeExtensionProvider(false),
@@ -110,6 +114,11 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerTools.set(NamedTools.MagicWandSelector, new MagicWandSelectorTool());
   serviceContainer.designerTools.set(NamedTools.PickColor, new PickColorTool());
   serviceContainer.designerTools.set(NamedTools.Text, new TextTool());
+
+  serviceContainer.designViewConfigButtons.push(
+    new ButtonSeperatorProvider(20),
+    new GridExtensionDesignViewConfigButtons()
+  );
 
   serviceContainer.designerContextMenuExtensions = [
     new CopyPasteContextMenu(),
