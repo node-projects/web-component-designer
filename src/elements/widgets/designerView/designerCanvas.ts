@@ -231,6 +231,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this.serviceContainer.globalContext.fillBrush = command.parameter;
       }
         break;
+      case CommandType.setStrokeThickness: {
+        this.serviceContainer.globalContext.strokeThickness = command.parameter;
+      }
+        break;
       case CommandType.delete:
         this.handleDeleteCommand();
         break;

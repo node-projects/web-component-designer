@@ -49,6 +49,7 @@ export class DrawPathTool implements ITool {
           this._path.setAttribute("D", this._pathD);
           this._path.setAttribute("stroke", designerCanvas.serviceContainer.globalContext.strokeColor);
           this._path.setAttribute("fill", designerCanvas.serviceContainer.globalContext.fillBrush);
+          this._path.setAttribute("stroke-width", designerCanvas.serviceContainer.globalContext.strokeThickness);
           designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
         }
 

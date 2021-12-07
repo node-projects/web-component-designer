@@ -30,6 +30,7 @@ export enum CommandType {
 
   'setStrokeColor' = 'setStrokeColor',
   'setFillBrush' = 'setFillBrush',
+  'setStrokeThickness' = 'setStrokeThickness',
   
   'screenshot' = 'screenshot',
 }
