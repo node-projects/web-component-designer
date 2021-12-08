@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from "./ICodeView";
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
@@ -10,6 +10,7 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
   elementsToPackages: Map<string, string>;
 
   public code: string;
+  public onTextChanged = new TypedEvent<string>();
 
   private _codeMirrorEditor: CodeMirror.Editor;
   private _editor: HTMLTextAreaElement;
@@ -99,6 +100,7 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
     //@ts-ignore
     this._codeMirrorEditor = CodeMirror(this._editor, config);
     this._codeMirrorEditor.setSize('100%', '100%');
+    this._codeMirrorEditor.on('change', () => this.onTextChanged.emit(this._codeMirrorEditor.getValue()))
   }
 
   update(code) {

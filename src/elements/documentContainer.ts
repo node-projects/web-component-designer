@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css } from "@node-projects/base-custom-webcomponent"
+import { BaseCustomWebComponentLazyAppend, css, debounce } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from "./controls/DesignerTabControl";
 import { DesignerView } from "./widgets/designerView/designerView";
 import { ServiceContainer } from "./services/ServiceContainer";
@@ -22,6 +22,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _content: string = '';
   private _tabControl: DesignerTabControl;
   private _selectionPosition: IStringPosition;
+  private _splitDiv: HTMLDivElement;
+  private _designerDiv: HTMLDivElement;
+  private _codeDiv: HTMLDivElement;
+  private refreshInSplitViewDebounced: (...args: any) => any;
 
   static override get style() {
     return css`
@@ -33,11 +37,18 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       node-projects-designer-view {
         height: 100%;
         /*overflow: auto;*/
-      }`;
+      }
+      .split-div {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+      }
+      `;
   }
 
   constructor(serviceContainer: ServiceContainer, content?: string) {
     super();
+
+    this.refreshInSplitViewDebounced = debounce(this.refreshInSplitView, 200)
     this._serviceContainer = serviceContainer;
     if (content != null)
       this._content = content;
@@ -47,12 +58,28 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     div.appendChild(this._tabControl);
     this.designerView = new DesignerView();
     this.designerView.setAttribute('exportparts', 'canvas');
-    this.designerView.title = 'Designer';
-    this._tabControl.appendChild(this.designerView);
+    this._designerDiv = document.createElement("div");
+    this._designerDiv.title = 'Designer';
+    this._designerDiv.appendChild(this.designerView);
+    this._tabControl.appendChild(this._designerDiv);
     this.designerView.initialize(this._serviceContainer);
+
     this.codeView = new serviceContainer.config.codeViewWidget();
-    this.codeView.title = 'Code';
-    this._tabControl.appendChild(this.codeView);
+    this._codeDiv = document.createElement("div");
+    this._codeDiv.title = 'Code';
+    this._codeDiv.appendChild(this.codeView);
+    this.codeView.onTextChanged.on(text => {
+      if (this._tabControl.selectedIndex === 2) {
+        this._content = text;
+        this.refreshInSplitViewDebounced();
+      }
+    })
+    this._tabControl.appendChild(this._codeDiv);
+
+    this._splitDiv = document.createElement("div");
+    this._splitDiv.title = 'Split';
+    this._splitDiv.className = 'split-div';
+    this._tabControl.appendChild(this._splitDiv);
     this.demoView = new serviceContainer.config.demoViewWidget();
     this.demoView.title = 'Preview';
     this._tabControl.appendChild(this.demoView);
@@ -60,6 +87,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this.shadowRoot.appendChild(div);
       this._tabControl.selectedIndex = 0;
     });
+  }
+
+  refreshInSplitView() {
+    this.designerView.parseHTML(this._content);
   }
 
   dispose(): void {
@@ -89,7 +120,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this.designerView.parseHTML(this._content);
       else if (this._tabControl.selectedIndex === 1)
         this.codeView.update(this._content);
-      else if (this._tabControl.selectedIndex === 2)
+      else if (this._tabControl.selectedIndex === 2) {
+
+      }
+      else if (this._tabControl.selectedIndex === 3)
         this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
     }
   }
@@ -112,12 +146,16 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
         this._content = this.designerView.getHTML(designItemsAssignmentList);
         this._selectionPosition = designItemsAssignmentList.get(primarySelection);
-      } else if (i.oldIndex === 1)
+      } else if (i.oldIndex === 1) {
         this._content = this.codeView.getText();
+      } else if (i.oldIndex === 2) {
+        this._designerDiv.appendChild(this.designerView);
+        this._codeDiv.appendChild(this.codeView);
+      }
 
-      if (i.newIndex === 0)
+      if (i.newIndex === 0 || i.newIndex === 2)
         this.designerView.parseHTML(this._content);
-      else if (i.newIndex === 1) {
+      if (i.newIndex === 1 || i.newIndex === 2) {
         this.codeView.update(this._content);
         if (this._selectionPosition) {
           this.codeView.setSelection(this._selectionPosition);
@@ -126,8 +164,14 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         if (i.changedViaClick) {
           this.codeView.focusEditor();
         }
-      } else if (i.newIndex === 2)
+      }
+      if (i.newIndex === 2) {
+        this._splitDiv.appendChild(this.designerView);
+        this._splitDiv.appendChild(this.codeView);
+      }
+      if (i.newIndex === 3) {
         this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
+      }
     });
     if (this._content)
       this.content = this._content;
