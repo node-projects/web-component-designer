@@ -26,6 +26,12 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.instanceServiceContainer = value;
   }
 
+  private _designerCanvas: DesignerCanvas;
+
+  public get designerCanvas() {
+    return this._designerCanvas;
+  }
+  
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
 
@@ -111,7 +117,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
             <div title="snap to elements" id="alignSnap" class="toolbar-control snap-guide"></div>
           </div>
         </div>`;
-  private _designerCanvas: DesignerCanvas;
 
   constructor() {
     super();
@@ -223,7 +228,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
-    this.instanceServiceContainer.selectionService.setSelectedElements(null);
+    //this.instanceServiceContainer.selectionService.setSelectedElements(null);
     return DomConverter.ConvertToString([...this._designerCanvas.rootDesignItem.children()], designItemsAssignmentList);
   }
 
@@ -231,6 +236,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     const parserService = this.serviceContainer.htmlParserService;
     if (!html) {
       this.instanceServiceContainer.undoService.clear();
+      this._designerCanvas.overlayLayer.removeAllOverlays();
       DomHelper.removeAllChildnodes(this._designerCanvas.overlayLayer);
       this._designerCanvas.rootDesignItem.clearChildren();
     }

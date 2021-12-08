@@ -27,6 +27,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _designerDiv: HTMLDivElement;
   private _codeDiv: HTMLDivElement;
   private refreshInSplitViewDebounced: (...args: any) => any;
+  private _disableChangeNotificationDesigner: boolean;
+  private _disableChangeNotificationEditor: boolean;
 
   static override get style() {
     return css`
@@ -65,6 +67,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._designerDiv.appendChild(this.designerView);
     this.designerView.initialize(this._serviceContainer);
     this.designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e))
+    this.designerView.designerCanvas.onContentChanged.on(() => this.designerContentChanged())
 
     this.codeView = new serviceContainer.config.codeViewWidget();
     this._codeDiv = document.createElement("div");
@@ -72,9 +75,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._codeDiv.title = 'Code';
     this._codeDiv.appendChild(this.codeView);
     this.codeView.onTextChanged.on(text => {
-      if (this._tabControl.selectedIndex === 2) {
-        this._content = text;
-        this.refreshInSplitViewDebounced();
+      if (!this._disableChangeNotificationDesigner) {
+        this._disableChangeNotificationEditor = true;
+        if (this._tabControl.selectedIndex === 2) {
+          this._content = text;
+          this.refreshInSplitViewDebounced();
+        }
       }
     })
 
@@ -91,18 +97,40 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     });
   }
 
-  refreshInSplitView() {
-    this.designerView.parseHTML(this._content);
+  async refreshInSplitView() {
+    await this.designerView.parseHTML(this._content);
+    this._disableChangeNotificationEditor = false;
   }
 
   designerSelectionChanged(e: ISelectionChangedEvent) {
-    let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-    if (primarySelection) {
-      let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
-      this._content = this.designerView.getHTML(designItemsAssignmentList);
-      this._selectionPosition = designItemsAssignmentList.get(primarySelection);
-      this.codeView.setSelection(this._selectionPosition);
-      this._selectionPosition = null;
+    if (this._tabControl.selectedIndex === 2) {
+      let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
+      if (primarySelection) {
+        let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
+        this._content = this.designerView.getHTML(designItemsAssignmentList);
+        this._selectionPosition = designItemsAssignmentList.get(primarySelection);
+        this.codeView.setSelection(this._selectionPosition);
+        this._selectionPosition = null;
+      }
+    }
+  }
+
+  designerContentChanged() {
+    if (!this._disableChangeNotificationEditor) {
+      this._disableChangeNotificationDesigner = true;
+      if (this._tabControl.selectedIndex === 2) {
+        let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
+        let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
+        this._content = this.designerView.getHTML(designItemsAssignmentList);
+        this.codeView.update(this._content);
+        if (primarySelection) {
+          this._selectionPosition = designItemsAssignmentList.get(primarySelection);
+          if (this._selectionPosition)
+            this.codeView.setSelection(this._selectionPosition);
+          this._selectionPosition = null;
+        }
+      }
+      this._disableChangeNotificationDesigner = false;
     }
   }
 

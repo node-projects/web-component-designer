@@ -6,7 +6,7 @@ import { UndoService } from '../../services/undoService/UndoService';
 import { SelectionService } from '../../services/selectionService/SelectionService';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
@@ -57,6 +57,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._zoomFactor = value;
     this.zoomFactorChanged();
   }
+
+  public onContentChanged = new TypedEvent<void>();
 
   // Private Variables
   private _canvas: HTMLDivElement;
@@ -379,6 +381,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public setDesignItems(designItems: IDesignItem[]) {
     this.instanceServiceContainer.undoService.clear();
+    this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
     this.rootDesignItem.clearChildren();
     this.addDesignItems(designItems);

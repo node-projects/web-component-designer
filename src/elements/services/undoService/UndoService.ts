@@ -51,6 +51,7 @@ export class UndoService implements IUndoService {
       this._transactionStack[this._transactionStack.length - 1].execute(item);
     }
     this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
+    this._designerCanvas.onContentChanged.emit();
   }
 
   clear() {
@@ -74,6 +75,7 @@ export class UndoService implements IUndoService {
       throw err;
     }
     this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
+    this._designerCanvas.onContentChanged.emit();
   }
 
   redo() {
@@ -91,6 +93,7 @@ export class UndoService implements IUndoService {
       throw err;
     }
     this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
+    this._designerCanvas.onContentChanged.emit();
   }
 
   canUndo(): boolean {
