@@ -90,12 +90,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
       this._monacoEditor.layout();
       let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-        () => this.onTextChanged.emit(this._monacoEditor.getValue())
+        this.onTextChanged.emit(this._monacoEditor.getValue())
       })
       this._monacoEditor.onDidChangeModel(e => {
         changeContentListener.dispose();
         changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-          () => this.onTextChanged.emit(this._monacoEditor.getValue())
+          this.onTextChanged.emit(this._monacoEditor.getValue())
         })
       })
     });

@@ -10,6 +10,7 @@ import { IDemoView } from './widgets/demoView/IDemoView';
 import { IUiCommandHandler } from "../commandHandling/IUiCommandHandler";
 import { IUiCommand } from "../commandHandling/IUiCommand";
 import { IDisposable } from "../interfaces/IDisposable";
+import { ISelectionChangedEvent } from "./services/selectionService/ISelectionChangedEvent.js";
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;
@@ -59,13 +60,15 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this.designerView = new DesignerView();
     this.designerView.setAttribute('exportparts', 'canvas');
     this._designerDiv = document.createElement("div");
+    this._tabControl.appendChild(this._designerDiv);
     this._designerDiv.title = 'Designer';
     this._designerDiv.appendChild(this.designerView);
-    this._tabControl.appendChild(this._designerDiv);
     this.designerView.initialize(this._serviceContainer);
+    this.designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e))
 
     this.codeView = new serviceContainer.config.codeViewWidget();
     this._codeDiv = document.createElement("div");
+    this._tabControl.appendChild(this._codeDiv);
     this._codeDiv.title = 'Code';
     this._codeDiv.appendChild(this.codeView);
     this.codeView.onTextChanged.on(text => {
@@ -74,7 +77,6 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this.refreshInSplitViewDebounced();
       }
     })
-    this._tabControl.appendChild(this._codeDiv);
 
     this._splitDiv = document.createElement("div");
     this._splitDiv.title = 'Split';
@@ -91,6 +93,17 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   refreshInSplitView() {
     this.designerView.parseHTML(this._content);
+  }
+
+  designerSelectionChanged(e: ISelectionChangedEvent) {
+    let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
+    if (primarySelection) {
+      let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
+      this._content = this.designerView.getHTML(designItemsAssignmentList);
+      this._selectionPosition = designItemsAssignmentList.get(primarySelection);
+      this.codeView.setSelection(this._selectionPosition);
+      this._selectionPosition = null;
+    }
   }
 
   dispose(): void {
