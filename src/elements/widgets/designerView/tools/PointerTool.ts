@@ -8,8 +8,8 @@ import { ExtensionType } from "../extensions/ExtensionType";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { ITool } from "./ITool";
 import { NamedTools } from './NamedTools';
-import { DesignerCanvas } from '../designerCanvas';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
+import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 
 export class PointerTool implements ITool {
 
@@ -125,7 +125,7 @@ export class PointerTool implements ITool {
         (<HTMLElement>currentDesignItem.element).style.pointerEvents = 'none';
       }
       let currentElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-      if (DesignerCanvas.getHost(currentElement) !== designerCanvas.overlayLayer)
+      if (DomHelper.getHost(currentElement) !== designerCanvas.overlayLayer)
         currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
     } else {
       this._resetPointerEventsForClickThrough();

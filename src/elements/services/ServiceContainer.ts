@@ -25,6 +25,8 @@ import { IDragDropService } from './dragDropService/IDragDropService';
 import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
 import { IDesignerPointerExtensionProvider } from "../widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
 import { IModelCommandService } from "./modelCommandService/IModelCommandService.js";
+import { IDesignViewConfigButtonsProvider } from "../widgets/designerView/IDesignViewConfigButtonsProvider.js";
+import { IDemoProviderService } from "./demoProviderService/IDemoProviderService.js";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -41,7 +43,8 @@ interface ServiceNameMap {
   "prepareElementsForDesignerService": IPrepareElementsForDesignerService;
   "dragDropService": IDragDropService;
   "copyPasteService": ICopyPasteService;
-  "modelCommandService": IModelCommandService;
+  "modelCommandService": IModelCommandService
+  "demoProviderService": IDemoProviderService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -56,6 +59,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public readonly designerExtensions: Map<(ExtensionType | string), IDesignerExtensionProvider[]> = new Map();
 
+  public readonly designViewConfigButtons: IDesignViewConfigButtonsProvider[] = [];
+  
   public readonly designerPointerExtensions: IDesignerPointerExtensionProvider[] = [];
 
   public designerContextMenuExtensions: IContextMenuExtension[];
@@ -122,5 +127,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get modelCommandService(): IModelCommandService {
     return this.getLastService('modelCommandService');
+  }
+
+  get demoProviderService(): IDemoProviderService {
+    return this.getLastService('demoProviderService');
   }
 }

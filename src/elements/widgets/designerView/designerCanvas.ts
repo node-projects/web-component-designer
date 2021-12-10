@@ -6,7 +6,7 @@ import { UndoService } from '../../services/undoService/UndoService';
 import { SelectionService } from '../../services/selectionService/SelectionService';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatName } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
@@ -57,6 +57,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._zoomFactor = value;
     this.zoomFactorChanged();
   }
+
+  public onContentChanged = new TypedEvent<void>();
 
   // Private Variables
   private _canvas: HTMLDivElement;
@@ -223,6 +225,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this.serviceContainer.globalContext.tool = this.serviceContainer.designerTools.get(command.parameter);
       }
         break;
+      case CommandType.setStrokeColor: {
+        this.serviceContainer.globalContext.strokeColor = command.parameter;
+      }
+        break;
+      case CommandType.setFillBrush: {
+        this.serviceContainer.globalContext.fillBrush = command.parameter;
+      }
+        break;
+      case CommandType.setStrokeThickness: {
+        this.serviceContainer.globalContext.strokeThickness = command.parameter;
+      }
+        break;
       case CommandType.delete:
         this.handleDeleteCommand();
         break;
@@ -367,6 +381,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public setDesignItems(designItems: IDesignItem[]) {
     this.instanceServiceContainer.undoService.clear();
+    this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
     this.rootDesignItem.clearChildren();
     this.addDesignItems(designItems);
@@ -574,15 +589,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: normEvt.x - normEl.x, y: normEvt.y - normEl.y };
   }
 
-  //todo remove, is in base custom webcomp domhelper
-  static getHost(node: Node) {
-    while (node.parentElement)
-      node = node.parentElement;
-    if ((<ShadowRoot>node).host)
-      return (<ShadowRoot>node).host
-    return (<ShadowRoot>node.parentNode).host;
-  }
-
   public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
     let backupPEventsMap: Map<HTMLElement, string> = new Map();
     let currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
@@ -631,6 +637,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   _rect: SVGRectElement
   private _pointerEventHandler(event: PointerEvent) {
     this._fillCalculationrects();
+
+    /*let clickOnScrollbar = event.clientX - this.containerBoundingRect.x > this.containerBoundingRect.width || event.clientY - this.containerBoundingRect.y > this.containerBoundingRect.height
+    if (clickOnScrollbar) https://kingsora.github.io/OverlayScrollbars/
+      return;*/
+
     if (this._pointerextensions) {
       for (let pe of this._pointerextensions)
         pe.refresh(event);
@@ -645,20 +656,23 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     let currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
     if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer || !currentElement) {
       currentElement = this._canvas;
-    }
+    } /* else {
+      if (!DesignerCanvas.hasOrIsParent(currentElement, this._canvas))
+        return;
+    }*/
 
     //TODO: remove duplication when tool refactoring starts
-    this._fillCalculationrects();
+    //this._fillCalculationrects();
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
     if (this._lastHoverDesignItem != currentDesignItem) {
       if (this._lastHoverDesignItem)
         this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
-      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DesignerCanvas.getHost(currentElement.parentNode) !== this.overlayLayer)
+      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DomHelper.getHost(currentElement.parentNode) !== this.overlayLayer)
         this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
       this._lastHoverDesignItem = currentDesignItem;
     }
 
-    if (currentElement && DesignerCanvas.getHost(currentElement.parentNode) === this.overlayLayer) {
+    if (currentElement && DomHelper.getHost(currentElement.parentNode) === this.overlayLayer) {
       if (this.eatEvents)
         return;
       currentElement = this.instanceServiceContainer.selectionService.primarySelection?.element ?? this._canvas;

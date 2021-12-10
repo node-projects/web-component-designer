@@ -24,11 +24,6 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     position: absolute;
     top: 60px;
     left: 20px;
-  }
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
   }`;
 
   constructor() {
@@ -43,26 +38,10 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     this.shadowRoot.appendChild(this._loading)
   }
 
-  display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string) {
-    let iframe = document.createElement('iframe');
-    this._placeholder.innerHTML = '';
-    this._placeholder.appendChild(iframe);
+  async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string) {
     this._loading.hidden = false;
-
-    iframe.onload = () => {
-      this._loading.hidden = true;
-    };
-
-    let doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write('<script type="module">');
-    for (let i of instanceServiceContainer.designContext.imports) {
-      doc.write("import '" + i + "';");
-    }
-    doc.write("document.body.style.display='';");
-    doc.write('</script>');
-    doc.write('<body style="display:none">' + code + '</body>');
-    doc.close();
+    await serviceContainer.demoProviderService.provideDemo(this._placeholder, serviceContainer, instanceServiceContainer, code);
+    this._loading.hidden = true;
   }
 }
 

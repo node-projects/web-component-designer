@@ -96,6 +96,13 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     }
   }
 
+  public removeAllOverlays() {
+    const nodes = this._svg.querySelectorAll('svg > g > *');
+    for (const e of nodes) {
+      e.parentNode.removeChild(e);
+    }
+  }
+
   public createPoint(): DOMPointInit {
     //@ts-ignore
     return this._svg.createSVGPoint();

@@ -10,6 +10,7 @@ export class GlobalContext {
   private _serviceContainer: ServiceContainer
   private _tool: ITool;
   private _strokeColor: string = 'black';
+  private _strokeThickness: string = '3';
   private _fillBrush: string = 'transparent';
 
   constructor(serviceContainer: ServiceContainer) {
@@ -46,6 +47,17 @@ export class GlobalContext {
   }
   readonly onStrokeColorChanged = new TypedEvent<PropertyChangedArgs<string>>();
 
+  public set strokeThickness(strokeThickness: string) {
+    if (this._strokeThickness !== strokeThickness) {
+      const oldStrokeThickness = this._strokeThickness;
+      this._strokeThickness = strokeThickness;
+      this.onStrokeThicknessChanged.emit(new PropertyChangedArgs<string>(strokeThickness, oldStrokeThickness));
+    }
+  }
+  public get strokeThickness(): string {
+    return this._strokeThickness;
+  }
+  readonly onStrokeThicknessChanged = new TypedEvent<PropertyChangedArgs<string>>();
 
   public set fillBrush(fillBrush: string) {
     this._fillBrush = fillBrush;

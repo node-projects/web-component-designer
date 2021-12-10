@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from "./ICodeView";
 import type { Ace } from "ace-builds";
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
@@ -25,6 +25,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   elementsToPackages: Map<string, string>;
 
   public code: string;
+  public onTextChanged = new TypedEvent<string>();
 
   private _aceEditor: Ace.Editor;
   private _editor: HTMLDivElement;
@@ -129,6 +130,8 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     });
     let config = { attributes: true, childList: true, characterData: true };
     observer.observe(this.shadowRoot.querySelector('.ace_content'), config);
+
+    this._aceEditor.on('change', () => this.onTextChanged.emit(this._aceEditor.getValue()));
   }
 
   update(code) {

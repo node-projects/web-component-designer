@@ -27,5 +27,10 @@ export enum CommandType {
   'distributeVertical' = 'distributeVertical',
 
   'setTool' = 'setTool',
+
+  'setStrokeColor' = 'setStrokeColor',
+  'setFillBrush' = 'setFillBrush',
+  'setStrokeThickness' = 'setStrokeThickness',
+  
   'screenshot' = 'screenshot',
 }

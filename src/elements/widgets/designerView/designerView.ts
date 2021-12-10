@@ -26,7 +26,14 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.instanceServiceContainer = value;
   }
 
+  private _designerCanvas: DesignerCanvas;
+
+  public get designerCanvas() {
+    return this._designerCanvas;
+  }
+  
   private _zoomInput: HTMLInputElement;
+  private _lowertoolbar: HTMLDivElement;
 
   static override readonly style = css`
     :host {
@@ -60,6 +67,12 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       display: block;
       margin-right: 1px;
       cursor: default;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .selected {
+      background-color: deepskyblue;
     }
     .toolbar-control:hover {
       background-color:rgba(164,206,249,.6);
@@ -104,7 +117,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
             <div title="snap to elements" id="alignSnap" class="toolbar-control snap-guide"></div>
           </div>
         </div>`;
-  private _designerCanvas: DesignerCanvas;
 
   constructor() {
     super();
@@ -154,6 +166,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     let alignGrid = this._getDomElement<HTMLDivElement>('alignGrid');
     alignGrid.onclick = () => { this._designerCanvas.alignOnGrid = !this._designerCanvas.alignOnGrid; alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : ''; }
     alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : '';
+
+    this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
   }
 
   private _onWheel(event: WheelEvent) {
@@ -205,10 +219,16 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   initialize(serviceContainer: ServiceContainer) {
     this.serviceContainer = serviceContainer;
     this._designerCanvas.initialize(serviceContainer);
+    if (serviceContainer.designViewConfigButtons) {
+      for (let provider of serviceContainer.designViewConfigButtons) {
+        for (let btn of provider.provideButtons(this, this._designerCanvas))
+          this._lowertoolbar.appendChild(btn);
+      }
+    }
   }
 
   public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
-    this.instanceServiceContainer.selectionService.setSelectedElements(null);
+    //this.instanceServiceContainer.selectionService.setSelectedElements(null);
     return DomConverter.ConvertToString([...this._designerCanvas.rootDesignItem.children()], designItemsAssignmentList);
   }
 
@@ -216,6 +236,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     const parserService = this.serviceContainer.htmlParserService;
     if (!html) {
       this.instanceServiceContainer.undoService.clear();
+      this._designerCanvas.overlayLayer.removeAllOverlays();
       DomHelper.removeAllChildnodes(this._designerCanvas.overlayLayer);
       this._designerCanvas.rootDesignItem.clearChildren();
     }

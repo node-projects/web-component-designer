@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from "./ICodeView";
 import type * as monaco from 'monaco-editor';
 import { IActivateable } from '../../../interfaces/IActivateable';
@@ -17,6 +17,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   elementsToPackages: Map<string, string>;
 
   public code: string;
+  public onTextChanged = new TypedEvent<string>();
 
   private _monacoEditor: monaco.editor.IStandaloneCodeEditor;
   private _editor: HTMLDivElement;
@@ -88,6 +89,15 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       });
 
       this._monacoEditor.layout();
+      let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
+        this.onTextChanged.emit(this._monacoEditor.getValue())
+      })
+      this._monacoEditor.onDidChangeModel(e => {
+        changeContentListener.dispose();
+        changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
+          this.onTextChanged.emit(this._monacoEditor.getValue())
+        })
+      })
     });
   }
 

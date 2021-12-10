@@ -9,6 +9,7 @@ import { IUiCommandHandler } from "../../../commandHandling/IUiCommandHandler";
 import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayerView } from "./overlayLayerView";
 import { IRect } from "../../../interfaces/IRect.js";
+import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 
 export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
@@ -24,6 +25,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;
+
+  readonly onContentChanged: TypedEvent<void>;
 
   zoomFactor: number;
 
