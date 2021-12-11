@@ -27,7 +27,8 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
         }
         .header {
             display: inline-flex; 
-            user-select: none; 
+            user-select: none;
+            -webkit-user-select: none; 
             flex-direction: row; 
             cursor: pointer; 
             height: 30px;
@@ -52,7 +53,8 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
         }
         .more-container {
             z-index: 1;
-            user-select: none; 
+            user-select: none;
+            -webkit-user-select: none;
             background-color: var(--dark-grey, #232733);
             right: 0;
             top: 30px;

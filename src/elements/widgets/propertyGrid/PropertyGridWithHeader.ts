@@ -12,6 +12,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       display: block;
       height: 100%;
       user-select: none;
+      -webkit-user-select: none;
       background: var(--medium-grey, #2f3545);
       color: white;
     }

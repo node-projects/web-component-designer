@@ -229,7 +229,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
     // If the target is a <span>, you clicked on the span inside the button
     // so you need to use currentTarget.
     let item = event.target;
-    if (item.tagName === 'SPAN') {
+    if (item.localName === 'span') {
       item = item.parentElement;
     }
     this._selectTreeElements([item]);

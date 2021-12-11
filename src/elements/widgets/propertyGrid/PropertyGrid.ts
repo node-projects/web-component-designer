@@ -23,6 +23,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
       display: block;
       height: 100%;
       user-select: none;
+      -webkit-user-select: none;
     }
     button:hover {
       box-shadow: inset 0 3px 0 var(--light-grey);

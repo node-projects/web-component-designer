@@ -114,12 +114,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       pointer-events: none;
       overflow: visible;
       user-select: none;
+      -webkit-user-select: none;
       z-index: 999999999999;
     }
     
     #node-projects-designer-canvas-canvas * {
       cursor: pointer;
       user-select: none;
+      -webkit-user-select: none;
     }`;
 
   static override readonly template = html`

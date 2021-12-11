@@ -15,6 +15,7 @@ export class SimpleSplitView extends BaseCustomWebComponentConstructorAppend {
     }
     #splitter {
       user-select: none;
+      -webkit-user-select: none;
     }
     :host(:not([orientation="vertical"])) > div > #splitter {
       cursor: ew-resize;
