@@ -31,7 +31,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   public get designerCanvas() {
     return this._designerCanvas;
   }
-  
+
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
 
@@ -102,7 +102,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }`;
 
   static override readonly template = html`
-        <div id="outer">          
+        <div id="outer">
           <div id="lowertoolbar">
             <input id="zoomInput" type="text" value="100%">
             <div title="decrease zoom" id="zoomIncrease" class="toolbar-control zoom-in"></div>
@@ -179,6 +179,12 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
         zf = 0.02;
       this._designerCanvas.zoomFactor = zf;
       this._zoomInput.value = Math.round(zf * 100) + '%';
+
+      let norm = this._designerCanvas.getNormalizedEventCoordinates(event);
+      let rect = this._designerCanvas.getBoundingClientRect();
+      let xp = norm.x - rect.width / 2;
+      let yp = norm.y - rect.height / 2;
+
       //TODO: we should zoom on the current cursor position, so it stays the center
     }
   }

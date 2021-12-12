@@ -21,7 +21,7 @@ export class SelectionDefaultExtension extends AbstractExtension {
     const top = Number.parseFloat(computedStyle.marginTop.replace('px', ''));
     const right = Number.parseFloat(computedStyle.marginRight.replace('px', ''));
     const bottom = Number.parseFloat(computedStyle.marginBottom.replace('px', ''));
-    this._rect = this._drawRect(itemRect.x - this.designerCanvas.containerBoundingRect.x - left, itemRect.y - this.designerCanvas.containerBoundingRect.y - top, left + itemRect.width + right, top + itemRect.height + bottom, 'svg-selection', this._rect);
+    this._rect = this._drawRect(itemRect.x - this.designerCanvas.containerBoundingRect.x - left, itemRect.y - this.designerCanvas.containerBoundingRect.y - top, left + itemRect.width / this.designerCanvas.zoomFactor + right, top + itemRect.height / this.designerCanvas.zoomFactor + bottom, 'svg-selection', this._rect);
   }
 
   override dispose() {
