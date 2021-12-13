@@ -13,11 +13,6 @@ export class DrawRectTool implements ITool {
 
   private _pathD: string;
   private _path: SVGPathElement;
-  private _samePoint = false;
-  private _p2pMode = false;
-  private _dragMode = false;
-  private _pointerMoved = false;
-  private _eventStarted = false;
   private _startPoint: IPoint = { x: 0, y: 0 };
 
   constructor() {
@@ -36,9 +31,7 @@ export class DrawRectTool implements ITool {
 
     switch (event.type) {
       case EventNames.PointerDown:
-        console.log("Rect Tool Pressed");
         this._startPoint = currentPoint;
-        this._eventStarted = true;
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
@@ -57,18 +50,27 @@ export class DrawRectTool implements ITool {
             let normLength = Math.abs(this.calculateNormLegth(this._startPoint, currentPoint));
             if (alpha >= 0 && alpha <= 90) {
               this._path.setAttribute("d", this._pathD +
-              "L" + (this._startPoint.x + normLength) + " " + this._startPoint.y +
-              "L" + (this._startPoint.x + normLength) + " " + (this._startPoint.y + normLength) +
-              "L" + this._startPoint.x + " " + (this._startPoint.x - normLength) + "z");
+                "L" + (this._startPoint.x + normLength) + " " + this._startPoint.y +
+                "L" + (this._startPoint.x + normLength) + " " + (this._startPoint.y - normLength) +
+                "L" + this._startPoint.x + " " + (this._startPoint.y - normLength) + "z");
             }
             else if (alpha >= 90 && alpha <= 180) {
-
+              this._path.setAttribute("d", this._pathD +
+                "L" + (this._startPoint.x - normLength) + " " + this._startPoint.y +
+                "L" + (this._startPoint.x - normLength) + " " + (this._startPoint.y - normLength) +
+                "L" + this._startPoint.x + " " + (this._startPoint.y - normLength) + "z");
             }
             else if (alpha >= 180 && alpha <= 270) {
-
+              this._path.setAttribute("d", this._pathD +
+                "L" + (this._startPoint.x - normLength) + " " + this._startPoint.y +
+                "L" + (this._startPoint.x - normLength) + " " + (this._startPoint.y + normLength) +
+                "L" + this._startPoint.x + " " + (this._startPoint.y + normLength) + "z");
             }
             else if (alpha >= 270 && alpha <= 360) {
-
+              this._path.setAttribute("d", this._pathD +
+                "L" + (this._startPoint.x + normLength) + " " + this._startPoint.y +
+                "L" + (this._startPoint.x + normLength) + " " + (this._startPoint.y + normLength) +
+                "L" + this._startPoint.x + " " + (this._startPoint.y + normLength) + "z");
             }
           }
           else {
@@ -115,17 +117,10 @@ export class DrawRectTool implements ITool {
 
   calculateNormLegth(p1: IPoint, p2: IPoint): number {
     let normLenght;
-    let currentLength = Math.sqrt(Math.pow(p2.x - p1.x,2) + Math.pow(p2.y - p1.y,2));
+    let currentLength = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
     let alpha = this.calculateAlpha(p1, p2);
-    let beta = alpha - ((alpha % 45) * 45);
-    normLenght = currentLength * Math.cos(beta);
-    console.log("alpha: " + alpha);
-    console.log("beta: " + beta);
-    console.log("currentLength: " + currentLength);
-    console.log("normLength: " + normLenght);
-    console.log(alpha % 45);
-    console.log((alpha % 45) * 45);
-    console.log(46.2 % 45);
+    let beta = alpha - ((Math.floor(alpha / 90) * 90) + 45);
+    normLenght = currentLength * Math.cos(beta * (Math.PI / 180)) / Math.sqrt(2);
 
     return normLenght;
   }
