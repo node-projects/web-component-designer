@@ -49,6 +49,7 @@ import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperator
 import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons';
 import { DemoProviderService } from './demoProviderService/DemoProviderService';
 import { CursorLinePointerExtensionProvider } from '../widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js';
+import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -109,6 +110,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());
   serviceContainer.designerTools.set(NamedTools.DrawSelection, new RectangleSelectorTool());
   serviceContainer.designerTools.set(NamedTools.DrawPath, new DrawPathTool());
+  serviceContainer.designerTools.set(NamedTools.DrawRect, new DrawRectTool());
   serviceContainer.designerTools.set(NamedTools.Zoom, new ZoomTool());
   serviceContainer.designerTools.set(NamedTools.Pan, new PanTool());
   serviceContainer.designerTools.set(NamedTools.RectangleSelector, new RectangleSelectorTool());

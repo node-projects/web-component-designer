@@ -123,6 +123,7 @@ export type { ITool } from "./elements/widgets/designerView/tools/ITool.js";
 export * from "./elements/widgets/designerView/tools/NamedTools.js";
 export * from "./elements/widgets/designerView/tools/DrawElementTool.js";
 export * from "./elements/widgets/designerView/tools/DrawPathTool.js";
+export * from "./elements/widgets/designerView/tools/DrawRectTool.js";
 export * from "./elements/widgets/designerView/tools/MagicWandSelectorTool.js";
 export * from "./elements/widgets/designerView/tools/PanTool.js";
 export * from "./elements/widgets/designerView/tools/PickColorTool.js";
