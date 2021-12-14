@@ -1,5 +1,5 @@
 import { EventNames } from '../../../../enums/EventNames';
-import { movePathData } from '../../../helper/PathDataPolyfill';
+import { moveSVGData } from '../../../helper/PathDataPolyfill';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
@@ -115,7 +115,7 @@ export class DrawPathTool implements ITool {
           const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
           const mvX = rect.x - designerCanvas.containerBoundingRect.x - offset;
           const mvY = rect.y - designerCanvas.containerBoundingRect.y - offset;
-          const d = movePathData(this._path, mvX, mvY);
+          const d = moveSVGData(this._path, mvX, mvY);
           this._path.setAttribute("d", d);
           svg.appendChild(this._path);
           svg.style.left = (mvX) + 'px';
@@ -138,17 +138,57 @@ export class DrawPathTool implements ITool {
 
 
   straightenLine(p1: IPoint, p2: IPoint): IPoint {
-    let newP: IPoint = { x: 0, y: 0 };
+    let newP = p2;
+    let alpha = this.calculateAlpha(p1, p2);
+    let normLength;
+
+    if ((alpha >= 337.5 && alpha < 360 || alpha >= 0 && alpha < 22.5)) { // 0
+      newP = { x: p2.x, y: p1.y }
+    }
+    else if ((alpha >= 22.5 && alpha < 67.5)) {   // 45
+      normLength = this.calculateNormLegth(p1, p2);
+      newP = { x: p1.x + normLength, y: p1.y - normLength }
+    }
+    else if ((alpha >= 67.5 && alpha < 112.5)) {  // 90
+      newP = { x: p1.x, y: p2.y }
+    }
+    else if ((alpha >= 112.5 && alpha < 157.5)) { // 135
+      normLength = this.calculateNormLegth(p1, p2);
+      newP = { x: p1.x - normLength, y: p1.y - normLength }
+    }
+    else if ((alpha >= 157.5 && alpha < 202.5)) { // 180
+      newP = { x: p2.x, y: p1.y }
+    }
+    else if ((alpha >= 202.5 && alpha < 247.5)) { // 225
+      normLength = this.calculateNormLegth(p1, p2);
+      newP = { x: p1.x - normLength, y: p1.y + normLength }
+    }
+    else if ((alpha >= 247.5 && alpha < 292.5)) { // 270
+      newP = { x: p1.x, y: p2.y }
+    }
+    else if ((alpha >= 292.5 && alpha < 337.5)) { // 315
+      normLength = this.calculateNormLegth(p1, p2);
+      newP = { x: p1.x + normLength, y: p1.y + normLength }
+    }
+
+    return newP;
+  }
+
+  calculateNormLegth(p1: IPoint, p2: IPoint): number {
+    let normLenght;
+    let currentLength = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+    let alpha = this.calculateAlpha(p1, p2);
+    let beta = alpha - ((Math.floor(alpha / 90) * 90) + 45);
+    normLenght = currentLength * Math.cos(beta * (Math.PI / 180)) / Math.sqrt(2);
+
+    return normLenght;
+  }
+
+  calculateAlpha(p1: IPoint, p2: IPoint): number {
     let alpha = - 1 * Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
     if (alpha < 0)
       alpha += 360;
-    if (alpha > 0 && alpha < 45 || alpha > 315 && alpha < 360 || alpha > 135 && alpha < 225)   // right or left
-      newP = { x: p2.x, y: p1.y }
-    else if (alpha > 45 && alpha < 135 || alpha > 225 && alpha < 315)   // up or down
-      newP = { x: p1.x, y: p2.y }
-    else    // something else
-      newP = { x: p2.x, y: p2.y }
 
-    return newP;
+    return alpha;
   }
 }

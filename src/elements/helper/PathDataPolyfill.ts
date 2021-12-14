@@ -10,6 +10,9 @@
 // @author
 //   Jarosław Foksa
 // @license
+
+import { IPoint } from "../..";
+
 //   MIT License
 if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathData) {
   (function () {
@@ -1105,38 +1108,146 @@ declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: number, x: 
 declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
 declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
 
-export function movePathData(path: SVGPathElement, xFactor: number, yFactor: number): string {
+
+
+
+
+export function straightenLine(p1: IPoint, p2: IPoint): IPoint {
+  let newP = p2;
+  let alpha = calculateAlpha(p1, p2);
+  let normLength;
+
+  if ((alpha >= 337.5 && alpha < 360 || alpha >= 0 && alpha < 22.5)) { // 0
+    newP = { x: p2.x, y: p1.y }
+  }
+  else if ((alpha >= 22.5 && alpha < 67.5)) {   // 45
+    normLength = calculateNormLegth(p1, p2);
+    newP = { x: p1.x + normLength, y: p1.y - normLength }
+  }
+  else if ((alpha >= 67.5 && alpha < 112.5)) {  // 90
+    newP = { x: p1.x, y: p2.y }
+  }
+  else if ((alpha >= 112.5 && alpha < 157.5)) { // 135
+    normLength = calculateNormLegth(p1, p2);
+    newP = { x: p1.x - normLength, y: p1.y - normLength }
+  }
+  else if ((alpha >= 157.5 && alpha < 202.5)) { // 180
+    newP = { x: p2.x, y: p1.y }
+  }
+  else if ((alpha >= 202.5 && alpha < 247.5)) { // 225
+    normLength = calculateNormLegth(p1, p2);
+    newP = { x: p1.x - normLength, y: p1.y + normLength }
+  }
+  else if ((alpha >= 247.5 && alpha < 292.5)) { // 270
+    newP = { x: p1.x, y: p2.y }
+  }
+  else if ((alpha >= 292.5 && alpha < 337.5)) { // 315
+    normLength = calculateNormLegth(p1, p2);
+    newP = { x: p1.x + normLength, y: p1.y + normLength }
+  }
+
+  return newP;
+}
+
+export function calculateNormLegth(p1: IPoint, p2: IPoint): number {
+  let normLenght;
+  let currentLength = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+  let alpha = calculateAlpha(p1, p2);
+  let beta = alpha - ((Math.floor(alpha / 90) * 90) + 45);
+  normLenght = currentLength * Math.cos(beta * (Math.PI / 180)) / Math.sqrt(2);
+
+  return normLenght;
+}
+
+export function calculateAlpha(p1: IPoint, p2: IPoint): number {
+  let alpha = - 1 * Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+  if (alpha < 0)
+    alpha += 360;
+
+  return alpha;
+}
+
+
+
+
+
+export function moveSVGData(path: SVGPathElement | SVGLineElement | SVGEllipseElement | SVGRectElement, xFactor: number, yFactor: number): string {
   let newPathData = "";
-  let pd = path.getPathData({ normalize: true });
-  {
-    for (let p of pd) {
-      switch (p.type) {
-        case ('M'):
-        case ('m'):
-        case ('L'):
-        case ('l'):
-        case ('T'):
-        case ('t'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor);
-          break;
-        case ('Z'):
-        case ('z'):
-          newPathData += p.type;
-          break;
-        case ('C'):
-        case ('c'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " " + (p.values[4] - xFactor) + " " + (p.values[5] - yFactor);
-          break;
-        case ('S'):
-        case ('s'):
-        case ('Q'):
-        case ('q'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor);
-          break;
-        case ('A'):
-        case ('a'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + (p.values[5] - xFactor) + " " + (p.values[6] - yFactor);
-          break;
+  if (path instanceof SVGPathElement) {
+    let pd = path.getPathData({ normalize: true });
+    {
+      for (let p of pd) {
+        switch (p.type) {
+          case ('M'):
+          case ('m'):
+          case ('L'):
+          case ('l'):
+          case ('T'):
+          case ('t'):
+            newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor);
+            break;
+          case ('Z'):
+          case ('z'):
+            newPathData += p.type;
+            break;
+          case ('C'):
+          case ('c'):
+            newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " " + (p.values[4] - xFactor) + " " + (p.values[5] - yFactor);
+            break;
+          case ('S'):
+          case ('s'):
+          case ('Q'):
+          case ('q'):
+            newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor);
+            break;
+          case ('A'):
+          case ('a'):
+            newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + (p.values[5] - xFactor) + " " + (p.values[6] - yFactor);
+            break;
+        }
+      }
+    }
+  }
+  else if (path instanceof SVGLineElement) {
+    let pd = path.getPathData({ normalize: true });
+    {
+      for (let p of pd) {
+        switch (p.type) {
+          case ("x1"):
+          case ("x2"):
+            newPathData += p.type + (p.values[0] - xFactor);
+            break;
+          case ("y1"):
+          case ("y2"):
+            newPathData += p.type + (p.values[0] - yFactor);
+            break;
+        }
+      }
+    }
+  }
+  else if (path instanceof SVGRectElement) {
+    let pd = path.getPathData({ normalize: true });
+    {
+      for (let p of pd) {
+        switch (p.type) {
+          case ('Z'):
+          case ('z'):
+            newPathData += p.type;
+            break;
+        }
+      }
+    }
+  }
+  else if (path instanceof SVGEllipseElement) {
+    let pd = path.getPathData({ normalize: true });
+    {
+      for (let p of pd) {
+        switch (p.type) {
+          case ('Z'):
+          case ('z'):
+            newPathData += p.type;
+            break;
+        }
       }
     }
   }

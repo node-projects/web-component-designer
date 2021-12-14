@@ -4,6 +4,8 @@ export enum NamedTools {
 
   DrawPath = 'DrawPath',
   DrawRect = 'DrawRect',
+  DrawEllip = 'DrawEllip',
+  DrawLine = 'DrawLine',
   Zoom = 'Zoom',
   Pan = 'Pan',
   MagicWandSelector = 'MagicWandSelector',
