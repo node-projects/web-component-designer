@@ -3,11 +3,14 @@ import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { calculateNormLegth, DesignItem, InsertAction, IPoint } from '../../../..';
+import { calculateNormLegth } from '../../../helper/PathDataPolyfill';
+import { DesignItem } from '../../../item/DesignItem';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
+import { IPoint } from '../../../../interfaces/IPoint';
 
 
 
-export class DrawEllipTool implements ITool {
+export class DrawEllipsisTool implements ITool {
 
   readonly cursor = 'crosshair';
 

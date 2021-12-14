@@ -49,7 +49,7 @@ import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperator
 import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons';
 import { DemoProviderService } from './demoProviderService/DemoProviderService';
 import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
-import { DrawEllipTool } from '../widgets/designerView/tools/DrawEllipTool.js';
+import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
 import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
 
 export function createDefaultServiceContainer() {
@@ -112,7 +112,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerTools.set(NamedTools.DrawSelection, new RectangleSelectorTool());
   serviceContainer.designerTools.set(NamedTools.DrawPath, new DrawPathTool());
   serviceContainer.designerTools.set(NamedTools.DrawRect, new DrawRectTool());
-  serviceContainer.designerTools.set(NamedTools.DrawEllip, new DrawEllipTool());
+  serviceContainer.designerTools.set(NamedTools.DrawEllipsis, new DrawEllipsisTool());
   serviceContainer.designerTools.set(NamedTools.DrawLine, new DrawLineTool());
   serviceContainer.designerTools.set(NamedTools.Zoom, new ZoomTool());
   serviceContainer.designerTools.set(NamedTools.Pan, new PanTool());

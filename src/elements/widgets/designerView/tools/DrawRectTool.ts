@@ -3,7 +3,10 @@ import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { calculateNormLegth, DesignItem, InsertAction, IPoint } from '../../../..';
+import { calculateNormLegth } from '../../../helper/PathDataPolyfill';
+import { DesignItem } from '../../../item/DesignItem';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
+import { IPoint } from '../../../../interfaces/IPoint';
 
 
 
@@ -68,6 +71,8 @@ export class DrawRectTool implements ITool {
             this._path.setAttribute("height", (normLength).toString());
           }
           else {
+            this._px = currentPoint.x < this._startPoint.x ? currentPoint.x : this._startPoint.x;
+            this._py = currentPoint.y < this._startPoint.y ? currentPoint.y : this._startPoint.y;
             this._path.setAttribute("x", this._minX.toString());
             this._path.setAttribute("y", this._minY.toString());
             this._path.setAttribute("width", (this._maxX - this._minX).toString());
