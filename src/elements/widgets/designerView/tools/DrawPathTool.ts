@@ -1,12 +1,12 @@
 import { EventNames } from '../../../../enums/EventNames';
-import { movePathData } from '../../../helper/PathDataPolyfill';
+import { moveSVGPath, straightenLine } from '../../../helper/PathDataPolyfill';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 import { DesignItem } from '../../../item/DesignItem';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { IPoint } from '../../../..';
+import { IPoint } from '../../../../interfaces/IPoint';
 
 
 
@@ -76,7 +76,7 @@ export class DrawPathTool implements ITool {
           if (this._path) {
             let straightLine = currentPoint;
             if (event.shiftKey)
-              straightLine = this.straightenLine(this._savedPoint, currentPoint);
+              straightLine = straightenLine(this._savedPoint, currentPoint);
             this._path.setAttribute("d", this._pathD + "L" + straightLine.x + " " + straightLine.y);
           }
         }
@@ -91,7 +91,7 @@ export class DrawPathTool implements ITool {
         if (this._p2pMode && !this._samePoint) {
           if (this._path) {
             if (event.shiftKey) {
-              let straightLine = this.straightenLine(this._savedPoint, currentPoint);
+              let straightLine = straightenLine(this._savedPoint, currentPoint);
               this._pathD += "L" + straightLine.x + " " + straightLine.y;
               this._path.setAttribute("d", this._pathD);
             }
@@ -115,7 +115,7 @@ export class DrawPathTool implements ITool {
           const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
           const mvX = rect.x - designerCanvas.containerBoundingRect.x - offset;
           const mvY = rect.y - designerCanvas.containerBoundingRect.y - offset;
-          const d = movePathData(this._path, mvX, mvY);
+          const d = moveSVGPath(this._path, mvX, mvY);
           this._path.setAttribute("d", d);
           svg.appendChild(this._path);
           svg.style.left = (mvX) + 'px';
@@ -134,21 +134,5 @@ export class DrawPathTool implements ITool {
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
         break;
     }
-  }
-
-
-  straightenLine(p1: IPoint, p2: IPoint): IPoint {
-    let newP: IPoint = { x: 0, y: 0 };
-    let alpha = - 1 * Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
-    if (alpha < 0)
-      alpha += 360;
-    if (alpha > 0 && alpha < 45 || alpha > 315 && alpha < 360 || alpha > 135 && alpha < 225)   // right or left
-      newP = { x: p2.x, y: p1.y }
-    else if (alpha > 45 && alpha < 135 || alpha > 225 && alpha < 315)   // up or down
-      newP = { x: p1.x, y: p2.y }
-    else    // something else
-      newP = { x: p2.x, y: p2.y }
-
-    return newP;
   }
 }
