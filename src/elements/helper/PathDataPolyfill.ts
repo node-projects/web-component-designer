@@ -11,7 +11,7 @@
 //   Jarosław Foksa
 // @license
 
-import { IPoint } from "../..";
+import { IPoint } from "../../interfaces/IPoint.js";
 
 //   MIT License
 if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathData) {
@@ -1108,10 +1108,6 @@ declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: number, x: 
 declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
 declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
 
-
-
-
-
 export function straightenLine(p1: IPoint, p2: IPoint): IPoint {
   let newP = p2;
   let alpha = calculateAlpha(p1, p2);
@@ -1167,10 +1163,6 @@ export function calculateAlpha(p1: IPoint, p2: IPoint): number {
   return alpha;
 }
 
-
-
-
-
 export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: number): string {
   let newPathData = "";
   let pd = path.getPathData({ normalize: true });
@@ -1206,7 +1198,7 @@ export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: numb
       }
     }
   }
-return newPathData;
+  return newPathData;
 }
 
 declare global {
