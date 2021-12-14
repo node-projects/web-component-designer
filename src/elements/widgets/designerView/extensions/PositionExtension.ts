@@ -46,10 +46,10 @@ export class PositionExtension extends AbstractExtension {
       ty = Number.parseFloat(transforms[5].replace(')', ''));
     }
 
-    this._line1 = this._drawLine(xOffset - left - tx, yOffset + itemRect.height / 2, xOffset, yOffset + itemRect.height / 2, 'svg-position', this._line1);
-    this._line2 = this._drawLine(xOffset + itemRect.width / 2, yOffset - top - ty, xOffset + itemRect.width / 2, yOffset, 'svg-position', this._line2);
-    this._line3 = this._drawLine(xOffset + itemRect.width, yOffset + itemRect.height / 2, xOffset + itemRect.width + right + -1 * tx, yOffset + itemRect.height / 2, 'svg-position', this._line3);
-    this._line4 = this._drawLine(xOffset + itemRect.width / 2, yOffset + itemRect.height, xOffset + itemRect.width / 2, yOffset + itemRect.height + bottom + -1 * ty, 'svg-position', this._line4);
+    this._line1 = this._drawLine((xOffset / this.designerCanvas.scaleFactor - left - tx), (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, xOffset / this.designerCanvas.scaleFactor, (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, 'svg-position', this._line1);
+    this._line2 = this._drawLine((xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, (yOffset / this.designerCanvas.scaleFactor) - top - ty, (xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, yOffset / this.designerCanvas.scaleFactor, 'svg-position', this._line2);
+    this._line3 = this._drawLine((xOffset + itemRect.width) / this.designerCanvas.scaleFactor, (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, (xOffset + itemRect.width + right + -1 * tx)/ this.designerCanvas.scaleFactor, (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, 'svg-position', this._line3);
+    this._line4 = this._drawLine((xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, (yOffset + itemRect.height) / this.designerCanvas.scaleFactor, (xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, (yOffset + itemRect.height + bottom + -1 * ty) / this.designerCanvas.scaleFactor, 'svg-position', this._line4);
   }
 
 

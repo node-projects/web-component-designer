@@ -48,6 +48,7 @@ import { DefaultModelCommandService } from './modelCommandService/DefaultModelCo
 import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperatorProvider';
 import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons';
 import { DemoProviderService } from './demoProviderService/DemoProviderService';
+import { CursorLinePointerExtensionProvider } from '../widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -114,6 +115,10 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerTools.set(NamedTools.MagicWandSelector, new MagicWandSelectorTool());
   serviceContainer.designerTools.set(NamedTools.PickColor, new PickColorTool());
   serviceContainer.designerTools.set(NamedTools.Text, new TextTool());
+
+  serviceContainer.designerPointerExtensions.push(
+    new CursorLinePointerExtensionProvider()
+  );
 
   serviceContainer.designViewConfigButtons.push(
     new ButtonSeperatorProvider(20),

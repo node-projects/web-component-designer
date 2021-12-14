@@ -15,9 +15,7 @@ export class PanTool implements ITool {
 
       case EventNames.PointerMove:
         if (event.buttons == 1) {
-          designerCanvas._translate.x += event.movementX / designerCanvas.zoomFactor;
-          designerCanvas._translate.y += event.movementY/ designerCanvas.zoomFactor;
-          designerCanvas._updateTransform();
+          designerCanvas.canvasOffset = { x: designerCanvas.canvasOffset.x + + event.movementX / designerCanvas.zoomFactor, y: designerCanvas.canvasOffset.y + event.movementY / designerCanvas.zoomFactor };
         }
         break;
 
@@ -25,7 +23,6 @@ export class PanTool implements ITool {
         (<Element>event.target).releasePointerCapture(event.pointerId);
         break;
     }
-
   }
 
   activated(serviceContainer: ServiceContainer) {

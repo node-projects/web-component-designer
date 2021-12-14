@@ -1,4 +1,5 @@
 export * from "./elements/controls/DesignerTabControl.js";
+export * from "./elements/controls/PlainScrollbar.js"
 
 export * from "./elements/services/DefaultServiceBootstrap.js";
 

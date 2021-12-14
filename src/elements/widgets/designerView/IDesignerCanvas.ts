@@ -29,6 +29,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly onContentChanged: TypedEvent<void>;
 
   zoomFactor: number;
+  readonly scaleFactor: number;
+  canvasOffset: IPoint
 
   eatEvents: Element;
 
