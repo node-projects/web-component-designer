@@ -10,6 +10,8 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 
+const autoZomOffset = 10;
+
 export class DesignerView extends BaseCustomWebComponentConstructorAppend implements IUiCommandHandler {
 
   public get serviceContainer(): ServiceContainer {
@@ -31,7 +33,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   public get designerCanvas() {
     return this._designerCanvas;
   }
-  
+
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
 
@@ -99,24 +101,51 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
     .snap-guide {
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAYVJREFUeNqkU7tKA1EQnbs3CnlVqbQNARMjFilS+AnZQhIbW0ER/AA/wlYbhXR2wUKx0iKNYGMKDViEdEIgieBujGvCPpyz7sK6iWLIwJk798zsuXsfIxzHoXksAqcoij+vMbYq7MoszGxaEB3wtODlH3i5E5uojck210RCgq7SJie4MC0TsdO1cim/lMmkwHdarZWni+t16/1jz/FElJBAGc5imLzyakXNG0IuVo+OnwHE4JCzgisG7BJu/I3CQjyRuq1dvWi6vg8gBofcOHgGAZO+AFv88/VNDofDEcd3IBCD43ycfhEowY28Sazfnzh1cKMggWsUQvi4waiqKuVyud16/d7JZrOHxWJxKudMuQV3C81mk3RdX0wmk9Tr9UxN06jb7dJgMPjBwQRUAu/AtWg0SpZl7TDSUso2/1UVNWHOMIwJARzWBhcQwMXu1oJb9Ufbtsk0zYktPLrvgD8E/mWeYoNxxlj2xoZ3qI2/YrePQs10PksjTRPozCog5m3nLwEGABrLzseuHT6IAAAAAElFTkSuQmCC);
+    }
+    
+    .bottom-scroll {
+      width: calc(100% - 16px);
+      position: absolute;
+      bottom: 16px;
+      height: 16px;
+      box-sizing: border-box;
+    }
+    .right-scroll {
+      height: calc(100% - 32px);
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 16px;
+      box-sizing: border-box;
+    }
+    .bottom-right {
+      width: 16px;
+      height: 16px;
+      bottom: 16px;
+      right: 0;
+      position: absolute;
+      background: #f0f0f0;
     }`;
 
   static override readonly template = html`
-        <div id="outer">          
-          <div id="lowertoolbar">
-            <input id="zoomInput" type="text" value="100%">
-            <div title="decrease zoom" id="zoomIncrease" class="toolbar-control zoom-in"></div>
-            <div title="increase zoom" id="zoomDecrease" class="toolbar-control zoom-out"></div>
-            <div title="reset zoom" id="zoomReset" class="toolbar-control"
-              style="width: 16px; height: 16px; font-size: 14px; display: flex; align-items: center; justify-content: center;">1
-            </div>
-            <div title="zoom to fit" id="zoomFit" class="toolbar-control"
-              style="width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center;">
-              100%</div>
-            <div title="snap to grid" id="alignGrid" class="toolbar-control snap-grid"></div>
-            <div title="snap to elements" id="alignSnap" class="toolbar-control snap-guide"></div>
-          </div>
-        </div>`;
+    <div id="outer">
+      <node-projects-plain-scrollbar value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
+      <node-projects-plain-scrollbar value="0.5" orientation="vertical" class="right-scroll"></node-projects-plain-scrollbar>
+      <div class="bottom-right"></div>
+      <div id="lowertoolbar">
+        <input id="zoomInput" type="text" value="100%">
+        <div title="decrease zoom" id="zoomIncrease" class="toolbar-control zoom-in"></div>
+        <div title="increase zoom" id="zoomDecrease" class="toolbar-control zoom-out"></div>
+        <div title="reset zoom" id="zoomReset" class="toolbar-control"
+          style="width: 16px; height: 16px; font-size: 14px; display: flex; align-items: center; justify-content: center;">1
+        </div>
+        <div title="zoom to fit" id="zoomFit" class="toolbar-control"
+          style="width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center;">
+          100%</div>
+        <div title="snap to grid" id="alignGrid" class="toolbar-control snap-grid"></div>
+        <div title="snap to elements" id="alignSnap" class="toolbar-control snap-guide"></div>
+      </div>
+    </div>`;
 
   constructor() {
     super();
@@ -150,12 +179,34 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
     zoomReset.onclick = () => {
+      this._designerCanvas.canvasOffset = { x: 0, y: 0 };
       this._designerCanvas.zoomFactor = 1;
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
     zoomFit.onclick = () => {
-      this._designerCanvas.zoomFactor = 7.7;
+      let maxX = 0, maxY = 0, minX = 0, minY = 0;
+
+      this._designerCanvas.canvasOffset = { x: 0, y: 0 };
+      this._designerCanvas.zoomFactor = 1;
+
+      for (let n of DomHelper.getAllChildNodes(this.designerCanvas.rootDesignItem.element)) {
+        if (n instanceof Element) {
+          const rect = n.getBoundingClientRect();
+          minX = minX < rect.x ? minX : rect.x;
+          minY = minY < rect.y ? minY : rect.y;
+          maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
+          maxY = maxY > rect.y + rect.height + autoZomOffset ? maxY : rect.y + rect.height + autoZomOffset;
+        }
+      }
+
+      const cvRect = this.designerCanvas.getBoundingClientRect();
+      maxX -= cvRect.x;
+      maxY -= cvRect.y;
+
+      let scaleX = cvRect.width / (maxX / this._designerCanvas.zoomFactor);
+      let scaleY = cvRect.height / (maxY / this._designerCanvas.zoomFactor);
+      this._designerCanvas.zoomFactor = scaleX < scaleY ? scaleX : scaleY;
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
@@ -179,6 +230,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
         zf = 0.02;
       this._designerCanvas.zoomFactor = zf;
       this._zoomInput.value = Math.round(zf * 100) + '%';
+
       //TODO: we should zoom on the current cursor position, so it stays the center
     }
   }
