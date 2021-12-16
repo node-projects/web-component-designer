@@ -62,7 +62,25 @@ export class DrawRectTool implements ITool {
           this._maxY = currentPoint.y > this._startPoint.y ? currentPoint.y : this._startPoint.y;
 
           if (event.ctrlKey) {
-
+            if (event.shiftKey) {
+              const normLength = 2 * calculateNormLegth(this._startPoint, currentPoint);
+              this._px = this._startPoint.x - normLength / 2;
+              this._py = this._startPoint.y - normLength / 2;
+              this._path.setAttribute("x", this._px.toString());
+              this._path.setAttribute("y", this._py.toString());
+              this._path.setAttribute("width", (normLength).toString());
+              this._path.setAttribute("height", (normLength).toString());
+            }
+            else {
+              const w = 2 * (this._maxX - this._minX);
+              const h = 2 * (this._maxY - this._minY);
+              this._px = currentPoint.x < this._startPoint.x ? currentPoint.x : this._startPoint.x - w / 2;
+              this._py = currentPoint.y < this._startPoint.y ? currentPoint.y : this._startPoint.y - h / 2;
+              this._path.setAttribute("x", this._px.toString());
+              this._path.setAttribute("y", this._py.toString());
+              this._path.setAttribute("width", (w).toString());
+              this._path.setAttribute("height", (h).toString());
+            }
           }
           else {
             if (event.shiftKey) {
@@ -77,8 +95,8 @@ export class DrawRectTool implements ITool {
             else {
               this._px = currentPoint.x < this._startPoint.x ? currentPoint.x : this._startPoint.x;
               this._py = currentPoint.y < this._startPoint.y ? currentPoint.y : this._startPoint.y;
-              this._path.setAttribute("x", this._minX.toString());
-              this._path.setAttribute("y", this._minY.toString());
+              this._path.setAttribute("x", this._px.toString());
+              this._path.setAttribute("y", this._py.toString());
               this._path.setAttribute("width", (this._maxX - this._minX).toString());
               this._path.setAttribute("height", (this._maxY - this._minY).toString());
             }
