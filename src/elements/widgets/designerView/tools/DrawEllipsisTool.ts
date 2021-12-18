@@ -17,6 +17,8 @@ export class DrawEllipsisTool implements ITool {
   private _path: SVGEllipseElement;
   private _startPoint: IPoint;
   private _radius: IPoint;
+  private _cx: number;
+  private _cy: number;
 
   constructor() {
   }
@@ -50,17 +52,34 @@ export class DrawEllipsisTool implements ITool {
 
       case EventNames.PointerMove:
         if (this._path) {
-          this._radius = {x: Math.abs(currentPoint.x - this._startPoint.x), y: Math.abs(currentPoint.y - this._startPoint.y)}
-          this._path.setAttribute("cx", this._startPoint.x.toString());
-          this._path.setAttribute("cy", this._startPoint.y.toString());
-          if (event.shiftKey) {
-            const radius = calculateNormLegth(this._startPoint, currentPoint);
-            this._path.setAttribute("rx", radius.toString());
-            this._path.setAttribute("ry", radius.toString());
+          this._radius = { x: Math.abs(currentPoint.x - this._startPoint.x), y: Math.abs(currentPoint.y - this._startPoint.y) }
+          
+          if (event.ctrlKey) {
+            this._path.setAttribute("cx", this._startPoint.x.toString());
+            this._path.setAttribute("cy", this._startPoint.y.toString());
+            this._cx = this._startPoint.x;
+            this._cy = this._startPoint.y;
+            if (event.shiftKey) {
+              const radius = calculateNormLegth(this._startPoint, currentPoint);
+              this._path.setAttribute("rx", radius.toString());
+              this._path.setAttribute("ry", radius.toString());
+            }
+            else {
+              this._path.setAttribute("rx", this._radius.x.toString());
+              this._path.setAttribute("ry", this._radius.y.toString());
+            }
           }
           else {
-            this._path.setAttribute("rx", this._radius.x.toString());
-            this._path.setAttribute("ry", this._radius.y.toString());
+            if (event.shiftKey) {
+              const radius = calculateNormLegth(this._startPoint, currentPoint);
+              this._radius = {x: radius, y: radius};
+            }
+            this._cx = currentPoint.x < this._startPoint.x ? this._startPoint.x - this._radius.x / 2 : this._startPoint.x + this._radius.x / 2;
+            this._cy = currentPoint.y < this._startPoint.y ? this._startPoint.y - this._radius.y / 2 : this._startPoint.y + this._radius.y / 2;
+            this._path.setAttribute("cx", this._cx.toString());
+            this._path.setAttribute("cy", this._cy.toString());
+            this._path.setAttribute("rx", (this._radius.x / 2).toString());
+            this._path.setAttribute("ry", (this._radius.y / 2).toString());
           }
         }
         break;
@@ -74,8 +93,8 @@ export class DrawEllipsisTool implements ITool {
         const mvX = rect.x - designerCanvas.containerBoundingRect.x - offset;
         const mvY = rect.y - designerCanvas.containerBoundingRect.y - offset;
         svg.appendChild(this._path);
-        this._path.setAttribute("cx", (this._startPoint.x - mvX).toString());
-        this._path.setAttribute("cy", (this._startPoint.y - mvY).toString());
+        this._path.setAttribute("cx", (this._cx - mvX).toString());
+        this._path.setAttribute("cy", (this._cy - mvY).toString());
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';
         svg.style.position = 'absolute';

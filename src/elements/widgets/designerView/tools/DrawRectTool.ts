@@ -66,8 +66,6 @@ export class DrawRectTool implements ITool {
               const normLength = 2 * calculateNormLegth(this._startPoint, currentPoint);
               this._px = this._startPoint.x - normLength / 2;
               this._py = this._startPoint.y - normLength / 2;
-              this._path.setAttribute("x", this._px.toString());
-              this._path.setAttribute("y", this._py.toString());
               this._path.setAttribute("width", (normLength).toString());
               this._path.setAttribute("height", (normLength).toString());
             }
@@ -76,30 +74,28 @@ export class DrawRectTool implements ITool {
               const h = 2 * (this._maxY - this._minY);
               this._px = currentPoint.x < this._startPoint.x ? currentPoint.x : this._startPoint.x - w / 2;
               this._py = currentPoint.y < this._startPoint.y ? currentPoint.y : this._startPoint.y - h / 2;
-              this._path.setAttribute("x", this._px.toString());
-              this._path.setAttribute("y", this._py.toString());
               this._path.setAttribute("width", (w).toString());
               this._path.setAttribute("height", (h).toString());
             }
+            this._path.setAttribute("x", this._px.toString());
+            this._path.setAttribute("y", this._py.toString());
           }
           else {
             if (event.shiftKey) {
               const normLength = calculateNormLegth(this._startPoint, currentPoint);
               this._px = currentPoint.x < this._startPoint.x ? this._startPoint.x - normLength : this._startPoint.x;
               this._py = currentPoint.y < this._startPoint.y ? this._startPoint.y - normLength : this._startPoint.y;
-              this._path.setAttribute("x", this._px.toString());
-              this._path.setAttribute("y", this._py.toString());
               this._path.setAttribute("width", (normLength).toString());
               this._path.setAttribute("height", (normLength).toString());
             }
             else {
               this._px = currentPoint.x < this._startPoint.x ? currentPoint.x : this._startPoint.x;
               this._py = currentPoint.y < this._startPoint.y ? currentPoint.y : this._startPoint.y;
-              this._path.setAttribute("x", this._px.toString());
-              this._path.setAttribute("y", this._py.toString());
               this._path.setAttribute("width", (this._maxX - this._minX).toString());
               this._path.setAttribute("height", (this._maxY - this._minY).toString());
             }
+            this._path.setAttribute("x", this._px.toString());
+            this._path.setAttribute("y", this._py.toString());
           }
         }
         break;
