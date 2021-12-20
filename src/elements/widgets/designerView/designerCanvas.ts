@@ -606,7 +606,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public getNormalizedElementCoordinates(element: Element): IRect {
     const targetRect = element.getBoundingClientRect();
-    return { x: targetRect.x - this.containerBoundingRect.x, y: targetRect.y - this.containerBoundingRect.y, width: targetRect.width, height: targetRect.height };
+    return { x: (targetRect.x - this.containerBoundingRect.x) / this.scaleFactor, y: (targetRect.y - this.containerBoundingRect.y) / this.scaleFactor, width: targetRect.width / this.scaleFactor, height: targetRect.height / this.scaleFactor };
   }
 
   public getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint {
@@ -663,10 +663,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   _rect: SVGRectElement
   private _pointerEventHandler(event: PointerEvent) {
     this._fillCalculationrects();
-
-    /*let clickOnScrollbar = event.clientX - this.containerBoundingRect.x > this.containerBoundingRect.width || event.clientY - this.containerBoundingRect.y > this.containerBoundingRect.height
-    if (clickOnScrollbar) https://kingsora.github.io/OverlayScrollbars/
-      return;*/
 
     if (this._pointerextensions) {
       for (let pe of this._pointerextensions)

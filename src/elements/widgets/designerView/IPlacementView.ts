@@ -9,4 +9,7 @@ export interface IPlacementView {
   rootDesignItem: IDesignItem;
   overlayLayer: OverlayLayerView;
   snapLines: Snaplines;
+
+  readonly zoomFactor: number;
+  readonly scaleFactor: number;
 }

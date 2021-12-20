@@ -9,10 +9,13 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
+import { PlainScrollbar } from '../../controls/PlainScrollbar';
 
 const autoZomOffset = 10;
 
 export class DesignerView extends BaseCustomWebComponentConstructorAppend implements IUiCommandHandler {
+  private _sVert: PlainScrollbar;
+  private _sHor: PlainScrollbar;
 
   public get serviceContainer(): ServiceContainer {
     return this._designerCanvas.serviceContainer;
@@ -129,8 +132,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   static override readonly template = html`
     <div id="outer">
-      <node-projects-plain-scrollbar value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
-      <node-projects-plain-scrollbar value="0.5" orientation="vertical" class="right-scroll"></node-projects-plain-scrollbar>
+      <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
+      <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll"></node-projects-plain-scrollbar>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -181,6 +184,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     zoomReset.onclick = () => {
       this._designerCanvas.canvasOffset = { x: 0, y: 0 };
       this._designerCanvas.zoomFactor = 1;
+      this._sVert.value = 0.5;
+      this._sHor.value = 0.5;
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
@@ -219,6 +224,18 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : '';
 
     this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
+
+    this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
+    this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
+    this._sVert.addEventListener('scrollbar-input', () => this._onScrollbar())
+    this._sHor.addEventListener('scrollbar-input', () => this._onScrollbar())
+
+  }
+
+  private _onScrollbar() {
+    const x = this.designerCanvas.offsetWidth * (this._sHor.value - 0.5) * -1;
+    const y = this.designerCanvas.offsetHeight * (this._sVert.value - 0.5) * -1;
+    this.designerCanvas.canvasOffset = { x, y };
   }
 
   private _onWheel(event: WheelEvent) {

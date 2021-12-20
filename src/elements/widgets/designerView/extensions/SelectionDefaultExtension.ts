@@ -15,13 +15,13 @@ export class SelectionDefaultExtension extends AbstractExtension {
   }
 
   override refresh() {
-    const itemRect = this.extendedItem.element.getBoundingClientRect();
+    const itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
     const computedStyle = getComputedStyle(this.extendedItem.element);
     const left = Number.parseFloat(computedStyle.marginLeft.replace('px', ''));
     const top = Number.parseFloat(computedStyle.marginTop.replace('px', ''));
     const right = Number.parseFloat(computedStyle.marginRight.replace('px', ''));
     const bottom = Number.parseFloat(computedStyle.marginBottom.replace('px', ''));
-    this._rect = this._drawRect((itemRect.x - this.designerCanvas.containerBoundingRect.x - left) / this.designerCanvas.scaleFactor, (itemRect.y - this.designerCanvas.containerBoundingRect.y - top) / this.designerCanvas.scaleFactor, (left + itemRect.width + right) / this.designerCanvas.scaleFactor, (top + itemRect.height + bottom) / this.designerCanvas.scaleFactor, 'svg-selection', this._rect);
+    this._rect = this._drawRect(itemRect.x  - left, itemRect.y - top, left + itemRect.width + right, top + itemRect.height + bottom, 'svg-selection', this._rect);
   }
 
   override dispose() {

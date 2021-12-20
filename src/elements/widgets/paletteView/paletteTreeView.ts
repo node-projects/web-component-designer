@@ -1,5 +1,4 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
-import { IDesignItem } from '../../item/IDesignItem';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { IElementsService } from '../../services/elementsService/IElementsService';
 import { dragDropFormatName } from '../../../Constants';
@@ -84,14 +83,6 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       extensions: ['childcounter', 'dnd5', 'filter'],
       quicksearch: true,
       source: [],
-
-      activate: (event, data) => {
-        let node = data.node;
-        let designItem: IDesignItem = node.data.ref;
-
-        designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
-      },
-
       dnd5: {
         dropMarkerParent: this.shadowRoot,
         preventRecursion: true, // Prevent dropping nodes on own descendants

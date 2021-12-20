@@ -42,7 +42,7 @@ export class DefaultPlacementService implements IPlacementService {
       }
       else if (placementView.alignOnSnap) {
         let rect = item.element.getBoundingClientRect();
-        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.x - offsetInControl.x, y: newPoint.y - offsetInControl.y }, { width: rect.width, height: rect.height }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        let newPos = placementView.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / placementView.scaleFactor, height: rect.height/ placementView.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x - Math.round(startPoint.x) + Math.round(offsetInControl.x);
         } else {
