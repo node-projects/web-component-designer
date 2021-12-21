@@ -14,6 +14,7 @@ export class ContextMenuHelper {
     box-shadow: 1px 1px 2px #cfcfcf;
     cursor: default;
     user-select: none;
+    -webkit-user-select: none;
     border-radius: 12px;
   }
 

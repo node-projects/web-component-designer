@@ -3,6 +3,7 @@ import type { IPoint } from "../../../interfaces/IPoint";
 import type { ISize } from '../../../interfaces/ISize';
 import { OverlayLayerView } from "./overlayLayerView";
 import { OverlayLayer } from "./extensions/OverlayLayer.js";
+import { IRect } from "../../../interfaces/IRect.js";
 
 const overlayLayer = OverlayLayer.Normal;
 
@@ -12,10 +13,10 @@ export class Snaplines {
   private _overlayLayerView: OverlayLayerView;
 
   private _containerItem: IDesignItem;
-  private _positionsH: [number, DOMRect][] = [];
-  private _positionsMiddleH: [number, DOMRect][] = [];
-  private _positionsV: [number, DOMRect][] = [];
-  private _positionsMiddleV: [number, DOMRect][] = [];
+  private _positionsH: [number, IRect][] = [];
+  private _positionsMiddleH: [number, IRect][] = [];
+  private _positionsV: [number, IRect][] = [];
+  private _positionsMiddleV: [number, IRect][] = [];
   private _outerRect: DOMRect;
 
   constructor(overlayLayer: OverlayLayerView) {
@@ -143,7 +144,7 @@ export class Snaplines {
     return { x: null, y: null };
   }
 
-  drawSnaplines(position: IPoint, size: ISize, rectsH: DOMRect[], rectsV: DOMRect[]) {
+  drawSnaplines(position: IPoint, size: ISize, rectsH: IRect[], rectsV: IRect[]) {
     if (rectsH) {
       let minY = position.y;
       let maxY = position.y;

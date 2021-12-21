@@ -1,0 +1,7 @@
+# Acknowledgments
+
+- Thanks to @notwaldorf who created the original `wizzywid` project (MIT License).
+  https://github.com/PolymerLabs/wizzywid
+  This was a start for this whole project (even if mostly nothing of the original code is left)
+- Thanks to @chdh for plain-scrollbar component
+  https://github.com/chdh/plain-scrollbar

@@ -33,7 +33,7 @@ export class RotateExtension extends AbstractExtension {
     g.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeRotate(event));
     g.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeRotate(event));
     g.setAttribute('class', 'svg-primary-rotate');
-    g.setAttribute('transform', 'translate(' + (itemRect.x - this.designerCanvas.containerBoundingRect.x - 13) + ',' + (itemRect.y - this.designerCanvas.containerBoundingRect.y - 8.5) + ')');
+    g.setAttribute('transform', 'translate(' + ((itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor - 13) + ',' + ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 8.5) + ')');
     this.overlayLayerView.addOverlay(g);
     this.overlays.push(g);
   }

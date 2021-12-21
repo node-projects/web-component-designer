@@ -40,6 +40,13 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    if (((event.ctrlKey || event.metaKey) && event.shiftKey) || event.buttons == 4) {
+      const panTool = designerCanvas.serviceContainer.designerTools.get(NamedTools.Pan);
+      if (panTool) {
+        panTool.pointerEventHandler(designerCanvas, event, currentElement);
+        return;
+      }
+    }
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);

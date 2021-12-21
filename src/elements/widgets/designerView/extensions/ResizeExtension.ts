@@ -13,6 +13,7 @@ export class ResizeExtension extends AbstractExtension {
   private _initialSizes: ISize[];
   private _actionModeStarted: string;
   private _initialPoint: IPoint;
+  private _offsetPoint: IPoint;
   private _circle1: SVGCircleElement;
   private _circle2: SVGCircleElement;
   private _circle3: SVGCircleElement;
@@ -32,14 +33,14 @@ export class ResizeExtension extends AbstractExtension {
 
   override refresh() {
     const rect = this.extendedItem.element.getBoundingClientRect();
-    this._circle1 = this._drawResizerOverlay(rect.x - this.designerCanvas.containerBoundingRect.x, rect.y - this.designerCanvas.containerBoundingRect.y, 'nw-resize', this._circle1);
-    this._circle2 = this._drawResizerOverlay(rect.x + (rect.width / 2) - this.designerCanvas.containerBoundingRect.x, rect.y - this.designerCanvas.containerBoundingRect.y, 'n-resize', this._circle2);
-    this._circle3 = this._drawResizerOverlay(rect.x + rect.width - this.designerCanvas.containerBoundingRect.x, rect.y - this.designerCanvas.containerBoundingRect.y, 'ne-resize', this._circle3);
-    this._circle4 = this._drawResizerOverlay(rect.x - this.designerCanvas.containerBoundingRect.x, rect.y + rect.height - this.designerCanvas.containerBoundingRect.y, 'sw-resize', this._circle4);
-    this._circle5 = this._drawResizerOverlay(rect.x + (rect.width / 2) - this.designerCanvas.containerBoundingRect.x, rect.y + rect.height - this.designerCanvas.containerBoundingRect.y, 's-resize', this._circle5);
-    this._circle6 = this._drawResizerOverlay(rect.x + rect.width - this.designerCanvas.containerBoundingRect.x, rect.y + rect.height - this.designerCanvas.containerBoundingRect.y, 'se-resize', this._circle6);
-    this._circle7 = this._drawResizerOverlay(rect.x - this.designerCanvas.containerBoundingRect.x, rect.y + (rect.height / 2) - this.designerCanvas.containerBoundingRect.y, 'w-resize', this._circle7);
-    this._circle8 = this._drawResizerOverlay(rect.x + rect.width - this.designerCanvas.containerBoundingRect.x, rect.y + (rect.height / 2) - this.designerCanvas.containerBoundingRect.y, 'e-resize', this._circle8);
+    this._circle1 = this._drawResizerOverlay((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'nw-resize', this._circle1);
+    this._circle2 = this._drawResizerOverlay((rect.x + (rect.width / 2) - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'n-resize', this._circle2);
+    this._circle3 = this._drawResizerOverlay((rect.x + rect.width - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'ne-resize', this._circle3);
+    this._circle4 = this._drawResizerOverlay((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + rect.height - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'sw-resize', this._circle4);
+    this._circle5 = this._drawResizerOverlay((rect.x + (rect.width / 2) - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + rect.height - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 's-resize', this._circle5);
+    this._circle6 = this._drawResizerOverlay((rect.x + rect.width - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + rect.height - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'se-resize', this._circle6);
+    this._circle7 = this._drawResizerOverlay((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + (rect.height / 2) - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'w-resize', this._circle7);
+    this._circle8 = this._drawResizerOverlay((rect.x + rect.width - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + (rect.height / 2) - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'e-resize', this._circle8);
     if (rect.width < 12) {
       this._circle2.style.display = 'none';
       this._circle5.style.display = 'none';
@@ -59,28 +60,31 @@ export class ResizeExtension extends AbstractExtension {
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
     let circle = this._drawCircle(x, y, 3, 'svg-primary-resizer', oldCircle);
-    if (!oldCircle) {
-      circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(event, cursor));
-      circle.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeResize(event, cursor));
-      circle.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeResize(event, cursor));
+     if (!oldCircle) {
+      circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(circle,event, cursor));
+      circle.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeResize(circle,event, cursor));
+      circle.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeResize(circle,event, cursor));
     }
     circle.setAttribute('style', 'cursor: ' + cursor);
     return circle;
   }
 
-  _pointerActionTypeResize(event: PointerEvent, actionMode: string = 'se-resize') {
+  _pointerActionTypeResize(circle:SVGCircleElement, event: PointerEvent, actionMode: string = 'se-resize') {
     event.stopPropagation();
     const currentPoint = this.designerCanvas.getNormalizedEventCoordinates(event) //, this.extendedItem.element, event.type === 'pointerdown' ? null : this._initialPoint);
 
     switch (event.type) {
       case EventNames.PointerDown:
+        const cx = parseFloat(circle.getAttribute('cx'));
+        const cy = parseFloat(circle.getAttribute('cy'));
+        this._offsetPoint = { x: cx - currentPoint.x, y: cy - currentPoint.y };
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._initialPoint = currentPoint;
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
         for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
           let rect = designItem.element.getBoundingClientRect();
-          this._initialSizes.push({ width: rect.width, height: rect.height });
+          this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor});
         }
         if (this.designerCanvas.alignOnSnap)
           this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
@@ -93,8 +97,8 @@ export class ResizeExtension extends AbstractExtension {
 
           const diff = containerService.placePoint(event, <IPlacementView><any>this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
-          let trackX = diff.x - this._initialPoint.x;
-          let trackY = diff.y - this._initialPoint.y;
+          let trackX = diff.x - this._initialPoint.x - this._offsetPoint.x;
+          let trackY = diff.y - this._initialPoint.y - this._offsetPoint.y;
 
           let i = 0;
 

@@ -11,6 +11,7 @@ import { IUiCommandHandler } from "../commandHandling/IUiCommandHandler";
 import { IUiCommand } from "../commandHandling/IUiCommand";
 import { IDisposable } from "../interfaces/IDisposable";
 import { ISelectionChangedEvent } from "./services/selectionService/ISelectionChangedEvent.js";
+import { SimpleSplitView } from './controls/SimpleSplitView';
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;
@@ -23,7 +24,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _content: string = '';
   private _tabControl: DesignerTabControl;
   private _selectionPosition: IStringPosition;
-  private _splitDiv: HTMLDivElement;
+  private _splitDiv: SimpleSplitView;
   private _designerDiv: HTMLDivElement;
   private _codeDiv: HTMLDivElement;
   private refreshInSplitViewDebounced: (...args: any) => any;
@@ -39,11 +40,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       }                            
       node-projects-designer-view {
         height: 100%;
-        /*overflow: auto;*/
-      }
-      .split-div {
-        display: grid;
-        grid-template-rows: 1fr 1fr;
+        overflow: hidden;
       }
       `;
   }
@@ -61,6 +58,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     div.appendChild(this._tabControl);
     this.designerView = new DesignerView();
     this.designerView.setAttribute('exportparts', 'canvas');
+    this.designerView.slot = 'top';
     this._designerDiv = document.createElement("div");
     this._tabControl.appendChild(this._designerDiv);
     this._designerDiv.title = 'Designer';
@@ -70,6 +68,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this.designerView.designerCanvas.onContentChanged.on(() => this.designerContentChanged())
 
     this.codeView = new serviceContainer.config.codeViewWidget();
+    this.codeView.slot = 'bottom';
     this._codeDiv = document.createElement("div");
     this._tabControl.appendChild(this._codeDiv);
     this._codeDiv.title = 'Code';
@@ -84,9 +83,9 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       }
     })
 
-    this._splitDiv = document.createElement("div");
+    this._splitDiv = new SimpleSplitView();
+    this._splitDiv.style.height = '100%';
     this._splitDiv.title = 'Split';
-    this._splitDiv.className = 'split-div';
     this._tabControl.appendChild(this._splitDiv);
     this.demoView = new serviceContainer.config.demoViewWidget();
     this.demoView.title = 'Preview';

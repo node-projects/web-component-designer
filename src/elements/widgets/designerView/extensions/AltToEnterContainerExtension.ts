@@ -18,9 +18,9 @@ export class AltToEnterContainerExtension extends AbstractExtension {
   }
 
   override refresh() {
-    let itemRect = this.extendedItem.element.getBoundingClientRect();
-    this._text = this._drawText("Press ALT to enter container", itemRect.x - this.designerCanvas.containerBoundingRect.x + 5, itemRect.y - this.designerCanvas.containerBoundingRect.y + 12, 'svg-text-enter-container', this._text, OverlayLayer.Background);
-    this._rect = this._drawRect(itemRect.x - this.designerCanvas.containerBoundingRect.x, itemRect.y - this.designerCanvas.containerBoundingRect.y, itemRect.width,  itemRect.height, 'svg-rect-enter-container', this._rect, OverlayLayer.Background);
+    let itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
+    this._text = this._drawText("Press ALT to enter container", itemRect.x + 5, itemRect.y + 12, 'svg-text-enter-container', this._text, OverlayLayer.Foregorund);
+    this._rect = this._drawRect(itemRect.x, itemRect.y, itemRect.width,  itemRect.height, 'svg-rect-enter-container', this._rect, OverlayLayer.Foregorund);
   }
 
   override dispose() {

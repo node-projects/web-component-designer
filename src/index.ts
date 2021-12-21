@@ -1,4 +1,5 @@
 export * from "./elements/controls/DesignerTabControl.js";
+export * from "./elements/controls/PlainScrollbar.js"
 
 export * from "./elements/services/DefaultServiceBootstrap.js";
 
@@ -85,7 +86,6 @@ export * from "./elements/services/propertiesService/services/NativeElementsProp
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
 export * from "./elements/services/propertiesService/ValueType.js";
-
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";

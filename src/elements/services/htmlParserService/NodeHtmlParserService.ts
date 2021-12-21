@@ -78,6 +78,9 @@ export class NodeHtmlParserService implements IHtmlParserService {
         }
       }
 
+      if (element instanceof HTMLElement || element instanceof SVGElement)
+        element.style.pointerEvents = 'auto';
+
       designItem.hideAtDesignTime = hideAtDesignTime;
       designItem.hideAtRunTime = hideAtRunTime;
       designItem.lockAtDesignTime = lockAtDesignTime;
