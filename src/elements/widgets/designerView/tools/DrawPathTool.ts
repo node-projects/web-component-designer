@@ -23,6 +23,7 @@ export class DrawPathTool implements ITool {
   private _eventStarted = false;
   private _lastPoint: IPoint = { x: 0, y: 0 };
   private _savedPoint: IPoint = { x: 0, y: 0 };
+  private _startPoint: IPoint = { x: 0, y: 0 };
 
   constructor() {
   }
@@ -51,6 +52,7 @@ export class DrawPathTool implements ITool {
           this._path.setAttribute("fill", designerCanvas.serviceContainer.globalContext.fillBrush);
           this._path.setAttribute("stroke-width", designerCanvas.serviceContainer.globalContext.strokeThickness);
           designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
+          this._startPoint = currentPoint;
         }
 
         if (this._lastPoint.x === currentPoint.x && this._lastPoint.y === currentPoint.y && !this._samePoint) {
@@ -88,7 +90,7 @@ export class DrawPathTool implements ITool {
         if (this._eventStarted && !this._pointerMoved) {
           this._p2pMode = true;
         }
-        if (this._p2pMode && !this._samePoint) {
+        if (this._p2pMode && !this._samePoint && this._startPoint.x != currentPoint.x && this._startPoint.y != currentPoint.y) {
           if (this._path) {
             if (event.shiftKey) {
               let straightLine = straightenLine(this._savedPoint, currentPoint);

@@ -1106,7 +1106,7 @@ declare type PathDataC = { type: 'C' | 'c', values: [x1: number, y1: number, x2:
 declare type PathDataS = { type: 'S' | 's', values: [x2: number, y2: number, x: number, y: number] }
 declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: number, x: number, y: number] }
 declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
-declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
+export declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
 
 export function straightenLine(p1: IPoint, p2: IPoint): IPoint {
   let newP = p2;
