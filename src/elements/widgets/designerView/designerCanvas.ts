@@ -450,6 +450,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.rootDesignItem))
       containerService.finishPlace(this, this.rootDesignItem, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
     }*/
+
+    this._fillCalculationrects();
+    
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
       const ddService = this.serviceContainer.dragDropService;
       if (ddService) {
@@ -474,6 +477,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private async _onDrop(event: DragEvent) {
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
+
+    this._fillCalculationrects();
 
     if (event.dataTransfer.files.length > 0) {
       const ddService = this.serviceContainer.dragDropService;

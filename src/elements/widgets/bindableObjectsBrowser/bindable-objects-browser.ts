@@ -99,8 +99,8 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
   lazyLoad(event: JQueryEventObject, data: Fancytree.EventData) {
     data.result = new Promise(async resolve => {
       const service: IBindableObjectsService = data.node.data.service;
-      const bindable: IBindableObject = data.node.data.bindable;
-      let children: IBindableObject[];
+      const bindable: IBindableObject<any> = data.node.data.bindable;
+      let children: IBindableObject<any>[];
       if (bindable?.children)
         children = bindable.children;
       else
