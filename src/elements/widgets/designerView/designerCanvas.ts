@@ -433,12 +433,30 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onDragEnter(event: DragEvent) {
+    this._fillCalculationrects();
     event.preventDefault();
+  const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
+    if (hasTransferDataBindingObject) {
+      const ddService = this.serviceContainer.bindableObjectDragDropService;
+      if (ddService) {
+        const effect = ddService.dragEnter(this, event);
+        event.dataTransfer.dropEffect = effect;
+      }
+    }
   }
 
   private _onDragLeave(event: DragEvent) {
+    this._fillCalculationrects();
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
+    const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
+    if (hasTransferDataBindingObject) {
+      const ddService = this.serviceContainer.bindableObjectDragDropService;
+      if (ddService) {
+        const effect = ddService.dragLeave(this, event);
+        event.dataTransfer.dropEffect = effect;
+      }
+    }
   }
 
   private _onDragOver(event: DragEvent) {
@@ -452,7 +470,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }*/
 
     this._fillCalculationrects();
-    
+
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
       const ddService = this.serviceContainer.dragDropService;
       if (ddService) {
@@ -463,12 +481,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       }
     }
 
-    const transferDataBindingObject = event.dataTransfer.getData(dragDropFormatNameBindingObject)
-    if (transferDataBindingObject) {
-      const bo = JSON.parse(transferDataBindingObject);
+    const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
+    if (hasTransferDataBindingObject) {
       const ddService = this.serviceContainer.bindableObjectDragDropService;
       if (ddService) {
-        const effect = ddService.dragOver(event, bo);
+        const effect = ddService.dragOver(this, event);
         event.dataTransfer.dropEffect = effect;
       }
     }
