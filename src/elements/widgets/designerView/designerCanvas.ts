@@ -7,7 +7,7 @@ import { SelectionService } from '../../services/selectionService/SelectionServi
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { dragDropFormatName } from '../../../Constants';
+import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
 import { IDesignerCanvas } from './IDesignerCanvas';
@@ -459,6 +459,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           this._canvas.classList.add('dragFileActive');
       }
     }
+
+    const transferDataBindingObject = event.dataTransfer.getData(dragDropFormatNameBindingObject)
+    if (transferDataBindingObject) {
+      const bo = JSON.parse(transferDataBindingObject);
+      const ddService = this.serviceContainer.bindableObjectDragDropService;
+      if (ddService) {
+        const effect = ddService.dragOver(event, bo);
+        event.dataTransfer.dropEffect = effect;
+      }
+    }
   }
 
   private async _onDrop(event: DragEvent) {
@@ -472,19 +482,30 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       }
     }
     else {
-      this._fillCalculationrects();
-      const position = this.getNormalizedEventCoordinates(event);
+      const transferDataBindingObject = event.dataTransfer.getData(dragDropFormatNameBindingObject)
+      if (transferDataBindingObject) {
+        const bo = JSON.parse(transferDataBindingObject);
+        const ddService = this.serviceContainer.bindableObjectDragDropService;
+        if (ddService) {
+          const effect = ddService.drop(this, event, bo);
+          event.dataTransfer.dropEffect = effect;
+        }
+      }
+      else {
+        this._fillCalculationrects();
+        const position = this.getNormalizedEventCoordinates(event);
 
-      const transferData = event.dataTransfer.getData(dragDropFormatName);
-      const elementDefinition = <IElementDefinition>JSON.parse(transferData);
-      const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
-      const grp = di.openGroup("Insert");
-      di.setStyle('position', 'absolute');
-      di.setStyle('left', position.x + 'px');
-      di.setStyle('top', position.y + 'px');
-      this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
-      grp.commit();
-      requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
+        const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
+        const elementDefinition = <IElementDefinition>JSON.parse(transferData);
+        const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
+        const grp = di.openGroup("Insert");
+        di.setStyle('position', 'absolute');
+        di.setStyle('left', position.x + 'px');
+        di.setStyle('top', position.y + 'px');
+        this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
+        grp.commit();
+        requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
+      }
     }
   }
 

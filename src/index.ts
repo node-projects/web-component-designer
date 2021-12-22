@@ -22,6 +22,7 @@ export type { IDesignItem } from "./elements/item/IDesignItem.js";
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
 export type { IBindableObjectsService } from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
+export type { IBindableObjectDragDropService } from "./elements/services/bindableObjectsService/IBindableObjectDragDropService.js";
 
 export type { IBindingService } from "./elements/services/bindingsService/IBindingService.js";
 export * from "./elements/services/bindingsService/BaseCustomWebcomponentBindingsService.js";
@@ -107,6 +108,9 @@ export * from "./elements/services/InstanceServiceContainer.js";
 export type { IService } from "./elements/services/IService.js";
 export type { IServiceContainer } from "./elements/services/IServiceContainer.js";
 export * from "./elements/services/ServiceContainer.js";
+
+export * from "./elements/widgets/bindableObjectsBrowser/bindable-objects-browser.js";
+export type { IBindableObjectsBrowser } from "./elements/widgets/bindableObjectsBrowser/IBindableObjectsBrowser.js";
 
 export * from "./elements/widgets/propertyGrid/PropertyGrid.js";
 export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";

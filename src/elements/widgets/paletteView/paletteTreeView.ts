@@ -1,7 +1,7 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { IElementsService } from '../../services/elementsService/IElementsService';
-import { dragDropFormatName } from '../../../Constants';
+import { dragDropFormatNameElementDefinition } from '../../../Constants';
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _treeDiv: HTMLTableElement;
@@ -92,7 +92,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
 
         dragStart: (node, data) => {
           data.effectAllowed = "all";
-          data.dataTransfer.setData(dragDropFormatName, JSON.stringify(node.data.ref));
+          data.dataTransfer.setData(dragDropFormatNameElementDefinition, JSON.stringify(node.data.ref));
           data.dropEffect = "copy";
           return true;
         },

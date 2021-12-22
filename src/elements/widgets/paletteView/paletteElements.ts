@@ -1,5 +1,5 @@
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
-import { dragDropFormatName } from '../../../Constants';
+import { dragDropFormatNameElementDefinition } from '../../../Constants';
 import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { DrawElementTool } from '../designerView/tools/DrawElementTool';
@@ -72,7 +72,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
       button.draggable = true;
       button.ondragstart = (e) => {
-        e.dataTransfer.setData(dragDropFormatName, JSON.stringify(elementDefintion));
+        e.dataTransfer.setData(dragDropFormatNameElementDefinition, JSON.stringify(elementDefintion));
         (<HTMLElement>e.currentTarget).style.outline = "dashed";
 
         if (elementDefintion.ghostElement) {

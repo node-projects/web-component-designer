@@ -1,11 +1,12 @@
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
-import { IDesignItem } from '../../item/IDesignItem';
-import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
+import { dragDropFormatNameBindingObject } from '../../../Constants.js';
+import { IBindableObject } from '../../services/bindableObjectsService/IBindableObject.js';
+import { IBindableObjectsService } from '../../services/bindableObjectsService/IBindableObjectsService.js';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
 
 export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
   private _treeDiv: HTMLDivElement;
   private _tree: Fancytree.Fancytree;
-  private _filter: HTMLInputElement;
 
   static override readonly style = css`
       span.drag-source {
@@ -39,18 +40,6 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
     externalCss.innerHTML = '@import url("./node_modules/jquery.fancytree/dist/skin-win8/ui.fancytree.css");';
     this.shadowRoot.appendChild(externalCss);
 
-    this._filter = document.createElement('input');
-    this._filter.style.width = '100%'
-    this._filter.placeholder = 'Filter...';
-    this._filter.autocomplete = 'off';
-    this._filter.onkeyup = () => {
-      let match = this._filter.value;
-      this._tree.filterNodes((node) => {
-        return new RegExp(match, "i").test(node.title);
-      })
-    }
-    this.shadowRoot.appendChild(this._filter);
-
     this._treeDiv = document.createElement('div');
     this._treeDiv.style.height = '100%'
     this._treeDiv.style.overflow = 'auto';
@@ -61,84 +50,69 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
 
   async ready() {
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
-      icon: false, //atm, maybe if we include icons for specific elements
-      extensions: ['filter'],
+      icon: false,
+      extensions: ['dnd5'],
       quicksearch: true,
       source: [],
       lazyLoad: this.lazyLoad,
-      filter: {
-        autoApply: true,   // Re-apply last filter if lazy data is loaded
-        autoExpand: false, // Expand all branches that contain matches while filtered
-        counter: true,     // Show a badge with number of matching child nodes near parent icons
-        fuzzy: true,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
-        hideExpandedCounter: true,  // Hide counter badge if parent is expanded
-        hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
-        highlight: true,   // Highlight matches by wrapping inside <mark> tags
-        leavesOnly: false, // Match end nodes only
-        nodata: true,      // Display a 'no data' status node if result is empty
-        mode: "hide"       // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
+      dnd5: {
+        dropMarkerParent: this.shadowRoot,
+        preventRecursion: true,
+        preventVoidMoves: false,
+        dropMarkerOffsetX: -24,
+        dropMarkerInsertOffsetX: -16,
+
+        dragStart: (node, data) => {
+          data.effectAllowed = "all";
+          data.dataTransfer.setData(dragDropFormatNameBindingObject, JSON.stringify(node.data.bindable));
+          data.dropEffect = "copy";
+          return true;
+        },
+        dragEnter: (node, data) => {
+          return false;
+        }
       }
     });
 
-    //@ts-ignore
     this._tree = $.ui.fancytree.getTree(this._treeDiv);
     this._treeDiv.children[0].classList.add('fancytree-connectors');
   }
 
-  lazyLoad(event: JQueryEventObject, data: Fancytree.EventData) {
-    data.result = new Promise(resolve => {
+  public async initialize(serviceContainer: ServiceContainer) {
+    let rootNode = this._tree.getRootNode();
+    rootNode.removeChildren();
 
-    });
-  }
-
-  public createTree(rootItem: IDesignItem): void {
-    if (this._tree) {
-      this._recomputeTree(rootItem);
-    }
-  }
-
-  public selectionChanged(event: ISelectionChangedEvent) {
-    if (event.selectedElements.length > 0) {
-      this._highlight(event.selectedElements);
-    }
-  }
-
-  private _recomputeTree(rootItem: IDesignItem): void {
-    this._tree.getRootNode().removeChildren();
-
-    this._getChildren(rootItem, null);
-    //@ts-ignore
-    this._tree.getRootNode().updateCounters();
-  }
-
-  private _getChildren(item: IDesignItem, currentNode: Fancytree.FancytreeNode): any {
-    if (currentNode == null) {
-      currentNode = this._tree.getRootNode();
-    }
-
-    const newNode = currentNode.addChildren({
-      title: item.name + " " + (item.id ? ('#' + item.id) : ''),
-      folder: item.children.length > 0 ? true : false,
-      //@ts-ignore
-      ref: item
-    });
-
-    for (let i of item.children()) {
-      this._getChildren(i, newNode);
-    }
-  }
-
-  private _highlight(activeElements: IDesignItem[]) {
-    if (activeElements != null) {
-      this._tree.visit((node) => {
-        //@ts-ignore
-        if (activeElements.indexOf(node.data.ref) >= 0) {
-          node.setSelected(true);
-        } else {
-          node.setSelected(false);
+    const services = serviceContainer.bindableObjectsServices;
+    for (const s of services) {
+      const newNode = rootNode.addChildren({
+        title: s.name,
+        folder: true,
+        lazy: true,
+        data: {
+          service: s
         }
       });
+      rootNode.addNode(newNode);
     }
+  }
+
+  lazyLoad(event: JQueryEventObject, data: Fancytree.EventData) {
+    data.result = new Promise(async resolve => {
+      const service: IBindableObjectsService = data.node.data.service;
+      const bindable: IBindableObject = data.node.data.bindable;
+      let children: IBindableObject[];
+      if (bindable?.children)
+        children = bindable.children;
+      else
+        children = await service.getBindableObjects(bindable);
+      resolve(children.map(x => ({
+        service,
+        title: x.name,
+        bindable: x,
+        folder: x.children !== false,
+        lazy: x.children !== false
+      })));
+    });
   }
 }
 

@@ -27,6 +27,8 @@ import { IDesignerPointerExtensionProvider } from "../widgets/designerView/exten
 import { IModelCommandService } from "./modelCommandService/IModelCommandService.js";
 import { IDesignViewConfigButtonsProvider } from "../widgets/designerView/IDesignViewConfigButtonsProvider.js";
 import { IDemoProviderService } from "./demoProviderService/IDemoProviderService.js";
+import { IBindableObjectsService } from "./bindableObjectsService/IBindableObjectsService.js";
+import { IBindableObjectDragDropService } from "./bindableObjectsService/IBindableObjectDragDropService.js";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -39,6 +41,8 @@ interface ServiceNameMap {
   "htmlParserService": IHtmlParserService;
   "intializationService": IIntializationService;
   "bindingService": IBindingService;
+  "bindableObjectsService": IBindableObjectsService;
+  "bindableObjectDragDropService": IBindableObjectDragDropService;
   "elementAtPointService": IElementAtPointService;
   "prepareElementsForDesignerService": IPrepareElementsForDesignerService;
   "dragDropService": IDragDropService;
@@ -71,6 +75,14 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get bindingService(): IBindingService {
     return this.getLastService('bindingService');
+  }
+
+  get bindableObjectsServices(): IBindableObjectsService[] {
+    return this.getServices('bindableObjectsService');
+  }
+
+  get bindableObjectDragDropService(): IBindableObjectDragDropService {
+    return this.getLastService('bindableObjectDragDropService');
   }
 
   get propertiesServices(): IPropertiesService[] {
