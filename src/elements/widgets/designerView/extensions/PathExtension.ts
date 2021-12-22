@@ -14,6 +14,7 @@ export class PathExtension extends AbstractExtension {
   private _parentRect: DOMRect;
   private _startPos: IPoint;
   private _circlePos: IPoint;
+  private _originalPathPoint: IPoint;
   private _pathdata: PathData[];
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
@@ -83,6 +84,8 @@ export class PathExtension extends AbstractExtension {
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._startPos = { x: event.x, y: event.y };
         this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
+        this._originalPathPoint = { x: p.values[index], y: p.values[index + 1] }
+
 
         break;
 
@@ -91,36 +94,29 @@ export class PathExtension extends AbstractExtension {
           this._lastPos = { x: this._startPos.x, y: this._startPos.y };
           const cx = event.x - this._lastPos.x + this._circlePos.x;
           const cy = event.y - this._lastPos.y + this._circlePos.y;
-          const dx = this._circlePos.x - cx;
-          const dy = this._circlePos.y - cy;
-          console.log("Path")
-          console.log(this._pathdata)
-          console.log("CirclePos");
-          console.log(this._circlePos);
-          console.log("cx + " + cx + " / cy " + cy);
-          console.log("dx + " + dx + " / dy " + dy);
-          console.log(p.values);
-          circle.setAttribute("cx", (cx).toString());
-          circle.setAttribute("cy", (cy).toString());
-          p.values[index] = this._circlePos.x + dx;
-          p.values[index + 1] = this._circlePos.y + dy;
+          const dx = cx - this._circlePos.x;
+          const dy = cy - this._circlePos.y;
+          p.values[index] = this._originalPathPoint.x + dx;
+          p.values[index + 1] = this._originalPathPoint.y + dy;
+          this._drawPath(this._pathdata, index);
         }
         break;
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        this._drawPath(this._pathdata);
         this._startPos = null;
+        this._circlePos = null;
+        this._lastPos = null;
         break;
     }
   }
 
-  _drawPath(path: PathData[]) {
-    let pathD: string;
-    for(let p of path){
-      pathD += p.type + p.values[0] + " " + p.values[1];
+  _drawPath(path: PathData[], index: number) {
+    let pathD: string = "";
+    for (let p of path) {
+      pathD += p.type + p.values[index] + " " + p.values[index + 1];
     }
-    console.log(pathD);
+    this.extendedItem.setAttribute("d", pathD);
   }
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
