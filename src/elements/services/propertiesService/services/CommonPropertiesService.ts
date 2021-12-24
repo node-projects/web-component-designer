@@ -2,6 +2,7 @@ import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
+import { BindingTarget } from "../../../item/BindingTarget";
 
 export class CommonPropertiesService implements IPropertiesService {
 
@@ -74,6 +75,12 @@ export class CommonPropertiesService implements IPropertiesService {
         all = all && has;
         some = some || has;
       });
+      //todo: optimize perf, do not call bindings service for each property. 
+      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.getBindings(designItems[0]);
+      });
+      if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+        return ValueType.bound;
     }
     else
       return ValueType.none
