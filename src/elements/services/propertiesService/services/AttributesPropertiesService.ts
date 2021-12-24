@@ -3,9 +3,10 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
 import { IBinding } from "../../../item/IBinding.js";
+import { BindingTarget } from "../../../item/BindingTarget";
 
 export class AttributesPropertiesService implements IPropertiesService {
-
+  
   public name = "attributes"
 
   isHandledElement(designItem: IDesignItem): boolean {
@@ -29,6 +30,10 @@ export class AttributesPropertiesService implements IPropertiesService {
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
 
+  }
+
+  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.attribute;
   }
 
   clearValue(designItems: IDesignItem[], property: IProperty) {

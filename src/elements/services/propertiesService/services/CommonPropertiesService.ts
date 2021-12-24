@@ -58,10 +58,17 @@ export class CommonPropertiesService implements IPropertiesService {
     }
   }
 
+  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.property;
+  }
+
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
       d.attributes.delete(<string>property.name);
       d.element.removeAttribute(property.name);
+      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+      });
     }
   }
 

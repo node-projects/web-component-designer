@@ -241,10 +241,17 @@ export class CssPropertiesService implements IPropertiesService {
     cg.commit();
   }
 
+  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.css;
+  }
+
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
       d.styles.delete(property.name);
       (<HTMLElement>d.element).style[property.name] = '';
+      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+      });
     }
   }
 

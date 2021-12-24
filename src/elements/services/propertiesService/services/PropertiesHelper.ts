@@ -25,6 +25,6 @@ export class PropertiesHelper {
   }
 
   public static dashToCamelCase(text: string) {
-    return text.replace(/-([a-z])/i, (i) => i[1].toUpperCase());
+    return text.replace(/-([a-z])/g, (i) => i[1].toUpperCase());
   }
 }

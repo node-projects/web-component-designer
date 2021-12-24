@@ -78,6 +78,7 @@ export * from "./elements/services/propertiesService/DefaultEditorTypesService.j
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
+export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
