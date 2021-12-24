@@ -10,12 +10,12 @@ export interface IBinding {
   type?: string //here a name wich the bindings Service recognizes....
 
   expression?: string;  //the Binding internal Code
-  bindableObjectNames?: string[];
+  bindableObjectNames?: string[]; 
 
   mode?: BindingMode;
 
   invert?: boolean;
   //converter?: string;
-  changedEvent?: string;
+  changedEvents?: string[];
   nullSafe?: boolean;
 }

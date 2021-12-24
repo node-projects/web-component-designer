@@ -497,7 +497,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this._fillCalculationrects();
 
-    if (event.dataTransfer.files.length > 0) {
+    if (event.dataTransfer.files?.length > 0) {
       const ddService = this.serviceContainer.dragDropService;
       if (ddService) {
         ddService.drop(this, event);
