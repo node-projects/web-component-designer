@@ -208,3 +208,4 @@ export type { IDisposable } from "./interfaces/IDisposable.js";
 export type { IPoint } from "./interfaces/IPoint.js";
 export type { IRect } from "./interfaces/IRect.js";
 export type { ISize } from "./interfaces/ISize.js";
+export type { ICommandHandler } from "./interfaces/ICommandHandler.js";

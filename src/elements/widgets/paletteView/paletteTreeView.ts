@@ -62,9 +62,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   constructor() {
     super();
 
-    let externalCss = document.createElement('style');
-    externalCss.innerHTML = '@import url("./node_modules/jquery.fancytree/dist/skin-win8/ui.fancytree.css");';
-    this.shadowRoot.appendChild(externalCss);
+    //@ts-ignore
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
