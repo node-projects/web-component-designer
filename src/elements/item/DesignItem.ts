@@ -7,10 +7,11 @@ import { NodeType } from './NodeType';
 import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 import { CssAttributeParser } from '../helper/CssAttributeParser.js';
 import { ISize } from '../../interfaces/ISize.js';
 import { PropertiesHelper } from '../services/propertiesService/services/PropertiesHelper.js';
+import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction';
+import { DeleteAction } from '../..';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -71,7 +72,7 @@ export class DesignItem implements IDesignItem {
     return this.instanceServiceContainer.contentService.rootDesignItem === this;
   }
 
-  private _childArray: IDesignItem[] = [];
+  _childArray: IDesignItem[] = [];
   public get hasChildren() {
     return this._childArray.length > 0;
   }
@@ -89,50 +90,42 @@ export class DesignItem implements IDesignItem {
   public get parent(): IDesignItem {
     return this.getOrCreateDesignItem(this.element.parentNode);
   }
+
+  public indexOf(designItem: IDesignItem): number {
+    return this._childArray.indexOf(designItem);
+  }
+
+  public insertAdjacentElement(designItem: IDesignItem, where: InsertPosition) {
+    if (where == 'afterbegin') {
+      this._insertChildInternal(designItem, 0);
+    } else if (where == 'beforeend') {
+      this._insertChildInternal(designItem);
+    } else if (where == 'beforebegin') {
+      this.parent._insertChildInternal(designItem, this.parent.indexOf(this));
+    } else if (where == 'afterend') {
+      this.parent._insertChildInternal(designItem, this.parent.indexOf(this) + 1);
+    }
+  }
+
   public insertChild(designItem: IDesignItem, index?: number) {
-    //todo... via undoredo system....
-    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
-
-    if (designItem.parent) {
-      designItem.parent.removeChild(designItem);
-    }
-    this.removeChild(designItem);
-
-
-    if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
-      this._childArray.push(designItem);
-      this.element.appendChild(designItem.node);
-    } else {
-      let el = this._childArray[index];
-      this.node.insertBefore(designItem.node, el.element)
-      this._childArray.splice(index, 0, designItem);
-    }
-
-    if (this.instanceServiceContainer.selectionService.primarySelection == designItem)
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+    const action = new InsertChildAction(designItem, this, index);
+    this.instanceServiceContainer.undoService.execute(action);
   }
   public removeChild(designItem: IDesignItem) {
-    //todo... via undoredo system....
-
-    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
-
-    const index = this._childArray.indexOf(designItem);
-    if (index > -1) {
-      this._childArray.splice(index, 1);
-      designItem.element.remove();
-    }
+    const action = new DeleteAction([designItem]);
+    this.instanceServiceContainer.undoService.execute(action);
   }
   public remove() {
-    this.parent.removeChild(this);
+    this.parent._removeChildInternal(this);
   }
   public clearChildren() {
-    this._childArray = [];
-    DomHelper.removeAllChildnodes(this.element);
+    for (let i = this._childArray.length - 1; i >= 0; i--) {
+      let di = this._childArray[i];
+      di.remove();
+    }
   }
 
-  //abstract text content to own property. so only chnage via designer api will use it.
+  //abstract text content to own property. so only change via designer api will use it.
   public get hasContent() {
     return this.nodeType == NodeType.TextNode || (this._childArray.length === 0 && this.content !== null);
   }
@@ -306,20 +299,38 @@ export class DesignItem implements IDesignItem {
     this.instanceServiceContainer.undoService.execute(action);
   }
 
-  /*
-  public setProperty(name: string, value?: string | null) {
-    const propService = this.serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this));
-    const property = propService.getProperty(this, name);
-    const oldValue = propService.getValue([this], property)
-    const action = new PropertyChangeAction(this, property, value, oldValue);
-    this.instanceServiceContainer.undoService.execute(action);
+  // Internal implementations wich don't use undo/redo
+
+  public _insertChildInternal(designItem: IDesignItem, index?: number) {
+    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+
+    if (designItem.parent) {
+      designItem.parent._removeChildInternal(designItem);
+    }
+
+    if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
+      this._childArray.push(designItem);
+      this.element.appendChild(designItem.node);
+    } else {
+      let el = this._childArray[index];
+      this.node.insertBefore(designItem.node, el.element)
+      this._childArray.splice(index, 0, designItem);
+    }
+
+    if (this.instanceServiceContainer.selectionService.primarySelection == designItem)
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
   }
-  public removeProperty(name: string, value?: string | null) {
-    const propService = this.serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this));
-    const property = propService.getProperty(this, name);
-    const oldValue = propService.getValue([this], property)
-    const action = new PropertyChangeAction(this, property, undefined, oldValue);
-    this.instanceServiceContainer.undoService.execute(action);
+  public _removeChildInternal(designItem: IDesignItem) {
+    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+
+    designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtensions([designItem]);
+
+    const index = this._childArray.indexOf(designItem);
+    if (index > -1) {
+      this._childArray.splice(index, 1);
+      designItem.element.remove();
+    }
   }
-  */
 }

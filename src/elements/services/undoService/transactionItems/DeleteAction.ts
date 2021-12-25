@@ -1,14 +1,12 @@
 import { ITransactionItem } from '../ITransactionItem';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
-import { IExtensionManager } from '../../../widgets/designerView/extensions/IExtensionManger';
 
 export class DeleteAction implements ITransactionItem {
 
-  constructor(deletedItems: IDesignItem[], extensionManager: IExtensionManager) {
+  constructor(deletedItems: IDesignItem[]) {
     this.title = "Delete Items";
     this.deletedItems = deletedItems;
-    this.extensionManager = extensionManager;
   }
 
   title?: string;
@@ -19,7 +17,7 @@ export class DeleteAction implements ITransactionItem {
 
   undo() {
     for (let n = 0; n < this.deletedItems.length; n++) {
-      this._parentItems[n].insertChild(this.deletedItems[n], this._parentIndexes[n]);
+      this._parentItems[n]._insertChildInternal(this.deletedItems[n], this._parentIndexes[n]);
     }
     this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'added', designItems: this.deletedItems});
   }
@@ -34,12 +32,10 @@ export class DeleteAction implements ITransactionItem {
     for (let n = 0; n < this.deletedItems.length; n++) {
       this.deletedItems[n].remove();
     }
-    this.extensionManager.removeExtensions(this.deletedItems);
     this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'removed', designItems: this.deletedItems});
   }
 
   public deletedItems: IDesignItem[];
-  public extensionManager: IExtensionManager;
   private _parentItems: IDesignItem[];
   private _parentIndexes: number[];
 

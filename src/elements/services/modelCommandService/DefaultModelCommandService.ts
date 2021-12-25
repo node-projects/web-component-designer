@@ -1,8 +1,6 @@
 import { CommandType } from "../../../commandHandling/CommandType.js";
 import { IUiCommand } from "../../../commandHandling/IUiCommand.js";
-import { DesignItem } from "../../item/DesignItem.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
-import { MoveElementInDomAction } from "../undoService/transactionItems/MoveElementInDomAction.js";
 import { IModelCommandService } from "./IModelCommandService.js";
 
 
@@ -27,14 +25,20 @@ export class DefaultModelCommandService implements IModelCommandService {
 
   async executeCommand(designerCanvas: IDesignerCanvas, command: IUiCommand) {
     let sel = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
-    if (command.type == CommandType.moveBackward)
-      designerCanvas.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'beforebegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
-    else if (command.type == CommandType.moveForward)
-      designerCanvas.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'afterend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
+    if (command.type == CommandType.moveBackward) {
+      let idx = sel.parent.indexOf(sel) - 1;
+      if (idx >= 0)
+        sel.parent.insertChild(sel, idx);
+    }
+     else if (command.type == CommandType.moveForward) {
+      let idx = sel.parent.indexOf(sel) + 1;
+      if (idx < sel.parent.childCount)
+        sel.parent.insertChild(sel, idx);
+    }
     else if (command.type == CommandType.moveToBack)
-      designerCanvas.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'afterbegin', DesignItem.GetDesignItem((<HTMLElement>sel.element).previousElementSibling), 'afterend'));
+      sel.parent.insertChild(sel, 0);
     else if (command.type == CommandType.moveToFront)
-      designerCanvas.instanceServiceContainer.undoService.execute(new MoveElementInDomAction(sel, DesignItem.GetDesignItem((<HTMLElement>sel.element).parentElement), 'beforeend', DesignItem.GetDesignItem((<HTMLElement>sel.element).nextElementSibling), 'beforebegin'));
+      sel.parent.insertChild(sel);
     else if (command.type == CommandType.arrangeLeft) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('arrangeLeft');
       const left = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('left');

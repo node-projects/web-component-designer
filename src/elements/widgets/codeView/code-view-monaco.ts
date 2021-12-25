@@ -32,7 +32,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   static override readonly template = html`
       <style>@import "./node_modules/monaco-editor/min/vs/editor/editor.main.css";</style>
-      <div id="container" style="width: 100%; height: 100%;"></div>
+      <div id="container" style="width: 100%; height: 100%; position: absolute;"></div>
   `;
 
   executeCommand(command: IUiCommand) {
@@ -83,9 +83,9 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         value: this.code,
         language: 'html',
         minimap: {
-          //@ts-ignore
           size: 'fill'
-        }
+        },
+        fixedOverflowWidgets: true
       });
 
       this._monacoEditor.layout();

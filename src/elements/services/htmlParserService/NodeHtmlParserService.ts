@@ -89,7 +89,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
       for (let c of item.childNodes) {
         let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null);
-        designItem.insertChild(di);
+        designItem._insertChildInternal(di);
       }
     } else if (item.nodeType == 3) {
       this._parseDiv.innerHTML = item.rawText;

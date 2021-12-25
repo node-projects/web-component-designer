@@ -332,7 +332,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   handleDeleteCommand() {
     let items = this.instanceServiceContainer.selectionService.selectedElements;
-    this.instanceServiceContainer.undoService.execute(new DeleteAction(items, this.extensionManager));
+    this.instanceServiceContainer.undoService.execute(new DeleteAction(items));
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
   }
 
@@ -415,7 +415,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public addDesignItems(designItems: IDesignItem[]) {
     if (designItems) {
       for (let di of designItems) {
-        this.rootDesignItem.insertChild(di);
+        this.rootDesignItem._insertChildInternal(di);
       }
     }
 

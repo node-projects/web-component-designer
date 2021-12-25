@@ -101,7 +101,7 @@ export * from "./elements/services/undoService/transactionItems/AttributeChangeA
 export * from "./elements/services/undoService/transactionItems/CssStyleChangeAction.js";
 export * from "./elements/services/undoService/transactionItems/DeleteAction.js";
 export * from "./elements/services/undoService/transactionItems/InsertAction.js";
-export * from "./elements/services/undoService/transactionItems/MoveElementInDomAction.js";
+export * from "./elements/services/undoService/transactionItems/InsertChildAction.js";
 export * from "./elements/services/undoService/transactionItems/PropertyChangeAction.js";
 
 export * from "./elements/services/BaseServiceContainer.js";
