@@ -55,6 +55,7 @@ export type { IElementDefinition } from "./elements/services/elementsService/IEl
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
 export * from "./elements/services/elementsService/JsonFileElementsService.js";
+export * from "./elements/services/elementsService/PreDefinedElementsService.js";
 
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
