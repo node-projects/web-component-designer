@@ -21,6 +21,14 @@ export class BaseServiceContainer<NameMap> {
     this._services.get(<string>name).push(service);
   }
 
+  registerMultiple<K extends keyof NameMap>(names: K[], service: NameMap[K]) {
+    for (const name of names) {
+      if (!this._services.has(<string>name))
+        this._services.set(<string>name, []);
+      this._services.get(<string>name).push(service);
+    }
+  }
+
   forSomeServicesTillResult<K extends keyof NameMap, Y>(service: K, callback: (service: NameMap[K]) => Y): Y {
     let services = this.getServices<K>(<any>service);
     if (services == null) {

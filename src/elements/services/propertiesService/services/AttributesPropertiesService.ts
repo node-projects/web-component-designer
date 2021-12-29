@@ -4,9 +4,10 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
 import { IBinding } from "../../../item/IBinding.js";
 import { BindingTarget } from "../../../item/BindingTarget";
+import { PropertyType } from "../PropertyType";
 
 export class AttributesPropertiesService implements IPropertiesService {
-  
+
   public name = "attributes"
 
   isHandledElement(designItem: IDesignItem): boolean {
@@ -14,14 +15,14 @@ export class AttributesPropertiesService implements IPropertiesService {
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
-    return { name: name, type: 'string', service: this };
+    return { name: name, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute };
   }
 
   getProperties(designItem: IDesignItem): IProperty[] {
     if (designItem) {
       let p: IProperty[] = [];
       for (let a of designItem.attributes.keys()) {
-        p.push({ name: a, type: 'string', service: this })
+        p.push({ name: a, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
       }
       return p;
     }

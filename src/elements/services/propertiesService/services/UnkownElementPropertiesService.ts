@@ -5,10 +5,8 @@ import { ValueType } from "../ValueType";
 import { PropertiesHelper } from './PropertiesHelper';
 import { BindingTarget } from "../../../item/BindingTarget";
 
-export class UnkownElementPropertiesService implements IPropertiesService {
-
-
-  public readonly name: string = "unkown";
+//@ts-ignore
+export abstract class UnkownElementPropertiesService implements IPropertiesService {
 
   public isHandledElement(designItem: IDesignItem): boolean {
     return true;

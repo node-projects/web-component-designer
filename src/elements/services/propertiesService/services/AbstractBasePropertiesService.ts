@@ -2,6 +2,7 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { PropertiesHelper } from './PropertiesHelper';
 import { UnkownElementPropertiesService } from "./UnkownElementPropertiesService";
+import { PropertyType } from '../PropertyType';
 
 export abstract class AbstractBasePropertiesService extends UnkownElementPropertiesService {
 
@@ -20,22 +21,22 @@ export abstract class AbstractBasePropertiesService extends UnkownElementPropert
         type = polymerProperty.type;
 
       if (type === String) {
-        let property: IProperty = { name: name, type: "string", service: this };
+        let property: IProperty = { name: name, type: "string", service: this, propertyType: PropertyType.propertyAndAttribute };
         properties.push(property);
       } else if (type === Object) {
-        let property: IProperty = { name: name, type: "object", service: this };
+        let property: IProperty = { name: name, type: "object", service: this, propertyType: PropertyType.propertyAndAttribute };
         properties.push(property);
       } else if (type === Number) {
-        let property: IProperty = { name: name, type: "number", service: this };
+        let property: IProperty = { name: name, type: "number", service: this, propertyType: PropertyType.propertyAndAttribute };
         properties.push(property);
       } else if (type === Date) {
-        let property: IProperty = { name: name, type: "date", service: this };
+        let property: IProperty = { name: name, type: "date", service: this, propertyType: PropertyType.propertyAndAttribute };
         properties.push(property);
       } else if (type === Boolean) {
-        let property: IProperty = { name: name, type: "boolean", service: this };
+        let property: IProperty = { name: name, type: "boolean", service: this, propertyType: PropertyType.propertyAndAttribute };
         properties.push(property);
       } else if (PropertiesHelper.isTypescriptEnum(type)) {
-        let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(type), service: this };
+        let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(type), service: this, propertyType: PropertyType.propertyAndAttribute };
         properties.push(property);
       }
     }

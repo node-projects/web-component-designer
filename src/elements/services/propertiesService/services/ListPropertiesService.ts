@@ -2,10 +2,11 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions';
 import { UnkownElementPropertiesService } from './UnkownElementPropertiesService';
+import { PropertyType } from '../PropertyType';
 
 export class ListPropertiesService extends UnkownElementPropertiesService {
 
-  public override name = "list"
+  public name = "list"
 
   private _propertys: Map<string, IProperty[]> = new Map();
 
@@ -20,6 +21,8 @@ export class ListPropertiesService extends UnkownElementPropertiesService {
         parr.push(
           {
             name: pdef.name,
+            propertyName: pdef.propertyName,
+            attributeName: pdef.attributeName,
             description: pdef.description,
             type: pdef.type,
             default: pdef.default,
@@ -30,7 +33,8 @@ export class ListPropertiesService extends UnkownElementPropertiesService {
             enumValues: pdef.enumValues,
             value: pdef.value,
             defaultValue: pdef.defaultValue,
-            service: this
+            service: this,
+            propertyType: pdef.propertyType ?? PropertyType.propertyAndAttribute
           });
       }
     }

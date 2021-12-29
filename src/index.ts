@@ -72,6 +72,8 @@ export type { IInstanceService } from "./elements/services/instanceService/IInst
 export * from "./elements/services/instanceService/PrepareElementsForDesignerService.js";
 export type { IPrepareElementsForDesignerService } from "./elements/services/instanceService/IPrepareElementsForDesignerService.js";
 
+export * from "./elements/services/manifestParsers/WebcomponentManifestParserService.js";
+
 export type { IModelCommandService } from "./elements/services/modelCommandService/IModelCommandService.js";
 export * from "./elements/services/modelCommandService/DefaultModelCommandService.js";
 
@@ -88,6 +90,7 @@ export * from "./elements/services/propertiesService/services/LitElementProperti
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
+export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";

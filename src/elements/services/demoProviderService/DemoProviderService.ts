@@ -27,7 +27,7 @@ export class DemoProviderService implements IDemoProviderService {
       }
       doc.write("document.body.style.display='';");
       doc.write('</script>');
-      doc.write('<body style="display:none">' + code + '</body>');
+      doc.write('<body style="display:none; width: 100%; height: 100%; margin: 0; padding: 0; position: absolute;">' + code + '</body>');
       doc.close();
     });
   }

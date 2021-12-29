@@ -63,7 +63,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     super();
 
     //@ts-ignore
-    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -116,15 +116,20 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         folder: true
       });
 
-      let elements = await s.getElements();
-      for (let e of elements) {
-        newNode.addChildren({
-          title: e.name ?? e.tag,
-          folder: false,
-          //@ts-ignore
-          ref: e
-        });
+      try {
+        let elements = await s.getElements();
+        for (let e of elements) {
+          newNode.addChildren({
+            title: e.name ?? e.tag,
+            folder: false,
+            //@ts-ignore
+            ref: e
+          });
+        }
+      } catch (err) {
+        console.warn('Error loading elements', err);
       }
+
 
       //@ts-ignore
       newNode.updateCounters();

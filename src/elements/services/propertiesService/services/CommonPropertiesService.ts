@@ -3,6 +3,7 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
 import { BindingTarget } from "../../../item/BindingTarget";
+import { PropertyType } from "../PropertyType";
 
 export class CommonPropertiesService implements IPropertiesService {
 
@@ -11,19 +12,25 @@ export class CommonPropertiesService implements IPropertiesService {
     {
       name: "id",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
     }, {
       name: "class",
       type: "string",
-      service: this
+      service: this,
+      attributeName: "class",
+      propertyName: "className",
+      propertyType: PropertyType.propertyAndAttribute
     }, {
       name: "title",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
     }, {
       name: "tabindex",
       type: "number",
-      service: this
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
     }
   ];
 

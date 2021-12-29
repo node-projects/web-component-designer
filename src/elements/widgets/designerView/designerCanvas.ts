@@ -96,6 +96,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       position: relative;
       transform: translateZ(0);
       overflow: hidden;
+
+      font-family: initial;
+      font-size: initial;
+      font-weight: initial;
+      font-style: initial;
+      line-height: initial;
     }
     * {
       touch-action: none;

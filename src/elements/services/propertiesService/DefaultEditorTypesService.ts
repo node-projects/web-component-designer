@@ -54,7 +54,6 @@ export class DefaultEditorTypesService implements IEditorTypesService {
           return new ThicknessPropertyEditor(property);
         }
       case "css-length":
-      case "thickness":
       case "string":
       default:
         {

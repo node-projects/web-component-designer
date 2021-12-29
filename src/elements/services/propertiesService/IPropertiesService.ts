@@ -5,7 +5,7 @@ import { ValueType } from './ValueType';
 import { BindingTarget } from '../../item/BindingTarget';
 
 export interface IPropertiesService extends IService {
-  readonly name: string;
+  //readonly name: string;
   isHandledElement(designItem: IDesignItem): boolean;
   getProperties(designItem: IDesignItem): IProperty[];
   getProperty(designItem: IDesignItem, name: string): IProperty;
