@@ -8,3 +8,8 @@ export function newElementFromString(text): Element {
 export function isInline(element: HTMLElement): boolean {
   return element != null && window.getComputedStyle(element).display.startsWith('inline');
 }
+
+export function isEmptyTextNode(node: Node): boolean {
+  return node.textContent.trim() == '' && node.textContent.indexOf('\xa0' /* &nbsp; */) < 0 ;
+}
+
