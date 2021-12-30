@@ -173,7 +173,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
       }
       else if (this._tabControl.selectedIndex === 3)
-        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
+        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
     }
   }
   get content() {
@@ -219,7 +219,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this._splitDiv.appendChild(this.codeView);
       }
       if (i.newIndex === 3) {
-        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
+        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
       }
     });
     if (this._content)

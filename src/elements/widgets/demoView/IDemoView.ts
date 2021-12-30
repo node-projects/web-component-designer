@@ -2,5 +2,5 @@ import { InstanceServiceContainer } from '../../services/InstanceServiceContaine
 import { ServiceContainer } from '../../services/ServiceContainer';
 
 export interface IDemoView {
-  display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string);
+  display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string);
 }

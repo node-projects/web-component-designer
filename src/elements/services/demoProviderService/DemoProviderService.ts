@@ -4,7 +4,7 @@ import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelpe
 import { IDemoProviderService } from "./IDemoProviderService.js";
 
 export class DemoProviderService implements IDemoProviderService {
-  provideDemo(container: HTMLElement, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string) {
+  provideDemo(container: HTMLElement, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
     return new Promise<void>(resolve => {
       const iframe = document.createElement('iframe');
       iframe.style.width = '100%';
@@ -27,6 +27,7 @@ export class DemoProviderService implements IDemoProviderService {
       }
       doc.write("document.body.style.display='';");
       doc.write('</script>');
+      doc.write('<style>' + (style ?? '') + '</style>');
       doc.write('<body style="display:none; width: 100%; height: 100%; margin: 0; padding: 0; position: absolute;">' + code + '</body>');
       doc.close();
     });
