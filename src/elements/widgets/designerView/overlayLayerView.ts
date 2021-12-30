@@ -82,8 +82,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
 
   public removeOverlay(element: SVGGraphicsElement) {
     try {
-      if (element)
-        element.parentElement.removeChild(element);
+      element?.parentElement?.removeChild(element);
     } catch (err) {
       console.error(err);
     }
