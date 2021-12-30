@@ -18,45 +18,55 @@ export class WebcomponentManifestParserService extends UnkownElementPropertiesSe
   private _propertiesList: Record<string, IProperty[]>;
   private _resolveStored: ((value: IElementDefinition[]) => void)[];
   private _rejectStored: ((errorCode: number) => void)[];
+  private _importPrefix = '';
 
-  constructor(name: string, file: string) {
+  constructor(name: string, fileOrObject: string | object, importPrefix = '') {
     super();
     this._name = name;
-    let path = file.split('/').slice(0, -1).join('/')
-    import(file, { assert: { type: 'json' } }).then(module => {
-      this._packageData = module.default;
-
-      this._elementList = [];
-      this._propertiesList = {};
-      for (let m of this._packageData.modules) {
-        for (let e of m.exports) {
-          if (e.kind == 'custom-element-definition') {
-            this._elementList.push({ tag: e.name, import: path + '/' + e.declaration.module });
-            let properties: IProperty[] = [];
-            let declaration: CustomElement = <CustomElement>m.declarations.find(x => x.name == e.declaration.name);
-            for (let d of declaration.members) {
-              if (d.kind == 'field') {
-                let pType = PropertyType.property;
-                pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
-                properties.push({ name: d.name, service: this, propertyType: pType, type: this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text) });
-              }
-            }
-            this._propertiesList[e.name] = properties;
-          }
-        }
-        if (this._resolveStored) {
-          this._resolveStored.forEach(x => x(this._elementList));
+    this._importPrefix = importPrefix;
+    if (typeof fileOrObject === 'string') {
+      this._importPrefix = this._importPrefix ?? fileOrObject.split('/').slice(0, -1).join('/');
+      import(fileOrObject, { assert: { type: 'json' } }).then(module => {
+        this._packageData = module.default;
+        this._parseManifest();
+      }).catch(err => {
+        if (this._rejectStored) {
+          this._rejectStored.forEach(x => x(err));
           this._resolveStored = null;
           this._rejectStored = null;
         }
+      });
+    } else {
+      this._packageData = <Package>fileOrObject;
+      this._parseManifest();
+    }
+  }
+
+  private _parseManifest() {
+    this._elementList = [];
+    this._propertiesList = {};
+    for (let m of this._packageData.modules) {
+      for (let e of m.exports) {
+        if (e.kind == 'custom-element-definition') {
+          this._elementList.push({ tag: e.name, import: this._importPrefix + '/' + e.declaration.module });
+          let properties: IProperty[] = [];
+          let declaration: CustomElement = <CustomElement>m.declarations.find(x => x.name == e.declaration.name);
+          for (let d of declaration.members) {
+            if (d.kind == 'field') {
+              let pType = PropertyType.property;
+              pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
+              properties.push({ name: d.name, service: this, propertyType: pType, type: this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text) });
+            }
+          }
+          this._propertiesList[e.name] = properties;
+        }
       }
-    }).catch(err => {
-      if (this._rejectStored) {
-        this._rejectStored.forEach(x => x(err));
+      if (this._resolveStored) {
+        this._resolveStored.forEach(x => x(this._elementList));
         this._resolveStored = null;
         this._rejectStored = null;
       }
-    });
+    }
   }
 
   private manifestClassPropertyTypeToEditorPropertyType(type: string) {
