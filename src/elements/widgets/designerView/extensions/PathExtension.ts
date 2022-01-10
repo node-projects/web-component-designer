@@ -5,7 +5,7 @@ import "../../../helper/PathDataPolyfill";
 import { IPoint } from "../../../../interfaces/IPoint";
 import { IExtensionManager } from "./IExtensionManger";
 import { EventNames } from "../../../../enums/EventNames";
-import { PathData } from "../../../helper/PathDataPolyfill";
+import { PathData, straightenLine } from "../../../helper/PathDataPolyfill";
 
 export class PathExtension extends AbstractExtension {
   //private _itemRect: DOMRect;
@@ -96,10 +96,22 @@ export class PathExtension extends AbstractExtension {
           const cy = event.y - this._lastPos.y + this._circlePos.y;
           const dx = cx - this._circlePos.x;
           const dy = cy - this._circlePos.y;
-          p.values[index] = this._originalPathPoint.x + dx;
-          p.values[index + 1] = this._originalPathPoint.y + dy;
-          this._drawPath(this._pathdata, index);
+          if (event.shiftKey) {
+            const straightLine: IPoint = straightenLine(this._startPos, {x: cx,y: cy});
+            console.log(straightLine)
+            p.values[index] = straightLine.x;
+            p.values[index + 1] = straightLine.y;
+            circle.setAttribute("cx", (straightLine.x).toString());
+            circle.setAttribute("cy", (straightLine.y).toString());
+          }
+          else {
+            p.values[index] = this._originalPathPoint.x + dx;
+            p.values[index + 1] = this._originalPathPoint.y + dy;
+            circle.setAttribute("cx", (this._circlePos.x + dx).toString());
+            circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+          }
         }
+        this._drawPath(this._pathdata, index);
         break;
 
       case EventNames.PointerUp:
@@ -116,7 +128,7 @@ export class PathExtension extends AbstractExtension {
     for (let p of path) {
       pathD += p.type + p.values[index] + " " + p.values[index + 1];
     }
-    this.extendedItem.setAttribute("d", pathD);
+    this.extendedItem.element.setAttribute("d", pathD);
   }
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
