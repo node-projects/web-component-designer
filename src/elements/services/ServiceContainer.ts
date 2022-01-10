@@ -109,8 +109,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getServices('editorTypesService');
   }
 
-  get htmlWriterServices(): IHtmlWriterService[] {
-    return this.getServices('htmlWriterService');
+  get htmlWriterService(): IHtmlWriterService {
+    return this.getLastService('htmlWriterService');
   }
 
   get htmlParserService(): IHtmlParserService {

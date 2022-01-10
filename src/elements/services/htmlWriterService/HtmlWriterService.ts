@@ -10,9 +10,6 @@ import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper
 import { isEmptyTextNode, isInline } from '../../helper/ElementHelper.js';
 
 export class HtmlWriterService implements IHtmlWriterService {
-  canWrite(designItem: IDesignItem) {
-    return true;
-  }
 
   private _conditionalyWriteIndent(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
     if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
@@ -29,7 +26,13 @@ export class HtmlWriterService implements IHtmlWriterService {
       indentedTextWriter.writeNewline();
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+    for (const d of designItems) {
+      this.internalWrite(indentedTextWriter, d, options, designItemsAssignmentList);
+    }
+  }
+
+  private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     let start = indentedTextWriter.position;
 
     if (designItem.nodeType == NodeType.TextNode) {
@@ -89,11 +92,7 @@ export class HtmlWriterService implements IHtmlWriterService {
             indentedTextWriter.levelRaise();
           }
           for (const c of children) {
-            c.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
-              if (s.canWrite(c)) {
-                s.write(indentedTextWriter, c, options, designItemsAssignmentList);
-              }
-            });
+            this.internalWrite(indentedTextWriter, c, options, designItemsAssignmentList);
             let childSingleTextNode = c.childCount === 1 && c.firstChild.nodeType === NodeType.TextNode;
             if (childSingleTextNode)
               indentedTextWriter.writeNewline();

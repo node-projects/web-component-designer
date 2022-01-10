@@ -4,7 +4,6 @@ import { LitElementPropertiesService } from './propertiesService/services/LitEle
 import { NativeElementsPropertiesService } from './propertiesService/services/NativeElementsPropertiesService.js';
 import { DefaultInstanceService } from './instanceService/DefaultInstanceService.js';
 import { DefaultEditorTypesService } from './propertiesService/DefaultEditorTypesService.js';
-import { HtmlWriterService } from './htmlWriterService/HtmlWriterService.js';
 import { BaseCustomWebComponentPropertiesService } from './propertiesService/services/BaseCustomWebComponentPropertiesService.js';
 import { DefaultPlacementService } from './placementService/DefaultPlacementService.js';
 import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserService.js';
@@ -52,6 +51,7 @@ import { DemoProviderService } from './demoProviderService/DemoProviderService';
 import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
 import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
+import { HtmlWriterService } from './htmlWriterService/HtmlWriterService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();

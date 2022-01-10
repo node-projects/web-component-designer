@@ -1,9 +1,8 @@
-import { IDesignItem } from '../../item/IDesignItem';
-import { IHtmlWriterOptions } from './IHtmlWriterOptions';
-import { IndentedTextWriter } from '../../helper/IndentedTextWriter';
-import { IStringPosition } from './IStringPosition';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
+import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
+import { IStringPosition } from './IStringPosition.js';
 
 export interface IHtmlWriterService {
-  canWrite(designItem:IDesignItem) : boolean;
-  write(indentedTextWriter : IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>);
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>);
 }

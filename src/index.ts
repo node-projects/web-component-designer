@@ -59,7 +59,9 @@ export * from "./elements/services/elementsService/PreDefinedElementsService.js"
 
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
+export * from "./elements/services/htmlWriterService/FormatingHtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
+export * from "./elements/services/htmlWriterService/LitTsElementWriterService.js";
 
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";

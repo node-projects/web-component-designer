@@ -54,7 +54,8 @@ export class WebcomponentManifestParserService extends UnkownElementPropertiesSe
           for (let d of declaration.members) {
             if (d.kind == 'field') {
               let pType = PropertyType.property;
-              pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
+              if (declaration.attributes)
+                pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
               properties.push({ name: d.name, service: this, propertyType: pType, type: this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text) });
             }
           }

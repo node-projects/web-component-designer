@@ -26,7 +26,6 @@ export class DomConverter {
       tag === 'col' ||
       tag === 'embed' ||
       tag === 'hr' ||
-      tag === 'iframe' ||
       tag === 'img' ||
       tag === 'input' ||
       tag === 'keygen' ||
@@ -42,12 +41,7 @@ export class DomConverter {
     let itw = new IndentedTextWriter();
     let options: IHtmlWriterOptions = { beautifyOutput: true, writeDesignerProperties: true, compressCssToShorthandProperties: true };
 
-    for (let d of designItems) {
-      d.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
-        if (s.canWrite(d))
-          s.write(itw, d, options, designItemsAssignmentList);
-      });
-    }
+    designItems[0].serviceContainer.htmlWriterService.write(itw, designItems, true, options, designItemsAssignmentList);
 
     return itw.getString();
   }
