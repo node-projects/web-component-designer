@@ -112,7 +112,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     this._aceEditor = ace.edit(this._editor, {
       theme: "ace/theme/chrome",
       mode: "ace/mode/html",
-      value: "test",
+      value: "",
       autoScrollEditorIntoView: true,
       fontSize: "14px",
       showPrintMargin: false,
