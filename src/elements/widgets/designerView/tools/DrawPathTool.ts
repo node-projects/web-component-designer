@@ -125,6 +125,7 @@ export class DrawPathTool implements ITool {
           svg.style.position = 'absolute';
           svg.style.width = (rect.width + 2 * offset) + 'px';
           svg.style.height = (rect.height + 2 * offset) + 'px';
+          svg.style.overflow = 'visible';
           //designerView.rootDesignItem.element.appendChild(svg);
           this._path = null;
           this._pathD = null;

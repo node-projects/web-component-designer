@@ -5,7 +5,7 @@ import "../../../helper/PathDataPolyfill";
 import { IPoint } from "../../../../interfaces/IPoint";
 import { IExtensionManager } from "./IExtensionManger";
 import { EventNames } from "../../../../enums/EventNames";
-import { PathData, straightenLine } from "../../../helper/PathDataPolyfill";
+import { PathData } from "../../../helper/PathDataPolyfill";
 
 export class PathExtension extends AbstractExtension {
   //private _itemRect: DOMRect;
@@ -97,12 +97,18 @@ export class PathExtension extends AbstractExtension {
           const dx = cx - this._circlePos.x;
           const dy = cy - this._circlePos.y;
           if (event.shiftKey) {
-            const straightLine: IPoint = straightenLine(this._startPos, {x: cx,y: cy});
-            console.log(straightLine)
-            p.values[index] = straightLine.x;
-            p.values[index + 1] = straightLine.y;
-            circle.setAttribute("cx", (straightLine.x).toString());
-            circle.setAttribute("cy", (straightLine.y).toString());
+            if (Math.abs(dx) >= Math.abs(dy)) {
+              p.values[index] = this._originalPathPoint.x + dx;
+              circle.setAttribute("cx", (this._circlePos.x + dx).toString());
+              p.values[index + 1] = this._originalPathPoint.y;
+              circle.setAttribute("cy", (this._circlePos.y).toString());
+            }
+            else {
+              p.values[index] = this._originalPathPoint.x;
+              circle.setAttribute("cx", (this._circlePos.x).toString());
+              p.values[index + 1] = this._originalPathPoint.y + dy;
+              circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+            }
           }
           else {
             p.values[index] = this._originalPathPoint.x + dx;
@@ -119,6 +125,11 @@ export class PathExtension extends AbstractExtension {
         this._startPos = null;
         this._circlePos = null;
         this._lastPos = null;
+        let pathD: string = "";
+        for (let p of this._pathdata) {
+          pathD += p.type + p.values[index] + " " + p.values[index + 1];
+        }
+        this.extendedItem.setAttribute('d', pathD);
         break;
     }
   }
