@@ -116,8 +116,8 @@ export class PathExtension extends AbstractExtension {
             circle.setAttribute("cx", (this._circlePos.x + dx).toString());
             circle.setAttribute("cy", (this._circlePos.y + dy).toString());
           }
+          this.extendedItem.element.setAttribute("d", this._drawPath(this._pathdata, index));
         }
-        this._drawPath(this._pathdata, index);
         break;
 
       case EventNames.PointerUp:
@@ -125,11 +125,7 @@ export class PathExtension extends AbstractExtension {
         this._startPos = null;
         this._circlePos = null;
         this._lastPos = null;
-        let pathD: string = "";
-        for (let p of this._pathdata) {
-          pathD += p.type + p.values[index] + " " + p.values[index + 1];
-        }
-        this.extendedItem.setAttribute('d', pathD);
+        this.extendedItem.setAttribute('d', this._drawPath(this._pathdata, index));
         break;
     }
   }
@@ -137,9 +133,42 @@ export class PathExtension extends AbstractExtension {
   _drawPath(path: PathData[], index: number) {
     let pathD: string = "";
     for (let p of path) {
-      pathD += p.type + p.values[index] + " " + p.values[index + 1];
+      switch (p.type) {
+        case 'M':
+          pathD += p.type + p.values[0] + " " + p.values[1];
+          break;
+        case 'L':
+          pathD += p.type + p.values[0] + " " + p.values[1];
+          break;
+        case 'H':
+
+          break;
+        case 'V':
+
+          break;
+        case 'Z':
+
+          break;
+        case 'C':
+        case 'c':
+          pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5];
+          break;
+        case 'S':
+
+          break;
+        case 'Q':
+
+          break;
+        case 'T':
+
+          break;
+        case 'A':
+
+          break;
+      }
     }
-    this.extendedItem.element.setAttribute("d", pathD);
+    return pathD;
+    console.log(pathD);
   }
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
@@ -151,6 +180,16 @@ export class PathExtension extends AbstractExtension {
 
   _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
     this._drawLine(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x1, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y1, this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x2, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y2, 'svg-path-line');
+  }
+
+  _drawHelpLine(pStart: IPoint, pEnd: IPoint) {
+    let line: SVGLineElement;
+    line.setAttribute("stroke", "yellow");
+    line.setAttribute("stroke-width", "2");
+    line.setAttribute("x1", pStart.x.toString());
+    line.setAttribute("y1", pStart.y.toString());
+    line.setAttribute("x2", pEnd.x.toString());
+    line.setAttribute("y2", pEnd.y.toString());
   }
 
   override refresh() {
