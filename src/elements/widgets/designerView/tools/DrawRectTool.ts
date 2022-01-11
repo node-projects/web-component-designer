@@ -116,6 +116,7 @@ export class DrawRectTool implements ITool {
         svg.style.position = 'absolute';
         svg.style.width = (rect.width + 2 * offset) + 'px';
         svg.style.height = (rect.height + 2 * offset) + 'px';
+        svg.style.overflow = 'visible';
         this._path = null;
         const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
