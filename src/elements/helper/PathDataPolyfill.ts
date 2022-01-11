@@ -1109,7 +1109,8 @@ declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang
 export declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
 
 export function straightenLine(p1: IPoint, p2: IPoint): IPoint {
-  let newP = p2;
+  let newP: IPoint;
+  
   let alpha = calculateAlpha(p1, p2);
   let normLength;
 

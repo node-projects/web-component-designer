@@ -21,8 +21,7 @@ export class DrawPathTool implements ITool {
   private _dragMode = false;
   private _pointerMoved = false;
   private _eventStarted = false;
-  private _lastPoint: IPoint = { x: 0, y: 0 };
-  private _savedPoint: IPoint = { x: 0, y: 0 };
+  private _lastPoint: IPoint;
   private _startPoint: IPoint = { x: 0, y: 0 };
 
   constructor() {
@@ -55,11 +54,12 @@ export class DrawPathTool implements ITool {
           this._startPoint = currentPoint;
         }
 
-        if (this._lastPoint.x === currentPoint.x && this._lastPoint.y === currentPoint.y && !this._samePoint) {
+        if (this._lastPoint != null && this._lastPoint.x === currentPoint.x && this._lastPoint.y === currentPoint.y && !this._samePoint) {
           this._samePoint = true;
         }
-
-        this._lastPoint = currentPoint;
+        if(this._lastPoint == null){
+          this._lastPoint = currentPoint;
+        }
         break;
 
 
@@ -77,8 +77,9 @@ export class DrawPathTool implements ITool {
         else {  // shows line preview
           if (this._path) {
             let straightLine = currentPoint;
-            if (event.shiftKey)
-              straightLine = straightenLine(this._savedPoint, currentPoint);
+            if (event.shiftKey) {
+              straightLine = straightenLine(this._lastPoint, currentPoint);
+            }
             this._path.setAttribute("d", this._pathD + "L" + straightLine.x + " " + straightLine.y);
           }
         }
@@ -93,15 +94,16 @@ export class DrawPathTool implements ITool {
         if (this._p2pMode && !this._samePoint && this._startPoint.x != currentPoint.x && this._startPoint.y != currentPoint.y) {
           if (this._path) {
             if (event.shiftKey) {
-              let straightLine = straightenLine(this._savedPoint, currentPoint);
+              let straightLine = straightenLine(this._lastPoint, currentPoint);
               this._pathD += "L" + straightLine.x + " " + straightLine.y;
               this._path.setAttribute("d", this._pathD);
+              this._lastPoint = straightLine;
             }
             else {
               this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
               this._path.setAttribute("d", this._pathD);
+              this._lastPoint = currentPoint;
             }
-            this._savedPoint = currentPoint;
           }
         }
 
