@@ -96,10 +96,28 @@ export class PathExtension extends AbstractExtension {
           const cy = event.y - this._lastPos.y + this._circlePos.y;
           const dx = cx - this._circlePos.x;
           const dy = cy - this._circlePos.y;
-          p.values[index] = this._originalPathPoint.x + dx;
-          p.values[index + 1] = this._originalPathPoint.y + dy;
-          this._drawPath(this._pathdata, index);
+          if (event.shiftKey) {
+            if (Math.abs(dx) >= Math.abs(dy)) {
+              p.values[index] = this._originalPathPoint.x + dx;
+              circle.setAttribute("cx", (this._circlePos.x + dx).toString());
+              p.values[index + 1] = this._originalPathPoint.y;
+              circle.setAttribute("cy", (this._circlePos.y).toString());
+            }
+            else {
+              p.values[index] = this._originalPathPoint.x;
+              circle.setAttribute("cx", (this._circlePos.x).toString());
+              p.values[index + 1] = this._originalPathPoint.y + dy;
+              circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+            }
+          }
+          else {
+            p.values[index] = this._originalPathPoint.x + dx;
+            p.values[index + 1] = this._originalPathPoint.y + dy;
+            circle.setAttribute("cx", (this._circlePos.x + dx).toString());
+            circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+          }
         }
+        this._drawPath(this._pathdata, index);
         break;
 
       case EventNames.PointerUp:
@@ -107,6 +125,11 @@ export class PathExtension extends AbstractExtension {
         this._startPos = null;
         this._circlePos = null;
         this._lastPos = null;
+        let pathD: string = "";
+        for (let p of this._pathdata) {
+          pathD += p.type + p.values[index] + " " + p.values[index + 1];
+        }
+        this.extendedItem.setAttribute('d', pathD);
         break;
     }
   }
@@ -116,7 +139,7 @@ export class PathExtension extends AbstractExtension {
     for (let p of path) {
       pathD += p.type + p.values[index] + " " + p.values[index + 1];
     }
-    this.extendedItem.setAttribute("d", pathD);
+    this.extendedItem.element.setAttribute("d", pathD);
   }
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
