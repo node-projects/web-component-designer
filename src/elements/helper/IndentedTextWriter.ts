@@ -7,6 +7,10 @@ export class IndentedTextWriter {
     return this._textHolder.length;
   }
 
+  public isLastCharNewline() {
+    return this._textHolder[this._textHolder.length - 1] === '\n';
+  }
+
   public levelRaise() {
     this.level++;
   }

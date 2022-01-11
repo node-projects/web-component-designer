@@ -7,16 +7,14 @@ import { CssCombiner } from '../../helper/CssCombiner';
 import { NodeType } from '../../item/NodeType';
 import { IStringPosition } from './IStringPosition';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper';
-import { isInline } from '../../helper/ElementHelper.js';
+import { isEmptyTextNode, isInline } from '../../helper/ElementHelper.js';
 
 export class HtmlWriterService implements IHtmlWriterService {
-  canWrite(designItem: IDesignItem) {
-    return true;
-  }
 
   private _conditionalyWriteIndent(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
     if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
-      (designItem.element.previousElementSibling instanceof HTMLElement && !isInline(designItem.element.previousElementSibling))
+      (designItem.element.previousElementSibling instanceof HTMLElement && !isInline(designItem.element.previousElementSibling)) ||
+      (designItem.element.previousElementSibling == null && !isInline(designItem.element.parentElement) && (designItem.element.previousSibling == null || isEmptyTextNode(designItem.element.previousSibling)))
     )
       indentedTextWriter.writeIndent();
   }
@@ -28,11 +26,21 @@ export class HtmlWriterService implements IHtmlWriterService {
       indentedTextWriter.writeNewline();
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+    for (const d of designItems) {
+      this.internalWrite(indentedTextWriter, d, options, designItemsAssignmentList);
+    }
+  }
+
+  private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     let start = indentedTextWriter.position;
 
     if (designItem.nodeType == NodeType.TextNode) {
-      this.writeTextNode(indentedTextWriter, designItem, true);
+      if (isEmptyTextNode(designItem.element) &&
+        ((designItem.element.previousSibling instanceof HTMLElement && !isInline(designItem.element.previousSibling)) ||
+          (designItem.element.nextSibling instanceof HTMLElement && !isInline(designItem.element.nextSibling)))) {
+      } else
+        this.writeTextNode(indentedTextWriter, designItem, true);
     } else if (designItem.nodeType == NodeType.Comment) {
       this._conditionalyWriteIndent(indentedTextWriter, designItem);
       indentedTextWriter.write('<!--' + designItem.content + '-->');
@@ -72,23 +80,29 @@ export class HtmlWriterService implements IHtmlWriterService {
       }
       indentedTextWriter.write('>');
 
+      let contentSingleTextNode = false;
       if (designItem.hasChildren) {
         const children = designItem.children();
-        const singleTextNode = designItem.childCount === 1 && designItem.firstChild.nodeType === NodeType.TextNode;
-        if (singleTextNode) {
+        contentSingleTextNode = designItem.childCount === 1 && designItem.firstChild.nodeType === NodeType.TextNode;
+        if (contentSingleTextNode) {
           this.writeTextNode(indentedTextWriter, designItem, false);
         } else {
-          indentedTextWriter.writeNewline();
-          indentedTextWriter.levelRaise();
-          for (const c of children) {
-            c.serviceContainer.forSomeServicesTillResult('htmlWriterService', (s) => {
-              if (s.canWrite(c)) {
-                s.write(indentedTextWriter, c, options, designItemsAssignmentList);
-              }
-            });
+          if (designItem.element instanceof HTMLElement && !isInline(designItem.element)) {
+            indentedTextWriter.writeNewline();
+            indentedTextWriter.levelRaise();
           }
-          indentedTextWriter.levelShrink();
-          indentedTextWriter.writeIndent();
+          for (const c of children) {
+            this.internalWrite(indentedTextWriter, c, options, designItemsAssignmentList);
+            let childSingleTextNode = c.childCount === 1 && c.firstChild.nodeType === NodeType.TextNode;
+            if (childSingleTextNode)
+              indentedTextWriter.writeNewline();
+          }
+          if (designItem.element instanceof HTMLElement && !isInline(designItem.element)) {
+            indentedTextWriter.levelShrink();
+            if (!indentedTextWriter.isLastCharNewline())
+              indentedTextWriter.writeNewline();
+            indentedTextWriter.writeIndent();
+          }
         }
       } else if (designItem.hasContent) {
         indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content));
@@ -96,7 +110,8 @@ export class HtmlWriterService implements IHtmlWriterService {
 
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
-      this._conditionalyWriteNewline(indentedTextWriter, designItem);
+      if (!contentSingleTextNode)
+        this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
 
     if (designItemsAssignmentList) {

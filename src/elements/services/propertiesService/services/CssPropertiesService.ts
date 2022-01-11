@@ -4,6 +4,7 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from '../ValueType';
 import { NodeType } from '../../../item/NodeType';
 import { BindingTarget } from '../../../item/BindingTarget.js';
+import { PropertyType } from '../PropertyType';
 
 export class CssPropertiesService implements IPropertiesService {
 
@@ -12,79 +13,96 @@ export class CssPropertiesService implements IPropertiesService {
     {
       name: "color",
       type: "color",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "background-color",
       type: "color",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "box-sizing",
       type: "list",
       values: ["border-box", "content-box"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "border",
       type: "string",
       default: "0px none rbg(0,0,0)",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "box-shadow",
       type: "string",
       default: "none",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "opacity",
       type: "number",
       min: 0,
       max: 1,
       step: 0.1,
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "padding",
       type: "thickness",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "margin",
       type: "thickness",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "position",
       type: "list",
       values: ["static", "relative", "absolute"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "left",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "top",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "right",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "bottom",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "width",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "height",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "font-size",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "font-weight",
       type: "list",
       values: ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900", "lighter", "bolder"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }
   ];
 
@@ -94,24 +112,29 @@ export class CssPropertiesService implements IPropertiesService {
       name: "display",
       type: "list",
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "position",
       type: "list",
       values: ["static", "relative", "absolute"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "inset",
       type: "thickness",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "margin",
       type: "thickness",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "padding",
       type: "thickness",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }
   ];
 
@@ -121,48 +144,58 @@ export class CssPropertiesService implements IPropertiesService {
       name: "display",
       type: "list",
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "position",
       type: "list",
       values: ["static", "relative", "absolute"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "grid-template-columns",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "grid-template-rows",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "column-gap",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "row-gap",
       type: "css-length",
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "align-content",
       type: "img-list",
       values: ["center", "space-between", "space-around", "space-evenly", "stretch"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "justify-content",
       type: "img-list",
       values: ["center", "start", "end", "space-between", "space-around", "space-evenly"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "align-items",
       type: "img-list",
       values: ["center", "start", "end", "stretch", "baseline"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "justify-items",
       type: "img-list",
       values: ["center", "start", "end", "stretch"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }
   ];
 
@@ -172,37 +205,44 @@ export class CssPropertiesService implements IPropertiesService {
       name: "display",
       type: "list",
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "position",
       type: "list",
       values: ["static", "relative", "absolute"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "flex-direction",
       type: "img-list",
       values: ["row", "column"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "flex-wrap",
       type: "img-list",
       values: ["nowrap", "wrap"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "align-content",
       type: "img-list",
       values: ["center", "flex-start", "flex-end", "space-between", "space-around", "stretch"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "justify-content",
       type: "img-list",
       values: ["center", "flex-start", "flex-end", "space-between", "space-around", "space-evenly"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }, {
       name: "align-items",
       type: "img-list",
       values: ["center", "flex-start", "flex-end", "stretch", "baseline"],
-      service: this
+      service: this,
+      propertyType: PropertyType.cssValue
     }
   ];
 
@@ -218,7 +258,7 @@ export class CssPropertiesService implements IPropertiesService {
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
     if (this.name == 'set-styles') {
-      return { name: name, type: 'string', service: this };
+      return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
     }
     return this[this.name][name]
   }
@@ -227,7 +267,7 @@ export class CssPropertiesService implements IPropertiesService {
     if (this.name == 'set-styles') {
       if (!designItem)
         return [];
-      return Array.from(designItem.styles.keys(), x => ({ name: x, type: 'string', service: this }));
+      return Array.from(designItem.styles.keys(), x => ({ name: x, type: 'string', service: this, propertyType: PropertyType.cssValue }));
     }
     return this[this.name];
   }
@@ -241,10 +281,17 @@ export class CssPropertiesService implements IPropertiesService {
     cg.commit();
   }
 
+  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.css;
+  }
+
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
       d.styles.delete(property.name);
       (<HTMLElement>d.element).style[property.name] = '';
+      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+      });
     }
   }
 

@@ -1,3 +1,5 @@
+import { IBinding } from "../../item/IBinding";
+
 export interface IElementDefinition {
   tag: string;
   name?: string;
@@ -22,4 +24,5 @@ export interface IElementDefinition {
    * If none, the DrawElementTool is used
    */
   tool?: string;
+  defaultBinding?: IBinding;
 }

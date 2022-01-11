@@ -308,7 +308,7 @@ export class PointerTool implements ITool {
                 const newOffset = newContainerService.getElementOffset(newContainerElementDesignItem, this._actionStartedDesignItem);
                 this._moveItemsOffset = { x: newOffset.x - oldOffset.x + this._moveItemsOffset.x, y: newOffset.y - oldOffset.y + this._moveItemsOffset.y };
                 currentContainerService.leaveContainer(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem]);
-                newContainerElementDesignItem.insertChild(this._actionStartedDesignItem);
+                newContainerElementDesignItem._insertChildInternal(this._actionStartedDesignItem);
 
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
                 newContainerService.enterContainer(newContainerElementDesignItem, [this._actionStartedDesignItem]);

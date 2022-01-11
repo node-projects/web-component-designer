@@ -1,6 +1,7 @@
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { CommonPropertiesService } from "./CommonPropertiesService";
+import { PropertyType } from '../PropertyType';
 
 export class NativeElementsPropertiesService extends CommonPropertiesService {
 
@@ -11,23 +12,28 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
       type: "list",
       values: ["text", "number", "button", "checkbox", "color", "date", "datetime-local", "email", "file", "hidden", "image", "month", "password", "radio", "range", "reset", "search", "submit", "tel", "time", "url", "week"],
       service: this,
-      defaultValue: "text"
+      defaultValue: "text",
+      propertyType: PropertyType .propertyAndAttribute
     }, {
       name: "value",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }, {
       name: "checked",
       type: "boolean",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }, {
       name: "min",
       type: "number",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }, {
       name: "max",
       type: "number",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }
   ];
 
@@ -37,15 +43,18 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
       type: "list",
       values: ["button", "submit", "reset"],
       service: this,
-      defaultValue: "button"
+      defaultValue: "button",
+      propertyType: PropertyType .propertyAndAttribute
     }, {
       name: "value",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }, {
       name: "disabled",
       type: "boolean",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }
   ];
 
@@ -53,7 +62,8 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
     {
       name: "href",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }
   ];
 
@@ -61,7 +71,8 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
     {
       name: "title",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }
   ];
 
@@ -69,7 +80,8 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
     {
       name: "src",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }
   ];
 
@@ -77,7 +89,8 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
     {
       name: "src",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType .propertyAndAttribute
     }
   ];
 

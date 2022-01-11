@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css, debounce } from "@node-projects/base-custom-webcomponent"
+import { BaseCustomWebComponentLazyAppend, css, cssFromString, debounce } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from "./controls/DesignerTabControl";
 import { DesignerView } from "./widgets/designerView/designerView";
 import { ServiceContainer } from "./services/ServiceContainer";
@@ -19,6 +19,15 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public demoView: IDemoView & HTMLElement;
 
   public additionalData: any;
+
+  private _additionalStyle: string;
+  public set additionalStyleString(style: string) {
+    this._additionalStyle = style;
+    this.designerView.additionalStyle = cssFromString(style);
+  };
+  public get additionalStyleString() {
+    return this._additionalStyle;
+  };
 
   private _serviceContainer: ServiceContainer;
   private _content: string = '';
@@ -164,7 +173,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
       }
       else if (this._tabControl.selectedIndex === 3)
-        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
+        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
     }
   }
   get content() {
@@ -210,7 +219,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this._splitDiv.appendChild(this.codeView);
       }
       if (i.newIndex === 3) {
-        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content);
+        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
       }
     });
     if (this._content)

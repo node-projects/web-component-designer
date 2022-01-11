@@ -50,4 +50,8 @@ export class SpecialTagsBindingService implements IBindingService {
   setBinding(designItem: IDesignItem, binding: IBinding): boolean {
     return true;
   }
+
+  clearBinding(designItem: IDesignItem, propertyName: string, propertyTarget: BindingTarget): boolean {
+    return true;
+  }
 }

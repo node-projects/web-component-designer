@@ -4,7 +4,7 @@ import { BaseCustomWebComponentLazyAppend, BaseCustomWebComponentConstructorAppe
 import { AbstractBasePropertiesService } from './AbstractBasePropertiesService';
 
 export class BaseCustomWebComponentPropertiesService extends AbstractBasePropertiesService {
-  public override name = "baseCustomWebComponent";
+  public name = "baseCustomWebComponent";
 
   override isHandledElement(designItem: IDesignItem): boolean {
     return designItem.element instanceof BaseCustomWebComponentLazyAppend || designItem.element instanceof BaseCustomWebComponentConstructorAppend;

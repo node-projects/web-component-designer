@@ -23,7 +23,7 @@ export class InsertAction implements ITransactionItem {
   }
 
   do() {
-    this.designItem.insertChild(this.newItem, this.index);
+    this.designItem._insertChildInternal(this.newItem, this.index);
     const prepService = this.designItem.serviceContainer.prepareElementsForDesignerService;
     if (prepService)
       requestAnimationFrame(() => prepService.prepareElementsForDesigner(this.newItem));

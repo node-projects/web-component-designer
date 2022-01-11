@@ -4,7 +4,7 @@ import { AbstractBasePropertiesService } from "./AbstractBasePropertiesService";
 
 export class LitElementPropertiesService extends AbstractBasePropertiesService {
 
-  public override name = "lit"
+  public name = "lit"
 
   override isHandledElement(designItem: IDesignItem): boolean {
     let proto = (<any>designItem.element.constructor).__proto__;

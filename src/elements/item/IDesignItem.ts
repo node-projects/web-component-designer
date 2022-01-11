@@ -30,6 +30,11 @@ export interface IDesignItem {
   readonly firstChild: IDesignItem;
   readonly parent: IDesignItem;
 
+  _insertChildInternal(designItem: IDesignItem, index?: number);
+  _removeChildInternal(designItem: IDesignItem);
+
+  indexOf(designItem: IDesignItem): number;
+  insertAdjacentElement(designItem: IDesignItem, where: InsertPosition);
   insertChild(designItem: IDesignItem, index?: number);
   removeChild(designItem: IDesignItem);
   remove();

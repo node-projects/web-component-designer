@@ -22,6 +22,7 @@ export type { IDesignItem } from "./elements/item/IDesignItem.js";
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
 export type { IBindableObjectsService } from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
+export type { IBindableObjectDragDropService } from "./elements/services/bindableObjectsService/IBindableObjectDragDropService.js";
 
 export type { IBindingService } from "./elements/services/bindingsService/IBindingService.js";
 export * from "./elements/services/bindingsService/BaseCustomWebcomponentBindingsService.js";
@@ -54,10 +55,13 @@ export type { IElementDefinition } from "./elements/services/elementsService/IEl
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
 export * from "./elements/services/elementsService/JsonFileElementsService.js";
+export * from "./elements/services/elementsService/PreDefinedElementsService.js";
 
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
+export * from "./elements/services/htmlWriterService/FormatingHtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
+export * from "./elements/services/htmlWriterService/LitTsElementWriterService.js";
 
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
@@ -70,6 +74,8 @@ export type { IInstanceService } from "./elements/services/instanceService/IInst
 export * from "./elements/services/instanceService/PrepareElementsForDesignerService.js";
 export type { IPrepareElementsForDesignerService } from "./elements/services/instanceService/IPrepareElementsForDesignerService.js";
 
+export * from "./elements/services/manifestParsers/WebcomponentManifestParserService.js";
+
 export type { IModelCommandService } from "./elements/services/modelCommandService/IModelCommandService.js";
 export * from "./elements/services/modelCommandService/DefaultModelCommandService.js";
 
@@ -77,6 +83,7 @@ export * from "./elements/services/propertiesService/DefaultEditorTypesService.j
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
+export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
@@ -85,6 +92,7 @@ export * from "./elements/services/propertiesService/services/LitElementProperti
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
+export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
@@ -99,7 +107,7 @@ export * from "./elements/services/undoService/transactionItems/AttributeChangeA
 export * from "./elements/services/undoService/transactionItems/CssStyleChangeAction.js";
 export * from "./elements/services/undoService/transactionItems/DeleteAction.js";
 export * from "./elements/services/undoService/transactionItems/InsertAction.js";
-export * from "./elements/services/undoService/transactionItems/MoveElementInDomAction.js";
+export * from "./elements/services/undoService/transactionItems/InsertChildAction.js";
 export * from "./elements/services/undoService/transactionItems/PropertyChangeAction.js";
 
 export * from "./elements/services/BaseServiceContainer.js";
@@ -107,6 +115,9 @@ export * from "./elements/services/InstanceServiceContainer.js";
 export type { IService } from "./elements/services/IService.js";
 export type { IServiceContainer } from "./elements/services/IServiceContainer.js";
 export * from "./elements/services/ServiceContainer.js";
+
+export * from "./elements/widgets/bindableObjectsBrowser/bindable-objects-browser.js";
+export type { IBindableObjectsBrowser } from "./elements/widgets/bindableObjectsBrowser/IBindableObjectsBrowser.js";
 
 export * from "./elements/widgets/propertyGrid/PropertyGrid.js";
 export * from "./elements/widgets/propertyGrid/PropertyGridPropertyList.js";
@@ -136,6 +147,7 @@ export * from "./elements/widgets/designerView/tools/ZoomTool.js";
 export type { IDesignerExtension } from "./elements/widgets/designerView/extensions/IDesignerExtension.js";
 export type { IDesignerExtensionProvider } from "./elements/widgets/designerView/extensions/IDesignerExtensionProvider.js";
 export type { IExtensionManager } from "./elements/widgets/designerView/extensions/IExtensionManger.js";
+export * from "./elements/widgets/designerView/extensions/OverlayLayer.js";
 export * from "./elements/widgets/designerView/extensions/ExtensionType.js";
 export * from "./elements/widgets/designerView/extensions/AbstractExtension.js";
 export * from "./elements/widgets/designerView/extensions/AltToEnterContainerExtension.js";
@@ -202,3 +214,4 @@ export type { IDisposable } from "./interfaces/IDisposable.js";
 export type { IPoint } from "./interfaces/IPoint.js";
 export type { IRect } from "./interfaces/IRect.js";
 export type { ISize } from "./interfaces/ISize.js";
+export type { ICommandHandler } from "./interfaces/ICommandHandler.js";

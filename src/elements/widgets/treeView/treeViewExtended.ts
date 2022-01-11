@@ -100,9 +100,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   constructor() {
     super();
 
-    let externalCss = document.createElement('style');
-    externalCss.innerHTML = '@import url("./node_modules/jquery.fancytree/dist/skin-win8/ui.fancytree.css");';
-    this.shadowRoot.appendChild(externalCss);
+   //@ts-ignore
+   import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -113,12 +112,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable');
-
-    /*this._treeDiv = document.createElement('div');
-    this._treeDiv.style.height = 'calc(100% - 21px)'
-    this._treeDiv.style.overflow = 'auto';
-    this._treeDiv.setAttribute('id', 'tree');
-    this.shadowRoot.appendChild(this._treeDiv);*/
   }
 
   _showHideAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {

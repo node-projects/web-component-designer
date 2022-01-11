@@ -66,7 +66,7 @@ export class DefaultInstanceService implements IInstanceService {
     if (definition.defaultProperties) {
       let propertiesService: IPropertiesService = null;
       if (definition.type) {
-        propertiesService = serviceContainer.getLastServiceWhere('propertyService', (x) => x.name == definition.type);
+        propertiesService = serviceContainer.getLastServiceWhere('propertyService', (x) => x.isHandledElement(designItem));
       }
       let properties = propertiesService.getProperties(designItem);
       for (let a in definition.defaultProperties) {

@@ -1,35 +1,38 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.0.66",
+  "version": "0.0.79",
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
   "license": "MIT",
   "scripts": {
     "tsc": "tsc",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.3.7",
-    "construct-style-sheets-polyfill": "^3.0.4"
+    "@node-projects/base-custom-webcomponent": "^0.4.1",
+    "construct-style-sheets-polyfill": "^3.0.5"
   },
   "devDependencies": {
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^2.4.1",
     "@types/codemirror": "^5.60.5",
-    "@types/jquery": "^3.5.9",
+    "@types/jquery": "^3.5.11",
     "@types/jquery.fancytree": "0.0.7",
     "ace-builds": "^1.4.13",
-    "codemirror": "^5.64.0",
-    "esprima-next": "^5.7.0",
+    "codemirror": "^5.65.0",
+    "custom-elements-manifest": "^1.0.0",
+    "esprima-next": "^5.8.1",
     "html2canvas": "*",
-    "jest": "^27.4.3",
+    "jest": "^27.4.7",
     "jquery": "^3.6.0",
     "jquery.fancytree": "^2.38.0",
-    "monaco-editor": "^0.30.1",
-    "ts-jest": "^27.1.1",
-    "typescript": "^4.5.2",
+    "monaco-editor": "^0.31.1",
+    "ts-jest": "^27.1.2",
+    "typescript": "^4.5.4",
     "typescript-lit-html-plugin": "^0.9.0"
   },
   "repository": {

@@ -1,6 +1,7 @@
 import { IBindableObject } from "./IBindableObject";
 
 export interface IBindableObjectsService {
-  getBindableObject(fullName: string): Promise<IBindableObject>;
-  getBindableObjects(parent?: IBindableObject): Promise<IBindableObject[]>;
+  readonly name: string;
+  getBindableObject(fullName: string): Promise<IBindableObject<any>>;
+  getBindableObjects(parent?: IBindableObject<any>): Promise<IBindableObject<any>[]>;
 }

@@ -20,18 +20,18 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
       display: block;
       height: 100%;
       width: 100%;
-    }
-    `;
+    }`;
 
   static override readonly template = html`
-<style>@import "./node_modules/codemirror/lib/codemirror.css";</style>
-<div  style="width: 100%; height: 100%;">
-<div id="textarea"></div>
-</div>
-`;
+    <div  style="width: 100%; height: 100%;">
+      <div id="textarea"></div>
+    </div>`;
 
   constructor() {
     super();
+
+    //@ts-ignore
+    import("codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this.style.display = 'block';
     this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');

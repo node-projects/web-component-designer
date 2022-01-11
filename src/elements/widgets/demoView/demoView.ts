@@ -38,9 +38,9 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     this.shadowRoot.appendChild(this._loading)
   }
 
-  async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string) {
+  async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
     this._loading.hidden = false;
-    await serviceContainer.demoProviderService.provideDemo(this._placeholder, serviceContainer, instanceServiceContainer, code);
+    await serviceContainer.demoProviderService.provideDemo(this._placeholder, serviceContainer, instanceServiceContainer, code, style);
     this._loading.hidden = true;
   }
 }

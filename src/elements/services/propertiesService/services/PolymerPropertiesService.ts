@@ -4,7 +4,7 @@ import { AbstractBasePropertiesService } from './AbstractBasePropertiesService';
 
 export class PolymerPropertiesService extends AbstractBasePropertiesService {
 
-  public override name = "polymer"
+  public name = "polymer"
 
   override isHandledElement(designItem: IDesignItem): boolean {
     return (<any>designItem.element.constructor).polymerElementVersion != null;

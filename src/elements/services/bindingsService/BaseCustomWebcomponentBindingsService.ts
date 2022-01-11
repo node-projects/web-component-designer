@@ -70,4 +70,8 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
     designItem.setAttribute(nm, value);
     return true;
   }
+
+  clearBinding(designItem: IDesignItem, propertyName: string, propertyTarget: BindingTarget): boolean {
+    return true;
+  }
 }

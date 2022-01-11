@@ -3,11 +3,10 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
 import { PropertiesHelper } from './PropertiesHelper';
+import { BindingTarget } from "../../../item/BindingTarget";
 
-export class UnkownElementPropertiesService implements IPropertiesService {
-
-
-  public readonly name: string = "unkown";
+//@ts-ignore
+export abstract class UnkownElementPropertiesService implements IPropertiesService {
 
   public isHandledElement(designItem: IDesignItem): boolean {
     return true;
@@ -53,11 +52,18 @@ export class UnkownElementPropertiesService implements IPropertiesService {
     }
   }
 
+  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.property;
+  }
+
   clearValue(designItems: IDesignItem[], property: IProperty) {
     const attributeName = PropertiesHelper.camelToDashCase(property.name);
     for (let d of designItems) {
       d.attributes.delete(attributeName);
       d.element.removeAttribute(attributeName);
+      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+      });
       this._notifyChangedProperty(d, property, undefined);
     }
   }

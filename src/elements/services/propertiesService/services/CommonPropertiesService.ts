@@ -2,6 +2,8 @@ import { IPropertiesService } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
+import { BindingTarget } from "../../../item/BindingTarget";
+import { PropertyType } from "../PropertyType";
 
 export class CommonPropertiesService implements IPropertiesService {
 
@@ -10,19 +12,25 @@ export class CommonPropertiesService implements IPropertiesService {
     {
       name: "id",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
     }, {
       name: "class",
       type: "string",
-      service: this
+      service: this,
+      attributeName: "class",
+      propertyName: "className",
+      propertyType: PropertyType.propertyAndAttribute
     }, {
       name: "title",
       type: "string",
-      service: this
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
     }, {
       name: "tabindex",
       type: "number",
-      service: this
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
     }
   ];
 
@@ -57,10 +65,17 @@ export class CommonPropertiesService implements IPropertiesService {
     }
   }
 
+  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.property;
+  }
+
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
       d.attributes.delete(<string>property.name);
       d.element.removeAttribute(property.name);
+      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+      });
     }
   }
 
@@ -74,6 +89,12 @@ export class CommonPropertiesService implements IPropertiesService {
         all = all && has;
         some = some || has;
       });
+      //todo: optimize perf, do not call bindings service for each property. 
+      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.getBindings(designItems[0]);
+      });
+      if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+        return ValueType.bound;
     }
     else
       return ValueType.none

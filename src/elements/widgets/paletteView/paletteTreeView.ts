@@ -1,7 +1,7 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { IElementsService } from '../../services/elementsService/IElementsService';
-import { dragDropFormatName } from '../../../Constants';
+import { dragDropFormatNameElementDefinition } from '../../../Constants';
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _treeDiv: HTMLTableElement;
@@ -62,9 +62,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   constructor() {
     super();
 
-    let externalCss = document.createElement('style');
-    externalCss.innerHTML = '@import url("./node_modules/jquery.fancytree/dist/skin-win8/ui.fancytree.css");';
-    this.shadowRoot.appendChild(externalCss);
+    //@ts-ignore
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -92,7 +91,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
 
         dragStart: (node, data) => {
           data.effectAllowed = "all";
-          data.dataTransfer.setData(dragDropFormatName, JSON.stringify(node.data.ref));
+          data.dataTransfer.setData(dragDropFormatNameElementDefinition, JSON.stringify(node.data.ref));
           data.dropEffect = "copy";
           return true;
         },
@@ -117,15 +116,20 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         folder: true
       });
 
-      let elements = await s.getElements();
-      for (let e of elements) {
-        newNode.addChildren({
-          title: e.name ?? e.tag,
-          folder: false,
-          //@ts-ignore
-          ref: e
-        });
+      try {
+        let elements = await s.getElements();
+        for (let e of elements) {
+          newNode.addChildren({
+            title: e.name ?? e.tag,
+            folder: false,
+            //@ts-ignore
+            ref: e
+          });
+        }
+      } catch (err) {
+        console.warn('Error loading elements', err);
       }
+
 
       //@ts-ignore
       newNode.updateCounters();
