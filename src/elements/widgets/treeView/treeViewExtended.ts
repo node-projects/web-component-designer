@@ -67,6 +67,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         background: #ffffffc9;
         width: 70px;
         justify-content: flex-end;
+        background: white;
       }
 
       table.fancytree-ext-table tbody tr.fancytree-selected {

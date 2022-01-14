@@ -1,15 +1,15 @@
-import { IDesignItem } from '../../item/IDesignItem';
-import { IHtmlWriterService } from './IHtmlWriterService';
-import { IHtmlWriterOptions } from './IHtmlWriterOptions';
-import { DomConverter } from '../../widgets/designerView/DomConverter';
-import { IndentedTextWriter } from '../../helper/IndentedTextWriter';
-import { CssCombiner } from '../../helper/CssCombiner';
-import { NodeType } from '../../item/NodeType';
-import { IStringPosition } from './IStringPosition';
-import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
+import { DomConverter } from '../../widgets/designerView/DomConverter.js';
+import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
+import { CssCombiner } from '../../helper/CssCombiner.js';
+import { NodeType } from '../../item/NodeType.js';
+import { IStringPosition } from './IStringPosition.js';
+import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { isEmptyTextNode, isInline } from '../../helper/ElementHelper.js';
+import { AbstractHtmlWriterService } from './AbstractHtmlWriterService.js';
 
-export class HtmlWriterService implements IHtmlWriterService {
+export class HtmlWriterService extends AbstractHtmlWriterService {
 
   private _conditionalyWriteIndent(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
     if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
@@ -49,22 +49,7 @@ export class HtmlWriterService implements IHtmlWriterService {
       this._conditionalyWriteIndent(indentedTextWriter, designItem);
       indentedTextWriter.write('<' + designItem.name);
 
-      if (designItem.hasAttributes) {
-        for (const a of designItem.attributes) {
-          indentedTextWriter.write(' ');
-          if (typeof a[1] === 'string') {
-            if (a[1] === "")
-              indentedTextWriter.write(a[0]);
-            else
-              indentedTextWriter.write(a[0] + '="' + DomConverter.normalizeAttributeValue(a[1]) + '"');
-          }
-          else if (!a[1])
-            indentedTextWriter.write(a[0]);
-          else {
-            //TODO: writing of bindings
-          }
-        }
-      }
+      this.writeAttributes(indentedTextWriter, designItem, options);
 
       if (designItem.hasStyles) {
         indentedTextWriter.write(' style="');

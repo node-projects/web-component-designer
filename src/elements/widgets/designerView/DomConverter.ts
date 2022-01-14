@@ -1,15 +1,18 @@
-import { IDesignItem } from "../../item/IDesignItem";
-import { IndentedTextWriter } from "../../helper/IndentedTextWriter";
-import { IHtmlWriterOptions } from "../../services/htmlWriterService/IHtmlWriterOptions";
-import { IStringPosition } from "../../services/htmlWriterService/IStringPosition";
+import { IDesignItem } from "../../item/IDesignItem.js";
+import { IndentedTextWriter } from "../../helper/IndentedTextWriter.js";
+import { IHtmlWriterOptions } from "../../services/htmlWriterService/IHtmlWriterOptions.js";
+import { IStringPosition } from "../../services/htmlWriterService/IStringPosition.js";
 
 export class DomConverter {
 
-  public static normalizeAttributeValue(value: string | number) {
+  public static normalizeAttributeValue(value: string | number, useSingleQuotes = false) {
     if (typeof value === 'number')
       value = value.toString();
-    if (value)
+    if (value) {
+      if (useSingleQuotes)
+        return value.replaceAll('\'', '&#39;');
       return value.replaceAll('"', '&quot;');
+    }
     return value;
   }
 
@@ -39,7 +42,7 @@ export class DomConverter {
 
   public static ConvertToString(designItems: IDesignItem[], designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     let itw = new IndentedTextWriter();
-    let options: IHtmlWriterOptions = { beautifyOutput: true, writeDesignerProperties: true, compressCssToShorthandProperties: true };
+    let options: IHtmlWriterOptions = { beautifyOutput: true, writeDesignerProperties: true, compressCssToShorthandProperties: true, parseJsonInAttributes: true, jsonWriteMode: 'beauty' };
 
     designItems[0].serviceContainer.htmlWriterService.write(itw, designItems, true, options, designItemsAssignmentList);
 

@@ -1,12 +1,12 @@
-import { IDesignItem } from '../../item/IDesignItem';
-import { IHtmlWriterService } from './IHtmlWriterService';
-import { IHtmlWriterOptions } from './IHtmlWriterOptions';
-import { DomConverter } from '../../widgets/designerView/DomConverter';
-import { IndentedTextWriter } from '../../helper/IndentedTextWriter';
-import { CssCombiner } from '../../helper/CssCombiner';
-import { NodeType } from '../../item/NodeType';
-import { IStringPosition } from './IStringPosition';
-import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IHtmlWriterService } from './IHtmlWriterService.js';
+import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
+import { DomConverter } from '../../widgets/designerView/DomConverter.js';
+import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
+import { CssCombiner } from '../../helper/CssCombiner.js';
+import { NodeType } from '../../item/NodeType.js';
+import { IStringPosition } from './IStringPosition.js';
+import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
 
 enum ElementContainerType {
