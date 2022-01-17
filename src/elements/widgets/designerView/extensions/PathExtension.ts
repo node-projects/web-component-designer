@@ -5,7 +5,10 @@ import "../../../helper/PathDataPolyfill";
 import { IPoint } from "../../../../interfaces/IPoint";
 import { IExtensionManager } from "./IExtensionManger";
 import { EventNames } from "../../../../enums/EventNames";
-import { PathData } from "../../../helper/PathDataPolyfill";
+import { createPathD, PathData, PathDataL } from "../../../helper/PathDataPolyfill";
+import { ContextMenuHelper } from "../../../helper/contextMenu/ContextMenuHelper";
+import { IContextMenuItem } from "../../../..";
+
 
 export class PathExtension extends AbstractExtension {
   //private _itemRect: DOMRect;
@@ -25,15 +28,16 @@ export class PathExtension extends AbstractExtension {
     //this._itemRect = this.extendedItem.element.getBoundingClientRect();
     //this._svgRect = (<SVGGeometryElement>this.extendedItem.element).ownerSVGElement.getBoundingClientRect();
     this._parentRect = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
-    this._pathdata = (<SVGGraphicsElement>this.extendedItem.node).getPathData({ normalize: true });
+    this._pathdata = (<SVGGraphicsElement>this.extendedItem.node).getPathData({ normalize: false });
     for (let p of this._pathdata) {
       switch (p.type) {
         case 'M':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
-        case 'L':
-          this._drawPathCircle(p.values[0], p.values[1], p, 0);
+          case 'L':
+            this._drawPathCircle(p.values[0], p.values[1], p, 0);
+            this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
         case 'H':
           break;
@@ -64,6 +68,9 @@ export class PathExtension extends AbstractExtension {
         case 'Q':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._drawPathCircle(p.values[2], p.values[3], p, 2);
+          this._drawPathLine(this._lastPos.x, this._lastPos.y, p.values[0], p.values[1]);
+          this._drawPathLine(p.values[0], p.values[1], p.values[2], p.values[3]);
+
           break;
         case 'T':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
@@ -116,7 +123,7 @@ export class PathExtension extends AbstractExtension {
             circle.setAttribute("cx", (this._circlePos.x + dx).toString());
             circle.setAttribute("cy", (this._circlePos.y + dy).toString());
           }
-          this.extendedItem.element.setAttribute("d", this._drawPath(this._pathdata, index));
+          this.extendedItem.element.setAttribute("d", createPathD(this._pathdata));
         }
         break;
 
@@ -125,71 +132,99 @@ export class PathExtension extends AbstractExtension {
         this._startPos = null;
         this._circlePos = null;
         this._lastPos = null;
-        this.extendedItem.setAttribute('d', this._drawPath(this._pathdata, index));
+        this.extendedItem.setAttribute('d', createPathD(this._pathdata));
         break;
     }
   }
 
-  _drawPath(path: PathData[], index: number) {
-    let pathD: string = "";
-    for (let p of path) {
-      switch (p.type) {
-        case 'M':
-          pathD += p.type + p.values[0] + " " + p.values[1];
-          break;
-        case 'L':
-          pathD += p.type + p.values[0] + " " + p.values[1];
-          break;
-        case 'H':
-
-          break;
-        case 'V':
-
-          break;
-        case 'Z':
-
-          break;
-        case 'C':
-        case 'c':
-          pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5];
-          break;
-        case 'S':
-
-          break;
-        case 'Q':
-
-          break;
-        case 'T':
-
-          break;
-        case 'A':
-
-          break;
-      }
-    }
-    return pathD;
-    console.log(pathD);
-  }
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
-    let circle = this._drawCircle(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y, 3, 'svg-path');
+    const items: IContextMenuItem[] = [];
+    const pidx = this._pathdata.indexOf(p);
+
+    items.push({
+      title: 'delete point', action: () => {
+        this._pathdata.splice(pidx, 1);
+        if (pidx == 0)
+          this._pathdata[0].type = 'M';
+        this.extendedItem.setAttribute('d', createPathD(this._pathdata));
+      }
+    });
+
+    items.push({
+      title: 'insert point after', action: () => {
+        const l: PathDataL = { type: 'L', values: [p.values[0], p.values[1]] };
+        this._pathdata.splice(pidx + 1, 0, <any>l);
+        this.extendedItem.setAttribute('d', createPathD(this._pathdata));
+      }
+    });
+
+    if (pidx != 0) {
+      items.push({
+        title: 'convert to quadratic bézier', action: () => {
+          const p1x = this._pathdata[pidx - 1].values[0];
+          const p1y = this._pathdata[pidx - 1].values[1];
+          const p2x = this._pathdata[pidx].values[0];
+          const p2y = this._pathdata[pidx].values[1];
+          const mpx = (p2x + p1x) * 0.5;
+          const mpy = (p2y + p1y) * 0.5;
+          const theta = Math.atan2(p2y - p1y, p2x - p1x) - Math.PI / 2;
+          const offset = 50;
+          const c1x = mpx + offset * Math.cos(theta);
+          const c1y = mpy + offset * Math.sin(theta);
+          this._pathdata[pidx].type = 'Q';
+          this._pathdata[pidx].values[0] = c1x;
+          this._pathdata[pidx].values[1] = c1y;
+          this._pathdata[pidx].values[2] = p2x;
+          this._pathdata[pidx].values[3] = p2y;
+          this.extendedItem.setAttribute('d', createPathD(this._pathdata));
+        }
+      });
+    }
+
+    if (pidx != 0) {
+      items.push({
+        title: 'convert to cubic bézier', action: () => {
+
+          const p1x = this._pathdata[pidx - 1].values[0];
+          const p1y = this._pathdata[pidx - 1].values[1];
+          const p2x = this._pathdata[pidx].values[0];
+          const p2y = this._pathdata[pidx].values[1];
+          const mpx = (p2x + p1x) * 0.5;
+          const mpy = (p2y + p1y) * 0.5;
+          const theta = Math.atan2(p2y - p1y, p2x - p1x) - Math.PI / 2;
+          const offset = 50;
+          let c1x = mpx + offset * Math.cos(theta);
+          let c1y = mpy + offset * Math.sin(theta);
+          
+          c1x = p.values[0] + 2 * (p1x - p.values[0]) / 3;
+          c1y = p.values[1] + 2 * (p1y - p.values[1]) / 3;
+          const c2x = x + 2 * (p1x - x) / 3;
+          const c2y = y + 2 * (p1y - y) / 3;
+          this._pathdata[pidx].type = 'C';
+          this._pathdata[pidx].values[0] = c1x;
+          this._pathdata[pidx].values[1] = c1y;
+          this._pathdata[pidx].values[2] = c2x;
+          this._pathdata[pidx].values[3] = c2y;
+          this._pathdata[pidx].values[4] = p2x;
+          this._pathdata[pidx].values[5] = p2y;
+          this.extendedItem.setAttribute('d', createPathD(this._pathdata));
+        }
+      });
+    }
+
+    let circle = this._drawCircle(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y, 5, 'svg-path');
     circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, p, index));
     circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, p, index));
     circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, p, index));
+    circle.addEventListener(EventNames.ContextMenu, event => {
+      event.preventDefault();
+      ContextMenuHelper.showContextMenu(null, event, null, items);
+    })
   }
 
   _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
     this._drawLine(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x1, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y1, this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x2, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y2, 'svg-path-line');
-  }
-
-  _drawHelpLine(pStart: IPoint, pEnd: IPoint) {
-    let line: SVGLineElement;
-    line.setAttribute("stroke", "yellow");
-    line.setAttribute("stroke-width", "2");
-    line.setAttribute("x1", pStart.x.toString());
-    line.setAttribute("y1", pStart.y.toString());
-    line.setAttribute("x2", pEnd.x.toString());
-    line.setAttribute("y2", pEnd.y.toString());
   }
 
   override refresh() {

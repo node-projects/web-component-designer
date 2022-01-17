@@ -1096,21 +1096,21 @@ if (!SVGPathElement.prototype.getPathData || !SVGPathElement.prototype.setPathDa
 
 export { }
 
-declare type PathDataM = { type: 'M' | 'm', values: [x: number, y: number] }
-declare type PathDataL = { type: 'L' | 'l', values: [x: number, y: number] }
-declare type PathDataT = { type: 'T' | 't', values: [x: number, y: number] }
-declare type PathDataH = { type: 'H' | 'h', values: [x: number] }
-declare type PathDataV = { type: 'V' | 'v', values: [y: number] }
-declare type PathDataZ = { type: 'Z' | 'z', values?: [] }
-declare type PathDataC = { type: 'C' | 'c', values: [x1: number, y1: number, x2: number, y2: number, x: number, y: number] }
-declare type PathDataS = { type: 'S' | 's', values: [x2: number, y2: number, x: number, y: number] }
-declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: number, x: number, y: number] }
-declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
+export declare type PathDataM = { type: 'M' | 'm', values: [x: number, y: number] }
+export declare type PathDataL = { type: 'L' | 'l', values: [x: number, y: number] }
+export declare type PathDataT = { type: 'T' | 't', values: [x: number, y: number] }
+export declare type PathDataH = { type: 'H' | 'h', values: [x: number] }
+export declare type PathDataV = { type: 'V' | 'v', values: [y: number] }
+export declare type PathDataZ = { type: 'Z' | 'z', values?: [] }
+export declare type PathDataC = { type: 'C' | 'c', values: [x1: number, y1: number, x2: number, y2: number, x: number, y: number] }
+export declare type PathDataS = { type: 'S' | 's', values: [x2: number, y2: number, x: number, y: number] }
+export declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: number, x: number, y: number] }
+export declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
 export declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
 
 export function straightenLine(p1: IPoint, p2: IPoint): IPoint {
   let newP: IPoint;
-  
+
   let alpha = calculateAlpha(p1, p2);
   let normLength;
 
@@ -1200,6 +1200,47 @@ export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: numb
     }
   }
   return newPathData;
+}
+
+export function createPathD(path: PathData[]) {
+  let pathD: string = "";
+  for (let p of path) {
+    switch (p.type) {
+      case 'M':
+        pathD += p.type + p.values[0] + " " + p.values[1];
+        break;
+      case 'L':
+        pathD += p.type + p.values[0] + " " + p.values[1];
+        break;
+      case 'H':
+
+        break;
+      case 'V':
+
+        break;
+      case 'Z':
+        pathD += p.type;
+        break;
+      case 'C':
+      case 'c':
+        pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5];
+        break;
+      case 'S':
+
+        break;
+      case 'Q':
+      case 'q':
+        pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3]
+        break;
+      case 'T':
+
+        break;
+      case 'A':
+
+        break;
+    }
+  }
+  return pathD;
 }
 
 declare global {

@@ -52,6 +52,8 @@ import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
 import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
 import { HtmlWriterService } from './htmlWriterService/HtmlWriterService.js';
+import { RectContextMenu } from '../widgets/designerView/extensions/contextMenu/RectContextMenu.js';
+import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/PathContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -135,7 +137,9 @@ export function createDefaultServiceContainer() {
     new CopyPasteContextMenu(),
     new ZMoveContextMenu(),
     new MultipleItemsSelectedContextMenu(),
-    new ItemsBelowContextMenu()
+    new PathContextMenu(),
+    new RectContextMenu(),
+    new ItemsBelowContextMenu(),
   ];
 
   return serviceContainer;
