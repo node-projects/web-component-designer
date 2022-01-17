@@ -92,7 +92,9 @@ export class WebcomponentManifestParserService extends UnkownElementPropertiesSe
 
 
   override isHandledElement(designItem: IDesignItem): boolean {
-    return this._elementList.find(x => x.tag == designItem.name) != null
+    if (this._elementList)
+      return this._elementList.find(x => x.tag == designItem.name) != null
+    return false
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] {
