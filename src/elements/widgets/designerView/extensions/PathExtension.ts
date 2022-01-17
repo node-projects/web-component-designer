@@ -64,20 +64,23 @@ export class PathExtension extends AbstractExtension {
         case 'S':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._drawPathCircle(p.values[2], p.values[3], p, 2);
+          this._lastPos = { x: p.values[2], y: p.values[3] };
           break;
         case 'Q':
-          this._drawPathCircle(p.values[0], p.values[1], p, 0);
-          this._drawPathCircle(p.values[2], p.values[3], p, 2);
           this._drawPathLine(this._lastPos.x, this._lastPos.y, p.values[0], p.values[1]);
           this._drawPathLine(p.values[0], p.values[1], p.values[2], p.values[3]);
-
+          this._drawPathCircle(p.values[0], p.values[1], p, 0);
+          this._drawPathCircle(p.values[2], p.values[3], p, 2);
+          this._lastPos = { x: p.values[2], y: p.values[3] };
           break;
         case 'T':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
+          this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
         case 'A':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._drawPathCircle(p.values[5], p.values[6], p, 5);
+          this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
       }
     }
