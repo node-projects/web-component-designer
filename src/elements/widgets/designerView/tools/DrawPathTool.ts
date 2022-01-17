@@ -22,7 +22,7 @@ export class DrawPathTool implements ITool {
   private _pointerMoved = false;
   private _eventStarted = false;
   private _lastPoint: IPoint;
-  private _startPoint: IPoint = { x: 0, y: 0 };
+  private _startPoint: IPoint;
 
   constructor() {
   }
@@ -59,6 +59,9 @@ export class DrawPathTool implements ITool {
         }
         if(this._lastPoint == null){
           this._lastPoint = currentPoint;
+        }
+        if(this._startPoint == null){
+          this._startPoint = currentPoint;
         }
         break;
 
@@ -131,6 +134,7 @@ export class DrawPathTool implements ITool {
           //designerView.rootDesignItem.element.appendChild(svg);
           this._path = null;
           this._pathD = null;
+          this._lastPoint = null;
 
           const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
           designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
