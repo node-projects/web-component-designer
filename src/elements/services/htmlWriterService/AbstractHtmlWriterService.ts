@@ -4,6 +4,8 @@ import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 import { IStringPosition } from './IStringPosition.js';
+import { CssCombiner } from '../../helper/CssCombiner.js';
+import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 
 export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
@@ -51,6 +53,21 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
           //TODO: writing of bindings, really ???
         }
       }
+    }
+  }
+
+  writeStyles(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
+    if (designItem.hasStyles) {
+      indentedTextWriter.write(' style="');
+      let styles = designItem.styles;
+      if (options.compressCssToShorthandProperties)
+        styles = CssCombiner.combine(styles);
+      for (const s of styles) {
+        if (s[0]) {
+          indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+        }
+      }
+      indentedTextWriter.write('"');
     }
   }
 }

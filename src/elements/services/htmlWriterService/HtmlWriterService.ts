@@ -2,10 +2,8 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
-import { CssCombiner } from '../../helper/CssCombiner.js';
 import { NodeType } from '../../item/NodeType.js';
 import { IStringPosition } from './IStringPosition.js';
-import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { isEmptyTextNode, isInline } from '../../helper/ElementHelper.js';
 import { AbstractHtmlWriterService } from './AbstractHtmlWriterService.js';
 
@@ -50,19 +48,8 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       indentedTextWriter.write('<' + designItem.name);
 
       this.writeAttributes(indentedTextWriter, designItem, options);
-
-      if (designItem.hasStyles) {
-        indentedTextWriter.write(' style="');
-        let styles = designItem.styles;
-        if (options.compressCssToShorthandProperties)
-          styles = CssCombiner.combine(styles);
-        for (const s of styles) {
-          if (s[0]) {
-            indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
-          }
-        }
-        indentedTextWriter.write('"');
-      }
+      this.writeStyles(indentedTextWriter, designItem, options);
+      
       indentedTextWriter.write('>');
 
       let contentSingleTextNode = false;
