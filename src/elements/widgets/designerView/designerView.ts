@@ -227,20 +227,27 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
     this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
     this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
-    this._sVert.addEventListener('scrollbar-input', () => this._onScrollbar())
-    this._sHor.addEventListener('scrollbar-input', () => this._onScrollbar())
-
+    this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
+    this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
   }
 
-  private _onScrollbar() {
-    const x = this.designerCanvas.offsetWidth * (this._sHor.value - 0.5) * -1;
-    const y = this.designerCanvas.offsetHeight * (this._sVert.value - 0.5) * -1;
+  private _onScrollbar(e) {
+    if (e?.detail == 'incrementLarge')
+      e.target.value += 0.25;
+    else if (e?.detail == 'decrementLarge')
+      e.target.value -= 0.25;
+    else if (e?.detail == 'incrementSmall')
+      e.target.value += 0.05;
+    else if (e?.detail == 'decrementSmall')
+      e.target.value -= 0.05;
+    const x = this.designerCanvas.offsetWidth * (this._sHor.value - 0.5) * -2;
+    const y = this.designerCanvas.offsetHeight * (this._sVert.value - 0.5) * -2;
     this.designerCanvas.canvasOffset = { x, y };
   }
 
   private _onWheel(event: WheelEvent) {
+    event.preventDefault();
     if (event.ctrlKey) {
-      event.preventDefault();
       let zf = this._designerCanvas.zoomFactor
       zf += event.deltaY * -0.001; //deltamode = 0
       if (zf < 0.02)
@@ -249,6 +256,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       this._zoomInput.value = Math.round(zf * 100) + '%';
 
       //TODO: we should zoom on the current cursor position, so it stays the center
+    }
+    else {
+      this._sHor.value += event.deltaX / 1000;
+      this._sVert.value += event.deltaY / 1000;
+      this._onScrollbar(null);
     }
   }
 
