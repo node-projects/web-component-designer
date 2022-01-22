@@ -240,8 +240,10 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       e.target.value += 0.05;
     else if (e?.detail == 'decrementSmall')
       e.target.value -= 0.05;
-    const x = this.designerCanvas.offsetWidth * (this._sHor.value - 0.5) * -2;
-    const y = this.designerCanvas.offsetHeight * (this._sVert.value - 0.5) * -2;
+    const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
+    const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
+    const x = w * (this._sHor.value - 0.5) * -2;
+    const y = h * (this._sVert.value - 0.5) * -2;
     this.designerCanvas.canvasOffset = { x, y };
   }
 

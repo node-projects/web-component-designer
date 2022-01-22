@@ -196,6 +196,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.zoomFactorChanged();
   }
 
+  get designerOffsetWidth(): number {
+    return this._canvasContainer.offsetWidth;
+  }
+  get designerOffsetHeight(): number {
+    return this._canvasContainer.offsetHeight;
+  }
+
   set additionalStyle(value: CSSStyleSheet) {
     if (value) {
       for (let r of value.rules) {
