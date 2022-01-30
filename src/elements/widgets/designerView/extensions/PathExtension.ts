@@ -35,9 +35,9 @@ export class PathExtension extends AbstractExtension {
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
-          case 'L':
-            this._drawPathCircle(p.values[0], p.values[1], p, 0);
-            this._lastPos = { x: p.values[0], y: p.values[1] };
+        case 'L':
+          this._drawPathCircle(p.values[0], p.values[1], p, 0);
+          this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
         case 'H':
           break;
@@ -95,8 +95,6 @@ export class PathExtension extends AbstractExtension {
         this._startPos = { x: event.x, y: event.y };
         this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
         this._originalPathPoint = { x: p.values[index], y: p.values[index + 1] }
-
-
         break;
 
       case EventNames.PointerMove:
@@ -142,6 +140,8 @@ export class PathExtension extends AbstractExtension {
 
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
+    let circle = this._drawCircle(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y, 5, 'svg-path');
+    let circlePos = { x: x, y: y };
     const items: IContextMenuItem[] = [];
     const pidx = this._pathdata.indexOf(p);
 
@@ -162,11 +162,19 @@ export class PathExtension extends AbstractExtension {
       }
     });
 
-    if (pidx != 0) {
+    if (pidx != 0 && this._checkCircleIndex(p, circlePos)) {
       items.push({
         title: 'convert to quadratic bézier', action: () => {
-          const p1x = this._pathdata[pidx - 1].values[0];
-          const p1y = this._pathdata[pidx - 1].values[1];
+          let p1x = this._pathdata[pidx - 1].values[0];
+          let p1y = this._pathdata[pidx - 1].values[1];
+          if (this._pathdata[pidx - 1].type === 'C') {
+            p1x = this._pathdata[pidx - 1].values[4];
+            p1y = this._pathdata[pidx - 1].values[5];
+          }
+          else if (this._pathdata[pidx - 1].type === 'Q') {
+            p1x = this._pathdata[pidx - 1].values[2];
+            p1y = this._pathdata[pidx - 1].values[3];
+          }
           const p2x = this._pathdata[pidx].values[0];
           const p2y = this._pathdata[pidx].values[1];
           const mpx = (p2x + p1x) * 0.5;
@@ -185,12 +193,20 @@ export class PathExtension extends AbstractExtension {
       });
     }
 
-    if (pidx != 0) {
+    if (pidx != 0 && this._checkCircleIndex(p, circlePos)) {
       items.push({
         title: 'convert to cubic bézier', action: () => {
+          let p1x = this._pathdata[pidx - 1].values[0];
+          let p1y = this._pathdata[pidx - 1].values[1];
+          if (this._pathdata[pidx - 1].type === 'C') {
+            p1x = this._pathdata[pidx - 1].values[4];
+            p1y = this._pathdata[pidx - 1].values[5];
+          }
+          else if (this._pathdata[pidx - 1].type === 'Q') {
+            p1x = this._pathdata[pidx - 1].values[2];
+            p1y = this._pathdata[pidx - 1].values[3];
+          }
 
-          const p1x = this._pathdata[pidx - 1].values[0];
-          const p1y = this._pathdata[pidx - 1].values[1];
           const p2x = this._pathdata[pidx].values[0];
           const p2y = this._pathdata[pidx].values[1];
           const mpx = (p2x + p1x) * 0.5;
@@ -199,7 +215,7 @@ export class PathExtension extends AbstractExtension {
           const offset = 50;
           let c1x = mpx + offset * Math.cos(theta);
           let c1y = mpy + offset * Math.sin(theta);
-          
+
           c1x = p.values[0] + 2 * (p1x - p.values[0]) / 3;
           c1y = p.values[1] + 2 * (p1y - p.values[1]) / 3;
           const c2x = x + 2 * (p1x - x) / 3;
@@ -216,7 +232,6 @@ export class PathExtension extends AbstractExtension {
       });
     }
 
-    let circle = this._drawCircle(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y, 5, 'svg-path');
     circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, p, index));
     circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, p, index));
     circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, p, index));
@@ -228,6 +243,25 @@ export class PathExtension extends AbstractExtension {
 
   _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
     this._drawLine(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x1, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y1, this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x2, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y2, 'svg-path-line');
+  }
+
+  _checkCircleIndex(p: PathData, circlePos: IPoint): boolean {
+    switch (p.type) {
+      case 'M':
+      case 'L':
+        if (p.values[0] == circlePos.x && p.values[1] == circlePos.y)
+          return true;
+        break;
+      case 'Q':
+        if (p.values[2] == circlePos.x && p.values[3] == circlePos.y)
+          return true;
+        break;
+      case 'C':
+        if (p.values[4] == circlePos.x && p.values[5] == circlePos.y)
+          return true;
+        break;
+    }
+    return false;
   }
 
   override refresh() {
