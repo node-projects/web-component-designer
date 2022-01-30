@@ -80,7 +80,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("demoProviderService", new DemoProviderService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
-    new ResizeExtensionProvider(false),
+    // new ResizeExtensionProvider(false),
     new InvisibleDivExtensionProvider(),
     new IframeExtensionProvider()
   ]);
