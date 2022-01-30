@@ -7,4 +7,5 @@ export interface ITool extends IDisposable {
   readonly cursor: string;
   activated(serviceContainer: ServiceContainer);
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element);
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element);
 }

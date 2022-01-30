@@ -42,6 +42,9 @@ export class DrawElementTool implements ITool {
     }
   }
 
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
+
   private async _onPointerDown(designerView: IDesignerCanvas, event: PointerEvent) {
     event.preventDefault();
     this._startPosition = { x: event.x, y: event.y };

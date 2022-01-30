@@ -47,4 +47,7 @@ export class TextTool implements ITool {
 
     }
   }
+
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
 }

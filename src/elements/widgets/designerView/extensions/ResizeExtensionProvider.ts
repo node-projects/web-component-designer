@@ -5,6 +5,7 @@ import { IDesignerExtension } from "./IDesignerExtension";
 import { ResizeExtension } from "./ResizeExtension";
 import { IExtensionManager } from "./IExtensionManger";
 import { css } from "@node-projects/base-custom-webcomponent";
+import { NodeType } from "../../../item/NodeType.js";
 
 export class ResizeExtensionProvider implements IDesignerExtensionProvider {
   private resizeAllSelected: boolean;
@@ -14,7 +15,7 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
   }
 
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    return true;
+    return designItem.nodeType == NodeType.Element;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {

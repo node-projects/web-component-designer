@@ -70,6 +70,9 @@ export class MagicWandSelectorTool implements ITool {
     }
   }
 
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
+
   activated(serviceContainer: ServiceContainer) {
   }
 

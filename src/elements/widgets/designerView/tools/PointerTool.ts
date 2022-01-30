@@ -354,4 +354,7 @@ export class PointerTool implements ITool {
         }
     }
   }
+
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
 }

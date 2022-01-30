@@ -92,6 +92,9 @@ export class RectangleSelectorTool implements ITool {
     }
   }
 
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
+
   dispose(): void {
   }
 }

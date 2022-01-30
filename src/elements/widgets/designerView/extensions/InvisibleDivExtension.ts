@@ -6,8 +6,8 @@ import { IExtensionManager } from "./IExtensionManger";
 export class InvisibleDivExtension extends AbstractExtension {
   private _rect: SVGRectElement;
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
-    super(extensionManager, designerView, extendedItem);
+  constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem) {
+    super(extensionManager, designerCanvas, extendedItem);
   }
 
   override extend() {

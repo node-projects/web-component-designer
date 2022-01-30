@@ -7,7 +7,7 @@ import { InvisibleDivExtension } from "./InvisibleDivExtension";
 import { css } from "@node-projects/base-custom-webcomponent";
 
 export class InvisibleDivExtensionProvider implements IDesignerExtensionProvider {
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.name == 'div') {
       const st = window.getComputedStyle(designItem.element);
       return st.backgroundColor == 'rgba(0, 0, 0, 0)' && st.borderStyle == 'none'
@@ -15,8 +15,8 @@ export class InvisibleDivExtensionProvider implements IDesignerExtensionProvider
     return false;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new InvisibleDivExtension(extensionManager, designerView, designItem);
+  getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
+    return new InvisibleDivExtension(extensionManager, designerCanvas, designItem);
   }
 
   readonly style = css`

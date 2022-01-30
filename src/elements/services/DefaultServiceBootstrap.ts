@@ -54,6 +54,7 @@ import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
 import { HtmlWriterService } from './htmlWriterService/HtmlWriterService.js';
 import { RectContextMenu } from '../widgets/designerView/extensions/contextMenu/RectContextMenu.js';
 import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/PathContextMenu.js';
+import { IframeExtensionProvider } from '../widgets/designerView/extensions/IframeExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -80,7 +81,8 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     new ResizeExtensionProvider(false),
-    new InvisibleDivExtensionProvider()
+    new InvisibleDivExtensionProvider(),
+    new IframeExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new PrimarySelectionDefaultExtensionProvider(),

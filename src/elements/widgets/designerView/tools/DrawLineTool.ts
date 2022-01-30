@@ -8,8 +8,6 @@ import { DesignItem } from '../../../item/DesignItem';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
 import { IPoint } from '../../../../interfaces/IPoint';
 
-
-
 export class DrawLineTool implements ITool {
 
   readonly cursor = 'crosshair';
@@ -91,4 +89,7 @@ export class DrawLineTool implements ITool {
         break;
     }
   }
+
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
 }

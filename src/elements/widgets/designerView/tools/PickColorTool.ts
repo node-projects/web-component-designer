@@ -23,6 +23,9 @@ export class PickColorTool implements ITool {
   async pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
   }
 
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
+  
   dispose(): void {
   }
 }

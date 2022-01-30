@@ -1,3 +1,4 @@
+import { IContentChanged } from "../../../../index.js";
 import { DesignItem } from "../../../item/DesignItem";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { ISelectionChangedEvent } from "../../../services/selectionService/ISelectionChangedEvent";
@@ -7,20 +8,36 @@ import { IExtensionManager } from "./IExtensionManger";
 
 export class ExtensionManager implements IExtensionManager {
 
-  designerView: IDesignerCanvas;
+  designerCanvas: IDesignerCanvas;
 
-  constructor(designerView: IDesignerCanvas) {
-    this.designerView = designerView;
+  constructor(designerCanvas: IDesignerCanvas) {
+    this.designerCanvas = designerCanvas;
 
-    designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
+    designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
+    designerCanvas.instanceServiceContainer.contentService.onContentChanged.on(this._contentChanged.bind(this));
+  }
 
-    //TODO: Create Permanent Extensions. We need a Event for new DesignItem Added and Removed from DOM
+  private _contentChanged(contentChanged: IContentChanged) {
+    switch (contentChanged.changeType) {
+      case 'added':
+        this.applyExtensions(contentChanged.designItems, ExtensionType.Permanent, true);
+        break;
+      case 'moved':
+        this.refreshExtensions(contentChanged.designItems, ExtensionType.Permanent);
+        break;
+      case 'parsed':
+        this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, true);
+        break;
+      case 'removed':
+        this.removeExtensions(contentChanged.designItems, ExtensionType.Permanent);
+        break;
+    }
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
     if (selectionChangedEvent.oldSelectedElements && selectionChangedEvent.oldSelectedElements.length) {
       if (selectionChangedEvent.oldSelectedElements[0].parent) {
-        const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerView.serviceContainer, this.designerView.instanceServiceContainer)
+        const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
         this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
         this.removeExtensions(selectionChangedEvent.oldSelectedElements, ExtensionType.Selection);
@@ -29,23 +46,23 @@ export class ExtensionManager implements IExtensionManager {
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
-      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, this.designerView.serviceContainer, this.designerView.instanceServiceContainer)
+      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
       this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
     }
 
     this.refreshExtensions(selectionChangedEvent.selectedElements);
   }
 
-  applyExtension(designItem: IDesignItem, extensionType: ExtensionType) {
+  applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive: boolean = false) {
     if (designItem) {
-      const extProv = this.designerView.serviceContainer.designerExtensions.get(extensionType);
+      const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       if (extProv) {
         for (let e of extProv) {
-          if (e.shouldExtend(this, this.designerView, designItem)) {
+          if (e.shouldExtend(this, this.designerCanvas, designItem)) {
             let appE = designItem.appliedDesignerExtensions.get(extensionType);
             if (!appE)
               appE = [];
-            const ext = e.getExtension(this, this.designerView, designItem);
+            const ext = e.getExtension(this, this.designerCanvas, designItem);
             try {
               ext.extend();
             }
@@ -57,20 +74,26 @@ export class ExtensionManager implements IExtensionManager {
           }
         }
       }
+
+      if (recursive) {
+        for (const d of designItem.children()) {
+          this.applyExtension(d, extensionType, recursive);
+        }
+      }
     }
   }
 
-  applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType) {
+  applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType, recursive: boolean = false) {
     if (designItems) {
-      const extProv = this.designerView.serviceContainer.designerExtensions.get(extensionType);
+      const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       if (extProv) {
         for (let e of extProv) {
           for (let i of designItems) {
-            if (e.shouldExtend(this, this.designerView, i)) {
+            if (e.shouldExtend(this, this.designerCanvas, i)) {
               let appE = i.appliedDesignerExtensions.get(extensionType);
               if (!appE)
                 appE = [];
-              const ext = e.getExtension(this, this.designerView, i);
+              const ext = e.getExtension(this, this.designerCanvas, i);
               try {
                 ext.extend();
               }
@@ -81,6 +104,12 @@ export class ExtensionManager implements IExtensionManager {
               i.appliedDesignerExtensions.set(extensionType, appE);
             }
           }
+        }
+      }
+
+      if (recursive) {
+        for (const d of designItems) {
+          this.applyExtensions(Array.from(d.children()), extensionType, recursive);
         }
       }
     }
@@ -216,16 +245,16 @@ export class ExtensionManager implements IExtensionManager {
 
   refreshAllExtensions(designItems: IDesignItem[]) {
     if (designItems) {
-        this.refreshExtensions(designItems, ExtensionType.Permanent);
-        this.refreshExtensions(designItems, ExtensionType.Selection);
-        this.refreshExtensions(designItems, ExtensionType.PrimarySelection);
-        this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer);
-        this.refreshExtensions(designItems, ExtensionType.MouseOver);
-        this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected);
-        this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected);
-        this.refreshExtensions(designItems, ExtensionType.ContainerDragOver);
-        this.refreshExtensions(designItems, ExtensionType.ContainerDrag);
-        this.refreshExtensions(designItems, ExtensionType.Doubleclick);
+      this.refreshExtensions(designItems, ExtensionType.Permanent);
+      this.refreshExtensions(designItems, ExtensionType.Selection);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelection);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer);
+      this.refreshExtensions(designItems, ExtensionType.MouseOver);
+      this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected);
+      this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDragOver);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDrag);
+      this.refreshExtensions(designItems, ExtensionType.Doubleclick);
     }
   }
 }

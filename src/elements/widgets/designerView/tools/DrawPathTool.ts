@@ -8,8 +8,6 @@ import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { IPoint } from '../../../../interfaces/IPoint';
 
-
-
 export class DrawPathTool implements ITool {
 
   readonly cursor = 'crosshair';
@@ -144,4 +142,7 @@ export class DrawPathTool implements ITool {
         break;
     }
   }
+
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
+  { }
 }

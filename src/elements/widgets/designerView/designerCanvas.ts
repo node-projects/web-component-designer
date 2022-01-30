@@ -166,12 +166,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
 
-    this.instanceServiceContainer = new InstanceServiceContainer(this);
-    this.instanceServiceContainer.register("undoService", new UndoService(this));
-    this.instanceServiceContainer.register("selectionService", new SelectionService);
-
-    this.extensionManager = new ExtensionManager(this);
-
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
     this._onDblClickBound = this._onDblClick.bind(this);
@@ -351,9 +345,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   initialize(serviceContainer: ServiceContainer) {
     this.serviceContainer = serviceContainer;
+
+    this.instanceServiceContainer = new InstanceServiceContainer(this);
+    this.instanceServiceContainer.register("undoService", new UndoService(this));
+    this.instanceServiceContainer.register("selectionService", new SelectionService);
+
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
 
+    this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
     this._canvasContainer.appendChild(this.overlayLayer);
@@ -417,6 +417,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
 
   public setDesignItems(designItems: IDesignItem[]) {
+    this._fillCalculationrects();
     this.instanceServiceContainer.undoService.clear();
     this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
@@ -448,7 +449,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _onDragEnter(event: DragEvent) {
     this._fillCalculationrects();
     event.preventDefault();
-  const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
+    const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
     if (hasTransferDataBindingObject) {
       const ddService = this.serviceContainer.bindableObjectDragDropService;
       if (ddService) {

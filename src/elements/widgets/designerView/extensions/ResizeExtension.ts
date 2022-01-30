@@ -29,6 +29,7 @@ export class ResizeExtension extends AbstractExtension {
   }
 
   override extend() {
+    this.refresh();
   }
 
   override refresh() {
@@ -60,16 +61,16 @@ export class ResizeExtension extends AbstractExtension {
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
     let circle = this._drawCircle(x, y, 3, 'svg-primary-resizer', oldCircle);
-     if (!oldCircle) {
-      circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(circle,event, cursor));
-      circle.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeResize(circle,event, cursor));
-      circle.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeResize(circle,event, cursor));
+    if (!oldCircle) {
+      circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(circle, event, cursor));
+      circle.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeResize(circle, event, cursor));
+      circle.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeResize(circle, event, cursor));
     }
     circle.setAttribute('style', 'cursor: ' + cursor);
     return circle;
   }
 
-  _pointerActionTypeResize(circle:SVGCircleElement, event: PointerEvent, actionMode: string = 'se-resize') {
+  _pointerActionTypeResize(circle: SVGCircleElement, event: PointerEvent, actionMode: string = 'se-resize') {
     event.stopPropagation();
     const currentPoint = this.designerCanvas.getNormalizedEventCoordinates(event) //, this.extendedItem.element, event.type === 'pointerdown' ? null : this._initialPoint);
 
@@ -82,9 +83,14 @@ export class ResizeExtension extends AbstractExtension {
         this._initialPoint = currentPoint;
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
-        for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-          let rect = designItem.element.getBoundingClientRect();
-          this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor});
+
+        let rect = this.extendedItem.element.getBoundingClientRect();
+        this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+        if (this.resizeAllSelected) {
+          for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+            rect = designItem.element.getBoundingClientRect();
+            this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+          }
         }
         if (this.designerCanvas.alignOnSnap)
           this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
@@ -108,6 +114,7 @@ export class ResizeExtension extends AbstractExtension {
               (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
               if (this.resizeAllSelected) {
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  i++;
                   if (designItem !== this.extendedItem) {
                     (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
                     (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
@@ -118,6 +125,7 @@ export class ResizeExtension extends AbstractExtension {
             case 's-resize':
               (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
               if (this.resizeAllSelected) {
+                i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
                     (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + trackY + 'px';
@@ -128,6 +136,7 @@ export class ResizeExtension extends AbstractExtension {
             case 'e-resize':
               (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[i].width + trackX + 'px';
               if (this.resizeAllSelected) {
+                i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
                     (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + trackX + 'px';

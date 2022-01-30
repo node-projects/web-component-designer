@@ -83,6 +83,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       background-color:rgba(164,206,249,.6);
     }
     #outer {
+      user-select: none;
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -312,7 +313,9 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     //this.instanceServiceContainer.selectionService.setSelectedElements(null);
-    return DomConverter.ConvertToString([...this._designerCanvas.rootDesignItem.children()], designItemsAssignmentList);
+    if (this._designerCanvas.rootDesignItem.childCount > 0)
+      return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), designItemsAssignmentList);
+    return '';
   }
 
   public async parseHTML(html: string) {
