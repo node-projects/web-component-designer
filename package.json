@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@node-projects/base-custom-webcomponent": "^0.5.0",
-    "construct-style-sheets-polyfill": "^3.0.5"
+    "construct-style-sheets-polyfill": "^3.1.0"
   },
   "devDependencies": {
     "@node-projects/lean-he-esm": "^3.3.0",
@@ -22,7 +22,7 @@
     "@types/codemirror": "^5.60.5",
     "@types/jquery": "^3.5.13",
     "@types/jquery.fancytree": "0.0.7",
-    "ace-builds": "^1.4.13",
+    "ace-builds": "^1.4.14",
     "codemirror": "^5.65.1",
     "custom-elements-manifest": "^1.0.0",
     "esprima-next": "^5.8.1",
