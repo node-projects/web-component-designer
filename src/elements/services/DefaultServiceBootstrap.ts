@@ -9,7 +9,7 @@ import { DefaultPlacementService } from './placementService/DefaultPlacementServ
 import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserService.js';
 import { Lit2PropertiesService } from './propertiesService/services/Lit2PropertiesService.js';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
-import { PrimarySelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/PrimarySelectionDefaultExtensionProvider.js';
+import { ElementDragTitleExtensionProvider } from '../widgets/designerView/extensions/ElementDragTitleExtensionProvider.js';
 import { GridExtensionProvider } from '../widgets/designerView/extensions/GridExtensionProvider.js';
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider.js';
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider.js';
@@ -82,10 +82,11 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),
     new InvisibleDivExtensionProvider(),
-    new IframeExtensionProvider()
+    new IframeExtensionProvider(),
+    // new ElementDragTitleExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
-    new PrimarySelectionDefaultExtensionProvider(),
+    new ElementDragTitleExtensionProvider(),
     new GridExtensionProvider(),
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),

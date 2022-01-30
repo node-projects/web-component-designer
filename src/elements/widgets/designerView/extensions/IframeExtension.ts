@@ -12,9 +12,9 @@ export class IframeExtension extends AbstractExtension {
   override extend() {
     // forward events to designer, so iframe is selectable via click
     let iframe = this.extendedItem.element as HTMLIFrameElement;
-    iframe.contentWindow.onpointerdown = (e) => this._pointerEvent(e);
-    iframe.contentWindow.onpointermove = (e) => this._pointerEvent(e);
-    iframe.contentWindow.onpointerup = (e) => this._pointerEvent(e);
+    iframe.contentWindow.addEventListener('pointerdown', (e) => this._pointerEvent(e), { capture: true });
+    iframe.contentWindow.addEventListener('pointermove', (e) => this._pointerEvent(e), { capture: true });
+    iframe.contentWindow.addEventListener('pointerup', (e) => this._pointerEvent(e), { capture: true });
   }
 
   _pointerEvent(event: PointerEvent) {

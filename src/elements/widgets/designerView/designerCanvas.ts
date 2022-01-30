@@ -717,8 +717,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return currentElement;
   }
 
-  _rect: SVGRectElement
-  private _pointerEventHandler(event: PointerEvent) {
+  _rect: SVGRectElement;
+
+  private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
     this._fillCalculationrects();
 
     if (this._pointerextensions) {
@@ -732,9 +733,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (event.buttons == 2)
       return;
 
-    let currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
-    if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer || !currentElement) {
-      currentElement = this._canvas;
+    let currentElement: Node;
+    if (forceElement)
+      currentElement = forceElement;
+    else {
+      currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
+      if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer || !currentElement) {
+        currentElement = this._canvas;
+      }
     } /* else {
       if (!DesignerCanvas.hasOrIsParent(currentElement, this._canvas))
         return;
@@ -761,7 +767,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._canvas.style.cursor = tool.cursor;
-    tool.pointerEventHandler(this, event, currentElement);
+    tool.pointerEventHandler(this, event, <Element>currentElement);
   }
 
   private _fillCalculationrects() {
