@@ -257,8 +257,16 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
         zf = 0.02;
       this._designerCanvas.zoomFactor = zf;
       this._zoomInput.value = Math.round(zf * 100) + '%';
+      const rect = this.getBoundingClientRect();
 
-      //TODO: we should zoom on the current cursor position, so it stays the center
+      //const xc = this.designerCanvas.canvasOffset.x;
+      //const yc = this.designerCanvas.canvasOffset.y;
+      const xp = event.x - rect.x;
+      const yp = event.y - rect.y;
+      const x = xp / zf * (1 - zf);
+      const y = yp / zf * (1 - zf);
+
+      this.designerCanvas.canvasOffset = { x, y };
     }
     else {
       this._sHor.value += event.deltaX / 1000;
