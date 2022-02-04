@@ -12,8 +12,9 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   private _headerDiv: HTMLDivElement;
   private _moreDiv: HTMLDivElement;
   private _moreContainer: HTMLDivElement;
-  private _elementMap = new WeakMap<HTMLElement, HTMLDivElement>()
-
+  private _elementMap = new WeakMap<HTMLElement, HTMLDivElement>();
+  private _firstConnect = true;
+  
   static override readonly style = css`
         :host {
             height: 100%;
@@ -106,7 +107,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
     super();
 
     this._contentObserver = new MutationObserver(() => {
-      this._createItems();
+      this.refreshItems();
     });
 
     let outerDiv = document.createElement("div")
@@ -161,13 +162,16 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   }
 
   connectedCallback() {
-    this._createItems();
-    this._selectedIndexChanged();
-    this._contentObserver.observe(this, { childList: true });
+    if (this._firstConnect) {
+      this.refreshItems();
+      this._firstConnect = false;
 
-    let selectedIndexAttribute = this.getAttribute("selected-index")
-    if (selectedIndexAttribute) {
-      this.selectedIndex = parseInt(selectedIndexAttribute);
+      this._contentObserver.observe(this, { childList: true });
+
+      let selectedIndexAttribute = this.getAttribute("selected-index")
+      if (selectedIndexAttribute) {
+        this.selectedIndex = parseInt(selectedIndexAttribute);
+      }
     }
   }
 
@@ -177,15 +181,15 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   public set selectedIndex(value: number) {
     let old = this._selectedIndex;
     this._selectedIndex = value;
-    if (this.children.length)
+    if (this.children.length && old != this._selectedIndex)
       this._selectedIndexChanged(old);
   }
 
   disconnectedCallback() {
-    this._contentObserver.disconnect();
+    //this._contentObserver.disconnect();
   }
 
-  private _createItems() {
+  public refreshItems() {
     this._headerDiv.innerHTML = "";
     let i = 0;
     for (let item of this.children) {

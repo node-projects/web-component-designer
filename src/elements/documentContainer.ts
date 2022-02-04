@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css, cssFromString, debounce } from "@node-projects/base-custom-webcomponent"
+import { BaseCustomWebComponentLazyAppend, css, cssFromString, debounce, TypedEvent } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from "./controls/DesignerTabControl";
 import { DesignerView } from "./widgets/designerView/designerView";
 import { ServiceContainer } from "./services/ServiceContainer";
@@ -28,6 +28,9 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public get additionalStyleString() {
     return this._additionalStyle;
   };
+
+  
+  public onContentChanged = new TypedEvent<void>();
 
   private _serviceContainer: ServiceContainer;
   private _content: string = '';
@@ -124,6 +127,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   designerContentChanged() {
+    this.onContentChanged.emit();
+    
     if (!this._disableChangeNotificationEditor) {
       this._disableChangeNotificationDesigner = true;
       if (this._tabControl.selectedIndex === 2) {
