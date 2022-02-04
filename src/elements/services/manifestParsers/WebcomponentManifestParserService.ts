@@ -3,7 +3,6 @@ import { IElementDefinition } from "../elementsService/IElementDefinition";
 import { IElementsService } from "../elementsService/IElementsService";
 import { IPropertiesService } from "../propertiesService/IPropertiesService";
 import { IProperty } from "../propertiesService/IProperty";
-import type { CustomElement, Package } from 'custom-elements-manifest/schema';
 import { PropertyType } from "../propertiesService/PropertyType";
 import { IDesignItem } from "../../item/IDesignItem";
 import { UnkownElementPropertiesService } from "../propertiesService/services/UnkownElementPropertiesService";
@@ -13,7 +12,7 @@ export class WebcomponentManifestParserService extends UnkownElementPropertiesSe
   private _name: string;
   get name() { return this._name; }
 
-  private _packageData: Package;
+  private _packageData: any;
   private _elementList: IElementDefinition[];
   private _propertiesList: Record<string, IProperty[]>;
   private _resolveStored: ((value: IElementDefinition[]) => void)[];
@@ -37,7 +36,7 @@ export class WebcomponentManifestParserService extends UnkownElementPropertiesSe
         }
       });
     } else {
-      this._packageData = <Package>fileOrObject;
+      this._packageData = fileOrObject;
       this._parseManifest();
     }
   }
@@ -50,7 +49,7 @@ export class WebcomponentManifestParserService extends UnkownElementPropertiesSe
         if (e.kind == 'custom-element-definition') {
           this._elementList.push({ tag: e.name, import: this._importPrefix + '/' + e.declaration.module });
           let properties: IProperty[] = [];
-          let declaration: CustomElement = <CustomElement>m.declarations.find(x => x.name == e.declaration.name);
+          let declaration = m.declarations.find(x => x.name == e.declaration.name);
           for (let d of declaration.members) {
             if (d.kind == 'field') {
               let pType = PropertyType.property;
