@@ -58,7 +58,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
       let attr = item.attributes;
       for (let a in attr) {
         if (a !== 'style') {
-          designItem.setAttribute(a, attr[a]);
+          designItem.attributes.set(a, attr[a])
           if (a === 'node-projects-hide-at-design-time')
             hideAtDesignTime = true;
           else if (a === 'node-projects-hide-at-run-time')
@@ -74,12 +74,13 @@ export class NodeHtmlParserService implements IHtmlParserService {
         let styleParser = new CssAttributeParser();
         styleParser.parse(style);
         for (let s of styleParser.entries) {
-          designItem.setStyle(s.name, s.value);
+          designItem.styles.set(s.name, s.value);
         }
       }
 
-      if (element instanceof HTMLElement || element instanceof SVGElement)
-        element.style.pointerEvents = 'auto';
+      if (!lockAtDesignTime && (element instanceof HTMLElement || element instanceof SVGElement)) {
+        requestAnimationFrame(() => (<HTMLElement>element).style.pointerEvents = 'auto');
+      }
 
       designItem.hideAtDesignTime = hideAtDesignTime;
       designItem.hideAtRunTime = hideAtRunTime;

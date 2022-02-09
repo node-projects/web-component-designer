@@ -215,9 +215,9 @@ export class DesignItem implements IDesignItem {
             designItem.styles.set(<string>e.name, e.value);
           }
         }
-        if (!designItem._lockAtDesignTime)
-          node.style.pointerEvents = 'auto';
-        else
+        if (!designItem._lockAtDesignTime) {
+          requestAnimationFrame(() => node.style.pointerEvents = 'auto');
+        } else
           node.style.pointerEvents = 'none';
 
         //node.style.cursor = 'pointer';
