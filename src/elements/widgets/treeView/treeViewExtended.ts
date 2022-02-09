@@ -418,6 +418,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         //@ts-ignore
         if (activeElements.indexOf(node.data.ref) >= 0) {
           node.setSelected(true);
+          node.makeVisible({scrollIntoView: true});
         } else {
           node.setSelected(false);
         }

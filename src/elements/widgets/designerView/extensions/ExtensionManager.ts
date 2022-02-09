@@ -18,20 +18,22 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   private _contentChanged(contentChanged: IContentChanged) {
-    switch (contentChanged.changeType) {
-      case 'added':
-        this.applyExtensions(contentChanged.designItems, ExtensionType.Permanent, true);
-        break;
-      case 'moved':
-        this.refreshExtensions(contentChanged.designItems, ExtensionType.Permanent);
-        break;
-      case 'parsed':
-        this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, true);
-        break;
-      case 'removed':
-        this.removeExtensions(contentChanged.designItems, ExtensionType.Permanent);
-        break;
-    }
+    requestAnimationFrame(() => {
+      switch (contentChanged.changeType) {
+        case 'added':
+          this.applyExtensions(contentChanged.designItems, ExtensionType.Permanent, true);
+          break;
+        case 'moved':
+          this.refreshExtensions(contentChanged.designItems, ExtensionType.Permanent);
+          break;
+        case 'parsed':
+          this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, true);
+          break;
+        case 'removed':
+          this.removeExtensions(contentChanged.designItems, ExtensionType.Permanent);
+          break;
+      }
+    });
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
