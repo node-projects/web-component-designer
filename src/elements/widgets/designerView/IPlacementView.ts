@@ -12,4 +12,6 @@ export interface IPlacementView {
 
   readonly zoomFactor: number;
   readonly scaleFactor: number;
+
+  readonly transformHelperElement: HTMLDivElement;
 }

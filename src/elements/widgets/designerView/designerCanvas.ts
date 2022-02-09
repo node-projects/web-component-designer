@@ -48,10 +48,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public overlayLayer: OverlayLayerView;
   public rootDesignItem: IDesignItem;
   public eatEvents: Element;
+  public transformHelperElement: HTMLDivElement;
 
   private _zoomFactor = 1; //if scale or zoom css property is used this needs to be the value
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
   private _canvasOffset: IPoint = { x: 0, y: 0 };
+  
   public get zoomFactor(): number {
     return this._zoomFactor;
   }
@@ -140,6 +142,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
+    }
+    
+    #transformHelper {
+      height: 0;
+      width: 0;
     }`;
 
   static override readonly template = html`
@@ -153,6 +160,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           </div>
         </div>
       </div>
+      <div id="transformHelper"></div>
     </div>`;
 
   public extensionManager: IExtensionManager;
@@ -165,6 +173,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvas = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvas');
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
+    this.transformHelperElement = this._getDomElement<HTMLDivElement>('transformHelper');
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
