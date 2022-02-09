@@ -41,4 +41,6 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
   elementFromPoint(x: number, y: number): Element;
+
+  getItemsBelowMouse(event: MouseEvent): Element[];
 }
