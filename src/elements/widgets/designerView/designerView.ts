@@ -181,12 +181,22 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
     zoomIncrease.onclick = () => {
-      this._designerCanvas.zoomFactor += 0.1;
+      if (this._designerCanvas.zoomFactor > 0.1)
+        this._designerCanvas.zoomFactor += 0.1;
+      else
+        this._designerCanvas.zoomFactor += 0.01;
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
     zoomDecrease.onclick = () => {
-      this._designerCanvas.zoomFactor -= 0.1;
+      if (this._designerCanvas.zoomFactor > 0.11)
+        this._designerCanvas.zoomFactor -= 0.1;
+      else
+        this._designerCanvas.zoomFactor -= 0.01;
+        
+      if (this._designerCanvas.zoomFactor < 0.001)
+        this._designerCanvas.zoomFactor = 0.001
+
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');

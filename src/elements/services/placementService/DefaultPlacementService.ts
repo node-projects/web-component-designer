@@ -94,7 +94,7 @@ export class DefaultPlacementService implements IPlacementService {
     //TODO: -> what is if a transform already exists -> backup existing style.?
     for (const designItem of filterdItems) {
       const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
-      combineTransforms(<HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
+      combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
     }
   }
 

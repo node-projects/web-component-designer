@@ -1,7 +1,7 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.0.84",
+  "version": "0.0.86",
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
@@ -24,7 +24,6 @@
     "@types/jquery.fancytree": "0.0.7",
     "ace-builds": "^1.4.14",
     "codemirror": "^5.65.1",
-    "custom-elements-manifest": "^1.0.0",
     "esprima-next": "^5.8.1",
     "html2canvas": "*",
     "jest": "^27.4.7",

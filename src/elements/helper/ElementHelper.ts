@@ -23,4 +23,3 @@ export function getElementDisplaytype(element: HTMLElement): ElementDisplayType 
 export function isEmptyTextNode(node: Node): boolean {
   return node.textContent.trim() == '' && node.textContent.indexOf('\xa0' /* &nbsp; */) < 0;
 }
-
