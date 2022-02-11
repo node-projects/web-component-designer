@@ -20,7 +20,6 @@ import { GlobalContext } from './GlobalContext';
 import { IBindingService } from "./bindingsService/IBindingService";
 import { IElementAtPointService } from './elementAtPointService/IElementAtPointService';
 import { ISnaplinesProviderService } from "./placementService/ISnaplinesProviderService.js";
-import { IPrepareElementsForDesignerService } from './instanceService/IPrepareElementsForDesignerService';
 import { IDragDropService } from './dragDropService/IDragDropService';
 import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
 import { IDesignerPointerExtensionProvider } from "../widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
@@ -44,7 +43,6 @@ interface ServiceNameMap {
   "bindableObjectsService": IBindableObjectsService;
   "bindableObjectDragDropService": IBindableObjectDragDropService;
   "elementAtPointService": IElementAtPointService;
-  "prepareElementsForDesignerService": IPrepareElementsForDesignerService;
   "dragDropService": IDragDropService;
   "copyPasteService": ICopyPasteService;
   "modelCommandService": IModelCommandService
@@ -123,10 +121,6 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get elementAtPointService(): IElementAtPointService {
     return this.getLastService('elementAtPointService');
-  }
-
-  get prepareElementsForDesignerService(): IPrepareElementsForDesignerService {
-    return this.getLastService('prepareElementsForDesignerService');
   }
 
   get dragDropService(): IDragDropService {

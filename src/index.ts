@@ -72,8 +72,6 @@ export type { IIntializationService } from "./elements/services/initializationSe
 
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";
-export * from "./elements/services/instanceService/PrepareElementsForDesignerService.js";
-export type { IPrepareElementsForDesignerService } from "./elements/services/instanceService/IPrepareElementsForDesignerService.js";
 
 export * from "./elements/services/manifestParsers/WebcomponentManifestParserService.js";
 
@@ -160,8 +158,6 @@ export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GridExtension.js";
 export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/IframeExtension.js";
-export * from "./elements/widgets/designerView/extensions/IframeExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtension.js";

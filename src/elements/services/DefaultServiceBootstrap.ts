@@ -39,7 +39,6 @@ import { GridPlacementService } from './placementService/GridPlacementService.js
 import { ElementAtPointService } from './elementAtPointService/ElementAtPointService';
 import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementService';
 import { SnaplinesProviderService } from './placementService/SnaplinesProviderService';
-import { PrepareElementsForDesignerService } from './instanceService/PrepareElementsForDesignerService';
 import { DragDropService } from './dragDropService/DragDropService';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
 import { CopyPasteService } from './copyPasteService/CopyPasteService';
@@ -54,7 +53,6 @@ import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
 import { HtmlWriterService } from './htmlWriterService/HtmlWriterService.js';
 import { RectContextMenu } from '../widgets/designerView/extensions/contextMenu/RectContextMenu.js';
 import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/PathContextMenu.js';
-import { IframeExtensionProvider } from '../widgets/designerView/extensions/IframeExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -73,7 +71,6 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
-  serviceContainer.register("prepareElementsForDesignerService", new PrepareElementsForDesignerService());
   serviceContainer.register("dragDropService", new DragDropService());
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
@@ -82,7 +79,6 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),
     new InvisibleDivExtensionProvider(),
-    new IframeExtensionProvider(),
     // new ElementDragTitleExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
