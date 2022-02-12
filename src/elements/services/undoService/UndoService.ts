@@ -31,6 +31,7 @@ export class UndoService implements IUndoService {
     }
     if (itm.undoStack.length)
       this._undoStack.push(itm);
+      this._redoStack = [];
   }
 
   private abortTransactionItem(transactionItem: ITransactionItem) {

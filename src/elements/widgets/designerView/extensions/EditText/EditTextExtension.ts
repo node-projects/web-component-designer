@@ -46,13 +46,15 @@ export class EditTextExtension extends AbstractExtension {
     elements.querySelectorAll('button').forEach(x => x.onclick = () => this._formatSelection(x.dataset['command']));
 
     let foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    foreignObject.setAttribute('x', '' + (itemRect.x - this.designerCanvas.containerBoundingRect.x));
-    foreignObject.setAttribute('y', '' + (itemRect.y - this.designerCanvas.containerBoundingRect.y - 30));
+    foreignObject.setAttribute('x', '' + (itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor);
+    foreignObject.setAttribute('y', '' + ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 30));
     foreignObject.setAttribute('width', '96');
     foreignObject.setAttribute('height', '24');
     foreignObject.appendChild(elements)
     this.overlayLayerView.addOverlay(foreignObject, OverlayLayer.Foregorund);
     this.overlays.push(foreignObject);
+
+    this.designerCanvas.clickOverlay.style.pointerEvents = 'none';
   }
 
   override refresh() {
@@ -66,6 +68,7 @@ export class EditTextExtension extends AbstractExtension {
     this.extendedItem.element.removeEventListener('blur', this._blurBound);
     this.designerCanvas.eatEvents = null;
     this.extendedItem.updateChildrenFromNodesChildren();
+    this.designerCanvas.clickOverlay.style.pointerEvents = 'auto';
   }
 
   _contentEdited() {

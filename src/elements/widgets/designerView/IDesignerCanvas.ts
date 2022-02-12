@@ -18,6 +18,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly rootDesignItem: IDesignItem;
   readonly overlayLayer: OverlayLayerView;
   readonly extensionManager: IExtensionManager;
+  readonly clickOverlay: HTMLDivElement;
 
   readonly snapLines: Snaplines;
 
