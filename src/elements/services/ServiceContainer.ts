@@ -61,8 +61,17 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public readonly designerExtensions: Map<(ExtensionType | string), IDesignerExtensionProvider[]> = new Map();
 
+  removeDesignerExtensionOfType(container: (ExtensionType | string), lambda: new (...args: any[]) => IDesignerExtensionProvider): void {
+    const extContainer = this.designerExtensions.get(container);
+    for (let i = 0; i < extContainer.length; i++) {
+      if (extContainer[i].constructor === lambda) {
+        extContainer.splice(i, 1);
+      }
+    }
+  }
+
   public readonly designViewConfigButtons: IDesignViewConfigButtonsProvider[] = [];
-  
+
   public readonly designerPointerExtensions: IDesignerPointerExtensionProvider[] = [];
 
   public designerContextMenuExtensions: IContextMenuExtension[];

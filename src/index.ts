@@ -177,6 +177,11 @@ export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtens
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
 
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtension.js";
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextWithStyloExtension.js";
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextWithStyloExtensionProvider.js";
+
 export type { IContextMenuExtension, ContextmenuInitiator } from "./elements/widgets/designerView/extensions/contextMenu/IContextMenuExtension.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js";

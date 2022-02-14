@@ -19,6 +19,7 @@
   "devDependencies": {
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^2.4.1",
+    "@papyrs/stylo": "^0.0.7",
     "@types/codemirror": "^5.60.5",
     "@types/jquery": "^3.5.13",
     "@types/jquery.fancytree": "0.0.7",
