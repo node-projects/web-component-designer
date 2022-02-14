@@ -136,6 +136,14 @@ export class DesignItem implements IDesignItem {
     this.node.textContent = value;
   }
 
+  public get innerHTML(): string {
+    return this.element.innerHTML;
+  }
+  public set innerHTML(value: string) {
+    this.element.innerHTML = value;
+    this.updateChildrenFromNodesChildren();
+  }
+
   private _hideAtDesignTime: boolean;
   public get hideAtDesignTime() {
     return this._hideAtDesignTime;

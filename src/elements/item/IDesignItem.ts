@@ -43,6 +43,7 @@ export interface IDesignItem {
 
   readonly hasContent: boolean;
   content: string;
+  innerHTML?: string;
 
   readonly node: Node;
   readonly element: Element;

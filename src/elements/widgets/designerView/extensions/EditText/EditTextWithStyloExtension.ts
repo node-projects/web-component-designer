@@ -5,34 +5,18 @@ import { AbstractExtension } from "../AbstractExtension.js";
 import { ExtensionType } from "../ExtensionType.js";
 import { IExtensionManager } from "../IExtensionManger";
 import { OverlayLayer } from "../OverlayLayer.js";
-import { getActiveElement } from "../../../../helper/ElementHelper.js";
 
 export class EditTextWithStyloExtension extends AbstractExtension {
 
   private _contentEditedBound: any;
   private _blurBound: any;
-  private _focusBound: any;
-
-  /*private static style = css`    
-  .stylo-container > * {
-    white-space: pre-wrap;
-  }
-  .stylo-container > *:after {
-    content: attr(placeholder);
-    color: #6e6d6f;
-  }`;*/
-
+  
   private static template = html`
     <stylo-editor></stylo-editor>
   `;
-  private _blurTimeout: NodeJS.Timeout;
-
+  
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
-
-    this._contentEditedBound = this._contentEdited.bind(this);
-    this._blurBound = this._blur.bind(this);
-
     import('@papyrs/stylo/www/build/stylo.esm.js');
   }
 
@@ -54,6 +38,21 @@ export class EditTextWithStyloExtension extends AbstractExtension {
     foreignObject.appendChild(elements)
     this.overlayLayerView.addOverlay(foreignObject, OverlayLayer.Foregorund);
     this.overlays.push(foreignObject);
+
+    const normalized = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
+    const rect1 = this._drawRect(0, 0, this.designerCanvas.containerBoundingRect.width, normalized.y, 'svg-transparent', null, OverlayLayer.Normal);
+    const rect2 = this._drawRect(0, 0, normalized.x, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', null, OverlayLayer.Normal);
+    const rect3 = this._drawRect(normalized.x + normalized.width, 0, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', null, OverlayLayer.Normal);
+    const rect4 = this._drawRect(0, normalized.y + normalized.height, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', null, OverlayLayer.Normal);
+    rect1.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    rect1.addEventListener('pointerup', (e) => this._clickOutside(e));
+    rect2.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    rect2.addEventListener('pointerup', (e) => this._clickOutside(e));
+    rect3.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    rect3.addEventListener('pointerup', (e) => this._clickOutside(e));
+    rect4.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    rect4.addEventListener('pointerup', (e) => this._clickOutside(e));
+
     requestAnimationFrame(() => {
       const stylo = foreignObject.querySelector('stylo-editor');
       //@ts-ignore
@@ -71,32 +70,15 @@ export class EditTextWithStyloExtension extends AbstractExtension {
   }
 
   override dispose() {
-    console.log('disposed');
     this._removeAllOverlays();
     this.extendedItem.element.removeAttribute('contenteditable');
-    this.extendedItem.element.removeEventListener('input', this._contentEditedBound);
-    this.extendedItem.element.removeEventListener('blur', this._blurBound);
-    this.extendedItem.element.removeEventListener('focus', this._focusBound);
     this.designerCanvas.eatEvents = null;
     this.extendedItem.updateChildrenFromNodesChildren();
     this.designerCanvas.clickOverlay.style.pointerEvents = 'auto';
   }
-
-  _contentEdited() {
-    //this.extendedItem.content = this.extendedItem.element.innerHTML;    
-  }
-
-  _blur(e) {
-    console.log('blur', e);
-    if (!this._blurTimeout) {
-      this._blurTimeout = setTimeout(() => {
-        //let activeElement = getActiveElement();
-        //todo, don't remove doubleclick extension (another type could be used), remove extension itself
-        //maybe also configureable when when to remove the extension
-        //if (activeElement != this.extendedItem.element)
-        //  this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Doubleclick);
-        this._blurTimeout = null;
-      }, 250);
-    }
+  
+  _clickOutside(e) {
+    this.extendedItem.innerHTML = this.extendedItem.element.innerHTML; 
+    this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Doubleclick);
   }
 }
