@@ -121,6 +121,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
     super();
 
     this._treeDiv = document.createElement('div');
+    this._treeDiv.style.userSelect = 'none';
     this.shadowRoot.appendChild(this._treeDiv);
     this._treeDiv.addEventListener('click', this._clickElement.bind(this));
   }
