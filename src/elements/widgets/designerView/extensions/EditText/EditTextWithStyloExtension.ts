@@ -10,14 +10,19 @@ export class EditTextWithStyloExtension extends AbstractExtension {
 
   private _contentEditedBound: any;
   private _blurBound: any;
-  
+
   private static template = html`
     <stylo-editor></stylo-editor>
   `;
-  
+  private _resizeObserver: ResizeObserver;
+  private _rect1: SVGRectElement;
+  private _rect2: SVGRectElement;
+  private _rect3: SVGRectElement;
+  private _rect4: SVGRectElement;
+
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
-    import('@papyrs/stylo/www/build/stylo.esm.js');
+    import('@papyrs/stylo/dist/esm/loader.js').then(d => d.defineCustomElements());
   }
 
   override extend() {
@@ -39,19 +44,15 @@ export class EditTextWithStyloExtension extends AbstractExtension {
     this.overlayLayerView.addOverlay(foreignObject, OverlayLayer.Foregorund);
     this.overlays.push(foreignObject);
 
-    const normalized = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
-    const rect1 = this._drawRect(0, 0, this.designerCanvas.containerBoundingRect.width, normalized.y, 'svg-transparent', null, OverlayLayer.Normal);
-    const rect2 = this._drawRect(0, 0, normalized.x, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', null, OverlayLayer.Normal);
-    const rect3 = this._drawRect(normalized.x + normalized.width, 0, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', null, OverlayLayer.Normal);
-    const rect4 = this._drawRect(0, normalized.y + normalized.height, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', null, OverlayLayer.Normal);
-    rect1.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    rect1.addEventListener('pointerup', (e) => this._clickOutside(e));
-    rect2.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    rect2.addEventListener('pointerup', (e) => this._clickOutside(e));
-    rect3.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    rect3.addEventListener('pointerup', (e) => this._clickOutside(e));
-    rect4.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    rect4.addEventListener('pointerup', (e) => this._clickOutside(e));
+    this._drawClickOverlayRects();
+    this._rect1.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    this._rect1.addEventListener('pointerup', (e) => this._clickOutside(e));
+    this._rect2.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    this._rect2.addEventListener('pointerup', (e) => this._clickOutside(e));
+    this._rect3.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    this._rect3.addEventListener('pointerup', (e) => this._clickOutside(e));
+    this._rect4.addEventListener('pointerdown', (e) => this._clickOutside(e));
+    this._rect4.addEventListener('pointerup', (e) => this._clickOutside(e));
 
     requestAnimationFrame(() => {
       const stylo = foreignObject.querySelector('stylo-editor');
@@ -63,6 +64,18 @@ export class EditTextWithStyloExtension extends AbstractExtension {
       };
     });
     this.designerCanvas.clickOverlay.style.pointerEvents = 'none';
+
+    this._resizeObserver = new ResizeObserver(() => this._drawClickOverlayRects());
+    this._resizeObserver.observe(this.extendedItem.element);
+  }
+
+  private _drawClickOverlayRects() {
+    const normalized = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
+
+    this._rect1 = this._drawRect(0, 0, this.designerCanvas.containerBoundingRect.width, normalized.y, 'svg-transparent', this._rect1, OverlayLayer.Normal);
+    this._rect2 = this._drawRect(0, 0, normalized.x, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', this._rect2, OverlayLayer.Normal);
+    this._rect3 = this._drawRect(normalized.x + normalized.width, 0, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', this._rect3, OverlayLayer.Normal);
+    this._rect4 = this._drawRect(0, normalized.y + normalized.height, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', this._rect4, OverlayLayer.Normal);
   }
 
   override refresh() {
@@ -70,15 +83,19 @@ export class EditTextWithStyloExtension extends AbstractExtension {
   }
 
   override dispose() {
+    this._resizeObserver.disconnect();
     this._removeAllOverlays();
     this.extendedItem.element.removeAttribute('contenteditable');
     this.designerCanvas.eatEvents = null;
     this.extendedItem.updateChildrenFromNodesChildren();
     this.designerCanvas.clickOverlay.style.pointerEvents = 'auto';
   }
-  
+
   _clickOutside(e) {
-    this.extendedItem.innerHTML = this.extendedItem.element.innerHTML; 
+    this.extendedItem.innerHTML = this.extendedItem.element.innerHTML;
+    //TODO: the extension should remove itself, not the doubleclick extensions
+    //      cause the extension could be applied in another way
+    //maybe also the removal is maybe not desired (for example if it's permanet extension)
     this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Doubleclick);
   }
 }
