@@ -61,13 +61,17 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         display: flex;
         position: sticky;
         right: 0;
-        padding-right: 4px;
+        padding-right: 2px;
         align-items: center;
         gap: 2px;
         background: #ffffffc9;
-        width: 70px;
+        width: 42px;
         justify-content: flex-end;
         background: white;
+      }
+
+      .cmd > img {
+        width: 10px;
       }
 
       table.fancytree-ext-table tbody tr.fancytree-selected {
@@ -195,17 +199,18 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
             let d = document.createElement("div");
             d.className = "cmd"
-            let img = document.createElement('img');
-            this._showHideAtDesignTimeState(img, designItem);
-            img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
-            img.title = 'hide in designer';
-            d.appendChild(img);
 
             let imgL = document.createElement('img');
             this._showLockAtDesignTimeState(imgL, designItem);
             imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, designItem);
             imgL.title = 'lock';
             d.appendChild(imgL);
+           
+            let img = document.createElement('img');
+            this._showHideAtDesignTimeState(img, designItem);
+            img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
+            img.title = 'hide in designer';
+            d.appendChild(img);
 
             let imgH = document.createElement('img');
             this._showHideAtRunTimeState(imgH, designItem);

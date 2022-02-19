@@ -39,6 +39,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
       let element: Element;
+      let manualCreatedElement = false;
       if (!namespace)
         element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call 
       if (!element) {
@@ -46,6 +47,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
           element = document.createElementNS(namespace, item.rawTagName);
         else
           element = document.createElement(item.rawTagName);
+        manualCreatedElement = true;
       }
       designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
 
@@ -59,6 +61,9 @@ export class NodeHtmlParserService implements IHtmlParserService {
       for (let a in attr) {
         if (a !== 'style') {
           designItem.attributes.set(a, attr[a])
+          if (manualCreatedElement) {
+            element.setAttribute(a, attr[a]);
+          }
           if (a === 'node-projects-hide-at-design-time')
             hideAtDesignTime = true;
           else if (a === 'node-projects-hide-at-run-time')
@@ -75,6 +80,9 @@ export class NodeHtmlParserService implements IHtmlParserService {
         styleParser.parse(style);
         for (let s of styleParser.entries) {
           designItem.styles.set(s.name, s.value);
+          if (manualCreatedElement) {
+            element.style[s.name] = s.value;
+          }
         }
       }
 

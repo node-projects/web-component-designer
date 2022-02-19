@@ -23,3 +23,14 @@ export function getElementDisplaytype(element: HTMLElement): ElementDisplayType 
 export function isEmptyTextNode(node: Node): boolean {
   return node.textContent.trim() == '' && node.textContent.indexOf('\xa0' /* &nbsp; */) < 0;
 }
+
+export function getActiveElement(): Element {
+  let activeElement = document.activeElement;
+  let lastActive = null;
+  while (activeElement != lastActive) {
+    lastActive = activeElement;
+    if (activeElement.shadowRoot != null && activeElement.shadowRoot.activeElement)
+      activeElement = activeElement.shadowRoot.activeElement;
+  }
+  return activeElement;
+}

@@ -11,8 +11,7 @@ import { IContextMenuItem } from "../../../..";
 
 
 export class PathExtension extends AbstractExtension {
-  //private _itemRect: DOMRect;
-  //private _svgRect: DOMRect;
+
   private _lastPos: IPoint
   private _parentRect: DOMRect;
   private _startPos: IPoint;
@@ -25,8 +24,6 @@ export class PathExtension extends AbstractExtension {
   }
 
   override extend(): void {
-    //this._itemRect = this.extendedItem.element.getBoundingClientRect();
-    //this._svgRect = (<SVGGeometryElement>this.extendedItem.element).ownerSVGElement.getBoundingClientRect();
     this._parentRect = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
     this._pathdata = (<SVGGraphicsElement>this.extendedItem.node).getPathData({ normalize: false });
     for (let p of this._pathdata) {
@@ -140,7 +137,7 @@ export class PathExtension extends AbstractExtension {
 
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
-    let circle = this._drawCircle(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y, 5, 'svg-path');
+    let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5, 'svg-path');
     let circlePos = { x: x, y: y };
     const items: IContextMenuItem[] = [];
     const pidx = this._pathdata.indexOf(p);
@@ -238,7 +235,7 @@ export class PathExtension extends AbstractExtension {
     circle.addEventListener(EventNames.ContextMenu, event => {
       event.preventDefault();
       ContextMenuHelper.showContextMenu(null, event, null, items);
-    })
+    });
   }
 
   _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
