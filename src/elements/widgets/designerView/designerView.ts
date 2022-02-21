@@ -159,16 +159,17 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.id = "canvas";
     this._designerCanvas.appendChild(document.createElement("slot"));
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
+    this._designerCanvas.onZoomFactorChanged.on(() => {
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    })
 
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     this._zoomInput.onkeydown = (e) => {
       if (e.key == 'Enter')
         this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     this._zoomInput.onblur = () => {
       this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
@@ -177,7 +178,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
         this._designerCanvas.zoomFactor += 0.1;
       else
         this._designerCanvas.zoomFactor += 0.01;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
     zoomDecrease.onclick = () => {
@@ -185,7 +185,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
         this._designerCanvas.zoomFactor -= 0.1;
       else
         this._designerCanvas.zoomFactor -= 0.01;
-        
+
       if (this._designerCanvas.zoomFactor < 0.001)
         this._designerCanvas.zoomFactor = 0.001
 

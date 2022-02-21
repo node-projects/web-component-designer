@@ -62,7 +62,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
   public set zoomFactor(value: number) {
     this._zoomFactor = value;
-    this.zoomFactorChanged();
+    this._zoomFactorChanged();
   }
   public get scaleFactor(): number {
     return this._scaleFactor;
@@ -72,10 +72,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
   public set canvasOffset(value: IPoint) {
     this._canvasOffset = value;
-    this.zoomFactorChanged();
+    this._zoomFactorChanged();
   }
 
   public onContentChanged = new TypedEvent<void>();
+  public onZoomFactorChanged = new TypedEvent<number>();
 
   // Private Variables
   private _canvas: HTMLDivElement;
@@ -201,14 +202,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
   set designerWidth(value: string) {
     this._canvasContainer.style.width = value;
-    this.zoomFactorChanged();
+    this._zoomFactorChanged();
   }
   get designerHeight(): string {
     return this._canvasContainer.style.height;
   }
   set designerHeight(value: string) {
     this._canvasContainer.style.height = value;
-    this.zoomFactorChanged();
+    this._zoomFactorChanged();
   }
 
   get designerOffsetWidth(): number {
@@ -424,7 +425,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
-  zoomFactorChanged() {
+  private _zoomFactorChanged() {
     //a@ts-ignore
     //this._canvasContainer.style.zoom = <any>this._zoomFactor;
     //this._canvasContainer.style.transform = 'scale(' + this._zoomFactor+') translate(' + this._translate.x + ', '+this._translate.y+')';
@@ -432,6 +433,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer.style.bottom = this._outercanvas2.offsetHeight >= this._canvasContainer.offsetHeight ? '0' : '';
     this._canvasContainer.style.right = this._outercanvas2.offsetWidth >= this._canvasContainer.offsetWidth ? '0' : '';
     this._updateTransform();
+    this.onZoomFactorChanged.emit(this._zoomFactor);
   }
 
   _updateTransform() {
