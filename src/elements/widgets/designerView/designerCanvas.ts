@@ -676,8 +676,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y / this.zoomFactor * this._scaleFactor;
 
     return {
-      x: offsetOfOuterX - offsetOfCanvasX + offsetOfCanvasX - offsetOfCanvasX / this.zoomFactor,
-      y: offsetOfOuterY - offsetOfCanvasY + offsetOfCanvasY - offsetOfCanvasY / this.zoomFactor
+      x: offsetOfOuterX - offsetOfCanvasX / this.zoomFactor,
+      y: offsetOfOuterY - offsetOfCanvasY / this.zoomFactor
     };
   }
 
