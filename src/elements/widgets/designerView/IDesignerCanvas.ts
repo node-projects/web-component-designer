@@ -44,4 +44,6 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   elementFromPoint(x: number, y: number): Element;
 
   getItemsBelowMouse(event: MouseEvent): Element[];
+
+  zoomTowardsPointer(point: IPoint, scalechange: number) : void;
 }

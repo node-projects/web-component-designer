@@ -16,45 +16,31 @@ export class ZoomTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    const eventPoint = designerCanvas.getNormalizedEventCoordinates(event)
-
-    let offsetOuter: IPoint = {
-      x: (event.clientX - designerCanvas.outerRect.x) / designerCanvas.zoomFactor,
-      y: (event.clientY - designerCanvas.outerRect.y) / designerCanvas.zoomFactor
-    }
-
+    const eventPoint = designerCanvas.getNormalizedEventCoordinates(event);
     switch (event.type) {
       case EventNames.PointerDown:
         this._startPoint = eventPoint;
         break;
       case EventNames.PointerUp:
         this._endPoint = eventPoint;
-        this._zoomOnto(this._startPoint, this._endPoint, offsetOuter, designerCanvas)
+        let isLeftClick: boolean = event.button == 0;
+        switch (event.button) {
+          case 0: //Left-Click
+          case 2: //Right-Click
+            this._zoomOnto(isLeftClick, this._startPoint, this._endPoint, designerCanvas);
+            break;
+        }
         break;
     }
 
   }
 
-  private _zoomOnto(startPoint: IPoint, endPoint: IPoint, posOuter: IPoint, designerCanvas: IDesignerCanvas) {
+  private _zoomOnto(isZoomInto: boolean, startPoint: IPoint, endPoint: IPoint, designerCanvas: IDesignerCanvas) {
     if (this._isPositionEqual(startPoint, endPoint)) {
-
       const oldZoom = designerCanvas.zoomFactor;
-      const newZoom = oldZoom + this._zoomStepSize;
+      const newZoom = isZoomInto ? oldZoom + this._zoomStepSize : oldZoom - this._zoomStepSize;
       const scalechange = newZoom / oldZoom;
-
-      let deltaOffset: IPoint = {
-        x: endPoint.x / oldZoom - posOuter.x,
-        y: endPoint.y / oldZoom - posOuter.y,
-      }
-
-      let canvasOffset: IPoint = {
-        x: -(endPoint.x / scalechange) - (deltaOffset.x / (newZoom / oldZoom)),
-        y: -(endPoint.y / scalechange) - (deltaOffset.y / (newZoom / oldZoom)),
-      }
-
-      designerCanvas.zoomFactor = newZoom;
-      designerCanvas.canvasOffset = canvasOffset;
-
+      designerCanvas.zoomTowardsPointer(endPoint, scalechange);
     } else {
 
     }
