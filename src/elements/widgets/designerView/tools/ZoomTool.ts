@@ -11,6 +11,7 @@ export class ZoomTool implements ITool {
   private _endPoint: IPoint;
   private _pointerMovementTolerance: number = 5;
   private _zoomStepSize: number = 1; //number x 100 = Scale in percent
+  private _lastZoomPoint : IPoint = {x: -1, y: -1};
 
   activated(serviceContainer: ServiceContainer) {
   }
@@ -36,22 +37,28 @@ export class ZoomTool implements ITool {
       const oldZoom = designerCanvas.zoomFactor;
       const newZoom = oldZoom + this._zoomStepSize;
 
-      designerCanvas.zoomFactor = newZoom;
-
+      
       console.log("Xpreoff " + designerCanvas.canvasOffset.x)
       console.log("Ypreoff " + designerCanvas.canvasOffset.y)
-
-      let canvasOffset = {
-        x: (endPoint.x / (newZoom / oldZoom)),
-        y: (endPoint.y / (newZoom / oldZoom)),
+      let canvasOffset : IPoint;
+      if(endPoint.x !== this._lastZoomPoint.x && endPoint.y !== this._lastZoomPoint.y){
+        canvasOffset = {
+          x: (designerCanvas.canvasOffset.x / oldZoom) - (endPoint.x / (newZoom / oldZoom)),
+          y: (designerCanvas.canvasOffset.x / oldZoom) - (endPoint.y / (newZoom / oldZoom)),
+        }
+      } else {
+        canvasOffset = {
+          x: -(endPoint.x / (newZoom / oldZoom)),
+          y: -(endPoint.y / (newZoom / oldZoom)),
+        }
       }
-      
+      designerCanvas.zoomFactor = newZoom;
       designerCanvas.canvasOffset = canvasOffset;
+
+      this._lastZoomPoint = endPoint;
 
     } else {
       console.log("moved");
-
-
     }
   }
 
