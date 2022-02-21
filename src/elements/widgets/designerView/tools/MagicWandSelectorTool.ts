@@ -11,7 +11,7 @@ export class MagicWandSelectorTool implements ITool {
 
   private _pathD: string;
   private _path: SVGPathElement;
-  
+
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
 
@@ -40,18 +40,18 @@ export class MagicWandSelectorTool implements ITool {
 
         let point: DOMPointInit = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
-          let elementRect = e.getBoundingClientRect();
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
+          let elementRect = designerCanvas.getNormalizedElementCoordinates(e);
+          point.x = elementRect.x;
+          point.y = elementRect.y;
           const p1 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
+          point.x = elementRect.x + elementRect.width;
+          point.y = elementRect.y;
           const p2 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
+          point.x = elementRect.x;
+          point.y = elementRect.y + elementRect.height;
           const p3 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
+          point.x = elementRect.x + elementRect.width;
+          point.y = elementRect.y + elementRect.height;
           const p4 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
           if (p1 && p2 && p3 && p4) {
             const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
@@ -70,8 +70,7 @@ export class MagicWandSelectorTool implements ITool {
     }
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
-  { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 
   activated(serviceContainer: ServiceContainer) {
   }
