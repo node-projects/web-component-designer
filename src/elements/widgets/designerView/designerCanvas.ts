@@ -55,6 +55,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
   private _canvasOffset: IPoint = { x: 0, y: 0 };
 
+  private _lastPointerDownHandler: (evt: any) => boolean;
+
   public get zoomFactor(): number {
     return this._zoomFactor;
   }
@@ -674,8 +676,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y / this.zoomFactor * this._scaleFactor;
 
     return {
-      x: offsetOfOuterX - offsetOfCanvasX + offsetOfCanvasX - offsetOfCanvasX / this.zoomFactor,
-      y: offsetOfOuterY - offsetOfCanvasY + offsetOfCanvasY - offsetOfCanvasY / this.zoomFactor
+      x: offsetOfOuterX - offsetOfCanvasX / this.zoomFactor,
+      y: offsetOfOuterY - offsetOfCanvasY / this.zoomFactor
     };
   }
 
@@ -766,10 +768,21 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         return;
     }*/
 
+    if (this._lastPointerDownHandler) {
+      try {
+        this._lastPointerDownHandler(event);
+      } catch { }
+      if (event.type == EventNames.PointerUp)
+        this._lastPointerDownHandler = null;
+      return;
+    }
+
     if (currentElement instanceof SVGGraphicsElement && (<ShadowRoot>currentElement?.ownerSVGElement?.parentNode)?.host == this.overlayLayer) {
       this.clickOverlay.style.cursor = getComputedStyle(currentElement).cursor;
-      //@ts-ignore
-      currentElement.dispatchEvent(new event.constructor(event.type, event));
+      if (event.type == EventNames.PointerDown) {
+        this._lastPointerDownHandler = (evt) => currentElement.dispatchEvent(new evt.constructor(evt.type, evt));
+      }
+      currentElement.dispatchEvent(new (<any>event).constructor(event.type, event));
       return;
     }
     this.clickOverlay.style.cursor = this._canvas.style.cursor;
@@ -795,6 +808,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._canvas.style.cursor = tool.cursor;
+    tool.pointerEventHandler(this, event, <Element>currentElement);
+
+    if (event.type == EventNames.PointerDown) {
+      this._lastPointerDownHandler = (evt) => tool.pointerEventHandler(this, evt, <Element>currentElement);
+    }
     tool.pointerEventHandler(this, event, <Element>currentElement);
   }
 
