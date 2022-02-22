@@ -16,7 +16,7 @@ export class ZoomTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    const eventPoint = designerCanvas.getNormalizedEventCoordinates(event);
+    const eventPoint = designerCanvas.getViewportCoordinates(event);
     switch (event.type) {
       case EventNames.PointerDown:
         this._startPoint = eventPoint;
@@ -39,8 +39,7 @@ export class ZoomTool implements ITool {
     if (this._isPositionEqual(startPoint, endPoint)) {
       const oldZoom = designerCanvas.zoomFactor;
       const newZoom = isZoomInto ? oldZoom + this._zoomStepSize : oldZoom - this._zoomStepSize;
-      const scalechange = newZoom / oldZoom;
-      designerCanvas.zoomTowardsPointer(endPoint, scalechange);
+      designerCanvas.zoomTowardsPointer(endPoint, newZoom);
     } else {
 
     }

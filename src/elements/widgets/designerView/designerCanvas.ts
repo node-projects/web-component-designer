@@ -75,10 +75,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._zoomFactorChanged();
   }
   public get canvasOffsetUnzoomed(): IPoint {
-    return {x:this._canvasOffset.x * this.zoomFactor, y:this._canvasOffset.y * this.zoomFactor};
+    return { x: this._canvasOffset.x * this.zoomFactor, y: this._canvasOffset.y * this.zoomFactor };
   }
   public set canvasOffsetUnzoomed(value: IPoint) {
-    this.canvasOffset = {x:value.x / this.zoomFactor, y:value.y / this.zoomFactor};
+    this.canvasOffset = { x: value.x / this.zoomFactor, y: value.y / this.zoomFactor };
   }
 
   public onContentChanged = new TypedEvent<void>();
@@ -688,8 +688,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
-
-
+  public getViewportCoordinates(event: MouseEvent): IPoint {
+    return {
+      x: (event.clientX - this.outerRect.x),
+      y: (event.clientY - this.outerRect.y)
+    };
+  }
 
   public getNormalizedElementCoordinates(element: Element): IRect {
     const targetRect = element.getBoundingClientRect();
@@ -878,24 +882,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   }
 
-  public zoomTowardsPointer(point: IPoint, scalechange: number) {
-     
-    /*let canvasOffset: IPoint = {
-      x: -(point.x / scalechange) - ((point.x / this.zoomFactor - (point.x + (this.containerBoundingRect.x - this.outerRect.x) / this.zoomFactor)) / scalechange),
-      y: -(point.y / scalechange) - ((point.y / this.zoomFactor - (point.y + (this.containerBoundingRect.y - this.outerRect.y) / this.zoomFactor)) / scalechange),
-    }
+  public zoomTowardsPointer(point: IPoint, newZoom: number) {
 
-    this.zoomFactor = scalechange * this.zoomFactor;
-    this.canvasOffset = canvasOffset;
+    const scaleChange = newZoom / this.zoomFactor;
 
-
-    return;*/
-
-    const newZoom = scalechange * this.zoomFactor;
-    
-    let newCanvasOffset = {
-      x: -(point.x * (scalechange - 1) + scalechange * -this.canvasOffsetUnzoomed.x),
-      y: -(point.y * (scalechange - 1) + scalechange * -this.canvasOffsetUnzoomed.y) 
+    const newCanvasOffset = {
+      x: -(point.x * (scaleChange - 1) + scaleChange * -this.canvasOffsetUnzoomed.x),
+      y: -(point.y * (scaleChange - 1) + scaleChange * -this.canvasOffsetUnzoomed.y)
     }
 
     this.zoomFactor = newZoom;
