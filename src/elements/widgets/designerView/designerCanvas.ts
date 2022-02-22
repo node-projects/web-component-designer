@@ -171,7 +171,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       <div style="width: 100%;height: 100%;">
         <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative;">
           <div id="node-projects-designer-canvas-canvasContainer"
-            style="width: 100%;height: 100%;margin: auto;position: absolute;top: 0;left: 0;user-select: none;">
+            style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none;">
             <div id="node-projects-designer-canvas-canvas" part="canvas"></div>
           </div>
         </div>
@@ -443,7 +443,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   _updateTransform() {
     this._scaleFactor = this._zoomFactor;
-    this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + this._canvasOffset.x + 'px, ' + this._canvasOffset.y + 'px)';
+    this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + (isNaN(this._canvasOffset.x) ? '0' : this._canvasOffset.x) + 'px, ' + (isNaN(this._canvasOffset.y) ? '0' : this._canvasOffset.y) + 'px)';
     this._canvasContainer.style.transformOrigin = '0 0';
     this.snapLines.clearSnaplines();
   }
