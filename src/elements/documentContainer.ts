@@ -84,6 +84,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._codeDiv = document.createElement("div");
     this._tabControl.appendChild(this._codeDiv);
     this._codeDiv.title = 'Code';
+    this._codeDiv.style.position = 'relative';
     this._codeDiv.appendChild(this.codeView);
     this.codeView.onTextChanged.on(text => {
       if (!this._disableChangeNotificationDesigner) {
