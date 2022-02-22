@@ -337,7 +337,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       },
       filter: {
         autoApply: true,   // Re-apply last filter if lazy data is loaded
-        autoExpand: false, // Expand all branches that contain matches while filtered
+        autoExpand: true, // Expand all branches that contain matches while filtered
         counter: true,     // Show a badge with number of matching child nodes near parent icons
         fuzzy: true,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
         hideExpandedCounter: true,  // Hide counter badge if parent is expanded
