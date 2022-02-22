@@ -82,6 +82,13 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       extensions: ['childcounter', 'dnd5', 'filter'],
       quicksearch: true,
       source: [],
+
+      filter: {
+        autoExpand: true,
+        mode: 'hide',
+        highlight: true
+      },
+
       dnd5: {
         dropMarkerParent: this.shadowRoot,
         preventRecursion: true, // Prevent dropping nodes on own descendants
