@@ -27,7 +27,7 @@ export class UndoService implements IUndoService {
     let itm = this._transactionStack.pop();
     if (itm !== transactionItem) {
       this.clear();
-      throw "UndoService - Commited Transation was not the last";
+      throw "UndoService - Commited Transaction was not the last";
     }
     if (itm.undoStack.length)
       this._undoStack.push(itm);
@@ -38,7 +38,7 @@ export class UndoService implements IUndoService {
     let itm = this._transactionStack.pop();
     if (itm !== transactionItem) {
       this.clear();
-      throw "UndoService - Aborted Transation was not the last";
+      throw "UndoService - Aborted Transaction was not the last";
     }
     itm.undo();
   }
