@@ -74,6 +74,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasOffset = value;
     this._zoomFactorChanged();
   }
+  public get canvasOffsetUnzoomed(): IPoint {
+    return {x:this._canvasOffset.x * this.zoomFactor, y:this._canvasOffset.y * this.zoomFactor};
+  }
+  public set canvasOffsetUnzoomed(value: IPoint) {
+    this.canvasOffset = {x:value.x / this.zoomFactor, y:value.y / this.zoomFactor};
+  }
 
   public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();
@@ -873,16 +879,27 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public zoomTowardsPointer(point: IPoint, scalechange: number) {
-    // offsetOuter = (point.x + (this.containerBoundingRect.x - this.outerRect.x) / this.zoomFactor),
-    // deltaOffset = point.x / this.zoomFactor - offsetOuter
-
-    let canvasOffset: IPoint = {
+     
+    /*let canvasOffset: IPoint = {
       x: -(point.x / scalechange) - ((point.x / this.zoomFactor - (point.x + (this.containerBoundingRect.x - this.outerRect.x) / this.zoomFactor)) / scalechange),
       y: -(point.y / scalechange) - ((point.y / this.zoomFactor - (point.y + (this.containerBoundingRect.y - this.outerRect.y) / this.zoomFactor)) / scalechange),
     }
 
     this.zoomFactor = scalechange * this.zoomFactor;
     this.canvasOffset = canvasOffset;
+
+
+    return;*/
+
+    const newZoom = scalechange * this.zoomFactor;
+    
+    let newCanvasOffset = {
+      x: -(point.x * (scalechange - 1) + scalechange * -this.canvasOffsetUnzoomed.x),
+      y: -(point.y * (scalechange - 1) + scalechange * -this.canvasOffsetUnzoomed.y) 
+    }
+
+    this.zoomFactor = newZoom;
+    this.canvasOffsetUnzoomed = newCanvasOffset;
   }
 }
 

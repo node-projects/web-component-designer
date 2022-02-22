@@ -10,7 +10,7 @@ export class ZoomTool implements ITool {
   private _startPoint: IPoint;
   private _endPoint: IPoint;
   private _pointerMovementTolerance: number = 5;
-  private _zoomStepSize: number = 1; //number x 100 = Scale in percent
+  private _zoomStepSize: number = 0.2; //number x 100 = Scale in percent
 
   activated(serviceContainer: ServiceContainer) {
   }
