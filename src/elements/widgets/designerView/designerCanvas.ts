@@ -889,8 +889,23 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return lstEl;
   }
 
-  public zoomOntoRectangle(startpoint: IPoint, endPoint: IPoint, scalechange: number) {
+  public zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint) {
+    let rect: IRect = {
+      x: startPoint.x < endPoint.x ? startPoint.x : endPoint.x,
+      y: startPoint.y < endPoint.y ? startPoint.y : endPoint.y,
+      width: Math.abs(startPoint.x - endPoint.x),
+      height: Math.abs(startPoint.y - endPoint.y),
+    }
 
+    let zFactorWidth = this.containerBoundingRect.width / rect.width;
+    let zFactorHeight = this.containerBoundingRect.height / rect.height;
+
+    let rectCenter : IPoint = {
+      x: (rect.width / 2) + rect.x,
+      y: (rect.height / 2) + rect.y
+    }
+
+    this.zoomTowardsPointer(rectCenter, zFactorWidth >= zFactorWidth ? zFactorHeight : zFactorWidth);
   }
 
   public zoomTowardsPointer(point: IPoint, newZoom: number) {
