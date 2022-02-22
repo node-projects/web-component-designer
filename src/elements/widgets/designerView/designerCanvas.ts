@@ -32,6 +32,7 @@ import { OverlayLayer } from "./extensions/OverlayLayer";
 import { OverlayLayerView } from './overlayLayerView';
 import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
 import { IRect } from "../../../interfaces/IRect.js";
+import { ISize } from "../../../interfaces/ISize.js";
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -215,6 +216,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   set designerHeight(value: string) {
     this._canvasContainer.style.height = value;
     this._zoomFactorChanged();
+  }
+
+  getDesignSurfaceDimensions(): ISize {
+    let ret: ISize = { width: null, height: null };
+    const cs = getComputedStyle(this._canvasContainer);
+    if (this._canvasContainer.style.width)
+      ret.width = parseFloat(cs.width);
+    if (this._canvasContainer.style.height)
+      ret.height = parseFloat(cs.height);
+    return ret;
   }
 
   get designerOffsetWidth(): number {
