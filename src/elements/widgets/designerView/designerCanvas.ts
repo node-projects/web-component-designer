@@ -74,6 +74,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasOffset = value;
     this._zoomFactorChanged();
   }
+  public get canvasOffsetUnzoomed(): IPoint {
+    return { x: this._canvasOffset.x * this.zoomFactor, y: this._canvasOffset.y * this.zoomFactor };
+  }
+  public set canvasOffsetUnzoomed(value: IPoint) {
+    this.canvasOffset = { x: value.x / this.zoomFactor, y: value.y / this.zoomFactor };
+  }
 
   public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();
@@ -163,8 +169,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   static override readonly template = html`
     <div style="display: flex;flex-direction: column;width: 100%;height: 100%;">
       <div style="width: 100%;height: 100%;">
-        <div id="node-projects-designer-canvas-outercanvas2"
-          style="width:100%;height:100%;position:relative;">
+        <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative;">
           <div id="node-projects-designer-canvas-canvasContainer"
             style="width: 100%;height: 100%;margin: auto;position: absolute;top: 0;left: 0;user-select: none;">
             <div id="node-projects-designer-canvas-canvas" part="canvas"></div>
@@ -672,14 +677,21 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public getNormalizedEventCoordinates(event: MouseEvent): IPoint {
     const offsetOfOuterX = (event.clientX - this.outerRect.x) / this.zoomFactor;
-    const offsetOfCanvasX = this.containerBoundingRect.x - this.outerRect.x / this.zoomFactor * this._scaleFactor;
+    const offsetOfCanvasX = this.containerBoundingRect.x - this.outerRect.x;
 
     const offsetOfOuterY = (event.clientY - this.outerRect.y) / this.zoomFactor;
-    const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y / this.zoomFactor * this._scaleFactor;
+    const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y;
 
     return {
       x: offsetOfOuterX - offsetOfCanvasX / this.zoomFactor,
       y: offsetOfOuterY - offsetOfCanvasY / this.zoomFactor
+    };
+  }
+
+  public getViewportCoordinates(event: MouseEvent): IPoint {
+    return {
+      x: (event.clientX - this.outerRect.x),
+      y: (event.clientY - this.outerRect.y)
     };
   }
 
@@ -864,6 +876,23 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.style.pointerEvents = 'auto';
     }
     return lstEl;
+  }
+
+  public zoomOntoRectangle(startpoint: IPoint, endPoint: IPoint, scalechange: number) {
+
+  }
+
+  public zoomTowardsPointer(point: IPoint, newZoom: number) {
+
+    const scaleChange = newZoom / this.zoomFactor;
+
+    const newCanvasOffset = {
+      x: -(point.x * (scaleChange - 1) + scaleChange * -this.canvasOffsetUnzoomed.x),
+      y: -(point.y * (scaleChange - 1) + scaleChange * -this.canvasOffsetUnzoomed.y)
+    }
+
+    this.zoomFactor = newZoom;
+    this.canvasOffsetUnzoomed = newCanvasOffset;
   }
 }
 

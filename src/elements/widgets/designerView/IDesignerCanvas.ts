@@ -15,6 +15,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
   readonly instanceServiceContainer: InstanceServiceContainer;
   readonly containerBoundingRect: DOMRect;
+  readonly outerRect: DOMRect;
   readonly rootDesignItem: IDesignItem;
   readonly overlayLayer: OverlayLayerView;
   readonly extensionManager: IExtensionManager;
@@ -38,10 +39,14 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   initialize(serviceContainer: ServiceContainer);
 
   getNormalizedEventCoordinates(event: MouseEvent): IPoint;
+  getViewportCoordinates(event: MouseEvent): IPoint;
   getNormalizedElementCoordinates(element: Element): IRect;
+
   getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
   elementFromPoint(x: number, y: number): Element;
 
   getItemsBelowMouse(event: MouseEvent): Element[];
+
+  zoomTowardsPointer(point: IPoint, scalechange: number) : void;
 }
