@@ -72,7 +72,7 @@ export class ResizeExtension extends AbstractExtension {
 
   _pointerActionTypeResize(circle: SVGCircleElement, event: PointerEvent, actionMode: string = 'se-resize') {
     event.stopPropagation();
-    const currentPoint = this.designerCanvas.getNormalizedEventCoordinates(event) //, this.extendedItem.element, event.type === 'pointerdown' ? null : this._initialPoint);
+    const currentPoint = this.designerCanvas.getNormalizedEventCoordinates(event);
 
     switch (event.type) {
       case EventNames.PointerDown:
@@ -155,6 +155,8 @@ export class ResizeExtension extends AbstractExtension {
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        this.designerCanvas.removeCurrentPointerEventHandler();
+        
         let cg = this.extendedItem.openGroup("Resize Elements", this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);

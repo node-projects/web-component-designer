@@ -54,6 +54,8 @@ export class PointerTool implements ITool {
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerCanvas.removeCurrentPointerEventHandler();
+
         break;
     }
 

@@ -21,6 +21,7 @@ export class PanTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerCanvas.removeCurrentPointerEventHandler();
         break;
     }
   }

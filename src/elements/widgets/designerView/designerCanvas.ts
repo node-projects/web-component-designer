@@ -851,6 +851,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     tool.pointerEventHandler(this, event, <Element>currentElement);
   }
 
+  public removeCurrentPointerEventHandler() {
+    this._lastPointerDownHandler = null;
+  }
+
   private _fillCalculationrects() {
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
     this.outerRect = this._outercanvas2.getBoundingClientRect();

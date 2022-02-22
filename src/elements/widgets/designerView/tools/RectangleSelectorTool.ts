@@ -56,6 +56,7 @@ export class RectangleSelectorTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerCanvas.removeCurrentPointerEventHandler();
 
         const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];

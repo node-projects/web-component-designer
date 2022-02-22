@@ -43,6 +43,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   getViewportCoordinates(event: MouseEvent): IPoint;
   getNormalizedElementCoordinates(element: Element): IRect;
 
+  removeCurrentPointerEventHandler()
+
   getDesignSurfaceDimensions(): ISize;
 
   getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;

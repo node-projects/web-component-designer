@@ -53,6 +53,8 @@ export class TransformOriginExtension extends AbstractExtension {
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        this.designerCanvas.removeCurrentPointerEventHandler();
+        
         if (this._startPos) {
           const dx = normalized.x - this._startPos.x;
           const dy = normalized.y - this._startPos.y;

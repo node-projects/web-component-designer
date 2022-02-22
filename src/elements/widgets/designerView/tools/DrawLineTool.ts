@@ -66,6 +66,8 @@ export class DrawLineTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerCanvas.removeCurrentPointerEventHandler();
+
         const rect = this._path.getBoundingClientRect();
         designerCanvas.overlayLayer.removeOverlay(this._path);
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");

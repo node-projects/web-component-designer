@@ -89,6 +89,8 @@ export class DrawPathTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerCanvas.removeCurrentPointerEventHandler();
+
         if (this._eventStarted && !this._pointerMoved) {
           this._p2pMode = true;
         }

@@ -127,6 +127,8 @@ export class PathExtension extends AbstractExtension {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        this.designerCanvas.removeCurrentPointerEventHandler();
+        
         this._startPos = null;
         this._circlePos = null;
         this._lastPos = null;
