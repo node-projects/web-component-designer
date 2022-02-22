@@ -699,6 +699,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
+  public convertEventToViewPortCoordinates(point: IPoint): IPoint {
+    const offsetOfCanvasX = this.containerBoundingRect.x - this.outerRect.x;
+    const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y;
+
+    return {
+      x: (point.x + offsetOfCanvasX / this.zoomFactor) * this.zoomFactor,
+      y: (point.y + offsetOfCanvasY / this.zoomFactor) * this.zoomFactor
+    };
+  }
+
   public getViewportCoordinates(event: MouseEvent): IPoint {
     return {
       x: (event.clientX - this.outerRect.x),
@@ -897,20 +907,23 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       height: Math.abs(startPoint.y - endPoint.y),
     }
 
-    let zFactorWidth = this.containerBoundingRect.width / rect.width;
-    let zFactorHeight = this.containerBoundingRect.height / rect.height;
+    let zFactorWidth = this.outerRect.width / rect.width;
+    let zFactorHeight = this.outerRect.height / rect.height;
 
-    let rectCenter : IPoint = {
+    let zoomFactor = zFactorWidth >= zFactorHeight ? zFactorHeight : zFactorWidth;
+
+    let rectCenter: IPoint = {
       x: (rect.width / 2) + rect.x,
       y: (rect.height / 2) + rect.y
     }
 
-    this.zoomTowardsPointer(rectCenter, zFactorWidth >= zFactorWidth ? zFactorHeight : zFactorWidth);
+    this.zoomTowardsPoint(rectCenter, zoomFactor);
   }
 
-  public zoomTowardsPointer(point: IPoint, newZoom: number) {
-
+  public zoomTowardsPoint(canvasPoint: IPoint, newZoom: number) {
     const scaleChange = newZoom / this.zoomFactor;
+
+    const point = this.convertEventToViewPortCoordinates(canvasPoint);
 
     const newCanvasOffset = {
       x: -(point.x * (scaleChange - 1) + scaleChange * -this.canvasOffsetUnzoomed.x),

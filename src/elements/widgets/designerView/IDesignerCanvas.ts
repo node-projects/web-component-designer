@@ -51,6 +51,6 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   getItemsBelowMouse(event: MouseEvent): Element[];
 
-  zoomTowardsPointer(point: IPoint, scalechange: number): void;
+  zoomTowardsPoint(point: IPoint, scalechange: number): void;
   zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint): void;
 }
