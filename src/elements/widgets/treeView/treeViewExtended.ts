@@ -418,17 +418,14 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
-    if (activeElements != null) {
       this._tree.visit((node) => {
-        //@ts-ignore
-        if (activeElements.indexOf(node.data.ref) >= 0) {
+        if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
           node.setSelected(true);
           node.makeVisible({scrollIntoView: true});
         } else {
           node.setSelected(false);
         }
       });
-    }
   }
 }
 
