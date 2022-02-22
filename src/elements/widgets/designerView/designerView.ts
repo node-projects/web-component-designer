@@ -56,6 +56,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 16px;
       background: #787f82;
       display: flex;
+      bottom: 0;
+      position: absolute;
     }
     input {
       width: 40px;
@@ -90,8 +92,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 100%;
     }
     #canvas {
-      width: 100%;
-      height: 100%;
+      width: calc(100% - 16px);
+      height: calc(100% - 32px);
     }
   
     .zoom-in {
@@ -229,6 +231,13 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
       let scaleX = cvRect.width / (maxX / this._designerCanvas.zoomFactor);
       let scaleY = cvRect.height / (maxY / this._designerCanvas.zoomFactor);
+
+      const dimensions = this.designerCanvas.getDesignSurfaceDimensions();
+      if (dimensions.width)
+        scaleX = cvRect.width / dimensions.width;
+      if (dimensions.height)
+        scaleY = cvRect.height / dimensions.height;
+
       this._designerCanvas.zoomFactor = scaleX < scaleY ? scaleX : scaleY;
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }

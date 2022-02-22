@@ -10,6 +10,7 @@ import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayerView } from "./overlayLayerView";
 import { IRect } from "../../../interfaces/IRect.js";
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+import { ISize } from "../../../interfaces/ISize.js";
 
 export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
@@ -41,6 +42,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   getNormalizedEventCoordinates(event: MouseEvent): IPoint;
   getViewportCoordinates(event: MouseEvent): IPoint;
   getNormalizedElementCoordinates(element: Element): IRect;
+
+  getDesignSurfaceDimensions(): ISize;
 
   getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
