@@ -81,6 +81,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
     this.codeView = new serviceContainer.config.codeViewWidget();
     this.codeView.slot = 'bottom';
+    this.codeView.style.position = 'relative';
     this._codeDiv = document.createElement("div");
     this._tabControl.appendChild(this._codeDiv);
     this._codeDiv.title = 'Code';
