@@ -161,7 +161,14 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
     this._designerCanvas.onZoomFactorChanged.on(() => {
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
-    })
+
+      const pos = this.designerCanvas.canvasOffset;
+
+      const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
+      const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
+      this._sHor.value = (pos.x / (-2 * w)) + 0.5;
+      this._sVert.value = (pos.y / (-2 * h)) + 0.5;
+    });
 
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     this._zoomInput.onkeydown = (e) => {
