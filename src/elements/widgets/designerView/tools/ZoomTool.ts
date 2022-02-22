@@ -1,4 +1,4 @@
-import { EventNames, IPoint, IRect, OverlayLayer } from '../../../../index.js';
+import { EventNames, IPoint, OverlayLayer } from '../../../../index.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
@@ -11,6 +11,7 @@ export class ZoomTool implements ITool {
 
   private _startPoint: IPoint;
   private _endPoint: IPoint;
+
   private _pointerMovementTolerance: number = 5;
   private _zoomStepSize: number = 0.2; //number x 100 = Scale in percent
 
@@ -18,18 +19,16 @@ export class ZoomTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    const eventPoint = designerCanvas.getViewportCoordinates(event);
+    const eventPoint = designerCanvas.getNormalizedEventCoordinates(event);
 
     switch (event.type) {
       case EventNames.PointerDown:
         this._startPoint = eventPoint;
-        (<Element>event.target).setPointerCapture(event.pointerId);
-        this._startPoint = eventPoint;
         if (!this._rect)
           this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this._rect.setAttribute('class', 'svg-selector');
-        this._rect.setAttribute('x', <string><any>(this._startPoint.x * designerCanvas.scaleFactor));
-        this._rect.setAttribute('y', <string><any>(this._startPoint.y * designerCanvas.scaleFactor));
+        this._rect.setAttribute('x', <string><any>(this._startPoint.x * designerCanvas.zoomFactor));
+        this._rect.setAttribute('y', <string><any>(this._startPoint.y * designerCanvas.zoomFactor));
         this._rect.setAttribute('width', <string><any>0);
         this._rect.setAttribute('height', <string><any>0);
         designerCanvas.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
@@ -78,7 +77,8 @@ export class ZoomTool implements ITool {
     if (this._isPositionEqual(startPoint, endPoint)) {
       const oldZoom = designerCanvas.zoomFactor;
       const newZoom = isZoomInto ? oldZoom + this._zoomStepSize : oldZoom - this._zoomStepSize;
-      designerCanvas.zoomTowardsPointer(endPoint, newZoom);
+
+      designerCanvas.zoomTowardsPoint(endPoint, newZoom);
     } else {
       designerCanvas.zoomOntoRectangle(startPoint, endPoint);
     }

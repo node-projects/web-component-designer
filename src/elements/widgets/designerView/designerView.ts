@@ -282,8 +282,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       if (zf < 0.02)
         zf = 0.02;
 
-      const vp = this.designerCanvas.getViewportCoordinates(event)
-      this.designerCanvas.zoomTowardsPointer(vp, zf);
+      const vp = this.designerCanvas.getNormalizedEventCoordinates(event)
+      this.designerCanvas.zoomTowardsPoint(vp, zf);
     }
     else {
       this._sHor.value += event.deltaX / 1000;
