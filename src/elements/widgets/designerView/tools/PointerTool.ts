@@ -217,8 +217,7 @@ export class PointerTool implements ITool {
                         newContainerService = null;
                         break;
                       }
-                    }
-                    else if (newContainerElement == this._actionStartedDesignItem.element) {
+                    } else if (newContainerElement == this._actionStartedDesignItem.element || newContainerElement == currentDesignItem.element) {
                       backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
                       newContainerElement.style.pointerEvents = 'none';
                       const old = newContainerElement;
@@ -226,10 +225,10 @@ export class PointerTool implements ITool {
                       if (old === newContainerElement) {
                         newContainerElementDesignItem = null;
                         newContainerService = null;
+                        newContainerElement = null;
                         break;
                       }
-                    }
-                    else {
+                    } else {
                       //check we don't try to move a item over one of its children...
                       let par = newContainerElement.parentElement;
                       while (par) {

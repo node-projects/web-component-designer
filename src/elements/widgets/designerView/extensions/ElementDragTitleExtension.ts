@@ -1,5 +1,6 @@
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
+import { NamedTools } from "../tools/NamedTools.js";
 import { AbstractExtension } from './AbstractExtension';
 import { IExtensionManager } from "./IExtensionManger";
 
@@ -38,8 +39,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
   _pointerEvent(event: PointerEvent) {
     event.preventDefault();
     event.stopPropagation();
-    //@ts-ignore
-    (<DesignerCanvas>this.designerCanvas)._pointerEventHandlerBound(event, this.extendedItem.element);
+    
+    this.designerCanvas.serviceContainer.designerTools.get(NamedTools.Pointer).pointerEventHandler(this.designerCanvas, event, this.extendedItem.element);
   }
 
   override dispose() {
