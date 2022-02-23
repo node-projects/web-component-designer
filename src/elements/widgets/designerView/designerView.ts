@@ -10,6 +10,7 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar';
+import "./tools/designerToolBar.js"
 
 const autoZomOffset = 10;
 
@@ -92,7 +93,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 100%;
     }
     #canvas {
-      width: calc(100% - 16px);
+      left: 36px;
+      width: calc(100% - 52px);
       height: calc(100% - 32px);
     }
   
@@ -131,12 +133,18 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       right: 0;
       position: absolute;
       background: #f0f0f0;
+    }
+    .tool-bar{
+      width: 36px;
+      height: calc(100% - 32px);
+      position: absolute;
     }`;
 
   static override readonly template = html`
     <div id="outer">
       <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
       <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll"></node-projects-plain-scrollbar>
+      <node-projects-designer-tool-bar class="tool-bar"></node-projects-designer-tool-bar>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -286,8 +294,13 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       this.designerCanvas.zoomTowardsPoint(vp, zf);
     }
     else {
-      this._sHor.value += event.deltaX / 1000;
-      this._sVert.value += event.deltaY / 1000;
+      if(event.shiftKey){
+        this._sHor.value += event.deltaY / 1000;
+      }
+      else{
+        this._sHor.value += event.deltaX / 1000;
+        this._sVert.value += event.deltaY / 1000;
+      }
       this._onScrollbar(null);
     }
   }
