@@ -30,7 +30,7 @@ export class DefaultModelCommandService implements IModelCommandService {
       if (idx >= 0)
         sel.parent.insertChild(sel, idx);
     }
-     else if (command.type == CommandType.moveForward) {
+    else if (command.type == CommandType.moveForward) {
       let idx = sel.parent.indexOf(sel) + 1;
       if (idx < sel.parent.childCount)
         sel.parent.insertChild(sel, idx);
@@ -45,7 +45,16 @@ export class DefaultModelCommandService implements IModelCommandService {
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         s.setStyle('left', left);
       }
-      grp.commit()
+      grp.commit();
+    }
+    else if (command.type == CommandType.arrangeRight) {
+      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('arrangeRight');
+      const arrElement = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.primarySelection.element);
+      const right = Math.floor(arrElement.x + arrElement.width);
+      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+        s.setStyle('left', <string><any>(right - Math.floor(designerCanvas.getNormalizedElementCoordinates(s.element).width)) + "px");
+      }
+      grp.commit();
     }
     else if (command.type == CommandType.arrangeTop) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('arrangeTop');

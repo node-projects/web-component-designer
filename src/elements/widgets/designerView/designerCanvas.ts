@@ -33,6 +33,7 @@ import { OverlayLayerView } from './overlayLayerView';
 import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
 import { IRect } from "../../../interfaces/IRect.js";
 import { ISize } from "../../../interfaces/ISize.js";
+import { Orientation } from "../../../enums/Orientation";
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -55,6 +56,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _zoomFactor = 1; //if scale or zoom css property is used this needs to be the value
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
   private _canvasOffset: IPoint = { x: 0, y: 0 };
+
+  private _currentContextMenu: ContextMenuHelper
 
   private _lastPointerDownHandler: (evt: any) => boolean;
 
@@ -91,8 +94,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _outercanvas2: HTMLDivElement;
 
   private _lastHoverDesignItem: IDesignItem;
-
-  private _onContextMenuBound: () => void;
 
   private _pointerEventHandlerBound: (event: PointerEvent) => void;
 
@@ -197,10 +198,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
     this._onDblClickBound = this._onDblClick.bind(this);
-    this._onContextMenuBound = this._onContextMenu.bind(this);
     this._pointerEventHandlerBound = this._pointerEventHandler.bind(this);
 
-    this.clickOverlay.oncontextmenu = this._onContextMenuBound;
+    this.clickOverlay.oncontextmenu = (e) => e.preventDefault();
   }
 
   get designerWidth(): string {
@@ -585,31 +585,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
-  private _onContextMenu(event: MouseEvent) {
-    event.preventDefault();
-    if (!event.shiftKey) {
-      let items = this.getItemsBelowMouse(event);
-      if (items.indexOf(this.instanceServiceContainer.selectionService.primarySelection.element) >= 0)
-        this.showDesignItemContextMenu(this.instanceServiceContainer.selectionService.primarySelection, event);
-      else {
-        const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, this.serviceContainer, this.instanceServiceContainer);
-        if (!this.instanceServiceContainer.selectionService.isSelected(designItem)) {
-          this.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
-        }
-        this.showDesignItemContextMenu(designItem, event);
-      }
-    }
-  }
-
   public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
+    this._currentContextMenu?.close();
     const mnuItems: IContextMenuItem[] = [];
     for (let cme of this.serviceContainer.designerContextMenuExtensions) {
       if (cme.shouldProvideContextmenu(event, this, designItem, 'designer')) {
         mnuItems.push(...cme.provideContextMenuItems(event, this, designItem));
       }
     }
-    let ctxMnu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
-    return ctxMnu;
+    this._currentContextMenu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
+    return this._currentContextMenu;
   }
 
   private _onDblClick(event: KeyboardEvent) {
@@ -787,8 +772,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (event.composedPath().indexOf(this.eatEvents) >= 0)
       return;
 
-    if (event.buttons == 2)
-      return;
+    // if (event.buttons == 2)
+    //   return;
 
     let currentElement: Node;
     if (forceElement)
@@ -932,6 +917,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.zoomFactor = newZoom;
     this.canvasOffsetUnzoomed = newCanvasOffset;
+  }
+
+  public getClosestElementToOutside(orientation: Orientation, elements: IDesignItem[]): [distance: number, index: number] {
+    return null
   }
 }
 

@@ -11,6 +11,7 @@ import { OverlayLayerView } from "./overlayLayerView";
 import { IRect } from "../../../interfaces/IRect.js";
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { ISize } from "../../../interfaces/ISize.js";
+import { Orientation } from "../../../enums/Orientation";
 
 export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
@@ -53,4 +54,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   zoomTowardsPoint(point: IPoint, scalechange: number): void;
   zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint): void;
+
+  showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent)
+
+  getClosestElementToOutside(orientation : Orientation, elements : IDesignItem[]) : [distance : number, index : number]
 }
