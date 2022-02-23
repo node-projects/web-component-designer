@@ -39,7 +39,28 @@ export class PointerTool implements ITool {
   dispose(): void {
   }
 
+  private _showContextMenu(event: MouseEvent, designerCanvas : IDesignerCanvas) {
+    event.preventDefault();
+    if (!event.shiftKey) {
+      let items = designerCanvas.getItemsBelowMouse(event);
+      if (items.indexOf(designerCanvas.instanceServiceContainer.selectionService.primarySelection?.element) >= 0)
+      designerCanvas.showDesignItemContextMenu(designerCanvas.instanceServiceContainer.selectionService.primarySelection, event);
+      else {
+        const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+        if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
+          designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        }
+        designerCanvas.showDesignItemContextMenu(designItem, event);
+      }
+    }
+  }
+
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    if (event.button == 2){
+      this._showContextMenu(event, designerCanvas)
+      return;
+    }
+
     if (((event.ctrlKey || event.metaKey) && event.shiftKey) || event.buttons == 4) {
       const panTool = designerCanvas.serviceContainer.designerTools.get(NamedTools.Pan);
       if (panTool) {
