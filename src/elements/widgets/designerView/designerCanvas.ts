@@ -33,7 +33,6 @@ import { OverlayLayerView } from './overlayLayerView';
 import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
 import { IRect } from "../../../interfaces/IRect.js";
 import { ISize } from "../../../interfaces/ISize.js";
-import { Orientation } from "../../../enums/Orientation";
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -772,9 +771,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (event.composedPath().indexOf(this.eatEvents) >= 0)
       return;
 
-    // if (event.buttons == 2)
-    //   return;
-
     let currentElement: Node;
     if (forceElement)
       currentElement = forceElement;
@@ -917,10 +913,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.zoomFactor = newZoom;
     this.canvasOffsetUnzoomed = newCanvasOffset;
-  }
-
-  public getClosestElementToOutside(orientation: Orientation, elements: IDesignItem[]): [distance: number, index: number] {
-    return null
   }
 }
 
