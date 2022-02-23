@@ -843,8 +843,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._canvas.style.cursor = tool.cursor;
-    tool.pointerEventHandler(this, event, <Element>currentElement);
-
+   
     if (event.type == EventNames.PointerDown) {
       this._lastPointerDownHandler = (evt) => tool.pointerEventHandler(this, evt, <Element>currentElement);
     }

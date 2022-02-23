@@ -1,7 +1,7 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.0.88",
+  "version": "0.0.89",
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
