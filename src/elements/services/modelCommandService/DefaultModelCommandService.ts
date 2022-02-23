@@ -2,7 +2,7 @@ import { CommandType } from "../../../commandHandling/CommandType.js";
 import { IUiCommand } from "../../../commandHandling/IUiCommand.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { IModelCommandService } from "./IModelCommandService.js";
-import {ArrangeHelper} from "../../helper/ArrangeHelper.js";
+import { ArrangeHelper } from "../../helper/ArrangeHelper.js";
 import { Orientation } from "../../../enums/Orientation.js";
 
 
@@ -41,20 +41,29 @@ export class DefaultModelCommandService implements IModelCommandService {
       sel.parent.insertChild(sel, 0);
     else if (command.type == CommandType.moveToFront)
       sel.parent.insertChild(sel);
-    else if (command.type == CommandType.arrangeLeft) {
-      ArrangeHelper.arrangeElements(Orientation.LEFT, designerCanvas);
+    else if (command.type == CommandType.arrangeTop) {
+      ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas);
     }
     else if (command.type == CommandType.arrangeRight) {
       ArrangeHelper.arrangeElements(Orientation.RIGHT, designerCanvas);
     }
-    else if (command.type == CommandType.arrangeTop) {
-      ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas);
+    else if (command.type == CommandType.arrangeLeft) {
+      ArrangeHelper.arrangeElements(Orientation.LEFT, designerCanvas);
+    }
+    else if (command.type == CommandType.arrangeBottom){
+      ArrangeHelper.arrangeElements(Orientation.BOTTOM, designerCanvas);
+    }
+    else if (command.type == CommandType.arrangeCenter) {
+      ArrangeHelper.arrangeElements(Orientation.HORIZONTAL_CENTER, designerCanvas);
+    }
+    else if (command.type == CommandType.arrangeMiddle) {
+      ArrangeHelper.arrangeElements(Orientation.VERTICAL_CENTER, designerCanvas);
     }
     else if (command.type == CommandType.unifyHeight) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('unifyHeight');
       const height = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('height');
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-        s.setStyle('height', height); 
+        s.setStyle('height', height);
       }
       grp.commit();
     }
