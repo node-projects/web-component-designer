@@ -1,66 +1,62 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
+import { ITool } from "./ITool.js";
 
 export class DesignerToolBar extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
-:host {
-display: block;
-}
-    .outer{
+    .toolbar-host{
         background: #2f3545;
-        box-sizing: border-box;
         width: 100%;
         height: 100%;
-        border: black;
-        border-width: 1px;
-        border-top-style: solid;
-        border-right-style: solid;
-        border-bottom-style: solid;
+        border: 1px solid black;
         
         display: flex;
         flex-direction: column;
-        flex-wrap: nowrap;
         align-items: center;
-        padding-top: 5px;
-        gap: 5px;
-    }
-    .outer > div {
-        background: #eeefef;
-        width: 28px;
-        height: 28px;
-        border-radius: 5px;
+
+        min-height: calc(max-content - 20px);
+
+        overflow: hidden;
     }
 
-        .outer > div > div {
-        display: none;
-}
+    .tool {
+        height: 32px;
+        width: 32px;
+        background-color: #eeefef;
+        border-radius: 5px;
+        margin: 2px 0px;
+
+        background-size: cover;
+        background-size: 70%;
+        background-repeat: no-repeat;
+        background-position: center;
+
+        flex-shrink: 0;
+    }
+
+    .multi-tool {
+
+    }
+
+    .tool.selected {
+        background-color: green;
+    }
 `;
 
     static override readonly template = html`
-<div class="outer">
-    <div
-        style="background-image: url('./assets/images/layout/PointerTool.svg'); background-size: cover; background-size: 70%;background-repeat: no-repeat;background-position: center;">
-    </div>
-    <div
-        style="background-image: url('./assets/images/layout/MagicWandTool.svg'); background-size: cover; background-size: 70%;background-repeat: no-repeat;background-position: center;">
-    </div>
-    <div
-        style="background-image: url('./assets/images/layout/DrawLineTool.svg'); background-size: cover; background-size: 70%;background-repeat: no-repeat;background-position: center;">
-    </div>
-    <div
-        style="background-image: url('./assets/images/layout/DrawPathTool.svg'); background-size: cover; background-size: 70%;background-repeat: no-repeat;background-position: center;">
-    </div>
-    <div
-        style="background-image: url('./assets/images/layout/DrawRectTool.svg'); background-size: cover; background-size: 70%;background-repeat: no-repeat;background-position: center;">
-    </div>
-    <div
-        style="background-image: url('./assets/images/layout/DrawEllipTool.svg'); background-size: cover; background-size: 70%;background-repeat: no-repeat;background-position: center;">
-    </div>
-</div>`;
+    <div class="toolbar-host">
+        <div class="tool" data-command="setTool" data-command-parameter="Pointer" title="Pointer Tool" style="background-image: url('./assets/images/layout/PointerTool.svg');"></div>
+        <div class="tool" style="background-image: url('./assets/images/layout/MagicWandTool.svg');"></div>
+        <div class="tool" style="background-image: url('./assets/images/layout/DrawLineTool.svg');"></div>
+        <div class="tool" style="background-image: url('./assets/images/layout/DrawPathTool.svg');"></div>
+        <div class="tool" style="background-image: url('./assets/images/layout/DrawRectTool.svg');"></div>
+        <div class="tool" style="background-image: url('./assets/images/layout/DrawEllipTool.svg');"></div>
+    </div>`;
 
     public static properties = {
-        orientation: String
+        orientation: String,
     }
 
+    tools : ITool[] = [];
     orientation: 'vertical' | 'horizontal' = 'vertical';
 
     constructor() {
@@ -68,7 +64,19 @@ display: block;
     }
 
     ready() {
+        this._registerTools();
+    }
 
+    private _registerTools(){
+        let toolElements = this._getDomElements<HTMLDivElement>('div');
+        toolElements = [...toolElements].filter(elem => elem.classList.contains('tool'));
+        for(let t of toolElements){
+            t.addEventListener('click', () => this._toolActivated(t))
+        } 
+    }
+
+    private _toolActivated(elem){
+        elem;
     }
 }
 customElements.define('node-projects-designer-tool-bar', DesignerToolBar);
