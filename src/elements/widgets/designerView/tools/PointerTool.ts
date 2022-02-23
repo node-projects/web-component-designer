@@ -325,7 +325,7 @@ export class PointerTool implements ITool {
         }
       case EventNames.PointerUp:
         {
-          if (this._actionType == PointerActionType.DragOrSelect) {
+          if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
             if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey)
               designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
             return;
