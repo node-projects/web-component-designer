@@ -1,4 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
+import { assetsPath } from "../../../../Constants.js";
 import { IDesignerCanvas } from "../IDesignerCanvas.js";
 
 interface IToolHelper {
@@ -59,31 +60,46 @@ export class DesignerToolBar extends BaseCustomWebComponentConstructorAppend {
     static override readonly template = html`
     <div id="toolbar-host" class="toolbar-host">
         <div class="single-tool tool" data-command="setTool" data-command-parameter="Pointer" title="Pointer Tool"
-            style="background-image: url('./assets/images/layout/PointerTool.svg');"></div>
-        <div class="single-tool tool" style="background-image: url('./assets/images/layout/MagicWandTool.svg');"></div>
-    
+            style="background-image: url('${assetsPath}images/layout/PointerTool.svg');"></div>
+            <div class="multi-tool" multi-tool="Select">
+                <div class="multi-tool-preview tool"></div>
+                <div class="multi-tool-container closed">
+                    <div class="tool" data-command="setTool" data-command-parameter="MagicWandSelector" title="Magic Wand Selector" style="background-image: url('${assetsPath}images/layout/MagicWandTool.svg');"></div>
+                    <div class="tool" data-command="setTool" data-command-parameter="RectangleSelector" title="Rectangle Selector" style="background-image: url('${assetsPath}images/layout/SelectRectTool.svg');"></div>
+            </div>
+        </div>
         <div class="multi-tool" multi-tool="Draw">
             <div class="multi-tool-preview tool"></div>
             <div class="multi-tool-container closed">
-                <div class="tool" style="background-image: url('./assets/images/layout/DrawLineTool.svg');"></div>
-                <div class="tool" style="background-image: url('./assets/images/layout/DrawPathTool.svg');"></div>
-                <div class="tool" style="background-image: url('./assets/images/layout/DrawRectTool.svg');"></div>
-                <div class="tool" style="background-image: url('./assets/images/layout/DrawEllipTool.svg');"></div>
+                <div class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" style="background-image: url('${assetsPath}images/layout/DrawLineTool.svg');"></div>
+                <div class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Pointer Tool" style="background-image: url('${assetsPath}images/layout/DrawPathTool.svg');"></div>
+                <div class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="background-image: url('${assetsPath}images/layout/DrawRectTool.svg');"></div>
+                <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/layout/DrawEllipTool.svg');"></div>
             </div>
+        </div>
+        <div class="single-tool tool" data-command="setTool" data-command-parameter="Zoom" title="Zoom Tool"
+            style="background-image: url('${assetsPath}images/layout/ZoomTool.svg');">
+        </div>
+        <div class="single-tool tool" data-command="setTool" data-command-parameter="Text" title="Text Tool"
+            style="background-image: url('${assetsPath}images/layout/TextTool.svg');">
+        </div>
+        <div class="single-tool tool" data-command="setTool" data-command-parameter="TextBoc" title="Textbox Tool"
+            style="background-image: url('${assetsPath}images/layout/TextBoxTool.svg');">
         </div>
     </div>`;
 
     public static properties = {
         orientation: String,
     }
-    
+
     _toolHelper: IToolHelper;
     _designerCanvas: IDesignerCanvas;
     _toolbarHost: HTMLDivElement;
     orientation: 'vertical' | 'horizontal' = 'vertical';
 
     constructor() {
-        super();
+        super();  
+        console.log(new URL((import.meta.url)))     ;
     }
 
     public setup(designerCanvas: IDesignerCanvas) {
@@ -128,6 +144,7 @@ export class DesignerToolBar extends BaseCustomWebComponentConstructorAppend {
         }
 
         this._markAsSelected(this._toolHelper);
+        this._closeOpenMultiTools()
     }
 
     private _multiToolPressed(mTHost: HTMLDivElement) {
@@ -182,6 +199,17 @@ export class DesignerToolBar extends BaseCustomWebComponentConstructorAppend {
     private _markToolInternal(toolHelper: IToolHelper, color: string) {
         toolHelper.selectedToolElement.style.backgroundColor = color;
         if (toolHelper.isMultiTool) toolHelper.previewElement.style.backgroundColor = color;
+    }
+
+    private _closeOpenMultiTools() {
+        let toolElements = [...this._toolbarHost.querySelectorAll<HTMLDivElement>('div.multi-tool-container')].filter(elem => elem.classList.contains('opened'));
+        for (let t of toolElements) {
+            t.style.display = "none";
+            t.parentElement.querySelector<HTMLDivElement>('div.multi-tool-preview').style.display = "block";
+
+            t.classList.remove('opened');
+            t.classList.add('closed');
+        }
     }
 }
 customElements.define('node-projects-designer-tool-bar', DesignerToolBar);

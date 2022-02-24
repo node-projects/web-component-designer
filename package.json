@@ -13,7 +13,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.5.3",
+    "@node-projects/base-custom-webcomponent": "^0.6.0",
     "construct-style-sheets-polyfill": "^3.1.0"
   },
   "devDependencies": {
