@@ -1,82 +1,187 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
-import { ITool } from "./ITool.js";
+import { IDesignerCanvas } from "../IDesignerCanvas.js";
+
+interface IToolHelper {
+    selectedToolElement: HTMLElement,
+    isMultiTool: boolean,
+    previewElement?: HTMLElement;
+}
 
 export class DesignerToolBar extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
     .toolbar-host{
-        background: #2f3545;
+        background: rgb(47, 53, 69);
         width: 100%;
         height: 100%;
         border: 1px solid black;
-        
         display: flex;
         flex-direction: column;
-        align-items: center;
-
-        min-height: calc(max-content - 20px);
-
-        overflow: hidden;
+        overflow: visible;
+        place-content: flex-start left;
     }
 
     .tool {
         height: 32px;
         width: 32px;
-        background-color: #eeefef;
+        background-color: rgb(255, 255, 255);
         border-radius: 5px;
-        margin: 2px 0px;
-
-        background-size: cover;
+        margin: 2px 2px 2px 0px;
         background-size: 70%;
         background-repeat: no-repeat;
-        background-position: center;
-
+        background-position: center center;
         flex-shrink: 0;
+        border: 1px solid black;
     }
 
     .multi-tool {
-
+        overflow: visible;
     }
 
     .tool.selected {
         background-color: green;
     }
+
+    .tool:hover {
+        cursor: pointer;
+    }
+
+    .multi-tool-container {
+        display: none;
+        justify-content: flex-start;
+        flex-direction: row;
+        overflow: visible;
+    }
+
+    .multi-tool-preview {
+    }
 `;
 
     static override readonly template = html`
-    <div class="toolbar-host">
-        <div class="tool" data-command="setTool" data-command-parameter="Pointer" title="Pointer Tool" style="background-image: url('./assets/images/layout/PointerTool.svg');"></div>
-        <div class="tool" style="background-image: url('./assets/images/layout/MagicWandTool.svg');"></div>
-        <div class="tool" style="background-image: url('./assets/images/layout/DrawLineTool.svg');"></div>
-        <div class="tool" style="background-image: url('./assets/images/layout/DrawPathTool.svg');"></div>
-        <div class="tool" style="background-image: url('./assets/images/layout/DrawRectTool.svg');"></div>
-        <div class="tool" style="background-image: url('./assets/images/layout/DrawEllipTool.svg');"></div>
+    <div id="toolbar-host" class="toolbar-host">
+        <div class="single-tool tool" data-command="setTool" data-command-parameter="Pointer" title="Pointer Tool"
+            style="background-image: url('./assets/images/layout/PointerTool.svg');"></div>
+        <div class="single-tool tool" style="background-image: url('./assets/images/layout/MagicWandTool.svg');"></div>
+    
+        <div class="multi-tool" multi-tool="Draw">
+            <div class="multi-tool-preview tool"></div>
+            <div class="multi-tool-container closed">
+                <div class="tool" style="background-image: url('./assets/images/layout/DrawLineTool.svg');"></div>
+                <div class="tool" style="background-image: url('./assets/images/layout/DrawPathTool.svg');"></div>
+                <div class="tool" style="background-image: url('./assets/images/layout/DrawRectTool.svg');"></div>
+                <div class="tool" style="background-image: url('./assets/images/layout/DrawEllipTool.svg');"></div>
+            </div>
+        </div>
     </div>`;
 
     public static properties = {
         orientation: String,
     }
-
-    tools : ITool[] = [];
+    
+    _toolHelper: IToolHelper;
+    _designerCanvas: IDesignerCanvas;
+    _toolbarHost: HTMLDivElement;
     orientation: 'vertical' | 'horizontal' = 'vertical';
 
     constructor() {
         super();
     }
 
+    public setup(designerCanvas: IDesignerCanvas) {
+        this._designerCanvas = designerCanvas;
+    }
+
     ready() {
+        this._toolbarHost = this._getDomElement<HTMLDivElement>('toolbar-host');
         this._registerTools();
+        this._setStandardTool();
     }
 
-    private _registerTools(){
-        let toolElements = this._getDomElements<HTMLDivElement>('div');
-        toolElements = [...toolElements].filter(elem => elem.classList.contains('tool'));
-        for(let t of toolElements){
-            t.addEventListener('click', () => this._toolActivated(t))
-        } 
+    private _setStandardTool() {
+        let toolElements = this._toolbarHost.querySelectorAll<HTMLDivElement>('div.single-tool')
+        let elem = [...toolElements].find(elem => elem.dataset["commandParameter"] == "Pointer");
+        this._toolHelper = {
+            selectedToolElement: elem,
+            isMultiTool: false,
+        }
+
+        this._markAsSelected(this._toolHelper);
     }
 
-    private _toolActivated(elem){
-        elem;
+    private _registerTools() {
+        let toolElements = this._toolbarHost.querySelectorAll<HTMLDivElement>('div.single-tool')
+        for (let t of toolElements) {
+            t.addEventListener('click', () => this._singleToolSelected(t))
+        }
+
+        let multiToolElemetns = this._toolbarHost.querySelectorAll<HTMLDivElement>('div.multi-tool');
+        for (let mT of multiToolElemetns) {
+            mT.addEventListener('click', () => this._multiToolPressed(mT));
+        }
+    }
+
+    private _singleToolSelected(elem: HTMLDivElement) {
+        if (this._toolHelper.selectedToolElement != null) this._markAsUnselected(this._toolHelper);
+
+        this._toolHelper = {
+            selectedToolElement: elem,
+            isMultiTool: false,
+        }
+
+        this._markAsSelected(this._toolHelper);
+    }
+
+    private _multiToolPressed(mTHost: HTMLDivElement) {
+        let mTContainer = mTHost.querySelector<HTMLDivElement>('div.multi-tool-container');
+        let mTPreview = mTHost.querySelector<HTMLDivElement>('div.multi-tool-preview');
+        let toolsOfContainer = mTContainer.querySelectorAll<HTMLDivElement>('div.tool');
+
+        if (mTContainer.classList.contains('closed')) {
+            for (let t of toolsOfContainer) {
+                t.addEventListener("click", () => this._multiToolSelected(mTHost.dataset['multi-tool'], t, mTPreview));
+            }
+
+            mTContainer.style.display = "flex";
+            mTPreview.style.display = "none";
+
+            mTContainer.classList.remove('closed');
+            mTContainer.classList.add('opened');
+        } else {
+            mTContainer.style.display = "none";
+            mTPreview.style.display = "block";
+
+            for (let t of toolsOfContainer) {
+                t.removeEventListener('Click', () => this._multiToolSelected);
+            }
+
+            mTContainer.classList.remove('opened');
+            mTContainer.classList.add('closed');
+        }
+    }
+
+    private _multiToolSelected(multi_tool: string, elem: HTMLElement, preview: HTMLDivElement) {
+        if (this._toolHelper.selectedToolElement != null) this._markAsUnselected(this._toolHelper);
+        this._toolHelper = {
+            selectedToolElement: elem,
+            isMultiTool: true,
+            previewElement: preview,
+        }
+        preview.style.backgroundImage = elem.style.backgroundImage;
+        this._markAsSelected(this._toolHelper);
+    }
+
+    private _markAsSelected(toolHelper: IToolHelper) {
+        let color = "green";
+        this._markToolInternal(toolHelper, color)
+    }
+
+    private _markAsUnselected(toolHelper: IToolHelper) {
+        let color = "white";
+        this._markToolInternal(toolHelper, color)
+    }
+
+    private _markToolInternal(toolHelper: IToolHelper, color: string) {
+        toolHelper.selectedToolElement.style.backgroundColor = color;
+        if (toolHelper.isMultiTool) toolHelper.previewElement.style.backgroundColor = color;
     }
 }
 customElements.define('node-projects-designer-tool-bar', DesignerToolBar);
