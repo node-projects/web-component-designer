@@ -105,8 +105,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   constructor() {
     super();
 
-   //@ts-ignore
-   import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    //@ts-ignore
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -205,7 +205,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, designItem);
             imgL.title = 'lock';
             d.appendChild(imgL);
-           
+
             let img = document.createElement('img');
             this._showHideAtDesignTimeState(img, designItem);
             img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
@@ -384,9 +384,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {
-    if (event.selectedElements.length > 0) {
-      this._highlight(event.selectedElements);
-    }
+    this._highlight(event.selectedElements);
   }
 
   private _recomputeTree(rootItem: IDesignItem): void {
@@ -418,14 +416,14 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
-      this._tree.visit((node) => {
-        if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
-          node.setSelected(true);
-          node.makeVisible({scrollIntoView: true});
-        } else {
-          node.setSelected(false);
-        }
-      });
+    this._tree.visit((node) => {
+      if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
+        node.setSelected(true);
+        node.makeVisible({ scrollIntoView: true });
+      } else {
+        node.setSelected(false);
+      }
+    });
   }
 }
 

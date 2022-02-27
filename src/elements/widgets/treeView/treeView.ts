@@ -148,9 +148,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {
-    if (event.selectedElements.length > 0) {
-      this._selectTreeElements(event.selectedElements.map(x => this._mapElementTreeitem.get(x.element)));
-    }
+    this._selectTreeElements(event.selectedElements.map(x => this._mapElementTreeitem.get(x.element)));
   }
 
   private _recomputeTree(parent, activeElement: Element) {
