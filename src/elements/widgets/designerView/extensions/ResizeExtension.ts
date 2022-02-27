@@ -1,7 +1,7 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from "../../../../interfaces/ISize";
-import { combineTransforms, convertCoordinates, getDomMatrix } from "../../../helper/TransformHelper.js";
+import { convertCoordinates, getDomMatrix } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
