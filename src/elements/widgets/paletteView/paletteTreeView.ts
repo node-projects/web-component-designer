@@ -138,8 +138,12 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       }
 
 
-      //@ts-ignore
-      newNode.updateCounters();
+      try {
+        //@ts-ignore
+        newNode.updateCounters();
+      }
+      catch
+      { }
     }
   }
 }
