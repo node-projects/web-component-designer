@@ -46,14 +46,10 @@ export class EditTextWithStyloExtension extends AbstractExtension {
 
     this._drawClickOverlayRects();
     this._rect1.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    this._rect1.addEventListener('pointerup', (e) => this._clickOutside(e));
     this._rect2.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    this._rect2.addEventListener('pointerup', (e) => this._clickOutside(e));
     this._rect3.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    this._rect3.addEventListener('pointerup', (e) => this._clickOutside(e));
     this._rect4.addEventListener('pointerdown', (e) => this._clickOutside(e));
-    this._rect4.addEventListener('pointerup', (e) => this._clickOutside(e));
-
+   
     requestAnimationFrame(() => {
       const stylo = foreignObject.querySelector('stylo-editor');
       //@ts-ignore
