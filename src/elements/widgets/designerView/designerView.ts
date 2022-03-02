@@ -202,11 +202,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
     zoomReset.onclick = () => {
-      this._designerCanvas.canvasOffset = { x: 0, y: 0 };
-      this._designerCanvas.zoomFactor = 1;
-      this._sVert.value = 0.5;
-      this._sHor.value = 0.5;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+      this.zoomReset();
     }
     let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
     zoomFit.onclick = () => {
@@ -227,6 +223,14 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
     this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
+  }
+
+  public zoomReset() {
+    this._designerCanvas.canvasOffset = { x: 0, y: 0 };
+    this._designerCanvas.zoomFactor = 1;
+    this._sVert.value = 0.5;
+    this._sHor.value = 0.5;
+    this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
   }
 
   public zoomToFit() {
