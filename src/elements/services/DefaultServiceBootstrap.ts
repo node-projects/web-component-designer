@@ -53,6 +53,8 @@ import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
 import { HtmlWriterService } from './htmlWriterService/HtmlWriterService.js';
 import { RectContextMenu } from '../widgets/designerView/extensions/contextMenu/RectContextMenu.js';
 import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/PathContextMenu.js';
+import { SeperatorContextMenu } from '../widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js';
+import { ZoomToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -134,10 +136,14 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designerContextMenuExtensions = [
     new CopyPasteContextMenu(),
+    new SeperatorContextMenu(),
+    new ZoomToElementContextMenu(),
+    new SeperatorContextMenu(),
     new ZMoveContextMenu(),
     new MultipleItemsSelectedContextMenu(),
     new PathContextMenu(),
     new RectContextMenu(),
+    new SeperatorContextMenu(),
     new ItemsBelowContextMenu(),
   ];
 

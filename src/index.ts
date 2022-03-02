@@ -186,7 +186,11 @@ export type { IContextMenuExtension, ContextmenuInitiator } from "./elements/wid
 export * from "./elements/widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/MultipleItemsSelectedContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/PathContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/RectContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
 export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";

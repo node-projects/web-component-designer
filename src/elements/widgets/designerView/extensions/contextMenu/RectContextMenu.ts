@@ -16,7 +16,6 @@ export class RectContextMenu implements IContextMenuExtension {
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
-      { title: '-' },
       {
         title: 'convert to path', action: () => {
           let rect = <SVGRectElement>designItem.element;

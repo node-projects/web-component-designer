@@ -15,7 +15,6 @@ export class CopyPasteContextMenu implements IContextMenuExtension {
       { title: 'cut', action: () => { designerView.executeCommand({ type: CommandType.cut }); }, shortCut: 'Ctrl + X' },
       { title: 'paste', action: () => { designerView.executeCommand({ type: CommandType.paste }); }, shortCut: 'Ctrl + V' },
       { title: 'delete', action: () => { designerView.executeCommand({ type: CommandType.delete }); }, shortCut: 'Del' },
-      { title: '-' }
     ]
   }
 }

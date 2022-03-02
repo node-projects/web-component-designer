@@ -448,6 +448,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer.style.bottom = this._outercanvas2.offsetHeight >= this._canvasContainer.offsetHeight ? '0' : '';
     this._canvasContainer.style.right = this._outercanvas2.offsetWidth >= this._canvasContainer.offsetWidth ? '0' : '';
     this._updateTransform();
+    this._fillCalculationrects();
     this.onZoomFactorChanged.emit(this._zoomFactor);
   }
 
@@ -824,7 +825,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._canvas.style.cursor = tool.cursor;
-   
+
     if (event.type == EventNames.PointerDown) {
       this._lastPointerDownHandler = (evt) => tool.pointerEventHandler(this, evt, <Element>currentElement);
     }
@@ -901,7 +902,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       y: (rect.height / 2) + rect.y
     }
 
-    this.zoomTowardsPoint(rectCenter, zoomFactor);
+    this.zoomPoint(rectCenter, zoomFactor);
+  }
+
+  public zoomPoint(canvasPoint: IPoint, newZoom: number) {
+    this.zoomFactor = newZoom;
+
+    const newCanvasOffset = {
+      x: -(canvasPoint.x) + this.outerRect.width / this.zoomFactor / 2,
+      y: -(canvasPoint.y) + this.outerRect.height / this.zoomFactor / 2
+    }
+
+    this.canvasOffset = newCanvasOffset;
   }
 
   public zoomTowardsPoint(canvasPoint: IPoint, newZoom: number) {

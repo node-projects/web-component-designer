@@ -15,7 +15,7 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
     const lstItems = designerCanvas.getItemsBelowMouse(event);
     if (lstItems.length > 0) {
       //TODO: create a submenu 'select items below...'
-      return [{ title: '-' }, ...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))];
+      return [...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))];
     }
     return [];
   }
