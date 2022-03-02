@@ -1,7 +1,7 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.0.90",
+  "version": "0.0.91",
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
@@ -13,7 +13,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.5.3",
+    "@node-projects/base-custom-webcomponent": "^0.6.0",
     "construct-style-sheets-polyfill": "^3.1.0"
   },
   "devDependencies": {
@@ -21,10 +21,10 @@
     "@node-projects/node-html-parser-esm": "^2.4.1",
     "@papyrs/stylo": "^0.0.8",
     "@types/codemirror": "^5.60.5",
-    "@types/jquery": "^3.5.13",
+    "@types/jquery": "^3.5.14",
     "@types/jquery.fancytree": "0.0.7",
     "ace-builds": "^1.4.14",
-    "codemirror": "^5.65.1",
+    "codemirror": "^5.65.2",
     "esprima-next": "^5.8.1",
     "html2canvas": "*",
     "jest": "^27.5.1",

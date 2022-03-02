@@ -1,6 +1,7 @@
 # web-component-designer
 
-## Caution - this is a preview Version, a RC is planed for January 2022
+## Caution - this is a preview Version, a RC1 is now planed for May 2022 - it's already usable but big Refactoring could still happen
+
 
 A HTML WebComponent for Designing Webcomponents and HTML Pages.
 

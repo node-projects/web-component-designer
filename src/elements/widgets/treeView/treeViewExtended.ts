@@ -393,9 +393,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {
-    if (event.selectedElements.length > 0) {
-      this._highlight(event.selectedElements);
-    }
+    this._highlight(event.selectedElements);
   }
 
   private _recomputeTree(rootItem: IDesignItem): void {
