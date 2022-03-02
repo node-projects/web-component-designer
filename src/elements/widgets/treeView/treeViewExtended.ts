@@ -105,18 +105,27 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   constructor() {
     super();
 
-   //@ts-ignore
-   import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    //@ts-ignore
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
-      let match = this._filter.value;
-      this._tree.filterNodes((node) => {
-        return new RegExp(match, "i").test(node.title);
-      })
+      this._filterNodes();
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable');
+  }
+
+  _filterNodes() {
+    let match = this._filter.value;
+    if (match) {
+      this._tree.filterNodes((node) => {
+        return new RegExp(match, "i").test(node.title);
+      });
+    }
+    else {
+      this._tree.clearFilter();
+    }
   }
 
   _showHideAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
@@ -205,7 +214,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, designItem);
             imgL.title = 'lock';
             d.appendChild(imgL);
-           
+
             let img = document.createElement('img');
             this._showHideAtDesignTimeState(img, designItem);
             img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
@@ -396,6 +405,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._tree.expandAll();
     //@ts-ignore
     this._tree.getRootNode().updateCounters();
+    this._filterNodes();
   }
 
   private _getChildren(item: IDesignItem, currentNode: Fancytree.FancytreeNode): any {
@@ -418,14 +428,14 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
-      this._tree.visit((node) => {
-        if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
-          node.setSelected(true);
-          node.makeVisible({scrollIntoView: true});
-        } else {
-          node.setSelected(false);
-        }
-      });
+    this._tree.visit((node) => {
+      if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
+        node.setSelected(true);
+        node.makeVisible({ scrollIntoView: true });
+      } else {
+        node.setSelected(false);
+      }
+    });
   }
 }
 
