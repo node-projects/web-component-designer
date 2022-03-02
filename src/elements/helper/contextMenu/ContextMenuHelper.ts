@@ -117,10 +117,8 @@ export class ContextMenuHelper {
       window.removeEventListener('mousedown', this._closeOnDownBound);
       window.removeEventListener('mouseup', this._closeOnUpBound);
 
-      if (this._shadowRoot === document)
-        document.body.removeChild(this._element);
-      else
-        this._shadowRoot.removeChild(this._element);
+      if (this._element.parentElement)
+        this._element.parentElement.removeChild(this._element);
     });
   }
 
