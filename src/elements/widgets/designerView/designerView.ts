@@ -210,36 +210,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
     let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
     zoomFit.onclick = () => {
-      let maxX = 0, maxY = 0, minX = 0, minY = 0;
-
-      this._designerCanvas.canvasOffset = { x: 0, y: 0 };
-      this._designerCanvas.zoomFactor = 1;
-
-      for (let n of DomHelper.getAllChildNodes(this.designerCanvas.rootDesignItem.element)) {
-        if (n instanceof Element) {
-          const rect = n.getBoundingClientRect();
-          minX = minX < rect.x ? minX : rect.x;
-          minY = minY < rect.y ? minY : rect.y;
-          maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
-          maxY = maxY > rect.y + rect.height + autoZomOffset ? maxY : rect.y + rect.height + autoZomOffset;
-        }
-      }
-
-      const cvRect = this.designerCanvas.getBoundingClientRect();
-      maxX -= cvRect.x;
-      maxY -= cvRect.y;
-
-      let scaleX = cvRect.width / (maxX / this._designerCanvas.zoomFactor);
-      let scaleY = cvRect.height / (maxY / this._designerCanvas.zoomFactor);
-
-      const dimensions = this.designerCanvas.getDesignSurfaceDimensions();
-      if (dimensions.width)
-        scaleX = cvRect.width / dimensions.width;
-      if (dimensions.height)
-        scaleY = cvRect.height / dimensions.height;
-
-      this._designerCanvas.zoomFactor = scaleX < scaleY ? scaleX : scaleY;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+      this.zoomToFit();
     }
     this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
 
@@ -256,6 +227,39 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
     this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
+  }
+
+  public zoomToFit() {
+    let maxX = 0, maxY = 0, minX = 0, minY = 0;
+
+    this._designerCanvas.canvasOffset = { x: 0, y: 0 };
+    this._designerCanvas.zoomFactor = 1;
+
+    for (let n of DomHelper.getAllChildNodes(this.designerCanvas.rootDesignItem.element)) {
+      if (n instanceof Element) {
+        const rect = n.getBoundingClientRect();
+        minX = minX < rect.x ? minX : rect.x;
+        minY = minY < rect.y ? minY : rect.y;
+        maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
+        maxY = maxY > rect.y + rect.height + autoZomOffset ? maxY : rect.y + rect.height + autoZomOffset;
+      }
+    }
+
+    const cvRect = this.designerCanvas.getBoundingClientRect();
+    maxX -= cvRect.x;
+    maxY -= cvRect.y;
+
+    let scaleX = cvRect.width / (maxX / this._designerCanvas.zoomFactor);
+    let scaleY = cvRect.height / (maxY / this._designerCanvas.zoomFactor);
+
+    const dimensions = this.designerCanvas.getDesignSurfaceDimensions();
+    if (dimensions.width)
+      scaleX = cvRect.width / dimensions.width;
+    if (dimensions.height)
+      scaleY = cvRect.height / dimensions.height;
+
+    this._designerCanvas.zoomFactor = scaleX < scaleY ? scaleX : scaleY;
+    this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
   }
 
   private _onScrollbar(e) {
