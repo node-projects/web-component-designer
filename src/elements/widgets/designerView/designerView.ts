@@ -287,7 +287,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     if (event.ctrlKey) {
       let zf = this._designerCanvas.zoomFactor
       zf += event.deltaY * -0.0010;//deltamode = 0
-      zf = Math.min(Math.max(.125, zf), 4);
       if (zf < 0.02)
         zf = 0.02;
       
