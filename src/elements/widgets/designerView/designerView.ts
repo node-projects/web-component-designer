@@ -286,16 +286,17 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     event.preventDefault();
     if (event.ctrlKey) {
       let zf = this._designerCanvas.zoomFactor
-      zf += event.deltaY * -0.001; //deltamode = 0
+      zf += event.deltaY * -0.0010;//deltamode = 0
+      zf = Math.min(Math.max(.125, zf), 4);
       if (zf < 0.02)
         zf = 0.02;
-
+      
       const vp = this.designerCanvas.getNormalizedEventCoordinates(event)
       this.designerCanvas.zoomTowardsPoint(vp, zf);
     }
     else {
-      this._sHor.value += event.deltaX / 1000;
-      this._sVert.value += event.deltaY / 1000;
+      this._sHor.value += event.deltaX / 10000;
+      this._sVert.value += event.deltaY / 10000;
       this._onScrollbar(null);
     }
   }
