@@ -12,8 +12,8 @@ export class RotateLeftAndRight implements IContextMenuExtension{
 
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
-        { title: 'rotate right', action: () => {designerView.executeCommand({type: CommandType.rotateRight});}, shortCut: 'Ctrl + R' },
-        { title: 'rotate left', action: () => {designerView.executeCommand({type: CommandType.rotateLeft});}, shortCut: 'Ctrl + Shift + R' }  
+        { title: 'rotate right', action: () => {designerView.executeCommand({type: CommandType.rotateClockwise});}, shortCut: 'Ctrl + R' },
+        { title: 'rotate left', action: () => {designerView.executeCommand({type: CommandType.rotateCounterClockwise});}, shortCut: 'Ctrl + Shift + R' }  
     ]
   }
 }
