@@ -282,8 +282,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this.designerCanvas.canvasOffset = { x, y };
   }
 
-  
-
   private _onWheel(event: WheelEvent) {
     event.preventDefault();
     if (event.ctrlKey) {
