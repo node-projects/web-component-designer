@@ -10,7 +10,7 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar';
-import { DesignerToolBar } from './tools/designerToolBar.js';
+import { DesignerToolsDock } from './tools/designerToolsDock.js';
 
 const autoZomOffset = 10;
 
@@ -41,7 +41,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
 
-  private _toolbar: DesignerToolBar;
+  private _toolsDock: DesignerToolsDock;
 
   static override readonly style = css`
     :host {
@@ -99,6 +99,12 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       width: calc(100% - 52px);
       height: calc(100% - 32px);
     }
+
+    #tool-bar{
+      width: 36px;
+      height: calc(100% - 32px);
+      position: absolute;
+    }
   
     .zoom-in {
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAn9JREFUeNqkU11o01AUTtI06U/6tzHWbnNVS+k67FAG/gwfZEOcCrpNEBwEH2Q+Otqxh+5VEaHYV18UwQd9sk4Q+6CUKogbtSoM10qftJS2iGuT/iRpshvvDZu4DHHggY+TnHu+795zz7m4qqrYxfA6pjerlcHMZvMQQRCL8Hccoh+iBJECAMQEQci3Wk2MxP5iqgqmJUmIB3xkdTRoKgQG6Wr1JxBX1oTQx3UxCdcjMO2ZJiCK4g4y3HUIACV+bsL5dSRAWfwe636z0WBzWEFzn5vku5xyIZGsx2UF5AhEaDYbO8Dz3KLPi1X9B2iTy0pRiDx5/Z2bJgmGwDH8WMhuDxzEf6A8TYDneT3GR4JMzcVQThNlcCtANaM48pICutodxXTkkI1HeVslSPor6B/wWL7B3Z1n2KR3O3h05rkDOkd2eYoSxM025PVrAgAQeoFSuSLI3Q66jpJNRsIWPLvM5JJTTUkGGsqVtgJ5JU3AaLTqBVKZT9xh7yDT2Gh05G4bNQBzGETkBbkMVAxbzdadMJbSBDzCHXgKgKGZQJCp0IP32dnEaKhd6nOZAay7mXk6UUGeIHDDh88NKb0qumjaHiN391/1GjtrJ6ZPSb33H9eJYomuTJ601Qf7SKVYVlqplZblxRvOThrtEaC28qSOPAwncCYSWbzJsrO3XP4br9KZa1fTmcaOSTQYLDFFaeURh/yDfLynp/fCwkI0yrKX79ZqG49sUr2A44a3u+d08/fXVhfAeZ8vcDocjs6z7KV7xeL3JzBcwPZgmoAkScGlpdvzc3NXHuZyXxIwlMX2aJoAfFkvx8aGnRzH5WEpr7cXuerKPwVw1Lb/sV8CDACbf0U37X3NqwAAAABJRU5ErkJggg==);
@@ -142,7 +148,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
       <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
       </node-projects-plain-scrollbar>
-      <node-projects-designer-tool-bar id="tool-bar" class="tool-bar"></node-projects-designer-tool-bar>
+      <node-projects-designer-tools-dock id="tool-bar" class="tool-bar"></node-projects-designer-tools-dock>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -229,11 +235,12 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
     this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
+
+    this._toolsDock = this._getDomElement<DesignerToolsDock>('tool-bar');
+    console.log(this._toolsDock);
   }
 
   async ready() {
-    await this._waitForChildrenReady();
-    this._toolbar.setup(this.designerCanvas);
   }
 
   public zoomReset() {
