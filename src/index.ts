@@ -190,6 +190,7 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/PathContex
 export * from "./elements/widgets/designerView/extensions/contextMenu/RectContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";

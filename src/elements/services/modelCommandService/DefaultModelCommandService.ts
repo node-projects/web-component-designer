@@ -75,6 +75,58 @@ export class DefaultModelCommandService implements IModelCommandService {
       }
       grp.commit();
     }
+    else if(command.type == CommandType.rotateCounterClockwise){
+      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateCounterClockwise');
+      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
+
+      if(trf != null){
+        try{
+          if(trf.includes('-'))
+            var degree = parseInt(trf.match(/\d+/)[0]) * -1;
+          else
+            var degree = parseInt(trf.match(/\d+/)[0]);
+  
+            var rotation = "rotate(" + (degree - 90) + "deg)";
+          }
+          catch{
+            var rotation = "rotate(-90deg)"
+          }
+      }
+      else
+      {
+        var rotation = "rotate(-90deg)";
+      }
+      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+        s.setStyle('transform', rotation);
+      }
+      grp.commit();
+    }
+    else if(command.type == CommandType.rotateClockwise){
+      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateClockwise');
+      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
+
+      if(trf != null){
+        try{
+        if(trf.includes('-'))
+          var degree = parseInt(trf.match(/\d+/)[0]) * -1;
+        else
+          var degree = parseInt(trf.match(/\d+/)[0]);
+
+          var rotation = "rotate(" + (degree + 90) + "deg)";
+        }
+        catch{
+          var rotation = "rotate(90deg)"
+        }
+      }
+      else
+      {
+        var rotation = "rotate(90deg)";
+      }
+      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+        s.setStyle('transform', rotation);
+      }
+      grp.commit();
+    }
     else
       return null;
     return true;
