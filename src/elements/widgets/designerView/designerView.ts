@@ -10,6 +10,7 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar';
+import { DesignerToolBar } from './tools/designerToolBar.js';
 
 const autoZomOffset = 10;
 
@@ -39,6 +40,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
+
+  private _toolbar: DesignerToolBar;
 
   static override readonly style = css`
     :host {
@@ -92,7 +95,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 100%;
     }
     #canvas {
-      width: calc(100% - 16px);
+      left: 36px;
+      width: calc(100% - 52px);
       height: calc(100% - 32px);
     }
   
@@ -136,7 +140,9 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   static override readonly template = html`
     <div id="outer">
       <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
-      <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll"></node-projects-plain-scrollbar>
+      <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
+      </node-projects-plain-scrollbar>
+      <node-projects-designer-tool-bar id="tool-bar" class="tool-bar"></node-projects-designer-tool-bar>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -225,6 +231,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
   }
 
+  async ready() {
+    await this._waitForChildrenReady();
+    this._toolbar.setup(this.designerCanvas);
+  }
+
   public zoomReset() {
     this._designerCanvas.canvasOffset = { x: 0, y: 0 };
     this._designerCanvas.zoomFactor = 1;
@@ -293,11 +304,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       const vp = this.designerCanvas.getNormalizedEventCoordinates(event)
       this.designerCanvas.zoomTowardsPoint(vp, zf);
     }
-    else if(event.shiftKey){
-      this._sHor.value += event.deltaY /10000;
+    else if (event.shiftKey) {
+      this._sHor.value += event.deltaY / 10000;
       this._onScrollbar(null);
     }
-    else{
+    else {
       this._sVert.value += event.deltaY / 10000;
       this._onScrollbar(null);
     }
