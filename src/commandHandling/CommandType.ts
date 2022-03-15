@@ -6,6 +6,9 @@ export enum CommandType {
   'undo' = 'undo',
   'redo' = 'redo',
 
+  'rotateLeft' = 'rotateLeft',
+  'rotateRight' = 'rotateRight',
+
   'selectAll' = 'selectAll',
 
   'moveToFront' = 'moveToFront',
