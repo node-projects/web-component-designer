@@ -78,23 +78,24 @@ export class DefaultModelCommandService implements IModelCommandService {
     else if(command.type == CommandType.rotateCounterClockwise){
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateCounterClockwise');
       var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
-
+      let degree = 0;
+      let rotation = "";
       if(trf != null){
         try{
           if(trf.includes('-'))
-            var degree = parseInt(trf.match(/\d+/)[0]) * -1;
+            degree = parseInt(trf.match(/\d+/)[0]) * -1;
           else
-            var degree = parseInt(trf.match(/\d+/)[0]);
+            degree = parseInt(trf.match(/\d+/)[0]);
   
-            var rotation = "rotate(" + (degree - 90) + "deg)";
+            rotation = "rotate(" + (degree - 90) + "deg)";
           }
           catch{
-            var rotation = "rotate(-90deg)"
+            rotation = "rotate(-90deg)"
           }
       }
       else
       {
-        var rotation = "rotate(-90deg)";
+        rotation = "rotate(-90deg)";
       }
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         s.setStyle('transform', rotation);
@@ -104,23 +105,24 @@ export class DefaultModelCommandService implements IModelCommandService {
     else if(command.type == CommandType.rotateClockwise){
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateClockwise');
       var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
-
+      let degree = 0;
+      let rotation = "";
       if(trf != null){
         try{
         if(trf.includes('-'))
-          var degree = parseInt(trf.match(/\d+/)[0]) * -1;
+          degree = parseInt(trf.match(/\d+/)[0]) * -1;
         else
-          var degree = parseInt(trf.match(/\d+/)[0]);
+          degree = parseInt(trf.match(/\d+/)[0]);
 
-          var rotation = "rotate(" + (degree + 90) + "deg)";
+          rotation = "rotate(" + (degree + 90) + "deg)";
         }
         catch{
-          var rotation = "rotate(90deg)"
+          rotation = "rotate(90deg)"
         }
       }
       else
       {
-        var rotation = "rotate(90deg)";
+        rotation = "rotate(90deg)";
       }
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         s.setStyle('transform', rotation);
