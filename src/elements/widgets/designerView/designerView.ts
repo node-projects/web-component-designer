@@ -155,6 +155,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     const outer = this._getDomElement<DesignerCanvas>('outer');
     this._designerCanvas = new DesignerCanvas();

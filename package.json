@@ -13,13 +13,13 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.6.0",
+    "@node-projects/base-custom-webcomponent": "^0.9.0",
     "construct-style-sheets-polyfill": "^3.1.0"
   },
   "devDependencies": {
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^2.4.1",
-    "@papyrs/stylo": "^0.0.8",
+    "@papyrs/stylo": "^0.0.9",
     "@types/codemirror": "^5.60.5",
     "@types/jquery": "^3.5.14",
     "@types/jquery.fancytree": "0.0.7",
@@ -32,7 +32,7 @@
     "jquery.fancytree": "^2.38.1",
     "monaco-editor": "^0.32.1",
     "ts-jest": "^27.1.3",
-    "typescript": "^4.5.5",
+    "typescript": "^4.6.2",
     "typescript-lit-html-plugin": "^0.9.0"
   },
   "repository": {

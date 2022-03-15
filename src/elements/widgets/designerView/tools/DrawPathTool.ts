@@ -42,6 +42,8 @@ export class DrawPathTool implements ITool {
 
         if (!this._p2pMode) {
           (<Element>event.target).setPointerCapture(event.pointerId);
+          designerCanvas.captureActiveTool(this);
+
           this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
           this._path.setAttribute("d", this._pathD);
@@ -55,10 +57,10 @@ export class DrawPathTool implements ITool {
         if (this._lastPoint != null && this._lastPoint.x === currentPoint.x && this._lastPoint.y === currentPoint.y && !this._samePoint) {
           this._samePoint = true;
         }
-        if(this._lastPoint == null){
+        if (this._lastPoint == null) {
           this._lastPoint = currentPoint;
         }
-        if(this._startPoint == null){
+        if (this._startPoint == null) {
           this._startPoint = currentPoint;
         }
         break;
@@ -88,9 +90,6 @@ export class DrawPathTool implements ITool {
 
 
       case EventNames.PointerUp:
-        (<Element>event.target).releasePointerCapture(event.pointerId);
-        designerCanvas.removeCurrentPointerEventHandler();
-
         if (this._eventStarted && !this._pointerMoved) {
           this._p2pMode = true;
         }
@@ -111,6 +110,9 @@ export class DrawPathTool implements ITool {
         }
 
         if (this._samePoint && this._p2pMode || this._dragMode && !this._p2pMode) {
+          (<Element>event.target).releasePointerCapture(event.pointerId);
+          designerCanvas.releaseActiveTool();
+
           this._eventStarted = false;
           this._p2pMode = false;
           this._pointerMoved = false;
@@ -143,8 +145,9 @@ export class DrawPathTool implements ITool {
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
         break;
     }
+    event.preventDefault();
+    event.stopPropagation();
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
-  { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 }

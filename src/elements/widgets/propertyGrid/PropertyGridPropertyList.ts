@@ -87,6 +87,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   constructor(serviceContainer: ServiceContainer) {
     super();
+    this._restoreCachedInititalValues();
 
     this._serviceContainer = serviceContainer;
 

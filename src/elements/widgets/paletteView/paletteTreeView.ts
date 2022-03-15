@@ -61,6 +61,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     //@ts-ignore
     import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
@@ -74,9 +75,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable')
-  }
-
-  async ready() {
+ 
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
       icon: true, //atm, maybe if we include icons for specific elements
       extensions: ['childcounter', 'dnd5', 'filter'],

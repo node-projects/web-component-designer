@@ -104,6 +104,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     //@ts-ignore
     import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);

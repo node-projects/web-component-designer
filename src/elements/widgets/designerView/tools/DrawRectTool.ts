@@ -39,6 +39,8 @@ export class DrawRectTool implements ITool {
       case EventNames.PointerDown:
         this._startPoint = currentPoint;
         (<Element>event.target).setPointerCapture(event.pointerId);
+        designerCanvas.captureActiveTool(this);
+        
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this._path.setAttribute("stroke", designerCanvas.serviceContainer.globalContext.strokeColor);
         this._path.setAttribute("fill", designerCanvas.serviceContainer.globalContext.fillBrush);
@@ -101,7 +103,7 @@ export class DrawRectTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        designerCanvas.removeCurrentPointerEventHandler();
+        designerCanvas.releaseActiveTool();
 
         const rect = this._path.getBoundingClientRect();
         designerCanvas.overlayLayer.removeOverlay(this._path);

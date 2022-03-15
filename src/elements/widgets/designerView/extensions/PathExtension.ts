@@ -89,6 +89,7 @@ export class PathExtension extends AbstractExtension {
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
+
         this._startPos = { x: event.x, y: event.y };
         this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
         this._originalPathPoint = { x: p.values[index], y: p.values[index + 1] }
@@ -127,7 +128,6 @@ export class PathExtension extends AbstractExtension {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        this.designerCanvas.removeCurrentPointerEventHandler();
         
         this._startPos = null;
         this._circlePos = null;

@@ -22,7 +22,7 @@ export class PointerTool implements ITool {
 
   private _previousEventName: EventNames;
 
-  private _clickThroughElements: [designItem: IDesignItem, backupPointerEvents: string][] = []
+  //private _clickThroughElements: [designItem: IDesignItem, backupPointerEvents: string][] = []
 
   private _dragOverExtensionItem: IDesignItem;
   private _dragExtensionItem: IDesignItem;
@@ -39,12 +39,12 @@ export class PointerTool implements ITool {
   dispose(): void {
   }
 
-  private _showContextMenu(event: MouseEvent, designerCanvas : IDesignerCanvas) {
+  private _showContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
     event.preventDefault();
     if (!event.shiftKey) {
       let items = designerCanvas.getItemsBelowMouse(event);
       if (items.indexOf(designerCanvas.instanceServiceContainer.selectionService.primarySelection?.element) >= 0)
-      designerCanvas.showDesignItemContextMenu(designerCanvas.instanceServiceContainer.selectionService.primarySelection, event);
+        designerCanvas.showDesignItemContextMenu(designerCanvas.instanceServiceContainer.selectionService.primarySelection, event);
       else {
         const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
@@ -56,7 +56,7 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    if (event.button == 2){
+    if (event.button == 2) {
       this._showContextMenu(event, designerCanvas)
       return;
     }
@@ -71,17 +71,17 @@ export class PointerTool implements ITool {
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
+        designerCanvas.captureActiveTool(this);
         this._movedSinceStartedAction = false;
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        designerCanvas.removeCurrentPointerEventHandler();
-
+        designerCanvas.releaseActiveTool();
         break;
     }
 
-    if (!event.altKey)
-      this._resetPointerEventsForClickThrough();
+    //if (!event.altKey)
+    //  this._resetPointerEventsForClickThrough();
 
     if (!currentElement)
       return;
@@ -123,43 +123,51 @@ export class PointerTool implements ITool {
         if (currentDesignItem !== designerCanvas.rootDesignItem)
           designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
       }
-      this._actionType = null;
-      this._actionStartedDesignItem = null;
-      this._movedSinceStartedAction = false;
-      this._initialPoint = null;
+      this._resetTool();
     }
 
     this._previousEventName = <EventNames>event.type;
   }
 
+  private _resetTool() {
+    this._actionType = null;
+    this._actionStartedDesignItem = null;
+    this._movedSinceStartedAction = false;
+    this._initialPoint = null;
+  }
+
   private _pointerActionTypeDrawSelection(designerView: IDesignerCanvas, event: PointerEvent, currentElement: HTMLElement) {
     const drawSelectionTool = designerView.serviceContainer.designerTools.get(NamedTools.DrawSelection);
     if (drawSelectionTool) {
+      this._resetTool();
       drawSelectionTool.pointerEventHandler(designerView, event, currentElement);
     }
   }
 
-  private _resetPointerEventsForClickThrough() {
+  /*private _resetPointerEventsForClickThrough() {
     if (!this._clickThroughElements.length)
       return;
     for (const e of this._clickThroughElements) {
       (<HTMLElement>e[0].element).style.pointerEvents = e[1];
     }
     this._clickThroughElements = [];
-  }
+  }*/
 
   private _pointerActionTypeDragOrSelect(designerCanvas: IDesignerCanvas, event: PointerEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
     if (event.altKey) {
       if (event.type == EventNames.PointerDown) {
-        this._clickThroughElements.push([currentDesignItem, (<HTMLElement>currentDesignItem.element).style.pointerEvents]);
-        (<HTMLElement>currentDesignItem.element).style.pointerEvents = 'none';
+        const currentSelection = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
+
+        console.log(designerCanvas.elementsFromPoint(event.x, event.y));
+        //this._clickThroughElements.push([currentDesignItem, (<HTMLElement>currentDesignItem.element).style.pointerEvents]);
+        //(<HTMLElement>currentDesignItem.element).style.pointerEvents = 'none';
       }
       let currentElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
       if (DomHelper.getHost(currentElement) !== designerCanvas.overlayLayer)
         currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-    } else {
+    } /*else {
       this._resetPointerEventsForClickThrough();
-    }
+    }*/
 
     switch (event.type) {
       case EventNames.PointerDown:
@@ -218,6 +226,7 @@ export class PointerTool implements ITool {
                 //search for containers below mouse cursor.
                 //to do this, we need to disable pointer events for each in a loop and search wich element is there
                 let backupPEventsMap: Map<HTMLElement, string> = new Map();
+                //const elementsFromPoint =designerCanvas.elementsFromPoint(event.x, event.y);
                 let newContainerElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
                 try {
                   checkAgain: while (newContainerElement != null) {

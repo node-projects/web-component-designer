@@ -119,6 +119,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     this._treeDiv = document.createElement('div');
     this._treeDiv.style.userSelect = 'none';
