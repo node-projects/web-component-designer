@@ -1,6 +1,6 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
-import { rotateElementByMatrix3d } from "../../../helper/TransformHelper";
+import { cssMatrixToMatrixArray, getRotationAngleFromMatrix, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
@@ -10,6 +10,8 @@ export class RotateExtension extends AbstractExtension {
 
   private _initialPoint: IPoint;
   private _rotateIcon: any;
+  private _initialElementAngle: number;
+  private _initialOverlayAngle: number;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -61,7 +63,15 @@ export class RotateExtension extends AbstractExtension {
 
     switch (event.type) {
       case EventNames.PointerDown:
+        const el = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
+        let transformOriginInPx = {
+          x: el.x + el.width / 2,
+          y: el.y + el.height / 2
+        };
+
         this._initialPoint = currentPoint;
+        this._initialElementAngle = getRotationAngleFromMatrix(cssMatrixToMatrixArray(getComputedStyle(this.extendedItem.element).transform));
+        this._initialOverlayAngle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);
         (<Element>event.target).setPointerCapture(event.pointerId);
         break;
       case EventNames.PointerMove:
@@ -73,10 +83,12 @@ export class RotateExtension extends AbstractExtension {
             x: el.x + el.width / 2,
             y: el.y + el.height / 2
           };
-
-          let angle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);          
+          
+          let angle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);
+          console.log("angle: " + angle, "initial overlay angle: " + this._initialOverlayAngle, "initial element angle: " + this._initialElementAngle);
+          angle = angle - this._initialOverlayAngle + this._initialElementAngle;
+          angle *= -1;
           rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), 'z', angle);
-
         }
         this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         break;

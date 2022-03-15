@@ -1,5 +1,12 @@
 import { IPoint } from "../../index.js";
 
+let identityMatrix = [
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1
+];
+
 export function combineTransforms(helperElement: HTMLElement, element: HTMLElement, transform1: string, transform2: string) {
   if (transform1 == null || transform1 == '') {
     element.style.transform = transform2;
@@ -61,6 +68,31 @@ export function rotateElementByMatrix3d(element: HTMLElement, axisOfRotation: 'x
       break;
   }
 
-  element.style.transform = "matrix3d(" + rotateMatrix.join(',') + ")";
+  const actualTransformMatrix = cssMatrixToMatrixArray(window.getComputedStyle(element).transform);
+  //const resultingMatrix
+  element.style.transform = matrixArrayToCssMatrix(rotateMatrix);
 
+}
+
+export function matrixArrayToCssMatrix(matrixArray: any[]) {
+  return "matrix3d(" + matrixArray.join(',') + ")";
+}
+
+export function cssMatrixToMatrixArray(cssMatrix: string) {
+  if (!cssMatrix.includes('matrix')) {
+    console.error('cssMatrixToMatrixArray: no css matrix passed');
+    return identityMatrix;
+  }
+  let matrixArray = cssMatrix.match(/^matrix.*\((.*)\)/)[1].split(',');
+  return matrixArray;
+}
+
+export function getRotationAngleFromMatrix(matrixArray: any[]) {
+  let angle = null;
+  const a = matrixArray[0];
+  const b = matrixArray[1];
+  angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+  
+  //return (angle < 0) ? angle +=360 : angle;
+  return angle;
 }
