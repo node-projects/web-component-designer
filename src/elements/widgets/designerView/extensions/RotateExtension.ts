@@ -1,5 +1,6 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
+import { rotateElementByMatrix3d } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
@@ -67,17 +68,15 @@ export class RotateExtension extends AbstractExtension {
         if (this._initialPoint) {
           const el = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
 
-          // TODO: use elements transform origin
+          // TODO: use element's transform origin
           let transformOriginInPx = {
             x: el.x + el.width / 2,
             y: el.y + el.height / 2
           };
 
-          let angle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);
+          let angle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);          
+          rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), 'z', angle);
 
-          console.log("currentPoint: ", currentPoint, "element: ", el, "transformOriginInPx: ", transformOriginInPx, "width: " + el.width, "height: " + el.height, "angle: " + angle);
-
-          (<HTMLElement>this.extendedItem.element).style.transform = `rotate(${angle}deg)`;
         }
         this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         break;
