@@ -56,11 +56,15 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
 
         this._serviceContainer.globalContext.onToolChanged.on((e) => {
             let command_name : string; 
+            let found = false;
             this._serviceContainer.designerTools.forEach((tool, key) => {
-                if(tool === e.newValue) command_name = key;
+                if(tool === e.newValue && !found){
+                    command_name = key;
+                    found = true;
+                    this._toolButtonsElem.externalToolChange(command_name);
+                } 
             });
 
-            this._toolButtonsElem.externalToolChange(command_name);
         })
     }
 

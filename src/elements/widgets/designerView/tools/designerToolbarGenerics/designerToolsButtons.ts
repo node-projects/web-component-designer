@@ -90,7 +90,7 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
 
     public externalToolChange(command_name : string){
         let tool = this._toolButtons.find(x => x.getAttribute("data-command-parameter") == command_name);
-        if(tool !== null) {
+        if(tool != null) {
             this._resetLastTool();
             this._toolSelected(tool);
         }
