@@ -32,15 +32,15 @@ export function convertCoordinates(point: IPoint, matrix: DOMMatrix) {
   return domPoint.matrixTransform(matrix.inverse());
 }
 
-export function rotateElementByMatrix3d(element: HTMLElement, axisOfRotation: 'x'| 'y' | 'z' | 'X'| 'Y' | 'Z', angle: number) {
+export function getRotationMatrix3d(element: HTMLElement, axisOfRotation: 'x'| 'y' | 'z' | 'X'| 'Y' | 'Z', angle: number) {
   const angleInRadians = angle / 180 * Math.PI;
   const sin = Math.sin;
   const cos = Math.cos;
-  let rotateMatrix = [];
+  let rotationMatrix3d = [];
 
   switch (axisOfRotation.toLowerCase()) {
     case 'x': 
-      rotateMatrix = [
+      rotationMatrix3d = [
         1,                    0,                     0,     0,
         0,  cos(angleInRadians),  -sin(angleInRadians),     0,
         0,  sin(angleInRadians),   cos(angleInRadians),     0,
@@ -48,7 +48,7 @@ export function rotateElementByMatrix3d(element: HTMLElement, axisOfRotation: 'x
       ];
       break;
     case 'y': 
-      rotateMatrix = [
+      rotationMatrix3d = [
          cos(angleInRadians),   0, sin(angleInRadians),   0,
                            0,   1,                   0,   0,
         -sin(angleInRadians),   0, cos(angleInRadians),   0,
@@ -56,7 +56,7 @@ export function rotateElementByMatrix3d(element: HTMLElement, axisOfRotation: 'x
       ];
       break;
     case 'z': 
-    rotateMatrix = [
+    rotationMatrix3d = [
         cos(angleInRadians), -sin(angleInRadians),    0,    0,
         sin(angleInRadians),  cos(angleInRadians),    0,    0,
                           0,                    0,    1,    0,
@@ -64,14 +64,15 @@ export function rotateElementByMatrix3d(element: HTMLElement, axisOfRotation: 'x
       ];
       break;
     default:
-      rotateMatrix = null;
+      rotationMatrix3d = null;
       break;
   }
 
-  const actualTransformMatrix = cssMatrixToMatrixArray(window.getComputedStyle(element).transform);
-  //const resultingMatrix
-  element.style.transform = matrixArrayToCssMatrix(rotateMatrix);
+  return rotationMatrix3d;
+}
 
+export function rotateElementByMatrix3d(element: HTMLElement, matrix: number[]) {
+  element.style.transform = matrixArrayToCssMatrix(matrix);
 }
 
 export function matrixArrayToCssMatrix(matrixArray: any[]) {

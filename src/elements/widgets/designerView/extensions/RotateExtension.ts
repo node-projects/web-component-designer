@@ -1,6 +1,6 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
-import { cssMatrixToMatrixArray, getRotationAngleFromMatrix, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
+import { cssMatrixToMatrixArray, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
@@ -88,7 +88,8 @@ export class RotateExtension extends AbstractExtension {
           console.log("angle: " + angle, "initial overlay angle: " + this._initialOverlayAngle, "initial element angle: " + this._initialElementAngle);
           angle = angle - this._initialOverlayAngle + this._initialElementAngle;
           angle *= -1;
-          rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), 'z', angle);
+          const rotationMatrix3d = getRotationMatrix3d((<HTMLElement>this.extendedItem.element), 'z', angle);
+          rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), rotationMatrix3d);
         }
         this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         break;
