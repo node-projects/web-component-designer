@@ -8,6 +8,7 @@ let identityMatrix: number[] = [
 ];
 
 export function combineTransforms(helperElement: HTMLElement, element: HTMLElement, transform1: string, transform2: string) {
+  console.log("transform1: " + transform1, "transform2: " + transform2);
   if (transform1 == null || transform1 == '') {
     element.style.transform = transform2;
     return;
@@ -32,7 +33,7 @@ export function convertCoordinates(point: IPoint, matrix: DOMMatrix) {
   return domPoint.matrixTransform(matrix.inverse());
 }
 
-export function getRotationMatrix3d(element: HTMLElement, axisOfRotation: 'x'| 'y' | 'z' | 'X'| 'Y' | 'Z', angle: number) {
+export function getRotationMatrix3d(axisOfRotation: 'x'| 'y' | 'z' | 'X'| 'Y' | 'Z', angle: number) {
   const angleInRadians = angle / 180 * Math.PI;
   const sin = Math.sin;
   const cos = Math.cos;
@@ -71,6 +72,16 @@ export function getRotationMatrix3d(element: HTMLElement, axisOfRotation: 'x'| '
   return rotationMatrix3d;
 }
 
+export function getTranslationMatrix3d(deltaX: number, deltaY: number, deltaZ: number) {
+  const translationMatrix = [
+    1,    0,    0,   0,
+    0,    1,    0,   0,
+    0,    0,    1,   0,
+    deltaX,    deltaY,    deltaZ,   1
+  ];
+  return translationMatrix;
+}
+
 export function rotateElementByMatrix3d(element: HTMLElement, matrix: number[]) {
   element.style.transform = matrixArrayToCssMatrix(matrix);
 }
@@ -95,4 +106,17 @@ export function getRotationAngleFromMatrix(matrixArray: number[]) {
   angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
   
   return angle;
+}
+
+export function composeTransforms(element: HTMLElement, cssTranformationMatrix: string) {
+  let actualElementTransform = element.style.transform;
+  if (actualElementTransform == null || actualElementTransform == '') {
+    element.style.transform = cssTranformationMatrix;
+    return;
+  }
+
+  const actualMatrix = new DOMMatrix(window.getComputedStyle(element).transform);
+  const transformationMatrix = new DOMMatrix(cssTranformationMatrix);
+  const result = actualMatrix.multiply(transformationMatrix);
+  element.style.transform = result.toString();
 }

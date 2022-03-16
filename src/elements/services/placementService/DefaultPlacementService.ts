@@ -3,7 +3,7 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { combineTransforms } from '../../helper/TransformHelper.js';
+import { composeTransforms, cssMatrixToMatrixArray, getTranslationMatrix3d, matrixArrayToCssMatrix } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
 
 export class DefaultPlacementService implements IPlacementService {
@@ -89,12 +89,23 @@ export class DefaultPlacementService implements IPlacementService {
     //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
-
+    console.log("track-x: " + track.x, "startPoint-x: " + startPoint.x, "track-y: " + track.y, "startPoint-y: " + startPoint.y);
     let filterdItems = filterChildPlaceItems(items);
     //TODO: -> what is if a transform already exists -> backup existing style.?
     for (const designItem of filterdItems) {
-      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
-      combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
+      let actualMatrix = cssMatrixToMatrixArray((<HTMLElement>designItem.element).style.transform);
+      let actualMatrixIs2dTransformationMatrix = actualMatrix.length == 6;
+      let actualXTranslation = actualMatrix[actualMatrixIs2dTransformationMatrix ? 4 : 12];
+      let actualYTranslation = actualMatrix[actualMatrixIs2dTransformationMatrix ? 5 : 13];
+      let actualZTranslation = actualMatrixIs2dTransformationMatrix ? 0 : actualMatrix[14];
+
+      let deltaX = track.x - actualXTranslation;
+      let deltaY = track.y - actualYTranslation;
+      let deltaZ = actualZTranslation;
+
+      const translationMatrix = getTranslationMatrix3d(deltaX, deltaY, deltaZ);
+      // TODO: eliminate transformHelperElement
+      composeTransforms((<HTMLElement>designItem.element), matrixArrayToCssMatrix(translationMatrix));
     }
   }
 

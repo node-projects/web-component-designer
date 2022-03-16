@@ -40,11 +40,11 @@ export class PositionExtension extends AbstractExtension {
 
     let tx = 0;
     let ty = 0;
-    if (computedStyle.transform !== 'none') {
-      const transforms = computedStyle.transform.replace('matrix(', '').split(',');
-      tx = Number.parseFloat(transforms[4]);
-      ty = Number.parseFloat(transforms[5].replace(')', ''));
-    }
+    // if (computedStyle.transform !== 'none') {
+    //   const transforms = computedStyle.transform.replace('matrix(', '').split(',');
+    //   tx = Number.parseFloat(transforms[4]);
+    //   ty = Number.parseFloat(transforms[5].replace(')', ''));
+    // }
 
     this._line1 = this._drawLine((xOffset / this.designerCanvas.scaleFactor - left - tx), (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, xOffset / this.designerCanvas.scaleFactor, (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, 'svg-position', this._line1);
     this._line2 = this._drawLine((xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, (yOffset / this.designerCanvas.scaleFactor) - top - ty, (xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, yOffset / this.designerCanvas.scaleFactor, 'svg-position', this._line2);

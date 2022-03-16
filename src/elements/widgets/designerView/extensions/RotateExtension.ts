@@ -88,7 +88,7 @@ export class RotateExtension extends AbstractExtension {
           console.log("angle: " + angle, "initial overlay angle: " + this._initialOverlayAngle, "initial element angle: " + this._initialElementAngle);
           angle = angle - this._initialOverlayAngle + this._initialElementAngle;
           angle *= -1;
-          const rotationMatrix3d = getRotationMatrix3d((<HTMLElement>this.extendedItem.element), 'z', angle);
+          const rotationMatrix3d = getRotationMatrix3d('z', angle);
           rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), rotationMatrix3d);
         }
         this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
