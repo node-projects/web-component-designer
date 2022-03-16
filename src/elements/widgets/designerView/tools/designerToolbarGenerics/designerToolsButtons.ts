@@ -1,10 +1,26 @@
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { assetsPath } from "../../../../../Constants.js";
+import { NamedTools } from "../NamedTools.js";
 
-export type ToolTypeAsArg = {
-    data_command : string,
-    open_popup: boolean,
-    popup_category: string,
+export interface ToolTypeAsArg  {
+    command_parameter : string;
+    open_popup?: boolean;
+    popup_category?: string;
+}
+
+export interface AdvancedToolTypeAsArg extends ToolTypeAsArg {
+    background_url: string;
+    title: string;
+    command: string;
+}
+
+export interface ToolPopupCategoryCollection {
+    category: string;
+    command: string;
+    command_parameter: string;
+    title: string;
+    tool: NamedTools;
+    background_url: string;
 }
 
 export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppend {
@@ -40,26 +56,45 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
 `;
 
     static override readonly template = html`
-        <div id="toolbar-host" class="toolbar-host">
-            <div class="tool" data-command="setTool" data-command-parameter="Pointer" title="Pointer Tool" style="background-image: url('${assetsPath}images/layout/PointerTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="MagicWandSelector" title="Magic Wand Selector" style="background-image: url('${assetsPath}images/layout/MagicWandTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="RectangleSelector" title="Rectangle Selector" style="background-image: url('${assetsPath}images/layout/SelectRectTool.svg');"></div>
-            <div class="tool" data-command="setTool" popup="draw" data-command-parameter="DrawLine" title="Draw Line" style="background-image: url('${assetsPath}images/layout/DrawLineTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Pointer Tool" style="background-image: url('${assetsPath}images/layout/DrawPathTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="background-image: url('${assetsPath}images/layout/DrawRectTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/layout/DrawEllipTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="Zoom" title="Zoom Tool" style="background-image: url('${assetsPath}images/layout/ZoomTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="Text" title="Text Tool" style="background-image: url('${assetsPath}images/layout/TextTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="TextBoc" title="Textbox Tool" style="background-image: url('${assetsPath}images/layout/TextBoxTool.svg');"></div>
-        </div>`;
+        <div id="toolbar-host" class="toolbar-host"></div>`;
 
     public readonly toolActivated = new TypedEvent<ToolTypeAsArg>();
     private _toolButtons : HTMLElement[];
     private _lastTool : HTMLElement;
+    private _toolCollection : ToolPopupCategoryCollection[];
+    private _toolbarhost : HTMLDivElement;
 
     ready(){
-        let toolbarhost = this._getDomElement<HTMLElement>("toolbar-host");
-        this._toolButtons = [...toolbarhost.querySelectorAll<HTMLDivElement>('div.tool')];
+        this._initToolCategories();
+        this._toolbarhost = this._getDomElement<HTMLDivElement>("toolbar-host");
+    }
+
+    public setToolsExternal(tools : ChildNode[]){
+        for(let tool of tools){
+            this._toolbarhost.appendChild(tool);
+        }
+        this._createToolEventListeners();
+    }
+
+    private _initToolCategories(){
+        let toolCollection : ToolPopupCategoryCollection[] = [];
+        toolCollection.push({tool: NamedTools.Pointer, category: "pointer", command: "setTool", command_parameter: NamedTools.Pointer, title: "Pointer Tool", background_url: "url("+assetsPath+"images/layout/PointerTool.svg)"});
+        toolCollection.push({tool: NamedTools.MagicWandSelector, category: "selector", command: "setTool", command_parameter: NamedTools.MagicWandSelector, title: "Magic Wand Selector", background_url: "url("+assetsPath+"images/layout/MagicWandTool.svg)"});
+        toolCollection.push({tool: NamedTools.RectangleSelector, category: "selector", command: "setTool", command_parameter: NamedTools.RectangleSelector, title: "Rectangle Selector", background_url: "url("+assetsPath+"images/layout/SelectRectTool.svg)"});
+        toolCollection.push({tool: NamedTools.DrawLine, category: "draw", command: "setTool", command_parameter: NamedTools.DrawLine, title: "Draw Line", background_url: "url("+assetsPath+"images/layout/DrawLineTool.svg)"});
+        toolCollection.push({tool: NamedTools.DrawPath, category: "draw", command: "setTool", command_parameter: NamedTools.DrawPath, title: "Draw Path", background_url: "url("+assetsPath+"images/layout/DrawPathTool.svg)"});
+        toolCollection.push({tool: NamedTools.DrawRect, category: "draw", command: "setTool", command_parameter: NamedTools.DrawRect, title: "Draw Rectangle", background_url: "url("+assetsPath+"images/layout/DrawRectTool.svg)"});
+        toolCollection.push({tool: NamedTools.DrawEllipsis, category: "draw", command: "setTool", command_parameter: NamedTools.DrawEllipsis, title: "Draw Ellipsis", background_url: "url("+assetsPath+"images/layout/DrawEllipTool.svg)"});
+        toolCollection.push({tool: NamedTools.Zoom, category: "zoom", command: "setTool", command_parameter: NamedTools.Zoom, title: "Zoom Tool", background_url: "url("+assetsPath+"images/layout/ZoomTool.svg)"});
+        toolCollection.push({tool: NamedTools.Text, category: "text", command: "setTool", command_parameter: NamedTools.Text, title: "Text Tool", background_url: "url("+assetsPath+"images/layout/TextTool.svg)"});
+        toolCollection.push({tool: NamedTools.TextBoc, category: "text", command: "setTool", command_parameter: NamedTools.TextBoc, title: "Textbox Tool", background_url: "url("+assetsPath+"images/layout/TextBoxTool.svg)"});
+        toolCollection.push({tool: NamedTools.PickColor, category: "pick", command: "setTool", command_parameter: NamedTools.PickColor, title: "Color Picker", background_url: "url("+assetsPath+"images/layout/ColorPickerTool.svg)"});
+
+        this._toolCollection = toolCollection;
+    }
+
+    private _createToolEventListeners(){
+        this._toolButtons = [...this._toolbarhost.querySelectorAll<HTMLDivElement>('div.tool')];
         for (let tool of this._toolButtons){
             tool.addEventListener("click", () => this._toolSelected(tool))
         }
@@ -68,7 +103,7 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
     private _toolSelected(tool : HTMLElement){
         let isPopup = this._lastTool === tool;
         this.toolActivated.emit({
-            data_command: tool.getAttribute("data-command-parameter"),
+            command_parameter: tool.getAttribute("data-command-parameter"),
             open_popup: isPopup,
             popup_category: tool.getAttribute("popup"),
         })
@@ -98,6 +133,10 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
 
     private _resetLastTool(){
         this._lastTool = null;
+    }
+
+    public get toolCollection(){
+        return this._toolCollection;
     }
 }
 customElements.define('node-projects-designer-tools-buttons', DesignerToolsButtons);

@@ -1,5 +1,5 @@
-import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
-import { assetsPath } from "../../../../../Constants.js";
+import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from "@node-projects/base-custom-webcomponent";
+import { AdvancedToolTypeAsArg } from "./designerToolsButtons";
 
 export class DesignerToolbarPopupToolSelect extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
@@ -21,11 +21,31 @@ export class DesignerToolbarPopupToolSelect extends BaseCustomWebComponentConstr
 `;
 
     static override readonly template = html`
-        <div id="popup-tool-select" class="popup-tool-select">
-            <div class="tool" data-command="setTool" popup="draw" data-command-parameter="DrawLine" title="Draw Line" style="background-image: url('${assetsPath}images/layout/DrawLineTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Pointer Tool" style="background-image: url('${assetsPath}images/layout/DrawPathTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="background-image: url('${assetsPath}images/layout/DrawRectTool.svg');"></div>
-            <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/layout/DrawEllipTool.svg');"></div>
-        </div>`;
+        <div id="popup-tool-select" class="popup-tool-select"></div>`;
+    
+    public readonly toolActivated = new TypedEvent<AdvancedToolTypeAsArg>();
+    
+    public insertToolContent(template : HTMLTemplateElement){
+        this._getDomElement<HTMLDivElement>("popup-tool-select")?.appendChild(template.content.cloneNode(true));
+
+        this._setupEventHandler();
+    }
+
+    private _setupEventHandler(){
+        for (let tool of [...this._getDomElement<HTMLDivElement>("popup-tool-selected")?.querySelectorAll("div.tool")]){
+            tool.addEventListener("click", () => this._toolSelected(<HTMLDivElement>tool));
+        }
+    }
+
+    private _toolSelected(tool : HTMLDivElement){
+        this.toolActivated.emit({
+            command_parameter: tool.getAttribute("data-command-parameter"),
+            open_popup: false,
+            popup_category: undefined,
+            background_url: tool.style.backgroundImage,
+            title: tool.getAttribute("title"),
+            command: tool.getAttribute("data-command"),
+        })
+    }
 }
 customElements.define('node-projects-designer-tools-popup-select', DesignerToolbarPopupToolSelect);

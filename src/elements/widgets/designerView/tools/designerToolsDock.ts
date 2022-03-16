@@ -1,9 +1,11 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
 import { DesignerToolbarPopup } from "./designerToolbarGenerics/designerToolbarPopup.js";
+import { DesignerToolRenderer } from "./designerToolbarGenerics/designerToolRenderer.js";
 import "./designerToolbarGenerics/designerToolsButtons.js";
-import { DesignerToolsButtons, ToolTypeAsArg } from "./designerToolbarGenerics/designerToolsButtons.js";
+import { AdvancedToolTypeAsArg, DesignerToolsButtons, ToolTypeAsArg } from "./designerToolbarGenerics/designerToolsButtons.js";
 import "./designerToolbarPopups/DrawToolPopup.js";
+import { DrawToolPopup } from "./designerToolbarPopups/DrawToolPopup.js";
 
 
 export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
@@ -47,8 +49,19 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
             this._toolButtonActivated(toolType);
         }));
 
+        this._registerPopups();
 
-        this._toolPopupElems = [...this._getDomElement<HTMLElement>("popups").querySelectorAll<DesignerToolbarPopup>('.popup')]
+        let categories : string[] = [];
+        
+        let tools = [];
+        for(let tool of this._toolButtonsElem.toolCollection){
+            if(!categories.includes(tool.category)){
+                tools.push(DesignerToolRenderer.createTool(tool));
+                categories.push(tool.category);
+            }
+        }
+
+        this._toolButtonsElem.setToolsExternal(tools);
     }
 
     public initialize(serviceContainer : ServiceContainer){
@@ -68,16 +81,29 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         })
     }
 
+    private _registerPopups(){
+        let popups = this._getDomElement<HTMLElement>("popups");
+        this._toolPopupElems = [...popups.querySelectorAll<DesignerToolbarPopup>('.popup')]
+
+        //DrawToolPopup
+        let drawToolPopup = popups.querySelectorAll<DrawToolPopup>("node-projects-designer-popup-drawtool")[0]
+        drawToolPopup.toolActivated.on((toolArg) => this._popupToolSelected(drawToolPopup, toolArg));
+    }
+
     private _toolButtonActivated(toolType: ToolTypeAsArg) {
         this._hideAllPopups();
 
         if (toolType.open_popup) this._activatePopup(toolType.popup_category);
-        this._toolButtonsElem.markToolAsSelected(toolType.data_command);
+        this._toolButtonsElem.markToolAsSelected(toolType.command_parameter);
     }
 
     private _activatePopup(id: string) {
         let combinedId = id + "-popup";
         this._toolPopupElems.find(x => x.getAttribute("value") == combinedId)?.setAttribute("opened", "");
+    }
+
+    private _popupToolSelected(popup : DesignerToolbarPopup, toolArg : AdvancedToolTypeAsArg){
+
     }
 
     private _hideAllPopups() {
