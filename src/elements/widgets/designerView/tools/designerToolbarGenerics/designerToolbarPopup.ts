@@ -22,11 +22,19 @@ export abstract class DesignerToolbarPopup extends BaseCustomWebComponentConstru
         </div>
     `;
 
-    private _setTitle(title : string){
-        this._getDomElement<HTMLElement>("title").innerHTML = title;
-    }
-
     ready(){
         this._setTitle(this.getAttribute("title"));
     }
+
+    protected _setTitle(title : string){
+        this._getDomElement<HTMLElement>("title").innerHTML = title;
+    }
+
+    protected _setContent(elements : HTMLElement[]){
+        let contentArea = this._getDomElement<HTMLElement>("content-area");
+        for(let elem of elements){
+            contentArea.appendChild(elem);
+        }
+    }
+
 }

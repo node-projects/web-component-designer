@@ -1,4 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
+import { ServiceContainer } from "../../../services/ServiceContainer.js";
 import { DesignerToolbarPopup } from "./designerToolbarGenerics/designerToolbarPopup.js";
 import "./designerToolbarGenerics/designerToolsButtons.js";
 import { DesignerToolsButtons, ToolTypeAsArg } from "./designerToolbarGenerics/designerToolsButtons.js";
@@ -38,6 +39,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
 
     private _toolButtonsElem: DesignerToolsButtons;
     private _toolPopupElems: DesignerToolbarPopup[];
+    private _serviceContainer: ServiceContainer;
 
     ready() {
         this._toolButtonsElem = this._getDomElement<DesignerToolsButtons>("tool-buttons");
@@ -49,9 +51,24 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         this._toolPopupElems = [...this._getDomElement<HTMLElement>("popups").querySelectorAll<DesignerToolbarPopup>('.popup')]
     }
 
+    public initialize(serviceContainer : ServiceContainer){
+        this._serviceContainer = serviceContainer;
+
+        this._serviceContainer.globalContext.onToolChanged.on((e) => {
+            let command_name : string; 
+            this._serviceContainer.designerTools.forEach((tool, key) => {
+                if(tool === e.newValue) command_name = key;
+            });
+
+            this._toolButtonsElem.externalToolChange(command_name);
+        })
+    }
+
     private _toolButtonActivated(toolType: ToolTypeAsArg) {
         this._hideAllPopups();
+
         if (toolType.open_popup) this._activatePopup(toolType.popup_category);
+        this._toolButtonsElem.markToolAsSelected(toolType.data_command);
     }
 
     private _activatePopup(id: string) {

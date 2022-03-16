@@ -10,6 +10,7 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar';
+import { DesignerToolsDock } from './tools/designerToolsDock';
 
 const autoZomOffset = 10;
 
@@ -39,6 +40,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
+  private _tooldock: DesignerToolsDock;
 
   static override readonly style = css`
     :host {
@@ -235,6 +237,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   async ready() {
+    this._tooldock = await this._getDomElement<DesignerToolsDock>('tool-bar');
+    this._tooldock.initialize(this.serviceContainer);
   }
 
   public zoomReset() {

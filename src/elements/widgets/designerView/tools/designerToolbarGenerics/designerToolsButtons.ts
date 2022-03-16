@@ -29,6 +29,14 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
         flex-shrink: 0;
         border-bottom: 1px solid black;
     }
+
+    .tool[selected] {
+        background-color: rgb(47, 53, 69);
+    }
+
+    .tool:hover {
+        cursor: pointer;
+    }
 `;
 
     static override readonly template = html`
@@ -46,11 +54,13 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
         </div>`;
 
     public readonly toolActivated = new TypedEvent<ToolTypeAsArg>();
+    private _toolButtons : HTMLElement[];
     private _lastTool : HTMLElement;
 
     ready(){
         let toolbarhost = this._getDomElement<HTMLElement>("toolbar-host");
-        for (let tool of toolbarhost.querySelectorAll<HTMLDivElement>('div.tool')){
+        this._toolButtons = [...toolbarhost.querySelectorAll<HTMLDivElement>('div.tool')];
+        for (let tool of this._toolButtons){
             tool.addEventListener("click", () => this._toolSelected(tool))
         }
     }
@@ -58,11 +68,36 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
     private _toolSelected(tool : HTMLElement){
         let isPopup = this._lastTool === tool;
         this.toolActivated.emit({
-            data_command: tool.getAttribute("data-command"),
+            data_command: tool.getAttribute("data-command-parameter"),
             open_popup: isPopup,
             popup_category: tool.getAttribute("popup"),
         })
         this._lastTool = tool;
+    }
+
+    public markToolAsSelected(id : string){
+        this._unselectTools();
+
+        let selectedElement = this._toolButtons.find(t => t.getAttribute("data-command-parameter") == id);
+        selectedElement?.setAttribute("selected", "");
+    }
+
+    private _unselectTools(){
+        for(let tool of this._toolButtons){
+            tool.removeAttribute("selected");
+        }
+    }
+
+    public externalToolChange(command_name : string){
+        let tool = this._toolButtons.find(x => x.getAttribute("data-command-parameter") == command_name);
+        if(tool !== null) {
+            this._resetLastTool();
+            this._toolSelected(tool);
+        }
+    }
+
+    private _resetLastTool(){
+        this._lastTool = null;
     }
 }
 customElements.define('node-projects-designer-tools-buttons', DesignerToolsButtons);
