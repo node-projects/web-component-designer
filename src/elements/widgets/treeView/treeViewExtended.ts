@@ -432,9 +432,11 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._tree.visit((node) => {
       if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
         node.setSelected(true);
+        node.setActive(true);
         node.makeVisible({ scrollIntoView: true });
       } else {
         node.setSelected(false);
+        node.setActive(false);
       }
     });
   }
