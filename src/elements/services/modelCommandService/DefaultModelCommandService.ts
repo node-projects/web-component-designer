@@ -75,6 +75,60 @@ export class DefaultModelCommandService implements IModelCommandService {
       }
       grp.commit();
     }
+    else if(command.type == CommandType.rotateCounterClockwise){
+      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateCounterClockwise');
+      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
+      let degree = 0;
+      let rotation = "";
+      if(trf != null){
+        try{
+          if(trf.includes('-'))
+            degree = parseInt(trf.match(/\d+/)[0]) * -1;
+          else
+            degree = parseInt(trf.match(/\d+/)[0]);
+  
+            rotation = "rotate(" + (degree - 90) + "deg)";
+          }
+          catch{
+            rotation = "rotate(-90deg)"
+          }
+      }
+      else
+      {
+        rotation = "rotate(-90deg)";
+      }
+      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+        s.setStyle('transform', rotation);
+      }
+      grp.commit();
+    }
+    else if(command.type == CommandType.rotateClockwise){
+      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateClockwise');
+      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
+      let degree = 0;
+      let rotation = "";
+      if(trf != null){
+        try{
+        if(trf.includes('-'))
+          degree = parseInt(trf.match(/\d+/)[0]) * -1;
+        else
+          degree = parseInt(trf.match(/\d+/)[0]);
+
+          rotation = "rotate(" + (degree + 90) + "deg)";
+        }
+        catch{
+          rotation = "rotate(90deg)"
+        }
+      }
+      else
+      {
+        rotation = "rotate(90deg)";
+      }
+      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+        s.setStyle('transform', rotation);
+      }
+      grp.commit();
+    }
     else
       return null;
     return true;

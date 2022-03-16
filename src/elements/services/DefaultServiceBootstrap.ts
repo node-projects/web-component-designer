@@ -55,6 +55,7 @@ import { RectContextMenu } from '../widgets/designerView/extensions/contextMenu/
 import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/PathContextMenu.js';
 import { SeperatorContextMenu } from '../widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js';
 import { ZoomToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js';
+import { RotateLeftAndRight } from '../widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -136,6 +137,8 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designerContextMenuExtensions = [
     new CopyPasteContextMenu(),
+    new SeperatorContextMenu(),
+    new RotateLeftAndRight(),
     new SeperatorContextMenu(),
     new ZoomToElementContextMenu(),
     new SeperatorContextMenu(),

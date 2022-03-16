@@ -286,17 +286,20 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   private _onWheel(event: WheelEvent) {
     event.preventDefault();
     if (event.ctrlKey) {
-      let zf = this._designerCanvas.zoomFactor
-      zf += event.deltaY * -0.001; //deltamode = 0
+      let zf = this._designerCanvas.zoomFactor;
+      const wheel = event.deltaY < 0 ? 1 : (-1);
+      zf *= Math.exp(wheel * 0.2);
       if (zf < 0.02)
         zf = 0.02;
-
       const vp = this.designerCanvas.getNormalizedEventCoordinates(event)
       this.designerCanvas.zoomTowardsPoint(vp, zf);
     }
-    else {
-      this._sHor.value += event.deltaX / 1000;
-      this._sVert.value += event.deltaY / 1000;
+    else if(event.shiftKey){
+      this._sHor.value += event.deltaY /10000;
+      this._onScrollbar(null);
+    }
+    else{
+      this._sVert.value += event.deltaY / 10000;
       this._onScrollbar(null);
     }
   }
