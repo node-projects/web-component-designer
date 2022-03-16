@@ -29,7 +29,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     return this._additionalStyle;
   };
 
-  
+
   public onContentChanged = new TypedEvent<void>();
 
   private _serviceContainer: ServiceContainer;
@@ -130,7 +130,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   designerContentChanged() {
     this.onContentChanged.emit();
-    
+
     if (!this._disableChangeNotificationEditor) {
       this._disableChangeNotificationDesigner = true;
       if (this._tabControl.selectedIndex === 2) {
@@ -154,14 +154,14 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   executeCommand(command: IUiCommand) {
-    if (this._tabControl.selectedIndex === 0)
+    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2)
       this.designerView.executeCommand(command);
     else if (this._tabControl.selectedIndex === 1)
       this.codeView.executeCommand(command);
   }
 
   canExecuteCommand(command: IUiCommand) {
-    if (this._tabControl.selectedIndex === 0)
+    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2)
       return this.designerView.canExecuteCommand(command);
     else if (this._tabControl.selectedIndex === 1)
       return this.codeView.canExecuteCommand(command);

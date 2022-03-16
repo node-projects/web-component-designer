@@ -206,6 +206,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
           if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
             node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
+            node.tr.onmouseenter = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(designItem.element);
+            node.tr.onmouseleave = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(null);
 
             let d = document.createElement("div");
             d.className = "cmd"

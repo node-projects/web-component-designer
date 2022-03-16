@@ -719,6 +719,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         continue;
       if (e == this.overlayLayer)
         continue;
+      if (e.getRootNode() !== this.shadowRoot)
+        continue;
       //retVal.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
       retVal.push(e);
       if (e === this._canvas)
@@ -737,52 +739,33 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         currentElement = null;
         continue;
       }
-      if (currentElement === this._outercanvas2) {
+      if (currentElement == this.clickOverlay) {
         currentElement = null;
         continue;
       }
-      if (currentElement === this.overlayLayer) {
-        currentElement = this.overlayLayer.elementFromPoint(point.x, point.y) as HTMLElement;
-        break;
+      if (currentElement == this.overlayLayer) {
+        currentElement = null;
+        continue;
       }
-      if (currentElement !== this.clickOverlay && currentElement !== this.overlayLayer) {
-        break;
+      if (currentElement.getRootNode() !== this.shadowRoot) {
+        currentElement = null;
+        continue;
       }
+      break;
     }
 
     return currentElement;
   }
 
-  //todo: remove
-  public getItemsBelowMouse(event: MouseEvent): Element[] {
-    const lstEl: HTMLElement[] = [];
-    let backupPEventsMap: Map<HTMLElement, string> = new Map();
-    try {
-      let el = this.elementFromPoint(event.x, event.y) as HTMLElement;
-      backupPEventsMap.set(el, el.style.pointerEvents);
-      el.style.pointerEvents = 'none';
-      if (el !== this.rootDesignItem.element) {
-        while (el != null) {
-          if (el === this.rootDesignItem.element)
-            break;
-          if (el !== <any>this.overlayLayer && el.parentElement !== <any>this.overlayLayer && el.getRootNode() === this.shadowRoot)
-            lstEl.push(el);
-          if (!backupPEventsMap.has(el))
-            backupPEventsMap.set(el, el.style.pointerEvents);
-          el.style.pointerEvents = 'none';
-          const oldEl = el;
-          el = this.elementFromPoint(event.x, event.y) as HTMLElement;
-          if (oldEl === el)
-            break;
-        }
-      }
+  public showHoverExtension(element: Element) {
+    const currentDesignItem = DesignItem.GetOrCreateDesignItem(element, this.serviceContainer, this.instanceServiceContainer);
+    if (this._lastHoverDesignItem != currentDesignItem) {
+      if (this._lastHoverDesignItem)
+        this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
+      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DomHelper.getHost(element.parentNode) !== this.overlayLayer)
+        this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
+      this._lastHoverDesignItem = currentDesignItem;
     }
-    finally {
-      for (let e of backupPEventsMap.entries()) {
-        e[0].style.pointerEvents = e[1];
-      }
-    }
-    return lstEl;
   }
 
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
@@ -814,13 +797,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.clickOverlay.style.cursor = this._canvas.style.cursor;
 
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-    if (this._lastHoverDesignItem != currentDesignItem) {
-      if (this._lastHoverDesignItem)
-        this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
-      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DomHelper.getHost(currentElement.parentNode) !== this.overlayLayer)
-        this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
-      this._lastHoverDesignItem = currentDesignItem;
-    }
+    this.showHoverExtension(currentDesignItem.element);
 
     //TODO: needed ??
     if (currentElement && DomHelper.getHost(currentElement.parentNode) === this.overlayLayer) {

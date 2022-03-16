@@ -13,12 +13,13 @@ export class PathExtensionProvider implements IDesignerExtensionProvider {
       designItem.node instanceof SVGEllipseElement ||
       designItem.node instanceof SVGLineElement ||
       designItem.node instanceof SVGPolylineElement ||
-      designItem.node instanceof SVGPolygonElement)
+      designItem.node instanceof SVGPolygonElement) {
       return true;
+    }
     return false;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas,  designItem: IDesignItem): IDesignerExtension {
+  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
     return new PathExtension(extensionManager, designerView, designItem);
   }
 }
