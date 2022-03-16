@@ -721,7 +721,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         continue;
       if (e.getRootNode() !== this.shadowRoot)
         continue;
-      //retVal.push(DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer));
       retVal.push(e);
       if (e === this._canvas)
         break;
@@ -735,15 +734,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     for (let i = 0; i < elements.length; i++) {
       currentElement = <HTMLElement>elements[i];
-      if (ignoreElementCallback && ignoreElementCallback(currentElement)) {
-        currentElement = null;
-        continue;
-      }
       if (currentElement == this.clickOverlay) {
         currentElement = null;
         continue;
       }
       if (currentElement == this.overlayLayer) {
+        currentElement = null;
+        continue;
+      }
+      if (ignoreElementCallback && ignoreElementCallback(currentElement)) {
         currentElement = null;
         continue;
       }
