@@ -1,6 +1,6 @@
 import { IPoint } from "../../index.js";
 
-let identityMatrix = [
+let identityMatrix: number[] = [
   1, 0, 0, 0,
   0, 1, 0, 0,
   0, 0, 1, 0,
@@ -75,7 +75,7 @@ export function rotateElementByMatrix3d(element: HTMLElement, matrix: number[]) 
   element.style.transform = matrixArrayToCssMatrix(matrix);
 }
 
-export function matrixArrayToCssMatrix(matrixArray: any[]) {
+export function matrixArrayToCssMatrix(matrixArray: number[]) {
   return "matrix3d(" + matrixArray.join(',') + ")";
 }
 
@@ -84,16 +84,15 @@ export function cssMatrixToMatrixArray(cssMatrix: string) {
     console.error('cssMatrixToMatrixArray: no css matrix passed');
     return identityMatrix;
   }
-  let matrixArray = cssMatrix.match(/^matrix.*\((.*)\)/)[1].split(',');
+  let matrixArray: number[] = cssMatrix.match(/^matrix.*\((.*)\)/)[1].split(',').map(Number);
   return matrixArray;
 }
 
-export function getRotationAngleFromMatrix(matrixArray: any[]) {
+export function getRotationAngleFromMatrix(matrixArray: number[]) {
   let angle = null;
   const a = matrixArray[0];
   const b = matrixArray[1];
   angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
   
-  //return (angle < 0) ? angle +=360 : angle;
   return angle;
 }
