@@ -1,17 +1,12 @@
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { assetsPath } from "../../../../../Constants.js";
 import { NamedTools } from "../NamedTools.js";
+import { DesignerToolRenderer } from "./designerToolRenderer.js";
 
 export interface ToolTypeAsArg  {
     command_parameter : string;
     open_popup?: boolean;
     popup_category?: string;
-}
-
-export interface AdvancedToolTypeAsArg extends ToolTypeAsArg {
-    background_url: string;
-    title: string;
-    command: string;
 }
 
 export interface ToolPopupCategoryCollection {
@@ -58,9 +53,8 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
     static override readonly template = html`
         <div id="toolbar-host" class="toolbar-host"></div>`;
 
-    public readonly toolActivated = new TypedEvent<ToolTypeAsArg>();
+    public readonly toolActivated = new TypedEvent<[ToolPopupCategoryCollection, boolean]>();
     private _toolButtons : HTMLElement[];
-    private _lastTool : HTMLElement;
     private _toolCollection : ToolPopupCategoryCollection[];
     private _toolbarhost : HTMLDivElement;
 
@@ -96,18 +90,12 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
     private _createToolEventListeners(){
         this._toolButtons = [...this._toolbarhost.querySelectorAll<HTMLDivElement>('div.tool')];
         for (let tool of this._toolButtons){
-            tool.addEventListener("click", () => this._toolSelected(tool))
+            tool.addEventListener("click", () => this._toolSelected(<HTMLDivElement>tool, false))
         }
     }
 
-    private _toolSelected(tool : HTMLElement){
-        let isPopup = this._lastTool === tool;
-        this.toolActivated.emit({
-            command_parameter: tool.getAttribute("data-command-parameter"),
-            open_popup: isPopup,
-            popup_category: tool.getAttribute("popup"),
-        })
-        this._lastTool = tool;
+    private _toolSelected(tool : HTMLDivElement, external : boolean){
+        this.toolActivated.emit([DesignerToolRenderer.createObjectFromTool(tool), external])
     }
 
     public markToolAsSelected(id : string){
@@ -124,15 +112,10 @@ export class DesignerToolsButtons extends BaseCustomWebComponentConstructorAppen
     }
 
     public externalToolChange(command_name : string){
-        let tool = this._toolButtons.find(x => x.getAttribute("data-command-parameter") == command_name);
+        let tool = <HTMLDivElement>this._toolButtons.find(x => x.getAttribute("data-command-parameter") == command_name);
         if(tool != null) {
-            this._resetLastTool();
-            this._toolSelected(tool);
+            this._toolSelected(tool, true);
         }
-    }
-
-    private _resetLastTool(){
-        this._lastTool = null;
     }
 
     public get toolCollection(){

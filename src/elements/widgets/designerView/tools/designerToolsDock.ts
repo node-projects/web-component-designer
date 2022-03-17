@@ -6,7 +6,7 @@ import { DesignerView } from "../designerView.js";
 import { DesignerToolbarPopup } from "./designerToolbarGenerics/designerToolbarPopup.js";
 import { DesignerToolRenderer } from "./designerToolbarGenerics/designerToolRenderer.js";
 import "./designerToolbarGenerics/designerToolsButtons.js";
-import { AdvancedToolTypeAsArg, DesignerToolsButtons, ToolTypeAsArg } from "./designerToolbarGenerics/designerToolsButtons.js";
+import { DesignerToolsButtons, ToolPopupCategoryCollection } from "./designerToolbarGenerics/designerToolsButtons.js";
 import "./designerToolbarPopups/DrawToolPopup.js";
 import { DrawToolPopup } from "./designerToolbarPopups/DrawToolPopup.js";
 
@@ -37,7 +37,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
     static override readonly template = html`
         <node-projects-designer-tools-buttons id="tool-buttons"></node-projects-designer-tools-buttons>
         <div id="popups">
-            <node-projects-designer-popup-drawtool value="draw-popup" class="popup" title="Drawtools" tabindex="-1">
+            <node-projects-designer-popup-drawtool popup="draw" class="popup" title="Drawtools" tabindex="-1">
             </node-projects-designer-popup-drawtool>
         </div>
     `;
@@ -46,11 +46,12 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
     private _toolButtonsElem: DesignerToolsButtons;
     private _toolPopupElems: DesignerToolbarPopup[];
     private _serviceContainer: ServiceContainer;
+    private _prevSelected: ToolPopupCategoryCollection[] = [];
 
     ready() {
         this._toolButtonsElem = this._getDomElement<DesignerToolsButtons>("tool-buttons");
-        this._toolButtonsElem.toolActivated.on((toolType => {
-            this._toolButtonActivated(toolType);
+        this._toolButtonsElem.toolActivated.on((toolActivated => {
+            this._toolButtonActivated(toolActivated[0], toolActivated[1]);
         }));
 
         this._registerPopups();
@@ -68,7 +69,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         this._toolButtonsElem.setToolsExternal(tools);
     }
 
-    public initialize(serviceContainer: ServiceContainer, designerView : DesignerView) {
+    public initialize(serviceContainer: ServiceContainer, designerView: DesignerView) {
         this._serviceContainer = serviceContainer;
 
         this._serviceContainer.globalContext.onToolChanged.on((e) => {
@@ -96,26 +97,44 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         drawToolPopup.toolActivated.on((toolArg) => this._popupToolSelected(drawToolPopup, toolArg));
     }
 
-    private _toolButtonActivated(toolType: ToolTypeAsArg) {
+    private _toolButtonActivated(tool: ToolPopupCategoryCollection, external : boolean) {
         this._hideAllPopups();
 
-        if (toolType.open_popup) this._activatePopup(toolType.popup_category);
-        this._toolButtonsElem.markToolAsSelected(toolType.command_parameter);
+        this._prevSelected[1] = this._prevSelected[0];
+        this._prevSelected[0] = tool;
 
-        let command : IUiCommand = {
+        if(!external){
+            if (this._isPopupScenario()) {
+                this._resetPreviousElements();
+                this._activatePopup(tool.category);
+            }
+        }
+
+        this._toolButtonsElem.markToolAsSelected(tool.command_parameter);
+
+        let command: IUiCommand = {
             type: CommandType.setTool,
-            parameter: toolType.command_parameter,
+            parameter: tool.command_parameter,
         }
         this._designerView.executeCommand(command);
     }
 
-    private _activatePopup(id: string) {
-        let combinedId = id + "-popup";
-        this._toolPopupElems.find(x => x.getAttribute("value") == combinedId)?.setAttribute("opened", "");
+    private _activatePopup(category: string) {
+        this._toolPopupElems.find(x => x.getAttribute("popup") == category)?.setAttribute("opened", "");
     }
 
-    private _popupToolSelected(popup: DesignerToolbarPopup, toolArg: AdvancedToolTypeAsArg) {
+    private _popupToolSelected(popup: DesignerToolbarPopup, tool: ToolPopupCategoryCollection) {
 
+    }
+
+    private _isPopupScenario() {
+        return JSON.stringify(this._prevSelected[1]) === JSON.stringify(this._prevSelected[0]);
+    }
+
+    private _resetPreviousElements() {
+        for (let i = 0; i < this._prevSelected.length; i++) {
+            this._prevSelected[i] = null;
+        }
     }
 
     private _hideAllPopups() {

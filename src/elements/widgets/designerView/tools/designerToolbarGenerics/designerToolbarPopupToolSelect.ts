@@ -1,5 +1,6 @@
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from "@node-projects/base-custom-webcomponent";
-import { AdvancedToolTypeAsArg } from "./designerToolsButtons";
+import { DesignerToolRenderer } from "./designerToolRenderer";
+import { ToolPopupCategoryCollection } from "./designerToolsButtons";
 
 export class DesignerToolbarPopupToolSelect extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
@@ -23,7 +24,7 @@ export class DesignerToolbarPopupToolSelect extends BaseCustomWebComponentConstr
     static override readonly template = html`
         <div id="popup-tool-select" class="popup-tool-select"></div>`;
     
-    public readonly toolActivated = new TypedEvent<AdvancedToolTypeAsArg>();
+    public readonly toolActivated = new TypedEvent<ToolPopupCategoryCollection>();
     
     public insertToolContent(template : HTMLTemplateElement){
         this._getDomElement<HTMLDivElement>("popup-tool-select")?.appendChild(template.content.cloneNode(true));
@@ -38,14 +39,7 @@ export class DesignerToolbarPopupToolSelect extends BaseCustomWebComponentConstr
     }
 
     private _toolSelected(tool : HTMLDivElement){
-        this.toolActivated.emit({
-            command_parameter: tool.getAttribute("data-command-parameter"),
-            open_popup: false,
-            popup_category: undefined,
-            background_url: tool.style.backgroundImage,
-            title: tool.getAttribute("title"),
-            command: tool.getAttribute("data-command"),
-        })
+        this.toolActivated.emit(DesignerToolRenderer.createObjectFromTool(tool))
     }
 }
 customElements.define('node-projects-designer-tools-popup-select', DesignerToolbarPopupToolSelect);

@@ -2,7 +2,7 @@ import { html, TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { assetsPath } from "../../../../../Constants";
 import { DesignerToolbarPopup } from "../designerToolbarGenerics/designerToolbarPopup";
 import { DesignerToolbarPopupToolSelect } from "../designerToolbarGenerics/designerToolbarPopupToolSelect";
-import { AdvancedToolTypeAsArg } from "../designerToolbarGenerics/designerToolsButtons";
+import { ToolPopupCategoryCollection } from "../designerToolbarGenerics/designerToolsButtons";
 
 export class DrawToolPopup extends DesignerToolbarPopup {
 
@@ -13,7 +13,7 @@ export class DrawToolPopup extends DesignerToolbarPopup {
         <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/layout/DrawEllipTool.svg');"></div>
     `; 
 
-    public readonly toolActivated = new TypedEvent<AdvancedToolTypeAsArg>();
+    public readonly toolActivated = new TypedEvent<ToolPopupCategoryCollection>();
     
     override ready() {
         this._setTitle(this.getAttribute("title"));
