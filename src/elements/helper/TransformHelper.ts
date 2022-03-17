@@ -7,21 +7,16 @@ let identityMatrix: number[] = [
   0, 0, 0, 1
 ];
 
-export function combineTransforms(helperElement: HTMLElement, element: HTMLElement, transform1: string, transform2: string) {
-  console.log("transform1: " + transform1, "transform2: " + transform2);
-  if (transform1 == null || transform1 == '') {
-    element.style.transform = transform2;
+export function combineTransforms(element: HTMLElement, actualTransforms: string, requestedTransformation: string) {
+  if (actualTransforms == null || actualTransforms == '') {
+    element.style.transform = requestedTransformation;
     return;
   }
 
-  helperElement.style.transform = '';
-  helperElement.style.transform = transform1;
-  const matrix1 = new DOMMatrix(window.getComputedStyle(helperElement).transform);
-  helperElement.style.transform = '';
-  helperElement.style.transform = transform2;
-  const matrix2 = new DOMMatrix(window.getComputedStyle(helperElement).transform);
-  const result = matrix2.multiply(matrix1);
-  element.style.transform = result.toString();
+  const actualTransformationMatrix = new DOMMatrix(actualTransforms);
+  const requestedTransformationMatrix = new DOMMatrix(requestedTransformation);
+  const newTransformationMatrix = requestedTransformationMatrix.multiply(actualTransformationMatrix);
+  element.style.transform = newTransformationMatrix.toString();
 }
 
 export function getDomMatrix(element: HTMLElement) {
@@ -106,17 +101,4 @@ export function getRotationAngleFromMatrix(matrixArray: number[]) {
   angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
   
   return angle;
-}
-
-export function composeTransforms(element: HTMLElement, cssTranformationMatrix: string) {
-  let actualElementTransform = element.style.transform;
-  if (actualElementTransform == null || actualElementTransform == '') {
-    element.style.transform = cssTranformationMatrix;
-    return;
-  }
-
-  const actualMatrix = new DOMMatrix(window.getComputedStyle(element).transform);
-  const transformationMatrix = new DOMMatrix(cssTranformationMatrix);
-  const result = actualMatrix.multiply(transformationMatrix);
-  element.style.transform = result.toString();
 }
