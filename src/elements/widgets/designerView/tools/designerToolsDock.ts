@@ -1,5 +1,8 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
+import { CommandType } from "../../../../commandHandling/CommandType.js";
+import { IUiCommand } from "../../../../commandHandling/IUiCommand.js";
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
+import { DesignerView } from "../designerView.js";
 import { DesignerToolbarPopup } from "./designerToolbarGenerics/designerToolbarPopup.js";
 import { DesignerToolRenderer } from "./designerToolbarGenerics/designerToolRenderer.js";
 import "./designerToolbarGenerics/designerToolsButtons.js";
@@ -39,6 +42,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         </div>
     `;
 
+    private _designerView: DesignerView;
     private _toolButtonsElem: DesignerToolsButtons;
     private _toolPopupElems: DesignerToolbarPopup[];
     private _serviceContainer: ServiceContainer;
@@ -51,12 +55,12 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
 
         this._registerPopups();
 
-        let categories : string[] = [];
-        
+        let categories: string[] = [];
+
         let tools = [];
-        for(let tool of this._toolButtonsElem.toolCollection){
-            if(!categories.includes(tool.category)){
-                tools.push(DesignerToolRenderer.createTool(tool));
+        for (let tool of this._toolButtonsElem.toolCollection) {
+            if (!categories.includes(tool.category)) {
+                tools.push(DesignerToolRenderer.createToolFromObject(tool));
                 categories.push(tool.category);
             }
         }
@@ -64,24 +68,26 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         this._toolButtonsElem.setToolsExternal(tools);
     }
 
-    public initialize(serviceContainer : ServiceContainer){
+    public initialize(serviceContainer: ServiceContainer, designerView : DesignerView) {
         this._serviceContainer = serviceContainer;
 
         this._serviceContainer.globalContext.onToolChanged.on((e) => {
-            let command_name : string; 
+            let command_name: string;
             let found = false;
             this._serviceContainer.designerTools.forEach((tool, key) => {
-                if(tool === e.newValue && !found){
+                if (tool === e.newValue && !found) {
                     command_name = key;
                     found = true;
                     this._toolButtonsElem.externalToolChange(command_name);
-                } 
+                }
             });
 
         })
+
+        this._designerView = designerView;
     }
 
-    private _registerPopups(){
+    private _registerPopups() {
         let popups = this._getDomElement<HTMLElement>("popups");
         this._toolPopupElems = [...popups.querySelectorAll<DesignerToolbarPopup>('.popup')]
 
@@ -95,6 +101,12 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
 
         if (toolType.open_popup) this._activatePopup(toolType.popup_category);
         this._toolButtonsElem.markToolAsSelected(toolType.command_parameter);
+
+        let command : IUiCommand = {
+            type: CommandType.setTool,
+            parameter: toolType.command_parameter,
+        }
+        this._designerView.executeCommand(command);
     }
 
     private _activatePopup(id: string) {
@@ -102,7 +114,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         this._toolPopupElems.find(x => x.getAttribute("value") == combinedId)?.setAttribute("opened", "");
     }
 
-    private _popupToolSelected(popup : DesignerToolbarPopup, toolArg : AdvancedToolTypeAsArg){
+    private _popupToolSelected(popup: DesignerToolbarPopup, toolArg: AdvancedToolTypeAsArg) {
 
     }
 

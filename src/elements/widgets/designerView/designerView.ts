@@ -238,7 +238,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   async ready() {
     this._tooldock = await this._getDomElement<DesignerToolsDock>('tool-bar');
-    this._tooldock.initialize(this.serviceContainer);
+    this._tooldock.initialize(this.serviceContainer, this);
   }
 
   public zoomReset() {
