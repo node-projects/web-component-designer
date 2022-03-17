@@ -50,7 +50,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public overlayLayer: OverlayLayerView;
   public rootDesignItem: IDesignItem;
   public eatEvents: Element;
-  public transformHelperElement: HTMLDivElement;
 
   private _zoomFactor = 1; //if scale or zoom css property is used this needs to be the value
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
@@ -161,11 +160,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       height: 100%;
       top: 0;
     }
-    
-    #node-projects-designer-canvas-transformHelper {
-      height: 0;
-      width: 0;
-    }`;
+  `;
 
   static override readonly template = html`
     <div style="display: flex;flex-direction: column;width: 100%;height: 100%;">
@@ -178,7 +173,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         </div>
         <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;"></div>
       </div>
-      <div id="node-projects-designer-canvas-transformHelper"></div>
     </div>`;
 
   public extensionManager: IExtensionManager;
@@ -192,7 +186,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
     this.clickOverlay = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-clickOverlay');
-    this.transformHelperElement = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-transformHelper');
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
