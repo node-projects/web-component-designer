@@ -1,4 +1,5 @@
 import { IPoint } from "../../index.js";
+import { IPoint3D } from "../../interfaces/IPoint3d.js";
 
 let identityMatrix: number[] = [
   1, 0, 0, 0,
@@ -101,4 +102,13 @@ export function getRotationAngleFromMatrix(matrixArray: number[]) {
   angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
   
   return angle;
+}
+
+export function applyMatrixToPoint(cssMatrix: string, point: {x: number, y: number}) : IPoint3D {
+  const transformationMatrix = new DOMMatrix(cssMatrix);
+  return {
+    x: transformationMatrix.m11 * point.x + transformationMatrix.m21 * point.y,
+    y: transformationMatrix.m12 * point.x + transformationMatrix.m22 * point.y,
+    z: 0
+  }
 }
