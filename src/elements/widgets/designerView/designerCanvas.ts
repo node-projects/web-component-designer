@@ -41,6 +41,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public containerBoundingRect: DOMRect;
   public outerRect: DOMRect;
   public clickOverlay: HTMLDivElement;
+  public helperElement: HTMLDivElement;
 
   // IPlacementView
   public gridSize = 10;
@@ -160,6 +161,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       height: 100%;
       top: 0;
     }
+
+    #node-projects-designer-canvas-helper-element {
+      height: 0;
+      width: 0;
+    }  
   `;
 
   static override readonly template = html`
@@ -173,6 +179,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         </div>
         <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;"></div>
       </div>
+      <div id="node-projects-designer-canvas-helper-element"></div>
     </div>`;
 
   public extensionManager: IExtensionManager;
@@ -186,6 +193,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
     this.clickOverlay = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-clickOverlay');
+    this.helperElement = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-helper-element');
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
