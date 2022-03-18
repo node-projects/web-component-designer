@@ -64,10 +64,11 @@ export class RotateExtension extends AbstractExtension {
     switch (event.type) {
       case EventNames.PointerDown:
         const el = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
+
         let transformOriginInPx = {
-          x: el.x + el.width / 2,
-          y: el.y + el.height / 2
-        };
+          x: el.x + parseInt(getComputedStyle(this.extendedItem.element).transformOrigin.split(' ')[0].replace('px', '')),
+          y: el.y + parseInt(getComputedStyle(this.extendedItem.element).transformOrigin.split(' ')[1].replace('px', ''))
+        }
 
         this._initialPoint = currentPoint;
         this._initialElementAngle = getRotationAngleFromMatrix(cssMatrixToMatrixArray(getComputedStyle(this.extendedItem.element).transform));
@@ -78,14 +79,12 @@ export class RotateExtension extends AbstractExtension {
         if (this._initialPoint) {
           const el = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
 
-          // TODO: use element's transform origin
           let transformOriginInPx = {
-            x: el.x + el.width / 2,
-            y: el.y + el.height / 2
-          };
-          
+            x: el.x + parseInt(getComputedStyle(this.extendedItem.element).transformOrigin.split(' ')[0].replace('px', '')),
+            y: el.y + parseInt(getComputedStyle(this.extendedItem.element).transformOrigin.split(' ')[1].replace('px', ''))
+          }
+            
           let angle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);
-          console.log("angle: " + angle, "initial overlay angle: " + this._initialOverlayAngle, "initial element angle: " + this._initialElementAngle);
           angle = angle - this._initialOverlayAngle + this._initialElementAngle;
           angle *= -1;
           const rotationMatrix3d = getRotationMatrix3d('z', angle);
