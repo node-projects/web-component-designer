@@ -90,7 +90,6 @@ export class DefaultPlacementService implements IPlacementService {
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
     let filteredItems = filterChildPlaceItems(items);
-    //TODO: -> what is if a transform already exists -> backup existing style.?
     for (const designItem of filteredItems) {
       const translationMatrix = getTranslationMatrix3d(track.x, track.y, 0);
       combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), matrixArrayToCssMatrix(translationMatrix));
