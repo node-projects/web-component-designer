@@ -1,4 +1,6 @@
 import { IPoint } from "../../index.js";
+import { IPoint3D } from "../../interfaces/IPoint3d.js";
+import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
 
 let identityMatrix: number[] = [
   1, 0, 0, 0,
@@ -28,35 +30,35 @@ export function convertCoordinates(point: IPoint, matrix: DOMMatrix) {
   return domPoint.matrixTransform(matrix.inverse());
 }
 
-export function getRotationMatrix3d(axisOfRotation: 'x'| 'y' | 'z' | 'X'| 'Y' | 'Z', angle: number) {
+export function getRotationMatrix3d(axisOfRotation: 'x' | 'y' | 'z' | 'X' | 'Y' | 'Z', angle: number) {
   const angleInRadians = angle / 180 * Math.PI;
   const sin = Math.sin;
   const cos = Math.cos;
   let rotationMatrix3d = [];
 
   switch (axisOfRotation.toLowerCase()) {
-    case 'x': 
+    case 'x':
       rotationMatrix3d = [
-        1,                    0,                     0,     0,
-        0,  cos(angleInRadians),  -sin(angleInRadians),     0,
-        0,  sin(angleInRadians),   cos(angleInRadians),     0,
-        0,                    0,                     0,     1
+        1, 0, 0, 0,
+        0, cos(angleInRadians), -sin(angleInRadians), 0,
+        0, sin(angleInRadians), cos(angleInRadians), 0,
+        0, 0, 0, 1
       ];
       break;
-    case 'y': 
+    case 'y':
       rotationMatrix3d = [
-         cos(angleInRadians),   0, sin(angleInRadians),   0,
-                           0,   1,                   0,   0,
-        -sin(angleInRadians),   0, cos(angleInRadians),   0,
-                           0,   0,                   0,   1
+        cos(angleInRadians), 0, sin(angleInRadians), 0,
+        0, 1, 0, 0,
+        -sin(angleInRadians), 0, cos(angleInRadians), 0,
+        0, 0, 0, 1
       ];
       break;
-    case 'z': 
-    rotationMatrix3d = [
-        cos(angleInRadians), -sin(angleInRadians),    0,    0,
-        sin(angleInRadians),  cos(angleInRadians),    0,    0,
-                          0,                    0,    1,    0,
-                          0,                    0,    0,    1
+    case 'z':
+      rotationMatrix3d = [
+        cos(angleInRadians), -sin(angleInRadians), 0, 0,
+        sin(angleInRadians), cos(angleInRadians), 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
       ];
       break;
     default:
@@ -69,10 +71,10 @@ export function getRotationMatrix3d(axisOfRotation: 'x'| 'y' | 'z' | 'X'| 'Y' | 
 
 export function getTranslationMatrix3d(deltaX: number, deltaY: number, deltaZ: number) {
   const translationMatrix = [
-    1,    0,    0,   0,
-    0,    1,    0,   0,
-    0,    0,    1,   0,
-    deltaX,    deltaY,    deltaZ,   1
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    deltaX, deltaY, deltaZ, 1
   ];
   return translationMatrix;
 }
@@ -98,8 +100,8 @@ export function getRotationAngleFromMatrix(matrixArray: number[]) {
   let angle = null;
   const a = matrixArray[0];
   const b = matrixArray[1];
-  angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
-  
+  angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+
   return angle;
 }
 
@@ -111,3 +113,69 @@ export function getRotationAngleFromMatrix(matrixArray: number[]) {
 //     z: 0
 //   }
 // }
+
+export function getTransformedCornerPoints(clonedElement: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas) {
+  clonedElement.style.visibility = 'hidden';
+  const transformBackup = clonedElement.style.transform;
+  clonedElement.style.transform = '';
+  let el = helperElement.appendChild(clonedElement);
+  const transformOriginBackup = getComputedStyle(el).transformOrigin;
+  clonedElement = null;
+  const cloneBoundingRect = designerCanvas.getNormalizedElementCoordinates(el);
+  const cornerPoints: IPoint[] = [
+    {
+      x: cloneBoundingRect.x,
+      y: cloneBoundingRect.y
+    },
+    {
+      x: cloneBoundingRect.x + cloneBoundingRect.width,
+      y: cloneBoundingRect.y
+    },
+    {
+      x: cloneBoundingRect.x,
+      y: cloneBoundingRect.y + cloneBoundingRect.height
+    },
+    {
+      x: cloneBoundingRect.x + cloneBoundingRect.width,
+      y: cloneBoundingRect.y + cloneBoundingRect.height
+    }
+  ]
+  helperElement.replaceChildren();
+
+  let cornerPointsTranformOrigins = new Array(4);
+  cornerPointsTranformOrigins[0] = (parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (parseInt(transformOriginBackup.split(' ')[1])).toString();
+  cornerPointsTranformOrigins[1] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (parseInt(transformOriginBackup.split(' ')[1])).toString();
+  cornerPointsTranformOrigins[2] = (parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOriginBackup.split(' ')[1])).toString();
+  cornerPointsTranformOrigins[3] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOriginBackup.split(' ')[1])).toString();
+
+  const cornerDivs: HTMLDivElement[] = [];
+  let element: HTMLDivElement;
+
+  for (let i = 0; i < cornerPointsTranformOrigins.length; i++) {
+    element = document.createElement('div');
+    element.style.visibility = 'hidden';
+    element.style.position = 'absolute';
+    element.style.width = "1px";
+    element.style.height = "1px";
+    element.style.top = cornerPoints[i].y.toString() + 'px';
+    element.style.left = cornerPoints[i].x.toString() + 'px';
+    element.style.transformOrigin = cornerPointsTranformOrigins[i].split(' ')[0] + 'px' + ' ' + cornerPointsTranformOrigins[i].split(' ')[1] + 'px';
+    cornerDivs.push(helperElement.appendChild(element));
+  }
+
+  let transformedCornerPoints: IPoint3D[] = [];
+
+  for (let i = 0; i < cornerDivs.length; i++) {
+    //let transformedCornerDiv: HTMLElement;
+    let transformedCornerPoint: IPoint3D = { x: null, y: null, z: null };
+    //transformedCornerDiv = applyMatrixToElement((<HTMLElement>this.extendedItem.element).style.transform, cornerDivs[i]);
+    cornerDivs[i].style.transform = transformBackup;
+    //transformedCornerDiv =  applyMatrixToElement((<HTMLElement>this.extendedItem.element).style.transform, cornerDivs[i]);
+    transformedCornerPoint.x = designerCanvas.getNormalizedElementCoordinates(cornerDivs[i]).x;
+    transformedCornerPoint.y = designerCanvas.getNormalizedElementCoordinates(cornerDivs[i]).y;
+    transformedCornerPoint.z = 0;
+    transformedCornerPoints.push(transformedCornerPoint);
+  }
+
+  return transformedCornerPoints;
+}
