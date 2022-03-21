@@ -35,10 +35,10 @@ export class ResizeExtension extends AbstractExtension {
   }
 
   override refresh() {
-    const rect = this.extendedItem.element.getBoundingClientRect();
+    // const rect = this.extendedItem.element.getBoundingClientRect();
         
     let clone = <HTMLElement>this.extendedItem.element.cloneNode();
-    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(clone, this.designerCanvas.helperElement, this.designerCanvas);
+    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
    
     this._circle1 = this._drawResizerOverlay(transformedCornerPoints[0].x, transformedCornerPoints[0].y, 'nw-resize', this._circle1);
     this._circle2 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[1].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[1].y - transformedCornerPoints[0].y) / 2), 'n-resize', this._circle2);
@@ -49,20 +49,20 @@ export class ResizeExtension extends AbstractExtension {
     this._circle7 = this._drawResizerOverlay(transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'w-resize', this._circle7);
     this._circle8 = this._drawResizerOverlay((transformedCornerPoints[1].x + (transformedCornerPoints[3].x - transformedCornerPoints[1].x) / 2), (transformedCornerPoints[1].y + (transformedCornerPoints[3].y - transformedCornerPoints[1].y) / 2), 'e-resize', this._circle8);
    
-    if (rect.width < 12) {
-      this._circle2.style.display = 'none';
-      this._circle5.style.display = 'none';
-    } else {
-      this._circle2.style.display = '';
-      this._circle5.style.display = '';
-    }
-    if (rect.height < 12) {
-      this._circle7.style.display = 'none';
-      this._circle8.style.display = 'none';
-    } else {
-      this._circle8.style.display = '';
-      this._circle8.style.display = '';
-    }
+    // if (rect.width < 12) {
+    //   this._circle2.style.display = 'none';
+    //   this._circle5.style.display = 'none';
+    // } else {
+    //   this._circle2.style.display = '';
+    //   this._circle5.style.display = '';
+    // }
+    // if (rect.height < 12) {
+    //   this._circle7.style.display = 'none';
+    //   this._circle8.style.display = 'none';
+    // } else {
+    //   this._circle8.style.display = '';
+    //   this._circle8.style.display = '';
+    // }
   }
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {

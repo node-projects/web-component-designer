@@ -24,12 +24,12 @@ export class MouseOverExtension extends AbstractExtension {
 
   override refresh() {
     let clone = <HTMLElement>this.extendedItem.element.cloneNode();
-    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(clone, this.designerCanvas.helperElement, this.designerCanvas);
+    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(clone, this.designerCanvas.helperElement, this.designerCanvas, offset);
 
-    this._line1 = this._drawLine(transformedCornerPoints[0].x - offset, transformedCornerPoints[0].y - offset, transformedCornerPoints[1].x + offset, transformedCornerPoints[1].y - offset, 'svg-hover', this._line1);
-    this._line2 = this._drawLine(transformedCornerPoints[0].x - offset, transformedCornerPoints[0].y - offset, transformedCornerPoints[2].x - offset, transformedCornerPoints[2].y + offset, 'svg-hover', this._line2);
-    this._line3 = this._drawLine(transformedCornerPoints[1].x + offset, transformedCornerPoints[1].y - offset, transformedCornerPoints[3].x + offset, transformedCornerPoints[3].y + offset, 'svg-hover', this._line3);
-    this._line4 = this._drawLine(transformedCornerPoints[2].x - offset, transformedCornerPoints[2].y + offset, transformedCornerPoints[3].x + offset, transformedCornerPoints[3].y + offset, 'svg-hover', this._line4);
+    this._line1 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'svg-hover', this._line1);
+    this._line2 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'svg-hover', this._line2);
+    this._line3 = this._drawLine(transformedCornerPoints[1].x, transformedCornerPoints[1].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line3);
+    this._line4 = this._drawLine(transformedCornerPoints[2].x, transformedCornerPoints[2].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line4);
   }
 
   override dispose() {

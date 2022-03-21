@@ -114,7 +114,7 @@ export function getRotationAngleFromMatrix(matrixArray: number[]) {
 //   }
 // }
 
-export function getTransformedCornerPoints(clonedElement: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas) {
+export function getTransformedCornerPoints(clonedElement: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas, untransformedCornerPointsOffset: number) {
   clonedElement.style.visibility = 'hidden';
   const transformBackup = clonedElement.style.transform;
   clonedElement.style.transform = '';
@@ -124,29 +124,29 @@ export function getTransformedCornerPoints(clonedElement: HTMLElement, helperEle
   const cloneBoundingRect = designerCanvas.getNormalizedElementCoordinates(el);
   const cornerPoints: IPoint[] = [
     {
-      x: cloneBoundingRect.x,
-      y: cloneBoundingRect.y
+      x: cloneBoundingRect.x - untransformedCornerPointsOffset,
+      y: cloneBoundingRect.y - untransformedCornerPointsOffset
     },
     {
-      x: cloneBoundingRect.x + cloneBoundingRect.width,
-      y: cloneBoundingRect.y
+      x: cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
+      y: cloneBoundingRect.y - untransformedCornerPointsOffset
     },
     {
-      x: cloneBoundingRect.x,
-      y: cloneBoundingRect.y + cloneBoundingRect.height
+      x: cloneBoundingRect.x - untransformedCornerPointsOffset,
+      y: cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
     },
     {
-      x: cloneBoundingRect.x + cloneBoundingRect.width,
-      y: cloneBoundingRect.y + cloneBoundingRect.height
+      x: cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
+      y: cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
     }
   ]
   helperElement.replaceChildren();
 
   let cornerPointsTranformOrigins = new Array(4);
-  cornerPointsTranformOrigins[0] = (parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (parseInt(transformOriginBackup.split(' ')[1])).toString();
-  cornerPointsTranformOrigins[1] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (parseInt(transformOriginBackup.split(' ')[1])).toString();
-  cornerPointsTranformOrigins[2] = (parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOriginBackup.split(' ')[1])).toString();
-  cornerPointsTranformOrigins[3] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOriginBackup.split(' ')[0])).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOriginBackup.split(' ')[1])).toString();
+  cornerPointsTranformOrigins[0] = (parseInt(transformOriginBackup.split(' ')[0]) + untransformedCornerPointsOffset).toString() + ' ' + (parseInt(transformOriginBackup.split(' ')[1]) + untransformedCornerPointsOffset).toString();
+  cornerPointsTranformOrigins[1] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOriginBackup.split(' ')[0]) + untransformedCornerPointsOffset).toString() + ' ' + (parseInt(transformOriginBackup.split(' ')[1]) + untransformedCornerPointsOffset).toString();
+  cornerPointsTranformOrigins[2] = (parseInt(transformOriginBackup.split(' ')[0]) + untransformedCornerPointsOffset).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOriginBackup.split(' ')[1]) + untransformedCornerPointsOffset).toString();
+  cornerPointsTranformOrigins[3] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOriginBackup.split(' ')[0]) + untransformedCornerPointsOffset).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOriginBackup.split(' ')[1]) + untransformedCornerPointsOffset).toString();
 
   const cornerDivs: HTMLDivElement[] = [];
   let element: HTMLDivElement;
