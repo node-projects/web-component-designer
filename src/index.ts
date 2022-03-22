@@ -129,6 +129,7 @@ export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";
 
 export type { ITool } from "./elements/widgets/designerView/tools/ITool.js";
+export * from "./elements/widgets/designerView/tools/designerToolsDock.js";
 export * from "./elements/widgets/designerView/tools/NamedTools.js";
 export * from "./elements/widgets/designerView/tools/DrawElementTool.js";
 export * from "./elements/widgets/designerView/tools/DrawPathTool.js";
