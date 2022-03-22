@@ -1,6 +1,7 @@
 import { NamedTools } from "../NamedTools";
 import { ToolPopupCategoryCollection } from "./designerToolsButtons";
 
+//TODO: rename, this is no renderer, it's a static class so more a helper
 export abstract class DesignerToolRenderer {
     public static createToolFromObject(tool: ToolPopupCategoryCollection) {
         let template = document.createElement('template');

@@ -22,6 +22,9 @@ export abstract class DesignerToolbarPopup extends BaseCustomWebComponentConstru
         </div>
     `;
 
+//TODO: remove this class,
+//     i think the popups need no base, okay if they need one the should at least be normal elmeents
+// and also the expicit popup should set the size, not the base class. maybe one needs to be bigger, one smaller...
     ready(){
         this._setTitle(this.getAttribute("title"));
     }

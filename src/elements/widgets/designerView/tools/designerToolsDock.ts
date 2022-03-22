@@ -48,7 +48,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
     private _serviceContainer: ServiceContainer;
     private _prevSelected: ToolPopupCategoryCollection[] = [];
 
-    ready() {
+    async ready() {
         this._toolButtonsElem = this._getDomElement<DesignerToolsButtons>("tool-buttons");
         this._toolButtonsElem.toolActivated.on((toolActivated => {
             this._toolButtonActivated(toolActivated[0], toolActivated[1]);
@@ -58,6 +58,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
 
         let categories: string[] = [];
 
+        await this._waitForChildrenReady();
         let tools = [];
         for (let tool of this._toolButtonsElem.toolCollection) {
             if (!categories.includes(tool.category)) {
