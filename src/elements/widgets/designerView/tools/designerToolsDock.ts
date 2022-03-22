@@ -22,7 +22,7 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
             position: absolute;
             top: calc(0px + 10px);
             height: 100%;
-            left: calc(32px + 4px + 10px);
+            left: calc(24px + 4px + 10px);
         }
 
         #popups > * {
@@ -59,6 +59,8 @@ export class DesignerToolsDock extends BaseCustomWebComponentConstructorAppend {
         let categories: string[] = [];
 
         await this._waitForChildrenReady();
+
+        //TODO: warum macht das nicht alles die tools buttons liste selbst????
         let tools = [];
         for (let tool of this._toolButtonsElem.toolCollection) {
             if (!categories.includes(tool.category)) {

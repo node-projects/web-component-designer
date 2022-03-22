@@ -94,13 +94,13 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 100%;
     }
     #canvas {
-      left: 36px;
-      width: calc(100% - 52px);
+      left: 24px;
+      width: calc(100% - 24px - 16px);
       height: calc(100% - 32px);
     }
 
     #tool-bar{
-      width: 36px;
+      width: 24px;
       height: calc(100% - 32px);
       position: absolute;
     }
