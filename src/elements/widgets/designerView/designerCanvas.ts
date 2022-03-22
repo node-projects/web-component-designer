@@ -395,7 +395,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
-    this._canvasContainer.appendChild(this.overlayLayer);
+    this.clickOverlay.appendChild(this.overlayLayer);
     this.snapLines = new Snaplines(this.overlayLayer);
     this.snapLines.initialize(this.rootDesignItem);
 
@@ -448,6 +448,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._scaleFactor = this._zoomFactor;
     this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + (isNaN(this._canvasOffset.x) ? '0' : this._canvasOffset.x) + 'px, ' + (isNaN(this._canvasOffset.y) ? '0' : this._canvasOffset.y) + 'px)';
     this._canvasContainer.style.transformOrigin = '0 0';
+    this.overlayLayer.style.transform = this._canvasContainer.style.transform;
+    this.overlayLayer.style.transformOrigin = '0 0';
     this.snapLines.clearSnaplines();
   }
 
