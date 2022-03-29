@@ -317,6 +317,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     else {
       this._sVert.value += event.deltaY / 10000;
       this._onScrollbar(null);
+      this._sHor.value += event.deltaX / 10000;
+      this._onScrollbar(null);
     }
   }
 
