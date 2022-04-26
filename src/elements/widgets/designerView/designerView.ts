@@ -10,7 +10,8 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar';
-import { DesignerToolsDock } from './tools/designerToolsDock';
+import { DesignerToolbar } from './tools/toolBar/DesignerToolbar.js';
+
 
 const autoZomOffset = 10;
 
@@ -40,7 +41,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
-  private _tooldock: DesignerToolsDock;
+  private _toolbar: DesignerToolbar;
 
   static override readonly style = css`
     :host {
@@ -103,6 +104,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       width: 24px;
       height: calc(100% - 32px);
       position: absolute;
+      background-color: lightgray;      
     }
   
     .zoom-in {
@@ -147,7 +149,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
       <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
       </node-projects-plain-scrollbar>
-      <node-projects-designer-tools-dock id="tool-bar" class="tool-bar"></node-projects-designer-tools-dock>
+      <node-projects-designer-toolbar id="tool-bar" class="tool-bar"></node-projects-designer-toolbar>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -238,8 +240,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   async ready() {
-    this._tooldock = await this._getDomElement<DesignerToolsDock>('tool-bar');
-    this._tooldock.initialize(this.serviceContainer, this);
+    this._toolbar = await this._getDomElement<DesignerToolbar>('tool-bar');
+    this._toolbar.initialize(this.serviceContainer, this);
   }
 
   public zoomReset() {

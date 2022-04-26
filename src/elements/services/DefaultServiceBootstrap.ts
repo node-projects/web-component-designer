@@ -56,6 +56,13 @@ import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/
 import { SeperatorContextMenu } from '../widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js';
 import { ZoomToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js';
 import { RotateLeftAndRight } from '../widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js';
+import { SelectAllChildrenContextMenu } from '../widgets/designerView/extensions/contextMenu/SelectAllChildrenContextMenu';
+import { PointerToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/PointerToolButtonProvider.js';
+import { SeperatorToolProvider } from '../widgets/designerView/tools/toolBar/buttons/SeperatorToolProvider.js';
+import { ZoomToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js';
+import { DrawToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/DrawToolButtonProvider.js';
+import { TextToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js';
+import { SelectorToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/SelectorToolButtonProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -135,6 +142,19 @@ export function createDefaultServiceContainer() {
     new GridExtensionDesignViewConfigButtons()
   );
 
+  serviceContainer.designViewToolbarButtons.push(    
+    new PointerToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new SelectorToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new ZoomToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new DrawToolButtonProvider(),
+    new SeperatorToolProvider(5),
+    new TextToolButtonProvider()
+
+  );
+
   serviceContainer.designerContextMenuExtensions = [
     new CopyPasteContextMenu(),
     new SeperatorContextMenu(),
@@ -146,6 +166,8 @@ export function createDefaultServiceContainer() {
     new MultipleItemsSelectedContextMenu(),
     new PathContextMenu(),
     new RectContextMenu(),
+    new SeperatorContextMenu(),
+    new SelectAllChildrenContextMenu(),
     new SeperatorContextMenu(),
     new ItemsBelowContextMenu(),
   ];

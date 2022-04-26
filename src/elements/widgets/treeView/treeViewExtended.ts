@@ -192,10 +192,12 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       },
 
       activate: (event, data) => {
-        let node = data.node;
-        let designItem: IDesignItem = node.data.ref;
-        if (designItem)
-          designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        if (event.originalEvent) { // only for clicked items, not when elements selected via code.
+          let node = data.node;
+          let designItem: IDesignItem = node.data.ref;
+          if (designItem)
+            designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        }
       },
 
       createNode: (event, data) => {

@@ -129,7 +129,7 @@ export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";
 
 export type { ITool } from "./elements/widgets/designerView/tools/ITool.js";
-export * from "./elements/widgets/designerView/tools/designerToolsDock.js";
+export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbar.js";
 export * from "./elements/widgets/designerView/tools/NamedTools.js";
 export * from "./elements/widgets/designerView/tools/DrawElementTool.js";
 export * from "./elements/widgets/designerView/tools/DrawPathTool.js";
@@ -190,6 +190,7 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/MultipleIt
 export * from "./elements/widgets/designerView/extensions/contextMenu/PathContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/RectContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/SelectAllChildrenContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js";
