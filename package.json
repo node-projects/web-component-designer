@@ -1,7 +1,7 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.0.95",
+  "version": "0.0.96",
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
@@ -31,8 +31,8 @@
     "jquery": "^3.6.0",
     "jquery.fancytree": "^2.38.1",
     "monaco-editor": "^0.33.0",
-    "ts-jest": "^27.1.3",
-    "typescript": "^4.6.2",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.6.3",
     "typescript-lit-html-plugin": "^0.9.0"
   },
   "repository": {
