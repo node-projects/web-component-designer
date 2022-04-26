@@ -142,7 +142,7 @@ export function createDefaultServiceContainer() {
     new GridExtensionDesignViewConfigButtons()
   );
 
-  serviceContainer.designViewToolbarButtons.push(    
+  serviceContainer.designViewToolbarButtons.push(
     new PointerToolButtonProvider(),
     new SeperatorToolProvider(22),
     new SelectorToolButtonProvider(),
@@ -152,7 +152,6 @@ export function createDefaultServiceContainer() {
     new DrawToolButtonProvider(),
     new SeperatorToolProvider(5),
     new TextToolButtonProvider()
-
   );
 
   serviceContainer.designerContextMenuExtensions = [

@@ -100,7 +100,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: calc(100% - 32px);
     }
 
-    #tool-bar{
+    #tool-bar {
       width: 24px;
       height: calc(100% - 32px);
       position: absolute;
@@ -149,7 +149,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
       <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
       </node-projects-plain-scrollbar>
-      <node-projects-designer-toolbar id="tool-bar" class="tool-bar"></node-projects-designer-toolbar>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -170,11 +169,19 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     super();
     this._restoreCachedInititalValues();
 
+    this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
+    this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
+
     const outer = this._getDomElement<DesignerCanvas>('outer');
     this._designerCanvas = new DesignerCanvas();
     this._designerCanvas.id = "canvas";
     this._designerCanvas.appendChild(document.createElement("slot"));
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
+    
+    this._toolbar = new DesignerToolbar();
+    this._toolbar.id = 'tool-bar';
+    this._sVert.insertAdjacentElement('afterend', this._toolbar);
+    
     this._designerCanvas.onZoomFactorChanged.on(() => {
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
 
@@ -233,15 +240,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
     this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
 
-    this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
-    this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
     this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
-  }
-
-  async ready() {
-    this._toolbar = await this._getDomElement<DesignerToolbar>('tool-bar');
-    this._toolbar.initialize(this.serviceContainer, this);
   }
 
   public zoomReset() {
@@ -366,6 +366,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
           this._lowertoolbar.appendChild(btn);
       }
     }
+    this._toolbar.initialize(this.serviceContainer, this);
   }
 
   public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
