@@ -177,11 +177,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.id = "canvas";
     this._designerCanvas.appendChild(document.createElement("slot"));
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
-    
+
     this._toolbar = new DesignerToolbar();
     this._toolbar.id = 'tool-bar';
     this._sVert.insertAdjacentElement('afterend', this._toolbar);
-    
+
     this._designerCanvas.onZoomFactorChanged.on(() => {
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
 
@@ -281,7 +281,9 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     if (dimensions.height)
       scaleY = cvRect.height / dimensions.height;
 
-    this._designerCanvas.zoomFactor = scaleX < scaleY ? scaleX : scaleY;
+    let fak = scaleX < scaleY ? scaleX : scaleY;
+    if (!isNaN(fak))
+      this._designerCanvas.zoomFactor = fak;
     this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
   }
 
