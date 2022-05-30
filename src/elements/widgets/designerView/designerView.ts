@@ -339,8 +339,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.designerHeight = value;
   }
 
-  set additionalStyle(value: CSSStyleSheet) {
-    this._designerCanvas.additionalStyle = value;
+  set additionalStyles(value: CSSStyleSheet[]) {
+    this._designerCanvas.additionalStyles = value;
   }
 
   public setDesignItems(designItems: IDesignItem[]) {

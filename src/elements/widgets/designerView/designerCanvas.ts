@@ -6,7 +6,7 @@ import { UndoService } from '../../services/undoService/UndoService';
 import { SelectionService } from '../../services/selectionService/SelectionService';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
@@ -236,22 +236,25 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return this._canvasContainer.offsetHeight;
   }
 
-  set additionalStyle(value: CSSStyleSheet) {
+  set additionalStyles(value: CSSStyleSheet[]) {
     if (value) {
-      for (let r of value.rules) {
-        if (r instanceof CSSStyleRule) {
-          let parts = r.selectorText.split(',');
-          let t = '';
-          for (let p of parts) {
-            if (r.selectorText)
-              t += ',';
-            t += '#canvas ' + p;
+      let style = '';
+      for (let s of value) {
+        for (let r of s.cssRules) {
+          if (r instanceof CSSStyleRule) {
+            let parts = r.selectorText.split(',');
+            let t = '';
+            for (let p of parts) {
+              if (t)
+                t += ',';
+              t += '#node-projects-designer-canvas-canvas ' + p;
+            }
+            style += t + '{' + r.style.cssText + '}';
           }
-          r.selectorText = t;
         }
       }
 
-      this.shadowRoot.adoptedStyleSheets = [this.constructor.style, value];
+      this.shadowRoot.adoptedStyleSheets = [this.constructor.style, cssFromString(style)];
     }
     else
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style];

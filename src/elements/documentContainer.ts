@@ -23,12 +23,11 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _additionalStyle: string;
   public set additionalStyleString(style: string) {
     this._additionalStyle = style;
-    this.designerView.additionalStyle = cssFromString(style);
+    this.designerView.additionalStyles = [cssFromString(style)];
   };
   public get additionalStyleString() {
     return this._additionalStyle;
   };
-
 
   public onContentChanged = new TypedEvent<void>();
 
