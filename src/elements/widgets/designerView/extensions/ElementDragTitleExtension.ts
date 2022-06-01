@@ -16,6 +16,9 @@ export class ElementDragTitleExtension extends AbstractExtension {
     const boundRect = this.extendedItem.element.getBoundingClientRect();
     this._rect = this._drawRect((boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (boundRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 16, 60, 15, 'svg-primary-selection-move', this._rect);
     this._text = this._drawText(this.extendedItem.name.substring(0, 10) + '…', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (boundRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 5, 'svg-text-primary', this._text);
+    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+    title.textContent = this.extendedItem.name;
+    this._text.appendChild(title);
     this._rect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
     this._rect.addEventListener('pointermove', (e) => this._pointerEvent(e));
     this._rect.addEventListener('pointerup', (e) => this._pointerEvent(e));
@@ -39,7 +42,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
   _pointerEvent(event: PointerEvent) {
     event.preventDefault();
     event.stopPropagation();
-    
+
     this.designerCanvas.serviceContainer.designerTools.get(NamedTools.Pointer).pointerEventHandler(this.designerCanvas, event, this.extendedItem.element);
   }
 
