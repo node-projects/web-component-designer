@@ -28,6 +28,9 @@ export class TransformOriginExtension extends AbstractExtension {
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
+    if (this.extendedItem.styles.get('transform-origin') == null || this.extendedItem.styles.get('transform-origin') == '') {
+      this.extendedItem.setStyle('transform-origin', this._circle.getAttribute('cx') + ' ' + this._circle.getAttribute('cy'), true);
+    }
   }
 
   pointerEvent(event: PointerEvent) {
@@ -68,6 +71,7 @@ export class TransformOriginExtension extends AbstractExtension {
           const przX = Math.round(newX / rectNr.width * 10000) / 100;
           const przY = Math.round(newY / rectNr.height * 10000) / 100;
           this.extendedItem.setStyle('transform-origin', przX + '% ' + przY + '%');
+          // this.extendedItem.setStyle('transform-origin', this._circle.getAttribute('cx') + ' ' + this._circle.getAttribute('cy'), true);
           this.refresh();
           this._startPos = null;
         }
