@@ -3,6 +3,7 @@ import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from "./AbstractExtension";
 import { IExtensionManager } from "./IExtensionManger";
+import { OverlayLayer } from "./OverlayLayer.js";
 
 export class GrayOutExtension extends AbstractExtension {
 
@@ -20,7 +21,7 @@ export class GrayOutExtension extends AbstractExtension {
     if (!this._path) {
       this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       this._path.setAttribute('class', 'svg-gray-out');
-      this.overlayLayerView.appendChild(this._path);
+      this.overlayLayerView.addOverlay(this._path, OverlayLayer.Background);
       this.overlays.push(this._path);
     }
     let itemRect = this.extendedItem.element.getBoundingClientRect();

@@ -28,6 +28,7 @@ import { IDesignViewConfigButtonsProvider } from "../widgets/designerView/IDesig
 import { IDemoProviderService } from "./demoProviderService/IDemoProviderService.js";
 import { IBindableObjectsService } from "./bindableObjectsService/IBindableObjectsService.js";
 import { IBindableObjectDragDropService } from "./bindableObjectsService/IBindableObjectDragDropService.js";
+import { IDesignViewToolbarButtonProvider } from "../widgets/designerView/tools/toolBar/IDesignViewToolbarButtonProvider.js";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -71,6 +72,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   }
 
   public readonly designViewConfigButtons: IDesignViewConfigButtonsProvider[] = [];
+
+  public readonly designViewToolbarButtons: IDesignViewToolbarButtonProvider[] = [];
 
   public readonly designerPointerExtensions: IDesignerPointerExtensionProvider[] = [];
 

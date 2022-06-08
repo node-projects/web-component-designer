@@ -9,7 +9,6 @@ import { IDesignerCanvas } from "../IDesignerCanvas";
 import { ITool } from "./ITool";
 import { NamedTools } from './NamedTools';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 
 export class PointerTool implements ITool {
 
@@ -21,8 +20,6 @@ export class PointerTool implements ITool {
   private _actionStartedDesignItem?: IDesignItem;
 
   private _previousEventName: EventNames;
-
-  private _clickThroughElements: [designItem: IDesignItem, backupPointerEvents: string][] = []
 
   private _dragOverExtensionItem: IDesignItem;
   private _dragExtensionItem: IDesignItem;
@@ -39,24 +36,26 @@ export class PointerTool implements ITool {
   dispose(): void {
   }
 
-  private _showContextMenu(event: MouseEvent, designerCanvas : IDesignerCanvas) {
+  private _showContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
     event.preventDefault();
     if (!event.shiftKey) {
-      let items = designerCanvas.getItemsBelowMouse(event);
-      if (items.indexOf(designerCanvas.instanceServiceContainer.selectionService.primarySelection?.element) >= 0)
-      designerCanvas.showDesignItemContextMenu(designerCanvas.instanceServiceContainer.selectionService.primarySelection, event);
-      else {
-        const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-        if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
-          designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+      let items = designerCanvas.elementsFromPoint(event.x, event.y);
+      for (let e of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+        if (items.indexOf(e.element) >= 0) {
+          designerCanvas.showDesignItemContextMenu(designerCanvas.instanceServiceContainer.selectionService.primarySelection, event);
+          return;
         }
-        designerCanvas.showDesignItemContextMenu(designItem, event);
       }
+      const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+      if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+      }
+      designerCanvas.showDesignItemContextMenu(designItem, event);
     }
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    if (event.button == 2){
+    if (event.button == 2) {
       this._showContextMenu(event, designerCanvas)
       return;
     }
@@ -71,17 +70,14 @@ export class PointerTool implements ITool {
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
+        designerCanvas.captureActiveTool(this);
         this._movedSinceStartedAction = false;
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        designerCanvas.removeCurrentPointerEventHandler();
-
+        designerCanvas.releaseActiveTool();
         break;
     }
-
-    if (!event.altKey)
-      this._resetPointerEventsForClickThrough();
 
     if (!currentElement)
       return;
@@ -123,42 +119,42 @@ export class PointerTool implements ITool {
         if (currentDesignItem !== designerCanvas.rootDesignItem)
           designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
       }
-      this._actionType = null;
-      this._actionStartedDesignItem = null;
-      this._movedSinceStartedAction = false;
-      this._initialPoint = null;
+      this._resetTool();
     }
 
     this._previousEventName = <EventNames>event.type;
   }
 
+  private _resetTool() {
+    this._actionType = null;
+    this._actionStartedDesignItem = null;
+    this._movedSinceStartedAction = false;
+    this._initialPoint = null;
+  }
+
   private _pointerActionTypeDrawSelection(designerView: IDesignerCanvas, event: PointerEvent, currentElement: HTMLElement) {
     const drawSelectionTool = designerView.serviceContainer.designerTools.get(NamedTools.DrawSelection);
     if (drawSelectionTool) {
+      this._resetTool();
       drawSelectionTool.pointerEventHandler(designerView, event, currentElement);
     }
-  }
-
-  private _resetPointerEventsForClickThrough() {
-    if (!this._clickThroughElements.length)
-      return;
-    for (const e of this._clickThroughElements) {
-      (<HTMLElement>e[0].element).style.pointerEvents = e[1];
-    }
-    this._clickThroughElements = [];
   }
 
   private _pointerActionTypeDragOrSelect(designerCanvas: IDesignerCanvas, event: PointerEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
     if (event.altKey) {
       if (event.type == EventNames.PointerDown) {
-        this._clickThroughElements.push([currentDesignItem, (<HTMLElement>currentDesignItem.element).style.pointerEvents]);
-        (<HTMLElement>currentDesignItem.element).style.pointerEvents = 'none';
+        const currentSelection = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
+        if (currentSelection) {
+          const elements = designerCanvas.elementsFromPoint(event.x, event.y);
+          let idx = elements.indexOf(currentSelection.element);
+          if (idx >= 0) {
+            idx++;
+          }
+          let currentElement = elements[idx];
+          if (currentElement)
+            currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+        }
       }
-      let currentElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-      if (DomHelper.getHost(currentElement) !== designerCanvas.overlayLayer)
-        currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-    } else {
-      this._resetPointerEventsForClickThrough();
     }
 
     switch (event.type) {
@@ -215,99 +211,37 @@ export class PointerTool implements ITool {
               let newContainerService: IPlacementService = null;
 
               if (canLeave) {
-                //search for containers below mouse cursor.
-                //to do this, we need to disable pointer events for each in a loop and search wich element is there
-                let backupPEventsMap: Map<HTMLElement, string> = new Map();
-                let newContainerElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-                try {
-                  checkAgain: while (newContainerElement != null) {
-                    if (newContainerElement == this._actionStartedDesignItem.parent.element) {
-                      newContainerElement = null;
-                    } else if (newContainerElement == designerCanvas.rootDesignItem.element) {
-                      newContainerElementDesignItem = designerCanvas.rootDesignItem;
-                      const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-                      newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
-                      break;
-                    } else if (newContainerElement.getRootNode() !== designerCanvas.shadowRoot || <any>newContainerElement === designerCanvas.overlayLayer || <any>newContainerElement.parentElement === designerCanvas.overlayLayer) {
-                      backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                      newContainerElement.style.pointerEvents = 'none';
-                      const old = newContainerElement;
-                      newContainerElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-                      if (old === newContainerElement) {
+                const elementsFromPoint = designerCanvas.elementsFromPoint(event.x, event.y);
+                for (let e of elementsFromPoint) {
+                  if (e == this._actionStartedDesignItem.element) {
+                    continue;
+                  } else if (e == this._actionStartedDesignItem.parent.element) {
+                    break;
+                  } else if (e == designerCanvas.rootDesignItem.element) {
+                    newContainerElementDesignItem = designerCanvas.rootDesignItem;
+                    const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+                    newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+                    break;
+                  } else if (false) {
+                    //check we don't try to move a item over one of its children..
+                  } else {
+                    newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+                    const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+                    newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+                    if (newContainerService) {
+                      if (newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem])) {
+                        break;
+                      } else {
                         newContainerElementDesignItem = null;
                         newContainerService = null;
-                        break;
+                        continue;
                       }
-                    } else if (newContainerElement == this._actionStartedDesignItem.element || newContainerElement == currentDesignItem.element) {
-                      backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                      newContainerElement.style.pointerEvents = 'none';
-                      const old = newContainerElement;
-                      newContainerElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-                      if (old === newContainerElement) {
-                        newContainerElementDesignItem = null;
-                        newContainerService = null;
-                        newContainerElement = null;
-                        break;
-                      }
-                    } else {
-                      //check we don't try to move a item over one of its children...
-                      let par = newContainerElement.parentElement;
-                      while (par) {
-                        if (par == this._actionStartedDesignItem.element) {
-                          backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                          newContainerElement.style.pointerEvents = 'none';
-                          const old = newContainerElement;
-                          newContainerElement = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-                          if (old === newContainerElement)
-                            break;
-                          continue checkAgain;
-                        }
-                        par = par.parentElement;
-                      }
-                      //end check
-                      newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-                      const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-                      newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
-                      if (newContainerService) {
-                        if (newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem])) {
-                          break;
-                        } else {
-                          newContainerElementDesignItem = null;
-                          newContainerService = null;
-                        }
-                      }
-                      backupPEventsMap.set(newContainerElement, newContainerElement.style.pointerEvents);
-                      newContainerElement.style.pointerEvents = 'none';
-                      const newC = designerCanvas.elementFromPoint(event.x, event.y) as HTMLElement;
-                      if (newContainerElement === newC) {
-                        newContainerElement = null;
-                        break;
-                      }
-                      newContainerElement = newC;
                     }
                   }
                 }
-                finally {
-                  for (let e of backupPEventsMap.entries()) {
-                    e[0].style.pointerEvents = e[1];
-                  }
-                }
 
-                if (newContainerElement != null) { //Check if container is in designer canvas....
-                  let p = newContainerElement
-                  while (p != null) {
-                    if (p === designerCanvas.rootDesignItem.element)
-                      break;
-                    p = p.parentElement;
-                  }
-                  if (p == null) {
-                    newContainerService = null;
-                    newContainerElement = null;
-                  }
-                }
                 //if we found a new enterable container create extensions 
-                if (newContainerElement != null) {
-                  const newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(newContainerElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+                if (newContainerElementDesignItem != null) {
                   if (this._dragOverExtensionItem != newContainerElementDesignItem) {
                     designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
                     designerCanvas.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
@@ -348,7 +282,7 @@ export class PointerTool implements ITool {
         {
           if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
             if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey)
-              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem]);
             return;
           }
 

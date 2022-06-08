@@ -11,6 +11,7 @@ export class PanTool implements ITool {
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
+        designerCanvas.captureActiveTool(this);
         break;
 
       case EventNames.PointerMove:
@@ -21,7 +22,7 @@ export class PanTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        designerCanvas.removeCurrentPointerEventHandler();
+        designerCanvas.releaseActiveTool();
         break;
     }
   }

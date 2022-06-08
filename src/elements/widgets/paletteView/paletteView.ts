@@ -21,6 +21,8 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
+    
     this._designerTabControl = new DesignerTabControl();
     this._designerTabControl.selectedIndex = 0;
     this.shadowRoot.appendChild(this._designerTabControl);

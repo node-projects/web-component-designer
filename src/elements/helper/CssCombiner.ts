@@ -118,7 +118,10 @@ export class CssCombiner {
       styles.delete('margin-right');
       styles.delete('margin-bottom');
       styles.delete('margin-left');
-      styles.set('margin', e.style.marginTop + ' ' + e.style.marginRight + ' ' + e.style.marginBottom + ' ' + e.style.marginLeft);
+      if (e.style.marginTop == e.style.marginRight && e.style.marginTop == e.style.marginBottom && e.style.marginTop == e.style.marginLeft) {
+        styles.set('margin', e.style.marginTop);
+      } else
+        styles.set('margin', e.style.marginTop + ' ' + e.style.marginRight + ' ' + e.style.marginBottom + ' ' + e.style.marginLeft);
     }
   }
 
@@ -128,14 +131,17 @@ export class CssCombiner {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-bottom')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding-left')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'padding')) return;
-         
+
     let e = CssCombiner._helperElement;
     if (e.style.paddingTop && e.style.paddingRight && e.style.paddingBottom && e.style.paddingLeft) {
       styles.delete('padding-top');
       styles.delete('padding-right');
       styles.delete('padding-bottom');
       styles.delete('padding-left');
-      styles.set('padding', e.style.paddingTop + ' ' + e.style.paddingRight + ' ' + e.style.paddingBottom + ' ' + e.style.paddingLeft);
+      if (e.style.paddingTop == e.style.paddingRight && e.style.paddingTop == e.style.paddingBottom && e.style.paddingTop == e.style.paddingLeft) {
+        styles.set('padding', e.style.paddingTop);
+      } else
+        styles.set('padding', e.style.paddingTop + ' ' + e.style.paddingRight + ' ' + e.style.paddingBottom + ' ' + e.style.paddingLeft);
     }
   }
 
@@ -145,7 +151,7 @@ export class CssCombiner {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'bottom')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'left')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'inset')) return;
-         
+
     let e = CssCombiner._helperElement;
     if (e.style.top && e.style.right && e.style.bottom && e.style.left) {
       styles.delete('top');
@@ -170,7 +176,7 @@ export class CssCombiner {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-clip')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background-color')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'background')) return;
-     
+
     let e = CssCombiner._helperElement;
     styles.delete('background-image');
     styles.delete('background-position');
@@ -215,7 +221,7 @@ export class CssCombiner {
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'line-height')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font-family')) return;
     if (!CssCombiner.checkIfStyleIsCombinable(styles, 'font')) return;
-         
+
     let e = CssCombiner._helperElement;
     if (e.style.fontFamily) {
       styles.delete('font-style');

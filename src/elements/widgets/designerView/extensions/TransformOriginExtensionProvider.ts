@@ -8,8 +8,10 @@ import { css } from "@node-projects/base-custom-webcomponent";
 
 export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designItem.node instanceof HTMLElement || (designItem.node instanceof SVGElement && designItem.node.localName === 'svg'))
-      return true;
+    if (designItem.node instanceof HTMLElement || (designItem.node instanceof SVGElement && designItem.node.localName === 'svg')) {
+      let r = designItem.element.getBoundingClientRect()
+      return r.width > 10 && r.height > 10;
+    }
     return false;
   }
 
@@ -19,5 +21,5 @@ export class TransformOriginExtensionProvider implements IDesignerExtensionProvi
 
   readonly style = css`
     .svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
-  `;    
+  `;
 }

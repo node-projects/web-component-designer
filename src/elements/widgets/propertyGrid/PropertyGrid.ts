@@ -35,6 +35,8 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
+    
     this._designerTabControl = new DesignerTabControl();
     this.shadowRoot.appendChild(this._designerTabControl);
     this.addEventListener('contextmenu', (e) => {

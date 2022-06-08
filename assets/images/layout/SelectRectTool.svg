@@ -1,0 +1,9 @@
+<svg width="500px" height="500px" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:square;stroke-miterlimit:2;">
+
+ <g>
+  <title>Layer 1</title>
+  <rect x="60.796" y="59.225" width="380" height="380" stroke-dasharray="80" style="stroke-linecap: round; stroke-miterlimit: 6; stroke-linejoin: round; fill: none; stroke: rgb(0, 0, 0); stroke-width: 50px;"></rect>
+  <ellipse style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 50px;" cx="61.059" cy="58.963" rx="45" ry="45"></ellipse>
+  <ellipse style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 50px;" cx="441.823" cy="440.776" rx="45" ry="45"></ellipse>
+ </g>
+</svg>

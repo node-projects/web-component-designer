@@ -10,6 +10,8 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar';
+import { DesignerToolbar } from './tools/toolBar/DesignerToolbar.js';
+
 
 const autoZomOffset = 10;
 
@@ -39,6 +41,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
+  private _toolbar: DesignerToolbar;
 
   static override readonly style = css`
     :host {
@@ -92,8 +95,16 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 100%;
     }
     #canvas {
-      width: calc(100% - 16px);
+      left: 24px;
+      width: calc(100% - 24px - 16px);
       height: calc(100% - 32px);
+    }
+
+    #tool-bar {
+      width: 24px;
+      height: calc(100% - 32px);
+      position: absolute;
+      background-color: lightgray;      
     }
   
     .zoom-in {
@@ -136,7 +147,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   static override readonly template = html`
     <div id="outer">
       <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
-      <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll"></node-projects-plain-scrollbar>
+      <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
+      </node-projects-plain-scrollbar>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -155,12 +167,21 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
+
+    this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
+    this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
 
     const outer = this._getDomElement<DesignerCanvas>('outer');
     this._designerCanvas = new DesignerCanvas();
     this._designerCanvas.id = "canvas";
     this._designerCanvas.appendChild(document.createElement("slot"));
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
+
+    this._toolbar = new DesignerToolbar();
+    this._toolbar.id = 'tool-bar';
+    this._sVert.insertAdjacentElement('afterend', this._toolbar);
+
     this._designerCanvas.onZoomFactorChanged.on(() => {
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
 
@@ -219,8 +240,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
     this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
 
-    this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
-    this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
     this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
   }
@@ -262,7 +281,9 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     if (dimensions.height)
       scaleY = cvRect.height / dimensions.height;
 
-    this._designerCanvas.zoomFactor = scaleX < scaleY ? scaleX : scaleY;
+    let fak = scaleX < scaleY ? scaleX : scaleY;
+    if (!isNaN(fak))
+      this._designerCanvas.zoomFactor = fak;
     this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
   }
 
@@ -293,12 +314,14 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       const vp = this.designerCanvas.getNormalizedEventCoordinates(event)
       this.designerCanvas.zoomTowardsPoint(vp, zf);
     }
-    else if(event.shiftKey){
-      this._sHor.value += event.deltaY /10000;
+    else if (event.shiftKey) {
+      this._sHor.value += event.deltaY / 10000;
       this._onScrollbar(null);
     }
-    else{
+    else {
       this._sVert.value += event.deltaY / 10000;
+      this._onScrollbar(null);
+      this._sHor.value += event.deltaX / 10000;
       this._onScrollbar(null);
     }
   }
@@ -316,8 +339,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.designerHeight = value;
   }
 
-  set additionalStyle(value: CSSStyleSheet) {
-    this._designerCanvas.additionalStyle = value;
+  set additionalStyles(value: CSSStyleSheet[]) {
+    this._designerCanvas.additionalStyles = value;
   }
 
   public setDesignItems(designItems: IDesignItem[]) {
@@ -345,6 +368,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
           this._lowertoolbar.appendChild(btn);
       }
     }
+    this._toolbar.initialize(this.serviceContainer, this);
   }
 
   public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {

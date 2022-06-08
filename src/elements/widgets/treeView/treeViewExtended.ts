@@ -104,6 +104,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     //@ts-ignore
     import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
@@ -191,10 +192,12 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       },
 
       activate: (event, data) => {
-        let node = data.node;
-        let designItem: IDesignItem = node.data.ref;
-        if (designItem)
-          designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        if (event.originalEvent) { // only for clicked items, not when elements selected via code.
+          let node = data.node;
+          let designItem: IDesignItem = node.data.ref;
+          if (designItem)
+            designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        }
       },
 
       createNode: (event, data) => {
@@ -205,6 +208,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
           if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
             node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
+            node.tr.onmouseenter = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(designItem.element);
+            node.tr.onmouseleave = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(null);
 
             let d = document.createElement("div");
             d.className = "cmd"
@@ -429,9 +434,11 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._tree.visit((node) => {
       if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
         node.setSelected(true);
+        node.setActive(true);
         node.makeVisible({ scrollIntoView: true });
       } else {
         node.setSelected(false);
+        node.setActive(false);
       }
     });
   }

@@ -61,6 +61,8 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
+    
     this._type = this._getDomElement<HTMLSpanElement>('type');
     this._id = this._getDomElement<HTMLInputElement>('id');
     this._pg = this._getDomElement<PropertyGrid>('pg');

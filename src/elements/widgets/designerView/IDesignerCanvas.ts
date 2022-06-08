@@ -11,6 +11,7 @@ import { OverlayLayerView } from "./overlayLayerView";
 import { IRect } from "../../../interfaces/IRect.js";
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { ISize } from "../../../interfaces/ISize.js";
+import { ITool } from "./tools/ITool.js";
 
 export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
@@ -44,15 +45,17 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   getViewportCoordinates(event: MouseEvent): IPoint;
   getNormalizedElementCoordinates(element: Element): IRect;
 
-  removeCurrentPointerEventHandler()
+  captureActiveTool(tool: ITool);
+  releaseActiveTool();
 
   getDesignSurfaceDimensions(): ISize;
 
   getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
   elementFromPoint(x: number, y: number): Element;
+  elementsFromPoint(x: number, y: number): Element[];
 
-  getItemsBelowMouse(event: MouseEvent): Element[];
+  showHoverExtension(element: Element);
 
   zoomTowardsPoint(point: IPoint, scalechange: number): void;
   zoomPoint(canvasPoint: IPoint, newZoom: number): void;

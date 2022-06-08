@@ -6,7 +6,7 @@ import { UndoService } from '../../services/undoService/UndoService';
 import { SelectionService } from '../../services/selectionService/SelectionService';
 import { DesignItem } from '../../item/DesignItem';
 import { IDesignItem } from '../../item/IDesignItem';
-import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants';
 import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
@@ -33,6 +33,7 @@ import { OverlayLayerView } from './overlayLayerView';
 import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
 import { IRect } from "../../../interfaces/IRect.js";
 import { ISize } from "../../../interfaces/ISize.js";
+import { ITool } from "./tools/ITool.js";
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -42,6 +43,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public outerRect: DOMRect;
   public clickOverlay: HTMLDivElement;
   public helperElement: HTMLDivElement;
+
+  private _activeTool: ITool;
 
   // IPlacementView
   public gridSize = 10;
@@ -57,8 +60,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _canvasOffset: IPoint = { x: 0, y: 0 };
 
   private _currentContextMenu: ContextMenuHelper
-
-  private _lastPointerDownHandler: (evt: any) => boolean;
 
   public get zoomFactor(): number {
     return this._zoomFactor;
@@ -188,6 +189,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     this._canvas = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvas');
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
@@ -235,22 +237,25 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return this._canvasContainer.offsetHeight;
   }
 
-  set additionalStyle(value: CSSStyleSheet) {
+  set additionalStyles(value: CSSStyleSheet[]) {
     if (value) {
-      for (let r of value.rules) {
-        if (r instanceof CSSStyleRule) {
-          let parts = r.selectorText.split(',');
-          let t = '';
-          for (let p of parts) {
-            if (r.selectorText)
-              t += ',';
-            t += '#canvas ' + p;
+      let style = '';
+      for (let s of value) {
+        for (let r of s.cssRules) {
+          if (r instanceof CSSStyleRule) {
+            let parts = r.selectorText.split(',');
+            let t = '';
+            for (let p of parts) {
+              if (t)
+                t += ',';
+              t += '#node-projects-designer-canvas-canvas ' + p;
+            }
+            style += t + '{' + r.style.cssText + '}';
           }
-          r.selectorText = t;
         }
       }
 
-      this.shadowRoot.adoptedStyleSheets = [this.constructor.style, value];
+      this.shadowRoot.adoptedStyleSheets = [this.constructor.style, cssFromString(style)];
     }
     else
       this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
@@ -394,7 +399,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
-    this._canvasContainer.appendChild(this.overlayLayer);
+    this.clickOverlay.appendChild(this.overlayLayer);
     this.snapLines = new Snaplines(this.overlayLayer);
     this.snapLines.initialize(this.rootDesignItem);
 
@@ -413,16 +418,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
       this.addDesignItems(parser.createDesignItems(children, this.serviceContainer, this.instanceServiceContainer));
     }
-  }
-
-  elementFromPoint(x: number, y: number): Element {
-    this.clickOverlay.style.pointerEvents = 'none';
-    //@ts-ignore
-    let element = this.shadowRoot.elementFromPoint(x, y);
-    if (element === this.clickOverlay)
-      element = this._canvas;
-    this.clickOverlay.style.pointerEvents = 'auto';
-    return element;
   }
 
   connectedCallback() {
@@ -457,6 +452,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._scaleFactor = this._zoomFactor;
     this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + (isNaN(this._canvasOffset.x) ? '0' : this._canvasOffset.x) + 'px, ' + (isNaN(this._canvasOffset.y) ? '0' : this._canvasOffset.y) + 'px)';
     this._canvasContainer.style.transformOrigin = '0 0';
+    this.overlayLayer.style.transform = this._canvasContainer.style.transform;
+    this.overlayLayer.style.transformOrigin = '0 0';
     this.snapLines.clearSnaplines();
   }
 
@@ -672,6 +669,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     event.preventDefault();
   }
 
+  /**
+   * Converts the Event x/y coordinates, to the mouse position on the canvas
+   */
   public getNormalizedEventCoordinates(event: MouseEvent): IPoint {
     const offsetOfOuterX = (event.clientX - this.outerRect.x) / this.zoomFactor;
     const offsetOfCanvasX = this.containerBoundingRect.x - this.outerRect.x;
@@ -685,16 +685,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
-  public convertEventToViewPortCoordinates(point: IPoint): IPoint {
-    const offsetOfCanvasX = this.containerBoundingRect.x - this.outerRect.x;
-    const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y;
-
-    return {
-      x: (point.x + offsetOfCanvasX / this.zoomFactor) * this.zoomFactor,
-      y: (point.y + offsetOfCanvasY / this.zoomFactor) * this.zoomFactor
-    };
-  }
-
+  /**
+   * Converts the Event x/y coordinates, to the mouse position in the viewport
+   */
   public getViewportCoordinates(event: MouseEvent): IPoint {
     return {
       x: (event.clientX - this.outerRect.x),
@@ -713,54 +706,72 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: normEvt.x - normEl.x, y: normEvt.y - normEl.y };
   }
 
-  public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
-    let backupPEventsMap: Map<HTMLElement, string> = new Map();
-    let currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
-    this.clickOverlay.style.pointerEvents = 'none';
-    let lastElement: HTMLElement = null;
-    try {
-      while (currentElement != null) {
-        if (currentElement == lastElement) {
-          currentElement = null;
-          break;
-        }
-        lastElement = currentElement;
-        if (currentElement == this._canvas) {
-          break;
-        }
-        if (currentElement === this.overlayLayer) {
-          currentElement = this.overlayLayer.elementFromPoint(point.x, point.y) as HTMLElement;
-          break;
-        }
-        if (!ignoreElementCallback || !ignoreElementCallback(currentElement)) {
-          break;
-        }
-        backupPEventsMap.set(currentElement, currentElement.style.pointerEvents);
-        currentElement.style.pointerEvents = 'none';
-        if (currentElement.shadowRoot) {
-          for (let e of currentElement.shadowRoot.querySelectorAll('*')) {
-            if (!backupPEventsMap.has((<HTMLElement>e))) {
-              if ((<HTMLElement>e).style)
-                backupPEventsMap.set((<HTMLElement>e), (<HTMLElement>e).style.pointerEvents);
-              (<HTMLElement>e).style.pointerEvents = 'none';
-            }
-          }
-        }
-        currentElement = this.elementFromPoint(point.x, point.y) as HTMLElement;
+  //todo: remove
+  public elementFromPoint(x: number, y: number): Element {
+    let elements = this.shadowRoot.elementsFromPoint(x, y);
+    let element = elements[0];
+    if (element === this.clickOverlay)
+      element = elements[1];
+    if (element === this.clickOverlay)
+      element = this._canvas;
+    return element;
+  }
 
-      }
+  public elementsFromPoint(x: number, y: number): Element[] {
+    let retVal: Element[] = [];
+    let elements = this.shadowRoot.elementsFromPoint(x, y);
+    for (let e of elements) {
+      if (e == this.clickOverlay)
+        continue;
+      if (e == this.overlayLayer)
+        continue;
+      if (e.getRootNode() !== this.shadowRoot)
+        continue;
+      retVal.push(e);
+      if (e === this._canvas)
+        break;
     }
-    finally {
-      for (let e of backupPEventsMap.entries()) {
-        e[0].style.pointerEvents = e[1];
+    return retVal;
+  }
+
+  public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
+    const elements = this.shadowRoot.elementsFromPoint(point.x, point.y);
+    let currentElement: HTMLElement = null;
+
+    for (let i = 0; i < elements.length; i++) {
+      currentElement = <HTMLElement>elements[i];
+      if (currentElement == this.clickOverlay) {
+        currentElement = null;
+        continue;
       }
-      this.clickOverlay.style.pointerEvents = 'auto';
+      if (currentElement == this.overlayLayer) {
+        currentElement = null;
+        continue;
+      }
+      if (ignoreElementCallback && ignoreElementCallback(currentElement)) {
+        currentElement = null;
+        continue;
+      }
+      if (currentElement.getRootNode() !== this.shadowRoot) {
+        currentElement = null;
+        continue;
+      }
+      break;
     }
 
     return currentElement;
   }
 
-  _rect: SVGRectElement;
+  public showHoverExtension(element: Element) {
+    const currentDesignItem = DesignItem.GetOrCreateDesignItem(element, this.serviceContainer, this.instanceServiceContainer);
+    if (this._lastHoverDesignItem != currentDesignItem) {
+      if (this._lastHoverDesignItem)
+        this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
+      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DomHelper.getHost(element.parentNode) !== this.overlayLayer)
+        this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
+      this._lastHoverDesignItem = currentDesignItem;
+    }
+  }
 
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
     this._fillCalculationrects();
@@ -778,63 +789,40 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       currentElement = forceElement;
     else {
       currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
-      if (currentElement === this._outercanvas2 || currentElement === this.overlayLayer || !currentElement) {
+      if (!currentElement) {
         currentElement = this._canvas;
       }
-    } /* else {
-      if (!DesignerCanvas.hasOrIsParent(currentElement, this._canvas))
-        return;
-    }*/
+    }
 
-    if (this._lastPointerDownHandler) {
-      try {
-        this._lastPointerDownHandler(event);
-      } catch { }
-      if (event.type == EventNames.PointerUp)
-        this._lastPointerDownHandler = null;
+    if (this._activeTool) {
+      this._activeTool.pointerEventHandler(this, event, <Element>currentElement);
       return;
     }
 
-    if (currentElement instanceof SVGGraphicsElement && (<ShadowRoot>currentElement?.ownerSVGElement?.parentNode)?.host == this.overlayLayer) {
-      this.clickOverlay.style.cursor = getComputedStyle(currentElement).cursor;
-      if (event.type == EventNames.PointerDown) {
-        this._lastPointerDownHandler = (evt) => currentElement.dispatchEvent(new evt.constructor(evt.type, evt));
-      }
-      currentElement.dispatchEvent(new (<any>event).constructor(event.type, event));
-      return;
-    }
     this.clickOverlay.style.cursor = this._canvas.style.cursor;
 
-    //TODO: remove duplication when tool refactoring starts
-    //this._fillCalculationrects();
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-    if (this._lastHoverDesignItem != currentDesignItem) {
-      if (this._lastHoverDesignItem)
-        this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
-      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DomHelper.getHost(currentElement.parentNode) !== this.overlayLayer)
-        this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
-      this._lastHoverDesignItem = currentDesignItem;
-    }
+    this.showHoverExtension(currentDesignItem.element);
 
+    //TODO: needed ??
     if (currentElement && DomHelper.getHost(currentElement.parentNode) === this.overlayLayer) {
       if (this.eatEvents)
         return;
       currentElement = this.instanceServiceContainer.selectionService.primarySelection?.element ?? this._canvas;
     }
 
-    this._fillCalculationrects();
-
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._canvas.style.cursor = tool.cursor;
 
-    if (event.type == EventNames.PointerDown) {
-      this._lastPointerDownHandler = (evt) => tool.pointerEventHandler(this, evt, <Element>currentElement);
-    }
     tool.pointerEventHandler(this, event, <Element>currentElement);
   }
 
-  public removeCurrentPointerEventHandler() {
-    this._lastPointerDownHandler = null;
+  public captureActiveTool(tool: ITool) {
+    this._activeTool = tool;
+  }
+
+  public releaseActiveTool() {
+    this._activeTool = null;
   }
 
   private _fillCalculationrects() {
@@ -848,41 +836,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public removeOverlay(element: SVGGraphicsElement) {
     this.overlayLayer.removeOverlay(element);
-  }
-
-  public getItemsBelowMouse(event: MouseEvent): Element[] {
-    const lstEl: HTMLElement[] = [];
-    //search for containers below mouse cursor.
-    //to do this, we need to disable pointer events for each in a loop and search wich element is there
-    let backupPEventsMap: Map<HTMLElement, string> = new Map();
-    this.clickOverlay.style.pointerEvents = 'none';
-    try {
-      let el = this.elementFromPoint(event.x, event.y) as HTMLElement;
-      backupPEventsMap.set(el, el.style.pointerEvents);
-      el.style.pointerEvents = 'none';
-      if (el !== this.rootDesignItem.element) {
-        while (el != null) {
-          if (el === this.rootDesignItem.element)
-            break;
-          if (el !== <any>this.overlayLayer && el.parentElement !== <any>this.overlayLayer && el.getRootNode() === this.shadowRoot)
-            lstEl.push(el);
-          if (!backupPEventsMap.has(el))
-            backupPEventsMap.set(el, el.style.pointerEvents);
-          el.style.pointerEvents = 'none';
-          const oldEl = el;
-          el = this.elementFromPoint(event.x, event.y) as HTMLElement;
-          if (oldEl === el)
-            break;
-        }
-      }
-    }
-    finally {
-      for (let e of backupPEventsMap.entries()) {
-        e[0].style.pointerEvents = e[1];
-      }
-      this.clickOverlay.style.pointerEvents = 'auto';
-    }
-    return lstEl;
   }
 
   public zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint) {
@@ -917,10 +870,21 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.canvasOffset = newCanvasOffset;
   }
 
+  private zoomConvertEventToViewPortCoordinates(point: IPoint): IPoint {
+    const offsetOfCanvasX = this.containerBoundingRect.x - this.outerRect.x;
+    const offsetOfCanvasY = this.containerBoundingRect.y - this.outerRect.y;
+
+    return {
+      x: (point.x + offsetOfCanvasX / this.zoomFactor) * this.zoomFactor,
+      y: (point.y + offsetOfCanvasY / this.zoomFactor) * this.zoomFactor
+    };
+  }
+
+
   public zoomTowardsPoint(canvasPoint: IPoint, newZoom: number) {
     const scaleChange = newZoom / this.zoomFactor;
 
-    const point = this.convertEventToViewPortCoordinates(canvasPoint);
+    const point = this.zoomConvertEventToViewPortCoordinates(canvasPoint);
 
     const newCanvasOffset = {
       x: -(point.x * (scaleChange - 1) + scaleChange * -this.canvasOffsetUnzoomed.x),

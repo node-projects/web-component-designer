@@ -1,4 +1,3 @@
-//TODO: global conext not yet used.
 //Service container should not be something with changeing information, so global context is for tool and color (and maybe more)
 
 import { PropertyChangedArgs, TypedEvent } from "@node-projects/base-custom-webcomponent";
@@ -20,10 +19,17 @@ export class GlobalContext {
   public set tool(tool: ITool) {
     if (this._tool !== tool) {
       const oldTool = this._tool;
-      if (oldTool)
+      if (oldTool) {
         oldTool.dispose();
+      }
       this._tool = tool;
-      this.onToolChanged.emit(new PropertyChangedArgs<ITool>(tool, oldTool));
+      let toolName = null;
+      for (let t of this._serviceContainer.designerTools) {
+        if (t[1] == tool)
+          toolName = t[0];
+      }
+
+      this.onToolChanged.emit(new PropertyChangedArgs<{ name: string, tool: ITool }>({ name: toolName, tool: tool }, { name: null, tool: oldTool }));
       if (this._tool)
         this._tool.activated(this._serviceContainer);
     }
@@ -31,7 +37,7 @@ export class GlobalContext {
   public get tool(): ITool {
     return this._tool;
   }
-  readonly onToolChanged = new TypedEvent<PropertyChangedArgs<ITool>>();
+  readonly onToolChanged = new TypedEvent<PropertyChangedArgs<{ name: string, tool: ITool }>>();
 
   finishedWithTool: (tool: ITool) => void = () => this.tool = null;
 

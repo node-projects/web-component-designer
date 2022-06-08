@@ -18,6 +18,8 @@ export class MagicWandSelectorTool implements ITool {
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
+        designerCanvas.captureActiveTool(this);
+        
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this._path.setAttribute('class', 'svg-selector');
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
@@ -34,7 +36,7 @@ export class MagicWandSelectorTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        designerCanvas.removeCurrentPointerEventHandler();
+        designerCanvas.releaseActiveTool();
 
         const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];

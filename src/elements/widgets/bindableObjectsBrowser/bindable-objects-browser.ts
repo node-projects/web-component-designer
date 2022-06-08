@@ -35,6 +35,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     //@ts-ignore
     import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
@@ -44,10 +45,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
     this._treeDiv.style.overflow = 'auto';
     this._treeDiv.setAttribute('id', 'tree');
     this.shadowRoot.appendChild(this._treeDiv);
-  }
-
-
-  async ready() {
+  
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
       icon: false,
       extensions: ['dnd5'],

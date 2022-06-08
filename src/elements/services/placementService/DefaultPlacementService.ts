@@ -28,7 +28,7 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint {
-    return container.element.getBoundingClientRect();
+    return container.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(container.element);
   }
 
   private calculateTrack(event: MouseEvent, placementView: IPlacementView, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, item: IDesignItem): IPoint {
@@ -94,6 +94,16 @@ export class DefaultPlacementService implements IPlacementService {
       const translationMatrix = getTranslationMatrix3d(track.x, track.y, 0);
       combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), matrixArrayToCssMatrix(translationMatrix));
 
+    let filterdItems = filterChildPlaceItems(items);
+    //TODO: -> what is if a transform already exists -> backup existing style.?
+    for (const designItem of filterdItems) {
+      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
+      combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
+    let filterdItems = filterChildPlaceItems(items);
+    //TODO: -> maybe get existing transform via getComputedStyle???
+    for (const designItem of filterdItems) {
+      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
+      combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
     }
   }
 
