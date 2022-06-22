@@ -89,7 +89,8 @@ export function matrixArrayToCssMatrix(matrixArray: number[]) {
 
 export function cssMatrixToMatrixArray(cssMatrix: string) {
   if (!cssMatrix.includes('matrix')) {
-    console.error('cssMatrixToMatrixArray: no css matrix passed');
+    if (cssMatrix != 'none')
+      console.error('cssMatrixToMatrixArray: no css matrix passed');
     return identityMatrix;
   }
   let matrixArray: number[] = cssMatrix.match(/^matrix.*\((.*)\)/)[1].split(',').map(Number);
