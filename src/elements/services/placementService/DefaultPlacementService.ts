@@ -5,6 +5,8 @@ import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { combineTransforms, getTranslationMatrix3d, matrixArrayToCssMatrix } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
+import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
+import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -86,6 +88,11 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    console.log('place()');
+    for (const item of items){
+      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
+      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.MouseOver);
+    }
     //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
@@ -94,6 +101,10 @@ export class DefaultPlacementService implements IPlacementService {
       const translationMatrix = getTranslationMatrix3d(track.x, track.y, 0);
       combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), matrixArrayToCssMatrix(translationMatrix));
     }
+    for (const item of items){
+      (<DesignerCanvas>placementView).extensionManager.applyExtension(item, ExtensionType.Placement);
+    }
+    
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
@@ -119,5 +130,10 @@ export class DefaultPlacementService implements IPlacementService {
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
       placeDesignItem(container, designItem, track, 'position');
     }
+    console.log('finishPlace()');
+    for (const item of items){
+      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
+    }
+    
   }
 }

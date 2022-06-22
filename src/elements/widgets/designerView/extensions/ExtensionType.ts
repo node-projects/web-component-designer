@@ -4,6 +4,7 @@ export enum ExtensionType {
   PrimarySelection = 4,
   PrimarySelectionContainer = 8,
   MouseOver = 16,
+  Placement = 17,
   OnlyOneItemSelected = 32,
   MultipleItemsSelected = 64,
   /**

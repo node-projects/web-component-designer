@@ -63,6 +63,7 @@ import { ZoomToolButtonProvider } from '../widgets/designerView/tools/toolBar/bu
 import { DrawToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/DrawToolButtonProvider.js';
 import { TextToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js';
 import { SelectorToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/SelectorToolButtonProvider.js';
+import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -109,6 +110,9 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new MouseOverExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.Placement, [
+    new PlacementExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
     new GrayOutExtensionProvider()
