@@ -10,7 +10,7 @@ export class DefaultPlacementService implements IPlacementService {
 
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
     if (containerStyle.display === 'grid' || containerStyle.display === 'inline-grid' ||
-        containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
+      containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
       return false;
     return true;
   }
@@ -42,7 +42,7 @@ export class DefaultPlacementService implements IPlacementService {
       }
       else if (placementView.alignOnSnap) {
         let rect = item.element.getBoundingClientRect();
-        let newPos = placementView.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / placementView.scaleFactor, height: rect.height/ placementView.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        let newPos = placementView.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / placementView.scaleFactor, height: rect.height / placementView.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x - Math.round(startPoint.x) + Math.round(offsetInControl.x);
         } else {
@@ -93,17 +93,6 @@ export class DefaultPlacementService implements IPlacementService {
     for (const designItem of filteredItems) {
       const translationMatrix = getTranslationMatrix3d(track.x, track.y, 0);
       combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), matrixArrayToCssMatrix(translationMatrix));
-
-    let filterdItems = filterChildPlaceItems(items);
-    //TODO: -> what is if a transform already exists -> backup existing style.?
-    for (const designItem of filterdItems) {
-      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
-      combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
-    let filterdItems = filterChildPlaceItems(items);
-    //TODO: -> maybe get existing transform via getComputedStyle???
-    for (const designItem of filterdItems) {
-      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
-      combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
     }
   }
 

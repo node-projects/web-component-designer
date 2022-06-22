@@ -29,7 +29,7 @@ export class TransformOriginExtension extends AbstractExtension {
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
     if (this.extendedItem.styles.get('transform-origin') == null || this.extendedItem.styles.get('transform-origin') == '') {
-      this.extendedItem.setStyle('transform-origin', this._circle.getAttribute('cx') + ' ' + this._circle.getAttribute('cy'), true);
+      this.extendedItem.setStyle('transform-origin', this._circle.getAttribute('cx') + ' ' + this._circle.getAttribute('cy'));
     }
   }
 

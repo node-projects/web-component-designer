@@ -94,7 +94,6 @@ export class RotateExtension extends AbstractExtension {
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        this.designerCanvas.removeCurrentPointerEventHandler();
 
         this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
 

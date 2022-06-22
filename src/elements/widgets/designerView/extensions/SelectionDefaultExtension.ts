@@ -1,6 +1,5 @@
-import { IPoint } from "../../../../interfaces/IPoint";
 import { IPoint3D } from "../../../../interfaces/IPoint3d";
-import { applyMatrixToElement, calcCornerPoints, getTransformedCornerPoints } from "../../../helper/TransformHelper";
+import {getTransformedCornerPoints } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
