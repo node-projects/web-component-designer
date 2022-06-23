@@ -21,7 +21,7 @@ export class SelectionDefaultExtension extends AbstractExtension {
 
   override refresh() {
     let clone = <HTMLElement>this.extendedItem.element.cloneNode();
-    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
+    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
 
     // console.log("cornerPoint0x: " + cornerPoints[0].x, "cornerPoint0y: " + cornerPoints[0].y, "actualElementTransform: " + (<HTMLElement>this.extendedItem.element).style.transform);
     // let transformedCornerPoints: IPoint3D[] = [

@@ -38,7 +38,7 @@ export class ResizeExtension extends AbstractExtension {
     // const rect = this.extendedItem.element.getBoundingClientRect();
         
     let clone = <HTMLElement>this.extendedItem.element.cloneNode();
-    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
+    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
    
     this._circle1 = this._drawResizerOverlay(transformedCornerPoints[0].x, transformedCornerPoints[0].y, 'nw-resize', this._circle1);
     this._circle2 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[1].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[1].y - transformedCornerPoints[0].y) / 2), 'n-resize', this._circle2);

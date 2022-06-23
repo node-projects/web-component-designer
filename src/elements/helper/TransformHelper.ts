@@ -115,7 +115,8 @@ export function getRotationAngleFromMatrix(matrixArray: number[]) {
 //   }
 // }
 
-export function getTransformedCornerPoints(clonedElement: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas, untransformedCornerPointsOffset: number) {
+export function getTransformedCornerPoints(originalElement: HTMLElement, clonedElement: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas, untransformedCornerPointsOffset: number) {
+  const originalRect = designerCanvas.getNormalizedElementCoordinates(originalElement.parentElement);
   clonedElement.style.visibility = 'hidden';
   const transformBackup = clonedElement.style.transform;
   clonedElement.style.transform = '';
@@ -125,20 +126,20 @@ export function getTransformedCornerPoints(clonedElement: HTMLElement, helperEle
   const cloneBoundingRect = designerCanvas.getNormalizedElementCoordinates(el);
   const cornerPoints: IPoint[] = [
     {
-      x: cloneBoundingRect.x - untransformedCornerPointsOffset,
-      y: cloneBoundingRect.y - untransformedCornerPointsOffset
+      x: originalRect.x + cloneBoundingRect.x - untransformedCornerPointsOffset,
+      y: originalRect.y + cloneBoundingRect.y - untransformedCornerPointsOffset
     },
     {
-      x: cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
-      y: cloneBoundingRect.y - untransformedCornerPointsOffset
+      x: originalRect.x + cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
+      y: originalRect.y + cloneBoundingRect.y - untransformedCornerPointsOffset
     },
     {
-      x: cloneBoundingRect.x - untransformedCornerPointsOffset,
-      y: cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
+      x: originalRect.x + cloneBoundingRect.x - untransformedCornerPointsOffset,
+      y: originalRect.y + cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
     },
     {
-      x: cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
-      y: cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
+      x: originalRect.x + cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
+      y: originalRect.y + cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
     }
   ]
   helperElement.replaceChildren();
