@@ -40,6 +40,10 @@ export class FlexBoxPlacementService implements IPlacementService {
     return null;
   }
 
+  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+
+  }
+
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     /*let direction = getComputedStyle(container.element).flexDirection;
     

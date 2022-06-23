@@ -15,7 +15,6 @@ export class PlacementExtension extends AbstractExtension {
   }
 
   override refresh() {
-    console.log('refresh');
     const itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
     const computedStyle = getComputedStyle(this.extendedItem.element);
     const left = Number.parseFloat(computedStyle.marginLeft.replace('px', ''));

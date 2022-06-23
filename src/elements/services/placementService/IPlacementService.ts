@@ -11,6 +11,7 @@ export interface IPlacementService extends IService {
   leaveContainer(container: IDesignItem, items: IDesignItem[])
   getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint
   placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl:IPoint,newPoint: IPoint, items: IDesignItem[]): IPoint;
+  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl:IPoint,newPoint: IPoint, items: IDesignItem[])
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl:IPoint,newPoint: IPoint, items: IDesignItem[])
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[])
 }

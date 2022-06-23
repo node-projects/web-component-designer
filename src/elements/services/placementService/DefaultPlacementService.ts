@@ -87,12 +87,15 @@ export class DefaultPlacementService implements IPlacementService {
     return { x: trackX, y: trackY };
   }
 
-  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    console.log('place()');
-    for (const item of items){
+  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    for (const item of items) {
       (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
       (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.MouseOver);
+      (<DesignerCanvas>placementView).extensionManager.applyExtension(item, ExtensionType.Placement);
     }
+  }
+
+  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
@@ -101,10 +104,6 @@ export class DefaultPlacementService implements IPlacementService {
       const translationMatrix = getTranslationMatrix3d(track.x, track.y, 0);
       combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), matrixArrayToCssMatrix(translationMatrix));
     }
-    for (const item of items){
-      (<DesignerCanvas>placementView).extensionManager.applyExtension(item, ExtensionType.Placement);
-    }
-    
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
@@ -130,10 +129,10 @@ export class DefaultPlacementService implements IPlacementService {
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
       placeDesignItem(container, designItem, track, 'position');
     }
-    console.log('finishPlace()');
-    for (const item of items){
+
+    for (const item of items) {
       (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
     }
-    
+
   }
 }
