@@ -20,6 +20,8 @@ export class DefaultPlacementService implements IPlacementService {
       return false;
     if (container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
       return false;
+    if (!items.every(x => !x.element.contains(container.element)))
+      return false;
     return true;
   }
 
