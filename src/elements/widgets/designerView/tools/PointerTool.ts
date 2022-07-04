@@ -18,6 +18,7 @@ export class PointerTool implements ITool {
   private _initialPoint: IPoint;
   private _actionType?: PointerActionType;
   private _actionStartedDesignItem?: IDesignItem;
+  private _actionStartedDesignItems?: IDesignItem[];
 
   private _previousEventName: EventNames;
 
@@ -90,6 +91,7 @@ export class PointerTool implements ITool {
       this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, currentElement);
       if (event.type == EventNames.PointerDown) {
         this._actionStartedDesignItem = currentDesignItem;
+        this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
         designerCanvas.snapLines.clearSnaplines();
         if (currentDesignItem !== designerCanvas.rootDesignItem) {
           this._actionType = PointerActionType.Drag;
@@ -128,6 +130,7 @@ export class PointerTool implements ITool {
   private _resetTool() {
     this._actionType = null;
     this._actionStartedDesignItem = null;
+    this._actionStartedDesignItems = null;
     this._movedSinceStartedAction = false;
     this._initialPoint = null;
   }
@@ -179,6 +182,9 @@ export class PointerTool implements ITool {
             if (designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
               designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
           }
+
+          this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
+          
           if (designerCanvas.alignOnSnap)
             designerCanvas.snapLines.calculateSnaplines(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
@@ -205,7 +211,7 @@ export class PointerTool implements ITool {
                 designerCanvas.extensionManager.refreshExtension(dragItem, ExtensionType.ContainerDrag);
               }
 
-              const canLeave = currentContainerService.canLeave(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem]);
+              const canLeave = currentContainerService.canLeave(this._actionStartedDesignItem.parent, this._actionStartedDesignItems);
 
               let newContainerElementDesignItem: IDesignItem = null;
               let newContainerService: IPlacementService = null;
@@ -229,7 +235,7 @@ export class PointerTool implements ITool {
                     const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
                     newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
                     if (newContainerService) {
-                      if (newContainerService.canEnter(newContainerElementDesignItem, [this._actionStartedDesignItem])) {
+                      if (newContainerService.canEnter(newContainerElementDesignItem, this._actionStartedDesignItems)) {
                         break;
                       } else {
                         newContainerElementDesignItem = null;
@@ -263,17 +269,18 @@ export class PointerTool implements ITool {
                 const oldOffset = currentContainerService.getElementOffset(this._actionStartedDesignItem.parent, this._actionStartedDesignItem);
                 const newOffset = newContainerService.getElementOffset(newContainerElementDesignItem, this._actionStartedDesignItem);
                 this._moveItemsOffset = { x: newOffset.x - oldOffset.x + this._moveItemsOffset.x, y: newOffset.y - oldOffset.y + this._moveItemsOffset.y };
-                currentContainerService.leaveContainer(this._actionStartedDesignItem.parent, [this._actionStartedDesignItem]);
-                newContainerElementDesignItem._insertChildInternal(this._actionStartedDesignItem);
+                currentContainerService.leaveContainer(this._actionStartedDesignItem.parent, this._actionStartedDesignItems);
+                for (let di of this._actionStartedDesignItems)
+                  newContainerElementDesignItem._insertChildInternal(di); //todo -> maybe in enter container???
 
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
-                newContainerService.enterContainer(newContainerElementDesignItem, [this._actionStartedDesignItem]);
-                newContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+                newContainerService.enterContainer(newContainerElementDesignItem, this._actionStartedDesignItems);
+                newContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
               } else {
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
-                currentContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+                currentContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
               }
-              designerCanvas.extensionManager.refreshExtensions(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+              designerCanvas.extensionManager.refreshExtensions(this._actionStartedDesignItems);
             }
           }
           break;
