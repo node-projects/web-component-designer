@@ -24,17 +24,16 @@ export class GrayOutExtension extends AbstractExtension {
       this.overlayLayerView.addOverlay(this._path, OverlayLayer.Background);
       this.overlays.push(this._path);
     }
-    let itemRect = this.extendedItem.element.getBoundingClientRect();
+    let normalizedRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
 
-    this.drawGrayOut(itemRect);
+    this.drawGrayOut(normalizedRect);
   }
 
-  drawGrayOut(rect: IRect) {
-    let r = { x: rect.x - this.designerCanvas.containerBoundingRect.x, y: rect.y - this.designerCanvas.containerBoundingRect.y, width: rect.width, height: rect.height };
-    const pathPoints = "M0 0 L0 " + this.designerCanvas.containerBoundingRect.height + "L" + r.x + " " + this.designerCanvas.containerBoundingRect.height + "L" + r.x + " 0" + " L0 0" +
-      "M" + r.x + " 0 L" + r.x + " " + r.y + "L" + this.designerCanvas.containerBoundingRect.width + " " + r.y + "L" + this.designerCanvas.containerBoundingRect.width + " 0" + "L" + r.x + " 0" +
-      "M" + r.x + " " + (r.y + r.height) + "L" + r.x + " " + this.designerCanvas.containerBoundingRect.height + "L" + this.designerCanvas.containerBoundingRect.width + " " + this.designerCanvas.containerBoundingRect.height + "L" + this.designerCanvas.containerBoundingRect.width + " " + (r.y + r.height) + "L" + r.x + " " + (r.y + r.height) +
-      "M" + (r.x + r.width) + " " + r.y + "L" + (r.x + r.width) + " " + (r.y + r.height) + "L" + this.designerCanvas.containerBoundingRect.width + " " + (r.y + r.height) + "L" + this.designerCanvas.containerBoundingRect.width + " " + (r.y) + "L" + (r.x + r.width) + " " + r.y;
+  drawGrayOut(r: IRect) {
+    const pathPoints = "M0 0 L0 " + this.designerCanvas.outerRect.height + "L" + r.x + " " + this.designerCanvas.outerRect.height + "L" + r.x + " 0" + " L0 0" +
+      "M" + r.x + " 0 L" + r.x + " " + r.y + "L" + this.designerCanvas.outerRect.width + " " + r.y + "L" + this.designerCanvas.outerRect.width + " 0" + "L" + r.x + " 0" +
+      "M" + r.x + " " + (r.y + r.height) + "L" + r.x + " " + this.designerCanvas.outerRect.height + "L" + this.designerCanvas.outerRect.width + " " + this.designerCanvas.outerRect.height + "L" + this.designerCanvas.outerRect.width + " " + (r.y + r.height) + "L" + r.x + " " + (r.y + r.height) +
+      "M" + (r.x + r.width) + " " + r.y + "L" + (r.x + r.width) + " " + (r.y + r.height) + "L" + this.designerCanvas.outerRect.width + " " + (r.y + r.height) + "L" + this.designerCanvas.outerRect.width + " " + (r.y) + "L" + (r.x + r.width) + " " + r.y;
     this._path.setAttribute("d", pathPoints);
   }
 
