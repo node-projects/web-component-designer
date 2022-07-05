@@ -170,6 +170,8 @@ export * from "./elements/widgets/designerView/extensions/CanvasExtensionProvide
 export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtension.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GridExtension.js";
 export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.js";

@@ -41,6 +41,10 @@ export class GridPlacementService implements IPlacementService {
     return true;
   }
 
+  canEnterByDrop(container: IDesignItem) {
+    return true;
+  }
+
   canLeave(container: IDesignItem, items: IDesignItem[]) {
     return true;
   }
