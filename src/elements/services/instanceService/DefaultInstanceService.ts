@@ -18,12 +18,18 @@ export class DefaultInstanceService implements IInstanceService {
       //@ts-ignore
       if (importShim) {
         //@ts-ignore
-        importShim(importUri).then(() => {
+        importShim(importUri).then((x) => {
+          let ctor = customElements.get(definition.tag)
+          if (!ctor && definition.className && x[definition.className])
+            customElements.define(definition.tag, x[definition.className])
           //TODO: refresh all extensions
         });
       }
       else {
-        import(importUri).then(() => {
+        import(importUri).then((x) => {
+          let ctor = customElements.get(definition.tag)
+          if (!ctor && definition.className && x[definition.className])
+            customElements.define(definition.tag, x[definition.className])
           //TODO: refresh all extensions
         });
       }

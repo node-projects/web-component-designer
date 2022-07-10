@@ -5,6 +5,7 @@ export interface IElementDefinition {
   name?: string;
   description?: string;
   import?: string;
+  className?: string;
   type?: string;
   defaultContent?: any;
   defaultAttributes?: { [key: string]: string; };
