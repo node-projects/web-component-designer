@@ -25,15 +25,21 @@ export class WebcomponentManifestPropertiesService extends UnkownElementProperti
         if (e.kind == 'custom-element-definition') {
           let properties: IProperty[] = [];
           let declaration = m.declarations.find(x => x.name == e.declaration.name);
-          for (let d of declaration.members) {
-            if (d.kind == 'field') {
-              let pType = PropertyType.property;
-              if (declaration.attributes)
-                pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
-              properties.push({ name: d.name, service: this, propertyType: pType, type: this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text) });
+          if (declaration) {
+            if (declaration.members) {
+              for (let d of declaration.members) {
+                if (d.kind == 'field') {
+                  let pType = PropertyType.property;
+                  if (declaration.attributes)
+                    pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
+                  properties.push({ name: d.name, service: this, propertyType: pType, type: this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text) });
+                }
+              }
+              this._propertiesList[e.name] = properties;
             }
+          } else {
+            console.warn('declaration for ' + e.declaration.name + ' not found', manifest);
           }
-          this._propertiesList[e.name] = properties;
         }
       }
     }

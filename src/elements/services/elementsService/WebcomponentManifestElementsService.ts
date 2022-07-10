@@ -22,7 +22,7 @@ export class WebcomponentManifestElementsService implements IElementsService {
     for (let m of manifest.modules) {
       for (let e of m.exports) {
         if (e.kind == 'custom-element-definition') {
-          this._elementList.push({ tag: e.name, import: this._importPrefix + '/' + e.declaration.module });
+          this._elementList.push({ tag: e.name, import: this._importPrefix + '/' + e.declaration.module, defaultWidth: "200px", defaultHeight: "200px" });
         }
       }
       if (this._resolveStored) {
