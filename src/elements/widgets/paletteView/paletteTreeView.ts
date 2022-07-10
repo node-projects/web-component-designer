@@ -75,8 +75,9 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable')
- 
+
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
+      debugLevel: 0,
       icon: true, //atm, maybe if we include icons for specific elements
       extensions: ['childcounter', 'dnd5', 'filter'],
       quicksearch: true,

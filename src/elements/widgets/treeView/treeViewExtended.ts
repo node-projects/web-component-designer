@@ -180,6 +180,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   async ready() {
     //this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
+      debugLevel: 0,
       icon: true, //atm, maybe if we include icons for specific elements
       extensions: ['childcounter', 'dnd5', 'multi', 'filter', 'table'],
       quicksearch: true,

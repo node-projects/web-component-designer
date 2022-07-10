@@ -20,11 +20,16 @@ export class WebcomponentManifestPropertiesService extends UnkownElementProperti
 
   private _parseManifest(manifest) {
     this._propertiesList = {};
+    let declarations = [];
+    for (let m of manifest.modules) {
+      if (m.declarations)
+        declarations.push(...m.declarations);
+    }
     for (let m of manifest.modules) {
       for (let e of m.exports) {
         if (e.kind == 'custom-element-definition') {
           let properties: IProperty[] = [];
-          let declaration = m.declarations.find(x => x.name == e.declaration.name);
+          let declaration = declarations.find(x => x.name == e.declaration.name);
           if (declaration) {
             if (declaration.members) {
               for (let d of declaration.members) {
