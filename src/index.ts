@@ -51,6 +51,8 @@ export type { IDemoProviderService } from "./elements/services/demoProviderServi
 export * from "./elements/services/dragDropService/DragDropService.js";
 export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";
 
+export type { IElementInteractionService } from "./elements/services/elementInteractionService/IElementInteractionService.js";
+
 export type { IElementDefinition } from "./elements/services/elementsService/IElementDefinition.js";
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";

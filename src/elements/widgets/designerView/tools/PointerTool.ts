@@ -56,6 +56,13 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    const interactionServices = designerCanvas.serviceContainer.elementInteractionServices;
+    if (interactionServices)
+      for (let s of interactionServices) {
+        if (s.stopEventHandling(designerCanvas, event, currentElement))
+          return;
+      }
+
     if (event.button == 2) {
       this._showContextMenu(event, designerCanvas)
       return;
@@ -184,7 +191,7 @@ export class PointerTool implements ITool {
           }
 
           this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
-          
+
           if (designerCanvas.alignOnSnap)
             designerCanvas.snapLines.calculateSnaplines(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
@@ -217,34 +224,7 @@ export class PointerTool implements ITool {
               let newContainerService: IPlacementService = null;
 
               if (canLeave) {
-                const elementsFromPoint = designerCanvas.elementsFromPoint(event.x, event.y);
-                for (let e of elementsFromPoint) {
-                  if (e == this._actionStartedDesignItem.element) {
-                    continue;
-                  } else if (e == this._actionStartedDesignItem.parent.element) {
-                    break;
-                  } else if (e == designerCanvas.rootDesignItem.element) {
-                    newContainerElementDesignItem = designerCanvas.rootDesignItem;
-                    const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-                    newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
-                    break;
-                  } else if (false) {
-                    //check we don't try to move a item over one of its children..
-                  } else {
-                    newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-                    const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-                    newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
-                    if (newContainerService) {
-                      if (newContainerService.canEnter(newContainerElementDesignItem, this._actionStartedDesignItems)) {
-                        break;
-                      } else {
-                        newContainerElementDesignItem = null;
-                        newContainerService = null;
-                        continue;
-                      }
-                    }
-                  }
-                }
+                [newContainerElementDesignItem, newContainerService] = PointerTool.FindPossibleContainer(this._actionStartedDesignItem, this._actionStartedDesignItems, event);
 
                 //if we found a new enterable container create extensions 
                 if (newContainerElementDesignItem != null) {
@@ -316,6 +296,42 @@ export class PointerTool implements ITool {
           break;
         }
     }
+  }
+
+  static FindPossibleContainer(designItem: IDesignItem, designItems: IDesignItem[], event: IPoint): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService] {
+    let newContainerElementDesignItem: IDesignItem = null;
+    let newContainerService: IPlacementService = null;
+
+    const designerCanvas = designItem.instanceServiceContainer.designerCanvas;
+    const elementsFromPoint = designerCanvas.elementsFromPoint(event.x, event.y);
+    for (let e of elementsFromPoint) {
+      if (e == designItem.element) {
+        continue;
+      } else if (e == designItem.parent.element) {
+        break;
+      } else if (e == designerCanvas.rootDesignItem.element) {
+        newContainerElementDesignItem = designerCanvas.rootDesignItem;
+        const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+        newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+        break;
+      } else if (false) {
+        //check we don't try to move a item over one of its children..
+      } else {
+        newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+        const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+        newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+        if (newContainerService) {
+          if (newContainerService.canEnter(newContainerElementDesignItem, designItems)) {
+            break;
+          } else {
+            newContainerElementDesignItem = null;
+            newContainerService = null;
+            continue;
+          }
+        }
+      }
+    }
+    return [newContainerElementDesignItem, newContainerService];
   }
 
   keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }

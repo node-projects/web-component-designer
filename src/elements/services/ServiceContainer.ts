@@ -29,6 +29,7 @@ import { IDemoProviderService } from "./demoProviderService/IDemoProviderService
 import { IBindableObjectsService } from "./bindableObjectsService/IBindableObjectsService.js";
 import { IBindableObjectDragDropService } from "./bindableObjectsService/IBindableObjectDragDropService.js";
 import { IDesignViewToolbarButtonProvider } from "../widgets/designerView/tools/toolBar/IDesignViewToolbarButtonProvider.js";
+import { IElementInteractionService } from './elementInteractionService/IElementInteractionService';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -48,6 +49,7 @@ interface ServiceNameMap {
   "copyPasteService": ICopyPasteService;
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
+  "elementInteractionService": IElementInteractionService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -93,6 +95,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get bindableObjectDragDropService(): IBindableObjectDragDropService {
     return this.getLastService('bindableObjectDragDropService');
+  }
+
+  get elementInteractionServices(): IElementInteractionService[] {
+    return this.getServices('elementInteractionService');
   }
 
   get propertiesServices(): IPropertiesService[] {
