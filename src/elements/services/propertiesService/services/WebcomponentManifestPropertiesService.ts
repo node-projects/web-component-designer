@@ -33,7 +33,7 @@ export class WebcomponentManifestPropertiesService extends UnkownElementProperti
           if (declaration) {
             if (declaration.members) {
               for (let d of declaration.members) {
-                if (d.kind == 'field') {
+                if (d.kind == 'field' && d.privacy !== 'private' && d.privacy !== 'protected') {
                   let pType = PropertyType.property;
                   if (declaration.attributes)
                     pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
