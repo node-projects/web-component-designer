@@ -78,6 +78,12 @@ export abstract class UnkownElementPropertiesService implements IPropertiesServi
         all = all && has;
         some = some || has;
       });
+      //todo: optimize perf, do not call bindings service for each property. 
+      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.getBindings(designItems[0]);
+      });
+      if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name))
+        return ValueType.bound;
     }
     else
       return ValueType.none
