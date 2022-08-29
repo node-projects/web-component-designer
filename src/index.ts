@@ -18,6 +18,9 @@ export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmen
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
+export type { IBinding } from "./elements/item/IBinding.js";
+export type { BindingMode } from "./elements/item/BindingMode.js";
+export type { BindingTarget } from "./elements/item/BindingTarget.js";
 
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
