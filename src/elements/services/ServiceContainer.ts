@@ -30,6 +30,10 @@ import { IBindableObjectsService } from "./bindableObjectsService/IBindableObjec
 import { IBindableObjectDragDropService } from "./bindableObjectsService/IBindableObjectDragDropService.js";
 import { IDesignViewToolbarButtonProvider } from "../widgets/designerView/tools/toolBar/IDesignViewToolbarButtonProvider.js";
 import { IElementInteractionService } from './elementInteractionService/IElementInteractionService';
+import { IProperty } from "./propertiesService/IProperty.js";
+import { IDesignItem } from "../item/IDesignItem.js";
+import { IBinding } from "../item/IBinding";
+import { BindingTarget } from "../item/BindingTarget";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -57,6 +61,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   readonly config: {
     codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
     demoViewWidget: new (...args: any[]) => IDemoView & HTMLElement;
+    openBindingsEditor?: (property:IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
   } = {
       codeViewWidget: CodeViewMonaco,
       demoViewWidget: DemoView
