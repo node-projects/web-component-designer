@@ -4,6 +4,7 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
 import { PropertiesHelper } from './PropertiesHelper';
 import { BindingTarget } from "../../../item/BindingTarget";
+import { IBinding } from "../../../item/IBinding";
 
 //@ts-ignore
 export abstract class UnkownElementPropertiesService implements IPropertiesService {
@@ -78,7 +79,7 @@ export abstract class UnkownElementPropertiesService implements IPropertiesServi
         all = all && has;
         some = some || has;
       });
-      //todo: optimize perf, do not call bindings service for each property. 
+      //TODO: optimize perf, do not call bindings service for each property. 
       const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.getBindings(designItems[0]);
       });
@@ -89,6 +90,14 @@ export abstract class UnkownElementPropertiesService implements IPropertiesServi
       return ValueType.none
 
     return all ? ValueType.all : some ? ValueType.some : ValueType.none;
+  }
+
+  getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
+    //TODO: optimize perf, do not call bindings service for each property. 
+    const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+      return s.getBindings(designItems[0]);
+    });
+    return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
   }
 
   getValue(designItems: IDesignItem[], property: IProperty) {
