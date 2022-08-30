@@ -47,6 +47,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
     this.shadowRoot.appendChild(this._treeDiv);
   
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
+      debugLevel: 0,
       icon: false,
       extensions: ['dnd5'],
       quicksearch: true,

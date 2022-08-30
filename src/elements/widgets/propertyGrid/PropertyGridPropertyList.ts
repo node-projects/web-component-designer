@@ -6,6 +6,7 @@ import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IDesignItem } from '../../item/IDesignItem';
 import { IPropertiesService } from '../../services/propertiesService/IPropertiesService';
 import { ValueType } from '../../services/propertiesService/ValueType';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextmenuItem';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -127,11 +128,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             rect.style.border = '1px white solid';
             rectContainer.appendChild(rect);
             this._div.appendChild(rectContainer);
-
-            ContextMenuHelper.addContextMenu(rectContainer, [
-              { title: 'clear', action: (e) => p.service.clearValue(this._designItems, p) },
-              { title: 'new binding', action: (e) => alert('new binding() ' + p.name) }
-            ]);
+            rect.oncontextmenu = (event) => {
+              event.preventDefault();
+              this.openContextMenu(event, p);
+            }
 
             let label = document.createElement("label");
             label.htmlFor = p.name;
@@ -149,6 +149,23 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
   }
 
+  public openContextMenu(event: MouseEvent, property: IProperty) {
+    const ctxMenu: IContextMenuItem[] = [
+      { title: 'clear', action: (e) => property.service.clearValue(this._designItems, property) },
+    ];
+    if (this._serviceContainer.config.openBindingsEditor) {
+      ctxMenu.push(...[
+        { title: '-' },
+        { title: 'edit binding', action: () =>  {
+          let target = this._propertiesService.getPropertyTarget(this._designItems[0], property);
+          let binding = this._propertiesService.getBinding(this._designItems, property);
+          this._serviceContainer.config.openBindingsEditor(property, this._designItems, binding, target);
+         } }
+      ]);
+    };
+    ContextMenuHelper.showContextMenu(null, event, null, ctxMenu);
+  }
+
   public designItemsChanged(designItems: IDesignItem[]) {
     this._designItems = designItems;
     for (let m of this._propertyMap) {
@@ -160,6 +177,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     for (let m of this._propertyMap) {
       let s = this._propertiesService.isSet(items, m[0]);
       let v = this._propertiesService.getValue(items, m[0]);
+      m[1].isSetElement.title = s;
       if (s == ValueType.none) {
         m[1].isSetElement.style.background = '';
         v = this._propertiesService.getUnsetValue(items, m[0]);

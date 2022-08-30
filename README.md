@@ -1,20 +1,15 @@
 # web-component-designer
 
-## Caution - this is a preview Version, a RC1 is now planed for May 2022 - it's already usable but big Refactoring could still happen
+==This is a preview version. It's already usable but big refactorings could still happen.==
 
-
-A HTML WebComponent for Designing Webcomponents and HTML Pages.
-
-Based on PolymerLabs Wizzywid (but it does not use Polymer any more.)
-
-This is a Designer Framework wich could easily be included in your own Software..
+A HTML web component for designing web components and HTML pages based on PolymerLabs wizzywid which can easily be integrated in your own software.
+Meanwhile polymer is not used anymore.
 
 ![image](https://user-images.githubusercontent.com/364896/117482820-358e2d80-af65-11eb-97fd-9d15ebf1966f.png)
 
 ## NPM Package
 
-At the moment there is no NPM Package.
-But there will be one when project is in Release Candidate state.
+At the moment there is no npm package available, but there will be one as soon as the software has reached RC status.
 
 ## Demo
 
@@ -35,9 +30,7 @@ repository: https://github.com/node-projects/web-component-designer-simple-demo
 
 ## Features we are workin on
 
- - CSS Grid Positioning (planed)
- - look at the issues
- - Much, much more ...
+https://github.com/node-projects/web-component-designer/issues
 
 ## Developing
 
@@ -46,38 +39,39 @@ repository: https://github.com/node-projects/web-component-designer-simple-demo
   $ npm install
 ```
 
-  * Compile Typescript after doing changes
+  * Compile typescript after doing changes
 ```
-  $ npm run build
+  $ npm run build (if you use Visual Studio Code, you can also run the build task via Ctrl + Shift + B > tsc:build - tsconfig.json)
+```
+
+  * *Link node module*<br/>
+```
+  $ npm link 
 ```
 
 ## Using
 
-at first you have to setup a service container, providing services for History, Properties, Elements, ....
-
-## Configuring
-
-## For some Widgets the Designer needs Additional Dependencies
+At first you have to setup a service container providing services for history, properties, elements, ...
 
 ## Code Editor
 
-You can select to use on of 3 Code Editors Available (ACE, CodeMirrow, Monaco).
-If you use one of the Widgets, you need to include the JS lib in you index.html and then use the specific widget.
+You can select to use one of 3 code editors available (ACE, CodeMirrow, Monaco).
+If you use one of the widgets, you need to include the JS lib in your index.html and then use the specific widget.
 
 ## TreeView
 
-We have 2 Tree Components. One Dependend Less and one Feature Rich wich uses FancyTree (and cause of this it needs JQuery and JqueryUI)
+We have 2 tree components. One independent and one feature rich which uses FancyTree (and cause of this it needs JQuery and JqueryUI).
 
 ## DragDrop
 
-If you'd like to use the Designer on Mobile, you need the mobile-drag-drop npm Library and include our polyfill.
-Your addition to your index.html should look like this:
+If you'd like to use the designer on mobile, you need the mobile-drag-drop npm library and include our polyfill.
+Your index.html should be extended as follows:
 
     <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
     <script src="/node_modules/@node-projects/web-component-designer/dist/polyfill/mobileDragDrop.js"></script>
 
-## Copyright notice:
+## Copyright notice
 
 The Library uses Images from the Chrome Dev Tools, see
 https://github.com/ChromeDevTools/devtools-frontend/tree/main/front_end/Images/src

@@ -5,6 +5,7 @@ import { IPoint } from "../../../interfaces/IPoint";
 
 export interface IPlacementService extends IService {
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration)
+  canEnterByDrop(container: IDesignItem)
   canEnter(container: IDesignItem, items: IDesignItem[])
   canLeave(container: IDesignItem, items: IDesignItem[])
   enterContainer(container: IDesignItem, items: IDesignItem[])

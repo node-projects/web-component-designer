@@ -18,6 +18,9 @@ export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmen
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
+export type { IBinding } from "./elements/item/IBinding.js";
+export * from "./elements/item/BindingMode.js";
+export * from "./elements/item/BindingTarget.js";
 
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
@@ -51,11 +54,14 @@ export type { IDemoProviderService } from "./elements/services/demoProviderServi
 export * from "./elements/services/dragDropService/DragDropService.js";
 export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";
 
+export type { IElementInteractionService } from "./elements/services/elementInteractionService/IElementInteractionService.js";
+
 export type { IElementDefinition } from "./elements/services/elementsService/IElementDefinition.js";
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
 export * from "./elements/services/elementsService/JsonFileElementsService.js";
 export * from "./elements/services/elementsService/PreDefinedElementsService.js";
+export * from "./elements/services/elementsService/WebcomponentManifestElementsService.js";
 
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
@@ -91,6 +97,7 @@ export * from "./elements/services/propertiesService/services/LitElementProperti
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
+export * from "./elements/services/propertiesService/services/WebcomponentManifestPropertiesService.js";
 export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
 
@@ -170,6 +177,8 @@ export * from "./elements/widgets/designerView/extensions/CanvasExtensionProvide
 export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtension.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GridExtension.js";
 export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.js";

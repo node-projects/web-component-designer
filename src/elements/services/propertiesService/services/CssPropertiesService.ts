@@ -5,6 +5,7 @@ import { ValueType } from '../ValueType';
 import { NodeType } from '../../../item/NodeType';
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType';
+import { IBinding } from '../../../item/IBinding';
 
 export class CssPropertiesService implements IPropertiesService {
 
@@ -330,6 +331,14 @@ export class CssPropertiesService implements IPropertiesService {
       return lastValue;
     }
     return null;
+  }
+
+  getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
+    //TODO: optimize perf, do not call bindings service for each property. 
+    const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+      return s.getBindings(designItems[0]);
+    });
+    return bindings.find(x => (x.target == BindingTarget.css) && x.targetName == property.name);
   }
 
   //todo: optimize perf, call window.getComputedStyle only once per item, and not per property

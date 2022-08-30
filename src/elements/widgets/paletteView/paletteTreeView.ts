@@ -54,7 +54,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   static override readonly template = html`
   <div style="height: 100%;">
     <input id="input" style="width: 100%; height:21px;" placeholder="Filter..." autocomplete="off">
-    <div style="height: calc(100% - 23px); overflow: auto;">
+    <div style="height: calc(100% - 26px); overflow: auto;">
       <div id="treetable" style="min-width: 100%;"></div>
     </div>
   </div>`;
@@ -75,8 +75,9 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable')
- 
+
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
+      debugLevel: 0,
       icon: true, //atm, maybe if we include icons for specific elements
       extensions: ['childcounter', 'dnd5', 'filter'],
       quicksearch: true,

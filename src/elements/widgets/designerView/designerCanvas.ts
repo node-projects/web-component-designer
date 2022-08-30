@@ -34,6 +34,7 @@ import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesig
 import { IRect } from "../../../interfaces/IRect.js";
 import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
+import { IPlacementService } from "../../services/placementService/IPlacementService.js";
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -484,6 +485,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.snapLines.clearSnaplines();
   }
 
+  _dragOverExtensionItem: IDesignItem;
   private _onDragEnter(event: DragEvent) {
     this._fillCalculationrects();
     event.preventDefault();
@@ -509,6 +511,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         event.dataTransfer.dropEffect = effect;
       }
     }
+
+    if (this._dragOverExtensionItem) {
+      this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
+      this._dragOverExtensionItem = null;
+    }
   }
 
   private _onDragOver(event: DragEvent) {
@@ -531,16 +538,55 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         if (effect !== 'none')
           this._canvas.classList.add('dragFileActive');
       }
-    }
+    } else {
+      const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
+      if (hasTransferDataBindingObject) {
+        const ddService = this.serviceContainer.bindableObjectDragDropService;
+        if (ddService) {
+          const effect = ddService.dragOver(this, event);
+          event.dataTransfer.dropEffect = effect;
+        }
+      } else {
+        let [newContainer] = this._getPossibleContainerForDrop(event);
 
-    const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
-    if (hasTransferDataBindingObject) {
-      const ddService = this.serviceContainer.bindableObjectDragDropService;
-      if (ddService) {
-        const effect = ddService.dragOver(this, event);
-        event.dataTransfer.dropEffect = effect;
+        if (this._dragOverExtensionItem != newContainer) {
+          this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
+          this.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver);
+          this._dragOverExtensionItem = newContainer;
+        }
       }
     }
+  }
+
+  private _getPossibleContainerForDrop(event: DragEvent): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService] {
+    let newContainerElementDesignItem: IDesignItem = null;
+    let newContainerService: IPlacementService = null;
+
+    const elementsFromPoint = this.elementsFromPoint(event.x, event.y);
+    for (let e of elementsFromPoint) {
+      if (e == this.rootDesignItem.element) {
+        newContainerElementDesignItem = this.rootDesignItem;
+        const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+        newContainerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+        break;
+      } else if (false) {
+        //check we don't try to move a item over one of its children..
+      } else {
+        newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer);
+        const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
+        newContainerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+        if (newContainerService) {
+          if (newContainerService.canEnterByDrop(newContainerElementDesignItem)) {
+            break;
+          } else {
+            newContainerElementDesignItem = null;
+            newContainerService = null;
+            continue;
+          }
+        }
+      }
+    }
+    return [newContainerElementDesignItem, newContainerService];
   }
 
   private async _onDrop(event: DragEvent) {
@@ -566,17 +612,26 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         }
       }
       else {
+        if (this._dragOverExtensionItem) {
+          this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
+          this._dragOverExtensionItem = null;
+        }
+
+        let [newContainer] = this._getPossibleContainerForDrop(event);
+        let pos = this.getNormalizedElementCoordinates(newContainer.element);
+
         this._fillCalculationrects();
         const position = this.getNormalizedEventCoordinates(event);
 
+        //TODO : we need to use container service for adding to element, so also grid and flexbox work correct
         const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
         const elementDefinition = <IElementDefinition>JSON.parse(transferData);
         const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
         const grp = di.openGroup("Insert");
         di.setStyle('position', 'absolute');
-        di.setStyle('left', position.x + 'px');
-        di.setStyle('top', position.y + 'px');
-        this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
+        di.setStyle('left', (position.x - pos.x) + 'px');
+        di.setStyle('top', (position.y - pos.y) + 'px');
+        this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
         grp.commit();
         requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
       }
