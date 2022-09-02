@@ -14,7 +14,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   private _moreContainer: HTMLDivElement;
   private _elementMap = new WeakMap<HTMLElement, HTMLDivElement>();
   private _firstConnect = true;
-  
+
   static override readonly style = css`
         :host {
             height: 100%;
@@ -150,8 +150,13 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
     let w = 0;
     DomHelper.removeAllChildnodes(this._moreContainer);
     DomHelper.removeAllChildnodes(this._headerDiv);
+    let reloadOnce = true;
     for (let item of this.children) {
       let htmlItem = item as HTMLElement;
+      if (!this._elementMap.has(htmlItem) && reloadOnce) {
+        this.refreshItems();
+        reloadOnce = false;
+      }
       const tabHeaderDiv = this._elementMap.get(htmlItem);
       this._moreContainer.appendChild(tabHeaderDiv);
       if (this._headerDiv.children.length == 0 || (w + (tabHeaderDiv.clientWidth / 2)) < this._headerDiv.clientWidth) {
