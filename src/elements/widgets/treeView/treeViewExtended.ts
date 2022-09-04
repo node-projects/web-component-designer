@@ -107,7 +107,12 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._restoreCachedInititalValues();
 
     //@ts-ignore
-    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    if (importShim)
+      //@ts-ignore
+      importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    else
+      //@ts-ignore
+      import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {

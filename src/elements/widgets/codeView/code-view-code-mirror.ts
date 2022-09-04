@@ -31,7 +31,12 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
     super();
 
     //@ts-ignore
-    import("./codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    if (importShim)
+      //@ts-ignore
+      importShim("./codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    else
+      //@ts-ignore
+      import("./codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this.style.display = 'block';
     this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');
