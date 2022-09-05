@@ -16,7 +16,7 @@ export class DefaultInstanceService implements IInstanceService {
       if (importUri[0] === '.')
         importUri = (window.location.origin + window.location.pathname).split('/').slice(0, -1).join('/') + '/' + importUri;
       //@ts-ignore
-      if (importShim) {
+      if (window.importShim) {
         //@ts-ignore
         importShim(importUri).then((x) => {
           let ctor = customElements.get(definition.tag)
