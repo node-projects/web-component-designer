@@ -64,7 +64,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     this._restoreCachedInititalValues();
 
     //@ts-ignore
-    if (importShim)
+    if (window.importShim)
       //@ts-ignore
       importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
     else

@@ -31,7 +31,7 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
     super();
 
     //@ts-ignore
-    if (importShim)
+    if (window.importShim)
       //@ts-ignore
       importShim("./codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
     else
