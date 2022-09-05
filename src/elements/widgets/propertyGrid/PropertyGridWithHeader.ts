@@ -89,6 +89,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         let di = DesignItem.GetOrCreateDesignItem(t, this._instanceServiceContainer.selectionService.primarySelection.serviceContainer, this._instanceServiceContainer)
         this._instanceServiceContainer.selectionService.primarySelection.insertAdjacentElement(di, 'afterbegin');
         grp.commit();
+        this._content.title = this._content.value;
       } else if (e.key == 'Escape') {
         this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
         e.preventDefault();
@@ -118,7 +119,11 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
       this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
       this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
-      this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+      if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
+        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+      else
+        this._content.value = ''
+      this._content.title = this._content.value;
     });
   }
 }

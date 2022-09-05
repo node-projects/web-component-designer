@@ -72,7 +72,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     let style: { default: CSSStyleSheet };
 
     //@ts-ignore
-    if (importShim)
+    if (window.importShim)
       //@ts-ignore
       style = await importShim("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } })
     else
