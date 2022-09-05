@@ -14,11 +14,11 @@ export class InsertAction implements ITransactionItem {
   title?: string;
 
   get affectedItems() {
-    return [this.designItem];
+    return [this.designItem, this.newItem];
   }
 
   undo() {
-    (<Element><unknown>this.newItem.element).remove();
+    this.newItem.parent._removeChildInternal(this.newItem);
     this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'removed', designItems: [this.newItem] });
   }
 

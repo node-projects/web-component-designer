@@ -30,7 +30,7 @@ export class DeleteAction implements ITransactionItem {
       this._parentIndexes.push(DomHelper.nodeIndex(this.deletedItems[n].element));
     }
     for (let n = 0; n < this.deletedItems.length; n++) {
-      this.deletedItems[n].remove();
+      this.deletedItems[n].parent._removeChildInternal(this.deletedItems[n]);
     }
     this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'removed', designItems: this.deletedItems});
   }

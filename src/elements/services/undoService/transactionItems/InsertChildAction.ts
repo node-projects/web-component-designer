@@ -4,7 +4,7 @@ import { IDesignItem } from '../../../item/IDesignItem';
 export class InsertChildAction implements ITransactionItem {
 
   constructor(designItem: IDesignItem, newParent: IDesignItem, newIndex: number) {
-    this.title = "Move Item";
+    this.title = "Move or Insert Item";
 
     this.designItem = designItem;
     this.newParent = newParent;
@@ -14,17 +14,23 @@ export class InsertChildAction implements ITransactionItem {
   title?: string;
 
   get affectedItems() {
-    return [this.designItem, this.newParent, this.oldParent];
+    if (this.oldParent)
+      return [this.designItem, this.newParent, this.oldParent];
+    return [this.designItem, this.newParent];
   }
 
   undo() {
-    this.oldParent._insertChildInternal(this.designItem, this.newIndex);
+    if (this.oldParent)
+      this.oldParent._insertChildInternal(this.designItem, this.oldIndex);
+    else
+      this.designItem.parent._removeChildInternal(this.designItem);
     this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'moved', designItems: [this.designItem] });
   }
 
   do() {
     this.oldParent = this.designItem.parent;
-    this.oldIndex = this.designItem.parent.indexOf(this.designItem);
+    if (this.oldParent)
+      this.oldIndex = this.designItem.parent.indexOf(this.designItem);
     this.newParent._insertChildInternal(this.designItem, this.newIndex);
     this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'moved', designItems: [this.designItem] });
   }

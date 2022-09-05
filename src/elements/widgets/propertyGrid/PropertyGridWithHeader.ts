@@ -4,6 +4,7 @@ import { PropertyGrid } from './PropertyGrid';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { sleep } from '../../helper/Helper.js';
+import { DesignItem } from '../../item/DesignItem';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
@@ -50,21 +51,25 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   <div>
     <span class="desc">Type:</span><span id="type"></span>
     <span class="desc">Id:</span><input type="text" id="id">
+    <span class="desc">Content:</span><input type="text" id="content">
   </div>
   <node-projects-property-grid id="pg"></node-projects-property-grid>
   `
   private _type: HTMLSpanElement;
   private _id: HTMLInputElement;
+  private _content: HTMLInputElement;
   private _pg: PropertyGrid;
   private _selectionChangedHandler: Disposable;
   private _instanceServiceContainer: InstanceServiceContainer;
 
+
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    
+
     this._type = this._getDomElement<HTMLSpanElement>('type');
     this._id = this._getDomElement<HTMLInputElement>('id');
+    this._content = this._getDomElement<HTMLInputElement>('content');
     this._pg = this._getDomElement<PropertyGrid>('pg');
 
     this._id.onkeydown = e => {
@@ -76,6 +81,21 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         e.stopPropagation();
       }
     }
+    this._content.onkeydown = e => {
+      if (e.key == 'Enter') {
+        const grp = this._instanceServiceContainer.selectionService.primarySelection.openGroup('set content');
+        this._instanceServiceContainer.selectionService.primarySelection.clearChildren();
+        let t = document.createTextNode(this._content.value);
+        let di = DesignItem.GetOrCreateDesignItem(t, this._instanceServiceContainer.selectionService.primarySelection.serviceContainer, this._instanceServiceContainer)
+        this._instanceServiceContainer.selectionService.primarySelection.insertAdjacentElement(di, 'afterbegin');
+        grp.commit();
+      } else if (e.key == 'Escape') {
+        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+
     let pSel: IDesignItem
     this._id.onfocus = e => {
       pSel = this._instanceServiceContainer.selectionService.primarySelection;
@@ -98,7 +118,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
       this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
       this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
-
+      this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
     });
   }
 }
