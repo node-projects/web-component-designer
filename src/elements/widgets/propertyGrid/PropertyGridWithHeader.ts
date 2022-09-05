@@ -118,7 +118,10 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
       this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
       this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
-      this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+      if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
+        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+      else
+        this._content.value = ''
     });
   }
 }
