@@ -286,7 +286,7 @@ export class PointerTool implements ITool {
             const cp = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
 
             if (containerService) {
-              let cg = designerCanvas.rootDesignItem.openGroup("Move Elements", designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+              let cg = designerCanvas.rootDesignItem.openGroup("Move Elements");
               containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
               cg.commit();
             }

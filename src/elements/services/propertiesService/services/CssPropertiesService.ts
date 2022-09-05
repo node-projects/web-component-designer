@@ -274,7 +274,7 @@ export class CssPropertiesService implements IPropertiesService {
   }
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-    const cg = designItems[0].openGroup("properties changed", designItems);
+    const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       d.styles.set(property.name, value);
       (<HTMLElement>d.element).style[property.name] = value;

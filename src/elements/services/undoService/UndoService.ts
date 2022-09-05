@@ -1,7 +1,6 @@
 import { ITransactionItem } from './ITransactionItem.js';
 import { ChangeGroup } from "./ChangeGroup.js";
 import { IUndoService } from './IUndoService.js';
-import { IDesignItem } from '../../item/IDesignItem';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 /*
@@ -17,8 +16,8 @@ export class UndoService implements IUndoService {
     this._designerCanvas = designerCanvas;
   }
 
-  openGroup(title: string, affectedItems: IDesignItem[]): ChangeGroup {
-    let t = new ChangeGroup(title, affectedItems, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t));
+  openGroup(title: string): ChangeGroup {
+    let t = new ChangeGroup(title, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t));
     this._transactionStack.push(t);
     return t;
   }

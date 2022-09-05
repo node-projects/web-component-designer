@@ -93,10 +93,12 @@ export class RotateExtension extends AbstractExtension {
         this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         break;
       case EventNames.PointerUp:
+        let cg = this.extendedItem.openGroup("Rotate Elements", this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         (<Element>event.target).releasePointerCapture(event.pointerId);
 
         this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
 
+        cg.commit();
         this._initialPoint = null;
         break;
     }

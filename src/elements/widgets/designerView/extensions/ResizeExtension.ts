@@ -166,7 +166,7 @@ export class ResizeExtension extends AbstractExtension {
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
         
-        let cg = this.extendedItem.openGroup("Resize Elements", this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+        let cg = this.extendedItem.openGroup("Resize Elements");
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
         if (this.resizeAllSelected) {

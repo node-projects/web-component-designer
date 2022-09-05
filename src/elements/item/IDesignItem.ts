@@ -54,7 +54,7 @@ export interface IDesignItem {
 
   getOrCreateDesignItem(node: Node);
 
-  openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup
+  openGroup(title: string): ChangeGroup
 
   setStyle(name: string, value?: string | null);
   removeStyle(name: string);
