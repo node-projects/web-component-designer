@@ -89,6 +89,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         let di = DesignItem.GetOrCreateDesignItem(t, this._instanceServiceContainer.selectionService.primarySelection.serviceContainer, this._instanceServiceContainer)
         this._instanceServiceContainer.selectionService.primarySelection.insertAdjacentElement(di, 'afterbegin');
         grp.commit();
+        this._content.title = this._content.value;
       } else if (e.key == 'Escape') {
         this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
         e.preventDefault();
@@ -122,6 +123,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
       else
         this._content.value = ''
+      this._content.title = this._content.value;
     });
   }
 }
