@@ -69,8 +69,16 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   async ready() {
+    let style: { default: CSSStyleSheet };
+
     //@ts-ignore
-    const style = await import("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } })
+    if (importShim)
+      //@ts-ignore
+      style = await importShim("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } })
+    else
+      //@ts-ignore
+      style = await import("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } })
+
     this.shadowRoot.adoptedStyleSheets = [style.default, this.constructor.style];
 
     this._editor = this._getDomElement<HTMLDivElement>('container')
