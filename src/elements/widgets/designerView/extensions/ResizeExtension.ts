@@ -171,6 +171,13 @@ export class ResizeExtension extends AbstractExtension {
                 }
               }
               break;
+            case 'sw-resize':
+              (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+              if (transformedTrack.x < this._initialSizes[i].width - 8) {
+                (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[i].width - transformedTrack.x + 'px';
+                (<HTMLElement>this.extendedItem.element).style.left = this._initialOffsetLeft + transformedTrack.x + 'px';
+              }
+              break;
             case 'w-resize':
               if (transformedTrack.x < this._initialSizes[i].width - 8) {
                 (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[i].width - transformedTrack.x + 'px';
