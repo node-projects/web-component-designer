@@ -2,7 +2,7 @@ import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { IPoint3D } from "../../../../interfaces/IPoint3d";
 import { ISize } from "../../../../interfaces/ISize";
-import { convertCoordinates, getDomMatrix, getTransformedCornerPoints} from "../../../helper/TransformHelper.js";
+import { convertCoordinates, cssMatrixToMatrixArray, getDomMatrix, getRotationAngleFromMatrix, getTransformedCornerPoints} from "../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
@@ -26,6 +26,7 @@ export class ResizeExtension extends AbstractExtension {
   private _circle8: SVGCircleElement;
   private _initialOffsetTop: number;
   private _initialOffsetLeft: number;
+  private _initialRect: DOMRect;
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
     super(extensionManager, designerCanvas, extendedItem);
@@ -91,12 +92,14 @@ export class ResizeExtension extends AbstractExtension {
         this._offsetPoint = { x: cx - currentPoint.x, y: cy - currentPoint.y };
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._initialPoint = currentPoint;
+        console.log("PointerDown > initialPoint: " + this._initialPoint);
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
         this._initialOffsetTop = (<HTMLElement>this.extendedItem.element).offsetTop;
         this._initialOffsetLeft = (<HTMLElement>this.extendedItem.element).offsetLeft;
 
         let rect = this.extendedItem.element.getBoundingClientRect();
+        this._initialRect = rect;
         this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -109,24 +112,46 @@ export class ResizeExtension extends AbstractExtension {
         break;
 
       case EventNames.PointerMove:
-        if (this._initialPoint) {
+        console.log("PointerMove > initialPoint: " + this._initialPoint);
+      if (this._initialPoint) {
+
+
           const containerStyle = getComputedStyle(this.extendedItem.parent.element);
           const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
           const diff = containerService.placePoint(event, <IPlacementView><any>this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-
-          let trackX = diff.x - this._initialPoint.x - this._offsetPoint.x;
-          let trackY = diff.y - this._initialPoint.y - this._offsetPoint.y;
-
+          console.log("diffx: " + diff.x);
+          console.log("diffy: " + diff.y);
+          console.log("this._initialPoint.x: " + this._initialPoint.x);
+          console.log("this._initialPoint.y: " + this._initialPoint.y);
+          console.log("this._offsetPoint.x: " + this._offsetPoint.x);
+          console.log("this._offsetPoint.y: " + this._offsetPoint.y);
+          let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
+          let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
+          console.log("trackX: " + trackX);
+          console.log("trackY: " + trackY);
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
           let transformedTrack = convertCoordinates({x:trackX, y:trackY}, matrix);
+          
+
+          
+          let angle = Math.acos(matrix.a) * (180 / Math.PI);
+          
 
           let i = 0;
           switch (this._actionModeStarted) {
             case 'n-resize':
               if (transformedTrack.y < this._initialSizes[i].height - 8) {
-                (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height - transformedTrack.y + 'px';
-                (<HTMLElement>this.extendedItem.element).style.top = this._initialOffsetTop + transformedTrack.y + 'px';
+
+                console.log("Original Height >>> (<HTMLElement>this.extendedItem.element).style.height: " + (<HTMLElement>this.extendedItem.element).style.height);
+                console.log("this._initialSizes[i].height: " + this._initialSizes[i].height);
+                console.log("transformedTrack.y: " + transformedTrack.y);
+                let deltah = transformedTrack.y / Math.cos(angle);
+                (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height - deltah + 'px';
+                console.log("(<HTMLElement>this.extendedItem.element).style.height: " + (<HTMLElement>this.extendedItem.element).style.height);
+                let resizedRect = this.extendedItem.element.getBoundingClientRect();
+                (<HTMLElement>this.extendedItem.element).style.top = this._initialOffsetTop - ((resizedRect.height - this._initialRect.height)) + 'px';
+                (<HTMLElement>this.extendedItem.element).style.left = this._initialOffsetLeft + ((resizedRect.width - this._initialRect.width) / 2) + 'px';
               }              
               break;
             case 'ne-resize':
