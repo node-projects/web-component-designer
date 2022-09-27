@@ -1,5 +1,8 @@
 import { EventNames } from '../../../../enums/EventNames.js';
+import { DesignItem } from '../../../item/DesignItem.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
+import { ExtensionType } from '../extensions/ExtensionType.js';
 import { IDesignerCanvas } from '../IDesignerCanvas';
 import { ITool } from './ITool';
 
@@ -16,38 +19,29 @@ export class TextTool implements ITool {
 
   readonly cursor = 'text';
 
-  private _text: SVGTextElement;
-
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
-    //const offset = 50;
 
-    addEventListener("keyup", function(event){
-      if(event.key === 'Enter') {
-        console.log("Enter Pressed");
-        event.preventDefault();
-      }
-    });
 
     switch (event.type) {
       case EventNames.PointerDown:
-        (<Element>event.target).setPointerCapture(event.pointerId);
-        this._text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        this._text.setAttribute("x", currentPoint.x.toString());
-        this._text.setAttribute("y", currentPoint.y.toString());
+        const span = document.createElement('span')
+        const di = DesignItem.createDesignItemFromInstance(span, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+        di.setStyle('position', 'absolute');
+        di.setStyle('left', currentPoint.x + 'px');
+        di.setStyle('top', currentPoint.y + 'px');
+        designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
+        designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
 
-        break;
-
-
-        case EventNames.KeyUp:
-        //if(event.key === 'Enter'){
-
-        //}
+        //TODO - don't apply doubleclick extension (maybe it is not the doubleclick one) - apply edit text extesion directly
+        designerCanvas.extensionManager.applyExtension(di, ExtensionType.Doubleclick);
+        setTimeout(() => {
+          span.focus();
+        }, 50);
         break;
 
     }
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
-  { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 }

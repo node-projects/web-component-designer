@@ -61,13 +61,17 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         display: flex;
         position: sticky;
         right: 0;
-        padding-right: 4px;
+        padding-right: 2px;
         align-items: center;
         gap: 2px;
         background: #ffffffc9;
-        width: 70px;
+        width: 42px;
         justify-content: flex-end;
         background: white;
+      }
+
+      .cmd > img {
+        width: 10px;
       }
 
       table.fancytree-ext-table tbody tr.fancytree-selected {
@@ -100,19 +104,34 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
-   //@ts-ignore
-   import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    //@ts-ignore
+    if (window.importShim)
+      //@ts-ignore
+      importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    else
+      //@ts-ignore
+      import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
-      let match = this._filter.value;
-      this._tree.filterNodes((node) => {
-        return new RegExp(match, "i").test(node.title);
-      })
+      this._filterNodes();
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable');
+  }
+
+  _filterNodes() {
+    let match = this._filter.value;
+    if (match) {
+      this._tree.filterNodes((node) => {
+        return new RegExp(match, "i").test(node.title);
+      });
+    }
+    else {
+      this._tree.clearFilter();
+    }
   }
 
   _showHideAtDesignTimeState(img: HTMLImageElement, designItem: IDesignItem) {
@@ -166,6 +185,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   async ready() {
     //this._treeDiv.classList.add('fancytree-connectors');
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
+      debugLevel: 0,
       icon: true, //atm, maybe if we include icons for specific elements
       extensions: ['childcounter', 'dnd5', 'multi', 'filter', 'table'],
       quicksearch: true,
@@ -178,10 +198,12 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       },
 
       activate: (event, data) => {
-        let node = data.node;
-        let designItem: IDesignItem = node.data.ref;
-        if (designItem)
-          designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        if (event.originalEvent) { // only for clicked items, not when elements selected via code.
+          let node = data.node;
+          let designItem: IDesignItem = node.data.ref;
+          if (designItem)
+            designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        }
       },
 
       createNode: (event, data) => {
@@ -192,20 +214,23 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
           if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
             node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
+            node.tr.onmouseenter = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(designItem.element);
+            node.tr.onmouseleave = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(null);
 
             let d = document.createElement("div");
             d.className = "cmd"
-            let img = document.createElement('img');
-            this._showHideAtDesignTimeState(img, designItem);
-            img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
-            img.title = 'hide in designer';
-            d.appendChild(img);
 
             let imgL = document.createElement('img');
             this._showLockAtDesignTimeState(imgL, designItem);
             imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, designItem);
             imgL.title = 'lock';
             d.appendChild(imgL);
+
+            let img = document.createElement('img');
+            this._showHideAtDesignTimeState(img, designItem);
+            img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
+            img.title = 'hide in designer';
+            d.appendChild(img);
 
             let imgH = document.createElement('img');
             this._showHideAtRunTimeState(imgH, designItem);
@@ -332,7 +357,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       },
       filter: {
         autoApply: true,   // Re-apply last filter if lazy data is loaded
-        autoExpand: false, // Expand all branches that contain matches while filtered
+        autoExpand: true, // Expand all branches that contain matches while filtered
         counter: true,     // Show a badge with number of matching child nodes near parent icons
         fuzzy: true,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
         hideExpandedCounter: true,  // Hide counter badge if parent is expanded
@@ -379,9 +404,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {
-    if (event.selectedElements.length > 0) {
-      this._highlight(event.selectedElements);
-    }
+    this._highlight(event.selectedElements);
   }
 
   private _recomputeTree(rootItem: IDesignItem): void {
@@ -391,6 +414,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._tree.expandAll();
     //@ts-ignore
     this._tree.getRootNode().updateCounters();
+    this._filterNodes();
   }
 
   private _getChildren(item: IDesignItem, currentNode: Fancytree.FancytreeNode): any {
@@ -413,17 +437,16 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
-    if (activeElements != null) {
-      this._tree.visit((node) => {
-        //@ts-ignore
-        if (activeElements.indexOf(node.data.ref) >= 0) {
-          node.setSelected(true);
-          node.makeVisible({scrollIntoView: true});
-        } else {
-          node.setSelected(false);
-        }
-      });
-    }
+    this._tree.visit((node) => {
+      if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
+        node.setSelected(true);
+        node.setActive(true);
+        node.makeVisible({ scrollIntoView: true });
+      } else {
+        node.setSelected(false);
+        node.setActive(false);
+      }
+    });
   }
 }
 

@@ -119,8 +119,10 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     this._treeDiv = document.createElement('div');
+    this._treeDiv.style.userSelect = 'none';
     this.shadowRoot.appendChild(this._treeDiv);
     this._treeDiv.addEventListener('click', this._clickElement.bind(this));
   }
@@ -147,9 +149,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {
-    if (event.selectedElements.length > 0) {
-      this._selectTreeElements(event.selectedElements.map(x => this._mapElementTreeitem.get(x.element)));
-    }
+    this._selectTreeElements(event.selectedElements.map(x => this._mapElementTreeitem.get(x.element)));
   }
 
   private _recomputeTree(parent, activeElement: Element) {

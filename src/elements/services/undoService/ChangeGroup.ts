@@ -4,13 +4,21 @@ import { IDesignItem } from '../../item/IDesignItem';
 export class ChangeGroup implements ITransactionItem {
 
   title: string;
-  affectedItems: IDesignItem[];
+  get affectedItems(): IDesignItem[] {
+    let s = new Set<IDesignItem>();
+    for (let u of this.undoStack)
+      for (let i of u.affectedItems)
+        s.add(i);
+    for (let u of this.redoStack)
+      for (let i of u.affectedItems)
+        s.add(i);
+    return [...s.values()]
+  }
   private commitHandler: (transactionItem: ITransactionItem) => void;
   private abortHandler: (transactionItem: ITransactionItem) => void;
 
-  constructor(title: string, affectedItems: IDesignItem[], commitHandler: (transactionItem: ITransactionItem) => void, abortHandler: (transactionItem: ITransactionItem) => void) {
+  constructor(title: string, commitHandler: (transactionItem: ITransactionItem) => void, abortHandler: (transactionItem: ITransactionItem) => void) {
     this.title = title;
-    this.affectedItems = affectedItems;
     this.commitHandler = commitHandler;
     this.abortHandler = abortHandler;
   }

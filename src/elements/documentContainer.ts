@@ -23,13 +23,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _additionalStyle: string;
   public set additionalStyleString(style: string) {
     this._additionalStyle = style;
-    this.designerView.additionalStyle = cssFromString(style);
+    this.designerView.additionalStyles = [cssFromString(style)];
   };
   public get additionalStyleString() {
     return this._additionalStyle;
   };
 
-  
   public onContentChanged = new TypedEvent<void>();
 
   private _serviceContainer: ServiceContainer;
@@ -81,9 +80,11 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
     this.codeView = new serviceContainer.config.codeViewWidget();
     this.codeView.slot = 'bottom';
+    this.codeView.style.position = 'relative';
     this._codeDiv = document.createElement("div");
     this._tabControl.appendChild(this._codeDiv);
     this._codeDiv.title = 'Code';
+    this._codeDiv.style.position = 'relative';
     this._codeDiv.appendChild(this.codeView);
     this.codeView.onTextChanged.on(text => {
       if (!this._disableChangeNotificationDesigner) {
@@ -128,7 +129,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   designerContentChanged() {
     this.onContentChanged.emit();
-    
+
     if (!this._disableChangeNotificationEditor) {
       this._disableChangeNotificationDesigner = true;
       if (this._tabControl.selectedIndex === 2) {
@@ -152,14 +153,14 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   executeCommand(command: IUiCommand) {
-    if (this._tabControl.selectedIndex === 0)
+    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2)
       this.designerView.executeCommand(command);
     else if (this._tabControl.selectedIndex === 1)
       this.codeView.executeCommand(command);
   }
 
   canExecuteCommand(command: IUiCommand) {
-    if (this._tabControl.selectedIndex === 0)
+    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2)
       return this.designerView.canExecuteCommand(command);
     else if (this._tabControl.selectedIndex === 1)
       return this.codeView.canExecuteCommand(command);

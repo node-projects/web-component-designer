@@ -39,7 +39,6 @@ import { GridPlacementService } from './placementService/GridPlacementService.js
 import { ElementAtPointService } from './elementAtPointService/ElementAtPointService';
 import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementService';
 import { SnaplinesProviderService } from './placementService/SnaplinesProviderService';
-import { PrepareElementsForDesignerService } from './instanceService/PrepareElementsForDesignerService';
 import { DragDropService } from './dragDropService/DragDropService';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
 import { CopyPasteService } from './copyPasteService/CopyPasteService';
@@ -54,7 +53,17 @@ import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
 import { HtmlWriterService } from './htmlWriterService/HtmlWriterService.js';
 import { RectContextMenu } from '../widgets/designerView/extensions/contextMenu/RectContextMenu.js';
 import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/PathContextMenu.js';
-import { IframeExtensionProvider } from '../widgets/designerView/extensions/IframeExtensionProvider.js';
+import { SeperatorContextMenu } from '../widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js';
+import { ZoomToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js';
+import { RotateLeftAndRight } from '../widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js';
+import { SelectAllChildrenContextMenu } from '../widgets/designerView/extensions/contextMenu/SelectAllChildrenContextMenu';
+import { PointerToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/PointerToolButtonProvider.js';
+import { SeperatorToolProvider } from '../widgets/designerView/tools/toolBar/buttons/SeperatorToolProvider.js';
+import { ZoomToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js';
+import { DrawToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/DrawToolButtonProvider.js';
+import { TextToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js';
+import { SelectorToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/SelectorToolButtonProvider.js';
+import { GrayOutDragOverContainerExtensionProvider } from '../widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -73,7 +82,6 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
-  serviceContainer.register("prepareElementsForDesignerService", new PrepareElementsForDesignerService());
   serviceContainer.register("dragDropService", new DragDropService());
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
@@ -82,7 +90,6 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),
     new InvisibleDivExtensionProvider(),
-    new IframeExtensionProvider(),
     // new ElementDragTitleExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
@@ -108,7 +115,11 @@ export function createDefaultServiceContainer() {
     new GrayOutExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
+    new GrayOutDragOverContainerExtensionProvider(),
     new AltToEnterContainerExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.ContainerExternalDragOver, [
+    new GrayOutDragOverContainerExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
     new EditTextExtensionProvider()
@@ -136,12 +147,32 @@ export function createDefaultServiceContainer() {
     new GridExtensionDesignViewConfigButtons()
   );
 
+  serviceContainer.designViewToolbarButtons.push(
+    new PointerToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new SelectorToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new ZoomToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new DrawToolButtonProvider(),
+    new SeperatorToolProvider(5),
+    new TextToolButtonProvider()
+  );
+
   serviceContainer.designerContextMenuExtensions = [
     new CopyPasteContextMenu(),
+    new SeperatorContextMenu(),
+    new RotateLeftAndRight(),
+    new SeperatorContextMenu(),
+    new ZoomToElementContextMenu(),
+    new SeperatorContextMenu(),
     new ZMoveContextMenu(),
     new MultipleItemsSelectedContextMenu(),
     new PathContextMenu(),
     new RectContextMenu(),
+    new SeperatorContextMenu(),
+    new SelectAllChildrenContextMenu(),
+    new SeperatorContextMenu(),
     new ItemsBelowContextMenu(),
   ];
 

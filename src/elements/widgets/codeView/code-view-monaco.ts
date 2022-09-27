@@ -69,8 +69,16 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   async ready() {
+    let style: { default: CSSStyleSheet };
+
     //@ts-ignore
-    const style = await import("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } })
+    if (window.importShim)
+      //@ts-ignore
+      style = await importShim("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } })
+    else
+      //@ts-ignore
+      style = await import("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } })
+
     this.shadowRoot.adoptedStyleSheets = [style.default, this.constructor.style];
 
     this._editor = this._getDomElement<HTMLDivElement>('container')
@@ -129,10 +137,10 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   setSelection(position: IStringPosition) {
     let model = this._monacoEditor.getModel();
-    let point2 = model.getPositionAt(position.start);
-    let point1 = model.getPositionAt(position.start + position.length);
+    let point1 = model.getPositionAt(position.start);
+    let point2 = model.getPositionAt(position.start + position.length);
     this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
-    this._monacoEditor.revealLineInCenter(point2.lineNumber);
+    setTimeout(() => this._monacoEditor.revealLine(point1.lineNumber), 20);
   }
 }
 

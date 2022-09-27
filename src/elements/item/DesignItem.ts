@@ -96,15 +96,17 @@ export class DesignItem implements IDesignItem {
   }
 
   public insertAdjacentElement(designItem: IDesignItem, where: InsertPosition) {
+    let action: InsertChildAction;
     if (where == 'afterbegin') {
-      this._insertChildInternal(designItem, 0);
+      action = new InsertChildAction(designItem, this, 0);
     } else if (where == 'beforeend') {
-      this._insertChildInternal(designItem);
+      action = new InsertChildAction(designItem, this, this._childArray.length);
     } else if (where == 'beforebegin') {
-      this.parent._insertChildInternal(designItem, this.parent.indexOf(this));
+      action = new InsertChildAction(designItem, this.parent, this.parent.indexOf(this));
     } else if (where == 'afterend') {
-      this.parent._insertChildInternal(designItem, this.parent.indexOf(this) + 1);
+      action = new InsertChildAction(designItem, this.parent, this.parent.indexOf(this));
     }
+    this.instanceServiceContainer.undoService.execute(action);
   }
 
   public insertChild(designItem: IDesignItem, index?: number) {
@@ -116,7 +118,8 @@ export class DesignItem implements IDesignItem {
     this.instanceServiceContainer.undoService.execute(action);
   }
   public remove() {
-    this.parent._removeChildInternal(this);
+    const action = new DeleteAction([this]);
+    this.instanceServiceContainer.undoService.execute(action);
   }
   public clearChildren() {
     for (let i = this._childArray.length - 1; i >= 0; i--) {
@@ -134,6 +137,14 @@ export class DesignItem implements IDesignItem {
   }
   public set content(value: string) {
     this.node.textContent = value;
+  }
+
+  public get innerHTML(): string {
+    return this.element.innerHTML;
+  }
+  public set innerHTML(value: string) {
+    this.element.innerHTML = value;
+    this.updateChildrenFromNodesChildren();
   }
 
   private _hideAtDesignTime: boolean;
@@ -234,12 +245,8 @@ export class DesignItem implements IDesignItem {
   updateChildrenFromNodesChildren() {
     this._childArray = [];
     if (this.nodeType == NodeType.Element) {
-      if (this.element.children && this.element.children.length === 0 && this.element.childNodes.length <= 1)
-        this.content = this.element.textContent; //was soll das bringen???
-      else {
-        for (const c of this.element.childNodes)
-          this._childArray.push(DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer));
-      }
+      for (const c of this.element.childNodes)
+        this._childArray.push(DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer));
     }
   }
 
@@ -254,8 +261,8 @@ export class DesignItem implements IDesignItem {
     DesignItem._designItemMap.set(node, this);
   }
 
-  public openGroup(title: string, affectedItems?: IDesignItem[]): ChangeGroup {
-    return this.instanceServiceContainer.undoService.openGroup(title, affectedItems);
+  public openGroup(title: string): ChangeGroup {
+    return this.instanceServiceContainer.undoService.openGroup(title);
   }
 
   public getOrCreateDesignItem(node: Node) {

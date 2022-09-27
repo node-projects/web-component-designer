@@ -9,7 +9,7 @@ const overlayLayer = OverlayLayer.Normal;
 
 export class Snaplines {
 
-  public snapOffset = 15;
+  public snapOffset = 5;
   private _overlayLayerView: OverlayLayerView;
 
   private _containerItem: IDesignItem;

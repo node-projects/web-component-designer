@@ -3,4 +3,5 @@ export interface IContextMenuItem {
   readonly icon?: string;
   readonly action?: (e: HTMLElement, args?: Event) => void 
   readonly children ?: IContextMenuItem[];
+  readonly shortCut?: string;
 }

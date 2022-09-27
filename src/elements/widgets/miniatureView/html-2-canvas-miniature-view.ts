@@ -14,6 +14,8 @@ export class Html2CanvasMiniatureView extends BaseCustomWebComponentLazyAppend i
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
+    
     this._imgdiv = this._getDomElement<HTMLDivElement>('imgdiv');
   }
 

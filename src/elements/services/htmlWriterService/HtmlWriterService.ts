@@ -78,12 +78,13 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
         }
       } else if (designItem.hasContent) {
         indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content));
+        //this._conditionalyWriteNewline(indentedTextWriter, designItem);
       }
 
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
-      if (!contentSingleTextNode)
-        this._conditionalyWriteNewline(indentedTextWriter, designItem);
+      //if (!contentSingleTextNode)
+      this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
 
     if (designItemsAssignmentList) {

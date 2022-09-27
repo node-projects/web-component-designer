@@ -20,7 +20,6 @@ import { GlobalContext } from './GlobalContext';
 import { IBindingService } from "./bindingsService/IBindingService";
 import { IElementAtPointService } from './elementAtPointService/IElementAtPointService';
 import { ISnaplinesProviderService } from "./placementService/ISnaplinesProviderService.js";
-import { IPrepareElementsForDesignerService } from './instanceService/IPrepareElementsForDesignerService';
 import { IDragDropService } from './dragDropService/IDragDropService';
 import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
 import { IDesignerPointerExtensionProvider } from "../widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
@@ -29,6 +28,12 @@ import { IDesignViewConfigButtonsProvider } from "../widgets/designerView/IDesig
 import { IDemoProviderService } from "./demoProviderService/IDemoProviderService.js";
 import { IBindableObjectsService } from "./bindableObjectsService/IBindableObjectsService.js";
 import { IBindableObjectDragDropService } from "./bindableObjectsService/IBindableObjectDragDropService.js";
+import { IDesignViewToolbarButtonProvider } from "../widgets/designerView/tools/toolBar/IDesignViewToolbarButtonProvider.js";
+import { IElementInteractionService } from './elementInteractionService/IElementInteractionService';
+import { IProperty } from "./propertiesService/IProperty.js";
+import { IDesignItem } from "../item/IDesignItem.js";
+import { IBinding } from "../item/IBinding";
+import { BindingTarget } from "../item/BindingTarget";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -44,11 +49,11 @@ interface ServiceNameMap {
   "bindableObjectsService": IBindableObjectsService;
   "bindableObjectDragDropService": IBindableObjectDragDropService;
   "elementAtPointService": IElementAtPointService;
-  "prepareElementsForDesignerService": IPrepareElementsForDesignerService;
   "dragDropService": IDragDropService;
   "copyPasteService": ICopyPasteService;
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
+  "elementInteractionService": IElementInteractionService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -56,6 +61,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   readonly config: {
     codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
     demoViewWidget: new (...args: any[]) => IDemoView & HTMLElement;
+    openBindingsEditor?: (property:IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
   } = {
       codeViewWidget: CodeViewMonaco,
       demoViewWidget: DemoView
@@ -63,8 +69,19 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public readonly designerExtensions: Map<(ExtensionType | string), IDesignerExtensionProvider[]> = new Map();
 
+  removeDesignerExtensionOfType(container: (ExtensionType | string), lambda: new (...args: any[]) => IDesignerExtensionProvider): void {
+    const extContainer = this.designerExtensions.get(container);
+    for (let i = 0; i < extContainer.length; i++) {
+      if (extContainer[i].constructor === lambda) {
+        extContainer.splice(i, 1);
+      }
+    }
+  }
+
   public readonly designViewConfigButtons: IDesignViewConfigButtonsProvider[] = [];
-  
+
+  public readonly designViewToolbarButtons: IDesignViewToolbarButtonProvider[] = [];
+
   public readonly designerPointerExtensions: IDesignerPointerExtensionProvider[] = [];
 
   public designerContextMenuExtensions: IContextMenuExtension[];
@@ -83,6 +100,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get bindableObjectDragDropService(): IBindableObjectDragDropService {
     return this.getLastService('bindableObjectDragDropService');
+  }
+
+  get elementInteractionServices(): IElementInteractionService[] {
+    return this.getServices('elementInteractionService');
   }
 
   get propertiesServices(): IPropertiesService[] {
@@ -123,10 +144,6 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get elementAtPointService(): IElementAtPointService {
     return this.getLastService('elementAtPointService');
-  }
-
-  get prepareElementsForDesignerService(): IPrepareElementsForDesignerService {
-    return this.getLastService('prepareElementsForDesignerService');
   }
 
   get dragDropService(): IDragDropService {

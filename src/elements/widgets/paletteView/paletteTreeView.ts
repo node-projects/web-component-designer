@@ -54,16 +54,22 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   static override readonly template = html`
   <div style="height: 100%;">
     <input id="input" style="width: 100%; height:21px;" placeholder="Filter..." autocomplete="off">
-    <div style="height: calc(100% - 23px); overflow: auto;">
+    <div style="height: calc(100% - 26px); overflow: auto;">
       <div id="treetable" style="min-width: 100%;"></div>
     </div>
   </div>`;
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     //@ts-ignore
-    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    if (window.importShim)
+      //@ts-ignore
+      importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    else
+      //@ts-ignore
+      import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -74,14 +80,20 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable')
-  }
 
-  async ready() {
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
+      debugLevel: 0,
       icon: true, //atm, maybe if we include icons for specific elements
       extensions: ['childcounter', 'dnd5', 'filter'],
       quicksearch: true,
       source: [],
+
+      filter: {
+        autoExpand: true,
+        mode: 'hide',
+        highlight: true
+      },
+
       dnd5: {
         dropMarkerParent: this.shadowRoot,
         preventRecursion: true, // Prevent dropping nodes on own descendants
@@ -131,8 +143,12 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       }
 
 
-      //@ts-ignore
-      newNode.updateCounters();
+      try {
+        //@ts-ignore
+        newNode.updateCounters();
+      }
+      catch
+      { }
     }
   }
 }

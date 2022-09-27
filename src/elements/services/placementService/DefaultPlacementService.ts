@@ -20,6 +20,16 @@ export class DefaultPlacementService implements IPlacementService {
       return false;
     if (container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
       return false;
+    if (!items.every(x => !x.element.contains(container.element)))
+      return false;
+    return true;
+  }
+
+  canEnterByDrop(container: IDesignItem) {
+    if (DomConverter.IsSelfClosingElement(container.element.localName))
+      return false;
+    if (container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
+      return false;
     return true;
   }
 
@@ -28,7 +38,7 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint {
-    return container.element.getBoundingClientRect();
+    return container.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(container.element);
   }
 
   private calculateTrack(event: MouseEvent, placementView: IPlacementView, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, item: IDesignItem): IPoint {
@@ -91,7 +101,7 @@ export class DefaultPlacementService implements IPlacementService {
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
     let filterdItems = filterChildPlaceItems(items);
-    //TODO: -> what is if a transform already exists -> backup existing style.?
+    //TODO: -> maybe get existing transform via getComputedStyle???
     for (const designItem of filterdItems) {
       const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
       combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);

@@ -1,7 +1,6 @@
 import { ITransactionItem } from './ITransactionItem.js';
 import { ChangeGroup } from "./ChangeGroup.js";
 import { IUndoService } from './IUndoService.js';
-import { IDesignItem } from '../../item/IDesignItem';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 /*
@@ -17,8 +16,8 @@ export class UndoService implements IUndoService {
     this._designerCanvas = designerCanvas;
   }
 
-  openGroup(title: string, affectedItems: IDesignItem[]): ChangeGroup {
-    let t = new ChangeGroup(title, affectedItems, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t));
+  openGroup(title: string): ChangeGroup {
+    let t = new ChangeGroup(title, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t));
     this._transactionStack.push(t);
     return t;
   }
@@ -27,17 +26,18 @@ export class UndoService implements IUndoService {
     let itm = this._transactionStack.pop();
     if (itm !== transactionItem) {
       this.clear();
-      throw "UndoService - Commited Transation was not the last";
+      throw "UndoService - Commited Transaction was not the last";
     }
     if (itm.undoStack.length)
       this._undoStack.push(itm);
+      this._redoStack = [];
   }
 
   private abortTransactionItem(transactionItem: ITransactionItem) {
     let itm = this._transactionStack.pop();
     if (itm !== transactionItem) {
       this.clear();
-      throw "UndoService - Aborted Transation was not the last";
+      throw "UndoService - Aborted Transaction was not the last";
     }
     itm.undo();
   }

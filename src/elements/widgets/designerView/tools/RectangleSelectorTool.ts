@@ -15,19 +15,21 @@ export class RectangleSelectorTool implements ITool {
 
   activated(serviceContainer: ServiceContainer) {
   }
-  
+
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
 
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
+        designerCanvas.captureActiveTool(this);
+        
         this._initialPoint = currentPoint;
         if (!this._rect)
           this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this._rect.setAttribute('class', 'svg-selector');
-        this._rect.setAttribute('x', <string><any>(this._initialPoint.x*designerCanvas.scaleFactor));
-        this._rect.setAttribute('y', <string><any>(this._initialPoint.y*designerCanvas.scaleFactor));
+        this._rect.setAttribute('x', <string><any>(this._initialPoint.x * designerCanvas.scaleFactor));
+        this._rect.setAttribute('y', <string><any>(this._initialPoint.y * designerCanvas.scaleFactor));
         this._rect.setAttribute('width', <string><any>0);
         this._rect.setAttribute('height', <string><any>0);
         designerCanvas.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
@@ -56,24 +58,25 @@ export class RectangleSelectorTool implements ITool {
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerCanvas.releaseActiveTool();
 
         const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];
 
         let point = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
-          let elementRect = e.getBoundingClientRect();
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
+          let elementRect = designerCanvas.getNormalizedElementCoordinates(e);
+          point.x = elementRect.x;
+          point.y = elementRect.y;
           const p1 = this._rect.isPointInFill(point);
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top;
+          point.x = elementRect.x + elementRect.width;
+          point.y = elementRect.y;
           const p2 = p1 && this._rect.isPointInFill(point);
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
+          point.x = elementRect.x;
+          point.y = elementRect.y + elementRect.height;
           const p3 = p2 && this._rect.isPointInFill(point);
-          point.x = elementRect.left - designerCanvas.containerBoundingRect.left + elementRect.width;
-          point.y = elementRect.top - designerCanvas.containerBoundingRect.top + elementRect.height;
+          point.x = elementRect.x + elementRect.width;
+          point.y = elementRect.y + elementRect.height;
           const p4 = p3 && this._rect.isPointInFill(point);
           if (p4) {
             const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
@@ -92,8 +95,7 @@ export class RectangleSelectorTool implements ITool {
     }
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
-  { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 
   dispose(): void {
   }

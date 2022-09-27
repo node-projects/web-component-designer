@@ -10,7 +10,8 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar';
-import "./tools/designerToolBar.js"
+import { DesignerToolbar } from './tools/toolBar/DesignerToolbar.js';
+
 
 const autoZomOffset = 10;
 
@@ -40,6 +41,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
+  private _toolbar: DesignerToolbar;
 
   static override readonly style = css`
     :host {
@@ -57,6 +59,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 16px;
       background: #787f82;
       display: flex;
+      bottom: 0;
+      position: absolute;
     }
     input {
       width: 40px;
@@ -91,9 +95,16 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 100%;
     }
     #canvas {
-      left: 36px;
-      width: calc(100% - 52px);
+      left: 24px;
+      width: calc(100% - 24px - 16px);
       height: calc(100% - 32px);
+    }
+
+    #tool-bar {
+      width: 24px;
+      height: calc(100% - 32px);
+      position: absolute;
+      background-color: lightgray;      
     }
   
     .zoom-in {
@@ -131,18 +142,13 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       right: 0;
       position: absolute;
       background: #f0f0f0;
-    }
-    .tool-bar{
-      width: 36px;
-      height: calc(100% - 32px);
-      position: absolute;
     }`;
 
   static override readonly template = html`
     <div id="outer">
       <node-projects-plain-scrollbar id="s-hor" value="0.5" class="bottom-scroll"></node-projects-plain-scrollbar>
-      <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll"></node-projects-plain-scrollbar>
-      <node-projects-designer-tool-bar class="tool-bar"></node-projects-designer-tool-bar>
+      <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
+      </node-projects-plain-scrollbar>
       <div class="bottom-right"></div>
       <div id="lowertoolbar">
         <input id="zoomInput" type="text" value="100%">
@@ -161,6 +167,10 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
+
+    this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
+    this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
 
     const outer = this._getDomElement<DesignerCanvas>('outer');
     this._designerCanvas = new DesignerCanvas();
@@ -168,15 +178,28 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.appendChild(document.createElement("slot"));
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);
 
+    this._toolbar = new DesignerToolbar();
+    this._toolbar.id = 'tool-bar';
+    this._sVert.insertAdjacentElement('afterend', this._toolbar);
+
+    this._designerCanvas.onZoomFactorChanged.on(() => {
+      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+
+      const pos = this.designerCanvas.canvasOffset;
+
+      const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
+      const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
+      this._sHor.value = (pos.x / (-2 * w)) + 0.5;
+      this._sVert.value = (pos.y / (-2 * h)) + 0.5;
+    });
+
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     this._zoomInput.onkeydown = (e) => {
       if (e.key == 'Enter')
         this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     this._zoomInput.onblur = () => {
       this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
@@ -185,7 +208,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
         this._designerCanvas.zoomFactor += 0.1;
       else
         this._designerCanvas.zoomFactor += 0.01;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
     }
     let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
     zoomDecrease.onclick = () => {
@@ -193,7 +215,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
         this._designerCanvas.zoomFactor -= 0.1;
       else
         this._designerCanvas.zoomFactor -= 0.01;
-        
+
       if (this._designerCanvas.zoomFactor < 0.001)
         this._designerCanvas.zoomFactor = 0.001
 
@@ -201,37 +223,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
     zoomReset.onclick = () => {
-      this._designerCanvas.canvasOffset = { x: 0, y: 0 };
-      this._designerCanvas.zoomFactor = 1;
-      this._sVert.value = 0.5;
-      this._sHor.value = 0.5;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+      this.zoomReset();
     }
     let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
     zoomFit.onclick = () => {
-      let maxX = 0, maxY = 0, minX = 0, minY = 0;
-
-      this._designerCanvas.canvasOffset = { x: 0, y: 0 };
-      this._designerCanvas.zoomFactor = 1;
-
-      for (let n of DomHelper.getAllChildNodes(this.designerCanvas.rootDesignItem.element)) {
-        if (n instanceof Element) {
-          const rect = n.getBoundingClientRect();
-          minX = minX < rect.x ? minX : rect.x;
-          minY = minY < rect.y ? minY : rect.y;
-          maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
-          maxY = maxY > rect.y + rect.height + autoZomOffset ? maxY : rect.y + rect.height + autoZomOffset;
-        }
-      }
-
-      const cvRect = this.designerCanvas.getBoundingClientRect();
-      maxX -= cvRect.x;
-      maxY -= cvRect.y;
-
-      let scaleX = cvRect.width / (maxX / this._designerCanvas.zoomFactor);
-      let scaleY = cvRect.height / (maxY / this._designerCanvas.zoomFactor);
-      this._designerCanvas.zoomFactor = scaleX < scaleY ? scaleX : scaleY;
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+      this.zoomToFit();
     }
     this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
 
@@ -244,10 +240,51 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
     this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
 
-    this._sVert = this._getDomElement<PlainScrollbar>('s-vert');
-    this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
     this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
+  }
+
+  public zoomReset() {
+    this._designerCanvas.canvasOffset = { x: 0, y: 0 };
+    this._designerCanvas.zoomFactor = 1;
+    this._sVert.value = 0.5;
+    this._sHor.value = 0.5;
+    this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+  }
+
+  public zoomToFit() {
+    let maxX = 0, maxY = 0, minX = 0, minY = 0;
+
+    this._designerCanvas.canvasOffset = { x: 0, y: 0 };
+    this._designerCanvas.zoomFactor = 1;
+
+    for (let n of DomHelper.getAllChildNodes(this.designerCanvas.rootDesignItem.element)) {
+      if (n instanceof Element) {
+        const rect = n.getBoundingClientRect();
+        minX = minX < rect.x ? minX : rect.x;
+        minY = minY < rect.y ? minY : rect.y;
+        maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
+        maxY = maxY > rect.y + rect.height + autoZomOffset ? maxY : rect.y + rect.height + autoZomOffset;
+      }
+    }
+
+    const cvRect = this.designerCanvas.getBoundingClientRect();
+    maxX -= cvRect.x;
+    maxY -= cvRect.y;
+
+    let scaleX = cvRect.width / (maxX / this._designerCanvas.zoomFactor);
+    let scaleY = cvRect.height / (maxY / this._designerCanvas.zoomFactor);
+
+    const dimensions = this.designerCanvas.getDesignSurfaceDimensions();
+    if (dimensions.width)
+      scaleX = cvRect.width / dimensions.width;
+    if (dimensions.height)
+      scaleY = cvRect.height / dimensions.height;
+
+    let fak = scaleX < scaleY ? scaleX : scaleY;
+    if (!isNaN(fak))
+      this._designerCanvas.zoomFactor = fak;
+    this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
   }
 
   private _onScrollbar(e) {
@@ -269,31 +306,22 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   private _onWheel(event: WheelEvent) {
     event.preventDefault();
     if (event.ctrlKey) {
-      let zf = this._designerCanvas.zoomFactor
-      zf += event.deltaY * -0.001; //deltamode = 0
+      let zf = this._designerCanvas.zoomFactor;
+      const wheel = event.deltaY < 0 ? 1 : (-1);
+      zf *= Math.exp(wheel * 0.2);
       if (zf < 0.02)
         zf = 0.02;
-      this._designerCanvas.zoomFactor = zf;
-      this._zoomInput.value = Math.round(zf * 100) + '%';
-      const rect = this.getBoundingClientRect();
-
-      //const xc = this.designerCanvas.canvasOffset.x;
-      //const yc = this.designerCanvas.canvasOffset.y;
-      const xp = event.x - rect.x;
-      const yp = event.y - rect.y;
-      const x = xp / zf * (1 - zf);
-      const y = yp / zf * (1 - zf);
-
-      this.designerCanvas.canvasOffset = { x, y };
+      const vp = this.designerCanvas.getNormalizedEventCoordinates(event)
+      this.designerCanvas.zoomTowardsPoint(vp, zf);
+    }
+    else if (event.shiftKey) {
+      this._sHor.value += event.deltaY / 10000;
+      this._onScrollbar(null);
     }
     else {
-      if(event.shiftKey){
-        this._sHor.value += event.deltaY / 1000;
-      }
-      else{
-        this._sHor.value += event.deltaX / 1000;
-        this._sVert.value += event.deltaY / 1000;
-      }
+      this._sVert.value += event.deltaY / 10000;
+      this._onScrollbar(null);
+      this._sHor.value += event.deltaX / 10000;
       this._onScrollbar(null);
     }
   }
@@ -311,8 +339,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._designerCanvas.designerHeight = value;
   }
 
-  set additionalStyle(value: CSSStyleSheet) {
-    this._designerCanvas.additionalStyle = value;
+  set additionalStyles(value: CSSStyleSheet[]) {
+    this._designerCanvas.additionalStyles = value;
   }
 
   public setDesignItems(designItems: IDesignItem[]) {
@@ -340,6 +368,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
           this._lowertoolbar.appendChild(btn);
       }
     }
+    this._toolbar.initialize(this.serviceContainer, this);
   }
 
   public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {

@@ -18,6 +18,9 @@ export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmen
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
+export type { IBinding } from "./elements/item/IBinding.js";
+export * from "./elements/item/BindingMode.js";
+export * from "./elements/item/BindingTarget.js";
 
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
@@ -51,11 +54,14 @@ export type { IDemoProviderService } from "./elements/services/demoProviderServi
 export * from "./elements/services/dragDropService/DragDropService.js";
 export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";
 
+export type { IElementInteractionService } from "./elements/services/elementInteractionService/IElementInteractionService.js";
+
 export type { IElementDefinition } from "./elements/services/elementsService/IElementDefinition.js";
 export type { IElementsJson } from "./elements/services/elementsService/IElementsJson.js";
 export type { IElementsService } from "./elements/services/elementsService/IElementsService.js";
 export * from "./elements/services/elementsService/JsonFileElementsService.js";
 export * from "./elements/services/elementsService/PreDefinedElementsService.js";
+export * from "./elements/services/elementsService/WebcomponentManifestElementsService.js";
 
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
@@ -72,8 +78,6 @@ export type { IIntializationService } from "./elements/services/initializationSe
 
 export * from "./elements/services/instanceService/DefaultInstanceService.js";
 export type { IInstanceService } from "./elements/services/instanceService/IInstanceService.js";
-export * from "./elements/services/instanceService/PrepareElementsForDesignerService.js";
-export type { IPrepareElementsForDesignerService } from "./elements/services/instanceService/IPrepareElementsForDesignerService.js";
 
 export * from "./elements/services/manifestParsers/WebcomponentManifestParserService.js";
 
@@ -93,6 +97,7 @@ export * from "./elements/services/propertiesService/services/LitElementProperti
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
+export * from "./elements/services/propertiesService/services/WebcomponentManifestPropertiesService.js";
 export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
 
@@ -130,7 +135,21 @@ export * from "./elements/widgets/designerView/designerView.js";
 export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";
 
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/DrawToolButtonProvider.js";
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/PointerToolButtonProvider.js";
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/SelectorToolButtonProvider.js";
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/SeperatorToolProvider.js";
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js";
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js";
+
+export * from "./elements/widgets/designerView/tools/toolBar/popups/DrawToolPopup.js";
+
+export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbar.js";
+export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbarButton.js";
+export type { IDesignViewToolbarButtonProvider } from "./elements/widgets/designerView/tools/toolBar/IDesignViewToolbarButtonProvider.js"
+
 export type { ITool } from "./elements/widgets/designerView/tools/ITool.js";
+export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbar.js";
 export * from "./elements/widgets/designerView/tools/NamedTools.js";
 export * from "./elements/widgets/designerView/tools/DrawElementTool.js";
 export * from "./elements/widgets/designerView/tools/DrawPathTool.js";
@@ -158,10 +177,10 @@ export * from "./elements/widgets/designerView/extensions/CanvasExtensionProvide
 export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtension.js";
+export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GridExtension.js";
 export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/IframeExtension.js";
-export * from "./elements/widgets/designerView/extensions/IframeExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtension.js";
@@ -181,11 +200,22 @@ export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtens
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
 
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtension.js";
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextWithStyloExtension.js";
+export * from "./elements/widgets/designerView/extensions/EditText/EditTextWithStyloExtensionProvider.js";
+
 export type { IContextMenuExtension, ContextmenuInitiator } from "./elements/widgets/designerView/extensions/contextMenu/IContextMenuExtension.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/MultipleItemsSelectedContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/PathContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/RectContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/SelectAllChildrenContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
 export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";

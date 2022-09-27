@@ -4,6 +4,7 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
 import { BindingTarget } from "../../../item/BindingTarget";
 import { PropertyType } from "../PropertyType";
+import { IBinding } from "../../../item/IBinding";
 
 export class CommonPropertiesService implements IPropertiesService {
 
@@ -120,6 +121,14 @@ export class CommonPropertiesService implements IPropertiesService {
       return lastValue;
     }
     return null;
+  }
+
+  getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
+    //TODO: optimize perf, do not call bindings service for each property. 
+    const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+      return s.getBindings(designItems[0]);
+    });
+    return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
   }
 
   getUnsetValue(designItems: IDesignItem[], property: IProperty) {

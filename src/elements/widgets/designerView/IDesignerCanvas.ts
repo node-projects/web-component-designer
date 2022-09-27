@@ -10,14 +10,18 @@ import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayerView } from "./overlayLayerView";
 import { IRect } from "../../../interfaces/IRect.js";
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+import { ISize } from "../../../interfaces/ISize.js";
+import { ITool } from "./tools/ITool.js";
 
 export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly serviceContainer: ServiceContainer;
   readonly instanceServiceContainer: InstanceServiceContainer;
   readonly containerBoundingRect: DOMRect;
+  readonly outerRect: DOMRect;
   readonly rootDesignItem: IDesignItem;
   readonly overlayLayer: OverlayLayerView;
   readonly extensionManager: IExtensionManager;
+  readonly clickOverlay: HTMLDivElement;
 
   readonly snapLines: Snaplines;
 
@@ -37,10 +41,24 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   initialize(serviceContainer: ServiceContainer);
 
   getNormalizedEventCoordinates(event: MouseEvent): IPoint;
+  getViewportCoordinates(event: MouseEvent): IPoint;
   getNormalizedElementCoordinates(element: Element): IRect;
+
+  captureActiveTool(tool: ITool);
+  releaseActiveTool();
+
+  getDesignSurfaceDimensions(): ISize;
+
   getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint;
   getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean);
   elementFromPoint(x: number, y: number): Element;
+  elementsFromPoint(x: number, y: number): Element[];
 
-  getItemsBelowMouse(event: MouseEvent): Element[];
+  showHoverExtension(element: Element);
+
+  zoomTowardsPoint(point: IPoint, scalechange: number): void;
+  zoomPoint(canvasPoint: IPoint, newZoom: number): void;
+  zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint): void;
+
+  showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent): void;
 }
