@@ -9,6 +9,7 @@ import { IExtensionManager } from "./IExtensionManger";
 export class ExtensionManager implements IExtensionManager {
 
   designerCanvas: IDesignerCanvas;
+  designItemsWithExtentions: Set<IDesignItem> = new Set();
 
   constructor(designerCanvas: IDesignerCanvas) {
     this.designerCanvas = designerCanvas;
@@ -73,6 +74,7 @@ export class ExtensionManager implements IExtensionManager {
             }
             appE.push(ext);
             designItem.appliedDesignerExtensions.set(extensionType, appE);
+            this.designItemsWithExtentions.add(designItem);
           }
         }
       }
@@ -104,6 +106,7 @@ export class ExtensionManager implements IExtensionManager {
               }
               appE.push(ext);
               i.appliedDesignerExtensions.set(extensionType, appE);
+              this.designItemsWithExtentions.add(i);
             }
           }
         }
@@ -131,6 +134,8 @@ export class ExtensionManager implements IExtensionManager {
             }
           }
           designItem.appliedDesignerExtensions.delete(extensionType);
+          if (!designItem.appliedDesignerExtensions.size)
+            this.designItemsWithExtentions.delete(designItem);
         }
       } else {
         for (let appE of designItem.appliedDesignerExtensions) {
@@ -144,6 +149,8 @@ export class ExtensionManager implements IExtensionManager {
           }
         }
         designItem.appliedDesignerExtensions.clear();
+        this.designItemsWithExtentions.delete(designItem);
+
       }
     }
   }
@@ -163,6 +170,8 @@ export class ExtensionManager implements IExtensionManager {
               }
             }
             i.appliedDesignerExtensions.delete(extensionType);
+            if (!i.appliedDesignerExtensions.size)
+              this.designItemsWithExtentions.delete(i);
           }
         }
       } else {
@@ -178,6 +187,8 @@ export class ExtensionManager implements IExtensionManager {
             }
           }
           i.appliedDesignerExtensions.clear();
+          this.designItemsWithExtentions.delete(i);
+
         }
       }
     }
@@ -258,5 +269,9 @@ export class ExtensionManager implements IExtensionManager {
       this.refreshExtensions(designItems, ExtensionType.ContainerDrag);
       this.refreshExtensions(designItems, ExtensionType.Doubleclick);
     }
+  }
+
+  refreshAllAppliedExtentions() {
+    this.refreshAllExtensions([...this.designItemsWithExtentions])
   }
 }

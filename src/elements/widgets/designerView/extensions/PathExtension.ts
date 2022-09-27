@@ -85,12 +85,11 @@ export class PathExtension extends AbstractExtension {
 
   pointerEvent(event: PointerEvent, circle: SVGCircleElement, p: PathData, index: number) {
     event.stopPropagation();
-
+    const cursorPos = this.designerCanvas.getNormalizedEventCoordinates(event);
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
-
-        this._startPos = { x: event.x, y: event.y };
+        this._startPos = cursorPos
         this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
         this._originalPathPoint = { x: p.values[index], y: p.values[index + 1] }
         break;
@@ -98,8 +97,8 @@ export class PathExtension extends AbstractExtension {
       case EventNames.PointerMove:
         if (this._startPos && event.buttons > 0) {
           this._lastPos = { x: this._startPos.x, y: this._startPos.y };
-          const cx = event.x - this._lastPos.x + this._circlePos.x;
-          const cy = event.y - this._lastPos.y + this._circlePos.y;
+          const cx = cursorPos.x - this._lastPos.x + this._circlePos.x;
+          const cy = cursorPos.y - this._lastPos.y + this._circlePos.y;
           const dx = cx - this._circlePos.x;
           const dy = cy - this._circlePos.y;
           if (event.shiftKey) {
@@ -139,7 +138,9 @@ export class PathExtension extends AbstractExtension {
 
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
-    let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5, 'svg-path');
+    let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path');
+    circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+
     let circlePos = { x: x, y: y };
     const items: IContextMenuItem[] = [];
     const pidx = this._pathdata.indexOf(p);

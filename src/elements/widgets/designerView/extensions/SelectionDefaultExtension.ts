@@ -22,6 +22,8 @@ export class SelectionDefaultExtension extends AbstractExtension {
     const right = Number.parseFloat(computedStyle.marginRight.replace('px', ''));
     const bottom = Number.parseFloat(computedStyle.marginBottom.replace('px', ''));
     this._rect = this._drawRect(itemRect.x  - left, itemRect.y - top, left + itemRect.width + right, top + itemRect.height + bottom, 'svg-selection', this._rect);
+    this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+
   }
 
   override dispose() {

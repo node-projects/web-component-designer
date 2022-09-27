@@ -24,6 +24,7 @@ export class MouseOverExtension extends AbstractExtension {
     const yOffset = itemRect.y - this.designerCanvas.containerBoundingRect.y;
 
     this._rect = this._drawRect((xOffset - offset) / this.designerCanvas.scaleFactor, (yOffset - offset) / this.designerCanvas.scaleFactor, (itemRect.width + offset + offset) / this.designerCanvas.scaleFactor, (itemRect.height + offset + offset) / this.designerCanvas.scaleFactor, 'svg-hover', this._rect);
+    this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
   }
 
   override dispose() {
