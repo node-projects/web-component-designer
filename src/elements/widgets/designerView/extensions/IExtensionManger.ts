@@ -9,4 +9,5 @@ export interface IExtensionManager {
   refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType);
   refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType);
   refreshAllExtensions(designItems: IDesignItem[]);
+  refreshAllAppliedExtentions();
 }

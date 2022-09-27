@@ -18,10 +18,12 @@ export class TransformOriginExtension extends AbstractExtension {
     const rect = this.extendedItem.element.getBoundingClientRect();
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' ');
-    this._circle = this._drawCircle((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + Number.parseFloat(to[0].replace('px', '')), (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + Number.parseFloat(to[1].replace('px', '')), 5, 'svg-transform-origin');
-    this._circle.setAttribute('style', 'cursor: pointer');
-    this._circle2 = this._drawCircle((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + Number.parseFloat(to[0].replace('px', '')), (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + Number.parseFloat(to[1].replace('px', '')), 1, 'svg-transform-origin');
-    this._circle2.setAttribute('style', 'pointer-events: none');
+    this._circle = this._drawCircle((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + Number.parseFloat(to[0].replace('px', '')), (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + Number.parseFloat(to[1].replace('px', '')), 5 / this.designerCanvas.scaleFactor, 'svg-transform-origin');
+    this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+    this._circle.style.cursor = 'pointer';
+    this._circle2 = this._drawCircle((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + Number.parseFloat(to[0].replace('px', '')), (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + Number.parseFloat(to[1].replace('px', '')), 1 / this.designerCanvas.scaleFactor, 'svg-transform-origin');
+    this._circle2.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+    this._circle2.style.pointerEvents = 'none';
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
