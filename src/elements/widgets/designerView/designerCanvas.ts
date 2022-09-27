@@ -446,6 +446,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._updateTransform();
     this._fillCalculationrects();
     this.onZoomFactorChanged.emit(this._zoomFactor);
+    this.extensionManager.refreshAllAppliedExtentions();
   }
 
   _updateTransform() {
