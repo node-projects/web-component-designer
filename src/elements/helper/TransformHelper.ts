@@ -25,9 +25,10 @@ export function getDomMatrix(element: HTMLElement) {
   return new DOMMatrix(window.getComputedStyle(element).transform);
 }
 
-export function convertCoordinates(point: IPoint, matrix: DOMMatrix) {
-  let domPoint = new DOMPoint(point.x, point.y);
+export function convertCoordinates(point: [number, number], matrix: DOMMatrix) {
+  let domPoint = new DOMPoint(point[0], point[1]);
   return domPoint.matrixTransform(matrix.inverse());
+  //return domPoint.matrixTransform(matrix);
 }
 
 export function getRotationMatrix3d(axisOfRotation: 'x' | 'y' | 'z' | 'X' | 'Y' | 'Z', angle: number) {
@@ -97,13 +98,17 @@ export function cssMatrixToMatrixArray(cssMatrix: string) {
   return matrixArray;
 }
 
-export function getRotationAngleFromMatrix(matrixArray: number[]) {
+export function getRotationAngleFromMatrix(matrixArray: number[], domMatrix: DOMMatrix) {
   let angle = null;
-  const a = matrixArray[0];
-  const b = matrixArray[1];
+  const a = domMatrix != null ? domMatrix.a : matrixArray[0];
+  const b = domMatrix != null ? domMatrix.b : matrixArray[1];
   angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
 
   return angle;
+}
+
+export function addVectors(vectorA: [number, number], vectorB: [number, number]): [number, number] {
+  return [vectorA[0] + vectorB[0], vectorA[1] + vectorB[1]];
 }
 
 // export function applyMatrixToPoint(cssMatrix: string, point: {x: number, y: number}) : IPoint3D {

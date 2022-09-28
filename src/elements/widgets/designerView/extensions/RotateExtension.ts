@@ -71,7 +71,7 @@ export class RotateExtension extends AbstractExtension {
         }
 
         this._initialPoint = currentPoint;
-        this._initialElementAngle = getRotationAngleFromMatrix(cssMatrixToMatrixArray(getComputedStyle(this.extendedItem.element).transform));
+        this._initialElementAngle = getRotationAngleFromMatrix(cssMatrixToMatrixArray(getComputedStyle(this.extendedItem.element).transform),null);
         this._initialOverlayAngle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);
         (<Element>event.target).setPointerCapture(event.pointerId);
         break;
