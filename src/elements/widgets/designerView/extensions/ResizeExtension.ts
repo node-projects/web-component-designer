@@ -2,7 +2,7 @@ import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { IPoint3D } from "../../../../interfaces/IPoint3d";
 import { ISize } from "../../../../interfaces/ISize";
-import { addVectors, convertCoordinates, getDomMatrix, getRotationAngleFromMatrix, getTransformedCornerPoints } from "../../../helper/TransformHelper.js";
+import { convertCoordinates, getDomMatrix, getTransformedCornerPoints } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
@@ -24,7 +24,8 @@ export class ResizeExtension extends AbstractExtension {
   private _circle6: SVGCircleElement;
   private _circle7: SVGCircleElement;
   private _circle8: SVGCircleElement;
-  private _initialTransformOrigins: DOMPoint[];
+  private _initialComputedTransformOrigins: DOMPoint[];
+  private _initialTransformOrigins: string[];
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
     super(extensionManager, designerCanvas, extendedItem);
@@ -75,6 +76,7 @@ export class ResizeExtension extends AbstractExtension {
         this._initialPoint = currentPoint;
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
+        this._initialComputedTransformOrigins = [];
         this._initialTransformOrigins = [];
         
         let rect = this.extendedItem.element.getBoundingClientRect();
@@ -82,7 +84,8 @@ export class ResizeExtension extends AbstractExtension {
         
         const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseInt(x.replace('px', '')));
         const transformOrigin: DOMPoint = new DOMPoint(toArr[0], toArr[1]);
-        this. _initialTransformOrigins.push(transformOrigin);
+        this. _initialComputedTransformOrigins.push(transformOrigin);
+        this._initialTransformOrigins.push( (<HTMLElement>this.extendedItem.element).style.transformOrigin);
 
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -104,34 +107,16 @@ export class ResizeExtension extends AbstractExtension {
           let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
 
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
-          let transformedTrack = convertCoordinates([trackX, trackY] , matrix);
-
-          console.log(trackX, transformedTrack.x);
-          //console.log(trackY, transformedTrack.y);
-
-          // let angle = getRotationAngleFromMatrix(null, matrix);
-          // let ay = Math.sin(angle) * transformedTrack.x;
-          // let ax = Math.sqrt(Math.pow(transformedTrack.x,2) + Math.pow(ay,2));
-
-          // let origin: [number, number] = [this._initialPoint.x, this._initialPoint.y];
-
-          //let a: [number, number] = addVectors(origin,[ax,ay]);
+          let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY) , matrix);
 
           let i = 0;
+          
+          (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
 
           switch (this._actionModeStarted) {
             case 'e-resize':
               let width = (this._initialSizes[i].width + transformedTrack.x);  
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
-              
-              // let by = Math.sin(angle) * width;
-              // let bx = Math.sqrt(Math.pow(width,2) + Math.pow(by,2));
-
-              // let b: [number, number] = addVectors(origin,[bx,by]);
-
-              // let e = addVectors(b,a);
-
-              (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[i].x + 'px ' + this._initialTransformOrigins[i].y + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
@@ -167,6 +152,7 @@ export class ResizeExtension extends AbstractExtension {
         let cg = this.extendedItem.openGroup("Resize Elements");
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
+        (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
             if (designItem !== this.extendedItem) {

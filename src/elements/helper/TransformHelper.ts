@@ -25,10 +25,8 @@ export function getDomMatrix(element: HTMLElement) {
   return new DOMMatrix(window.getComputedStyle(element).transform);
 }
 
-export function convertCoordinates(point: [number, number], matrix: DOMMatrix) {
-  let domPoint = new DOMPoint(point[0], point[1]);
-  return domPoint.matrixTransform(matrix.inverse());
-  //return domPoint.matrixTransform(matrix);
+export function convertCoordinates(point: DOMPoint, matrix: DOMMatrix) {
+  return point.matrixTransform(matrix.inverse());
 }
 
 export function getRotationMatrix3d(axisOfRotation: 'x' | 'y' | 'z' | 'X' | 'Y' | 'Z', angle: number) {
