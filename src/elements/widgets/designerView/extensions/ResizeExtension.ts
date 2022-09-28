@@ -109,13 +109,13 @@ export class ResizeExtension extends AbstractExtension {
           console.log(trackX, transformedTrack.x);
           //console.log(trackY, transformedTrack.y);
 
-          let angle = getRotationAngleFromMatrix(null, matrix);
-          let ay = Math.sin(angle) * transformedTrack.x;
-          let ax = Math.sqrt(Math.pow(transformedTrack.x,2) + Math.pow(ay,2));
+          // let angle = getRotationAngleFromMatrix(null, matrix);
+          // let ay = Math.sin(angle) * transformedTrack.x;
+          // let ax = Math.sqrt(Math.pow(transformedTrack.x,2) + Math.pow(ay,2));
 
-          let origin: [number, number] = [this._initialPoint.x, this._initialPoint.y];
+          // let origin: [number, number] = [this._initialPoint.x, this._initialPoint.y];
 
-          let a: [number, number] = addVectors(origin,[ax,ay]);
+          //let a: [number, number] = addVectors(origin,[ax,ay]);
 
           let i = 0;
 
@@ -124,12 +124,14 @@ export class ResizeExtension extends AbstractExtension {
               let width = (this._initialSizes[i].width + transformedTrack.x);  
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
               
-              let by = Math.sin(angle) * width;
-              let bx = Math.sqrt(Math.pow(width,2) + Math.pow(by,2));
+              // let by = Math.sin(angle) * width;
+              // let bx = Math.sqrt(Math.pow(width,2) + Math.pow(by,2));
 
-              let b: [number, number] = addVectors(origin,[bx,by]);
+              // let b: [number, number] = addVectors(origin,[bx,by]);
 
-              let e = addVectors(b,a);
+              // let e = addVectors(b,a);
+
+              (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[i].x + 'px ' + this._initialTransformOrigins[i].y + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
