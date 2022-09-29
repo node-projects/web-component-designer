@@ -161,6 +161,7 @@ export class ResizeExtension extends AbstractExtension {
         let deltaY = transformedRectWithOriginalTransformOrigin.y - transformedRect.y;
         const matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(deltaX, -deltaY);
         (<HTMLElement>this.extendedItem.element).style.transform = matrix.toString();
+        this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
             if (designItem !== this.extendedItem) {
