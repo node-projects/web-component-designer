@@ -22,6 +22,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
     this._rect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
     this._rect.addEventListener('pointermove', (e) => this._pointerEvent(e));
     this._rect.addEventListener('pointerup', (e) => this._pointerEvent(e));
+    this.refresh();
   }
 
   _drawMoveOverlay(itemRect: DOMRect) {
@@ -30,13 +31,19 @@ export class ElementDragTitleExtension extends AbstractExtension {
   override refresh() {
     const boundRect = this.extendedItem.element.getBoundingClientRect();
     const xr = (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor;
-    const yr = (boundRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 16;
+    const h = (15 / this.designerCanvas.scaleFactor);
+    const w = (60 / this.designerCanvas.scaleFactor);
+    const yr = (boundRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - h;
     this._rect.setAttribute('x', <string><any>xr);
     this._rect.setAttribute('y', <string><any>yr);
+    this._rect.setAttribute('height', '' + h);
+    this._rect.setAttribute('width', '' + w);
+    this._rect.style.strokeWidth = (1 / this.designerCanvas.scaleFactor).toString();
     const x = (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor;
-    const y = (boundRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 5;
+    const y = (boundRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 5 / this.designerCanvas.scaleFactor;
     this._text.setAttribute('x', <string><any>x);
     this._text.setAttribute('y', <string><any>y);
+    this._text.style.fontSize = (10 / this.designerCanvas.scaleFactor) + 'px';
   }
 
   _pointerEvent(event: PointerEvent) {
