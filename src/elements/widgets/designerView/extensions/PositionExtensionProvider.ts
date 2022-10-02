@@ -4,6 +4,7 @@ import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IDesignerExtension } from "./IDesignerExtension";
 import { PositionExtension } from "./PositionExtension";
 import { IExtensionManager } from "./IExtensionManger";
+import { css } from "@node-projects/base-custom-webcomponent";
 
 export class PositionExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
@@ -16,4 +17,8 @@ export class PositionExtensionProvider implements IDesignerExtensionProvider {
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas,  designItem: IDesignItem): IDesignerExtension {
     return new PositionExtension(extensionManager, designerView, designItem);
   }
+
+  readonly style = css`
+    .svg-position-text-rect { fill: white; }
+  `;
 }
