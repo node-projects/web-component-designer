@@ -47,10 +47,12 @@ export class PointerTool implements ITool {
           return;
         }
       }
-      const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+      let newEl = designerCanvas.serviceContainer.elementAtPointService.getElementAtPoint(designerCanvas, { x: event.x, y: event.y });
+      const designItem = DesignItem.GetOrCreateDesignItem(newEl, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
       if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
         designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
       }
+
       designerCanvas.showDesignItemContextMenu(designItem, event);
     }
   }
