@@ -93,8 +93,6 @@ export class ResizeExtension extends AbstractExtension {
         this. _initialComputedTransformOrigins.push(transformOrigin);
         this._initialTransformOrigins.push( (<HTMLElement>this.extendedItem.element).style.transformOrigin);
 
-        // console.log("PointerDown Width: " + (<HTMLElement>this.extendedItem.element).style.width);
-
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
             rect = designItem.element.getBoundingClientRect();
@@ -114,9 +112,7 @@ export class ResizeExtension extends AbstractExtension {
           let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
           let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
-          // console.log("Matrix PointerMove: " + matrix);
-          let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY) , matrix);
-
+          let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY, 0, 0) , matrix);
 
           let i = 0;
           
@@ -124,8 +120,6 @@ export class ResizeExtension extends AbstractExtension {
 
           switch (this._actionModeStarted) {
             case 'e-resize':
-              // console.log("InitialSize Width: " + this._initialSizes[i].width);
-              // console.log("Transformed Track: " + transformedTrack.x);
               let width = (this._initialSizes[i].width + transformedTrack.x);  
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
 
@@ -164,7 +158,6 @@ export class ResizeExtension extends AbstractExtension {
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
         
-        console.log("PointerUp Width: " + (<HTMLElement>this.extendedItem.element).style.width);
         let transformedRect = this.extendedItem.element.getBoundingClientRect();
         (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
         let transformedRectWithOriginalTransformOrigin = this.extendedItem.element.getBoundingClientRect();
@@ -182,7 +175,6 @@ export class ResizeExtension extends AbstractExtension {
           }
         }
         cg.commit();
-        console.log("Matrix PointerUp: " + matrix);
         this._initialSizes = null;
         this._initialPoint = null;
         break;
