@@ -154,11 +154,16 @@ export class ContextMenuHelper {
     ul.className = 'context-menu__items';
     nav.appendChild(ul);
 
+    let lastWasSeperator = false;
     for (let i of items) {
       if (i.title == '-') {
-        let hr = document.createElement('hr');
-        ul.appendChild(hr);
+        if (!lastWasSeperator) {
+          let hr = document.createElement('hr');
+          ul.appendChild(hr);
+          lastWasSeperator = true
+        }
       } else {
+        lastWasSeperator = false;
         let li = document.createElement('li');
         li.className = 'context-menu__item';
         let div = document.createElement('div');
