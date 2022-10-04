@@ -2,7 +2,7 @@ import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IDesignerExtension } from "./IDesignerExtension";
-import { SvgExtention } from "./SvgExtention";
+import { SvgExtension } from "./SvgExtension";
 import { IExtensionManager } from "./IExtensionManger";
 
 export class SvgExtensionProvider implements IDesignerExtensionProvider {
@@ -20,6 +20,6 @@ export class SvgExtensionProvider implements IDesignerExtensionProvider {
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new SvgExtention(extensionManager, designerView, designItem);
+    return new SvgExtension(extensionManager, designerView, designItem);
   }
 }

@@ -10,7 +10,7 @@ import { ContextMenuHelper } from "../../../helper/contextMenu/ContextMenuHelper
 import { IContextMenuItem } from "../../../..";
 
 
-export class SvgExtention extends AbstractExtension {
+export class SvgExtension extends AbstractExtension {
 
   private _lastPos: IPoint
   private _parentRect: DOMRect;
