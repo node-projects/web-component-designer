@@ -1207,36 +1207,52 @@ export function createPathD(path: PathData[]) {
   for (let p of path) {
     switch (p.type) {
       case 'M':
-        pathD += p.type + p.values[0] + " " + p.values[1];
+        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " ";
         break;
+
       case 'L':
-        pathD += p.type + p.values[0] + " " + p.values[1];
+      case 'l':
+        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " ";
         break;
+
       case 'H':
-
+      case 'h':
+        pathD += p.type + " " + p.values[0] + " ";
         break;
+
       case 'V':
+      case 'v':
+        pathD += p.type + " " + p.values[0] + " ";
+        break;
 
-        break;
       case 'Z':
-        pathD += p.type;
+      case 'z':
+        pathD += p.type + " ";
         break;
+
       case 'C':
       case 'c':
-        pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5];
+        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5] + " ";
         break;
-      case 'S':
 
+      case 'S':
+      case 's':
+        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " ";
         break;
+
       case 'Q':
       case 'q':
-        pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3]
+        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " ";
         break;
+
       case 'T':
-
+      case 't':
+        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " ";
         break;
-      case 'A':
 
+      case 'A':
+      case 'a':
+        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5] + " ";
         break;
     }
   }
