@@ -1205,55 +1205,12 @@ export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: numb
 export function createPathD(path: PathData[]) {
   let pathD: string = "";
   for (let p of path) {
-    switch (p.type) {
-      case 'M':
-        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " ";
-        break;
-
-      case 'L':
-      case 'l':
-        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " ";
-        break;
-
-      case 'H':
-      case 'h':
-        pathD += p.type + " " + p.values[0] + " ";
-        break;
-
-      case 'V':
-      case 'v':
-        pathD += p.type + " " + p.values[0] + " ";
-        break;
-
-      case 'Z':
-      case 'z':
-        pathD += p.type + " ";
-        break;
-
-      case 'C':
-      case 'c':
-        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5] + " ";
-        break;
-
-      case 'S':
-      case 's':
-        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " ";
-        break;
-
-      case 'Q':
-      case 'q':
-        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " ";
-        break;
-
-      case 'T':
-      case 't':
-        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " ";
-        break;
-
-      case 'A':
-      case 'a':
-        pathD += p.type + " " + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5] + " ";
-        break;
+    pathD += p.type + " ";
+    for (var i = 0; i < p.values.length; i++) {
+      if (p.values[i] != null && !isNaN(p.values[i])) {
+        console.log(p.values[i])
+        pathD += p.values[i] + " ";
+      }
     }
   }
   return pathD;

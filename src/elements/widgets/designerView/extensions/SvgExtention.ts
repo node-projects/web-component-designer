@@ -150,9 +150,13 @@ export class SvgExtention extends AbstractExtension {
             p.values[index + 1] = this._originalPathPoint.y + dy;
             if (p.type == 'V' || p.type == 'v') {
               p.values[index] = this._originalPathPoint.x + dy;
+              circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+            } else if (p.type == 'H' || p.type == 'h') {
+              circle.setAttribute("cy", (this._circlePos.x + dx).toString());
+            } else {
+              circle.setAttribute("cx", (this._circlePos.x + dx).toString());
+              circle.setAttribute("cy", (this._circlePos.y + dy).toString());
             }
-            circle.setAttribute("cx", (this._circlePos.x + dx).toString());
-            circle.setAttribute("cy", (this._circlePos.y + dy).toString());
           }
           this.extendedItem.element.setAttribute("d", createPathD(this._pathdata));
         }
