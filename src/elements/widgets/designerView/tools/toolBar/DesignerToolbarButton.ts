@@ -41,7 +41,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
     this.tools = tools;
     this._img = this._getDomElement<HTMLImageElement>('img');
     this._div = this._getDomElement<HTMLImageElement>('div');
-    this._img.onclick = () => {
+    this._div.onclick = () => {
       if (this.popup) {
         (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).showPopup(this);
       } else {
