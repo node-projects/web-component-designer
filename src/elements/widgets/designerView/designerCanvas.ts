@@ -363,9 +363,27 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     const designItems = await this.serviceContainer.copyPasteService.getPasteItems(this.serviceContainer, this.instanceServiceContainer);
 
     let grp = this.rootDesignItem.openGroup("Insert");
+
+    let pasteContainer = this.rootDesignItem;
+    let pCon = this.instanceServiceContainer.selectionService.primarySelection;
+    while (pCon != null) {
+      const containerStyle = getComputedStyle(pCon.element);
+      let newContainerService: IPlacementService;
+      newContainerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(pCon, containerStyle));
+      if (newContainerService) {
+        if (newContainerService.canEnter(pCon, designItems)) {
+          pasteContainer = pCon;
+          break;
+        } else {
+          pCon = pCon.parent;
+          continue;
+        }
+      }
+    }
+
     if (designItems) {
       for (let di of designItems) {
-        this.instanceServiceContainer.undoService.execute(new InsertAction(this.rootDesignItem, this.rootDesignItem.childCount, di));
+        this.instanceServiceContainer.undoService.execute(new InsertAction(pasteContainer, pasteContainer.childCount, di));
       }
 
       const intializationService = this.serviceContainer.intializationService;
