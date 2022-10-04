@@ -2,10 +2,10 @@ import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IDesignerExtension } from "./IDesignerExtension";
-import { PathExtension } from "./PathExtension";
+import { SvgExtension } from "./SvgExtension";
 import { IExtensionManager } from "./IExtensionManger";
 
-export class PathExtensionProvider implements IDesignerExtensionProvider {
+export class SvgExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.node instanceof SVGPathElement ||
       designItem.node instanceof SVGRectElement ||
@@ -20,6 +20,6 @@ export class PathExtensionProvider implements IDesignerExtensionProvider {
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new PathExtension(extensionManager, designerView, designItem);
+    return new SvgExtension(extensionManager, designerView, designItem);
   }
 }

@@ -14,7 +14,7 @@ import { GridExtensionProvider } from '../widgets/designerView/extensions/GridEx
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider.js';
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider.js';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider.js';
-import { PathExtensionProvider } from '../widgets/designerView/extensions/PathExtensionProvider.js';
+import { SvgExtensionProvider } from '../widgets/designerView/extensions/SvgExtensionProvider.js';
 import { MouseOverExtensionProvider } from '../widgets/designerView/extensions/MouseOverExtensionProvider.js';
 import { NamedTools } from '../widgets/designerView/tools/NamedTools.js';
 import { PointerTool } from '../widgets/designerView/tools/PointerTool.js';
@@ -98,7 +98,7 @@ export function createDefaultServiceContainer() {
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
-    new PathExtensionProvider(),
+    new SvgExtensionProvider(),
     new ResizeExtensionProvider(true),
     new RotateExtensionProvider(),
   ]);

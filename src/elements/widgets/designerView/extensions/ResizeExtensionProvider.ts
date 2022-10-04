@@ -15,13 +15,15 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
   }
 
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+    if (designItem.element instanceof SVGElement)
+      return false;
     return designItem.nodeType == NodeType.Element;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
     return new ResizeExtension(extensionManager, designerView, designItem, this.resizeAllSelected);
   }
-  
+
   readonly style = css`
     .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
   `;
