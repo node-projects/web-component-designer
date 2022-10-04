@@ -1208,7 +1208,6 @@ export function createPathD(path: PathData[]) {
     pathD += p.type + " ";
     for (var i = 0; i < p.values.length; i++) {
       if (p.values[i] != null && !isNaN(p.values[i])) {
-        console.log(p.values[i])
         pathD += p.values[i] + " ";
       }
     }

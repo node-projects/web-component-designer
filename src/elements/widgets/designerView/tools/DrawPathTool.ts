@@ -33,7 +33,7 @@ export class DrawPathTool implements ITool {
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
-    const offset = 50;
+    const offset = 10;
 
 
     switch (event.type) {
@@ -119,19 +119,20 @@ export class DrawPathTool implements ITool {
           this._samePoint = false;
           this._dragMode = false;
 
-          const rect = this._path.getBoundingClientRect();
+          let coords = designerCanvas.getNormalizedElementCoordinates(this._path);
           designerCanvas.overlayLayer.removeOverlay(this._path);
           const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          const mvX = rect.x - designerCanvas.containerBoundingRect.x - offset;
-          const mvY = rect.y - designerCanvas.containerBoundingRect.y - offset;
+          const mvX = coords.x - offset;
+          const mvY = coords.y - offset;
+          
           const d = moveSVGPath(this._path, mvX, mvY);
           this._path.setAttribute("d", d);
           svg.appendChild(this._path);
           svg.style.left = (mvX) + 'px';
           svg.style.top = (mvY) + 'px';
           svg.style.position = 'absolute';
-          svg.style.width = (rect.width + 2 * offset) + 'px';
-          svg.style.height = (rect.height + 2 * offset) + 'px';
+          svg.style.width = (coords.width + 2 * offset) + 'px';
+          svg.style.height = (coords.height + 2 * offset) + 'px';
           svg.style.overflow = 'visible';
           //designerView.rootDesignItem.element.appendChild(svg);
           this._path = null;
