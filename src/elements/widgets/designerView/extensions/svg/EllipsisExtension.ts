@@ -19,6 +19,10 @@ export class EllipsisExtension extends AbstractExtension {
     private _ry: number;
     private _newRx: number;
     private _newRy: number;
+    private _circle1: SVGCircleElement;
+    private _circle2: SVGCircleElement;
+    private _circle3: SVGCircleElement;
+    private _circle4: SVGCircleElement;
     constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
         super(extensionManager, designerView, extendedItem);
     }
@@ -33,10 +37,10 @@ export class EllipsisExtension extends AbstractExtension {
         this._rx = this._ellipseElement.rx.baseVal.value;
         this._ry = this._ellipseElement.ry.baseVal.value;
 
-        this._drawPathCircle(this._cx, this._cy - this._ry, this._ellipseElement, 0)
-        this._drawPathCircle(this._cx + this._rx, this._cy, this._ellipseElement, 1)
-        this._drawPathCircle(this._cx, this._cy + this._ry, this._ellipseElement, 2)
-        this._drawPathCircle(this._cx - this._rx, this._cy, this._ellipseElement, 3)
+        this._circle1 = this._drawPathCircle(this._cx, this._cy - this._ry, this._ellipseElement, 0)
+        this._circle2 = this._drawPathCircle(this._cx + this._rx, this._cy, this._ellipseElement, 1)
+        this._circle3 = this._drawPathCircle(this._cx, this._cy + this._ry, this._ellipseElement, 2)
+        this._circle4 = this._drawPathCircle(this._cx - this._rx, this._cy, this._ellipseElement, 3)
     }
 
 
@@ -87,6 +91,12 @@ export class EllipsisExtension extends AbstractExtension {
                     }
                     e.setAttribute("rx", this._newRx.toString());
                     e.setAttribute("ry", this._newRy.toString());
+
+                    this._redrawPathCircle(this._cx, this._cy - this._newRy, this._circle1);
+                    this._redrawPathCircle(this._cx + this._newRx, this._cy, this._circle2);
+                    this._redrawPathCircle(this._cx, this._cy + this._newRy, this._circle3);
+                    this._redrawPathCircle(this._cx - this._newRx, this._cy, this._circle4);
+
                 }
                 break;
 
@@ -112,6 +122,13 @@ export class EllipsisExtension extends AbstractExtension {
         circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, e, index));
         circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, e, index));
         circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, e, index));
+        return circle;
+    }
+
+    _redrawPathCircle(x: number, y: number, oldCircle: SVGCircleElement) {
+        let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path', oldCircle);
+        circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+        return circle;
     }
 
 

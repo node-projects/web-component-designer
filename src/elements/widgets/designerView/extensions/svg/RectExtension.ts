@@ -17,6 +17,10 @@ export class RectExtension extends AbstractExtension {
     private _y: number;
     private _w: number;
     private _h: number;
+    private _circle1: SVGCircleElement;
+    private _circle2: SVGCircleElement;
+    private _circle3: SVGCircleElement;
+    private _circle4: SVGCircleElement;
     private _rect = { x: 0, y: 0, w: 0, h: 0 }
 
 
@@ -35,10 +39,10 @@ export class RectExtension extends AbstractExtension {
         this._w = this._rectElement.width.baseVal.value;
         this._h = this._rectElement.height.baseVal.value;
 
-        this._drawPathCircle(this._x, this._y, this._rectElement, 0);
-        this._drawPathCircle(this._x + this._w, this._y, this._rectElement, 1);
-        this._drawPathCircle(this._x + this._w, this._y + this._h, this._rectElement, 2);
-        this._drawPathCircle(this._x, this._y + this._h, this._rectElement, 3);
+        this._circle1 = this._drawPathCircle(this._x, this._y, this._rectElement, 0);
+        this._circle2 = this._drawPathCircle(this._x + this._w, this._y, this._rectElement, 1);
+        this._circle3 = this._drawPathCircle(this._x + this._w, this._y + this._h, this._rectElement, 2);
+        this._circle4 = this._drawPathCircle(this._x, this._y + this._h, this._rectElement, 3);
     }
 
 
@@ -109,6 +113,11 @@ export class RectExtension extends AbstractExtension {
                     r.setAttribute("height", this._rect.h.toString());
                     circle.setAttribute("cx", (this._circlePos.x + dx).toString());
                     circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+
+                    this._redrawPathCircle(this._rect.x, this._rect.y, this._circle1);
+                    this._redrawPathCircle(this._rect.x + this._rect.w, this._rect.y, this._circle2);
+                    this._redrawPathCircle(this._rect.x + this._rect.w, this._rect.y + this._rect.h, this._circle3);
+                    this._redrawPathCircle(this._rect.x, this._rect.y + this._rect.h, this._circle4);
                 }
 
                 break;
@@ -135,6 +144,13 @@ export class RectExtension extends AbstractExtension {
         circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, r, index));
         circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, r, index));
         circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, r, index));
+        return circle;
+    }
+
+    _redrawPathCircle(x: number, y: number, oldCircle: SVGCircleElement) {
+        let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path', oldCircle);
+        circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+        return circle;
     }
 
 
