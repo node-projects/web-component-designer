@@ -1,16 +1,16 @@
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { AbstractExtension } from "./AbstractExtension";
-import "../../../helper/PathDataPolyfill";
-import { IPoint } from "../../../../interfaces/IPoint";
-import { IExtensionManager } from "./IExtensionManger";
-import { EventNames } from "../../../../enums/EventNames";
-import { createPathD, PathData, PathDataL } from "../../../helper/PathDataPolyfill";
-import { ContextMenuHelper } from "../../../helper/contextMenu/ContextMenuHelper";
-import { IContextMenuItem } from "../../../..";
+import { IDesignItem } from "../../../../item/IDesignItem";
+import { IDesignerCanvas } from "../../IDesignerCanvas";
+import { AbstractExtension } from "../AbstractExtension";
+import "../../../../helper/PathDataPolyfill";
+import { IPoint } from "../../../../../interfaces/IPoint";
+import { IExtensionManager } from "../IExtensionManger";
+import { EventNames } from "../../../../../enums/EventNames";
+import { createPathD, PathData, PathDataL } from "../../../../helper/PathDataPolyfill";
+import { ContextMenuHelper } from "../../../../helper/contextMenu/ContextMenuHelper";
+import { IContextMenuItem } from "../../../../..";
 
 
-export class SvgExtension extends AbstractExtension {
+export class PathExtension extends AbstractExtension {
 
   private _lastPos: IPoint
   private _parentRect: DOMRect;
