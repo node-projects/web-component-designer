@@ -114,6 +114,8 @@ export class RectExtension extends AbstractExtension {
                     circle.setAttribute("cx", (this._circlePos.x + dx).toString());
                     circle.setAttribute("cy", (this._circlePos.y + dy).toString());
 
+                    this.designerCanvas.extensionManager.refreshAllExtensions([this.extendedItem], this);
+
                     this._redrawPathCircle(this._rect.x, this._rect.y, this._circle1);
                     this._redrawPathCircle(this._rect.x + this._rect.w, this._rect.y, this._circle2);
                     this._redrawPathCircle(this._rect.x + this._rect.w, this._rect.y + this._rect.h, this._circle3);

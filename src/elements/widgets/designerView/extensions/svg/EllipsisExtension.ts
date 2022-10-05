@@ -92,6 +92,8 @@ export class EllipsisExtension extends AbstractExtension {
                     e.setAttribute("rx", this._newRx.toString());
                     e.setAttribute("ry", this._newRy.toString());
 
+                    this.designerCanvas.extensionManager.refreshAllExtensions([this.extendedItem], this);
+
                     this._redrawPathCircle(this._cx, this._cy - this._newRy, this._circle1);
                     this._redrawPathCircle(this._cx + this._newRx, this._cy, this._circle2);
                     this._redrawPathCircle(this._cx, this._cy + this._newRy, this._circle3);
@@ -129,6 +131,7 @@ export class EllipsisExtension extends AbstractExtension {
         let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path', oldCircle);
         circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
         return circle;
+
     }
 
 

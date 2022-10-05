@@ -1176,25 +1176,25 @@ export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: numb
         case ('l'):
         case ('T'):
         case ('t'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " ";
           break;
         case ('Z'):
         case ('z'):
-          newPathData += p.type;
+          newPathData += p.type + " ";
           break;
         case ('C'):
         case ('c'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " " + (p.values[4] - xFactor) + " " + (p.values[5] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " " + (p.values[4] - xFactor) + " " + (p.values[5] - yFactor) + " ";
           break;
         case ('S'):
         case ('s'):
         case ('Q'):
         case ('q'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " ";
           break;
         case ('A'):
         case ('a'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + (p.values[5] - xFactor) + " " + (p.values[6] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + (p.values[5] - xFactor) + " " + (p.values[6] - yFactor) + " ";
           break;
       }
     }
