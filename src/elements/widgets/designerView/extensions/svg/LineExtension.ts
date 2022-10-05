@@ -69,6 +69,8 @@ export class LineExtension extends AbstractExtension {
                         this._newCirclePoint = { x: this._circlePos.x + dx, y: this._circlePos.y + dy }
                         this._newLinePoint = { x: this._originalPoint.x + dx, y: this._originalPoint.y + dy }
                     }
+                    this.designerCanvas.extensionManager.refreshAllExtensions([this.extendedItem], this);
+
                     circle.setAttribute("cx", this._newCirclePoint.x.toString());
                     circle.setAttribute("cy", this._newCirclePoint.y.toString());
                     l.setAttribute("x" + index, this._newLinePoint.x.toString());

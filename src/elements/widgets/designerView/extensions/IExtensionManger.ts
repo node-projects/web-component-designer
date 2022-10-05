@@ -8,6 +8,6 @@ export interface IExtensionManager {
   removeExtensions(designItems: IDesignItem[], extensionType?: ExtensionType);
   refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType);
   refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType);
-  refreshAllExtensions(designItems: IDesignItem[]);
+  refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: any);
   refreshAllAppliedExtentions();
 }

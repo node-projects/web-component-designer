@@ -158,6 +158,7 @@ export class PathExtension extends AbstractExtension {
               circle.setAttribute("cy", (this._circlePos.y + dy).toString());
             }
           }
+          this.designerCanvas.extensionManager.refreshAllExtensions([this.extendedItem], this);
           this.extendedItem.element.setAttribute("d", createPathD(this._pathdata));
         }
         break;
