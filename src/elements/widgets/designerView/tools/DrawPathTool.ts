@@ -45,7 +45,7 @@ export class DrawPathTool implements ITool {
           designerCanvas.captureActiveTool(this);
 
           this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
+          this._pathD = "M " + currentPoint.x + " " + currentPoint.y + " ";
           this._path.setAttribute("d", this._pathD);
           this._path.setAttribute("stroke", designerCanvas.serviceContainer.globalContext.strokeColor);
           this._path.setAttribute("fill", designerCanvas.serviceContainer.globalContext.fillBrush);
@@ -73,7 +73,7 @@ export class DrawPathTool implements ITool {
         if (!this._p2pMode) {
           this._dragMode = true;
           if (this._path) {
-            this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
+            this._pathD += "L " + currentPoint.x + " " + currentPoint.y + " ";
             this._path.setAttribute("d", this._pathD);
           }
         }
@@ -83,7 +83,7 @@ export class DrawPathTool implements ITool {
             if (event.shiftKey) {
               straightLine = straightenLine(this._lastPoint, currentPoint);
             }
-            this._path.setAttribute("d", this._pathD + "L" + straightLine.x + " " + straightLine.y);
+            this._path.setAttribute("d", this._pathD + "L " + straightLine.x + " " + straightLine.y) + " ";
           }
         }
         break;
@@ -97,12 +97,12 @@ export class DrawPathTool implements ITool {
           if (this._path) {
             if (event.shiftKey) {
               let straightLine = straightenLine(this._lastPoint, currentPoint);
-              this._pathD += "L" + straightLine.x + " " + straightLine.y;
+              this._pathD += "L " + straightLine.x + " " + straightLine.y + " ";
               this._path.setAttribute("d", this._pathD);
               this._lastPoint = straightLine;
             }
             else {
-              this._pathD += "L" + currentPoint.x + " " + currentPoint.y;
+              this._pathD += "L " + currentPoint.x + " " + currentPoint.y + " ";
               this._path.setAttribute("d", this._pathD);
               this._lastPoint = currentPoint;
             }

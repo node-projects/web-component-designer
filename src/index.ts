@@ -185,8 +185,8 @@ export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtension.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/SvgExtension.js";
-export * from "./elements/widgets/designerView/extensions/SvgExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/svg/PathExtension.js";
+export * from "./elements/widgets/designerView/extensions/svg/PathExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/PositionExtension.js";
 export * from "./elements/widgets/designerView/extensions/PositionExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/ElementDragTitleExtension.js";
