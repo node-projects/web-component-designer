@@ -37,6 +37,7 @@ export class ResizeExtension extends AbstractExtension {
   }
 
   override refresh() {
+    //#region Resizer circles
     let clone = <HTMLElement>this.extendedItem.element.cloneNode();
     let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
 
@@ -50,6 +51,7 @@ export class ResizeExtension extends AbstractExtension {
     this._circle6 = this._drawResizerOverlay((transformedCornerPoints[2].x + (transformedCornerPoints[3].x - transformedCornerPoints[2].x) / 2), (transformedCornerPoints[2].y + (transformedCornerPoints[3].y - transformedCornerPoints[2].y) / 2), 's-resize', this._circle6);
     this._circle7 = this._drawResizerOverlay(transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'se-resize', this._circle7);
     this._circle8 = this._drawResizerOverlay((transformedCornerPoints[1].x + (transformedCornerPoints[3].x - transformedCornerPoints[1].x) / 2), (transformedCornerPoints[1].y + (transformedCornerPoints[3].y - transformedCornerPoints[1].y) / 2), 'e-resize', this._circle8);
+    //#endregion Circles
   }
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
@@ -78,11 +80,13 @@ export class ResizeExtension extends AbstractExtension {
         this._actionModeStarted = actionMode;
         this._initialComputedTransformOrigins = [];
         this._initialTransformOrigins = [];
-        
+
+        //#region Calc elements' dimension
         const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
-        (<HTMLElement>this.extendedItem.element).style.transform = '';        
+        (<HTMLElement>this.extendedItem.element).style.transform = '';
         let rect = this.extendedItem.element.getBoundingClientRect();
         (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
+        //#endregion Calc element's dimension
 
         this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
 
@@ -90,8 +94,8 @@ export class ResizeExtension extends AbstractExtension {
 
         const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseInt(x.replace('px', '')));
         const transformOrigin: DOMPoint = new DOMPoint(toArr[0], toArr[1]);
-        this. _initialComputedTransformOrigins.push(transformOrigin);
-        this._initialTransformOrigins.push( (<HTMLElement>this.extendedItem.element).style.transformOrigin);
+        this._initialComputedTransformOrigins.push(transformOrigin);
+        this._initialTransformOrigins.push((<HTMLElement>this.extendedItem.element).style.transformOrigin);
 
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -101,6 +105,66 @@ export class ResizeExtension extends AbstractExtension {
         }
         if (this.designerCanvas.alignOnSnap)
           this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+
+        let top: string = null;
+        let bottom: string = null;
+        let left: string = null;
+        let right: string = null;
+
+        switch (this._actionModeStarted) {
+          case 'e-resize':
+            left = getComputedStyle(this.extendedItem.element).left;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
+            (<HTMLElement>this.extendedItem.element).style.left = left;
+            break;
+          case 'se-resize':
+            top = getComputedStyle(this.extendedItem.element).top;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
+            (<HTMLElement>this.extendedItem.element).style.top = top;
+            left = getComputedStyle(this.extendedItem.element).left;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
+            (<HTMLElement>this.extendedItem.element).style.left = left;
+            break;
+          case 's-resize':
+            top = getComputedStyle(this.extendedItem.element).top;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
+            (<HTMLElement>this.extendedItem.element).style.top = top;
+            break;
+          case 'sw-resize':
+            top = getComputedStyle(this.extendedItem.element).top;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
+            (<HTMLElement>this.extendedItem.element).style.top = top;
+            right = getComputedStyle(this.extendedItem.element).right;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
+            (<HTMLElement>this.extendedItem.element).style.right = right;
+            break;
+          case 'w-resize':
+            right = getComputedStyle(this.extendedItem.element).right;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
+            (<HTMLElement>this.extendedItem.element).style.right = right;
+            break;
+          case 'nw-resize':
+            bottom = getComputedStyle(this.extendedItem.element).bottom;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
+            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
+            right = getComputedStyle(this.extendedItem.element).right;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
+            (<HTMLElement>this.extendedItem.element).style.right = right;
+            break;
+          case 'n-resize':
+            bottom = getComputedStyle(this.extendedItem.element).bottom;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
+            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
+            break;
+          case 'ne-resize':
+            bottom = getComputedStyle(this.extendedItem.element).bottom;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
+            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
+            left = getComputedStyle(this.extendedItem.element).left;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
+            (<HTMLElement>this.extendedItem.element).style.left = left;
+            break;
+        }
         break;
 
       case EventNames.PointerMove:
@@ -112,15 +176,18 @@ export class ResizeExtension extends AbstractExtension {
           let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
           let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
-          let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY, 0, 0) , matrix);
+          let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY, 0, 0), matrix);
 
           let i = 0;
-          
+
           (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+
+          let width = null;
+          let height = null;
 
           switch (this._actionModeStarted) {
             case 'e-resize':
-              let width = (this._initialSizes[i].width + transformedTrack.x);  
+              width = (this._initialSizes[i].width + transformedTrack.x);
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
 
               if (this.resizeAllSelected) {
@@ -132,12 +199,104 @@ export class ResizeExtension extends AbstractExtension {
                 }
               }
               break;
-            case 's-resize':
-              (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+            case 'se-resize':
+              width = (this._initialSizes[i].width + transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height + transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 's-resize':
+              height = (this._initialSizes[i].height + transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 'sw-resize':
+              width = (this._initialSizes[i].width - transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height + transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 'w-resize':
+              width = (this._initialSizes[i].width - transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                  }
+                }
+              }
+              break;
+            case 'nw-resize':
+              width = (this._initialSizes[i].width - transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height - transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 'n-resize':
+              height = (this._initialSizes[i].height - transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 'ne-resize':
+              width = (this._initialSizes[i].width + transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height - transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
                     (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
                   }
                 }
@@ -157,14 +316,31 @@ export class ResizeExtension extends AbstractExtension {
         let cg = this.extendedItem.openGroup("Resize Elements");
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
-        
+
         let transformedRect = this.extendedItem.element.getBoundingClientRect();
         (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
         let transformedRectWithOriginalTransformOrigin = this.extendedItem.element.getBoundingClientRect();
         let deltaX = transformedRectWithOriginalTransformOrigin.x - transformedRect.x;
         let deltaY = transformedRectWithOriginalTransformOrigin.y - transformedRect.y;
-        const matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(deltaX, -deltaY);
-        (<HTMLElement>this.extendedItem.element).style.transform = matrix.toString();
+        let matrix = null;
+
+        switch (this._actionModeStarted) {
+          case 'e-resize':
+            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(deltaX, -deltaY);
+            break;
+          case 'se-resize':
+            break;
+          case 's-resize':
+            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
+            break;
+          case 'sw-resize':
+            break;
+          case 'w-resize':
+            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
+            break;
+        }
+        if (matrix)
+          (<HTMLElement>this.extendedItem.element).style.transform = matrix.toString();
         this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
