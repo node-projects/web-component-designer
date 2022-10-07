@@ -106,7 +106,7 @@ export class ResizeExtension extends AbstractExtension {
         if (this.designerCanvas.alignOnSnap)
           this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
-          let i = 0;
+        let i = 0;
         let top: string = null;
         let bottom: string = null;
         let left: string = null;
@@ -343,7 +343,12 @@ export class ResizeExtension extends AbstractExtension {
           case 'sw-resize':
             break;
           case 'w-resize':
-            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
+            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(deltaX, -deltaY);
+            break;
+          case 'nw-resize':
+            break;
+          case 'n-resize':
+            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, -deltaY);
             break;
         }
         if (matrix)
