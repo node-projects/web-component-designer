@@ -201,6 +201,9 @@ export class PointerTool implements ITool {
         }
       case EventNames.PointerMove:
         {
+          if (event.buttons == 0) {
+            return;
+          }
           const elementMoved = currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
           if (this._actionType != PointerActionType.Drag && elementMoved) {
             this._actionType = PointerActionType.Drag;
