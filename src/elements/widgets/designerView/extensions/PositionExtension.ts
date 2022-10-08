@@ -38,10 +38,10 @@ export class PositionExtension extends AbstractExtension {
 
     let x = Math.round(itemRect.x - itemParentRect.x);
     let y = Math.round(itemRect.y - itemParentRect.y);
-    this._textX = this._drawTextWithBackground('' + x, itemParentRect.x + x / 2 - 9 / this.designerCanvas.scaleFactor, itemRect.y + itemRect.height / 2 + 4 / this.designerCanvas.scaleFactor, 'white', null, this._textX);
+    this._textX = this._drawTextWithBackground('' + x, itemParentRect.x + x / 2, itemRect.y + itemRect.height / 2, 'white', 'svg-position-text', this._textX);
     this._textX[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
     this._textX[3].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
-    this._textY = this._drawTextWithBackground('' + y, itemRect.x + itemRect.width / 2 - 10 / this.designerCanvas.scaleFactor, itemParentRect.y + y / 2 + 4 / this.designerCanvas.scaleFactor, 'white', null, this._textY);
+    this._textY = this._drawTextWithBackground('' + y, itemRect.x + itemRect.width / 2, itemParentRect.y + y / 2, 'white', 'svg-position-text', this._textY);
     this._textY[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
     this._textY[3].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
   }
