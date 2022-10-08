@@ -67,12 +67,22 @@ export class FlexBoxPlacementService implements IPlacementService {
           elBefore = c;
         }
       }
+      let posBefore = childrenWithPos.indexOf(elBefore);
+      let posDrag = childrenWithPos.indexOf(childrenWithPos.find(x => x[0] == items[0]));
       if (elBefore && elBefore[0] != items[0]) {
+        if (posBefore + 1 === posDrag)
+          return;
+        let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         elBefore[0].insertAdjacentElement(items[0], 'afterend');
+        cg.commit();
       } else if (elBefore == null) {
+        if (posDrag == 0)
+          return;
+        let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         container.insertChild(items[0], 0);
+        cg.commit();
       }
     } else if (style.flexDirection == 'column') {
       childrenWithPos.sort(x => x[1].y);
@@ -82,12 +92,22 @@ export class FlexBoxPlacementService implements IPlacementService {
           elBefore = c;
         }
       }
+      let posBefore = childrenWithPos.indexOf(elBefore);
+      let posDrag = childrenWithPos.indexOf(childrenWithPos.find(x => x[0] == items[0]));
       if (elBefore && elBefore[0] != items[0]) {
+        if (posBefore + 1 === posDrag)
+          return;
+        let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         elBefore[0].insertAdjacentElement(items[0], 'afterend');
+        cg.commit();
       } else if (elBefore == null) {
+        if (posDrag == 0)
+          return;
+        let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         container.insertChild(items[0], 0);
+        cg.commit();
       }
     }
 
