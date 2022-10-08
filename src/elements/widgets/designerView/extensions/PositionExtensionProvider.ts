@@ -19,6 +19,6 @@ export class PositionExtensionProvider implements IDesignerExtensionProvider {
   }
 
   readonly style = css`
-    .svg-position-text-rect { fill: white; }
+    .svg-position-text { text-anchor: middle; alignment-baseline: central; }
   `;
 }

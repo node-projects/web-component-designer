@@ -6,6 +6,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
 
   static override readonly template = html`
     <svg id="svg" style="pointer-events: none;">
+      <defs id="defs"></defs>
       <g id="background"></g>
       <g id="normal"></g>
       <g id="foreground"></g>
@@ -34,6 +35,8 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
   private _gBackground: SVGGElement;
   private _gNormal: SVGGElement;
   private _gForeground: SVGGElement;
+  private _defs: SVGDefsElement;
+  private _id: number = 0;
 
   constructor(serviceContainer: ServiceContainer) {
     super();
@@ -43,6 +46,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     this._gBackground = this._getDomElement<SVGGElement>('background');
     this._gNormal = this._getDomElement<SVGGElement>('normal');
     this._gForeground = this._getDomElement<SVGGElement>('foreground');
+    this._defs = this._getDomElement<SVGDefsElement>('defs');
 
     this._initialize();
   }
@@ -80,7 +84,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     }
   }
 
-  public removeOverlay(element: SVGGraphicsElement) {
+  public removeOverlay(element: SVGElement) {
     try {
       element?.parentElement?.removeChild(element);
     } catch (err) {
@@ -165,6 +169,42 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     if (className)
       textEl.setAttribute('class', className);
     return textEl;
+  }
+
+  drawTextWithBackground(text: string, x: number, y: number, backgroundColor: string, className?: string, existingEls?: [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement], overlayLayer?: OverlayLayer): [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement] {
+    if (!existingEls) {
+      let filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+      filter.setAttribute("x", "0");
+      filter.setAttribute("y", "0");
+      filter.setAttribute("width", "1");
+      filter.setAttribute("height", "1");
+      filter.setAttribute("id", "solid_" + (++this._id));
+      let flood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+      flood.setAttribute("flood-color", backgroundColor);
+      filter.appendChild(flood);
+      let composite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+      composite.setAttribute("in", "SourceGraphic");
+      composite.setAttribute("operator", "xor");
+      filter.appendChild(composite);
+      this._defs.appendChild(filter);
+      let textEl1 = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      textEl1.setAttribute("filter", "url(#solid_" + this._id + ")");
+      let textEl2 = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      this.addOverlay(textEl1, overlayLayer);
+      this.addOverlay(textEl2, overlayLayer);
+      existingEls = [filter, flood, textEl1, textEl2]
+    }
+    existingEls[2].setAttribute('x', <string><any>x);
+    existingEls[3].setAttribute('x', <string><any>x);
+    existingEls[2].setAttribute('y', <string><any>y);
+    existingEls[3].setAttribute('y', <string><any>y);
+    existingEls[2].textContent = text;
+    existingEls[3].textContent = text;
+    if (className) {
+      existingEls[2].setAttribute('class', className);
+      existingEls[3].setAttribute('class', className);
+    }
+    return existingEls;
   }
 }
 
