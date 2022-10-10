@@ -61,6 +61,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _canvasOffset: IPoint = { x: 0, y: 0 };
 
   private _currentContextMenu: ContextMenuHelper
+  private _backgroundImage: string;
 
   public get zoomFactor(): number {
     return this._zoomFactor;
@@ -274,8 +275,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       case CommandType.screenshot: {
         if (!this.instanceServiceContainer.selectionService.primarySelection) {
           this.zoomToFit();
-          const backgroundImage = this._canvas.style.backgroundImage;
-          this._canvas.style.backgroundImage = 'none';
+          this.disableBackgroud();
           await sleep(100);
           const el = this.rootDesignItem.element;
           const sel = this.instanceServiceContainer.selectionService.selectedElements;
@@ -283,7 +283,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
           await exportData(dataURItoBlob(screenshot), "screenshot.png");
           this.instanceServiceContainer.selectionService.setSelectedElements(sel);
-          this._canvas.style.backgroundImage = backgroundImage;
+          this.enableBackground();
         }
         else {
           if (!Screenshot.screenshotsEnabled) {
@@ -339,6 +339,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
+  public disableBackgroud() {
+    this._backgroundImage = this._canvas.style.backgroundImage;
+    this._canvas.style.backgroundImage = 'none';
+  }
+
+  public enableBackground() {
+    this._canvas.style.backgroundImage = this._backgroundImage;
+  }
 
   public zoomToFit() {
     const autoZomOffset = 10;
