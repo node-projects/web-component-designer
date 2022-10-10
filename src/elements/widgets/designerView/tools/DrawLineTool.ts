@@ -27,7 +27,7 @@ export class DrawLineTool implements ITool {
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
-    const offset = 50;
+    const offset = 10;
 
 
     switch (event.type) {
@@ -70,11 +70,11 @@ export class DrawLineTool implements ITool {
         (<Element>event.target).releasePointerCapture(event.pointerId);
         designerCanvas.releaseActiveTool();
 
-        const rect = this._path.getBoundingClientRect();
+        let coords = designerCanvas.getNormalizedElementCoordinates(this._path);
         designerCanvas.overlayLayer.removeOverlay(this._path);
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        const mvX = rect.x - designerCanvas.containerBoundingRect.x - offset;
-        const mvY = rect.y - designerCanvas.containerBoundingRect.y - offset;
+        const mvX = coords.x - offset;
+        const mvY = coords.y - offset;
         this._path.setAttribute("x1", (this._startPoint.x - mvX).toString());
         this._path.setAttribute("y1", (this._startPoint.y - mvY).toString());
         this._path.setAttribute("x2", (this._endPoint.x - mvX).toString());
@@ -83,8 +83,8 @@ export class DrawLineTool implements ITool {
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';
         svg.style.position = 'absolute';
-        svg.style.width = (rect.width + 2 * offset) + 'px';
-        svg.style.height = (rect.height + 2 * offset) + 'px';
+        svg.style.width = (coords.width + 2 * offset) + 'px';
+        svg.style.height = (coords.height + 2 * offset) + 'px';
         svg.style.overflow = 'visible';
         this._path = null;
         const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
