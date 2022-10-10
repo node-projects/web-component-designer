@@ -245,8 +245,8 @@ export class ExtensionManager implements IExtensionManager {
           for (let appE of i.appliedDesignerExtensions) {
             for (let e of appE[1]) {
               try {
-                if(e != ignoredExtension)
-                e.refresh();
+                if (e != ignoredExtension)
+                  e.refresh();
               }
               catch (err) {
                 console.error(err);
