@@ -4,7 +4,7 @@ import { OverlayLayerView } from '../overlayLayerView';
 import { OverlayLayer } from './OverlayLayer';
 
 export abstract class AbstractExtensionBase {
-  protected overlays: SVGGraphicsElement[] = [];
+  protected overlays: SVGElement[] = [];
   protected overlayLayerView: OverlayLayerView;
   protected extensionManager: IExtensionManager;
   protected designerCanvas: IDesignerCanvas;
@@ -58,5 +58,13 @@ export abstract class AbstractExtensionBase {
       this.overlays.push(newText);
     }
     return newText;
+  }
+
+  protected _drawTextWithBackground(text: string, x: number, y: number, backgroundColor: string, className?: string, existingEls?: [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement], overlayLayer?: OverlayLayer) {
+    const newEls = this.overlayLayerView.drawTextWithBackground(text, x, y, backgroundColor, className, existingEls, overlayLayer);
+    if (!existingEls) {
+      this.overlays.push(...newEls);
+    }
+    return newEls;
   }
 }

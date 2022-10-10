@@ -430,7 +430,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     });
 
     for (let i of item.children()) {
-      if (i.nodeType !== NodeType.TextNode || i.content?.trim()) {
+      if (!i.isEmptyTextNode) {
         this._getChildren(i, newNode);
       }
     }

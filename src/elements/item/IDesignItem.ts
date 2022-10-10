@@ -44,6 +44,7 @@ export interface IDesignItem {
   readonly hasContent: boolean;
   content: string;
   innerHTML?: string;
+  readonly isEmptyTextNode: boolean;
 
   readonly node: Node;
   readonly element: Element;
