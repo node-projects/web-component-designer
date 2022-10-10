@@ -329,40 +329,19 @@ export class ResizeExtension extends AbstractExtension {
 
         let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
         let p1 = new DOMPoint(p1Abs.x - p3Abs.x, -(p1Abs.y - p3Abs.y));
-        let matrix = null;
+        let matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
         let deltaX = 0;
         let deltaY = 0;
 
-        switch (this._actionModeStarted) {
-          case 'e-resize':
-            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(deltaX, -deltaY);
-            break;
-          case 'se-resize':
-            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
-            let p1transformed = p1.matrixTransform(matrix.inverse());
-            let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
-            let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
-            let p1p2transformed = p1p2.matrixTransform(matrix);
-            let p4Abs = new DOMPoint(p1Abs.x + p1p2transformed.x, p1Abs.y - p1p2transformed.y);
-            deltaX = p4Abs.x - p1Abs.x;
-            deltaY = p4Abs.y - p1Abs.y;
-            break;
-          case 's-resize':
-            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
-            break;
-          case 'sw-resize':
-            break;
-          case 'w-resize':
-            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(deltaX, -deltaY);
-            break;
-          case 'nw-resize':
-            break;
-          case 'n-resize':
-            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
-            break;
-        }
-        if (matrix)
-          (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
+        let p1transformed = p1.matrixTransform(matrix.inverse());
+        let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
+        let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
+        let p1p2transformed = p1p2.matrixTransform(matrix);
+        let p4Abs = new DOMPoint(p1Abs.x + p1p2transformed.x, p1Abs.y - p1p2transformed.y);
+        deltaX = p4Abs.x - p1Abs.x;
+        deltaY = p4Abs.y - p1Abs.y;
+
+        (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
         this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
