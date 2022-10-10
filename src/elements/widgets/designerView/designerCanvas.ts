@@ -24,7 +24,7 @@ import { IExtensionManager } from "./extensions/IExtensionManger";
 import { ExtensionManager } from "./extensions/ExtensionManager";
 import { NamedTools } from "./tools/NamedTools";
 import { Screenshot } from '../../helper/Screenshot';
-import { dataURItoBlob, exportData } from "../../helper/Helper";
+import { dataURItoBlob, exportData, sleep } from "../../helper/Helper";
 import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItem";
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 import { IPoint } from "../../../interfaces/IPoint";
@@ -272,8 +272,19 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     switch (command.type) {
       case CommandType.screenshot: {
-        if (!this.instanceServiceContainer.selectionService.primarySelection)
-          alert("you need to select an element!")
+        if (!this.instanceServiceContainer.selectionService.primarySelection) {
+          this.zoomToFit();
+          const backgroundImage = this._canvas.style.backgroundImage;
+          this._canvas.style.backgroundImage = 'none';
+          await sleep(100);
+          const el = this.rootDesignItem.element;
+          const sel = this.instanceServiceContainer.selectionService.selectedElements;
+          this.instanceServiceContainer.selectionService.setSelectedElements(null);
+          const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
+          await exportData(dataURItoBlob(screenshot), "screenshot.png");
+          this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+          this._canvas.style.backgroundImage = backgroundImage;
+        }
         else {
           if (!Screenshot.screenshotsEnabled) {
             alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
@@ -327,6 +338,45 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         break;
     }
   }
+
+
+  public zoomToFit() {
+    const autoZomOffset = 10;
+    let maxX = 0, maxY = 0, minX = 0, minY = 0;
+
+    this.canvasOffset = { x: 0, y: 0 };
+    this.zoomFactor = 1;
+
+    for (let n of DomHelper.getAllChildNodes(this.rootDesignItem.element)) {
+      if (n instanceof Element) {
+        const rect = n.getBoundingClientRect();
+        minX = minX < rect.x ? minX : rect.x;
+        minY = minY < rect.y ? minY : rect.y;
+        maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
+        maxY = maxY > rect.y + rect.height + autoZomOffset ? maxY : rect.y + rect.height + autoZomOffset;
+      }
+    }
+
+    const cvRect = this.getBoundingClientRect();
+    maxX -= cvRect.x;
+    maxY -= cvRect.y;
+
+    let scaleX = cvRect.width / (maxX / this.zoomFactor);
+    let scaleY = cvRect.height / (maxY / this.zoomFactor);
+
+    const dimensions = this.getDesignSurfaceDimensions();
+    if (dimensions.width)
+      scaleX = cvRect.width / dimensions.width;
+    if (dimensions.height)
+      scaleY = cvRect.height / dimensions.height;
+
+    let fak = scaleX < scaleY ? scaleX : scaleY;
+    if (!isNaN(fak))
+      this.zoomFactor = fak;
+    //this._zoomInput.value = Math.round(this.zoomFactor * 100) + '%';
+  }
+
+
   canExecuteCommand(command: IUiCommand) {
     const modelCommandService = this.serviceContainer.modelCommandService;
     if (modelCommandService) {
