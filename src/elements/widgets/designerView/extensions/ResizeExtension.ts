@@ -336,6 +336,7 @@ export class ResizeExtension extends AbstractExtension {
             matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(deltaX, -deltaY);
             break;
           case 'se-resize':
+            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
             break;
           case 's-resize':
             matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
@@ -348,7 +349,7 @@ export class ResizeExtension extends AbstractExtension {
           case 'nw-resize':
             break;
           case 'n-resize':
-            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, -deltaY);
+            matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform).translate(-deltaX, deltaY);
             break;
         }
         if (matrix)
