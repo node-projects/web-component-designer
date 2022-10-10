@@ -13,8 +13,6 @@ import { PlainScrollbar } from '../../controls/PlainScrollbar';
 import { DesignerToolbar } from './tools/toolBar/DesignerToolbar.js';
 
 
-const autoZomOffset = 10;
-
 export class DesignerView extends BaseCustomWebComponentConstructorAppend implements IUiCommandHandler {
   private _sVert: PlainScrollbar;
   private _sHor: PlainScrollbar;
@@ -253,38 +251,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   public zoomToFit() {
-    let maxX = 0, maxY = 0, minX = 0, minY = 0;
-
-    this._designerCanvas.canvasOffset = { x: 0, y: 0 };
-    this._designerCanvas.zoomFactor = 1;
-
-    for (let n of DomHelper.getAllChildNodes(this.designerCanvas.rootDesignItem.element)) {
-      if (n instanceof Element) {
-        const rect = n.getBoundingClientRect();
-        minX = minX < rect.x ? minX : rect.x;
-        minY = minY < rect.y ? minY : rect.y;
-        maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
-        maxY = maxY > rect.y + rect.height + autoZomOffset ? maxY : rect.y + rect.height + autoZomOffset;
-      }
-    }
-
-    const cvRect = this.designerCanvas.getBoundingClientRect();
-    maxX -= cvRect.x;
-    maxY -= cvRect.y;
-
-    let scaleX = cvRect.width / (maxX / this._designerCanvas.zoomFactor);
-    let scaleY = cvRect.height / (maxY / this._designerCanvas.zoomFactor);
-
-    const dimensions = this.designerCanvas.getDesignSurfaceDimensions();
-    if (dimensions.width)
-      scaleX = cvRect.width / dimensions.width;
-    if (dimensions.height)
-      scaleY = cvRect.height / dimensions.height;
-
-    let fak = scaleX < scaleY ? scaleX : scaleY;
-    if (!isNaN(fak))
-      this._designerCanvas.zoomFactor = fak;
-    this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+    this._designerCanvas.zoomToFit()
   }
 
   private _onScrollbar(e) {
