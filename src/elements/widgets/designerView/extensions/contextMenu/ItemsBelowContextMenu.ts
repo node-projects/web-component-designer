@@ -1,4 +1,4 @@
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
+import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItemTmp";
 import { DesignItem } from "../../../../item/DesignItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";

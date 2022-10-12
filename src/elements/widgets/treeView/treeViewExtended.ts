@@ -5,7 +5,7 @@ import { ISelectionChangedEvent } from '../../services/selectionService/ISelecti
 import { NodeType } from '../../item/NodeType';
 import { assetsPath } from '../../../Constants';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
-import { IContextMenuItem } from '../../helper/contextMenu/IContextmenuItem.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextmenuItemTmp.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {

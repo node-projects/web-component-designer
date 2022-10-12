@@ -24,7 +24,7 @@ import { ExtensionManager } from "./extensions/ExtensionManager";
 import { NamedTools } from "./tools/NamedTools";
 import { Screenshot } from '../../helper/Screenshot';
 import { dataURItoBlob, exportData, sleep } from "../../helper/Helper";
-import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItem";
+import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItemTmp";
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayer } from "./extensions/OverlayLayer";

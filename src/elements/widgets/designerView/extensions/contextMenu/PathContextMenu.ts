@@ -1,4 +1,4 @@
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
+import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItemTmp";
 import { createPathD } from "../../../../helper/PathDataPolyfill";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
