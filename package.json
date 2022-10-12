@@ -1,7 +1,7 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.0.126",
+  "version": "0.0.127",
   "type": "module",
   "main": "./dist/index.js",
   "author": "",
@@ -13,7 +13,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.10.1",
+    "@node-projects/base-custom-webcomponent": "^0.10.3",
     "construct-style-sheets-polyfill": "^3.1.0"
   },
   "devDependencies": {
