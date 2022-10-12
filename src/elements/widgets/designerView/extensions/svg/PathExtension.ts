@@ -6,8 +6,8 @@ import { IPoint } from "../../../../../interfaces/IPoint";
 import { IExtensionManager } from "../IExtensionManger";
 import { EventNames } from "../../../../../enums/EventNames";
 import { createPathD, PathData, PathDataL } from "../../../../helper/PathDataPolyfill";
-import { ContextMenuHelper } from "../../../../helper/contextMenu/ContextMenuHelper";
 import { IContextMenuItem } from "../../../../..";
+import { ContextMenu } from "../../../../helper/contextMenu/ContextMenu";
 
 
 export class PathExtension extends AbstractExtension {
@@ -275,7 +275,7 @@ export class PathExtension extends AbstractExtension {
     circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, p, index));
     circle.addEventListener(EventNames.ContextMenu, event => {
       event.preventDefault();
-      ContextMenuHelper.showContextMenu(null, event, null, items);
+      ContextMenu.show(items, event);
     });
   }
 

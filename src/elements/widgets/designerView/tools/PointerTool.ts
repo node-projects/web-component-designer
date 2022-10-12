@@ -65,7 +65,7 @@ export class PointerTool implements ITool {
           return;
       }
 
-    if (event.button == 2) {
+    if (event.button == 2 && event.type == EventNames.PointerDown) {
       this._showContextMenu(event, designerCanvas)
       return;
     }

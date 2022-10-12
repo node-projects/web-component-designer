@@ -12,7 +12,7 @@ export * from "./elements/helper/Screenshot.js";
 export * from "./elements/loader/OldCustomElementsManifestLoader.js"
 
 export * from "./elements/helper/w3color.js";
-export * from "./elements/helper/contextMenu/ContextMenuHelper.js";
+export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
 export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmenuItem.js";
 
@@ -72,6 +72,7 @@ export * from "./elements/services/htmlWriterService/LitTsElementWriterService.j
 
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
+export * from "./elements/services/htmlParserService/LitElementParserService.js";
 export type { IHtmlParserService } from "./elements/services/htmlParserService/IHtmlParserService.js";
 
 export type { IIntializationService } from "./elements/services/initializationService/IIntializationService.js";
