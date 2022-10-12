@@ -43,7 +43,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       height: 20px;
     }
     #pg {
-      height: calc(100% - 45px);
+      height: calc(100% - 64px);
     }
     `;
 
