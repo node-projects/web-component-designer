@@ -14,7 +14,7 @@ export * from "./elements/loader/OldCustomElementsManifestLoader.js"
 export * from "./elements/helper/w3color.js";
 export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
-export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmenuItemTmp.js";
+export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextMenuItem.js";
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";

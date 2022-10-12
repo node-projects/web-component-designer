@@ -5,7 +5,7 @@ import { IPropertyEditor } from '../../services/propertiesService/IPropertyEdito
 import { IDesignItem } from '../../item/IDesignItem';
 import { IPropertiesService } from '../../services/propertiesService/IPropertiesService';
 import { ValueType } from '../../services/propertiesService/ValueType';
-import { IContextMenuItem } from '../../helper/contextMenu/IContextmenuItemTmp';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {

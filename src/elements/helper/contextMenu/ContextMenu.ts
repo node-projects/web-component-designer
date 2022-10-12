@@ -1,5 +1,5 @@
 import { css } from "@node-projects/base-custom-webcomponent";
-import { IContextMenuItem } from "./IContextmenuItemTmp";
+import { IContextMenuItem } from "./IContextMenuItem";
 
 export interface IContextMenuOptions {
 	defaultIcon?: string,

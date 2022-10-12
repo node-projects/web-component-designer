@@ -1,5 +1,5 @@
 import { DeleteAction } from "../../../../..";
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItemTmp";
+import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
 import { DesignItem } from "../../../../item/DesignItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { InsertAction } from "../../../../services/undoService/transactionItems/InsertAction";
