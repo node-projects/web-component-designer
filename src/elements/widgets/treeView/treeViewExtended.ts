@@ -5,8 +5,8 @@ import { ISelectionChangedEvent } from '../../services/selectionService/ISelecti
 import { NodeType } from '../../item/NodeType';
 import { assetsPath } from '../../../Constants';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
-import { IContextMenuItem } from '../../helper/contextMenu/IContextmenuItem.js';
-import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
@@ -178,7 +178,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         mnuItems.push(...cme.provideContextMenuItems(event, designItem.instanceServiceContainer.designerCanvas, designItem));
       }
     }
-    let ctxMnu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
+    let ctxMnu = ContextMenu.show(mnuItems, event);
     return ctxMnu;
   }
 
@@ -211,9 +211,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
         if (node.tr.children[0]) {
           let designItem: IDesignItem = node.data.ref;
-
+          node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
           if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
-            node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
             node.tr.onmouseenter = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(designItem.element);
             node.tr.onmouseleave = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(null);
 
@@ -430,7 +429,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     });
 
     for (let i of item.children()) {
-      if (i.nodeType !== NodeType.TextNode || i.content?.trim()) {
+      if (!i.isEmptyTextNode) {
         this._getChildren(i, newNode);
       }
     }

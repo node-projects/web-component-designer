@@ -87,6 +87,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       extensions: ['childcounter', 'dnd5', 'filter'],
       quicksearch: true,
       source: [],
+      tooltip: true,
 
       filter: {
         autoExpand: true,

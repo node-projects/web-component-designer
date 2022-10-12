@@ -5,3 +5,5 @@
   This was a start for this whole project (even if mostly nothing of the original code is left)
 - Thanks to @chdh for plain-scrollbar component
   https://github.com/chdh/plain-scrollbar
+- Thanks to @m-thalmann for contextmenujs
+  https://github.com/m-thalmann/contextmenujs (also we have heavily modified it)

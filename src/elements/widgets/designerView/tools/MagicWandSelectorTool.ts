@@ -22,6 +22,8 @@ export class MagicWandSelectorTool implements ITool {
         
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this._path.setAttribute('class', 'svg-selector');
+        this._path.style.strokeWidth = '' + (1 / designerCanvas.scaleFactor);
+        this._path.style.strokeDasharray = '' + (2 / designerCanvas.scaleFactor);
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
         this._path.setAttribute("D", this._pathD);
         designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);

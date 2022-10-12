@@ -1,13 +1,13 @@
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { AbstractExtension } from "./AbstractExtension";
-import "../../../helper/PathDataPolyfill";
-import { IPoint } from "../../../../interfaces/IPoint";
-import { IExtensionManager } from "./IExtensionManger";
-import { EventNames } from "../../../../enums/EventNames";
-import { createPathD, PathData, PathDataL } from "../../../helper/PathDataPolyfill";
-import { ContextMenuHelper } from "../../../helper/contextMenu/ContextMenuHelper";
-import { IContextMenuItem } from "../../../..";
+import { IDesignItem } from "../../../../item/IDesignItem";
+import { IDesignerCanvas } from "../../IDesignerCanvas";
+import { AbstractExtension } from "../AbstractExtension";
+import "../../../../helper/PathDataPolyfill";
+import { IPoint } from "../../../../../interfaces/IPoint";
+import { IExtensionManager } from "../IExtensionManger";
+import { EventNames } from "../../../../../enums/EventNames";
+import { createPathD, PathData, PathDataL } from "../../../../helper/PathDataPolyfill";
+import { IContextMenuItem } from "../../../../..";
+import { ContextMenu } from "../../../../helper/contextMenu/ContextMenu";
 
 
 export class PathExtension extends AbstractExtension {
@@ -26,19 +26,40 @@ export class PathExtension extends AbstractExtension {
   override extend(): void {
     this._parentRect = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
     this._pathdata = (<SVGGraphicsElement>this.extendedItem.node).getPathData({ normalize: false });
+    this._lastPos = { x: 0, y: 0 };
     for (let p of this._pathdata) {
       switch (p.type) {
         case 'M':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
+        case 'm':
+          this._drawPathCircle(p.values[0] + this._lastPos.x, p.values[1] + this._lastPos.y, p, 0);
+          this._lastPos = { x: p.values[0] + this._lastPos.x, y: p.values[1] + this._lastPos.y };
+          break;
         case 'L':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._lastPos = { x: p.values[0], y: p.values[1] };
           break;
+        case 'l':
+          this._drawPathCircle(p.values[0] + this._lastPos.x, p.values[1] + this._lastPos.y, p, 0);
+          this._lastPos = { x: p.values[0] + this._lastPos.x, y: p.values[1] + this._lastPos.y };
+          break;
         case 'H':
+          this._drawPathCircle(p.values[0], this._lastPos.y, p, 0);
+          this._lastPos = { x: p.values[0], y: this._lastPos.y };
+          break;
+        case 'h':
+          this._drawPathCircle(p.values[0] + this._lastPos.x, this._lastPos.y, p, 0);
+          this._lastPos = { x: p.values[0] + this._lastPos.x, y: this._lastPos.y };
           break;
         case 'V':
+          this._drawPathCircle(this._lastPos.x, p.values[0], p, 0);
+          this._lastPos = { x: this._lastPos.x, y: p.values[0] };
+          break;
+        case 'v':
+          this._drawPathCircle(this._lastPos.x, p.values[0] + this._lastPos.y, p, 0);
+          this._lastPos = { x: this._lastPos.x, y: p.values[0] + this._lastPos.y };
           break;
         case 'Z':
           break;
@@ -56,12 +77,21 @@ export class PathExtension extends AbstractExtension {
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._drawPathCircle(p.values[2], p.values[3], p, 2);
           this._drawPathCircle(this._lastPos.x + p.values[4], this._lastPos.y + p.values[5], p, 4);
-          this._lastPos = { x: p.values[4], y: p.values[5] };
+          this._lastPos = { x: p.values[4] + this._lastPos.x, y: p.values[5] + this._lastPos.y };
           break;
         case 'S':
           this._drawPathCircle(p.values[0], p.values[1], p, 0);
           this._drawPathCircle(p.values[2], p.values[3], p, 2);
+          this._drawPathLine(this._lastPos.x, this._lastPos.y, p.values[0], p.values[1]);
+          this._drawPathLine(p.values[0], p.values[1], p.values[2], p.values[3]);
           this._lastPos = { x: p.values[2], y: p.values[3] };
+          break;
+        case 's':
+          this._drawPathCircle(p.values[0] + this._lastPos.x, p.values[1] + this._lastPos.y, p, 0);
+          this._drawPathCircle(p.values[2] + this._lastPos.x, p.values[3] + this._lastPos.y, p, 2);
+          this._drawPathLine(this._lastPos.x, this._lastPos.y, p.values[0] + this._lastPos.x, p.values[1] + this._lastPos.y);
+          this._drawPathLine(p.values[0] + this._lastPos.x, p.values[1] + this._lastPos.y, p.values[2] + this._lastPos.x, p.values[3] + this._lastPos.y);
+          this._lastPos = { x: p.values[2] + this._lastPos.x, y: p.values[3] + this._lastPos.y };
           break;
         case 'Q':
           this._drawPathLine(this._lastPos.x, this._lastPos.y, p.values[0], p.values[1]);
@@ -85,12 +115,11 @@ export class PathExtension extends AbstractExtension {
 
   pointerEvent(event: PointerEvent, circle: SVGCircleElement, p: PathData, index: number) {
     event.stopPropagation();
-
+    const cursorPos = this.designerCanvas.getNormalizedEventCoordinates(event);
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
-
-        this._startPos = { x: event.x, y: event.y };
+        this._startPos = cursorPos
         this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
         this._originalPathPoint = { x: p.values[index], y: p.values[index + 1] }
         break;
@@ -98,8 +127,8 @@ export class PathExtension extends AbstractExtension {
       case EventNames.PointerMove:
         if (this._startPos && event.buttons > 0) {
           this._lastPos = { x: this._startPos.x, y: this._startPos.y };
-          const cx = event.x - this._lastPos.x + this._circlePos.x;
-          const cy = event.y - this._lastPos.y + this._circlePos.y;
+          const cx = cursorPos.x - this._lastPos.x + this._circlePos.x;
+          const cy = cursorPos.y - this._lastPos.y + this._circlePos.y;
           const dx = cx - this._circlePos.x;
           const dy = cy - this._circlePos.y;
           if (event.shiftKey) {
@@ -119,16 +148,24 @@ export class PathExtension extends AbstractExtension {
           else {
             p.values[index] = this._originalPathPoint.x + dx;
             p.values[index + 1] = this._originalPathPoint.y + dy;
-            circle.setAttribute("cx", (this._circlePos.x + dx).toString());
-            circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+            if (p.type == 'V' || p.type == 'v') {
+              p.values[index] = this._originalPathPoint.x + dy;
+              circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+            } else if (p.type == 'H' || p.type == 'h') {
+              circle.setAttribute("cy", (this._circlePos.x + dx).toString());
+            } else {
+              circle.setAttribute("cx", (this._circlePos.x + dx).toString());
+              circle.setAttribute("cy", (this._circlePos.y + dy).toString());
+            }
           }
+          this.designerCanvas.extensionManager.refreshAllExtensions([this.extendedItem], this);
           this.extendedItem.element.setAttribute("d", createPathD(this._pathdata));
         }
         break;
 
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        
+
         this._startPos = null;
         this._circlePos = null;
         this._lastPos = null;
@@ -139,7 +176,9 @@ export class PathExtension extends AbstractExtension {
 
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
-    let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5, 'svg-path');
+    let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path');
+    circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+
     let circlePos = { x: x, y: y };
     const items: IContextMenuItem[] = [];
     const pidx = this._pathdata.indexOf(p);
@@ -236,13 +275,15 @@ export class PathExtension extends AbstractExtension {
     circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, p, index));
     circle.addEventListener(EventNames.ContextMenu, event => {
       event.preventDefault();
-      ContextMenuHelper.showContextMenu(null, event, null, items);
+      ContextMenu.show(items, event);
     });
   }
 
+
   _drawPathLine(x1: number, y1: number, x2: number, y2: number) {
-    this._drawLine(this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x1, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y1, this._parentRect.x - this.designerCanvas.containerBoundingRect.x + x2, this._parentRect.y - this.designerCanvas.containerBoundingRect.y + y2, 'svg-path-line');
+    this._drawLine((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x1, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y1, (this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x2, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y2, 'svg-path-line');
   }
+
 
   _checkCircleIndex(p: PathData, circlePos: IPoint): boolean {
     switch (p.type) {
@@ -263,10 +304,12 @@ export class PathExtension extends AbstractExtension {
     return false;
   }
 
+
   override refresh() {
     this._removeAllOverlays();
     this.extend();
   }
+
 
   override dispose() {
     this._removeAllOverlays();

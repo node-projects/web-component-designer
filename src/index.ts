@@ -12,9 +12,9 @@ export * from "./elements/helper/Screenshot.js";
 export * from "./elements/loader/OldCustomElementsManifestLoader.js"
 
 export * from "./elements/helper/w3color.js";
-export * from "./elements/helper/contextMenu/ContextMenuHelper.js";
+export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
-export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextmenuItem.js";
+export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextMenuItem.js";
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
@@ -72,6 +72,7 @@ export * from "./elements/services/htmlWriterService/LitTsElementWriterService.j
 
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
+export * from "./elements/services/htmlParserService/LitElementParserService.js";
 export type { IHtmlParserService } from "./elements/services/htmlParserService/IHtmlParserService.js";
 
 export type { IIntializationService } from "./elements/services/initializationService/IIntializationService.js";
@@ -185,8 +186,8 @@ export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtension.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/PathExtension.js";
-export * from "./elements/widgets/designerView/extensions/PathExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/svg/PathExtension.js";
+export * from "./elements/widgets/designerView/extensions/svg/PathExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/PositionExtension.js";
 export * from "./elements/widgets/designerView/extensions/PositionExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/ElementDragTitleExtension.js";

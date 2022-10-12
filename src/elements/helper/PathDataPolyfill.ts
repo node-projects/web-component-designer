@@ -1176,25 +1176,25 @@ export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: numb
         case ('l'):
         case ('T'):
         case ('t'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " ";
           break;
         case ('Z'):
         case ('z'):
-          newPathData += p.type;
+          newPathData += p.type + " ";
           break;
         case ('C'):
         case ('c'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " " + (p.values[4] - xFactor) + " " + (p.values[5] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " " + (p.values[4] - xFactor) + " " + (p.values[5] - yFactor) + " ";
           break;
         case ('S'):
         case ('s'):
         case ('Q'):
         case ('q'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + (p.values[2] - xFactor) + " " + (p.values[3] - yFactor) + " ";
           break;
         case ('A'):
         case ('a'):
-          newPathData += p.type + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + (p.values[5] - xFactor) + " " + (p.values[6] - yFactor);
+          newPathData += p.type + " " + (p.values[0] - xFactor) + " " + (p.values[1] - yFactor) + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + (p.values[5] - xFactor) + " " + (p.values[6] - yFactor) + " ";
           break;
       }
     }
@@ -1205,39 +1205,11 @@ export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: numb
 export function createPathD(path: PathData[]) {
   let pathD: string = "";
   for (let p of path) {
-    switch (p.type) {
-      case 'M':
-        pathD += p.type + p.values[0] + " " + p.values[1];
-        break;
-      case 'L':
-        pathD += p.type + p.values[0] + " " + p.values[1];
-        break;
-      case 'H':
-
-        break;
-      case 'V':
-
-        break;
-      case 'Z':
-        pathD += p.type;
-        break;
-      case 'C':
-      case 'c':
-        pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3] + " " + p.values[4] + " " + p.values[5];
-        break;
-      case 'S':
-
-        break;
-      case 'Q':
-      case 'q':
-        pathD += p.type + p.values[0] + " " + p.values[1] + " " + p.values[2] + " " + p.values[3]
-        break;
-      case 'T':
-
-        break;
-      case 'A':
-
-        break;
+    pathD += p.type + " ";
+    for (var i = 0; i < p.values.length; i++) {
+      if (p.values[i] != null && !isNaN(p.values[i])) {
+        pathD += p.values[i] + " ";
+      }
     }
   }
   return pathD;

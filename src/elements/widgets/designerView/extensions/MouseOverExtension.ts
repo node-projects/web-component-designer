@@ -30,6 +30,10 @@ export class MouseOverExtension extends AbstractExtension {
     this._line2 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'svg-hover', this._line2);
     this._line3 = this._drawLine(transformedCornerPoints[1].x, transformedCornerPoints[1].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line3);
     this._line4 = this._drawLine(transformedCornerPoints[2].x, transformedCornerPoints[2].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line4);
+	this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+	this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+	this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+	this._line4.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
   }
 
   override dispose() {

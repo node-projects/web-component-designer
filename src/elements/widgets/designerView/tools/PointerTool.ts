@@ -48,10 +48,12 @@ export class PointerTool implements ITool {
           return;
         }
       }
-      const designItem = DesignItem.GetOrCreateDesignItem(<Node>event.target, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+      let newEl = designerCanvas.serviceContainer.elementAtPointService.getElementAtPoint(designerCanvas, { x: event.x, y: event.y });
+      const designItem = DesignItem.GetOrCreateDesignItem(newEl, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
       if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
         designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
       }
+
       designerCanvas.showDesignItemContextMenu(designItem, event);
     }
   }
@@ -64,7 +66,7 @@ export class PointerTool implements ITool {
           return;
       }
 
-    if (event.button == 2) {
+    if (event.button == 2 && event.type == EventNames.PointerDown) {
       this._showContextMenu(event, designerCanvas)
       return;
     }
@@ -201,6 +203,9 @@ export class PointerTool implements ITool {
         }
       case EventNames.PointerMove:
         {
+          if (event.buttons == 0) {
+            return;
+          }
           const elementMoved = currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
           if (this._actionType != PointerActionType.Drag && elementMoved) {
             this._actionType = PointerActionType.Drag;

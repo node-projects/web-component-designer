@@ -104,7 +104,7 @@ export class DesignItem implements IDesignItem {
     } else if (where == 'beforebegin') {
       action = new InsertChildAction(designItem, this.parent, this.parent.indexOf(this));
     } else if (where == 'afterend') {
-      action = new InsertChildAction(designItem, this.parent, this.parent.indexOf(this));
+      action = new InsertChildAction(designItem, this.parent, this.parent.indexOf(this) + 1);
     }
     this.instanceServiceContainer.undoService.execute(action);
   }
@@ -145,6 +145,10 @@ export class DesignItem implements IDesignItem {
   public set innerHTML(value: string) {
     this.element.innerHTML = value;
     this.updateChildrenFromNodesChildren();
+  }
+
+  public get isEmptyTextNode(): boolean {
+    return this.nodeType === NodeType.TextNode && this.content?.trim() == '';
   }
 
   private _hideAtDesignTime: boolean;

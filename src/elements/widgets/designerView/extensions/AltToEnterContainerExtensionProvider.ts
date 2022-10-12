@@ -16,6 +16,6 @@ export class AltToEnterContainerExtensionProvider implements IDesignerExtensionP
   }
 
   readonly style = css`
-    .svg-text-enter-container { stroke: none; fill: black; stroke-width: 1; font-size: 14px; font-weight:800; font-family: monospace; }
+    .svg-text-enter-container { stroke: none; fill: black; stroke-width: 1; font-weight:800; font-family: monospace; }
   `;
 }

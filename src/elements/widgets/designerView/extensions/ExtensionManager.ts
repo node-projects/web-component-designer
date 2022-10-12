@@ -9,6 +9,7 @@ import { IExtensionManager } from "./IExtensionManger";
 export class ExtensionManager implements IExtensionManager {
 
   designerCanvas: IDesignerCanvas;
+  designItemsWithExtentions: Set<IDesignItem> = new Set();
 
   constructor(designerCanvas: IDesignerCanvas) {
     this.designerCanvas = designerCanvas;
@@ -73,6 +74,7 @@ export class ExtensionManager implements IExtensionManager {
             }
             appE.push(ext);
             designItem.appliedDesignerExtensions.set(extensionType, appE);
+            this.designItemsWithExtentions.add(designItem);
           }
         }
       }
@@ -104,6 +106,7 @@ export class ExtensionManager implements IExtensionManager {
               }
               appE.push(ext);
               i.appliedDesignerExtensions.set(extensionType, appE);
+              this.designItemsWithExtentions.add(i);
             }
           }
         }
@@ -131,6 +134,8 @@ export class ExtensionManager implements IExtensionManager {
             }
           }
           designItem.appliedDesignerExtensions.delete(extensionType);
+          if (!designItem.appliedDesignerExtensions.size)
+            this.designItemsWithExtentions.delete(designItem);
         }
       } else {
         for (let appE of designItem.appliedDesignerExtensions) {
@@ -144,6 +149,8 @@ export class ExtensionManager implements IExtensionManager {
           }
         }
         designItem.appliedDesignerExtensions.clear();
+        this.designItemsWithExtentions.delete(designItem);
+
       }
     }
   }
@@ -163,6 +170,8 @@ export class ExtensionManager implements IExtensionManager {
               }
             }
             i.appliedDesignerExtensions.delete(extensionType);
+            if (!i.appliedDesignerExtensions.size)
+              this.designItemsWithExtentions.delete(i);
           }
         }
       } else {
@@ -178,6 +187,8 @@ export class ExtensionManager implements IExtensionManager {
             }
           }
           i.appliedDesignerExtensions.clear();
+          this.designItemsWithExtentions.delete(i);
+
         }
       }
     }
@@ -212,7 +223,7 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType) {
+  refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, ignoredExtension?: any) {
     if (designItems) {
       if (extensionType) {
         for (let i of designItems) {
@@ -220,7 +231,8 @@ export class ExtensionManager implements IExtensionManager {
           if (exts) {
             for (let e of exts) {
               try {
-                e.refresh();
+                if (e != ignoredExtension)
+                  e.refresh();
               }
               catch (err) {
                 console.error(err);
@@ -233,7 +245,8 @@ export class ExtensionManager implements IExtensionManager {
           for (let appE of i.appliedDesignerExtensions) {
             for (let e of appE[1]) {
               try {
-                e.refresh();
+                if (e != ignoredExtension)
+                  e.refresh();
               }
               catch (err) {
                 console.error(err);
@@ -245,19 +258,23 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  refreshAllExtensions(designItems: IDesignItem[]) {
+  refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: any) {
     if (designItems) {
-      this.refreshExtensions(designItems, ExtensionType.Permanent);
-      this.refreshExtensions(designItems, ExtensionType.Selection);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelection);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer);
-      this.refreshExtensions(designItems, ExtensionType.MouseOver);
-      this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected);
-      this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected);
-      this.refreshExtensions(designItems, ExtensionType.ContainerDragOver);
-      this.refreshExtensions(designItems, ExtensionType.ContainerDrag);
-      this.refreshExtensions(designItems, ExtensionType.Doubleclick);
-      this.refreshExtensions(designItems, ExtensionType.Placement);
+      this.refreshExtensions(designItems, ExtensionType.Permanent, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Selection, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelection, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.MouseOver, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDragOver, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDrag, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Doubleclick, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Placement, ignoredExtension);
     }
+  }
+
+  refreshAllAppliedExtentions() {
+    this.refreshAllExtensions([...this.designItemsWithExtentions])
   }
 }

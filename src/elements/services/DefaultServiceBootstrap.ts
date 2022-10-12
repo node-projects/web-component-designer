@@ -14,7 +14,7 @@ import { GridExtensionProvider } from '../widgets/designerView/extensions/GridEx
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider.js';
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider.js';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider.js';
-import { PathExtensionProvider } from '../widgets/designerView/extensions/PathExtensionProvider.js';
+import { PathExtensionProvider } from '../widgets/designerView/extensions/svg/PathExtensionProvider.js';
 import { MouseOverExtensionProvider } from '../widgets/designerView/extensions/MouseOverExtensionProvider.js';
 import { NamedTools } from '../widgets/designerView/tools/NamedTools.js';
 import { PointerTool } from '../widgets/designerView/tools/PointerTool.js';
@@ -64,6 +64,9 @@ import { DrawToolButtonProvider } from '../widgets/designerView/tools/toolBar/bu
 import { TextToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js';
 import { SelectorToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/SelectorToolButtonProvider.js';
 import { GrayOutDragOverContainerExtensionProvider } from '../widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js';
+import { LineExtensionProvider } from '../widgets/designerView/extensions/svg/LineExtensionProvider.js';
+import { RectExtentionProvider } from '../widgets/designerView/extensions/svg/RectExtensionProvider.js';
+import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
@@ -99,7 +102,10 @@ export function createDefaultServiceContainer() {
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
+    new EllipsisExtensionProvider(),
+    new LineExtensionProvider(),
     new PathExtensionProvider(),
+    new RectExtentionProvider(),
     new ResizeExtensionProvider(true),
     new RotateExtensionProvider(),
   ]);
