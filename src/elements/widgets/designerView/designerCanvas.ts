@@ -12,7 +12,6 @@ import { ContentService } from '../../services/contentService/ContentService';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
 import { IDesignerCanvas } from './IDesignerCanvas';
 import { Snaplines } from './Snaplines';
-import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IPlacementView } from './IPlacementView';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
 import { CommandType } from '../../../commandHandling/CommandType';
@@ -25,7 +24,7 @@ import { ExtensionManager } from "./extensions/ExtensionManager";
 import { NamedTools } from "./tools/NamedTools";
 import { Screenshot } from '../../helper/Screenshot';
 import { dataURItoBlob, exportData, sleep } from "../../helper/Helper";
-import { IContextMenuItem } from "../../helper/contextMenu/IContextmenuItem";
+import { IContextMenuItem } from "../../helper/contextMenu/IContextMenuItem";
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
 import { IPoint } from "../../../interfaces/IPoint";
 import { OverlayLayer } from "./extensions/OverlayLayer";
@@ -35,6 +34,7 @@ import { IRect } from "../../../interfaces/IRect.js";
 import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
+import { ContextMenu } from "../../helper/contextMenu/ContextMenu";
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -60,7 +60,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
   private _canvasOffset: IPoint = { x: 0, y: 0 };
 
-  private _currentContextMenu: ContextMenuHelper
+  private _currentContextMenu: ContextMenu
   private _backgroundImage: string;
 
   public get zoomFactor(): number {
@@ -723,8 +723,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         mnuItems.push(...cme.provideContextMenuItems(event, this, designItem));
       }
     }
-    this._currentContextMenu = ContextMenuHelper.showContextMenu(null, event, null, mnuItems);
-    return this._currentContextMenu;
+    let ctxMenu=new ContextMenu(mnuItems, null)
+    ctxMenu.display(event);
+    return ctxMenu;
   }
 
   private _onDblClick(event: KeyboardEvent) {

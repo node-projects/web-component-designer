@@ -1,5 +1,5 @@
 import { IRect } from "../../../../../interfaces/IRect.js";
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
+import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";

@@ -1,4 +1,4 @@
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextmenuItem";
+import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
 import { DesignItem } from "../../../../item/DesignItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
@@ -14,8 +14,7 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
 
     const lstItems = designerCanvas.elementsFromPoint(event.x, event.y);
     if (lstItems.length > 0) {
-      //TODO: create a submenu 'select items below...'
-      return [...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))];
+      return [{ title: 'items below', children: [...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))] }];
     }
     return [];
   }
@@ -24,5 +23,5 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
     designerView.instanceServiceContainer.selectionService.setSelectedElements([item]);
   }
 
-  
+
 }
