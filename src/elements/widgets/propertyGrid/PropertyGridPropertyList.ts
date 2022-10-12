@@ -2,11 +2,11 @@ import { IProperty } from '../../services/propertiesService/IProperty';
 import { ServiceContainer } from '../../services/ServiceContainer';
 import { BaseCustomWebComponentLazyAppend, css, DomHelper } from '@node-projects/base-custom-webcomponent';
 import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor';
-import { ContextMenuHelper } from '../../helper/contextMenu/ContextMenuHelper';
 import { IDesignItem } from '../../item/IDesignItem';
 import { IPropertiesService } from '../../services/propertiesService/IPropertiesService';
 import { ValueType } from '../../services/propertiesService/ValueType';
-import { IContextMenuItem } from '../../helper/contextMenu/IContextmenuItem';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem';
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -163,7 +163,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
          } }
       ]);
     };
-    ContextMenuHelper.showContextMenu(null, event, null, ctxMenu);
+    ContextMenu.show(ctxMenu, event);
   }
 
   public designItemsChanged(designItems: IDesignItem[]) {
