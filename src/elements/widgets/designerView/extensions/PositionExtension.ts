@@ -44,37 +44,6 @@ export class PositionExtension extends AbstractExtension {
     this._textY = this._drawTextWithBackground('' + y, itemRect.x + itemRect.width / 2, itemParentRect.y + y / 2, 'white', 'svg-position-text', this._textY);
     this._textY[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
     this._textY[3].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
-
-+++ Check this after merge +++
-    const xOffset = itemRect.x - this.designerCanvas.containerBoundingRect.x;
-    const yOffset = itemRect.y - this.designerCanvas.containerBoundingRect.y;
-
-    let left = Number.parseFloat(computedStyle.left.replace('px', ''));
-    if (isNaN(left))
-      left = 0;
-    let top = Number.parseFloat(computedStyle.top.replace('px', ''));
-    if (isNaN(top))
-      top = 0;
-    let right = Number.parseFloat(computedStyle.right.replace('px', ''));
-    if (isNaN(right))
-      right = 0;
-    let bottom = Number.parseFloat(computedStyle.bottom.replace('px', ''));
-    if (isNaN(bottom))
-      bottom = 0;
-
-    let tx = 0;
-    let ty = 0;
-    // if (computedStyle.transform !== 'none') {
-    //   const transforms = computedStyle.transform.replace('matrix(', '').split(',');
-    //   tx = Number.parseFloat(transforms[4]);
-    //   ty = Number.parseFloat(transforms[5].replace(')', ''));
-    // }
-
-    this._line1 = this._drawLine((xOffset / this.designerCanvas.scaleFactor - left - tx), (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, xOffset / this.designerCanvas.scaleFactor, (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, 'svg-position', this._line1);
-    this._line2 = this._drawLine((xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, (yOffset / this.designerCanvas.scaleFactor) - top - ty, (xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, yOffset / this.designerCanvas.scaleFactor, 'svg-position', this._line2);
-    this._line3 = this._drawLine((xOffset + itemRect.width) / this.designerCanvas.scaleFactor, (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, (xOffset + itemRect.width + right + -1 * tx)/ this.designerCanvas.scaleFactor, (yOffset + itemRect.height / 2) / this.designerCanvas.scaleFactor, 'svg-position', this._line3);
-    this._line4 = this._drawLine((xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, (yOffset + itemRect.height) / this.designerCanvas.scaleFactor, (xOffset + itemRect.width / 2) / this.designerCanvas.scaleFactor, (yOffset + itemRect.height + bottom + -1 * ty) / this.designerCanvas.scaleFactor, 'svg-position', this._line4);
-+++ Check this after merge +++
   }
 
   override dispose() {
