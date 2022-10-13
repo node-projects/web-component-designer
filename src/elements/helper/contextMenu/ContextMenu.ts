@@ -18,6 +18,7 @@ export class ContextMenu {
 		transition: transform 0.1s;
 		transform-origin: top left;
 		padding: 0;
+		z-index: 2147483647;
 	  }
 	  
 	  .context_menu.display {
