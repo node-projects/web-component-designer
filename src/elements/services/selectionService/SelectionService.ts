@@ -2,7 +2,6 @@ import { ISelectionService } from './ISelectionService';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from './ISelectionChangedEvent';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { NodeType } from '../../item/NodeType';
 
 export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;
@@ -16,9 +15,7 @@ export class SelectionService implements ISelectionService {
     } else {
       let newSelection: IDesignItem[] = []
       for (let d of designItems) {
-        while (d && d.nodeType == NodeType.TextNode)
-          d = d.parent;
-        if (d && d.nodeType == NodeType.Element && d != d.instanceServiceContainer.contentService.rootDesignItem)
+        if (d && d != d.instanceServiceContainer.contentService.rootDesignItem)
           newSelection.push(d)
       }
       this.selectedElements = newSelection;
