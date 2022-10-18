@@ -86,12 +86,12 @@ export class ResizeExtension extends AbstractExtension {
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
 
-        let rect = this.extendedItem.element.getBoundingClientRect();
-        this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+        let rect = this.designerCanvas.getNormalizedElementCoordinatesAndRealSizes(this.extendedItem.element);
+        this._initialSizes.push({ width: rect.realWidth, height: rect.realHeight });
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-            rect = designItem.element.getBoundingClientRect();
-            this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+            rect = this.designerCanvas.getNormalizedElementCoordinatesAndRealSizes(designItem.element);
+            this._initialSizes.push({ width: rect.realWidth, height: rect.realHeight });
           }
         }
         if (this.designerCanvas.alignOnSnap)

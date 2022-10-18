@@ -723,7 +723,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         mnuItems.push(...cme.provideContextMenuItems(event, this, designItem));
       }
     }
-    let ctxMenu=new ContextMenu(mnuItems, null)
+    let ctxMenu = new ContextMenu(mnuItems, null)
     ctxMenu.display(event);
     return ctxMenu;
   }
@@ -831,6 +831,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public getNormalizedElementCoordinates(element: Element): IRect {
     const targetRect = element.getBoundingClientRect();
     return { x: (targetRect.x - this.containerBoundingRect.x) / this.scaleFactor, y: (targetRect.y - this.containerBoundingRect.y) / this.scaleFactor, width: targetRect.width / this.scaleFactor, height: targetRect.height / this.scaleFactor };
+  }
+
+  public getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number } {
+    let ret = this.getNormalizedElementCoordinates(element);
+    const st = getComputedStyle(element);
+    let realWidth = ret.width;
+    let realHeight = ret.height;
+    if (st.boxSizing != 'border-box') {
+      realWidth = realWidth - (parseFloat(st.borderLeft) + parseFloat(st.paddingLeft) + parseFloat(st.paddingRight) + parseFloat(st.borderRight));
+      realHeight = realHeight - (parseFloat(st.borderTop) + parseFloat(st.paddingTop) + parseFloat(st.paddingBottom) + parseFloat(st.borderBottom));
+    }
+    return { ...ret, realWidth, realHeight };
   }
 
   public getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint {
