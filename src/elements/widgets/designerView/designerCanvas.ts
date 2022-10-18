@@ -331,7 +331,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this.handleDeleteCommand();
         break;
       case CommandType.paste:
-        this.handlePasteCommand();
+        this.handlePasteCommand(command.altKey == true);
         break;
       case CommandType.selectAll:
         this.handleSelectAll();
@@ -417,8 +417,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     await this.serviceContainer.copyPasteService.copyItems(this.instanceServiceContainer.selectionService.selectedElements);
   }
 
-  async handlePasteCommand() {
-    const designItems = await this.serviceContainer.copyPasteService.getPasteItems(this.serviceContainer, this.instanceServiceContainer);
+  async handlePasteCommand(disableRestoreOfPositions: boolean) {
+    const [designItems, positions] = await this.serviceContainer.copyPasteService.getPasteItems(this.serviceContainer, this.instanceServiceContainer);
 
     let grp = this.rootDesignItem.openGroup("Insert");
 
@@ -440,8 +440,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
 
     if (designItems) {
-      for (let di of designItems) {
+      let containerPos = this.getNormalizedElementCoordinates(pasteContainer.element);
+      for (let i = 0; i < designItems.length; i++) {
+        let di = designItems[i];
+        let pos = positions ? positions[i] : null;
         this.instanceServiceContainer.undoService.execute(new InsertAction(pasteContainer, pasteContainer.childCount, di));
+        if (!disableRestoreOfPositions && pos) {
+          di.setStyle('left', (pos.x - containerPos.x) + 'px');
+          di.setStyle('top', (pos.y - containerPos.y) + 'px');
+        }
       }
 
       const intializationService = this.serviceContainer.intializationService;
@@ -745,19 +752,19 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       return;
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
-      this.executeCommand({ type: CommandType.undo });
+      this.executeCommand({ type: CommandType.undo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
-      this.executeCommand({ type: CommandType.redo });
+      this.executeCommand({ type: CommandType.redo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'y')
-      this.executeCommand({ type: CommandType.redo });
+      this.executeCommand({ type: CommandType.redo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'a')
-      this.executeCommand({ type: CommandType.selectAll });
+      this.executeCommand({ type: CommandType.selectAll, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'c')
-      this.executeCommand({ type: CommandType.copy });
+      this.executeCommand({ type: CommandType.copy, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'v')
-      this.executeCommand({ type: CommandType.paste });
+      this.executeCommand({ type: CommandType.paste, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'x')
-      this.executeCommand({ type: CommandType.cut });
+      this.executeCommand({ type: CommandType.cut, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (!primarySelection) {
@@ -770,7 +777,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
-          this.executeCommand({ type: CommandType.delete });
+          this.executeCommand({ type: CommandType.delete, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
           break;
         case 'ArrowUp':
           {
