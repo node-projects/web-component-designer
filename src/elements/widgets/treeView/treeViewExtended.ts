@@ -7,6 +7,7 @@ import { assetsPath } from '../../../Constants';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
+import { switchContainer } from '../../helper/SwitchContainerHelper';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
@@ -192,7 +193,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       source: [],
 
       table: {
-        indentation: 20,       // indent 20px per node level
+        indentation: 10,       // indent 20px per node level
         nodeColumnIdx: 0,      // render the node title into the 2nd column
         checkboxColumnIdx: 0,  // render the checkboxes into the 1st column
       },
@@ -248,108 +249,34 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         preventVoidMoves: false,
         dropMarkerOffsetX: -24,
         dropMarkerInsertOffsetX: -16,
-
+        multiSource: true,  
         dragStart: (node, data) => {
-          /* This function MUST be defined to enable dragging for the tree.
-            *
-            * Return false to cancel dragging of node.
-            * data.dataTransfer.setData() and .setDragImage() is available
-            * here.
-            */
-          // Set the allowed effects (i.e. override the 'effectAllowed' option)
           data.effectAllowed = "all";
-
-          // Set a drop effect (i.e. override the 'dropEffectDefault' option)
-          // data.dropEffect = "link";
-          data.dropEffect = "copy";
-
-          // We could use a custom image here:
-          // data.dataTransfer.setDragImage($("<div>TEST</div>").appendTo("body")[0], -10, -10);
-          // data.useDefaultImage = false;
-
-          // Return true to allow the drag operation
+          data.dropEffect = "move";
           return true;
         },
-        // dragDrag: function(node, data) {
-        //   logLazy("dragDrag", null, 2000,
-        //     "T1: dragDrag: " + "data: " + data.dropEffect + "/" + data.effectAllowed +
-        //     ", dataTransfer: " + data.dataTransfer.dropEffect + "/" + data.dataTransfer.effectAllowed );
-        // },
-        // dragEnd: function(node, data) {
-        //   node.debug( "T1: dragEnd: " + "data: " + data.dropEffect + "/" + data.effectAllowed +
-        //     ", dataTransfer: " + data.dataTransfer.dropEffect + "/" + data.dataTransfer.effectAllowed, data);
-        //     alert("T1: dragEnd")
-        // },
-
-        // --- Drop-support:
-
         dragEnter: (node, data) => {
-          // data.dropEffect = "copy";
+          data.dropEffect = data.originalEvent.ctrlKey ? 'copy' : 'move';
           return true;
         },
         dragOver: (node, data) => {
-          // Assume typical mapping for modifier keys
-          data.dropEffect = data.dropEffectSuggested;
-          // data.dropEffect = "move";
+          data.dropEffect = data.originalEvent.ctrlKey ? 'copy' : 'move';
+          return true;
         },
         dragDrop: (node, data) => {
-          /* This function MUST be defined to enable dropping of items on
-            * the tree.
-            */
-          let newNode,
-            transfer = data.dataTransfer,
-            sourceNodes = data.otherNodeList,
-            mode = data.dropEffect;
+          const sourceDesignitems: IDesignItem[] = data.otherNodeList.map(x => x.data.ref);
+          const targetDesignitem: IDesignItem = node.data.ref;
+          if (data.dropEffectSuggested == 'move') {
+            if (data.hitMode == 'over') {
+              switchContainer(sourceDesignitems, targetDesignitem);
+            } else if (data.hitMode == 'before') {
 
-          if (data.hitMode === "after") {
-            // If node are inserted directly after tagrget node one-by-one,
-            // this would reverse them. So we compensate:
-            sourceNodes.reverse();
-          }
-          if (data.otherNode) {
-            // Drop another Fancytree node from same frame (maybe a different tree however)
-            //let sameTree = (data.otherNode.tree === data.tree);
+            } else if (data.hitMode == 'after') {
 
-            if (mode === "move") {
-              data.otherNode.moveTo(node, data.hitMode);
-            } else {
-              newNode = data.otherNode.copyTo(node, data.hitMode);
-              if (mode === "link") {
-                newNode.setTitle("Link to " + newNode.title);
-              } else {
-                newNode.setTitle("Copy of " + newNode.title);
-              }
             }
-          } else if (data.otherNodeData) {
-            // Drop Fancytree node from different frame or window, so we only have
-            // JSON representation available
-            //@ts-ignore
-            node.addChild(data.otherNodeData, data.hitMode);
-          } else if (data.files.length) {
-            // Drop files
-            for (let i = 0; i < data.files.length; i++) {
-              let file = data.files[i];
-              node.addNode({ title: "'" + file.name + "' (" + file.size + " bytes)" }, data.hitMode);
-              // var url = "'https://example.com/upload",
-              //     formData = new FormData();
-
-              // formData.append("file", transfer.files[0])
-              // fetch(url, {
-              //   method: "POST",
-              //   body: formData
-              // }).then(function() { /* Done. Inform the user */ })
-              // .catch(function() { /* Error. Inform the user */ });
-            }
-          } else {
-            // Drop a non-node
-            node.addNode({ title: transfer.getData("text") }, data.hitMode);
           }
-          node.setExpanded();
         },
       },
-
-
-
 
       multi: {
         mode: ""
