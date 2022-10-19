@@ -249,7 +249,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         preventVoidMoves: false,
         dropMarkerOffsetX: -24,
         dropMarkerInsertOffsetX: -16,
-        multiSource: true,  
+        multiSource: true,
         dragStart: (node, data) => {
           data.effectAllowed = "all";
           data.dropEffect = "move";
@@ -263,18 +263,32 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           data.dropEffect = data.originalEvent.ctrlKey ? 'copy' : 'move';
           return true;
         },
-        dragDrop: (node, data) => {
-          const sourceDesignitems: IDesignItem[] = data.otherNodeList.map(x => x.data.ref);
+        dragDrop: async (node, data) => {
+          let sourceDesignitems: IDesignItem[] = data.otherNodeList.map(x => x.data.ref);
+          if (data.dropEffectSuggested == 'copy') {
+            let newSourceDesignitems: IDesignItem[] = [];
+            for (let d of sourceDesignitems)
+              newSourceDesignitems.push(await d.clone());
+            sourceDesignitems = newSourceDesignitems;
+          }
           const targetDesignitem: IDesignItem = node.data.ref;
-          if (data.dropEffectSuggested == 'move') {
-            if (data.hitMode == 'over') {
-              switchContainer(sourceDesignitems, targetDesignitem);
-            } else if (data.hitMode == 'before') {
+          let grp = targetDesignitem.openGroup("drag/drop in treeview");
 
-            } else if (data.hitMode == 'after') {
-
+          if (data.hitMode == 'over') {
+            switchContainer(sourceDesignitems, targetDesignitem);
+          } else if (data.hitMode == 'after' || data.hitMode == 'before') {
+            for (let d of sourceDesignitems) {
+              if (d.parent != targetDesignitem.parent) {
+                switchContainer([d], targetDesignitem.parent);
+              }
+              if (data.hitMode == 'before')
+                targetDesignitem.insertAdjacentElement(d, 'beforebegin');
+              else
+                targetDesignitem.insertAdjacentElement(d, 'afterend');
             }
           }
+
+          grp.commit();
         },
       },
 

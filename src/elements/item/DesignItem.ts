@@ -12,6 +12,7 @@ import { ISize } from '../../interfaces/ISize.js';
 import { PropertiesHelper } from '../services/propertiesService/services/PropertiesHelper.js';
 import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction';
 import { DeleteAction } from '../..';
+import { DomConverter } from '../widgets/designerView/DomConverter';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -25,6 +26,12 @@ export class DesignItem implements IDesignItem {
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
   appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]> = new Map();
+
+  async clone() {
+    const html = DomConverter.ConvertToString([this], null, false);
+    const parsed = await this.serviceContainer.htmlParserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
+    return parsed[0];
+  }
 
   public replaceNode(newNode: Node) {
     DesignItem._designItemMap.delete(this.node);
