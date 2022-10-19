@@ -1,8 +1,7 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint.js";
-import { IPoint3D } from "../../../../interfaces/IPoint3d";
 import { ISize } from "../../../../interfaces/ISize";
-import { convertCoordinates, getDomMatrix, getTransformedCornerPoints } from "../../../helper/TransformHelper.js";
+import { convertCoordinates, getDomMatrix, getTransformedCornerDOMPoints } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
@@ -38,8 +37,8 @@ export class ResizeExtension extends AbstractExtension {
 
   override refresh() {
     //#region Resizer circles
-    let clone = <HTMLElement>this.extendedItem.element.cloneNode();
-    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
+    // let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
+    let transformedCornerPoints: DOMPoint[] = getTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 0, this.designerCanvas.helperElement, this.designerCanvas);
 
     this._circle1 = this._drawResizerOverlay(transformedCornerPoints[0].x, transformedCornerPoints[0].y, 'nw-resize', this._circle1);
     this._circle2 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[1].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[1].y - transformedCornerPoints[0].y) / 2), 'n-resize', this._circle2);
