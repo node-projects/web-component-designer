@@ -2,16 +2,16 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { IHtmlWriterService } from './IHtmlWriterService.js';
 import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 import { IStringPosition } from './IStringPosition.js';
 import { CssCombiner } from '../../helper/CssCombiner.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
+import { ITextWriter } from '../../helper/ITextWriter.js';
 
 export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
-  abstract write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>);
+  abstract write(indentedTextWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>);
 
-  writeAttributes(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
+  writeAttributes(indentedTextWriter: ITextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
     if (designItem.hasAttributes) {
       for (const a of designItem.attributes) {
         indentedTextWriter.write(' ');
@@ -56,7 +56,7 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
     }
   }
 
-  writeStyles(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
+  writeStyles(indentedTextWriter: ITextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
     if (designItem.hasStyles) {
       indentedTextWriter.write(' style="');
       let styles = designItem.styles;

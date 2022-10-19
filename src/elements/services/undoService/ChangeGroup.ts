@@ -59,6 +59,10 @@ export class ChangeGroup implements ITransactionItem {
     return false;
   }
 
+  addCommitedSubchangeGroup(changeGroup: ChangeGroup) {
+    this.undoStack.push(changeGroup);
+  }
+
   public undoStack: ITransactionItem[] = []
   public redoStack: ITransactionItem[] = []
 
