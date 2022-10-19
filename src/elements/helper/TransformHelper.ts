@@ -187,3 +187,109 @@ export function getTransformedCornerPoints(originalElement: HTMLElement, clonedE
 
   return transformedCornerPoints;
 }
+
+
+export function getTransformedCornerDOMPoints(originalElement: HTMLElement, untransformedCornerPointsOffset: number): DOMPoint[] {
+  let clone = <HTMLElement>originalElement.cloneNode();
+
+  const topleft = 0;
+  const topright = 1;
+  const bottomleft = 2;
+  const bottomright = 3;
+
+  clone.style.transform = '';
+  const cornerDOMPoints: DOMPoint[] = [];
+  const cloneWithoutTranformBoundingRect = clone.getBoundingClientRect(); // TODO: Is the scalefactor considered here???
+  cornerDOMPoints[topleft] = DOMPoint.fromPoint(
+    {
+      x: cloneWithoutTranformBoundingRect.x - untransformedCornerPointsOffset,
+      y: cloneWithoutTranformBoundingRect.x - untransformedCornerPointsOffset
+    }
+  )
+  cornerDOMPoints[topright] = DOMPoint.fromPoint(
+    {
+      x: cloneWithoutTranformBoundingRect.x + cloneWithoutTranformBoundingRect.width + untransformedCornerPointsOffset,
+      y: cloneWithoutTranformBoundingRect.y - untransformedCornerPointsOffset
+    }
+  )
+  cornerDOMPoints[bottomleft] = DOMPoint.fromPoint(
+    {
+      x: cloneWithoutTranformBoundingRect.x - untransformedCornerPointsOffset,
+      y: cloneWithoutTranformBoundingRect.y + cloneWithoutTranformBoundingRect.height + untransformedCornerPointsOffset
+    }
+  )
+  cornerDOMPoints[bottomright] = DOMPoint.fromPoint(
+    {
+      x: cloneWithoutTranformBoundingRect.x + cloneWithoutTranformBoundingRect.width + untransformedCornerPointsOffset,
+      y: cloneWithoutTranformBoundingRect.y + cloneWithoutTranformBoundingRect.height + untransformedCornerPointsOffset
+    }
+  )
+
+  clone = null;
+
+  const transformOriginWithOffsetIncluded: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+    {
+      x: (parseInt(getComputedStyle(<HTMLElement>originalElement).transform.split(' ')[0]) + untransformedCornerPointsOffset),
+      y: (parseInt(getComputedStyle(<HTMLElement>originalElement).transform.split(' ')[1]) + untransformedCornerPointsOffset),
+      z: 0,
+      w: 0
+    })
+
+  let cornerPointsTranformOrigins: DOMPoint[] = [];
+  cornerPointsTranformOrigins[topleft] = DOMPoint.fromPoint(
+    {
+      x: transformOriginWithOffsetIncluded.x,
+      y: transformOriginWithOffsetIncluded.y
+    }
+  )
+  cornerPointsTranformOrigins[topright] = DOMPoint.fromPoint(
+    {
+      x: (cornerDOMPoints[0].x - cornerDOMPoints[1].x + transformOriginWithOffsetIncluded.x),
+      y: transformOriginWithOffsetIncluded.y
+    }
+  )
+  cornerPointsTranformOrigins[bottomleft] = DOMPoint.fromPoint(
+    {
+      x: transformOriginWithOffsetIncluded.x,
+      y: cornerDOMPoints[0].y - cornerDOMPoints[2].y + transformOriginWithOffsetIncluded.y
+    }
+  )
+  cornerPointsTranformOrigins[bottomright] = DOMPoint.fromPoint(
+    {
+      x: cornerDOMPoints[0].x - cornerDOMPoints[1].x + transformOriginWithOffsetIncluded.x,
+      y: cornerDOMPoints[0].y - cornerDOMPoints[2].y + transformOriginWithOffsetIncluded.y
+    }
+  )
+
+  // const cornerDivs: HTMLDivElement[] = [];
+  // let element: HTMLDivElement;
+
+  // for (let i = 0; i < cornerPointsTranformOrigins.length; i++) {
+  //   element = document.createElement('div');
+  //   element.style.visibility = 'hidden';
+  //   element.style.position = 'absolute';
+  //   element.style.width = "1px";
+  //   element.style.height = "1px";
+  //   element.style.top = cornerPoints[i].y.toString() + 'px';
+  //   element.style.left = cornerPoints[i].x.toString() + 'px';
+  //   element.style.transformOrigin = cornerPointsTranformOrigins[i].split(' ')[0] + 'px' + ' ' + cornerPointsTranformOrigins[i].split(' ')[1] + 'px';
+  //   cornerDivs.push(helperElement.appendChild(element));
+  // }
+
+  // let transformedCornerPoints: IPoint3D[] = [];
+
+  // for (let i = 0; i < cornerDivs.length; i++) {
+  //   //let transformedCornerDiv: HTMLElement;
+  //   let transformedCornerPoint: IPoint3D = { x: null, y: null, z: null };
+  //   //transformedCornerDiv = applyMatrixToElement((<HTMLElement>this.extendedItem.element).style.transform, cornerDivs[i]);
+  //   cornerDivs[i].style.transform = transformBackup;
+  //   //transformedCornerDiv =  applyMatrixToElement((<HTMLElement>this.extendedItem.element).style.transform, cornerDivs[i]);
+  //   transformedCornerPoint.x = designerCanvas.getNormalizedElementCoordinates(cornerDivs[i]).x;
+  //   transformedCornerPoint.y = designerCanvas.getNormalizedElementCoordinates(cornerDivs[i]).y;
+  //   transformedCornerPoint.z = 0;
+  //   transformedCornerPoints.push(transformedCornerPoint);
+  // }
+
+  let transformedCornerPoints: DOMPoint[] = [];
+  return transformedCornerPoints;
+}

@@ -1,5 +1,5 @@
 import { IPoint3D } from "../../../../interfaces/IPoint3d";
-import { getTransformedCornerPoints } from "../../../helper/TransformHelper";
+import { getTransformedCornerDOMPoints, getTransformedCornerPoints } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from "./AbstractExtension";
@@ -24,16 +24,17 @@ export class MouseOverExtension extends AbstractExtension {
 
   override refresh() {
     let clone = <HTMLElement>this.extendedItem.element.cloneNode();
-    let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, offset);
+    //let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, offset);
+    let transformedCornerPoints: DOMPoint[] = getTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 0);
 
-    this._line1 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'svg-hover', this._line1);
-    this._line2 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'svg-hover', this._line2);
-    this._line3 = this._drawLine(transformedCornerPoints[1].x, transformedCornerPoints[1].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line3);
-    this._line4 = this._drawLine(transformedCornerPoints[2].x, transformedCornerPoints[2].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line4);
-	this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-	this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-	this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-	this._line4.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+  //   this._line1 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'svg-hover', this._line1);
+  //   this._line2 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'svg-hover', this._line2);
+  //   this._line3 = this._drawLine(transformedCornerPoints[1].x, transformedCornerPoints[1].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line3);
+  //   this._line4 = this._drawLine(transformedCornerPoints[2].x, transformedCornerPoints[2].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-hover', this._line4);
+	// this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+	// this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+	// this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+	// this._line4.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
   }
 
   override dispose() {
