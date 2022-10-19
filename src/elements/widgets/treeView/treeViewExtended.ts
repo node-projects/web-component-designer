@@ -249,7 +249,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         preventVoidMoves: false,
         dropMarkerOffsetX: -24,
         dropMarkerInsertOffsetX: -16,
-        multiSource: true,  
+        multiSource: true,
         dragStart: (node, data) => {
           data.effectAllowed = "all";
           data.dropEffect = "move";
@@ -266,15 +266,24 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         dragDrop: (node, data) => {
           const sourceDesignitems: IDesignItem[] = data.otherNodeList.map(x => x.data.ref);
           const targetDesignitem: IDesignItem = node.data.ref;
+          let grp = targetDesignitem.openGroup("drag/drop in treeview");
           if (data.dropEffectSuggested == 'move') {
             if (data.hitMode == 'over') {
               switchContainer(sourceDesignitems, targetDesignitem);
-            } else if (data.hitMode == 'before') {
+            } else if (data.hitMode == 'after' || data.hitMode == 'before') {
 
-            } else if (data.hitMode == 'after') {
-
+              for (let d of sourceDesignitems) {
+                if (d.parent != targetDesignitem.parent) {
+                  switchContainer([d], targetDesignitem.parent);
+                }
+                if (data.hitMode == 'before')
+                  targetDesignitem.insertAdjacentElement(d, 'beforebegin');
+                else
+                  targetDesignitem.insertAdjacentElement(d, 'afterend');
+              }
             }
           }
+          grp.commit();
         },
       },
 
