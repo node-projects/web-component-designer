@@ -78,7 +78,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
   public set canvasOffset(value: IPoint) {
     this._canvasOffset = value;
-    this._zoomFactorChanged();
+    this._zoomFactorChanged(false);
   }
   public get canvasOffsetUnzoomed(): IPoint {
     return { x: this._canvasOffset.x * this.zoomFactor, y: this._canvasOffset.y * this.zoomFactor };
@@ -519,7 +519,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
-  private _zoomFactorChanged() {
+  private _zoomFactorChanged(refreshExtensions = true) {
     //a@ts-ignore
     //this._canvasContainer.style.zoom = <any>this._zoomFactor;
     //this._canvasContainer.style.transform = 'scale(' + this._zoomFactor+') translate(' + this._translate.x + ', '+this._translate.y+')';
@@ -529,7 +529,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._updateTransform();
     this._fillCalculationrects();
     this.onZoomFactorChanged.emit(this._zoomFactor);
-    this.extensionManager.refreshAllAppliedExtentions();
+    if (refreshExtensions)
+      this.extensionManager.refreshAllAppliedExtentions();
   }
 
   _updateTransform() {
