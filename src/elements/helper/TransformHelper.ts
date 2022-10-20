@@ -201,7 +201,7 @@ export function getTransformedCornerDOMPoints(originalElement: HTMLElement, untr
   let appendedClone = helperElement.appendChild(clone);
   clone = null;
 
-  const appendedCloneWithoutTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone); // TODO: Is the scalefactor considered here???
+  const appendedCloneWithoutTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
 
   const appendedCloneWithoutTranformCornerDOMPoints: DOMPoint[] = [];
   appendedCloneWithoutTranformCornerDOMPoints[topleft] = DOMPoint.fromPoint(

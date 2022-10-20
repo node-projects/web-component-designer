@@ -829,9 +829,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
-  public getNormalizedElementCoordinates(element: Element): IRect {
+  public getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect {
     const targetRect = element.getBoundingClientRect();
-    return { x: (targetRect.x - this.containerBoundingRect.x) / this.scaleFactor, y: (targetRect.y - this.containerBoundingRect.y) / this.scaleFactor, width: targetRect.width / this.scaleFactor, height: targetRect.height / this.scaleFactor };
+    return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
   }
 
   public getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint {
