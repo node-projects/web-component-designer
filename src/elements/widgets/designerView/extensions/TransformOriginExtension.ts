@@ -44,10 +44,16 @@ export class TransformOriginExtension extends AbstractExtension {
   pointerEvent(event: PointerEvent) {
     event.stopPropagation();
 
-    const rect = this.extendedItem.element.getBoundingClientRect();
-    const rectNr = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
+    const rect = this.designerCanvas.getNormalizedElementCoordinates(<HTMLElement>this.extendedItem.element);
     const computed = getComputedStyle(this.extendedItem.element);
-    const to = computed.transformOrigin.split(' ');
+    const x = 0;
+    const y = 1;
+    const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
+    const toInPercentage = [];
+    toInPercentage[0] = parseInt(to[0]) / parseInt((<HTMLElement>this.extendedItem.element).style.width); // This value remains the same regardless of scalefactor
+    toInPercentage[1] = parseInt(to[1]) / parseInt((<HTMLElement>this.extendedItem.element).style.height); // This value remains the same regardless of scalefactor
+
+    const toDOMPoint = new DOMPoint(rect.x + toInPercentage[x] * rect.width, rect.y + toInPercentage[y] * rect.height)
 
     const normalized = this.designerCanvas.getNormalizedEventCoordinates(event);
     switch (event.type) {
@@ -59,10 +65,10 @@ export class TransformOriginExtension extends AbstractExtension {
         if (this._startPos && event.buttons > 0) {
           const dx = normalized.x - this._startPos.x;
           const dy = normalized.y - this._startPos.y;
-          this._circle.setAttribute('cx', <any>((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + Number.parseFloat(to[0].replace('px', '')) + dx));
-          this._circle.setAttribute('cy', <any>((rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + Number.parseFloat(to[1].replace('px', '')) + dy));
-          this._circle2.setAttribute('cx', <any>((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + Number.parseFloat(to[0].replace('px', '')) + dx));
-          this._circle2.setAttribute('cy', <any>((rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + Number.parseFloat(to[1].replace('px', '')) + dy));
+          this._circle.setAttribute('cx', <any>(toDOMPoint.x + dx));
+          this._circle.setAttribute('cy', <any>(toDOMPoint.y + dy));
+          this._circle2.setAttribute('cx', <any>(toDOMPoint.x + dx));
+          this._circle2.setAttribute('cy', <any>(toDOMPoint.y + dy));
         }
         break;
       case EventNames.PointerUp:
@@ -71,14 +77,9 @@ export class TransformOriginExtension extends AbstractExtension {
         if (this._startPos) {
           const dx = normalized.x - this._startPos.x;
           const dy = normalized.y - this._startPos.y;
-          const x = Number.parseFloat(to[0].replace('px', ''));
-          const y = Number.parseFloat(to[1].replace('px', ''));
-          const newX = (dx + x);
-          const newY = (dy + y);
-          const przX = Math.round(newX / rectNr.width * 10000) / 100;
-          const przY = Math.round(newY / rectNr.height * 10000) / 100;
-          this.extendedItem.setStyle('transform-origin', przX + '% ' + przY + '%');
-          // this.extendedItem.setStyle('transform-origin', this._circle.getAttribute('cx') + ' ' + this._circle.getAttribute('cy'), true);
+          const newX = (dx + parseFloat(to[x]));
+          const newY = (dy + parseFloat(to[y]));
+          this.extendedItem.setStyle('transform-origin', newX + 'px' + ' ' + newY + 'px');
           this.refresh();
           this._startPos = null;
         }
