@@ -15,16 +15,22 @@ export class TransformOriginExtension extends AbstractExtension {
   }
 
   override extend() {
-    const rect = this.extendedItem.element.getBoundingClientRect();
+    const rect = this.designerCanvas.getNormalizedElementCoordinates(<HTMLElement>this.extendedItem.element);
     const computed = getComputedStyle(this.extendedItem.element);
-    const to = computed.transformOrigin.split(' ');
+    const x = 0;
+    const y = 1;
+    const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
     const toInPercentage = [];
-    toInPercentage[0] = parseInt(to[0].replaceAll('px', '')) / parseInt(computed.width);
-    toInPercentage[1] = parseInt(to[1].replaceAll('px', '')) / parseInt(computed.height);
-    this._circle = this._drawCircle((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + toInPercentage[0] * rect.width, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + toInPercentage[1] * rect.height, 5, 'svg-transform-origin');
+    toInPercentage[0] = parseInt(to[0]) / parseInt((<HTMLElement>this.extendedItem.element).style.width); // This value remains the same regardless of scalefactor
+    toInPercentage[1] = parseInt(to[1]) / parseInt((<HTMLElement>this.extendedItem.element).style.height); // This value remains the same regardless of scalefactor
+
+    const toDOMPoint = new DOMPoint(rect.x + toInPercentage[x] * rect.width, rect.y + toInPercentage[y] * rect.height)
+    
+    this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.scaleFactor, 'svg-transform-origin');
     this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     this._circle.setAttribute('style', 'cursor: pointer');
-    this._circle2 = this._drawCircle((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + toInPercentage[0] * rect.width, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + toInPercentage[1] * rect.height, 1, 'svg-transform-origin');
+
+    this._circle2 = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 1 / this.designerCanvas.scaleFactor, 'svg-transform-origin');
     this._circle2.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     this._circle2.setAttribute('style', 'pointer-events: none');
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
@@ -39,7 +45,7 @@ export class TransformOriginExtension extends AbstractExtension {
     event.stopPropagation();
 
     const rect = this.extendedItem.element.getBoundingClientRect();
-    const rectNr = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element); //.getBoundingClientRect();
+    const rectNr = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' ');
 

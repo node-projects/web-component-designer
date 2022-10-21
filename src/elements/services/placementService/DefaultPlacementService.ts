@@ -98,11 +98,7 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    for (const item of items) {
-      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
-      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.MouseOver);
-      (<DesignerCanvas>placementView).extensionManager.applyExtension(item, ExtensionType.Placement);
-    }
+
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
