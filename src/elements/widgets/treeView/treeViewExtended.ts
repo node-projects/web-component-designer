@@ -198,13 +198,27 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         checkboxColumnIdx: 0,  // render the checkboxes into the 1st column
       },
 
-      activate: (event, data) => {
+      click: (event, data) => {
         if (event.originalEvent) { // only for clicked items, not when elements selected via code.
           let node = data.node;
           let designItem: IDesignItem = node.data.ref;
-          if (designItem)
-            designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+          if (designItem) {
+            if (event.ctrlKey) {
+              const sel = [...designItem.instanceServiceContainer.selectionService.selectedElements];
+              const idx = sel.indexOf(designItem);
+              if (idx >= 0) {
+                sel.splice(idx, 1);
+                designItem.instanceServiceContainer.selectionService.setSelectedElements(sel);
+              } else {
+                designItem.instanceServiceContainer.selectionService.setSelectedElements([...sel, designItem]);
+              }
+            }
+            else {
+              designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+            }
+          }
         }
+        return false;
       },
 
       createNode: (event, data) => {
