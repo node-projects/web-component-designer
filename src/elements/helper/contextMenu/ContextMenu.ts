@@ -1,4 +1,5 @@
 import { css } from "@node-projects/base-custom-webcomponent";
+import { sleep } from "../Helper";
 import { IContextMenuItem } from "./IContextMenuItem";
 
 export interface IContextMenuOptions {
@@ -125,7 +126,6 @@ export class ContextMenu {
 	public options: IContextMenuOptions;
 	private num: number;
 	private _windowDownBound: any;
-	private _windowUpBound: any;
 	private _windowKeyUpBound: any;
 	private _windowResizeBound: any;
 	private _menuElement: HTMLDivElement;
@@ -138,7 +138,6 @@ export class ContextMenu {
 		this.reload();
 
 		this._windowDownBound = this._windowDown.bind(this);
-		this._windowUpBound = this._windowUp.bind(this);
 		this._windowKeyUpBound = this._windowKeyUp.bind(this);
 		this._windowResizeBound = this._windowResize.bind(this);
 	}
@@ -268,12 +267,12 @@ export class ContextMenu {
 
 		menu.classList.add("display");
 
+		event.preventDefault();
+
 		window.addEventListener("keyup", this._windowKeyUpBound);
 		window.addEventListener("mousedown", this._windowDownBound);
-		window.addEventListener("mouseup", this._windowUpBound);
 		window.addEventListener("resize", this._windowResizeBound);
-
-		event.preventDefault();
+		sleep(100).then(() => window.addEventListener("contextmenu", this._windowDownBound));
 	}
 
 	_windowResize() {
@@ -281,12 +280,6 @@ export class ContextMenu {
 	}
 
 	_windowDown(e: MouseEvent) {
-		const p = e.composedPath();
-		if (p.indexOf(this._menuElement) < 0)
-			this.close();
-	}
-
-	_windowUp(e: MouseEvent) {
 		const p = e.composedPath();
 		if (p.indexOf(this._menuElement) < 0)
 			this.close();
@@ -308,7 +301,7 @@ export class ContextMenu {
 		this._menuElement.remove();
 		window.removeEventListener("keyup", this._windowKeyUpBound);
 		window.removeEventListener("mousedown", this._windowDownBound);
-		window.removeEventListener("mouseup", this._windowUpBound);
+		window.removeEventListener("contextmenu", this._windowDownBound);
 		window.removeEventListener("resize", this._windowResizeBound);
 	}
 }
