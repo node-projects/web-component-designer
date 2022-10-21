@@ -266,6 +266,11 @@ export class PointerTool implements ITool {
               } else {
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
                 if (!this._started) {
+                  for (const item of this._actionStartedDesignItems) {
+                    designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
+                    designerCanvas.extensionManager.removeExtension(item, ExtensionType.MouseOver);
+                    designerCanvas.extensionManager.applyExtension(item, ExtensionType.Placement);
+                  }
                   currentContainerService.startPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
                   this._started = true;
                 }
@@ -294,6 +299,10 @@ export class PointerTool implements ITool {
               let cg = designerCanvas.rootDesignItem.openGroup("Move Elements");
               containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
               cg.commit();
+              for (const item of this._actionStartedDesignItems) {
+                designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver);
+                designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
+              }
             }
 
             designerCanvas.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
