@@ -49,6 +49,7 @@ export class ExtensionManager implements IExtensionManager {
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
+      this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.TransformOrigin);
       const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
       this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
     }
@@ -271,6 +272,7 @@ export class ExtensionManager implements IExtensionManager {
       this.refreshExtensions(designItems, ExtensionType.ContainerDrag, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Doubleclick, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Placement, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.TransformOrigin, ignoredExtension);
     }
   }
 
