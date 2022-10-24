@@ -116,78 +116,21 @@ export function addVectors(vectorA: [number, number], vectorB: [number, number])
 //   }
 // }
 
-// export function getTransformedCornerPoints(originalElement: HTMLElement, clonedElement: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas, untransformedCornerPointsOffset: number) {
-//   const originalRect = designerCanvas.getNormalizedElementCoordinates(originalElement.parentElement);
-//   clonedElement.style.visibility = 'hidden';
-//   const transformBackup = clonedElement.style.transform;
-//   clonedElement.style.transform = '';
-//   let el = helperElement.appendChild(clonedElement);
-//   const transformOriginBackup = getComputedStyle(el).transformOrigin;
-//   clonedElement = null;
-//   const cloneBoundingRect = designerCanvas.getNormalizedElementCoordinates(el);
-//   const cornerPoints: IPoint[] = [
-//     {
-//       x: originalRect.x + cloneBoundingRect.x - untransformedCornerPointsOffset,
-//       y: originalRect.y + cloneBoundingRect.y - untransformedCornerPointsOffset
-//     },
-//     {
-//       x: originalRect.x + cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
-//       y: originalRect.y + cloneBoundingRect.y - untransformedCornerPointsOffset
-//     },
-//     {
-//       x: originalRect.x + cloneBoundingRect.x - untransformedCornerPointsOffset,
-//       y: originalRect.y + cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
-//     },
-//     {
-//       x: originalRect.x + cloneBoundingRect.x + cloneBoundingRect.width + untransformedCornerPointsOffset,
-//       y: originalRect.y + cloneBoundingRect.y + cloneBoundingRect.height + untransformedCornerPointsOffset
-//     }
-//   ]
-//   helperElement.replaceChildren();
-
-//   let cornerPointsTranformOrigins = new Array(4);
-
-//   const transformOrigin = (parseInt(transformOriginBackup.split(' ')[0]) + untransformedCornerPointsOffset).toString() + ' ' + (parseInt(transformOriginBackup.split(' ')[1]) + untransformedCornerPointsOffset).toString();
-
-//   cornerPointsTranformOrigins[0] = (parseInt(transformOrigin.split(' ')[0])).toString() + ' ' + (parseInt(transformOrigin.split(' ')[1])).toString();
-//   cornerPointsTranformOrigins[1] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOrigin.split(' ')[0])).toString() + ' ' + (parseInt(transformOrigin.split(' ')[1])).toString();
-//   cornerPointsTranformOrigins[2] = (parseInt(transformOrigin.split(' ')[0])).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOrigin.split(' ')[1])).toString();
-//   cornerPointsTranformOrigins[3] = (cornerPoints[0].x - cornerPoints[1].x + parseInt(transformOrigin.split(' ')[0])).toString() + ' ' + (cornerPoints[0].y - cornerPoints[2].y + parseInt(transformOrigin.split(' ')[1])).toString();
-
-//   const cornerDivs: HTMLDivElement[] = [];
-//   let element: HTMLDivElement;
-
-//   for (let i = 0; i < cornerPointsTranformOrigins.length; i++) {
-//     element = document.createElement('div');
-//     element.style.visibility = 'hidden';
-//     element.style.position = 'absolute';
-//     element.style.width = "1px";
-//     element.style.height = "1px";
-//     element.style.top = cornerPoints[i].y.toString() + 'px';
-//     element.style.left = cornerPoints[i].x.toString() + 'px';
-//     element.style.transformOrigin = cornerPointsTranformOrigins[i].split(' ')[0] + 'px' + ' ' + cornerPointsTranformOrigins[i].split(' ')[1] + 'px';
-//     cornerDivs.push(helperElement.appendChild(element));
-//   }
-
-//   let transformedCornerPoints: IPoint3D[] = [];
-
-//   for (let i = 0; i < cornerDivs.length; i++) {
-//     //let transformedCornerDiv: HTMLElement;
-//     let transformedCornerPoint: IPoint3D = { x: null, y: null, z: null };
-//     //transformedCornerDiv = applyMatrixToElement((<HTMLElement>this.extendedItem.element).style.transform, cornerDivs[i]);
-//     cornerDivs[i].style.transform = transformBackup;
-//     //transformedCornerDiv =  applyMatrixToElement((<HTMLElement>this.extendedItem.element).style.transform, cornerDivs[i]);
-//     transformedCornerPoint.x = designerCanvas.getNormalizedElementCoordinates(cornerDivs[i]).x;
-//     transformedCornerPoint.y = designerCanvas.getNormalizedElementCoordinates(cornerDivs[i]).y;
-//     transformedCornerPoint.z = 0;
-//     transformedCornerPoints.push(transformedCornerPoint);
-//   }
-
-//   return transformedCornerPoints;
-// }
-
-
 export function getTransformedCornerDOMPoints(originalElement: HTMLElement, untransformedCornerPointsOffset: number, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas): DOMPoint[] {
+  let parentOffsetX: number = 0;
+  let parentOffsetY: number = 0;
+  const canvas = originalElement.closest('#node-projects-designer-canvas-canvas');
+
+  if (originalElement != canvas) {
+    let actualEl: HTMLElement = originalElement;
+    while (actualEl.parentElement != canvas) {
+      parentOffsetX += designerCanvas.getNormalizedElementCoordinates(actualEl.parentElement).x;
+      parentOffsetY += designerCanvas.getNormalizedElementCoordinates(actualEl.parentElement).y;
+      actualEl = actualEl.parentElement;
+    }
+  }
+
+
   let clone = <HTMLElement>originalElement.cloneNode();
 
   const topleft = 0;
@@ -206,26 +149,26 @@ export function getTransformedCornerDOMPoints(originalElement: HTMLElement, untr
   const appendedCloneWithoutTranformCornerDOMPoints: DOMPoint[] = [];
   appendedCloneWithoutTranformCornerDOMPoints[topleft] = DOMPoint.fromPoint(
     {
-      x: appendedCloneWithoutTranformRect.x - untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y - untransformedCornerPointsOffset
+      x: appendedCloneWithoutTranformRect.x + parentOffsetX - untransformedCornerPointsOffset,
+      y: appendedCloneWithoutTranformRect.y + parentOffsetY - untransformedCornerPointsOffset
     }
   )
   appendedCloneWithoutTranformCornerDOMPoints[topright] = DOMPoint.fromPoint(
     {
-      x: appendedCloneWithoutTranformRect.x + appendedCloneWithoutTranformRect.width + untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y - untransformedCornerPointsOffset
+      x: appendedCloneWithoutTranformRect.x + parentOffsetX + appendedCloneWithoutTranformRect.width + untransformedCornerPointsOffset,
+      y: appendedCloneWithoutTranformRect.y + parentOffsetY - untransformedCornerPointsOffset
     }
   )
   appendedCloneWithoutTranformCornerDOMPoints[bottomleft] = DOMPoint.fromPoint(
     {
-      x: appendedCloneWithoutTranformRect.x - untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y + appendedCloneWithoutTranformRect.height + untransformedCornerPointsOffset
+      x: appendedCloneWithoutTranformRect.x + parentOffsetX - untransformedCornerPointsOffset,
+      y: appendedCloneWithoutTranformRect.y + parentOffsetY + appendedCloneWithoutTranformRect.height + untransformedCornerPointsOffset
     }
   )
   appendedCloneWithoutTranformCornerDOMPoints[bottomright] = DOMPoint.fromPoint(
     {
-      x: appendedCloneWithoutTranformRect.x + appendedCloneWithoutTranformRect.width + untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y + appendedCloneWithoutTranformRect.height + untransformedCornerPointsOffset
+      x: appendedCloneWithoutTranformRect.x + parentOffsetX + appendedCloneWithoutTranformRect.width + untransformedCornerPointsOffset,
+      y: appendedCloneWithoutTranformRect.y + parentOffsetY + appendedCloneWithoutTranformRect.height + untransformedCornerPointsOffset
     }
   )
 
@@ -255,6 +198,6 @@ export function getTransformedCornerDOMPoints(originalElement: HTMLElement, untr
   transformedCornerPoints[1] = new DOMPoint(transformOriginRelatedToCanvas.x + top1Transformed.x, transformOriginRelatedToCanvas.y + top1Transformed.y);
   transformedCornerPoints[2] = new DOMPoint(transformOriginRelatedToCanvas.x + top2Transformed.x, transformOriginRelatedToCanvas.y + top2Transformed.y);
   transformedCornerPoints[3] = new DOMPoint(transformOriginRelatedToCanvas.x + top3Transformed.x, transformOriginRelatedToCanvas.y + top3Transformed.y);
- 
+
   return transformedCornerPoints;
 }
