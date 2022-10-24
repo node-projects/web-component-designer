@@ -6,7 +6,6 @@ import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
 import { AbstractExtension } from './AbstractExtension';
-import { ExtensionType } from "./ExtensionType";
 import { IExtensionManager } from "./IExtensionManger";
 
 export class ResizeExtension extends AbstractExtension {
@@ -26,8 +25,6 @@ export class ResizeExtension extends AbstractExtension {
   private _circle8: SVGCircleElement;
   private _initialComputedTransformOrigins: DOMPoint[];
   private _initialTransformOrigins: string[];
-  private _transformOrginAppliedMap: Map<IDesignItem, boolean> = new Map();
-  private _started: boolean;
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
     super(extensionManager, designerCanvas, extendedItem);
@@ -40,6 +37,7 @@ export class ResizeExtension extends AbstractExtension {
 
   override refresh() {
     //#region Resizer circles
+    // let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, 0);
     let transformedCornerPoints: DOMPoint[] = getTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 0, this.designerCanvas.helperElement, this.designerCanvas);
 
     this._circle1 = this._drawResizerOverlay(transformedCornerPoints[0].x, transformedCornerPoints[0].y, 'nw-resize', this._circle1);
@@ -181,14 +179,6 @@ export class ResizeExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          if (!this._started) {
-            for (const item of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-              this._transformOrginAppliedMap.set(item, item.appliedDesignerExtensions.get(ExtensionType.TransformOrigin) != null);
-              this.designerCanvas.extensionManager.removeExtension(item, ExtensionType.TransformOrigin);
-            }
-            this._started = true;
-          }
-
           const containerStyle = getComputedStyle(this.extendedItem.parent.element);
           const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
@@ -329,14 +319,6 @@ export class ResizeExtension extends AbstractExtension {
         }
         break;
       case EventNames.PointerUp:
-        this._started = false;
-
-        for (const item of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-          if (this._transformOrginAppliedMap.get(item)) {
-            this.designerCanvas.extensionManager.applyExtension(item, ExtensionType.TransformOrigin);
-          }
-        }
-
         (<Element>event.target).releasePointerCapture(event.pointerId);
 
         let cg = this.extendedItem.openGroup("Resize Elements");

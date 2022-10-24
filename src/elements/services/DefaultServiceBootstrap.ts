@@ -99,7 +99,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
     new GridExtensionProvider(),
-    //new TransformOriginExtensionProvider(),
+    new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
     new EllipsisExtensionProvider(),
@@ -114,9 +114,6 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
     new GridExtensionProvider()
-  ]);
-  serviceContainer.designerExtensions.set(ExtensionType.TransformOrigin, [
-    new TransformOriginExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new MouseOverExtensionProvider()
