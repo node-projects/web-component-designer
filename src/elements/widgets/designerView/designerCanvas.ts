@@ -633,7 +633,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         }
       } else {
         let [newContainer] = this._getPossibleContainerForDrop(event);
-
         if (this._dragOverExtensionItem != newContainer) {
           this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
           this.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver);
@@ -703,6 +702,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         }
 
         let [newContainer] = this._getPossibleContainerForDrop(event);
+        if (!newContainer)
+          newContainer = this.rootDesignItem;
+          
         let pos = this.getNormalizedElementCoordinates(newContainer.element);
 
         this._fillCalculationrects();
@@ -880,6 +882,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         continue;
       if (e.getRootNode() !== this.shadowRoot)
         continue;
+      if (e == this._outercanvas2)
+        break;
       retVal.push(e);
       if (e === this._canvas)
         break;
@@ -893,6 +897,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     for (let i = 0; i < elements.length; i++) {
       currentElement = <HTMLElement>elements[i];
+      if (currentElement == this._outercanvas2) {
+        currentElement = null;
+        break;
+      }
       if (currentElement == this.clickOverlay) {
         currentElement = null;
         continue;
@@ -965,7 +973,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
 
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
-    
+
     tool.pointerEventHandler(this, event, <Element>currentElement);
     this._canvas.style.cursor = tool.cursor;
   }
