@@ -176,8 +176,8 @@ export function getTransformedCornerDOMPoints(originalElement: HTMLElement, untr
 
   const transformOriginRelatedToCanvas: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
     {
-      x: appendedCloneWithoutTranformRect.x + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[0]),
-      y: appendedCloneWithoutTranformRect.y + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[1]),
+      x: appendedCloneWithoutTranformRect.x + parentOffsetX + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[0]),
+      y: appendedCloneWithoutTranformRect.y + parentOffsetY + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[1]),
       z: 0,
       w: 0
     }
