@@ -76,13 +76,6 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
     attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("set-styles"))
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "set-styles";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
     attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("styles"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "styles";
@@ -90,16 +83,9 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
     attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("alignment"))
+    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("layout"))
     attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "alignment";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("grid"))
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "grid";
+    attributeEditorAttributeList.title = "layout";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 
@@ -107,6 +93,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("flex"))
     attributeEditorAttributeList.createElements(null);
     attributeEditorAttributeList.title = "flex";
+    this._designerTabControl.appendChild(attributeEditorAttributeList);
+    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
+
+    attributeEditorAttributeList = new PropertyGridPropertyList(value);
+    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("grid"))
+    attributeEditorAttributeList.createElements(null);
+    attributeEditorAttributeList.title = "grid";
     this._designerTabControl.appendChild(attributeEditorAttributeList);
     this._propertyGridPropertyLists.push(attributeEditorAttributeList);
 

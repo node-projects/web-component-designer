@@ -70,7 +70,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
             let childSingleTextNode = c.childCount === 1 && c.firstChild.nodeType === NodeType.TextNode;
             if (childSingleTextNode)
               if (!indentedTextWriter.isLastCharNewline())
-                indentedTextWriter.writeNewline();
+                this._conditionalyWriteNewline(indentedTextWriter, c);
           }
           if (designItem.element instanceof HTMLElement && !isInline(designItem.element) || (designItem.element instanceof SVGElement)) {
             indentedTextWriter.levelShrink();

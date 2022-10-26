@@ -10,6 +10,7 @@ import { TextPropertyEditor } from './propertyEditors/TextPropertyEditor';
 import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor';
 import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor';
 import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEditor.js";
+import { MetricsPropertyEditor } from "./propertyEditors/MetricsPropertyEditor";
 
 export class DefaultEditorTypesService implements IEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
@@ -52,6 +53,10 @@ export class DefaultEditorTypesService implements IEditorTypesService {
       case "thickness":
         {
           return new ThicknessPropertyEditor(property);
+        }
+      case "metrics":
+        {
+          return new MetricsPropertyEditor(property);
         }
       case "css-length":
       case "string":
