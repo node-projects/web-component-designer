@@ -96,6 +96,7 @@ export * from "./elements/services/propertiesService/services/CssPropertiesServi
 export * from "./elements/services/propertiesService/services/ListPropertiesService.js";
 export * from "./elements/services/propertiesService/services/LitElementPropertiesService.js";
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
+export * from "./elements/services/propertiesService/services/SVGElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
 export * from "./elements/services/propertiesService/services/WebcomponentManifestPropertiesService.js";

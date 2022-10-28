@@ -2,6 +2,7 @@ import { ServiceContainer } from './ServiceContainer.js';
 import { PolymerPropertiesService } from './propertiesService/services/PolymerPropertiesService.js';
 import { LitElementPropertiesService } from './propertiesService/services/LitElementPropertiesService.js';
 import { NativeElementsPropertiesService } from './propertiesService/services/NativeElementsPropertiesService.js';
+import { SVGElementsPropertiesService } from './propertiesService/services/SVGElementsPropertiesService.js';
 import { DefaultInstanceService } from './instanceService/DefaultInstanceService.js';
 import { DefaultEditorTypesService } from './propertiesService/DefaultEditorTypesService.js';
 import { BaseCustomWebComponentPropertiesService } from './propertiesService/services/BaseCustomWebComponentPropertiesService.js';
@@ -74,6 +75,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("propertyService", new PolymerPropertiesService());
   serviceContainer.register("propertyService", new LitElementPropertiesService());
   serviceContainer.register("propertyService", new NativeElementsPropertiesService());
+  serviceContainer.register("propertyService", new SVGElementsPropertiesService());
   serviceContainer.register("propertyService", new Lit2PropertiesService());
   serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
   serviceContainer.register("instanceService", new DefaultInstanceService());
