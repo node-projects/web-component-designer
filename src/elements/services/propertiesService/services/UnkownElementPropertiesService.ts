@@ -29,7 +29,9 @@ export abstract class UnkownElementPropertiesService implements IPropertiesServi
   }
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-    const attributeName = PropertiesHelper.camelToDashCase(property.name);
+    let attributeName = property.attributeName
+    if (!attributeName)
+      attributeName = PropertiesHelper.camelToDashCase(property.name);
     const cg = designItems[0].openGroup("properties changed");
     try {
       for (let d of designItems) {
