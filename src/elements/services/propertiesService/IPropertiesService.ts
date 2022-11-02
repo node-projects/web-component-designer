@@ -7,6 +7,8 @@ import { IBinding } from '../../item/IBinding';
 
 export interface IPropertiesService extends IService {
   //readonly name: string;
+  listNeedsRefresh(designItem: IDesignItem): boolean;
+
   isHandledElement(designItem: IDesignItem): boolean;
   getProperties(designItem: IDesignItem): IProperty[];
   getProperty(designItem: IDesignItem, name: string): IProperty;

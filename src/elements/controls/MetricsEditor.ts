@@ -93,22 +93,22 @@ div.ct > div.ct > div.ct > div.ct > div.ct {
 
   public property: string;
   public unsetValue: string;
-  private _root: HTMLDivElement;
-  private _contentEditable: HTMLDivElement;
+  //private _root: HTMLDivElement;
+  //private _contentEditable: HTMLDivElement;
 
-  
+
 
   _updateValue() {
-    }
+  }
 
   ready() {
-    this._root = this._getDomElement<HTMLDivElement>("testdiv");
+    //this._root = this._getDomElement<HTMLDivElement>("testdiv");
     this._parseAttributesToProperties();
     this._updateValue();
     this._assignEvents();
   }
 
-  onDoubleClick(event: PointerEvent){
+  onDoubleClick(event: PointerEvent) {
 
     let element = this._getDomElement<HTMLDivElement>("testdiv");
 
@@ -118,15 +118,14 @@ div.ct > div.ct > div.ct > div.ct > div.ct {
     // - rausnehmen
     element.innerHTML = "-";
     // Input auswerten
-    
+
     //Input in div schreiben
 
     // contentEditable false setzen mit EnterTaste
 
-    element.onkeydown=(e) => {
+    element.onkeydown = (e) => {
 
-      if(e.key == "Enter")
-      {
+      if (e.key == "Enter") {
         let _input = element.innerHTML;
         //let value = document.createElement("input");
         element.style.marginTop = _input;

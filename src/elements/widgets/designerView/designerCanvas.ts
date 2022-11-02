@@ -273,28 +273,31 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     switch (command.type) {
       case CommandType.screenshot: {
+        if (!Screenshot.screenshotsEnabled) {
+          alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
+        }
         if (!this.instanceServiceContainer.selectionService.primarySelection) {
           this.zoomToFit();
           this.disableBackgroud();
-          await sleep(100);
           const el = this.rootDesignItem.element;
           const sel = this.instanceServiceContainer.selectionService.selectedElements;
           this.instanceServiceContainer.selectionService.setSelectedElements(null);
+          await sleep(100);
           const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
           await exportData(dataURItoBlob(screenshot), "screenshot.png");
           this.instanceServiceContainer.selectionService.setSelectedElements(sel);
           this.enableBackground();
         }
         else {
-          if (!Screenshot.screenshotsEnabled) {
-            alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
-          }
+          this.disableBackgroud();
           const el = this.instanceServiceContainer.selectionService.primarySelection.element;
           const sel = this.instanceServiceContainer.selectionService.selectedElements;
           this.instanceServiceContainer.selectionService.setSelectedElements(null);
+          await sleep(100);
           const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
           await exportData(dataURItoBlob(screenshot), "screenshot.png");
           this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+          this.enableBackground();
         }
       }
         break;
@@ -552,6 +555,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.rootDesignItem._removeChildInternal(i);
     this.addDesignItems(designItems);
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
+    this.instanceServiceContainer.selectionService.setSelectedElements(null);
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
@@ -704,7 +708,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         let [newContainer] = this._getPossibleContainerForDrop(event);
         if (!newContainer)
           newContainer = this.rootDesignItem;
-          
+
         let pos = this.getNormalizedElementCoordinates(newContainer.element);
 
         this._fillCalculationrects();
