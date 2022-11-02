@@ -106,8 +106,15 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   constructor() {
     super();
 
-    this._contentObserver = new MutationObserver(() => {
-      this.refreshItems();
+
+    this._contentObserver = new MutationObserver((mut) => {
+      let refresh = false;
+      for (let m of mut) {
+        if (m.type != 'attributes' || m.attributeName == 'style')
+          refresh = true;
+      }
+      if (refresh)
+        this.refreshItems();
     });
 
     let outerDiv = document.createElement("div")
@@ -152,16 +159,18 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
     DomHelper.removeAllChildnodes(this._headerDiv);
     let reloadOnce = true;
     for (let item of this.children) {
-      let htmlItem = item as HTMLElement;
-      if (!this._elementMap.has(htmlItem) && reloadOnce) {
-        this.refreshItems();
-        reloadOnce = false;
-      }
-      const tabHeaderDiv = this._elementMap.get(htmlItem);
-      this._moreContainer.appendChild(tabHeaderDiv);
-      if (this._headerDiv.children.length == 0 || (w + (tabHeaderDiv.clientWidth / 2)) < this._headerDiv.clientWidth) {
-        this._headerDiv.appendChild(tabHeaderDiv);
-        w += tabHeaderDiv.clientWidth;
+      if ((<HTMLElement>item).style.display != 'none') {
+        let htmlItem = item as HTMLElement;
+        if (!this._elementMap.has(htmlItem) && reloadOnce) {
+          this.refreshItems();
+          reloadOnce = false;
+        }
+        const tabHeaderDiv = this._elementMap.get(htmlItem);
+        this._moreContainer.appendChild(tabHeaderDiv);
+        if (this._headerDiv.children.length == 0 || (w + (tabHeaderDiv.clientWidth / 2)) < this._headerDiv.clientWidth) {
+          this._headerDiv.appendChild(tabHeaderDiv);
+          w += tabHeaderDiv.clientWidth;
+        }
       }
     }
   }
@@ -171,7 +180,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       this.refreshItems();
       this._firstConnect = false;
 
-      this._contentObserver.observe(this, { childList: true });
+      this._contentObserver.observe(this, { childList: true, subtree: true, attributes: true });
 
       let selectedIndexAttribute = this.getAttribute("selected-index")
       if (selectedIndexAttribute) {
@@ -190,30 +199,28 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       this._selectedIndexChanged(old);
   }
 
-  disconnectedCallback() {
-    //this._contentObserver.disconnect();
-  }
-
   public refreshItems() {
     this._headerDiv.innerHTML = "";
     let i = 0;
     for (let item of this.children) {
-      let htmlItem = item as HTMLElement;
-      let tabHeaderDiv = document.createElement("div")
-      tabHeaderDiv.innerText = htmlItem.title;
-      tabHeaderDiv.title = htmlItem.title;
-      tabHeaderDiv.className = 'tab-header';
-      let j = i;
-      tabHeaderDiv.onpointerdown = () => {
-        let old = this._selectedIndex;
-        this._selectedIndex = j;
-        if (this._headerDiv.children.length)
-          this._selectedIndexChanged(old, true);
-        this._moreContainer.style.visibility = 'hidden';
+      if ((<HTMLElement>item).style.display != 'none') {
+        let htmlItem = item as HTMLElement;
+        let tabHeaderDiv = document.createElement("div")
+        tabHeaderDiv.innerText = htmlItem.title;
+        tabHeaderDiv.title = htmlItem.title;
+        tabHeaderDiv.className = 'tab-header';
+        let j = i;
+        tabHeaderDiv.onpointerdown = () => {
+          let old = this._selectedIndex;
+          this._selectedIndex = j;
+          if (this._headerDiv.children.length)
+            this._selectedIndexChanged(old, true);
+          this._moreContainer.style.visibility = 'hidden';
+        }
+        this._elementMap.set(htmlItem, tabHeaderDiv);
+        this._headerDiv.appendChild(tabHeaderDiv);
+        i++;
       }
-      this._elementMap.set(htmlItem, tabHeaderDiv);
-      this._headerDiv.appendChild(tabHeaderDiv);
-      i++;
     }
 
     this._showHideHeaderItems();
@@ -221,23 +228,24 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   }
 
   private _selectedIndexChanged(oldIndex?: number, viaClick = false) {
-    for (let index = 0; index < this.children.length; index++) {
-      const element = this.children[index];
-      if (index == this._selectedIndex) {
-        element.slot = "panels";
-        const el = <HTMLElement>this.children[index];
-        const headerEl = this._elementMap.get(el);
-        if (headerEl) {
-          headerEl.classList.add('selected');
-          if ((<IActivateable><unknown>element).activated)
-            (<IActivateable><unknown>element).activated();
-        }
-      } else {
-        element.removeAttribute("slot");
-        const el = <HTMLElement>this.children[index];
-        const headerEl = this._elementMap.get(el);
-        if (headerEl) {
-          headerEl.classList.remove('selected');
+    let index = -1;
+    for (let element of this.children) {
+      if ((<HTMLElement>element).style.display != 'none') {
+        index++;
+        if (index == this._selectedIndex) {
+          element.slot = "panels";          
+          const headerEl = this._elementMap.get(<HTMLElement>element);
+          if (headerEl) {
+            headerEl.classList.add('selected');
+            if ((<IActivateable><unknown>element).activated)
+              (<IActivateable><unknown>element).activated();
+          }
+        } else {
+          element.removeAttribute("slot");
+          const headerEl = this._elementMap.get(<HTMLElement>element);
+          if (headerEl) {
+            headerEl.classList.remove('selected');
+          }
         }
       }
     }
