@@ -9,8 +9,14 @@ import { IBinding } from '../../../item/IBinding';
 
 export class CssPropertiesService implements IPropertiesService {
 
-  //@ts-ignore
-  private styles: IProperty[] = [
+  public layout: IProperty[] = [
+    {
+      name: "display",
+      type: "list",
+      values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
+      service: this,
+      propertyType: PropertyType.cssValue
+    }, 
     {
       name: "color",
       type: "color",
@@ -48,49 +54,14 @@ export class CssPropertiesService implements IPropertiesService {
       service: this,
       propertyType: PropertyType.cssValue
     }, {
-      name: "padding",
-      type: "thickness",
+      name: "metrics",
+      type: "metrics",
       service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "margin",
-      type: "thickness",
-      service: this,
-      propertyType: PropertyType.cssValue
+      propertyType: PropertyType.complex
     }, {
       name: "position",
       type: "list",
       values: ["static", "relative", "absolute"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "left",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "top",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "right",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "bottom",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "width",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "height",
-      type: "css-length",
       service: this,
       propertyType: PropertyType.cssValue
     }, {
@@ -107,40 +78,7 @@ export class CssPropertiesService implements IPropertiesService {
     }
   ];
 
-  //@ts-ignore
-  private alignment: IProperty[] = [
-    {
-      name: "display",
-      type: "list",
-      values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "position",
-      type: "list",
-      values: ["static", "relative", "absolute"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "inset",
-      type: "thickness",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "margin",
-      type: "thickness",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "padding",
-      type: "thickness",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }
-  ];
-
-  //@ts-ignore
-  private grid: IProperty[] = [
+  public grid: IProperty[] = [
     {
       name: "display",
       type: "list",
@@ -200,8 +138,7 @@ export class CssPropertiesService implements IPropertiesService {
     }
   ];
 
-  //@ts-ignore
-  private flex: IProperty[] = [
+  public flex: IProperty[] = [
     {
       name: "display",
       type: "list",
@@ -247,9 +184,9 @@ export class CssPropertiesService implements IPropertiesService {
     }
   ];
 
-  name: 'set-styles' | 'alignment' | 'styles' | 'grid' | 'flex';
+  name: 'styles' | 'layout' | 'grid' | 'flex';
 
-  constructor(name: 'set-styles' | 'alignment' | 'styles' | 'grid' | 'flex') {
+  constructor(name: 'styles' | 'layout' | 'grid' | 'flex') {
     this.name = name;
   }
 
@@ -258,14 +195,14 @@ export class CssPropertiesService implements IPropertiesService {
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
-    if (this.name == 'set-styles') {
+    if (this.name == 'styles') {
       return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
     }
     return this[this.name][name]
   }
 
   getProperties(designItem: IDesignItem): IProperty[] {
-    if (this.name == 'set-styles') {
+    if (this.name == 'styles') {
       if (!designItem)
         return [];
       return Array.from(designItem.styles.keys(), x => ({ name: x, type: 'string', service: this, propertyType: PropertyType.cssValue }));
