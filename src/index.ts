@@ -113,6 +113,7 @@ export * from "./elements/services/propertiesService/services/SVGElementsPropert
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";
 export * from "./elements/services/propertiesService/services/UnkownElementPropertiesService.js";
 export * from "./elements/services/propertiesService/services/WebcomponentManifestPropertiesService.js";
+export * from "./elements/services/propertiesService/services/AttributesPropertiesService.js";
 export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
 export * from "./elements/services/propertiesService/PropertyGroupsService.js";
