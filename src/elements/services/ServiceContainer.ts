@@ -34,6 +34,7 @@ import { IProperty } from "./propertiesService/IProperty.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 import { IBinding } from "../item/IBinding";
 import { BindingTarget } from "../item/BindingTarget";
+import { IPropertyGroupsService } from "./propertiesService/IPropertyGroupsService";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -54,6 +55,7 @@ interface ServiceNameMap {
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
+  "propertyGroupsService": IPropertyGroupsService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -108,6 +110,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');
+  }
+
+  get propertyGroupService(): IPropertyGroupsService {
+    return this.getLastService('propertyGroupsService');
   }
 
   get containerServices(): IPlacementService[] {

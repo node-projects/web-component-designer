@@ -102,11 +102,6 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
       type: "string",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
-    }, {
-      name: "disabled",
-      type: "boolean",
-      service: this,
-      propertyType: PropertyType.propertyAndAttribute
     }
   ];
 

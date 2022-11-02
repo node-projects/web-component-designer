@@ -3,5 +3,7 @@ export enum PropertyType {
     attribute = 'attribute',
     propertyAndAttribute = 'propertyAndAttribute',
     cssValue = 'cssvalue',
-    complex = 'complex' // editor is special and could write multiple properties
+
+    complex = 'complex', // editor is special and could write multiple properties
+    add = 'add' // editor allows to add a new one
 }

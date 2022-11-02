@@ -9,6 +9,10 @@ import { IBinding } from '../../../item/IBinding';
 
 export class CssPropertiesService implements IPropertiesService {
 
+  public listNeedsRefresh(designItem: IDesignItem): boolean {
+    return this.name == 'styles' ? true : false;
+  }
+
   public layout: IProperty[] = [
     {
       name: "display",
@@ -16,7 +20,7 @@ export class CssPropertiesService implements IPropertiesService {
       values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
       service: this,
       propertyType: PropertyType.cssValue
-    }, 
+    },
     {
       name: "color",
       type: "color",

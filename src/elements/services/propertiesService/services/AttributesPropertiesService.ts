@@ -10,6 +10,10 @@ export class AttributesPropertiesService implements IPropertiesService {
 
   public name = "attributes"
 
+  public listNeedsRefresh(designItem: IDesignItem): boolean {
+    return true;
+  }
+  
   isHandledElement(designItem: IDesignItem): boolean {
     return true;
   }
@@ -24,6 +28,7 @@ export class AttributesPropertiesService implements IPropertiesService {
       for (let a of designItem.attributes.keys()) {
         p.push({ name: a, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
       }
+      p.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex })
       return p;
     }
     return null;

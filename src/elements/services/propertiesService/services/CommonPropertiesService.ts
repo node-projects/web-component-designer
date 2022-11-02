@@ -8,6 +8,10 @@ import { IBinding } from "../../../item/IBinding";
 
 export class CommonPropertiesService implements IPropertiesService {
 
+  public listNeedsRefresh(designItem: IDesignItem): boolean {
+    return false;
+  }
+
   //@ts-ignore
   private commonProperties: IProperty[] = [
     {

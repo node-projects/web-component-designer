@@ -9,6 +9,10 @@ import { IBinding } from "../../../item/IBinding";
 //@ts-ignore
 export abstract class UnkownElementPropertiesService implements IPropertiesService {
 
+  public listNeedsRefresh(designItem: IDesignItem): boolean {
+    return true;
+  }
+
   public isHandledElement(designItem: IDesignItem): boolean {
     return true;
   }
