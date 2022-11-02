@@ -89,6 +89,18 @@ export * from "./elements/services/propertiesService/DefaultEditorTypesService.j
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
+export * from "./elements/services/propertiesService/propertyEditors/BasePropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/BooleanPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/ColorPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/DatePropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/ImageButtonListPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyPopupEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/MetricsPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/NumberPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/SelectPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/TextPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/ThicknessPropertyEditor.js";
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
