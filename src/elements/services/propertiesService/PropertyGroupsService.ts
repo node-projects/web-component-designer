@@ -6,7 +6,7 @@ import { CommonPropertiesService } from "./services/CommonPropertiesService";
 import { CssPropertiesService } from "./services/CssPropertiesService";
 
 export class PropertyGroupsService implements IPropertyGroupsService {
-    private _pgList: { name: string; propertiesService: IPropertiesService; }[] = [
+    protected _pgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'common', propertiesService: new CommonPropertiesService() },
@@ -16,7 +16,7 @@ export class PropertyGroupsService implements IPropertyGroupsService {
         { name: 'grid', propertiesService: new CssPropertiesService("grid") },
     ];
 
-    private _svgPgList: { name: string; propertiesService: IPropertiesService; }[] = [
+    protected _svgPgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'styles', propertiesService: new CssPropertiesService("styles") },
