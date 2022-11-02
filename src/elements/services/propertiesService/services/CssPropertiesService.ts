@@ -209,7 +209,9 @@ export class CssPropertiesService implements IPropertiesService {
     if (this.name == 'styles') {
       if (!designItem)
         return [];
-      return Array.from(designItem.styles.keys(), x => ({ name: x, type: 'string', service: this, propertyType: PropertyType.cssValue }));
+      let arr = Array.from(designItem.styles.keys(), x => ({ name: x, type: 'string', service: this, propertyType: PropertyType.cssValue }));
+      arr.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
+      return arr;
     }
     return this[this.name];
   }
