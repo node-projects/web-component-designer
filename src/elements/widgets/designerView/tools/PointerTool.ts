@@ -236,9 +236,13 @@ export class PointerTool implements ITool {
             this._clonedItems = [];
             for (let d of this._actionStartedDesignItems) {
               const clone = await d.clone();
-              this._clonedItems.push(clone);
+              if (this._clonedItems)
+                this._clonedItems.push(clone);
             }
           }
+
+          if (!this._actionStartedDesignItem)
+            return;
 
           if (event.ctrlKey && !this._copiedItemsInserted) {
             this._copiedItemsInserted = true;
