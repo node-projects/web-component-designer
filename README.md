@@ -1,6 +1,6 @@
 # web-component-designer
 
-```This is a preview version. It's already useable but big refactorings could still happen.```
+```It#s now considered beta. It works, we use it in production, but there are many more features to come```
 
 A HTML web component for designing web components and HTML pages based on PolymerLabs wizzywid which can easily be integrated in your own software.
 Meanwhile polymer is not used anymore.
@@ -9,7 +9,15 @@ Meanwhile polymer is not used anymore.
 
 ## NPM Package
 
-At the moment there is no npm package available, but there will be one as soon as the software has reached RC status.
+https://www.npmjs.com/package/@node-projects/web-component-designer
+
+     npm i @node-projects/web-component-designer
+
+## Browser support
+
+  - At the moment Chrome, and Firefox Nightly with Experimental Import Assertions enabled.
+  But when import Assertions are landing in Safari and Firefox they will work again.
+  And you could transpile them away in the meantime.
 
 ## Demo
 

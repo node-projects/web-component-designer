@@ -27,7 +27,8 @@ export class PropertyGroupsService implements IPropertyGroupsService {
         if (designItems == null || designItems.length == 0)
             return [];
         this._pgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
-        if (designItems[0] instanceof SVGElement)
+        this._svgPgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
+        if (designItems[0].element instanceof SVGElement)
             return this._svgPgList;
         return this._pgList;
     }

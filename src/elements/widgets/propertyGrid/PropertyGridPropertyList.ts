@@ -107,7 +107,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public createElements(designItem: IDesignItem) {
-    if (this._propertiesService.listNeedsRefresh(designItem) || this._propertyMap.size == 0) {
+    if (this._propertiesService && (this._propertiesService.listNeedsRefresh(designItem)) || this._propertyMap.size == 0) {
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
       if (this._propertiesService) {
@@ -139,14 +139,20 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
               }
 
               if (p.type == 'addNew') {
+                let input = <HTMLInputElement>editor.element;
+                input.disabled = true;
                 let label = document.createElement("input");
                 label.value = p.name;
                 label.onkeyup = e => {
-                  if (e.key == 'Enter') {
-                    designItem.setAttribute(label.value, "")
+                  if (e.key == 'Enter' && label.value) {
+                    p.name = label.value;
+                    label.disabled = true;
+                    input.disabled = false;
+                    input.focus();
                   }
                 }
                 this._div.appendChild(label);
+
               } else {
                 let label = document.createElement("label");
                 label.htmlFor = p.name;

@@ -16,6 +16,8 @@ export class InstanceServiceContainer extends BaseServiceContainer<InstanceServi
   public designContext: IDesignContext = new DesignContext();
   public readonly designerCanvas: IDesignerCanvas;
 
+  public designer: any; //usable to assign designer from outside
+
   constructor(designerCanvas: IDesignerCanvas) {
     super();
     this.designerCanvas = designerCanvas;

@@ -90,6 +90,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
       visibleDict.add(p.name);
     }
 
+    this._designerTabControl.refreshItems();
     if (this._designerTabControl.selectedIndex < 0)
       this._designerTabControl.selectedIndex = 0;
 
