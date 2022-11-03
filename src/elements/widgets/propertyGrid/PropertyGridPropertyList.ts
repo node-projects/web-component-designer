@@ -107,7 +107,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public createElements(designItem: IDesignItem) {
-    if (this._propertiesService.listNeedsRefresh(designItem) || this._propertyMap.size == 0) {
+    if (this._propertiesService && (this._propertiesService.listNeedsRefresh(designItem)) || this._propertyMap.size == 0) {
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
       if (this._propertiesService) {
