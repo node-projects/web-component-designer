@@ -7,7 +7,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
 
   private _selectedIndex: number = -1;
 
-  private _contentObserver: MutationObserver;
+  //private _contentObserver: MutationObserver;
   private _panels: HTMLDivElement;
   private _headerDiv: HTMLDivElement;
   private _moreDiv: HTMLDivElement;
@@ -107,7 +107,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
     super();
 
 
-    this._contentObserver = new MutationObserver((mut) => {
+    /*this._contentObserver = new MutationObserver((mut) => {
       let refresh = false;
       for (let m of mut) {
         if (m.type != 'attributes' || m.attributeName == 'style')
@@ -115,7 +115,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       }
       if (refresh)
         this.refreshItems();
-    });
+    });*/
 
     let outerDiv = document.createElement("div")
     outerDiv.className = 'outer';
