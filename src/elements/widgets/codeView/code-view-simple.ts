@@ -4,7 +4,6 @@ import { IActivateable } from '../../../interfaces/IActivateable';
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
 import { IUiCommand } from '../../../commandHandling/IUiCommand';
-import { CommandType } from '../../../commandHandling/CommandType';
 
 export class CodeViewSimple extends BaseCustomWebComponentConstructorAppend implements ICodeView, IActivateable, IUiCommandHandler {
 
@@ -17,7 +16,6 @@ export class CodeViewSimple extends BaseCustomWebComponentConstructorAppend impl
   public onTextChanged = new TypedEvent<string>();
 
   private _text: HTMLTextAreaElement;
-  private _editor: HTMLDivElement;
 
   static override readonly style = css`
     :host {
@@ -49,7 +47,6 @@ export class CodeViewSimple extends BaseCustomWebComponentConstructorAppend impl
   }
 
   async ready() {
-    this._editor = this._getDomElement<HTMLDivElement>('container');
     this._text = this._getDomElement<HTMLTextAreaElement>('text');
   }
 
