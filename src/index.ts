@@ -253,6 +253,7 @@ export type { ICodeView } from "./elements/widgets/codeView/ICodeView.js";
 export * from "./elements/widgets/codeView/code-view-monaco.js";
 export * from "./elements/widgets/codeView/code-view-ace.js";
 export * from "./elements/widgets/codeView/code-view-code-mirror.js";
+export * from "./elements/widgets/codeView/code-view-simple.js";
 
 export * from "./elements/documentContainer.js";
 
