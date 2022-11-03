@@ -180,7 +180,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       this.refreshItems();
       this._firstConnect = false;
 
-      this._contentObserver.observe(this, { childList: true, subtree: true, attributes: true });
+      //this._contentObserver.observe(this, { childList: true, subtree: true, attributes: true });
 
       let selectedIndexAttribute = this.getAttribute("selected-index")
       if (selectedIndexAttribute) {
@@ -233,7 +233,8 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       if ((<HTMLElement>element).style.display != 'none') {
         index++;
         if (index == this._selectedIndex) {
-          element.slot = "panels";          
+          if (element.slot != "panels")
+            element.slot = "panels";
           const headerEl = this._elementMap.get(<HTMLElement>element);
           if (headerEl) {
             headerEl.classList.add('selected');
