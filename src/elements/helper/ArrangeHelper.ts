@@ -6,12 +6,12 @@ export abstract class ArrangeHelper {
         switch (orientation) {
             case Orientation.TOP: {
                 const grp = this.formGroup(ArrangeDirection.TOP, designerCanvas);
-                const primeryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
                     var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primeryCoordinates.y != selectedCoordinates.y) {
-                        var diffY = selectedCoordinates.y - primeryCoordinates.y;
+                    if(primaryCoordinates.y != selectedCoordinates.y) {
+                        var diffY = selectedCoordinates.y - primaryCoordinates.y;
                         var top = selectedCoordinates.y - diffY;
                         this.arrange(elem, 'top', top + "px" );
                     }
@@ -21,12 +21,12 @@ export abstract class ArrangeHelper {
             }
             case Orientation.RIGHT: {
                 const grp = this.formGroup(ArrangeDirection.RIGHT, designerCanvas);
-                const primeryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
                     var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primeryCoordinates.x != selectedCoordinates.x) {
-                        var diffX = primeryCoordinates.x + primeryCoordinates.width - selectedCoordinates.x - selectedCoordinates.width;
+                    if(primaryCoordinates.x != selectedCoordinates.x) {
+                        var diffX = primaryCoordinates.x + primaryCoordinates.width - selectedCoordinates.x - selectedCoordinates.width;
                         var right = selectedCoordinates.x + diffX;
                         this.arrange(elem, 'left', right + "px" );
                     }
@@ -36,12 +36,12 @@ export abstract class ArrangeHelper {
             }
             case Orientation.BOTTOM:
                 const grp = this.formGroup(ArrangeDirection.BOTTOM, designerCanvas);
-                const primeryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
                     var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primeryCoordinates.y != selectedCoordinates.y) {
-                        var diffY = primeryCoordinates.y + primeryCoordinates.height - selectedCoordinates.y - selectedCoordinates.height;
+                    if(primaryCoordinates.y != selectedCoordinates.y) {
+                        var diffY = primaryCoordinates.y + primaryCoordinates.height - selectedCoordinates.y - selectedCoordinates.height;
                         var bottom = selectedCoordinates.y + diffY;
                         this.arrange(elem, 'top', bottom + "px" );
                     }
@@ -51,12 +51,12 @@ export abstract class ArrangeHelper {
 
             case Orientation.LEFT: {
                 const grp = this.formGroup(ArrangeDirection.LEFT, designerCanvas);
-                const primeryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
                     var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primeryCoordinates.x != selectedCoordinates.x) {
-                        var diffX = selectedCoordinates.x - primeryCoordinates.x;
+                    if(primaryCoordinates.x != selectedCoordinates.x) {
+                        var diffX = selectedCoordinates.x - primaryCoordinates.x;
                         var left = selectedCoordinates.x - diffX;
                         this.arrange(elem, 'left', left + "px" );
                     }
@@ -66,13 +66,13 @@ export abstract class ArrangeHelper {
             }
             case Orientation.VERTICAL_CENTER: {
                 const grp = this.formGroup(ArrangeDirection.VERTICAL_CENTER, designerCanvas);
-                const primeryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
                     var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primeryCoordinates.y != selectedCoordinates.y) {
-                        var diffY = selectedCoordinates.y - primeryCoordinates.y;
-                        var bottom = selectedCoordinates.y - diffY + (primeryCoordinates.height / 2) - (selectedCoordinates.height / 2);
+                    if(primaryCoordinates.y != selectedCoordinates.y) {
+                        var diffY = selectedCoordinates.y - primaryCoordinates.y;
+                        var bottom = selectedCoordinates.y - diffY + (primaryCoordinates.height / 2) - (selectedCoordinates.height / 2);
                         this.arrange(elem, 'top', bottom + "px" );
                     }
                 }
@@ -82,13 +82,13 @@ export abstract class ArrangeHelper {
 
             case Orientation.HORIZONTAL_CENTER: {
                 const grp = this.formGroup(ArrangeDirection.HORIZONTAL_CENTER, designerCanvas);
-                const primeryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
                     var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primeryCoordinates.x != selectedCoordinates.x) {
-                        var diffX = selectedCoordinates.x - primeryCoordinates.x;
-                        var left = selectedCoordinates.x - diffX + (primeryCoordinates.width / 2) - (selectedCoordinates.width / 2);
+                    if(primaryCoordinates.x != selectedCoordinates.x) {
+                        var diffX = selectedCoordinates.x - primaryCoordinates.x;
+                        var left = selectedCoordinates.x - diffX + (primaryCoordinates.width / 2) - (selectedCoordinates.width / 2);
                         this.arrange(elem, 'left', left + "px" );
                     }
                 }
