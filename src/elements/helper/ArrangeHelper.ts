@@ -2,13 +2,13 @@ import { ChangeGroup, IDesignerCanvas, IDesignItem } from "../..";
 import { Orientation } from "../../enums/Orientation";
 
 export abstract class ArrangeHelper {
-    public static arrangeElements(orientation: Orientation, designerCanvas: IDesignerCanvas) {
+    public static arrangeElements(orientation: Orientation, designerCanvas: IDesignerCanvas, arrangeElements: IDesignItem[]) {
         switch (orientation) {
             case Orientation.TOP: {
                 const grp = this.formGroup(ArrangeDirection.TOP, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
 
-                for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
+                for (let elem of arrangeElements) {        
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.y != selectedCoordinates.y) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
@@ -21,9 +21,9 @@ export abstract class ArrangeHelper {
             }
             case Orientation.RIGHT: {
                 const grp = this.formGroup(ArrangeDirection.RIGHT, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
 
-                for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
+                for (let elem of arrangeElements) {        
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.x != selectedCoordinates.x) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
@@ -36,9 +36,9 @@ export abstract class ArrangeHelper {
             }
             case Orientation.BOTTOM:
                 const grp = this.formGroup(ArrangeDirection.BOTTOM, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
 
-                for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
+                for (let elem of arrangeElements) {        
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.y != selectedCoordinates.y) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
@@ -51,9 +51,9 @@ export abstract class ArrangeHelper {
 
             case Orientation.LEFT: {
                 const grp = this.formGroup(ArrangeDirection.LEFT, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
 
-                for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
+                for (let elem of arrangeElements) {        
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.x != selectedCoordinates.x){
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
@@ -66,9 +66,9 @@ export abstract class ArrangeHelper {
             }
             case Orientation.VERTICAL_CENTER: {
                 const grp = this.formGroup(ArrangeDirection.VERTICAL_CENTER, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates =  designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
 
-                for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
+                for (let elem of arrangeElements) {        
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.y != selectedCoordinates.y) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
@@ -82,9 +82,9 @@ export abstract class ArrangeHelper {
 
             case Orientation.HORIZONTAL_CENTER: {
                 const grp = this.formGroup(ArrangeDirection.HORIZONTAL_CENTER, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
 
-                for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
+                for (let elem of arrangeElements) {        
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.x != selectedCoordinates.x) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
