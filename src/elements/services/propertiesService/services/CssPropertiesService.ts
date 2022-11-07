@@ -1,15 +1,12 @@
-import { IPropertiesService } from '../IPropertiesService';
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
-import { ValueType } from '../ValueType';
-import { NodeType } from '../../../item/NodeType';
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType';
-import { IBinding } from '../../../item/IBinding';
+import { CommonPropertiesService } from './CommonPropertiesService';
 
-export class CssPropertiesService implements IPropertiesService {
+export class CssPropertiesService extends CommonPropertiesService {
 
-  public listNeedsRefresh(designItem: IDesignItem): boolean {
+  public override listNeedsRefresh(designItem: IDesignItem): boolean {
     return this.name == 'styles' ? true : false;
   }
 
@@ -188,24 +185,23 @@ export class CssPropertiesService implements IPropertiesService {
     }
   ];
 
-  name: 'styles' | 'layout' | 'grid' | 'flex';
-
   constructor(name: 'styles' | 'layout' | 'grid' | 'flex') {
+    super();
     this.name = name;
   }
 
-  isHandledElement(designItem: IDesignItem): boolean {
+  override isHandledElement(designItem: IDesignItem): boolean {
     return true;
   }
 
-  getProperty(designItem: IDesignItem, name: string): IProperty {
+  override getProperty(designItem: IDesignItem, name: string): IProperty {
     if (this.name == 'styles') {
       return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
     }
     return this[this.name][name]
   }
 
-  getProperties(designItem: IDesignItem): IProperty[] {
+  override getProperties(designItem: IDesignItem): IProperty[] {
     if (this.name == 'styles') {
       if (!designItem)
         return [];
@@ -216,82 +212,7 @@ export class CssPropertiesService implements IPropertiesService {
     return this[this.name];
   }
 
-  setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-    const cg = designItems[0].openGroup("properties changed");
-    for (let d of designItems) {
-      d.styles.set(property.name, value);
-      (<HTMLElement>d.element).style[property.name] = value;
-    }
-    cg.commit();
-  }
-
-  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+  override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
     return BindingTarget.css;
-  }
-
-  clearValue(designItems: IDesignItem[], property: IProperty) {
-    for (let d of designItems) {
-      d.styles.delete(property.name);
-      (<HTMLElement>d.element).style[property.name] = '';
-      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
-        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
-      });
-    }
-  }
-
-  isSet(designItems: IDesignItem[], property: IProperty): ValueType {
-    let all = true;
-    let some = false;
-    if (designItems != null && designItems.length !== 0) {
-      designItems.forEach((x) => {
-        let has = x.styles.has(property.name);
-        all = all && has;
-        some = some || has;
-      });
-      //todo: optimize perf, do not call bindings service for each property. 
-      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
-        return s.getBindings(designItems[0]);
-      });
-      if (bindings && bindings.find(x => x.target == BindingTarget.css && x.targetName == property.name))
-        return ValueType.bound;
-    }
-    else
-      return ValueType.none
-
-    return all ? ValueType.all : some ? ValueType.some : ValueType.none;
-  }
-
-  getValue(designItems: IDesignItem[], property: IProperty) {
-    if (designItems != null && designItems.length !== 0) {
-      let lastValue = designItems[0].styles.get(property.name);
-      for (const x of designItems) {
-        let value = x.styles.get(property.name);
-        if (value != lastValue) {
-          lastValue = null;
-          break;
-        }
-      }
-      return lastValue;
-    }
-    return null;
-  }
-
-  getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
-    //TODO: optimize perf, do not call bindings service for each property. 
-    const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
-      return s.getBindings(designItems[0]);
-    });
-    return bindings.find(x => (x.target == BindingTarget.css) && x.targetName == property.name);
-  }
-
-  //todo: optimize perf, call window.getComputedStyle only once per item, and not per property
-  getUnsetValue(designItems: IDesignItem[], property: IProperty) {
-    if (designItems != null && designItems.length !== 0) {
-      if (designItems[0].nodeType == NodeType.Element) {
-        let v = window.getComputedStyle(designItems[0].element)[property.name];
-        return v;
-      }
-    }
-    return null;
   }
 }

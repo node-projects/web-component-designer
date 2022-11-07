@@ -1,10 +1,14 @@
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions';
-import { UnkownElementPropertiesService } from './UnkownElementPropertiesService';
+import { AbstractPropertiesService } from './AbstractPropertiesService';
 import { PropertyType } from '../PropertyType';
 
-export class ListPropertiesService extends UnkownElementPropertiesService {
+export class ListPropertiesService extends AbstractPropertiesService {
+
+  listNeedsRefresh(designItem: IDesignItem): boolean {
+    return false;
+  }
 
   public name = "list"
 

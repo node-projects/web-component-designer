@@ -1,10 +1,10 @@
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
-import { AbstractBasePropertiesService } from "./AbstractBasePropertiesService";
+import { AbstractPolymerLikePropertiesService } from "./AbstractPolymerLikePropertiesService";
 import { PropertiesHelper } from './PropertiesHelper';
 import { PropertyType } from '../PropertyType';
 
-export class Lit2PropertiesService extends AbstractBasePropertiesService {
+export class Lit2PropertiesService extends AbstractPolymerLikePropertiesService {
 
   public name = "lit2"
 

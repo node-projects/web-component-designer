@@ -4,13 +4,13 @@ import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 import { NodeType } from '../../item/NodeType.js';
 import { IStringPosition } from './IStringPosition.js';
-import { isEmptyTextNode, isInline } from '../../helper/ElementHelper.js';
+import { isEmptyTextNode, isInline, isInlineAfter } from '../../helper/ElementHelper.js';
 import { AbstractHtmlWriterService } from './AbstractHtmlWriterService.js';
 
 export class HtmlWriterService extends AbstractHtmlWriterService {
 
   private _conditionalyWriteIndent(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
-    if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
+    if ((designItem.element instanceof HTMLElement && !isInlineAfter(designItem.element)) ||
       (designItem.element.previousElementSibling instanceof HTMLElement && !isInline(designItem.element.previousElementSibling)) ||
       (designItem.element.previousElementSibling == null && !isInline(designItem.element.parentElement) && (designItem.element.previousSibling == null || isEmptyTextNode(designItem.element.previousSibling))) ||
       (designItem.element instanceof SVGElement)
@@ -18,8 +18,16 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       indentedTextWriter.writeIndent();
   }
 
+  private _conditionalyWriteIndentBefore(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
+    if ((designItem.element.previousElementSibling instanceof HTMLElement && !isInline(designItem.element.previousElementSibling)) ||
+      (designItem.element.previousElementSibling == null && !isInline(designItem.element.parentElement) && (designItem.element.previousSibling == null || isEmptyTextNode(designItem.element.previousSibling))) ||
+      (designItem.element instanceof SVGElement)
+    )
+      indentedTextWriter.writeIndent();
+  }
+
   private _conditionalyWriteNewline(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
-    if ((designItem.element instanceof HTMLElement && !isInline(designItem.element)) ||
+    if ((designItem.element instanceof HTMLElement && !isInlineAfter(designItem.element)) ||
       (designItem.element.nextElementSibling instanceof HTMLElement && !isInline(designItem.element.nextElementSibling)) ||
       (designItem.element instanceof SVGElement)
     )
@@ -37,7 +45,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
 
     if (designItem.nodeType == NodeType.TextNode) {
       if (isEmptyTextNode(designItem.element) &&
-        ((designItem.element.previousSibling instanceof HTMLElement && !isInline(designItem.element.previousSibling)) ||
+        ((designItem.element.previousSibling instanceof HTMLElement && !isInlineAfter(designItem.element.previousSibling)) ||
           (designItem.element.nextSibling instanceof HTMLElement && !isInline(designItem.element.nextSibling)))) {
       } else
         this.writeTextNode(indentedTextWriter, designItem, true);
@@ -46,7 +54,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       indentedTextWriter.write('<!--' + designItem.content + '-->');
       this._conditionalyWriteNewline(indentedTextWriter, designItem);
     } else {
-      this._conditionalyWriteIndent(indentedTextWriter, designItem);
+      this._conditionalyWriteIndentBefore(indentedTextWriter, designItem);
       indentedTextWriter.write('<' + designItem.name);
 
       this.writeAttributes(indentedTextWriter, designItem, options);
@@ -61,7 +69,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
         if (contentSingleTextNode) {
           this.writeTextNode(indentedTextWriter, designItem, false);
         } else {
-          if (designItem.element instanceof HTMLElement && !isInline(designItem.element) || (designItem.element instanceof SVGElement)) {
+          if (designItem.element instanceof HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof SVGElement)) {
             indentedTextWriter.writeNewline();
             indentedTextWriter.levelRaise();
           }
@@ -72,7 +80,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
               if (!indentedTextWriter.isLastCharNewline())
                 this._conditionalyWriteNewline(indentedTextWriter, c);
           }
-          if (designItem.element instanceof HTMLElement && !isInline(designItem.element) || (designItem.element instanceof SVGElement)) {
+          if (designItem.element instanceof HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof SVGElement)) {
             indentedTextWriter.levelShrink();
             if (!indentedTextWriter.isLastCharNewline())
               indentedTextWriter.writeNewline();
@@ -87,7 +95,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
       //if (!contentSingleTextNode)
-      if (!indentedTextWriter.isLastCharNewline())
+      if (!indentedTextWriter.isLastCharNewline() && (!designItem.parent || !isInlineAfter(<HTMLElement>designItem.parent.element)))
         this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
 

@@ -72,6 +72,12 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
       type: "boolean",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
+    }, {
+      name: "resize",
+      type: "list",
+      values: ["both", "none", "horizontal", "vertical"],
+      service: this,
+      propertyType: PropertyType.cssValue
     }
   ];
 
