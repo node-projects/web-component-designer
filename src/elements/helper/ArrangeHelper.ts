@@ -9,10 +9,10 @@ export abstract class ArrangeHelper {
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
-                    var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.y != selectedCoordinates.y) {
-                        var diffY = selectedCoordinates.y - primaryCoordinates.y;
-                        var top = selectedCoordinates.y - diffY;
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        let top = primaryCoordinates.y - parent.y;
                         this.arrange(elem, 'top', top + "px" );
                     }
                 }
@@ -24,10 +24,10 @@ export abstract class ArrangeHelper {
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
-                    var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.x != selectedCoordinates.x) {
-                        var diffX = primaryCoordinates.x + primaryCoordinates.width - selectedCoordinates.x - selectedCoordinates.width;
-                        var right = selectedCoordinates.x + diffX;
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        let right = primaryCoordinates.x - parent.x;
                         this.arrange(elem, 'left', right + "px" );
                     }
                 }
@@ -39,10 +39,10 @@ export abstract class ArrangeHelper {
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
-                    var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.y != selectedCoordinates.y) {
-                        var diffY = primaryCoordinates.y + primaryCoordinates.height - selectedCoordinates.y - selectedCoordinates.height;
-                        var bottom = selectedCoordinates.y + diffY;
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        let bottom = primaryCoordinates.y - parent.y;
                         this.arrange(elem, 'top', bottom + "px" );
                     }
                 }
@@ -54,10 +54,10 @@ export abstract class ArrangeHelper {
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
-                    var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primaryCoordinates.x != selectedCoordinates.x) {
-                        var diffX = selectedCoordinates.x - primaryCoordinates.x;
-                        var left = selectedCoordinates.x - diffX;
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    if(primaryCoordinates.x != selectedCoordinates.x){
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        let left = primaryCoordinates.x - parent.x;
                         this.arrange(elem, 'left', left + "px" );
                     }
                 }
@@ -69,11 +69,11 @@ export abstract class ArrangeHelper {
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
-                    var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.y != selectedCoordinates.y) {
-                        var diffY = selectedCoordinates.y - primaryCoordinates.y;
-                        var bottom = selectedCoordinates.y - diffY + (primaryCoordinates.height / 2) - (selectedCoordinates.height / 2);
-                        this.arrange(elem, 'top', bottom + "px" );
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        let center = primaryCoordinates.y - parent.y + (primaryCoordinates.height / 2) - (selectedCoordinates.height / 2);
+                        this.arrange(elem, 'top', center + "px" );
                     }
                 }
                 grp.commit();
@@ -85,11 +85,11 @@ export abstract class ArrangeHelper {
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(designerCanvas.instanceServiceContainer.selectionService.selectedElements[0].element);
 
                 for (let elem of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {        
-                    var selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
                     if(primaryCoordinates.x != selectedCoordinates.x) {
-                        var diffX = selectedCoordinates.x - primaryCoordinates.x;
-                        var left = selectedCoordinates.x - diffX + (primaryCoordinates.width / 2) - (selectedCoordinates.width / 2);
-                        this.arrange(elem, 'left', left + "px" );
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        let center = primaryCoordinates.x - parent.x + (primaryCoordinates.width / 2) - (selectedCoordinates.width / 2);
+                        this.arrange(elem, 'left', center + "px" );
                     }
                 }
                 grp.commit();
