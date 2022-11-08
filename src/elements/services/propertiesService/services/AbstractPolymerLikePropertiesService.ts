@@ -7,7 +7,7 @@ import { PropertyType } from '../PropertyType';
 export abstract class AbstractPolymerLikePropertiesService extends AbstractPropertiesService {
 
   override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return false;
+    return true;
   }
   
   public override getProperties(designItem: IDesignItem): IProperty[] {

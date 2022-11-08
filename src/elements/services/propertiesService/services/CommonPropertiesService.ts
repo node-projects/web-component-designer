@@ -6,7 +6,7 @@ import { AbstractPropertiesService } from "./AbstractPropertiesService";
 export class CommonPropertiesService extends AbstractPropertiesService {
 
   public override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+    return false;
   }
 
   //@ts-ignore

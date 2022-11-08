@@ -8,7 +8,7 @@ import { AbstractPropertiesService } from "./AbstractPropertiesService.js";
 export class WebcomponentManifestPropertiesService extends AbstractPropertiesService implements IPropertiesService {
 
   listNeedsRefresh(designItem: IDesignItem): boolean {
-    return false;
+    return true;
   }
 
   private _name: string;

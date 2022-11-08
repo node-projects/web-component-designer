@@ -7,7 +7,7 @@ import { PropertyType } from '../PropertyType';
 export class ListPropertiesService extends AbstractPropertiesService {
 
   listNeedsRefresh(designItem: IDesignItem): boolean {
-    return false;
+    return true;
   }
 
   public name = "list"
