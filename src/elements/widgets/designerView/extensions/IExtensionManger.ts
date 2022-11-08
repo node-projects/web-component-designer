@@ -1,8 +1,9 @@
 import { IDesignItem } from "../../../item/IDesignItem";
 import { ExtensionType } from './ExtensionType';
+import { IDesignerExtension } from "./IDesignerExtension";
 
 export interface IExtensionManager {
-  applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive?: boolean);
+  applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive?: boolean) : IDesignerExtension[];
   applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType, recursive?: boolean);
   removeExtension(designItem: IDesignItem, extensionType?: ExtensionType);
   removeExtensions(designItems: IDesignItem[], extensionType?: ExtensionType);

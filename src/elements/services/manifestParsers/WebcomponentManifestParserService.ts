@@ -5,9 +5,13 @@ import { IPropertiesService } from "../propertiesService/IPropertiesService";
 import { IProperty } from "../propertiesService/IProperty";
 import { PropertyType } from "../propertiesService/PropertyType";
 import { IDesignItem } from "../../item/IDesignItem";
-import { UnkownElementPropertiesService } from "../propertiesService/services/UnkownElementPropertiesService";
+import { AbstractPropertiesService } from "../propertiesService/services/AbstractPropertiesService";
 
-export class WebcomponentManifestParserService extends UnkownElementPropertiesService implements IElementsService, IPropertiesService {
+export class WebcomponentManifestParserService extends AbstractPropertiesService implements IElementsService, IPropertiesService {
+  
+  listNeedsRefresh(designItem: IDesignItem): boolean {
+    return false;
+  }
 
   private _name: string;
   get name() { return this._name; }
