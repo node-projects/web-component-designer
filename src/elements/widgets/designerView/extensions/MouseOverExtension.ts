@@ -1,4 +1,4 @@
-import { getTransformedCornerDOMPoints } from "../../../helper/TransformHelper";
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from "./AbstractExtension";
@@ -22,8 +22,7 @@ export class MouseOverExtension extends AbstractExtension {
   }
 
   override refresh() {
-    //let transformedCornerPoints: IPoint3D[] = getTransformedCornerPoints(<HTMLElement>this.extendedItem.element, clone, this.designerCanvas.helperElement, this.designerCanvas, offset);
-    let transformedCornerPoints: DOMPoint[] = getTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, offset, this.designerCanvas.helperElement, this.designerCanvas);
+    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, offset, this.designerCanvas.helperElement, this.designerCanvas);
 
     this._line1 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'svg-hover', this._line1);
     this._line2 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'svg-hover', this._line2);
