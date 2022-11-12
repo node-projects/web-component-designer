@@ -170,6 +170,10 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
 
   public override name = "native"
 
+  public override listNeedsRefresh(designItem: IDesignItem): boolean {
+    return true;
+  }
+
   override isHandledElement(designItem: IDesignItem): boolean {
     switch (designItem.element.localName) {
       case 'input':
