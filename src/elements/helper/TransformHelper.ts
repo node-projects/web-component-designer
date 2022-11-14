@@ -107,24 +107,12 @@ export function addVectors(vectorA: [number, number], vectorB: [number, number])
   return [vectorA[0] + vectorB[0], vectorA[1] + vectorB[1]];
 }
 
-// export function applyMatrixToPoint(cssMatrix: string, point: {x: number, y: number}) : IPoint3D {
-//   const transformationMatrix = new DOMMatrix(cssMatrix);
-//   return {
-//     x: transformationMatrix.m11 * point.x + transformationMatrix.m21 * point.y,
-//     y: transformationMatrix.m12 * point.x + transformationMatrix.m22 * point.y,
-//     z: 0
-//   }
-// }
-
 export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas): DOMPoint {
   let originalElement = element;
   let clone = <HTMLElement>element.cloneNode();
 
   const canvas = originalElement.closest('#node-projects-designer-canvas-canvas');
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(originalElement, <HTMLElement>canvas, true)
-
-  // const originalElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement)).transform);
-  // const originalElementParentMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement).parentElement).transform);
 
   clone.style.visibility = 'hidden';
   clone.style.transform = '';
@@ -142,8 +130,6 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
     }
   )
 
-  // appendedClone.style.transform = originalElementMatrix.multiply(originalElementAndAllParentsMultipliedMatix).toString();
-  // appendedClone.style.transform = originalElementMatrix.multiply(originalElementParentMatrix).toString();
   appendedClone.style.transform = originalElementAndAllParentsMultipliedMatrix.toString();
   const appendedCloneWithTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
   const originalElementRect = designerCanvas.getNormalizedElementCoordinates(originalElement, true);
@@ -192,8 +178,6 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   const bottomleft = 2;
   const bottomright = 3;
 
-  const originalElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement)).transform);
-  const originalElementParentMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement).parentElement).transform);
   clone.style.visibility = 'hidden';
   clone.style.transform = '';
   let appendedClone = helperElement.appendChild(clone); // this is a direct child of the designer canvas
