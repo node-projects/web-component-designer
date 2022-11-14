@@ -1,5 +1,7 @@
 import { EventNames } from "../../../../../enums/EventNames";
 import { IPoint } from "../../../../../interfaces/IPoint";
+import { IRect } from "../../../../../interfaces/IRect";
+import { DesignItem } from "../../../../item/DesignItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { AbstractExtension } from "../AbstractExtension";
@@ -22,7 +24,8 @@ export class RectExtension extends AbstractExtension {
     private _circle3: SVGCircleElement;
     private _circle4: SVGCircleElement;
     private _rect = { x: 0, y: 0, w: 0, h: 0 }
-
+    private _parentCoordinates: IRect;
+    private _offsetSvg = 10.0;
 
 
     constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
@@ -56,7 +59,7 @@ export class RectExtension extends AbstractExtension {
                 this._startPos = cursorPos;
                 this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
                 this._originalPoint = { x: this._x, y: this._y }
-
+                this._parentCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._rectElement.parentElement);
                 break;
 
             case EventNames.PointerMove:
@@ -133,10 +136,19 @@ export class RectExtension extends AbstractExtension {
                 this.extendedItem.setAttribute("y", this._rect.y.toString());
                 this.extendedItem.setAttribute("width", this._rect.w.toString());
                 this.extendedItem.setAttribute("height", this._rect.h.toString());
+
+                if(getComputedStyle(this._rectElement.parentElement).position == "absolute"){
+                    let group = this.extendedItem.openGroup('rearrangeSvg');
+                    let newRectCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._rectElement);
+                    let newRectCoordinatesCloud = this._getPointsFromRect(newRectCoordinates);
+                    let newRectExtrema = this._getMinMaxValues(newRectCoordinatesCloud);
+                    this._rearrangeSvgParent(newRectExtrema);
+                    this._rearrangePointsFromElement(this._parentCoordinates);
+                    group.commit();
+                }
                 break;
         }
     }
-
 
     _drawPathCircle(x: number, y: number, r: SVGRectElement, index: number) {
         let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path');
@@ -154,7 +166,6 @@ export class RectExtension extends AbstractExtension {
         circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
         return circle;
     }
-
 
     _calculateRect(x: number, y: number, w: number, h: number) {
         let rect = { x: 0, y: 0, w: 0, h: 0 }
@@ -175,12 +186,61 @@ export class RectExtension extends AbstractExtension {
         return rect;
     }
 
+    _getPointsFromRect(elementCoords: IRect) {
+        let Coords: number[] = [];
+        Coords.push(elementCoords.x);
+        Coords.push(elementCoords.x + elementCoords.width);
+        Coords.push(elementCoords.x);
+        Coords.push(elementCoords.x + elementCoords.width);
+        Coords.push(elementCoords.y);
+        Coords.push(elementCoords.y);
+        Coords.push(elementCoords.y + elementCoords.height);
+        Coords.push(elementCoords.y + elementCoords.height);
+        Coords.push(elementCoords.height);
+        Coords.push(elementCoords.width);
+        return Coords;
+    }
+
+    _getMinMaxValues(coords){
+        let extrema = {xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0};
+        for (let i = 0; i < coords.length - 2; i++) {
+            if(coords[i] < coords[i+1] && i <= 3){
+                extrema.xMin = coords[i];
+            }else if(coords[i] < coords[i+1]&& i > 3 && i <= 7){
+                extrema.yMin = coords[i];
+            }
+            if(coords[i] > coords[i+1]&& i <= 3){
+                extrema.xMax = coords[i];
+            }else if(coords[i] > coords[i+1] && i > 3 && i <= 8){
+                extrema.yMax = coords[i];
+            }
+        }
+        return extrema;
+    }
+
+    _rearrangeSvgParent(newRectExtrema){
+        let parentLeft = newRectExtrema.xMin - this._offsetSvg;
+        let parentTop = newRectExtrema.yMin - this._offsetSvg;
+        let widthRectElement = newRectExtrema.xMax - newRectExtrema.xMin + (2 * this._offsetSvg);
+        let heightRectElement = newRectExtrema.yMax - newRectExtrema.yMin + (2 * this._offsetSvg);
+        this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
+        this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
+        this.extendedItem.parent.setStyle("height", heightRectElement.toString());
+        this.extendedItem.parent.setStyle("width", widthRectElement.toString());
+    }
+
+    _rearrangePointsFromElement(oldParentCoords: IRect){
+        let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._rectElement.parentElement);
+        let diffX = oldParentCoords.x - newParentCoords.x;
+        let diffY = oldParentCoords.y - newParentCoords.y;
+        this.extendedItem.setAttribute('x', this._rectElement.x.baseVal.value + diffX + "px");
+        this.extendedItem.setAttribute('y', this._rectElement.y.baseVal.value + diffY + "px");
+    }
 
     override refresh() {
         this._removeAllOverlays();
         this.extend();
     }
-
 
     override dispose() {
         this._removeAllOverlays();

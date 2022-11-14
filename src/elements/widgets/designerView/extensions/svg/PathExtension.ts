@@ -8,6 +8,8 @@ import { EventNames } from "../../../../../enums/EventNames";
 import { createPathD, PathData, PathDataL } from "../../../../helper/PathDataPolyfill";
 import { IContextMenuItem } from "../../../../..";
 import { ContextMenu } from "../../../../helper/contextMenu/ContextMenu";
+import { data } from "jquery";
+import { IRect } from "../../../../../interfaces/IRect";
 
 
 export class PathExtension extends AbstractExtension {
@@ -18,6 +20,9 @@ export class PathExtension extends AbstractExtension {
   private _circlePos: IPoint;
   private _originalPathPoint: IPoint;
   private _pathdata: PathData[];
+  private _offsetSvg = 10.0;
+  private _pathElement: SVGPathElement;
+  private _parentCoordinates: IRect;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -26,6 +31,7 @@ export class PathExtension extends AbstractExtension {
   override extend(): void {
     this._parentRect = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
     this._pathdata = (<SVGGraphicsElement>this.extendedItem.node).getPathData({ normalize: false });
+    this._pathElement = (<SVGPathElement>this.extendedItem.node);
     this._lastPos = { x: 0, y: 0 };
     for (let p of this._pathdata) {
       switch (p.type) {
@@ -122,6 +128,7 @@ export class PathExtension extends AbstractExtension {
         this._startPos = cursorPos
         this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
         this._originalPathPoint = { x: p.values[index], y: p.values[index + 1] }
+        this._parentCoordinates = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
         break;
 
       case EventNames.PointerMove:
@@ -170,10 +177,14 @@ export class PathExtension extends AbstractExtension {
         this._circlePos = null;
         this._lastPos = null;
         this.extendedItem.setAttribute('d', createPathD(this._pathdata));
+        if(getComputedStyle(this._pathElement.parentElement).position == "absolute"){
+          let dataPath = this._pathdata;
+          this._rearrangeSvgElement();
+          this._rearrangePointsFromElement(this._parentCoordinates, dataPath);
+        }
         break;
     }
   }
-
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
     let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path');
@@ -304,12 +315,33 @@ export class PathExtension extends AbstractExtension {
     return false;
   }
 
+  _rearrangeSvgElement(){
+    let newElementCoords = (<SVGGeometryElement>this.extendedItem.element).getBoundingClientRect();
+    let parentLeft = (newElementCoords.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor - this._offsetSvg;
+    let parentTop = (newElementCoords.y -this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - this._offsetSvg;
+    let heightSvgElement = newElementCoords.height + (2 * this._offsetSvg);
+    let widthSvgElement = newElementCoords.width + (2 * this._offsetSvg);
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("left", parentLeft.toString() + "px");
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("top", parentTop.toString() + "px");
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("height", heightSvgElement.toString());
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("width", widthSvgElement.toString());
+  }
+
+  _rearrangePointsFromElement(oldParentCoords: IRect, pathData: PathData[]){
+    let newParentCoords = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
+    let diffX = oldParentCoords.x - newParentCoords.x;
+    let diffY = oldParentCoords.y - newParentCoords.y;
+    for (let i = 0; i < pathData.length; i++){
+      pathData[i].values[0] = pathData[i].values[0] + diffX;
+      pathData[i].values[1] = pathData[i].values[1] + diffY;
+    }
+    this.extendedItem.element.setAttribute("d", createPathD(this._pathdata));
+  }
 
   override refresh() {
     this._removeAllOverlays();
     this.extend();
   }
-
 
   override dispose() {
     this._removeAllOverlays();
