@@ -121,8 +121,9 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
   let clone = <HTMLElement>element.cloneNode();
 
   const originalElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement)).transform);
+  const originalElementParentMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement).parentElement).transform);
 
-  clone.style.visibility = 'hidden';
+  //clone.style.visibility = 'hidden';
   clone.style.transform = '';
   let appendedClone = helperElement.appendChild(clone);
   clone = null;
@@ -138,7 +139,7 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
     }
   )
 
-  appendedClone.style.transform = originalElementMatrix.toString();
+  appendedClone.style.transform = originalElementMatrix.multiply(originalElementParentMatrix).toString();
   const appendedCloneWithTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
   const originalElementRect = designerCanvas.getNormalizedElementCoordinates(originalElement, true);
   const appendedCloneToOriginalElementDeltaX = appendedCloneWithTranformRect.x - originalElementRect.x;
@@ -178,7 +179,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   const originalElementTransformOriginRelatedToCanvas: DOMPointReadOnly = getDesignerCanvasNormalizedTransformedOrigin(originalElement, helperElement, designerCanvas);
   const originalElementParentTransformOriginRelatedToCanvas: DOMPointReadOnly = getDesignerCanvasNormalizedTransformedOrigin(originalElement.parentElement, helperElement, designerCanvas);
 
-  const toParentToChild: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+  const toParentToDependantChild: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
     {
       x: originalElementTransformOriginRelatedToCanvas.x - originalElementParentTransformOriginRelatedToCanvas.x,
       y: originalElementTransformOriginRelatedToCanvas.y - originalElementParentTransformOriginRelatedToCanvas.y,
@@ -186,6 +187,43 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
       w: 0
     }
   )
+
+  // const toParentToIndependantChild: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+  //   {
+  //     x: originalElementTransformOriginRelatedToCanvas.x - originalElementParentTransformOriginRelatedToCanvas.x,
+  //     y: originalElementTransformOriginRelatedToCanvas.y - originalElementParentTransformOriginRelatedToCanvas.y,
+  //     z: 0,
+  //     w: 0
+  //   }
+  // )
+
+  // const toIndependentChildToDependentChild: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+  //   {
+  //     x: toParentToIndependantChild.x - toParentToIndependantChild.matrixTransform(originalElementParentMatrix).x,
+  //     y: toParentToIndependantChild.y - toParentToIndependantChild.matrixTransform(originalElementParentMatrix).y,
+  //     z: 0,
+  //     w: 0
+  //   }
+  // )
+
+  // const toIndependentChildToDependentChild: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+  //   {
+  //     x: toParentToDependantChild.x - toParentToDependantChild.matrixTransform(originalElementParentMatrix).x,
+  //     y: toParentToDependantChild.y - toParentToDependantChild.matrixTransform(originalElementParentMatrix).y,
+  //     z: 0,
+  //     w: 0
+  //   }
+  // )
+
+  const toIndependentChildToDependentChild: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+    {
+      x: toParentToDependantChild.x - toParentToDependantChild.matrixTransform(originalElementParentMatrix.inverse()).x,
+      y: toParentToDependantChild.y - toParentToDependantChild.matrixTransform(originalElementParentMatrix.inverse()).y,
+      z: 0,
+      w: 0
+    }
+  )
+
 
   const appendedCloneWithoutTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
 
@@ -229,18 +267,21 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top2 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[bottomleft].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[bottomleft].y));
   let top3 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[bottomright].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[bottomright].y));
 
-  let top0Transformed = top0.matrixTransform(originalElementMatrix);
-  let top1Transformed = top1.matrixTransform(originalElementMatrix);
-  let top2Transformed = top2.matrixTransform(originalElementMatrix);
-  let top3Transformed = top3.matrixTransform(originalElementMatrix);
-
-  
+  let top0Transformed = top0.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
+  let top1Transformed = top1.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
+  let top2Transformed = top2.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
+  let top3Transformed = top3.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
 
   let transformedCornerPoints: DOMPoint[] = [];
   transformedCornerPoints[0] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top0Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top0Transformed.y);
   transformedCornerPoints[1] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top1Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top1Transformed.y);
   transformedCornerPoints[2] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top2Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top2Transformed.y);
   transformedCornerPoints[3] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top3Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top3Transformed.y);
+
+  // for (let i = 0; i <= 3; i++){
+  //   transformedCornerPoints[i].x += toIndependentChildToDependentChild.x;
+  //   transformedCornerPoints[i].y += toIndependentChildToDependentChild.y;
+  // }  
 
   helperElement.replaceChildren();
 
