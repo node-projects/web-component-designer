@@ -131,8 +131,8 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
   )
 
   appendedClone.style.transform = originalElementAndAllAncestorsMultipliedMatrix.toString();
-  const appendedCloneWithTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
-  const originalElementRect = designerCanvas.getNormalizedElementCoordinates(originalElement, true);
+  const appendedCloneWithTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true); // appendedClone is not getting scaled. Because of that the scale factor must be ignored.
+  const originalElementRect = designerCanvas.getNormalizedElementCoordinates(originalElement, false); // The original element is scaled and must be set in relation to the non-scaled clone.
   const appendedCloneToOriginalElementDeltaX = appendedCloneWithTranformRect.x - originalElementRect.x;
   const appendedCloneToOriginalElementDeltaY = appendedCloneWithTranformRect.y - originalElementRect.y;
 
