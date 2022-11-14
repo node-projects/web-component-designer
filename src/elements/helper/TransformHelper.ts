@@ -112,7 +112,7 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
   let clone = <HTMLElement>element.cloneNode();
 
   const canvas = originalElement.closest('#node-projects-designer-canvas-canvas');
-  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(originalElement, <HTMLElement>canvas, true)
+  let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(originalElement, <HTMLElement>canvas, true)
 
   clone.style.visibility = 'hidden';
   clone.style.transform = '';
@@ -130,7 +130,7 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
     }
   )
 
-  appendedClone.style.transform = originalElementAndAllParentsMultipliedMatrix.toString();
+  appendedClone.style.transform = originalElementAndAllAncestorsMultipliedMatrix.toString();
   const appendedCloneWithTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
   const originalElementRect = designerCanvas.getNormalizedElementCoordinates(originalElement, true);
   const appendedCloneToOriginalElementDeltaX = appendedCloneWithTranformRect.x - originalElementRect.x;
