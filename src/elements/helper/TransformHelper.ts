@@ -121,24 +121,7 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
   let clone = <HTMLElement>element.cloneNode();
 
   const canvas = originalElement.closest('#node-projects-designer-canvas-canvas');
-  let originalElementAndAllParentsMultipliedMatix: DOMMatrix;
-  if (originalElement != canvas) {
-    let actualElement: HTMLElement = originalElement;
-    let actualElementMatrix: DOMMatrix;
-  //   const originalElementMatrix1 = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement)).transform);
-  // const originalElementParentMatrix1 = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement).parentElement).transform);
-  //   let test = originalElementMatrix1.multiply(originalElementParentMatrix1).toString();
-    while (actualElement != canvas) {
-      actualElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>actualElement)).transform);
-      if (actualElement == originalElement) {
-        originalElementAndAllParentsMultipliedMatix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
-      } else if (actualElement.parentElement != canvas) {
-        originalElementAndAllParentsMultipliedMatix = originalElementAndAllParentsMultipliedMatix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
-      } 
-      
-      actualElement = actualElement.parentElement;
-    }
-  }
+  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(originalElement, <HTMLElement>canvas, true)
 
   // const originalElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement)).transform);
   // const originalElementParentMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>originalElement).parentElement).transform);
@@ -161,7 +144,7 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
 
   // appendedClone.style.transform = originalElementMatrix.multiply(originalElementAndAllParentsMultipliedMatix).toString();
   // appendedClone.style.transform = originalElementMatrix.multiply(originalElementParentMatrix).toString();
-  appendedClone.style.transform = originalElementAndAllParentsMultipliedMatix.toString();
+  appendedClone.style.transform = originalElementAndAllParentsMultipliedMatrix.toString();
   const appendedCloneWithTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
   const originalElementRect = designerCanvas.getNormalizedElementCoordinates(originalElement, true);
   const appendedCloneToOriginalElementDeltaX = appendedCloneWithTranformRect.x - originalElementRect.x;
@@ -180,6 +163,24 @@ export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElemen
 
   return originalElementTransformOriginRelatedToCanvas;
 
+}
+
+export function getResultingTransformationBetweenElementAndAllAncestors(element: HTMLElement, ancestor: HTMLElement, excludeAncestor?: boolean) {
+  let actualElement: HTMLElement = element;
+  let actualElementMatrix: DOMMatrix;
+  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
+  while (actualElement != ancestor) {
+    actualElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>actualElement)).transform);
+    if (actualElement == element) {
+      originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
+    } else if (actualElement.parentElement != ancestor || !excludeAncestor) {
+      originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
+    } 
+    
+    actualElement = actualElement.parentElement;
+  }
+
+  return originalElementAndAllParentsMultipliedMatrix;
 }
 
 export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: number, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas): DOMPoint[] {
@@ -242,10 +243,12 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top2 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[bottomleft].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[bottomleft].y));
   let top3 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[bottomright].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[bottomright].y));
 
-  let top0Transformed = top0.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
-  let top1Transformed = top1.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
-  let top2Transformed = top2.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
-  let top3Transformed = top3.matrixTransform(originalElementMatrix.multiply(originalElementParentMatrix));
+  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(originalElement, <HTMLElement>designerCanvas.canvas, true)
+
+  let top0Transformed = top0.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+  let top1Transformed = top1.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+  let top2Transformed = top2.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+  let top3Transformed = top3.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
 
   let transformedCornerPoints: DOMPoint[] = [];
   transformedCornerPoints[0] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top0Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top0Transformed.y);

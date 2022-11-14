@@ -90,6 +90,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();
 
+  public get canvas(): HTMLElement {
+    return this._canvas;
+  }
+
   // Private Variables
   private _canvas: HTMLDivElement;
   private _canvasContainer: HTMLDivElement;
@@ -217,6 +221,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   get designerHeight(): string {
     return this._canvasContainer.style.height;
   }
+
   set designerHeight(value: string) {
     this._canvasContainer.style.height = value;
     this._zoomFactorChanged();
