@@ -66,16 +66,6 @@ export function getRotationMatrix3d(axisOfRotation: 'x' | 'y' | 'z' | 'X' | 'Y' 
   return rotationMatrix3d;
 }
 
-export function getTranslationMatrix3d(deltaX: number, deltaY: number, deltaZ: number) {
-  const translationMatrix = [
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    deltaX, deltaY, deltaZ, 1
-  ];
-  return translationMatrix;
-}
-
 export function rotateElementByMatrix3d(element: HTMLElement, matrix: number[]) {
   element.style.transform = matrixArrayToCssMatrix(matrix);
 }

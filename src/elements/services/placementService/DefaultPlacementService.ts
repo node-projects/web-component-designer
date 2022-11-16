@@ -116,8 +116,9 @@ export class DefaultPlacementService implements IPlacementService {
       } else {
         transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0);
       }
-      const translationMatrix = getTranslationMatrix3d(transformMatrixParentTransformsCompensated.x, transformMatrixParentTransformsCompensated.y, 0);
-      combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), matrixArrayToCssMatrix(translationMatrix));
+
+      const translationMatrix = new DOMMatrix().translate(transformMatrixParentTransformsCompensated.x, transformMatrixParentTransformsCompensated.y);
+      combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), translationMatrix.toString());
     }
   }
 
@@ -137,14 +138,11 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    // let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
-    let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
-
     let filterdItems = filterChildPlaceItems(items);
     for (const designItem of filterdItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
-      track = {x: translation.x, y: translation.y};
+      let track = {x: translation.x, y: translation.y};
       placeDesignItem(container, designItem, track, 'position');
     }
 
