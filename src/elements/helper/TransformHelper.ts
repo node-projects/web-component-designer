@@ -158,7 +158,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   while (actualElement != ancestor) {
     actualElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>actualElement)).transform);
     if (actualElement == element) {
-      originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
+        originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
     } else if (actualElement.parentElement != ancestor || !excludeAncestor) {
       originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
     } 
@@ -243,4 +243,8 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   helperElement.replaceChildren();
 
   return transformedCornerPoints;
+}
+
+export function extractTranslationFromDOMMatrix(matrix: DOMMatrix): DOMPoint {
+  return new DOMPoint(matrix.m41, matrix.m42, 0 , 0);
 }

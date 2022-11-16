@@ -3,7 +3,7 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { combineTransforms, getTranslationMatrix3d, matrixArrayToCssMatrix } from '../../helper/TransformHelper.js';
+import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransformationBetweenElementAndAllAncestors, getTranslationMatrix3d, matrixArrayToCssMatrix } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
@@ -106,8 +106,17 @@ export class DefaultPlacementService implements IPlacementService {
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
     let filteredItems = filterChildPlaceItems(items);
-    for (const designItem of filteredItems) {
-      const translationMatrix = getTranslationMatrix3d(track.x, track.y, 0);
+    for (const designItem of filteredItems) {     
+      const canvas = designItem.element.closest('#node-projects-designer-canvas-canvas');
+      let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(<HTMLElement>designItem.element.parentElement, <HTMLElement>canvas, true);
+
+      let transformMatrixParentTransformsCompensated = null;
+      if (originalElementAndAllAncestorsMultipliedMatrix){
+        transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0).matrixTransform(originalElementAndAllAncestorsMultipliedMatrix.inverse());
+      } else {
+        transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0);
+      }
+      const translationMatrix = getTranslationMatrix3d(transformMatrixParentTransformsCompensated.x, transformMatrixParentTransformsCompensated.y, 0);
       combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), matrixArrayToCssMatrix(translationMatrix));
     }
   }
@@ -128,11 +137,14 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    // let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
 
     let filterdItems = filterChildPlaceItems(items);
     for (const designItem of filterdItems) {
+      let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
+      track = {x: translation.x, y: translation.y};
       placeDesignItem(container, designItem, track, 'position');
     }
 
