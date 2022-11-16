@@ -81,16 +81,16 @@ export class ResizeExtension extends AbstractExtension {
         this._initialComputedTransformOrigins = [];
         this._initialTransformOrigins = [];
 
-        let rect = this.designerCanvas.getNormalizedElementCoordinatesAndRealSizes(this.extendedItem.element);
-        this._initialSizes.push({ width: rect.realWidth, height: rect.realHeight });
+																											  
+																					
         //#region Calc elements' dimension
         const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
         (<HTMLElement>this.extendedItem.element).style.transform = '';
-        //let rect = this.extendedItem.element.getBoundingClientRect();
+        let rect = this.extendedItem.element.getBoundingClientRect();
         (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
         //#endregion Calc element's dimension
 
-        //this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+        this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
 
         (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[0].width + 'px';
 
@@ -101,8 +101,8 @@ export class ResizeExtension extends AbstractExtension {
 
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-            rect = this.designerCanvas.getNormalizedElementCoordinatesAndRealSizes(designItem.element);
-            this._initialSizes.push({ width: rect.realWidth, height: rect.realHeight });
+            rect = designItem.element.getBoundingClientRect();
+            this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
           }
         }
         if (this.designerCanvas.alignOnSnap)
