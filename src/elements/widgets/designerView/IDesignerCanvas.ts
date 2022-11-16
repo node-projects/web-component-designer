@@ -46,6 +46,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   getNormalizedEventCoordinates(event: MouseEvent): IPoint;
   getViewportCoordinates(event: MouseEvent): IPoint;
+  getNormalizedElementCoordinates(element: Element): IRect;
+  getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number }
   getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect;
 
   captureActiveTool(tool: ITool);

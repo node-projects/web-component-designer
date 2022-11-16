@@ -7,6 +7,7 @@ import { assetsPath } from '../../../Constants';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
+import { switchContainer } from '../../helper/SwitchContainerHelper';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
@@ -81,7 +82,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   static override readonly template = html`
   <div style="height: 100%;">
-    <input id="input" style="width: 100%; height:21px;" placeholder="Filter..." autocomplete="off">
+    <input id="input" style="width: 100%; box-sizing: border-box; height:27px;" placeholder="Filter..." autocomplete="off">
     <div style="height: calc(100% - 23px); overflow: auto;">
       <table id="treetable" style="min-width: 100%;">
         <colgroup>
@@ -192,18 +193,32 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       source: [],
 
       table: {
-        indentation: 20,       // indent 20px per node level
+        indentation: 10,       // indent 20px per node level
         nodeColumnIdx: 0,      // render the node title into the 2nd column
         checkboxColumnIdx: 0,  // render the checkboxes into the 1st column
       },
 
-      activate: (event, data) => {
+      click: (event, data) => {
         if (event.originalEvent) { // only for clicked items, not when elements selected via code.
           let node = data.node;
           let designItem: IDesignItem = node.data.ref;
-          if (designItem)
-            designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+          if (designItem) {
+            if (event.ctrlKey) {
+              const sel = [...designItem.instanceServiceContainer.selectionService.selectedElements];
+              const idx = sel.indexOf(designItem);
+              if (idx >= 0) {
+                sel.splice(idx, 1);
+                designItem.instanceServiceContainer.selectionService.setSelectedElements(sel);
+              } else {
+                designItem.instanceServiceContainer.selectionService.setSelectedElements([...sel, designItem]);
+              }
+            }
+            else {
+              designItem.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+            }
+          }
         }
+        return false;
       },
 
       createNode: (event, data) => {
@@ -248,108 +263,48 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         preventVoidMoves: false,
         dropMarkerOffsetX: -24,
         dropMarkerInsertOffsetX: -16,
-
+        multiSource: true,
         dragStart: (node, data) => {
-          /* This function MUST be defined to enable dragging for the tree.
-            *
-            * Return false to cancel dragging of node.
-            * data.dataTransfer.setData() and .setDragImage() is available
-            * here.
-            */
-          // Set the allowed effects (i.e. override the 'effectAllowed' option)
           data.effectAllowed = "all";
-
-          // Set a drop effect (i.e. override the 'dropEffectDefault' option)
-          // data.dropEffect = "link";
-          data.dropEffect = "copy";
-
-          // We could use a custom image here:
-          // data.dataTransfer.setDragImage($("<div>TEST</div>").appendTo("body")[0], -10, -10);
-          // data.useDefaultImage = false;
-
-          // Return true to allow the drag operation
+          data.dropEffect = "move";
           return true;
         },
-        // dragDrag: function(node, data) {
-        //   logLazy("dragDrag", null, 2000,
-        //     "T1: dragDrag: " + "data: " + data.dropEffect + "/" + data.effectAllowed +
-        //     ", dataTransfer: " + data.dataTransfer.dropEffect + "/" + data.dataTransfer.effectAllowed );
-        // },
-        // dragEnd: function(node, data) {
-        //   node.debug( "T1: dragEnd: " + "data: " + data.dropEffect + "/" + data.effectAllowed +
-        //     ", dataTransfer: " + data.dataTransfer.dropEffect + "/" + data.dataTransfer.effectAllowed, data);
-        //     alert("T1: dragEnd")
-        // },
-
-        // --- Drop-support:
-
         dragEnter: (node, data) => {
-          // data.dropEffect = "copy";
+          data.dropEffect = data.originalEvent.ctrlKey ? 'copy' : 'move';
           return true;
         },
         dragOver: (node, data) => {
-          // Assume typical mapping for modifier keys
-          data.dropEffect = data.dropEffectSuggested;
-          // data.dropEffect = "move";
+          data.dropEffect = data.originalEvent.ctrlKey ? 'copy' : 'move';
+          return true;
         },
-        dragDrop: (node, data) => {
-          /* This function MUST be defined to enable dropping of items on
-            * the tree.
-            */
-          let newNode,
-            transfer = data.dataTransfer,
-            sourceNodes = data.otherNodeList,
-            mode = data.dropEffect;
-
-          if (data.hitMode === "after") {
-            // If node are inserted directly after tagrget node one-by-one,
-            // this would reverse them. So we compensate:
-            sourceNodes.reverse();
+        dragDrop: async (node, data) => {
+          let sourceDesignitems: IDesignItem[] = data.otherNodeList.map(x => x.data.ref);
+          if (data.dropEffectSuggested == 'copy') {
+            let newSourceDesignitems: IDesignItem[] = [];
+            for (let d of sourceDesignitems)
+              newSourceDesignitems.push(await d.clone());
+            sourceDesignitems = newSourceDesignitems;
           }
-          if (data.otherNode) {
-            // Drop another Fancytree node from same frame (maybe a different tree however)
-            //let sameTree = (data.otherNode.tree === data.tree);
+          const targetDesignitem: IDesignItem = node.data.ref;
+          let grp = targetDesignitem.openGroup("drag/drop in treeview");
 
-            if (mode === "move") {
-              data.otherNode.moveTo(node, data.hitMode);
-            } else {
-              newNode = data.otherNode.copyTo(node, data.hitMode);
-              if (mode === "link") {
-                newNode.setTitle("Link to " + newNode.title);
-              } else {
-                newNode.setTitle("Copy of " + newNode.title);
+          if (data.hitMode == 'over') {
+            switchContainer(sourceDesignitems, targetDesignitem);
+          } else if (data.hitMode == 'after' || data.hitMode == 'before') {
+            for (let d of sourceDesignitems) {
+              if (d.parent != targetDesignitem.parent) {
+                switchContainer([d], targetDesignitem.parent);
               }
+              if (data.hitMode == 'before')
+                targetDesignitem.insertAdjacentElement(d, 'beforebegin');
+              else
+                targetDesignitem.insertAdjacentElement(d, 'afterend');
             }
-          } else if (data.otherNodeData) {
-            // Drop Fancytree node from different frame or window, so we only have
-            // JSON representation available
-            //@ts-ignore
-            node.addChild(data.otherNodeData, data.hitMode);
-          } else if (data.files.length) {
-            // Drop files
-            for (let i = 0; i < data.files.length; i++) {
-              let file = data.files[i];
-              node.addNode({ title: "'" + file.name + "' (" + file.size + " bytes)" }, data.hitMode);
-              // var url = "'https://example.com/upload",
-              //     formData = new FormData();
-
-              // formData.append("file", transfer.files[0])
-              // fetch(url, {
-              //   method: "POST",
-              //   body: formData
-              // }).then(function() { /* Done. Inform the user */ })
-              // .catch(function() { /* Error. Inform the user */ });
-            }
-          } else {
-            // Drop a non-node
-            node.addNode({ title: transfer.getData("text") }, data.hitMode);
           }
-          node.setExpanded();
+
+          grp.commit();
         },
       },
-
-
-
 
       multi: {
         mode: ""

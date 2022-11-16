@@ -75,6 +75,27 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
     }
     this._designerView.designerCanvas.executeCommand({ type: CommandType.setTool, parameter: tool });
   }
+
+  public setStrokeColor(color: string){
+    if (this._popupContainer.children.length) {
+      this._popupContainer.innerHTML = '';
+    }
+    this._designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeColor, parameter: color });
+  }
+
+  public setFillBrush(color: string){
+    if (this._popupContainer.children.length) {
+      this._popupContainer.innerHTML = '';
+    }
+    this._designerView.designerCanvas.executeCommand({ type: CommandType.setFillBrush, parameter: color });
+  }
+
+  public setStrokeThickness(input: string){
+    if (this._popupContainer.children.length) {
+      this._popupContainer.innerHTML = '';
+    }
+    this._designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeThickness, parameter: input });
+  }
 }
 
 customElements.define('node-projects-designer-toolbar', DesignerToolbar);

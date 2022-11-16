@@ -11,6 +11,7 @@ export interface IDesignItem {
   lastContainerSize: ISize;
   
   replaceNode(newNode: Node);
+  clone() : Promise<IDesignItem>
 
   readonly nodeType: NodeType
 

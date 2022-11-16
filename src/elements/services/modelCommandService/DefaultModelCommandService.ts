@@ -42,22 +42,22 @@ export class DefaultModelCommandService implements IModelCommandService {
     else if (command.type == CommandType.moveToFront)
       sel.parent.insertChild(sel);
     else if (command.type == CommandType.arrangeTop) {
-      ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas);
+      ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
     else if (command.type == CommandType.arrangeRight) {
-      ArrangeHelper.arrangeElements(Orientation.RIGHT, designerCanvas);
+      ArrangeHelper.arrangeElements(Orientation.RIGHT, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
     else if (command.type == CommandType.arrangeLeft) {
-      ArrangeHelper.arrangeElements(Orientation.LEFT, designerCanvas);
+      ArrangeHelper.arrangeElements(Orientation.LEFT, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
     else if (command.type == CommandType.arrangeBottom){
-      ArrangeHelper.arrangeElements(Orientation.BOTTOM, designerCanvas);
+      ArrangeHelper.arrangeElements(Orientation.BOTTOM, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
     else if (command.type == CommandType.arrangeCenter) {
-      ArrangeHelper.arrangeElements(Orientation.HORIZONTAL_CENTER, designerCanvas);
+      ArrangeHelper.arrangeElements(Orientation.HORIZONTAL_CENTER, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
     else if (command.type == CommandType.arrangeMiddle) {
-      ArrangeHelper.arrangeElements(Orientation.VERTICAL_CENTER, designerCanvas);
+      ArrangeHelper.arrangeElements(Orientation.VERTICAL_CENTER, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
     else if (command.type == CommandType.unifyHeight) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('unifyHeight');

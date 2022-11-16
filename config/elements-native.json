@@ -3,6 +3,8 @@
   [
     "div",
     "input",
+    "textarea",
+    "select",
     {"tag" : "button", "defaultWidth": "80px", "defaultHeight": "30px", "defaultContent": "Button" },
     "img",
     "iframe",

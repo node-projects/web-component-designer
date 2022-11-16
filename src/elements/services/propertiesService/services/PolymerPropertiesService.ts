@@ -1,8 +1,8 @@
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
-import { AbstractBasePropertiesService } from './AbstractBasePropertiesService';
+import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService';
 
-export class PolymerPropertiesService extends AbstractBasePropertiesService {
+export class PolymerPropertiesService extends AbstractPolymerLikePropertiesService {
 
   public name = "polymer"
 

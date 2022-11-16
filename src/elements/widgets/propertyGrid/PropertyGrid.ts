@@ -3,9 +3,6 @@ import { PropertyGridPropertyList } from './PropertyGridPropertyList';
 import { DesignerTabControl } from '../../controls/DesignerTabControl';
 import { IDesignItem } from '../../item/IDesignItem';
 import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
-import { CssPropertiesService } from '../../services/propertiesService/services/CssPropertiesService';
-import { CommonPropertiesService } from '../../services/propertiesService/services/CommonPropertiesService';
-import { AttributesPropertiesService } from '../../services/propertiesService/services/AttributesPropertiesService';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
@@ -14,6 +11,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _designerTabControl: DesignerTabControl;
   private _selectedItems: IDesignItem[];
   private _propertyGridPropertyLists: PropertyGridPropertyList[];
+  private _propertyGridPropertyListsDict: Record<string, PropertyGridPropertyList>;
   private _itemsObserver: MutationObserver;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _selectionChangedHandler: Disposable;
@@ -36,7 +34,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    
+
     this._designerTabControl = new DesignerTabControl();
     this.shadowRoot.appendChild(this._designerTabControl);
     this.addEventListener('contextmenu', (e) => {
@@ -54,63 +52,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   public set serviceContainer(value: ServiceContainer) {
     this._serviceContainer = value;
     this._propertyGridPropertyLists = [];
-
-    let elementPropertyEditorAttributeList = new PropertyGridPropertyList(value);
-    elementPropertyEditorAttributeList.setPropertiesService(new CssPropertiesService("styles")) //This is replace in selectedItems
-    elementPropertyEditorAttributeList.title = "properties";
-    this._designerTabControl.appendChild(elementPropertyEditorAttributeList);
-    this._propertyGridPropertyLists.push(elementPropertyEditorAttributeList);
-
-    let attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new AttributesPropertiesService())
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "attributes";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CommonPropertiesService())
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "common";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("set-styles"))
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "set-styles";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("styles"))
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "styles";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("alignment"))
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "alignment";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("grid"))
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "grid";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    attributeEditorAttributeList = new PropertyGridPropertyList(value);
-    attributeEditorAttributeList.setPropertiesService(new CssPropertiesService("flex"))
-    attributeEditorAttributeList.createElements(null);
-    attributeEditorAttributeList.title = "flex";
-    this._designerTabControl.appendChild(attributeEditorAttributeList);
-    this._propertyGridPropertyLists.push(attributeEditorAttributeList);
-
-    this._designerTabControl.selectedIndex = 0;
+    this._propertyGridPropertyListsDict = {}
   }
   public get serviceContainer(): ServiceContainer {
     return this._serviceContainer;
@@ -132,12 +74,31 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   set selectedItems(items: IDesignItem[]) {
     this._selectedItems = items;
 
-    if (this.selectedItems && this.selectedItems.length > 0) {
-      const propService = this._serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(this.selectedItems[0]));
-      this._propertyGridPropertyLists[0].setPropertiesService(propService)
-      this._propertyGridPropertyLists[0].createElements(this.selectedItems[0]);
-      this._propertyGridPropertyLists[1].createElements(this.selectedItems[0]);
-      this._propertyGridPropertyLists[3].createElements(this.selectedItems[0]);
+    const pgGroups = this._serviceContainer.propertyGroupService.getPropertygroups(items);
+    const visibleDict = new Set<string>()
+    for (let p of pgGroups) {
+      let lst = this._propertyGridPropertyListsDict[p.name];
+      if (!lst) {
+        lst = new PropertyGridPropertyList(this.serviceContainer);
+        lst.title = p.name;
+        this._designerTabControl.appendChild(lst);
+        this._propertyGridPropertyLists.push(lst);
+        this._propertyGridPropertyListsDict[p.name] = lst;
+      }
+      lst.setPropertiesService(p.propertiesService);
+      lst.createElements(items[0]);
+      visibleDict.add(p.name);
+    }
+
+    this._designerTabControl.refreshItems();
+    if (this._designerTabControl.selectedIndex < 0)
+      this._designerTabControl.selectedIndex = 0;
+
+    for (let p of this._propertyGridPropertyLists) {
+      if (visibleDict.has(p.title))
+        p.style.display = 'block';
+      else
+        p.style.display = 'none';
     }
 
     for (const a of this._propertyGridPropertyLists) {
@@ -147,7 +108,6 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     if (items) {
       if (items.length == 1) {
         for (const a of this._propertyGridPropertyLists) {
-          a.designItemsChanged(items);
           a.refreshForDesignItems(items);
         }
 

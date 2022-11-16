@@ -78,7 +78,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
   public set canvasOffset(value: IPoint) {
     this._canvasOffset = value;
-    this._zoomFactorChanged();
+    this._zoomFactorChanged(false);
   }
   public get canvasOffsetUnzoomed(): IPoint {
     return { x: this._canvasOffset.x * this.zoomFactor, y: this._canvasOffset.y * this.zoomFactor };
@@ -279,28 +279,31 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     switch (command.type) {
       case CommandType.screenshot: {
+        if (!Screenshot.screenshotsEnabled) {
+          alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
+        }
         if (!this.instanceServiceContainer.selectionService.primarySelection) {
           this.zoomToFit();
           this.disableBackgroud();
-          await sleep(100);
           const el = this.rootDesignItem.element;
           const sel = this.instanceServiceContainer.selectionService.selectedElements;
           this.instanceServiceContainer.selectionService.setSelectedElements(null);
+          await sleep(100);
           const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
           await exportData(dataURItoBlob(screenshot), "screenshot.png");
           this.instanceServiceContainer.selectionService.setSelectedElements(sel);
           this.enableBackground();
         }
         else {
-          if (!Screenshot.screenshotsEnabled) {
-            alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
-          }
+          this.disableBackgroud();
           const el = this.instanceServiceContainer.selectionService.primarySelection.element;
           const sel = this.instanceServiceContainer.selectionService.selectedElements;
           this.instanceServiceContainer.selectionService.setSelectedElements(null);
+          await sleep(100);
           const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
           await exportData(dataURItoBlob(screenshot), "screenshot.png");
           this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+          this.enableBackground();
         }
       }
         break;
@@ -337,7 +340,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this.handleDeleteCommand();
         break;
       case CommandType.paste:
-        this.handlePasteCommand();
+        this.handlePasteCommand(command.altKey == true);
         break;
       case CommandType.selectAll:
         this.handleSelectAll();
@@ -423,8 +426,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     await this.serviceContainer.copyPasteService.copyItems(this.instanceServiceContainer.selectionService.selectedElements);
   }
 
-  async handlePasteCommand() {
-    const designItems = await this.serviceContainer.copyPasteService.getPasteItems(this.serviceContainer, this.instanceServiceContainer);
+  async handlePasteCommand(disableRestoreOfPositions: boolean) {
+    const [designItems, positions] = await this.serviceContainer.copyPasteService.getPasteItems(this.serviceContainer, this.instanceServiceContainer);
 
     let grp = this.rootDesignItem.openGroup("Insert");
 
@@ -446,8 +449,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
 
     if (designItems) {
-      for (let di of designItems) {
+      let containerPos = this.getNormalizedElementCoordinates(pasteContainer.element);
+      for (let i = 0; i < designItems.length; i++) {
+        let di = designItems[i];
+        let pos = positions ? positions[i] : null;
         this.instanceServiceContainer.undoService.execute(new InsertAction(pasteContainer, pasteContainer.childCount, di));
+        if (!disableRestoreOfPositions && pos) {
+          di.setStyle('left', (pos.x - containerPos.x) + 'px');
+          di.setStyle('top', (pos.y - containerPos.y) + 'px');
+        }
       }
 
       const intializationService = this.serviceContainer.intializationService;
@@ -518,7 +528,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
-  private _zoomFactorChanged() {
+  private _zoomFactorChanged(refreshExtensions = true) {
     //a@ts-ignore
     //this._canvasContainer.style.zoom = <any>this._zoomFactor;
     //this._canvasContainer.style.transform = 'scale(' + this._zoomFactor+') translate(' + this._translate.x + ', '+this._translate.y+')';
@@ -528,7 +538,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._updateTransform();
     this._fillCalculationrects();
     this.onZoomFactorChanged.emit(this._zoomFactor);
-    this.extensionManager.refreshAllAppliedExtentions();
+    if (refreshExtensions) {
+      this.extensionManager.refreshAllAppliedExtentions();
+      setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 200);
+    }
   }
 
   _updateTransform() {
@@ -550,6 +563,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.rootDesignItem._removeChildInternal(i);
     this.addDesignItems(designItems);
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
+    this.instanceServiceContainer.selectionService.setSelectedElements(null);
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
@@ -631,7 +645,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         }
       } else {
         let [newContainer] = this._getPossibleContainerForDrop(event);
-
         if (this._dragOverExtensionItem != newContainer) {
           this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
           this.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver);
@@ -701,6 +714,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         }
 
         let [newContainer] = this._getPossibleContainerForDrop(event);
+        if (!newContainer)
+          newContainer = this.rootDesignItem;
+
         let pos = this.getNormalizedElementCoordinates(newContainer.element);
 
         this._fillCalculationrects();
@@ -729,7 +745,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         mnuItems.push(...cme.provideContextMenuItems(event, this, designItem));
       }
     }
-    let ctxMenu=new ContextMenu(mnuItems, null)
+    let ctxMenu = new ContextMenu(mnuItems, null)
     ctxMenu.display(event);
     return ctxMenu;
   }
@@ -751,19 +767,19 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       return;
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
-      this.executeCommand({ type: CommandType.undo });
+      this.executeCommand({ type: CommandType.undo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
-      this.executeCommand({ type: CommandType.redo });
+      this.executeCommand({ type: CommandType.redo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'y')
-      this.executeCommand({ type: CommandType.redo });
+      this.executeCommand({ type: CommandType.redo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'a')
-      this.executeCommand({ type: CommandType.selectAll });
+      this.executeCommand({ type: CommandType.selectAll, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'c')
-      this.executeCommand({ type: CommandType.copy });
+      this.executeCommand({ type: CommandType.copy, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'v')
-      this.executeCommand({ type: CommandType.paste });
+      this.executeCommand({ type: CommandType.paste, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'x')
-      this.executeCommand({ type: CommandType.cut });
+      this.executeCommand({ type: CommandType.cut, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (!primarySelection) {
@@ -776,7 +792,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
-          this.executeCommand({ type: CommandType.delete });
+          this.executeCommand({ type: CommandType.delete, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
           break;
         case 'ArrowUp':
           {
@@ -839,6 +855,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
   }
 
+  public getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number } {
+    let ret = this.getNormalizedElementCoordinates(element);
+    const st = getComputedStyle(element);
+    let realWidth = ret.width;
+    let realHeight = ret.height;
+    if (st.boxSizing != 'border-box') {
+      realWidth = realWidth - (parseFloat(st.borderLeft) + parseFloat(st.paddingLeft) + parseFloat(st.paddingRight) + parseFloat(st.borderRight));
+      realHeight = realHeight - (parseFloat(st.borderTop) + parseFloat(st.paddingTop) + parseFloat(st.paddingBottom) + parseFloat(st.borderBottom));
+    }
+    return { ...ret, realWidth, realHeight };
+  }
+
   public getNormalizedOffsetInElement(event: MouseEvent, element: Element): IPoint {
     const normEvt = this.getNormalizedEventCoordinates(event);
     const normEl = this.getNormalizedElementCoordinates(element);
@@ -866,6 +894,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         continue;
       if (e.getRootNode() !== this.shadowRoot)
         continue;
+      if (e == this._outercanvas2)
+        break;
       retVal.push(e);
       if (e === this._canvas)
         break;
@@ -879,6 +909,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     for (let i = 0; i < elements.length; i++) {
       currentElement = <HTMLElement>elements[i];
+      if (currentElement == this._outercanvas2) {
+        currentElement = null;
+        break;
+      }
       if (currentElement == this.clickOverlay) {
         currentElement = null;
         continue;
@@ -951,9 +985,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
 
     let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
-    this._canvas.style.cursor = tool.cursor;
 
     tool.pointerEventHandler(this, event, <Element>currentElement);
+    this._canvas.style.cursor = tool.cursor;
   }
 
   public captureActiveTool(tool: ITool) {

@@ -10,6 +10,10 @@ export class AttributesPropertiesService implements IPropertiesService {
 
   public name = "attributes"
 
+  public listNeedsRefresh(designItem: IDesignItem): boolean {
+    return true;
+  }
+
   isHandledElement(designItem: IDesignItem): boolean {
     return true;
   }
@@ -24,13 +28,19 @@ export class AttributesPropertiesService implements IPropertiesService {
       for (let a of designItem.attributes.keys()) {
         p.push({ name: a, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
       }
+      p.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return p;
     }
     return null;
   }
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-
+    const cg = designItems[0].openGroup("properties changed");
+    for (let d of designItems) {
+      d.attributes.set(<string>property.name, value);
+      d.element.setAttribute(property.name, value);
+    }
+    cg.commit();
   }
 
   getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
@@ -38,7 +48,13 @@ export class AttributesPropertiesService implements IPropertiesService {
   }
 
   clearValue(designItems: IDesignItem[], property: IProperty) {
-
+    for (let d of designItems) {
+      d.attributes.delete(<string>property.name);
+      d.element.removeAttribute(property.name);
+      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+      });
+    }
   }
 
   isSet(designItems: IDesignItem[], property: IProperty): ValueType {

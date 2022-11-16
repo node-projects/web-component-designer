@@ -7,7 +7,7 @@ export interface IProperty {
   propertyName?: string;// normaly camelCased name of property
   attributeName?: string; // normaly dash seperated name of property
   description?: string;
-  type?: 'json' | 'color' | 'date' | 'number' | 'list' | 'enum' | 'boolean' | 'img-lis' | 'thickness' | 'css-length' | 'string' | string; // -> string, number, list, color, thickness, css-length
+  type?: 'addNew' | 'json' | 'color' | 'date' | 'number' | 'list' | 'enum' | 'boolean' | 'img-lis' | 'thickness' | 'css-length' | 'string' | string; // -> string, number, list, color, thickness, css-length
   default?: any;
   min?: number;
   max?: number;

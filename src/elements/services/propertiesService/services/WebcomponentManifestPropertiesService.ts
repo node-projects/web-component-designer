@@ -3,9 +3,13 @@ import { IDesignItem } from "../../../item/IDesignItem.js";
 import { IPropertiesService } from "../IPropertiesService.js";
 import { IProperty } from "../IProperty.js";
 import { PropertyType } from "../PropertyType.js";
-import { UnkownElementPropertiesService } from "./UnkownElementPropertiesService.js";
+import { AbstractPropertiesService } from "./AbstractPropertiesService.js";
 
-export class WebcomponentManifestPropertiesService extends UnkownElementPropertiesService implements IPropertiesService {
+export class WebcomponentManifestPropertiesService extends AbstractPropertiesService implements IPropertiesService {
+
+  listNeedsRefresh(designItem: IDesignItem): boolean {
+    return true;
+  }
 
   private _name: string;
   get name() { return this._name; }

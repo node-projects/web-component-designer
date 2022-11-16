@@ -24,7 +24,8 @@ export class Screenshot {
       Screenshot._video = document.createElement("video");
       const gdmOptions = {
         video: {
-          cursor: "never"
+          cursor: "never",
+          displaySurface: 'browser'
         },
         audio: false
       }

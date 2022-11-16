@@ -5,7 +5,6 @@ import { IInstanceService } from './instanceService/IInstanceService';
 import { IEditorTypesService } from './propertiesService/IEditorTypesService';
 import { BaseServiceContainer } from './BaseServiceContainer';
 import { IHtmlWriterService } from './htmlWriterService/IHtmlWriterService';
-import { CodeViewMonaco } from "../widgets/codeView/code-view-monaco";
 import { ICodeView } from "../widgets/codeView/ICodeView";
 import { IHtmlParserService } from "./htmlParserService/IHtmlParserService";
 import { IIntializationService } from "./initializationService/IIntializationService";
@@ -34,6 +33,8 @@ import { IProperty } from "./propertiesService/IProperty.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 import { IBinding } from "../item/IBinding";
 import { BindingTarget } from "../item/BindingTarget";
+import { IPropertyGroupsService } from "./propertiesService/IPropertyGroupsService";
+import { CodeViewSimple } from "../widgets/codeView/code-view-simple";
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -54,6 +55,7 @@ interface ServiceNameMap {
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
+  "propertyGroupsService": IPropertyGroupsService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -63,7 +65,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     demoViewWidget: new (...args: any[]) => IDemoView & HTMLElement;
     openBindingsEditor?: (property:IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
   } = {
-      codeViewWidget: CodeViewMonaco,
+      codeViewWidget: CodeViewSimple,
       demoViewWidget: DemoView
     };
 
@@ -108,6 +110,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get propertiesServices(): IPropertiesService[] {
     return this.getServices('propertyService');
+  }
+
+  get propertyGroupService(): IPropertyGroupsService {
+    return this.getLastService('propertyGroupsService');
   }
 
   get containerServices(): IPlacementService[] {

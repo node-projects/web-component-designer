@@ -15,6 +15,10 @@ export function isInline(element: HTMLElement): boolean {
   return element != null && window.getComputedStyle(element).display.startsWith('inline');
 }
 
+export function isInlineAfter(element: HTMLElement): boolean {
+  return element != null && window.getComputedStyle(element).display == 'inline';
+}
+
 export function getElementDisplaytype(element: HTMLElement): ElementDisplayType {
   const display = window.getComputedStyle(element).display;
   return display == 'none' ? ElementDisplayType.none : display.startsWith('inline') ? ElementDisplayType.inline : ElementDisplayType.block;

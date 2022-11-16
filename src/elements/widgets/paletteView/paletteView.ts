@@ -40,6 +40,7 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
         console.warn('Error loading elements', err);
       }
     }
+    this._designerTabControl.refreshItems();
   }
 }
 

@@ -1,10 +1,12 @@
 import { IContentChanged } from "../../../../index.js";
 import { DesignItem } from "../../../item/DesignItem";
 import { IDesignItem } from "../../../item/IDesignItem";
+import { NodeType } from "../../../item/NodeType.js";
 import { ISelectionChangedEvent } from "../../../services/selectionService/ISelectionChangedEvent";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { ExtensionType } from './ExtensionType';
 import { IExtensionManager } from "./IExtensionManger";
+import { IDesignerExtension } from "./IDesignerExtension";
 
 export class ExtensionManager implements IExtensionManager {
 
@@ -57,8 +59,9 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive: boolean = false) {
-    if (designItem) {
+    if (designItem && designItem.nodeType == NodeType.Element) {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
+      let extensions: IDesignerExtension[] = [];
       if (extProv) {
         for (let e of extProv) {
           if (e.shouldExtend(this, this.designerCanvas, designItem)) {
@@ -68,6 +71,7 @@ export class ExtensionManager implements IExtensionManager {
             const ext = e.getExtension(this, this.designerCanvas, designItem);
             try {
               ext.extend();
+              extensions.push(ext);
             }
             catch (err) {
               console.error(err);
@@ -84,7 +88,9 @@ export class ExtensionManager implements IExtensionManager {
           this.applyExtension(d, extensionType, recursive);
         }
       }
+      return extensions;
     }
+    return null;
   }
 
   applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType, recursive: boolean = false) {
@@ -93,7 +99,7 @@ export class ExtensionManager implements IExtensionManager {
       if (extProv) {
         for (let e of extProv) {
           for (let i of designItems) {
-            if (e.shouldExtend(this, this.designerCanvas, i)) {
+            if (i.nodeType == NodeType.Element && e.shouldExtend(this, this.designerCanvas, i)) {
               let appE = i.appliedDesignerExtensions.get(extensionType);
               if (!appE)
                 appE = [];

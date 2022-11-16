@@ -1,12 +1,14 @@
 import { html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
+import { TextTool } from "../../tools/TextTool";
 import { AbstractExtension } from "../AbstractExtension.js";
 import { ExtensionType } from "../ExtensionType.js";
 import { IExtensionManager } from "../IExtensionManger";
 import { OverlayLayer } from "../OverlayLayer.js";
+import { handlesPointerEvent } from "./EditTextExtension";
 
-export class EditTextWithStyloExtension extends AbstractExtension {
+export class EditTextWithStyloExtension extends AbstractExtension implements handlesPointerEvent {
 
   private _contentEditedBound: any;
   private _blurBound: any;
@@ -19,6 +21,7 @@ export class EditTextWithStyloExtension extends AbstractExtension {
   private _rect2: SVGRectElement;
   private _rect3: SVGRectElement;
   private _rect4: SVGRectElement;
+  private _foreignObject: SVGForeignObjectElement;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -33,9 +36,12 @@ export class EditTextWithStyloExtension extends AbstractExtension {
     (<HTMLElement>this.extendedItem.element).focus();
     this.designerCanvas.eatEvents = this.extendedItem.element;
 
+   this.designerCanvas.serviceContainer.globalContext.tool = new TextTool(true);
+
     const elements = <SVGGraphicsElement>(<any>EditTextWithStyloExtension.template.content.cloneNode(true));
 
-    let foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+    this._foreignObject = foreignObject
     foreignObject.setAttribute('x', '0');
     foreignObject.setAttribute('y', '0');
     foreignObject.setAttribute('width', '100%');
@@ -72,6 +78,12 @@ export class EditTextWithStyloExtension extends AbstractExtension {
     this._rect2 = this._drawRect(0, 0, normalized.x, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', this._rect2, OverlayLayer.Normal);
     this._rect3 = this._drawRect(normalized.x + normalized.width, 0, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', this._rect3, OverlayLayer.Normal);
     this._rect4 = this._drawRect(0, normalized.y + normalized.height, this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, 'svg-transparent', this._rect4, OverlayLayer.Normal);
+  }
+
+  handlesPointerEvent(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element): boolean {
+    let p = event.composedPath();
+    const stylo = this._foreignObject.querySelector('stylo-editor');
+    return p.indexOf(stylo) >= 0;
   }
 
   override refresh() {

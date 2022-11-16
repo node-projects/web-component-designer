@@ -1,9 +1,10 @@
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { BaseCustomWebComponentLazyAppend, BaseCustomWebComponentConstructorAppend, BaseCustomWebComponentNoAttachedTemplate, BaseCustomWebComponentConstructorAppendLazyReady } from '@node-projects/base-custom-webcomponent';
-import { AbstractBasePropertiesService } from './AbstractBasePropertiesService';
+import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService';
 
-export class BaseCustomWebComponentPropertiesService extends AbstractBasePropertiesService {
+export class BaseCustomWebComponentPropertiesService extends AbstractPolymerLikePropertiesService {
+  
   public name = "baseCustomWebComponent";
 
   override isHandledElement(designItem: IDesignItem): boolean {

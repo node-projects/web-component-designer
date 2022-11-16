@@ -9,16 +9,19 @@ import { IDesignerCanvas } from "../IDesignerCanvas";
 import { ITool } from "./ITool";
 import { NamedTools } from './NamedTools';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
+import { ChangeGroup } from "../../../services/undoService/ChangeGroup";
 
 export class PointerTool implements ITool {
 
-  readonly cursor: string = 'default';
+  public cursor: string = 'default';
 
   private _movedSinceStartedAction: boolean = false;
   private _initialPoint: IPoint;
   private _actionType?: PointerActionType;
   private _actionStartedDesignItem?: IDesignItem;
   private _actionStartedDesignItems?: IDesignItem[];
+  private _clonedItems?: IDesignItem[];
+  private _copiedItemsInserted = false;
 
   private _previousEventName: EventNames;
 
@@ -28,6 +31,10 @@ export class PointerTool implements ITool {
   private _moveItemsOffset: IPoint = { x: 0, y: 0 };
   private _initialOffset: IPoint;
   private _started: boolean = false;;
+
+  private _firstTimeInMove: boolean;
+  private _secondTimeInMove: boolean;
+  private _changeGroup: ChangeGroup
 
   constructor() {
   }
@@ -59,6 +66,12 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+
+    if (event.ctrlKey)
+      this.cursor = 'copy';
+    else
+      this.cursor = 'default';
+
     const interactionServices = designerCanvas.serviceContainer.elementInteractionServices;
     if (interactionServices)
       for (let s of interactionServices) {
@@ -83,10 +96,26 @@ export class PointerTool implements ITool {
         (<Element>event.target).setPointerCapture(event.pointerId);
         designerCanvas.captureActiveTool(this);
         this._movedSinceStartedAction = false;
+        this._copiedItemsInserted = false;
+        this._clonedItems = null;
+        this._firstTimeInMove = false;
+        this._secondTimeInMove = false;
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
         designerCanvas.releaseActiveTool();
+        this._copiedItemsInserted = false;
+        this._clonedItems = null;
+        this._firstTimeInMove = false;
+        this._secondTimeInMove = false;
+        break;
+      case EventNames.PointerMove:
+        if (this._firstTimeInMove)
+          this._secondTimeInMove = true;
+        if (this._secondTimeInMove)
+          this._firstTimeInMove = false;
+        else
+          this._firstTimeInMove = true;
         break;
     }
 
@@ -153,7 +182,7 @@ export class PointerTool implements ITool {
     }
   }
 
-  private _pointerActionTypeDragOrSelect(designerCanvas: IDesignerCanvas, event: PointerEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
+  private async _pointerActionTypeDragOrSelect(designerCanvas: IDesignerCanvas, event: PointerEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
     if (event.altKey) {
       if (event.type == EventNames.PointerDown) {
         const currentSelection = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
@@ -177,23 +206,6 @@ export class PointerTool implements ITool {
    
           this._moveItemsOffset = { x: 0, y: 0 };
 
-          if (event.shiftKey || event.ctrlKey) {
-            const index = designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
-            if (index >= 0) {
-              let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);
-              newSelectedList.splice(index, 1);
-              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
-            }
-            else {
-              let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);
-              newSelectedList.push(currentDesignItem);
-              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
-            }
-          } else {
-            if (designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
-              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
-          }
-
           this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
 
           if (designerCanvas.alignOnSnap)
@@ -203,9 +215,53 @@ export class PointerTool implements ITool {
         }
       case EventNames.PointerMove:
         {
+
           if (event.buttons == 0) {
             return;
           }
+
+          if (this._firstTimeInMove) {
+            if (!currentDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(currentDesignItem)) {
+              if (event.ctrlKey || event.shiftKey)
+                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([...currentDesignItem.instanceServiceContainer.selectionService.selectedElements, currentDesignItem]);
+              else
+                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+              this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
+              if (designerCanvas.alignOnSnap)
+                designerCanvas.snapLines.calculateSnaplines(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+            }
+          }
+
+          // *** Copy Items via Ctrl Drag ***
+
+          if (!this._clonedItems) {
+            this._clonedItems = [];
+            for (let d of this._actionStartedDesignItems) {
+              const clone = await d.clone();
+              if (this._clonedItems)
+                this._clonedItems.push(clone);
+            }
+          }
+
+          if (!this._actionStartedDesignItem)
+            return;
+
+          if (event.ctrlKey && !this._copiedItemsInserted) {
+            this._copiedItemsInserted = true;
+            if (!this._changeGroup)
+              this._changeGroup = designerCanvas.rootDesignItem.openGroup("Copy Elements");
+            for (let i = 0; i < this._clonedItems.length; i++) {
+              this._actionStartedDesignItems[i].insertAdjacentElement(this._clonedItems[i], 'beforebegin');
+            }
+          } else if (!event.ctrlKey && this._copiedItemsInserted) {
+            for (let d of this._clonedItems) {
+              d.remove();
+            }
+            this._copiedItemsInserted = false;
+          }
+
+          // *** End Copy Items Part ***
+
           const elementMoved = currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
           if (this._actionType != PointerActionType.Drag && elementMoved) {
             this._actionType = PointerActionType.Drag;
@@ -285,8 +341,11 @@ export class PointerTool implements ITool {
         {
           this._started = false;
           if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
-            if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey)
+            if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey) {
               designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem]);
+            } else {
+              this.checkSelectElement(event, designerCanvas, currentDesignItem);
+            }
             return;
           }
 
@@ -296,9 +355,11 @@ export class PointerTool implements ITool {
             const cp = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
 
             if (containerService) {
-              let cg = designerCanvas.rootDesignItem.openGroup("Move Elements");
+              if (!this._changeGroup)
+                this._changeGroup = designerCanvas.rootDesignItem.openGroup("Move Elements");
               containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-              cg.commit();
+              this._changeGroup.commit();
+              this._changeGroup = null;
               for (const item of this._actionStartedDesignItems) {
                 designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver);
                 designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
@@ -314,8 +375,32 @@ export class PointerTool implements ITool {
 
           designerCanvas.extensionManager.refreshExtensions(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
+          if (this._changeGroup) {
+            this._changeGroup.abort();
+            this._changeGroup = null;
+          }
+
           break;
         }
+    }
+  }
+
+  private checkSelectElement(event: PointerEvent, designerCanvas: IDesignerCanvas, currentDesignItem: IDesignItem) {
+    if (event.shiftKey || event.ctrlKey) {
+      const index = designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
+      if (index >= 0) {
+        let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);
+        newSelectedList.splice(index, 1);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
+      }
+      else {
+        let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);
+        newSelectedList.push(currentDesignItem);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
+      }
+    } else {
+      if (designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
     }
   }
 

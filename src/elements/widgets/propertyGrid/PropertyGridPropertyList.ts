@@ -7,6 +7,7 @@ import { IPropertiesService } from '../../services/propertiesService/IProperties
 import { ValueType } from '../../services/propertiesService/ValueType';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
+import { PropertyType } from '../../services/propertiesService/PropertyType';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -98,51 +99,73 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public setPropertiesService(propertiesService: IPropertiesService) {
-    this._propertiesService = propertiesService;
-    DomHelper.removeAllChildnodes(this._div);
-    this._propertyMap.clear();
+    if (this._propertiesService != propertiesService) {
+      this._propertiesService = propertiesService;
+      DomHelper.removeAllChildnodes(this._div);
+      this._propertyMap.clear();
+    }
   }
 
   public createElements(designItem: IDesignItem) {
-    DomHelper.removeAllChildnodes(this._div);
-    this._propertyMap.clear();
-    if (this._propertiesService) {
-      let properties = this._propertiesService.getProperties(designItem);
-      if (properties) {
-        for (const p of properties) {
-          let editor: IPropertyEditor;
-          if (p.createEditor)
-            editor = p.createEditor(p);
-          else {
-            editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
-          }
-          if (editor) {
-            let rectContainer = document.createElement("div")
-            rectContainer.style.width = '20px';
-            rectContainer.style.height = '20px';
-            rectContainer.style.display = 'flex';
-            rectContainer.style.alignItems = 'center';
-            let rect = document.createElement("div")
-            rect.style.width = '7px';
-            rect.style.height = '7px';
-            rect.style.border = '1px white solid';
-            rectContainer.appendChild(rect);
-            this._div.appendChild(rectContainer);
-            rect.oncontextmenu = (event) => {
-              event.preventDefault();
-              this.openContextMenu(event, p);
+    if (this._propertiesService && (this._propertiesService.listNeedsRefresh(designItem)) || this._propertyMap.size == 0) {
+      DomHelper.removeAllChildnodes(this._div);
+      this._propertyMap.clear();
+      if (this._propertiesService) {
+        let properties = this._propertiesService.getProperties(designItem);
+        if (properties) {
+          for (const p of properties) {
+            let editor: IPropertyEditor;
+            if (p.createEditor)
+              editor = p.createEditor(p);
+            else {
+              editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
             }
+            if (editor) {
+              let rectContainer = document.createElement("div")
+              rectContainer.style.width = '20px';
+              rectContainer.style.height = '20px';
+              rectContainer.style.display = 'flex';
+              rectContainer.style.alignItems = 'center';
+              let rect = document.createElement("div")
+              rect.style.width = '7px';
+              rect.style.height = '7px';
+              rect.style.border = '1px white solid';
+              if (p.propertyType != PropertyType.complex)
+                rectContainer.appendChild(rect);
+              this._div.appendChild(rectContainer);
+              rect.oncontextmenu = (event) => {
+                event.preventDefault();
+                this.openContextMenu(event, p);
+              }
 
-            let label = document.createElement("label");
-            label.htmlFor = p.name;
-            label.textContent = p.name;
-            label.title = p.name;
-            this._div.appendChild(label);
+              if (p.type == 'addNew') {
+                let input = <HTMLInputElement>editor.element;
+                input.disabled = true;
+                let label = document.createElement("input");
+                label.value = p.name;
+                label.onkeyup = e => {
+                  if (e.key == 'Enter' && label.value) {
+                    p.name = label.value;
+                    label.disabled = true;
+                    input.disabled = false;
+                    input.focus();
+                  }
+                }
+                this._div.appendChild(label);
 
-            editor.element.id = p.name;
-            this._div.appendChild(editor.element);
+              } else {
+                let label = document.createElement("label");
+                label.htmlFor = p.name;
+                label.textContent = p.name;
+                label.title = p.name;
+                this._div.appendChild(label);
+              }
 
-            this._propertyMap.set(p, { isSetElement: rect, editor: editor });
+              editor.element.id = p.name;
+              this._div.appendChild(editor.element);
+
+              this._propertyMap.set(p, { isSetElement: rect, editor: editor });
+            }
           }
         }
       }
@@ -156,11 +179,13 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     if (this._serviceContainer.config.openBindingsEditor) {
       ctxMenu.push(...[
         { title: '-' },
-        { title: 'edit binding', action: () =>  {
-          let target = this._propertiesService.getPropertyTarget(this._designItems[0], property);
-          let binding = this._propertiesService.getBinding(this._designItems, property);
-          this._serviceContainer.config.openBindingsEditor(property, this._designItems, binding, target);
-         } }
+        {
+          title: 'edit binding', action: () => {
+            let target = this._propertiesService.getPropertyTarget(this._designItems[0], property);
+            let binding = this._propertiesService.getBinding(this._designItems, property);
+            this._serviceContainer.config.openBindingsEditor(property, this._designItems, binding, target);
+          }
+        }
       ]);
     };
     ContextMenu.show(ctxMenu, event);
