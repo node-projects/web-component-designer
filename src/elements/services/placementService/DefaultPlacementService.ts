@@ -141,9 +141,10 @@ export class DefaultPlacementService implements IPlacementService {
     let filterdItems = filterChildPlaceItems(items);
     for (const designItem of filterdItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
+      const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.styles.get('transform') ?? ''));
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
       let track = {x: translation.x, y: translation.y};
-      placeDesignItem(container, designItem, track, 'position');
+      placeDesignItem(container, designItem, {x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y}, 'position');
     }
 
     for (const item of items) {
