@@ -720,7 +720,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
         const elementDefinition = <IElementDefinition>JSON.parse(transferData);
         const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
-        const grp = di.openGroup("Insert");
+        const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
         di.setStyle('position', 'absolute');
         di.setStyle('left', (position.x - pos.x) + 'px');
         di.setStyle('top', (position.y - pos.y) + 'px');

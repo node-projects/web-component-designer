@@ -4,7 +4,7 @@ import { IDesignItem } from '../../../item/IDesignItem';
 export class CssStyleChangeAction implements ITransactionItem {
 
   constructor(designItem: IDesignItem, name: string, newValue: any, oldValue: any) {
-    this.title = "Change CSS Style";
+    this.title = "Change Css Style " + name + " of &lt;" + designItem.name + "&gt;";
 
     this.designItem = designItem;
     this.name = name;

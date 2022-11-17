@@ -109,7 +109,7 @@ export class ResizeExtension extends AbstractExtension {
           let trackY = diff.y - this._initialPoint.y - this._offsetPoint.y;
 
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
-          let transformedTrack = convertCoordinates({x:trackX, y:trackY}, matrix)
+          let transformedTrack = convertCoordinates({ x: trackX, y: trackY }, matrix)
 
           let i = 0;
           switch (this._actionModeStarted) {
@@ -159,8 +159,8 @@ export class ResizeExtension extends AbstractExtension {
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
-        
-        let cg = this.extendedItem.openGroup("Resize Elements");
+
+        let cg = this.extendedItem.openGroup((this.resizeAllSelected && this.designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 1) ? "Resize Elements" : "Resize &lt;" + this.extendedItem.name + "&gt;");
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
         if (this.resizeAllSelected) {
