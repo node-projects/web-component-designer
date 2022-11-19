@@ -78,13 +78,19 @@ div.ct > div.ct > div.ct > div.ct > div.ct {
   display: inline-flex;
   justify-content: center;
   align-items: center;
+}
+
+span {
+  width: 30%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }`;
 
   public static override readonly template = html`
-  <div class="ct"><span>position</span>
-  <div class="top">-</div><br><div class="left">-</div><div class="ct"><span>margin</span>
-  <div id="testdiv" [contentEditable]="contentEditable"  @dblclick="onDoubleClick" class="top">-</div><br><div class="left">-</div><div class="ct"><span>border</span>
-  <div class="top">-</div><br><div class="left">-</div><div class="ct"><span>padding</span>
+  <div class="ct"><span title="position">position</span>
+  <div class="top">-</div><br><div class="left">-</div><div class="ct"><span title="margin">margin</span>
+  <div id="testdiv" [contentEditable]="contentEditable"  @dblclick="onDoubleClick" class="top">-</div><br><div class="left">-</div><div class="ct"><span title="border">border</span>
+  <div class="top">-</div><br><div class="left">-</div><div class="ct"><span title="padding">padding</span>
   <div class="top">-</div><br><div class="left">-</div><div class="ct" style="font-size:6px"><div class="left">-</div>
   x
   <div class="right">-</div>
