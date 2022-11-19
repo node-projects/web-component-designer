@@ -3,6 +3,7 @@ export enum EventNames {
   PointerMove = 'pointermove',
   PointerUp = 'pointerup',
   DragEnter = 'dragenter',
+  DragEnd = 'dragend',
   DragLeave = 'dragleave',
   DragOver = 'dragover',
   Drop = 'drop',
