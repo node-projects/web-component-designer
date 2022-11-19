@@ -151,6 +151,7 @@ export type { IPlacementView } from "./elements/widgets/designerView/IPlacementV
 export * from "./elements/widgets/designerView/designerView.js";
 export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";
+export * from "./elements/widgets/designerView/DomConverter.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/DrawToolButtonProvider.js";
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/PointerToolButtonProvider.js";
