@@ -76,7 +76,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
 
   const retVal: {
     cells?: { x: number, y: number, width: number, height: number, name: string }[][];
-    gaps?: { x: number, y: number, width: number, height: number }[];
+    gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number}[];
   } = { cells: [], gaps: [] };
 
   for (let xIdx = 0; xIdx < rows.length; xIdx++) {
@@ -92,13 +92,13 @@ export function CalculateGridInformation(designItem: IDesignItem) {
     retVal.cells.push(cellList);
     for (let yIdx = 0; yIdx < columns.length; yIdx++) {
       const c = columns[yIdx];
-      if (x > 0 && xGap) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY });
+      if (x > 0) {
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY, column: yIdx, row: xIdx });
         x += xGap
       }
       const currX = Number.parseFloat(c.replace('px', ''));
-      if (y > 0 && yGap) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap });
+      if (y > 0) {
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, column: yIdx, row: xIdx });
       }
       let name = null;
       if (areas) {
