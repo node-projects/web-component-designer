@@ -225,16 +225,16 @@ export class RectExtension extends AbstractExtension {
         let heightRectElement = newRectExtrema.yMax - newRectExtrema.yMin + (2 * this._offsetSvg);
         this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
         this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
-        this.extendedItem.parent.setStyle("height", heightRectElement.toString());
-        this.extendedItem.parent.setStyle("width", widthRectElement.toString());
+        this.extendedItem.parent.setStyle("height", heightRectElement.toString() + "px");
+        this.extendedItem.parent.setStyle("width", widthRectElement.toString() + "px");
     }
 
     _rearrangePointsFromElement(oldParentCoords: IRect){
         let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._rectElement.parentElement);
         let diffX = oldParentCoords.x - newParentCoords.x;
         let diffY = oldParentCoords.y - newParentCoords.y;
-        this.extendedItem.setAttribute('x', this._rectElement.x.baseVal.value + diffX + "px");
-        this.extendedItem.setAttribute('y', this._rectElement.y.baseVal.value + diffY + "px");
+        this.extendedItem.setAttribute('x', (this._rectElement.x.baseVal.value + diffX).toString());
+        this.extendedItem.setAttribute('y', (this._rectElement.y.baseVal.value + diffY).toString());
     }
 
     override refresh() {

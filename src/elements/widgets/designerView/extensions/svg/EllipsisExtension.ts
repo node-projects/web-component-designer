@@ -187,16 +187,16 @@ export class EllipsisExtension extends AbstractExtension {
         let heightEllipseElement = newEllipseExtrema.yMax - newEllipseExtrema.yMin + (2 * this._offsetSvg);
         this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
         this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
-        this.extendedItem.parent.setStyle("height", heightEllipseElement.toString());
-        this.extendedItem.parent.setStyle("width", widthEllipseElement.toString());
+        this.extendedItem.parent.setStyle("height", heightEllipseElement.toString() + "px");
+        this.extendedItem.parent.setStyle("width", widthEllipseElement.toString() + "px");
     }
 
     _rearrangePointsFromElement(oldParentCoords: IRect){
         let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._ellipseElement.parentElement);
         let diffX = oldParentCoords.x - newParentCoords.x;
         let diffY = oldParentCoords.y - newParentCoords.y;
-        this.extendedItem.setAttribute('cx', this._ellipseElement.cx.baseVal.value + diffX + "px");
-        this.extendedItem.setAttribute('cy', this._ellipseElement.cy.baseVal.value + diffY + "px");
+        this.extendedItem.setAttribute('cx', (this._ellipseElement.cx.baseVal.value + diffX).toString());
+        this.extendedItem.setAttribute('cy', (this._ellipseElement.cy.baseVal.value + diffY).toString());
     }
 
 

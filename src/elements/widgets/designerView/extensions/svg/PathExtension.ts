@@ -177,10 +177,13 @@ export class PathExtension extends AbstractExtension {
         this._circlePos = null;
         this._lastPos = null;
         this.extendedItem.setAttribute('d', createPathD(this._pathdata));
+        
         if(getComputedStyle(this._pathElement.parentElement).position == "absolute"){
+          let group = this.extendedItem.openGroup('rearrangeSvg');
           let dataPath = this._pathdata;
           this._rearrangeSvgElement();
           this._rearrangePointsFromElement(this._parentCoordinates, dataPath);
+          group.commit();
         }
         break;
     }
@@ -323,8 +326,8 @@ export class PathExtension extends AbstractExtension {
     let widthSvgElement = newElementCoords.width + (2 * this._offsetSvg);
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("left", parentLeft.toString() + "px");
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("top", parentTop.toString() + "px");
-    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("height", heightSvgElement.toString());
-    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("width", widthSvgElement.toString());
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("height", heightSvgElement.toString() + "px");
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("width", widthSvgElement.toString() + "px");
   }
 
   _rearrangePointsFromElement(oldParentCoords: IRect, pathData: PathData[]){

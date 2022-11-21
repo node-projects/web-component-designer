@@ -148,18 +148,18 @@ export class LineExtension extends AbstractExtension {
         let heightLineElement = newLineExtrema.yMax - newLineExtrema.yMin + (2 * this._offsetSvg);
         this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
         this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
-        this.extendedItem.parent.setStyle("height", heightLineElement.toString());
-        this.extendedItem.parent.setStyle("width", widthLineElement.toString());
+        this.extendedItem.parent.setStyle("height", heightLineElement.toString() + "px");
+        this.extendedItem.parent.setStyle("width", widthLineElement.toString() + "px");
     }
 
     _rearrangePointsFromElement(oldParentCoords: IRect){
         let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._lineElement.parentElement);
         let diffX = oldParentCoords.x - newParentCoords.x;
         let diffY = oldParentCoords.y - newParentCoords.y;
-        this.extendedItem.setAttribute('x1', this._lineElement.x1.baseVal.value + diffX + "px");
-        this.extendedItem.setAttribute('y1', this._lineElement.y1.baseVal.value + diffY + "px");
-        this.extendedItem.setAttribute('x2', this._lineElement.x2.baseVal.value + diffX + "px");
-        this.extendedItem.setAttribute('y2', this._lineElement.y2.baseVal.value + diffY + "px");
+        this.extendedItem.setAttribute('x1', (this._lineElement.x1.baseVal.value + diffX).toString());
+        this.extendedItem.setAttribute('y1', (this._lineElement.y1.baseVal.value + diffY).toString());
+        this.extendedItem.setAttribute('x2', (this._lineElement.x2.baseVal.value + diffX).toString());
+        this.extendedItem.setAttribute('y2', (this._lineElement.y2.baseVal.value + diffY).toString());
     }
     
     override refresh() {
