@@ -1,6 +1,6 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
-import { cssMatrixToMatrixArray, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
+import { cssMatrixToMatrixArray, extractRotationAngleFromDOMMatrix, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
@@ -96,6 +96,7 @@ export class RotateExtension extends AbstractExtension {
         let cg = this.extendedItem.openGroup("Rotate Elements");
         (<Element>event.target).releasePointerCapture(event.pointerId);
 
+        (<HTMLElement>this.extendedItem.element).style.transform = 'rotate(' + extractRotationAngleFromDOMMatrix(new DOMMatrix((<HTMLElement>this.extendedItem.element).style.transform)) + 'deg)';
         this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
 
         cg.commit();

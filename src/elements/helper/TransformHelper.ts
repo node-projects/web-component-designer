@@ -239,6 +239,10 @@ export function extractTranslationFromDOMMatrix(matrix: DOMMatrix): DOMPoint {
   return new DOMPoint(matrix.m41, matrix.m42, 0, 0);
 }
 
+export function extractRotationAngleFromDOMMatrix(matrix: DOMMatrix): number {
+  return getRotationAngleFromMatrix(null, matrix);
+}
+
 export function normalizeToAbsolutePosition(element: HTMLElement, normalizeProperty: "left" | "top") {
   switch (normalizeProperty) {
     case "left":
