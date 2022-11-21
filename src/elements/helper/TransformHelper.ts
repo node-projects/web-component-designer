@@ -148,11 +148,11 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   while (actualElement != ancestor) {
     actualElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>actualElement)).transform);
     if (actualElement == element) {
-        originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
+      originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
     } else if (actualElement.parentElement != ancestor || !excludeAncestor) {
       originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
-    } 
-    
+    }
+
     actualElement = actualElement.parentElement;
   }
 
@@ -236,5 +236,22 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
 }
 
 export function extractTranslationFromDOMMatrix(matrix: DOMMatrix): DOMPoint {
-  return new DOMPoint(matrix.m41, matrix.m42, 0 , 0);
+  return new DOMPoint(matrix.m41, matrix.m42, 0, 0);
+}
+
+export function normalizeToAbsolutePosition(element: HTMLElement, normalizeProperty: "left" | "top") {
+  switch (normalizeProperty) {
+    case "left":
+      let left = getComputedStyle(element).left;
+      (<HTMLElement>element).style.removeProperty('right');
+      (<HTMLElement>element).style.left = left;
+      return left;
+    case "top":
+      let top = getComputedStyle(element).top;
+      (<HTMLElement>element).style.removeProperty('bottom');
+      (<HTMLElement>element).style.top = top;
+      return top;
+  }
+  return null;
+
 }

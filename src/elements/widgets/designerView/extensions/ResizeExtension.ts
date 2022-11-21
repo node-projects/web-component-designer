@@ -1,7 +1,7 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from "../../../../interfaces/ISize";
-import { convertCoordinates, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../helper/TransformHelper.js";
+import { convertCoordinates, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
@@ -325,6 +325,9 @@ export class ResizeExtension extends AbstractExtension {
         let cg = this.extendedItem.openGroup("Resize Elements");
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
+
+        this.extendedItem.setStyle('left', normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'left'));
+        this.extendedItem.setStyle('top', normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'top'));
 
         let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
         (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
