@@ -17,5 +17,6 @@ export class RotateExtensionProvider implements IDesignerExtensionProvider {
 
   readonly style = css`
     .svg-primary-rotate { stroke: #3899ec; fill: #3899ec; pointer-events: all }
+    .svg-rotate-text { text-anchor: middle; alignment-baseline: central; }
   `;   
 }

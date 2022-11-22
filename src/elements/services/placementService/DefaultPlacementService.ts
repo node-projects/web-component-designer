@@ -3,7 +3,7 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransformationBetweenElementAndAllAncestors, getTranslationMatrix3d, matrixArrayToCssMatrix } from '../../helper/TransformHelper.js';
+import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransformationBetweenElementAndAllAncestors } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';

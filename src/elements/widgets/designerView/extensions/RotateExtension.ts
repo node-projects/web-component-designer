@@ -1,6 +1,6 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
-import { cssMatrixToMatrixArray, extractRotationAngleFromDOMMatrix, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
+import { cssMatrixToMatrixArray, extractRotationAngleFromDOMMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
@@ -12,6 +12,8 @@ export class RotateExtension extends AbstractExtension {
   private _rotateIcon: any;
   private _initialElementAngle: number;
   private _initialOverlayAngle: number;
+  private _textAngle: [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement];
+  private _actualRotationAngle: number;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -23,10 +25,14 @@ export class RotateExtension extends AbstractExtension {
 
   override refresh() {
     const rect = this.extendedItem.element.getBoundingClientRect();
+    this._actualRotationAngle = getRotationAngleFromMatrix(null, new DOMMatrix((<HTMLElement>this.extendedItem.element).style.transform));
     this._rotateIcon = this._drawRotateOverlay(rect, this._rotateIcon);
   }
 
   _drawRotateOverlay(itemRect: DOMRect, oldRotateIcon: any) {
+    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 10, this.designerCanvas.helperElement, this.designerCanvas);
+    let rotateIconPosition: DOMPoint = transformedCornerPoints[0];
+
     if (!oldRotateIcon) {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
       const line = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -47,12 +53,12 @@ export class RotateExtension extends AbstractExtension {
       g.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeRotate(event));
     
       g.setAttribute('class', 'svg-primary-rotate');
-      g.setAttribute('transform', 'translate(' + ((itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor - 13) + ',' + ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 8.5) + ')');
+      g.setAttribute('transform', 'translate(' + rotateIconPosition.x + ',' + rotateIconPosition.y + ')');
       this.overlayLayerView.addOverlay(g);
       this.overlays.push(g);
       return g;
     } else {
-      oldRotateIcon.setAttribute('transform', 'translate(' + ((itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor - 13) + ',' + ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 8.5) + ')');
+      oldRotateIcon.setAttribute('transform', 'translate(' + rotateIconPosition.x + ',' + rotateIconPosition.y + ')');
       return oldRotateIcon;
     }
   }
@@ -73,7 +79,7 @@ export class RotateExtension extends AbstractExtension {
         this._initialPoint = currentPoint;
         this._initialElementAngle = getRotationAngleFromMatrix(cssMatrixToMatrixArray(getComputedStyle(this.extendedItem.element).transform),null);
         this._initialOverlayAngle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);
-        (<Element>event.target).setPointerCapture(event.pointerId);
+        (<Element>event.target).setPointerCapture(event.pointerId);    
         break;
       case EventNames.PointerMove:
         if (this._initialPoint) {
@@ -89,6 +95,12 @@ export class RotateExtension extends AbstractExtension {
           angle *= -1;
           const rotationMatrix3d = getRotationMatrix3d('z', angle);
           rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), rotationMatrix3d);
+
+          let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 30, this.designerCanvas.helperElement, this.designerCanvas);
+          let angleTextPosition: DOMPoint = transformedCornerPoints[0];
+          this._textAngle = this._drawTextWithBackground(this._actualRotationAngle + '°', angleTextPosition.x, angleTextPosition.y, 'white', 'svg-rotate-text', this._textAngle);
+          this._textAngle[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
+          this._textAngle[3].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px'; 
         }
         this.extensionManager.refreshExtensions(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
         break;
@@ -100,6 +112,12 @@ export class RotateExtension extends AbstractExtension {
         this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
 
         cg.commit();
+
+        this._textAngle.forEach(x => {
+          this.designerCanvas.overlayLayer.removeOverlay(x);
+        })
+        this._textAngle = null;
+        
         this._initialPoint = null;
         break;
     }
