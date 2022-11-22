@@ -11,15 +11,15 @@ export class DomConverter {
       value = value.toString();
     if (value) {
       if (useSingleQuotes)
-        return value.replaceAll('\'', '&#39;').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-      return value.replaceAll('"', '&quot;').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        return value.replaceAll('&', '&amp;').replaceAll('\'', '&#39;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+      return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
     }
     return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
   }
 
   public static normalizeContentValue(value: string) {
     if (value)
-      return value.replaceAll('<', '&lt;').replaceAll(' ', '&nbsp;').replaceAll('&', '&amp;');  // !caution! -> this is not normal space, it's nbsp
+      return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll(' ', '&nbsp;');  // !caution! -> this is not normal space, it's nbsp
     return value;
   }
 
