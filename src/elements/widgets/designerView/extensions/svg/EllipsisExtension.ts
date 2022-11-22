@@ -115,7 +115,7 @@ export class EllipsisExtension extends AbstractExtension {
                 this._originalPoint = null;
                 this.extendedItem.setAttribute("rx", this._newRx.toString());
                 this.extendedItem.setAttribute("ry", this._newRy.toString());
-                if(getComputedStyle(this._ellipseElement.parentElement).position == "absolute"){
+                if (getComputedStyle(this._ellipseElement.parentElement).position == "absolute") {
                     let group = this.extendedItem.openGroup('rearrangeSvg');
                     let newEllipseCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._ellipseElement);
                     let newEllipseCoordinatesCloud = this._getPointsFromEllipse(newEllipseCoordinates);
@@ -163,24 +163,24 @@ export class EllipsisExtension extends AbstractExtension {
         return Coords;
     }
 
-    _getMinMaxValues(coords){
-        let extrema = {xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0};
+    _getMinMaxValues(coords) {
+        let extrema = { xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0 };
         for (let i = 0; i < coords.length - 2; i++) {
-            if(coords[i] < coords[i+1] && i <= 3){
+            if (coords[i] < coords[i + 1] && i <= 3) {
                 extrema.xMin = coords[i];
-            }else if(coords[i] < coords[i+1]&& i > 3 && i <= 7){
+            } else if (coords[i] < coords[i + 1] && i > 3 && i <= 7) {
                 extrema.yMin = coords[i];
             }
-            if(coords[i] > coords[i+1]&& i <= 3){
+            if (coords[i] > coords[i + 1] && i <= 3) {
                 extrema.xMax = coords[i];
-            }else if(coords[i] > coords[i+1] && i > 3 && i <= 8){
+            } else if (coords[i] > coords[i + 1] && i > 3 && i <= 7) {
                 extrema.yMax = coords[i];
             }
         }
         return extrema;
     }
 
-    _rearrangeSvgParent(newEllipseExtrema){
+    _rearrangeSvgParent(newEllipseExtrema) {
         let parentLeft = newEllipseExtrema.xMin - this._offsetSvg;
         let parentTop = newEllipseExtrema.yMin - this._offsetSvg;
         let widthEllipseElement = newEllipseExtrema.xMax - newEllipseExtrema.xMin + (2 * this._offsetSvg);
@@ -191,7 +191,7 @@ export class EllipsisExtension extends AbstractExtension {
         this.extendedItem.parent.setStyle("width", widthEllipseElement.toString() + "px");
     }
 
-    _rearrangePointsFromElement(oldParentCoords: IRect){
+    _rearrangePointsFromElement(oldParentCoords: IRect) {
         let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._ellipseElement.parentElement);
         let diffX = oldParentCoords.x - newParentCoords.x;
         let diffY = oldParentCoords.y - newParentCoords.y;

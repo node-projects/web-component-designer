@@ -177,8 +177,8 @@ export class PathExtension extends AbstractExtension {
         this._circlePos = null;
         this._lastPos = null;
         this.extendedItem.setAttribute('d', createPathD(this._pathdata));
-        
-        if(getComputedStyle(this._pathElement.parentElement).position == "absolute"){
+
+        if (getComputedStyle(this._pathElement.parentElement).position == "absolute") {
           let group = this.extendedItem.openGroup('rearrangeSvg');
           let dataPath = this._pathdata;
           this._rearrangeSvgElement();
@@ -318,10 +318,10 @@ export class PathExtension extends AbstractExtension {
     return false;
   }
 
-  _rearrangeSvgElement(){
+  _rearrangeSvgElement() {
     let newElementCoords = (<SVGGeometryElement>this.extendedItem.element).getBoundingClientRect();
     let parentLeft = (newElementCoords.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor - this._offsetSvg;
-    let parentTop = (newElementCoords.y -this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - this._offsetSvg;
+    let parentTop = (newElementCoords.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - this._offsetSvg;
     let heightSvgElement = newElementCoords.height + (2 * this._offsetSvg);
     let widthSvgElement = newElementCoords.width + (2 * this._offsetSvg);
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("left", parentLeft.toString() + "px");
@@ -330,11 +330,11 @@ export class PathExtension extends AbstractExtension {
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("width", widthSvgElement.toString() + "px");
   }
 
-  _rearrangePointsFromElement(oldParentCoords: IRect, pathData: PathData[]){
+  _rearrangePointsFromElement(oldParentCoords: IRect, pathData: PathData[]) {
     let newParentCoords = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
     let diffX = oldParentCoords.x - newParentCoords.x;
     let diffY = oldParentCoords.y - newParentCoords.y;
-    for (let i = 0; i < pathData.length; i++){
+    for (let i = 0; i < pathData.length; i++) {
       pathData[i].values[0] = pathData[i].values[0] + diffX;
       pathData[i].values[1] = pathData[i].values[1] + diffY;
     }

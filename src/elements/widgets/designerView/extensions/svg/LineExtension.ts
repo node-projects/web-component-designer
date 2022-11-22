@@ -92,7 +92,7 @@ export class LineExtension extends AbstractExtension {
                 this.extendedItem.setAttribute('x' + index, this._newLinePoint.x.toString());
                 this.extendedItem.setAttribute('y' + index, this._newLinePoint.y.toString());
 
-                if(getComputedStyle(this._lineElement.parentElement).position == "absolute"){
+                if (getComputedStyle(this._lineElement.parentElement).position == "absolute") {
                     let group = this.extendedItem.openGroup('rearrangeSvg');
                     let newLineCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._lineElement);
                     let newLineCoordinatesCloud = this._getPointsFromRect(newLineCoordinates);
@@ -124,24 +124,24 @@ export class LineExtension extends AbstractExtension {
         return Coords;
     }
 
-    _getMinMaxValues(coords){
-        let extrema = {xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0};
+    _getMinMaxValues(coords) {
+        let extrema = { xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0 };
         for (let i = 0; i < coords.length - 2; i++) {
-            if(coords[i] < coords[i+1] && i <= 1){
+            if (coords[i] < coords[i + 1] && i <= 1) {
                 extrema.xMin = coords[i];
-            }else if(coords[i] < coords[i+1]&& i > 1 && i <= 3){
+            } else if (coords[i] < coords[i + 1] && i > 1 && i <= 3) {
                 extrema.yMin = coords[i];
             }
-            if(coords[i] > coords[i+1]&& i <= 1){
+            if (coords[i] > coords[i + 1] && i <= 1) {
                 extrema.xMax = coords[i];
-            }else if(coords[i] > coords[i+1] && i > 1 && i <= 3){
+            } else if (coords[i] > coords[i + 1] && i > 1 && i <= 3) {
                 extrema.yMax = coords[i];
             }
         }
         return extrema;
     }
 
-    _rearrangeSvgParent(newLineExtrema){
+    _rearrangeSvgParent(newLineExtrema) {
         let parentLeft = newLineExtrema.xMin - this._offsetSvg;
         let parentTop = newLineExtrema.yMin - this._offsetSvg;
         let widthLineElement = newLineExtrema.xMax - newLineExtrema.xMin + (2 * this._offsetSvg);
@@ -152,7 +152,7 @@ export class LineExtension extends AbstractExtension {
         this.extendedItem.parent.setStyle("width", widthLineElement.toString() + "px");
     }
 
-    _rearrangePointsFromElement(oldParentCoords: IRect){
+    _rearrangePointsFromElement(oldParentCoords: IRect) {
         let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._lineElement.parentElement);
         let diffX = oldParentCoords.x - newParentCoords.x;
         let diffY = oldParentCoords.y - newParentCoords.y;
@@ -161,7 +161,7 @@ export class LineExtension extends AbstractExtension {
         this.extendedItem.setAttribute('x2', (this._lineElement.x2.baseVal.value + diffX).toString());
         this.extendedItem.setAttribute('y2', (this._lineElement.y2.baseVal.value + diffY).toString());
     }
-    
+
     override refresh() {
         this._removeAllOverlays();
         this.extend();

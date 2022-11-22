@@ -137,7 +137,7 @@ export class RectExtension extends AbstractExtension {
                 this.extendedItem.setAttribute("width", this._rect.w.toString());
                 this.extendedItem.setAttribute("height", this._rect.h.toString());
 
-                if(getComputedStyle(this._rectElement.parentElement).position == "absolute"){
+                if (getComputedStyle(this._rectElement.parentElement).position == "absolute") {
                     let group = this.extendedItem.openGroup('rearrangeSvg');
                     let newRectCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._rectElement);
                     let newRectCoordinatesCloud = this._getPointsFromRect(newRectCoordinates);
@@ -201,24 +201,24 @@ export class RectExtension extends AbstractExtension {
         return Coords;
     }
 
-    _getMinMaxValues(coords){
-        let extrema = {xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0};
+    _getMinMaxValues(coords) {
+        let extrema = { xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0 };
         for (let i = 0; i < coords.length - 2; i++) {
-            if(coords[i] < coords[i+1] && i <= 3){
+            if (coords[i] < coords[i + 1] && i <= 3) {
                 extrema.xMin = coords[i];
-            }else if(coords[i] < coords[i+1]&& i > 3 && i <= 7){
+            } else if (coords[i] < coords[i + 1] && i > 3 && i <= 7) {
                 extrema.yMin = coords[i];
             }
-            if(coords[i] > coords[i+1]&& i <= 3){
+            if (coords[i] > coords[i + 1] && i <= 3) {
                 extrema.xMax = coords[i];
-            }else if(coords[i] > coords[i+1] && i > 3 && i <= 8){
+            } else if (coords[i] > coords[i + 1] && i > 3 && i <= 8) {
                 extrema.yMax = coords[i];
             }
         }
         return extrema;
     }
 
-    _rearrangeSvgParent(newRectExtrema){
+    _rearrangeSvgParent(newRectExtrema) {
         let parentLeft = newRectExtrema.xMin - this._offsetSvg;
         let parentTop = newRectExtrema.yMin - this._offsetSvg;
         let widthRectElement = newRectExtrema.xMax - newRectExtrema.xMin + (2 * this._offsetSvg);
@@ -229,7 +229,7 @@ export class RectExtension extends AbstractExtension {
         this.extendedItem.parent.setStyle("width", widthRectElement.toString() + "px");
     }
 
-    _rearrangePointsFromElement(oldParentCoords: IRect){
+    _rearrangePointsFromElement(oldParentCoords: IRect) {
         let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._rectElement.parentElement);
         let diffX = oldParentCoords.x - newParentCoords.x;
         let diffY = oldParentCoords.y - newParentCoords.y;
