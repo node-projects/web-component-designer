@@ -18,7 +18,7 @@ export class DragDropService implements IDragDropService {
         const img = document.createElement('img');
         img.src = <string>reader.result;
         const di = DesignItem.createDesignItemFromInstance(img, designerView.serviceContainer, designerView.instanceServiceContainer);
-        let grp = di.openGroup("Insert");
+        let grp = di.openGroup("Insert of &lt;img&gt;");
         di.setStyle('position', 'absolute')
         const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
         di.setStyle('top', event.offsetY + targetRect.top - designerView.containerBoundingRect.y + 'px')

@@ -10,4 +10,6 @@ export interface IUndoService extends IService {
   clear();
   undo();
   redo();
+  getUndoEntries(): Generator<string, void, unknown>
+  getRedoEntries(): Generator<string, void, unknown>
 }

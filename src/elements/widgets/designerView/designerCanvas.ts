@@ -580,13 +580,22 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _onDragEnter(event: DragEvent) {
     this._fillCalculationrects();
     event.preventDefault();
+
     const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
     if (hasTransferDataBindingObject) {
       const ddService = this.serviceContainer.bindableObjectDragDropService;
       if (ddService) {
-        const effect = ddService.dragEnter(this, event);
-        event.dataTransfer.dropEffect = effect;
+        const el = this.getElementAtPoint({ x: event.x, y: event.y });
+        if (this._lastDdElement != el) {
+          ddService.dragLeave(this, event, this._lastDdElement);
+          ddService.dragEnter(this, event, el);
+          this._lastDdElement = el;
+        }
+      } else {
+        this._lastDdElement = null;
       }
+    } else {
+      this._lastDdElement = null;
     }
   }
 
@@ -594,14 +603,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._fillCalculationrects();
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
-    const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
-    if (hasTransferDataBindingObject) {
-      const ddService = this.serviceContainer.bindableObjectDragDropService;
-      if (ddService) {
-        const effect = ddService.dragLeave(this, event);
-        event.dataTransfer.dropEffect = effect;
-      }
-    }
 
     if (this._dragOverExtensionItem) {
       this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
@@ -609,6 +610,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
+  private _lastDdElement = null;
   private _onDragOver(event: DragEvent) {
     event.preventDefault();
     /*if (this.alignOnSnap) {
@@ -634,7 +636,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       if (hasTransferDataBindingObject) {
         const ddService = this.serviceContainer.bindableObjectDragDropService;
         if (ddService) {
-          const effect = ddService.dragOver(this, event);
+          const el = this.getElementAtPoint({ x: event.x, y: event.y });
+          if (this._lastDdElement != el) {
+            ddService.dragLeave(this, event, this._lastDdElement);
+            ddService.dragEnter(this, event, el);
+            this._lastDdElement = el;
+          }
+          const effect = ddService.dragOver(this, event, el);
           event.dataTransfer.dropEffect = effect;
         }
       } else {
@@ -680,6 +688,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private async _onDrop(event: DragEvent) {
+    this._lastDdElement = null;
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
 
@@ -697,7 +706,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const bo = JSON.parse(transferDataBindingObject);
         const ddService = this.serviceContainer.bindableObjectDragDropService;
         if (ddService) {
-          const effect = ddService.drop(this, event, bo);
+          const el = this.getElementAtPoint({ x: event.x, y: event.y });
+          const effect = ddService.drop(this, event, bo, el);
           event.dataTransfer.dropEffect = effect;
         }
       }
@@ -720,7 +730,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
         const elementDefinition = <IElementDefinition>JSON.parse(transferData);
         const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
-        const grp = di.openGroup("Insert");
+        const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
         di.setStyle('position', 'absolute');
         di.setStyle('left', (position.x - pos.x) + 'px');
         di.setStyle('top', (position.y - pos.y) + 'px');

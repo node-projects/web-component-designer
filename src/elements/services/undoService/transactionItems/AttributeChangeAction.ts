@@ -5,7 +5,7 @@ import { IBinding } from '../../../item/IBinding.js';
 export class AttributeChangeAction implements ITransactionItem {
 
   constructor(designItem: IDesignItem, name: string, newValue: string | IBinding | null, oldValue: string | IBinding | null) {
-    this.title = "Change Attribute";
+    this.title = "Change Attribute " + name + " of &lt;" + designItem.name + "&gt;";
 
     this.designItem = designItem;
     this.name = name;
