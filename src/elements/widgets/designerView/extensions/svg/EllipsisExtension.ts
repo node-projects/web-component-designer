@@ -4,6 +4,7 @@ import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { AbstractExtension } from "../AbstractExtension";
 import { IExtensionManager } from "../IExtensionManger";
+import { IRect } from "../../../../../interfaces/IRect";
 
 
 export class EllipsisExtension extends AbstractExtension {
@@ -23,6 +24,8 @@ export class EllipsisExtension extends AbstractExtension {
     private _circle2: SVGCircleElement;
     private _circle3: SVGCircleElement;
     private _circle4: SVGCircleElement;
+    private _parentCoordinates: IRect;
+    private _offsetSvg = 10.0;
     constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
         super(extensionManager, designerView, extendedItem);
     }
@@ -54,6 +57,7 @@ export class EllipsisExtension extends AbstractExtension {
                 this._startPos = cursorPos;
                 this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
                 this._originalPoint = { x: this._rx, y: this._ry }
+                this._parentCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._ellipseElement.parentElement);
                 break;
 
             case EventNames.PointerMove:
@@ -99,6 +103,7 @@ export class EllipsisExtension extends AbstractExtension {
                     this._redrawPathCircle(this._cx, this._cy + this._newRy, this._circle3);
                     this._redrawPathCircle(this._cx - this._newRx, this._cy, this._circle4);
 
+
                 }
                 break;
 
@@ -110,6 +115,15 @@ export class EllipsisExtension extends AbstractExtension {
                 this._originalPoint = null;
                 this.extendedItem.setAttribute("rx", this._newRx.toString());
                 this.extendedItem.setAttribute("ry", this._newRy.toString());
+                if (getComputedStyle(this._ellipseElement.parentElement).position == "absolute") {
+                    let group = this.extendedItem.openGroup('rearrangeSvg');
+                    let newEllipseCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._ellipseElement);
+                    let newEllipseCoordinatesCloud = this._getPointsFromEllipse(newEllipseCoordinates);
+                    let newEllipseExtrema = this._getMinMaxValues(newEllipseCoordinatesCloud);
+                    this._rearrangeSvgParent(newEllipseExtrema);
+                    this._rearrangePointsFromElement(this._parentCoordinates);
+                    group.commit();
+                }
                 break;
         }
     }
@@ -132,6 +146,57 @@ export class EllipsisExtension extends AbstractExtension {
         circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
         return circle;
 
+    }
+
+    _getPointsFromEllipse(elementCoords: IRect) {
+        let Coords: number[] = [];
+        Coords.push(elementCoords.x);
+        Coords.push(elementCoords.x + elementCoords.width);
+        Coords.push(elementCoords.x);
+        Coords.push(elementCoords.x + elementCoords.width);
+        Coords.push(elementCoords.y);
+        Coords.push(elementCoords.y);
+        Coords.push(elementCoords.y + elementCoords.height);
+        Coords.push(elementCoords.y + elementCoords.height);
+        Coords.push(elementCoords.height);
+        Coords.push(elementCoords.width);
+        return Coords;
+    }
+
+    _getMinMaxValues(coords) {
+        let extrema = { xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0 };
+        for (let i = 0; i < coords.length - 2; i++) {
+            if (coords[i] < coords[i + 1] && i <= 3) {
+                extrema.xMin = coords[i];
+            } else if (coords[i] < coords[i + 1] && i > 3 && i <= 7) {
+                extrema.yMin = coords[i];
+            }
+            if (coords[i] > coords[i + 1] && i <= 3) {
+                extrema.xMax = coords[i];
+            } else if (coords[i] > coords[i + 1] && i > 3 && i <= 7) {
+                extrema.yMax = coords[i];
+            }
+        }
+        return extrema;
+    }
+
+    _rearrangeSvgParent(newEllipseExtrema) {
+        let parentLeft = newEllipseExtrema.xMin - this._offsetSvg;
+        let parentTop = newEllipseExtrema.yMin - this._offsetSvg;
+        let widthEllipseElement = newEllipseExtrema.xMax - newEllipseExtrema.xMin + (2 * this._offsetSvg);
+        let heightEllipseElement = newEllipseExtrema.yMax - newEllipseExtrema.yMin + (2 * this._offsetSvg);
+        this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
+        this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
+        this.extendedItem.parent.setStyle("height", heightEllipseElement.toString() + "px");
+        this.extendedItem.parent.setStyle("width", widthEllipseElement.toString() + "px");
+    }
+
+    _rearrangePointsFromElement(oldParentCoords: IRect) {
+        let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._ellipseElement.parentElement);
+        let diffX = oldParentCoords.x - newParentCoords.x;
+        let diffY = oldParentCoords.y - newParentCoords.y;
+        this.extendedItem.setAttribute('cx', (this._ellipseElement.cx.baseVal.value + diffX).toString());
+        this.extendedItem.setAttribute('cy', (this._ellipseElement.cy.baseVal.value + diffY).toString());
     }
 
 
