@@ -8,6 +8,7 @@ import { InstanceServiceContainer } from '../../services/InstanceServiceContaine
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
 import { switchContainer } from '../../helper/SwitchContainerHelper';
+import { DomConverter } from '../designerView/DomConverter';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
@@ -218,7 +219,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             }
           }
         }
-        return false;
+        const disableExpand = (<MouseEvent>  event.originalEvent).ctrlKey || (<MouseEvent>  event.originalEvent).shiftKey;
+        return !disableExpand;
       },
 
       createNode: (event, data) => {
@@ -377,7 +379,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     }
 
     const newNode = currentNode.addChildren({
-      title: item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + item.content,
+      title: item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
       folder: item.children.length > 0 ? true : false,
       //@ts-ignore
       ref: item

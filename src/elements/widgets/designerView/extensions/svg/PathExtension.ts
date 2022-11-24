@@ -8,7 +8,6 @@ import { EventNames } from "../../../../../enums/EventNames";
 import { createPathD, PathData, PathDataL } from "../../../../helper/PathDataPolyfill";
 import { IContextMenuItem } from "../../../../..";
 import { ContextMenu } from "../../../../helper/contextMenu/ContextMenu";
-import { data } from "jquery";
 import { IRect } from "../../../../../interfaces/IRect";
 
 
