@@ -1,7 +1,6 @@
 import { EventNames } from "../../../../../enums/EventNames";
 import { IPoint } from "../../../../../interfaces/IPoint";
 import { IRect } from "../../../../../interfaces/IRect";
-import { DesignItem } from "../../../../item/DesignItem";
 import { IDesignItem } from "../../../../item/IDesignItem";
 import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { AbstractExtension } from "../AbstractExtension";
