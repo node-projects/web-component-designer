@@ -219,7 +219,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             }
           }
         }
-        return false;
+        const disableExpand = (<MouseEvent>  event.originalEvent).ctrlKey || (<MouseEvent>  event.originalEvent).shiftKey;
+        return !disableExpand;
       },
 
       createNode: (event, data) => {
