@@ -72,12 +72,14 @@ export class GridExtension extends AbstractExtension {
         break;
       case EventNames.PointerMove:
         if(this._initialPoint) {
+          var elementStyle = (<HTMLElement>this.extendedItem.element).style;
+          this.extendedItem.element.getBoundingClientRect
           switch(circle.style.cursor){
             case "ew-resize":
-              (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, event.clientX - this._initialPoint.x, gapColumn);
+              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, event.clientX - this._initialPoint.x, gapColumn, elementStyle.width, null);
               break;
             case "ns-resize":
-              (<HTMLElement>this.extendedItem.element).style.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, event.clientY - this._initialPoint.y, gapRow);
+              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, event.clientY - this._initialPoint.y, gapRow, null, elementStyle.height);
               break;
           }
           this.refresh();
@@ -127,38 +129,12 @@ export class GridExtension extends AbstractExtension {
     return {x: retX, y: retY};
   }
 
-  _calculateNewSize(initialSizes, diff, gapIndex){
+  _calculateNewSize(initialSizes, diff, gapIndex, itemWidth?, itemHeight?){
     var retVal = "";
     for(var i = 0; i < initialSizes.length; i++) {
       if(i + 1 == gapIndex || i == gapIndex) {
-        if(initialSizes[i].startsWith("calc(") && initialSizes[i].endsWith(")")) {
-          var calcString = initialSizes[i].substring(5, initialSizes[i].length - 1);
-          var calcStringPart = calcString.includes(" + ") ? calcString.split(" + ") : calcString.includes(" - ") ? calcString.split(" - ") : null;
-          if(calcStringPart && calcStringPart[0].endsWith("%") && calcStringPart[1].endsWith("px")){
-            var oldPx = parseInt(calcStringPart[1].substring(0, calcStringPart[1].length - 2))
-            var newPx;
-            var tmpOperator;
-            if(i + 1 == gapIndex){
-              newPx = calcString.includes(" - ") ? (oldPx * -1) + diff : oldPx + diff;
-            }
-            else if (i == gapIndex){
-              newPx = calcString.includes(" - ") ? (oldPx * -1) - diff : oldPx - diff;
-            }
-            if(newPx < 0) {
-              tmpOperator = " - "
-              newPx *= -1;
-            }
-            else {
-              tmpOperator = " + ";
-            }
-            retVal += "calc(" + calcStringPart[0] + tmpOperator + newPx + "px)"
-          } 
-          else {
-            console.error("calcString is invald! " + calcString);
-          }
-        }
         if(initialSizes[i].endsWith("px")){
-          var oldPx = parseInt(initialSizes[i].slice(0, initialSizes[i].length - 2));
+          var oldPx = parseFloat(initialSizes[i].slice(0, initialSizes[i].length - 2));
           var newPx;
           if(i + 1 == gapIndex) {
             newPx = oldPx + diff;
@@ -169,18 +145,25 @@ export class GridExtension extends AbstractExtension {
           retVal += newPx + "px";
         }
         else if(initialSizes[i].endsWith("%")) {
-          retVal += "calc(" + initialSizes[i];
+          var percentDiff;
+          var width;
+          var height;
+
+          if(itemWidth && itemWidth.endsWith("px")){
+            width = parseFloat(itemWidth.substring(0, itemWidth.length - 2));
+            percentDiff = (1 - ((width - diff) / width)) * 100;
+          }
+          if(itemHeight && itemHeight.endsWith("px")){
+            height = parseFloat(itemHeight.substring(0, itemHeight.length - 2));
+            percentDiff = (1 - ((height - diff) / height)) * 100;
+          }
           if(i + 1 == gapIndex)
-            if(diff > 0)
-              retVal += " + " + diff;
-            else 
-              retVal += " - " + (diff * -1);
+            retVal += parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) + percentDiff;
+
           else if(i == gapIndex)
-            if(diff > 0)
-              retVal += " - " + diff;
-            else 
-              retVal += " + " + (diff * -1);
-          retVal += "px)";
+            retVal += parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) - percentDiff;
+
+          retVal += "%";
         }
       } else {
         retVal += initialSizes[i];
