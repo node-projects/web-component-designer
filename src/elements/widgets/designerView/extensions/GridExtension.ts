@@ -76,10 +76,10 @@ export class GridExtension extends AbstractExtension {
           this.extendedItem.element.getBoundingClientRect
           switch(circle.style.cursor){
             case "ew-resize":
-              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, event.clientX - this._initialPoint.x, gapColumn, elementStyle.width, null);
+              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, elementStyle.gridTemplateColumns, event.clientX - this._initialPoint.x, gapColumn, elementStyle.width, null);
               break;
             case "ns-resize":
-              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, event.clientY - this._initialPoint.y, gapRow, null, elementStyle.height);
+              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, elementStyle.gridTemplateRows, event.clientY - this._initialPoint.y, gapRow, null, elementStyle.height);
               break;
           }
           this.refresh();
@@ -129,8 +129,9 @@ export class GridExtension extends AbstractExtension {
     return {x: retX, y: retY};
   }
 
-  _calculateNewSize(initialSizes, diff, gapIndex, itemWidth?, itemHeight?){
+  _calculateNewSize(initialSizes, prevSizes, diff, gapIndex, itemWidth?, itemHeight?){
     var retVal = "";
+    const minPixelSize = 10;
     for(var i = 0; i < initialSizes.length; i++) {
       if(i + 1 == gapIndex || i == gapIndex) {
         if(initialSizes[i].endsWith("px")){
@@ -138,38 +139,84 @@ export class GridExtension extends AbstractExtension {
           var newPx;
           if(i + 1 == gapIndex) {
             newPx = oldPx + diff;
+            if(newPx && newPx < minPixelSize){
+              retVal = ""
+              var newSizes = prevSizes.split(" ");
+              newSizes[i] = minPixelSize + "px";
+              newSizes[i + 1] = (parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 2)) + parseFloat(initialSizes[i+1].substring(0, initialSizes[i + 1].length - 2)) - minPixelSize) + "px";
+              newSizes.forEach(newSize => retVal += newSize + " ");
+              break;
+            }
           }
           else if (i == gapIndex) {
             newPx = oldPx - diff;
+            if(newPx && newPx < minPixelSize){
+              retVal = ""
+              var newSizes = prevSizes.split(" ");
+              newSizes[i] = minPixelSize + "px";
+              newSizes[i - 1] = (parseFloat(initialSizes[i - 1].substring(0, initialSizes[i - 1].length - 2)) + parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 2)) - minPixelSize) + "px";              
+              newSizes.forEach(newSize => retVal += newSize + " ");
+              break;
+            }
           }
           retVal += newPx + "px";
         }
         else if(initialSizes[i].endsWith("%")) {
+          var oldPercent = parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1));
+          var newPercent;
           var percentDiff;
           var width;
           var height;
+          var minPercentSize;
 
           if(itemWidth && itemWidth.endsWith("px")){
             width = parseFloat(itemWidth.substring(0, itemWidth.length - 2));
             percentDiff = (1 - ((width - diff) / width)) * 100;
+            minPercentSize = minPixelSize / width * 100;
           }
           if(itemHeight && itemHeight.endsWith("px")){
             height = parseFloat(itemHeight.substring(0, itemHeight.length - 2));
             percentDiff = (1 - ((height - diff) / height)) * 100;
+            minPercentSize = minPixelSize / height * 100;
           }
-          if(i + 1 == gapIndex)
-            retVal += parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) + percentDiff;
-
-          else if(i == gapIndex)
-            retVal += parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) - percentDiff;
-
-          retVal += "%";
+          if(i + 1 == gapIndex){
+            newPercent = oldPercent + percentDiff; 
+            if(newPercent < minPercentSize){
+              retVal = "";
+              var newSizes = prevSizes.split(" ");
+              newSizes[i] = minPercentSize + "%";
+              newSizes[i + 1] = (parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) + parseFloat(initialSizes[i+1].substring(0, initialSizes[i + 1].length - 1)) - minPercentSize) + "%";
+              newSizes.forEach(newSize => retVal += newSize + " ");
+              break;
+            }
+          }
+          else if(i == gapIndex){
+            newPercent = oldPercent - percentDiff;
+            console.log("newPercent:" + newPercent)
+            if(newPercent < minPercentSize){
+              retVal = "";
+              var newSizes = prevSizes.split(" ");
+              newSizes[i] = minPercentSize + "%";
+              newSizes[i - 1] = (parseFloat(initialSizes[i - 1].substring(0, initialSizes[i - 1].length - 1)) + parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) - minPercentSize) + "%";              
+              newSizes.forEach(newSize => retVal += newSize + " ");
+              break;
+            }
+          }
+          retVal += newPercent + "%";
+        }
+        else if(initialSizes[i].endsWith("fr")){
+          console.log("fr unit not implemented yet");
+        }
+        else {
+          console.error("Invalid Parameter!");
+          return "";
         }
       } else {
         retVal += initialSizes[i];
       }
       retVal += " ";
     }
+    console.log("retVal: " + retVal);
     return retVal;
   }
 }
