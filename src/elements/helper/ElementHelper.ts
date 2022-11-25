@@ -38,3 +38,14 @@ export function getActiveElement(): Element {
   }
   return activeElement;
 }
+
+export function getParentElementIncludingSlots(element: Element): Element {
+  if (element.assignedSlot)
+    return element.assignedSlot;
+  if (element.parentElement == null) {
+    if (element.parentNode instanceof ShadowRoot) {
+      return element.parentNode.host;
+    }
+  }
+  return element.parentElement;
+}

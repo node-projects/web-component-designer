@@ -1,4 +1,5 @@
 import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
+import { getParentElementIncludingSlots } from "./ElementHelper.js";
 
 let identityMatrix: number[] = [
   1, 0, 0, 0,
@@ -146,14 +147,15 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   let actualElementMatrix: DOMMatrix;
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
   while (actualElement != ancestor) {
+    const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
     actualElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>actualElement)).transform);
     if (actualElement == element) {
-      originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
-    } else if (actualElement.parentElement != ancestor || !excludeAncestor) {
-      originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(new DOMMatrix(getComputedStyle(actualElement.parentElement).transform));
+      originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(new DOMMatrix(getComputedStyle(newElement).transform));
+    } else if (newElement != ancestor || !excludeAncestor) {
+      originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(new DOMMatrix(getComputedStyle(newElement).transform));
     }
 
-    actualElement = actualElement.parentElement;
+    actualElement = newElement;
   }
 
   return originalElementAndAllParentsMultipliedMatrix;
