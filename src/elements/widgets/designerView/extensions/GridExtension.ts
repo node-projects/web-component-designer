@@ -192,7 +192,6 @@ export class GridExtension extends AbstractExtension {
           }
           else if(i == gapIndex){
             newPercent = oldPercent - percentDiff;
-            console.log("newPercent:" + newPercent)
             if(newPercent < minPercentSize){
               retVal = "";
               var newSizes = prevSizes.split(" ");
@@ -216,7 +215,6 @@ export class GridExtension extends AbstractExtension {
       }
       retVal += " ";
     }
-    console.log("retVal: " + retVal);
     return retVal;
   }
 }
