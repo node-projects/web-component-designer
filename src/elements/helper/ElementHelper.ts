@@ -49,3 +49,19 @@ export function getParentElementIncludingSlots(element: Element): Element {
   }
   return element.parentElement;
 }
+
+export function getElementsWindowOffset(element)
+{
+  var offsetLeft = 0;
+  var offsetTop  = 0;
+  
+  while (element)
+  {
+      offsetLeft += element.offsetLeft;
+      offsetTop  += element.offsetTop;
+  
+      element = element.offsetParent;
+  }
+  
+  return {offsetLeft: offsetLeft, offsetTop: offsetTop};
+}

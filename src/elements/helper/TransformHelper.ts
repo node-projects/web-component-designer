@@ -1,5 +1,5 @@
 import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
-import { getParentElementIncludingSlots } from "./ElementHelper.js";
+import { getElementsWindowOffset, getParentElementIncludingSlots } from "./ElementHelper.js";
 
 let identityMatrix: number[] = [
   1, 0, 0, 0,
@@ -98,47 +98,24 @@ export function addVectors(vectorA: [number, number], vectorB: [number, number])
   return [vectorA[0] + vectorB[0], vectorA[1] + vectorB[1]];
 }
 
-export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElement, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas): DOMPoint {
-  let originalElement = element;
-  let clone = <HTMLElement>element.cloneNode();
+export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElement, designerCanvas: IDesignerCanvas): DOMPoint {
+  const canvas = element.closest('#node-projects-designer-canvas-canvas');
+  let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(element, <HTMLElement>canvas, true)
 
-  const canvas = originalElement.closest('#node-projects-designer-canvas-canvas');
-  let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(originalElement, <HTMLElement>canvas, true)
-
-  clone.style.visibility = 'hidden';
-  clone.style.transform = '';
-  let appendedClone = helperElement.appendChild(clone);
-  clone = null;
-
-  const appendedCloneWithoutTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
-
-  const transformOriginAppendedCloneWithoutTransformRelatedToCanvas: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
-    {
-      x: appendedCloneWithoutTranformRect.x + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[0]),
-      y: appendedCloneWithoutTranformRect.y + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[1]),
-      z: 0,
-      w: 0
-    }
+  const top0: DOMPointReadOnly = new DOMPointReadOnly(
+    -parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]),
+    -parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1]),
+    0,
+    0
   )
 
-  appendedClone.style.transform = originalElementAndAllAncestorsMultipliedMatrix.toString();
-  const appendedCloneWithTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true); // appendedClone is not getting scaled. Because of that the scale factor must be ignored.
-  const originalElementRect = designerCanvas.getNormalizedElementCoordinates(originalElement, false); // The original element is scaled and must be set in relation to the non-scaled clone.
-  const appendedCloneToOriginalElementDeltaX = appendedCloneWithTranformRect.x - originalElementRect.x;
-  const appendedCloneToOriginalElementDeltaY = appendedCloneWithTranformRect.y - originalElementRect.y;
+  const top0Transformed = top0.matrixTransform(originalElementAndAllAncestorsMultipliedMatrix.inverse());
+  const p0Offsets = getElementsWindowOffset(element);
 
-  const originalElementTransformOriginRelatedToCanvas: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
-    {
-      x: transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneToOriginalElementDeltaX,
-      y: transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneToOriginalElementDeltaY,
-      z: 0,
-      w: 0
-    }
-  )
-
-  helperElement.removeChild(appendedClone)
-
-  return originalElementTransformOriginRelatedToCanvas;
+  const transformOriginAbsolutRelatedToWindow = new DOMPoint(p0Offsets.offsetLeft - top0Transformed.x, p0Offsets.offsetTop - top0Transformed.y);
+  const designerCanvasNormalizedTransformedOrigin = new DOMPoint(transformOriginAbsolutRelatedToWindow.x - designerCanvas.containerBoundingRect.x, transformOriginAbsolutRelatedToWindow.y - designerCanvas.containerBoundingRect.y);
+  
+  return designerCanvasNormalizedTransformedOrigin;
 
 }
 
@@ -162,64 +139,63 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
 }
 
 export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: number, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas): DOMPoint[] {
-  let originalElement = element;
-  let clone = <HTMLElement>originalElement.cloneNode();
-
   const topleft = 0;
   const topright = 1;
   const bottomleft = 2;
   const bottomright = 3;
 
-  clone.style.visibility = 'hidden';
-  clone.style.transform = '';
-  let appendedClone = helperElement.appendChild(clone); // this is a direct child of the designer canvas
-  clone = null;
-
-  const originalElementTransformOriginRelatedToCanvas: DOMPointReadOnly = getDesignerCanvasNormalizedTransformedOrigin(originalElement, helperElement, designerCanvas);
-
-  const appendedCloneWithoutTranformRect = designerCanvas.getNormalizedElementCoordinates(appendedClone, true);
-
-  const appendedCloneWithoutTranformCornerDOMPoints: DOMPoint[] = [];
-  appendedCloneWithoutTranformCornerDOMPoints[topleft] = DOMPoint.fromPoint(
+  const p0Offsets = getElementsWindowOffset(element);
+  const p0OffsetsRelatedToCanvas = DOMPoint.fromPoint(
     {
-      x: appendedCloneWithoutTranformRect.x - untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y - untransformedCornerPointsOffset
-    }
-  )
-  appendedCloneWithoutTranformCornerDOMPoints[topright] = DOMPoint.fromPoint(
-    {
-      x: appendedCloneWithoutTranformRect.x + appendedCloneWithoutTranformRect.width + untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y - untransformedCornerPointsOffset
-    }
-  )
-  appendedCloneWithoutTranformCornerDOMPoints[bottomleft] = DOMPoint.fromPoint(
-    {
-      x: appendedCloneWithoutTranformRect.x - untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y + appendedCloneWithoutTranformRect.height + untransformedCornerPointsOffset
-    }
-  )
-  appendedCloneWithoutTranformCornerDOMPoints[bottomright] = DOMPoint.fromPoint(
-    {
-      x: appendedCloneWithoutTranformRect.x + appendedCloneWithoutTranformRect.width + untransformedCornerPointsOffset,
-      y: appendedCloneWithoutTranformRect.y + appendedCloneWithoutTranformRect.height + untransformedCornerPointsOffset
-    }
+      x: p0Offsets.offsetLeft - designerCanvas.containerBoundingRect.left,
+      y: p0Offsets.offsetTop - designerCanvas.containerBoundingRect.y
+    }    
   )
 
-  const transformOriginAppendedCloneWithoutTransformRelatedToCanvas: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+  const width = parseInt(getComputedStyle(element).width.replace('px', ''));
+  const height = parseInt(getComputedStyle(element).height.replace('px', ''));
+
+  const elementWithoutTransformCornerDOMPoints: DOMPoint[] = [];
+  elementWithoutTransformCornerDOMPoints[topleft] = DOMPoint.fromPoint(
     {
-      x: appendedCloneWithoutTranformRect.x + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[0]),
-      y: appendedCloneWithoutTranformRect.y + parseInt(getComputedStyle(<HTMLElement>originalElement).transformOrigin.split(' ')[1]),
+      x: p0OffsetsRelatedToCanvas.x - untransformedCornerPointsOffset,
+      y: p0OffsetsRelatedToCanvas.y - untransformedCornerPointsOffset
+    }
+  )
+  elementWithoutTransformCornerDOMPoints[topright] = DOMPoint.fromPoint(
+    {
+      x: p0OffsetsRelatedToCanvas.x + width + untransformedCornerPointsOffset,
+      y: p0OffsetsRelatedToCanvas.y - untransformedCornerPointsOffset
+    }
+  )
+  elementWithoutTransformCornerDOMPoints[bottomleft] = DOMPoint.fromPoint(
+    {
+      x: p0OffsetsRelatedToCanvas.x - untransformedCornerPointsOffset,
+      y: p0OffsetsRelatedToCanvas.y + height + untransformedCornerPointsOffset
+    }
+  )
+  elementWithoutTransformCornerDOMPoints[bottomright] = DOMPoint.fromPoint(
+    {
+      x: p0OffsetsRelatedToCanvas.x + width + untransformedCornerPointsOffset,
+      y: p0OffsetsRelatedToCanvas.y + height + untransformedCornerPointsOffset
+    }
+  )
+
+  const transformOriginWithoutTransformRelatedToCanvas: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
+    {
+      x: p0OffsetsRelatedToCanvas.x + parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]),
+      y: p0OffsetsRelatedToCanvas.y + parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1]),
       z: 0,
       w: 0
     }
   )
 
-  let top0 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[topleft].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[topleft].y));
-  let top1 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[topright].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[topright].y));
-  let top2 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[bottomleft].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[bottomleft].y));
-  let top3 = new DOMPoint(-(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.x - appendedCloneWithoutTranformCornerDOMPoints[bottomright].x), -(transformOriginAppendedCloneWithoutTransformRelatedToCanvas.y - appendedCloneWithoutTranformCornerDOMPoints[bottomright].y));
+  let top0 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topleft].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topleft].y));
+  let top1 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topright].y));
+  let top2 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[bottomleft].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[bottomleft].y));
+  let top3 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[bottomright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[bottomright].y));
 
-  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(originalElement, <HTMLElement>designerCanvas.canvas, true)
+  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(element, <HTMLElement>designerCanvas.canvas, true)
 
   let top0Transformed = top0.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
   let top1Transformed = top1.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
@@ -227,10 +203,10 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top3Transformed = top3.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
 
   let transformedCornerPoints: DOMPoint[] = [];
-  transformedCornerPoints[0] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top0Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top0Transformed.y);
-  transformedCornerPoints[1] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top1Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top1Transformed.y);
-  transformedCornerPoints[2] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top2Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top2Transformed.y);
-  transformedCornerPoints[3] = new DOMPoint(originalElementTransformOriginRelatedToCanvas.x + top3Transformed.x, originalElementTransformOriginRelatedToCanvas.y + top3Transformed.y);
+  transformedCornerPoints[0] = new DOMPoint(transformOriginWithoutTransformRelatedToCanvas.x + top0Transformed.x, transformOriginWithoutTransformRelatedToCanvas.y + top0Transformed.y);
+  transformedCornerPoints[1] = new DOMPoint(transformOriginWithoutTransformRelatedToCanvas.x + top1Transformed.x, transformOriginWithoutTransformRelatedToCanvas.y + top1Transformed.y);
+  transformedCornerPoints[2] = new DOMPoint(transformOriginWithoutTransformRelatedToCanvas.x + top2Transformed.x, transformOriginWithoutTransformRelatedToCanvas.y + top2Transformed.y);
+  transformedCornerPoints[3] = new DOMPoint(transformOriginWithoutTransformRelatedToCanvas.x + top3Transformed.x, transformOriginWithoutTransformRelatedToCanvas.y + top3Transformed.y);
 
   helperElement.replaceChildren();
 
