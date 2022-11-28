@@ -29,7 +29,6 @@ export type { IBindableObjectDragDropService } from "./elements/services/bindabl
 
 export type { IBindingService } from "./elements/services/bindingsService/IBindingService.js";
 export * from "./elements/services/bindingsService/BaseCustomWebcomponentBindingsService.js";
-export * from "./elements/services/bindingsService/SpecialTagsBindingService.js";
 
 export * from "./elements/services/placementService/DefaultPlacementService.js";
 export * from "./elements/services/placementService/FlexBoxPlacementService.js";
