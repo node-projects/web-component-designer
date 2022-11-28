@@ -3,6 +3,7 @@ import { IBinding } from '../../item/IBinding';
 import { IBindingService } from "./IBindingService";
 import { BindingMode } from '../../item/BindingMode';
 import { BindingTarget } from "../../item/BindingTarget.js";
+import { PropertiesHelper } from "../propertiesService/services/PropertiesHelper";
 
 export class BaseCustomWebcomponentBindingsService implements IBindingService {
 
@@ -34,7 +35,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
           bnd.target = BindingTarget.event;
           bnd.expression = value.substring(2, value.length - 4);
         } else {
-          bnd.targetName = name;
+          bnd.targetName = PropertiesHelper.dashToCamelCase(name);
           bnd.target = BindingTarget.property;
           bnd.expression = value.substring(2, value.length - 4);
         }
