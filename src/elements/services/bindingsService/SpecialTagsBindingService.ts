@@ -6,6 +6,7 @@ import { BindingMode } from "../../item/BindingMode.js";
 
 
 /* Service wich read binings from special HTMl elements -> like tag-binding */
+//TODO: refactor so we could use it
 export class SpecialTagsBindingService implements IBindingService {
 
   public static type = 'visu-tagbinding-binding'
