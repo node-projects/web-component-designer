@@ -50,7 +50,7 @@ export function getParentElementIncludingSlots(element: Element): Element {
   return element.parentElement;
 }
 
-export function getElementsWindowOffset(element)
+export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element)
 {
   var offsetLeft = 0;
   var offsetTop  = 0;
