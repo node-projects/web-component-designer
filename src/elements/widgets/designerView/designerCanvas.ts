@@ -251,7 +251,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
                 t += ',';
               t += '#node-projects-designer-canvas-canvas ' + p;
             }
-            style += t + '{' + r.style.cssText + '}';
+            let cssText = r.style.cssText;
+            //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
+            if ((<any>r).styleMap && (<any>r).styleMap.get('grid-template') && (<any>r).styleMap.get('grid-template').toString().includes('repeat(')) {
+              let entr = (<any>r).styleMap.entries();
+              cssText = ''
+              for (let e of entr) {
+                cssText += e[0] + ':' + e[1].toString() + ';';
+              }
+            }
+            style += t + '{' + cssText + '}';
           }
         }
       }
