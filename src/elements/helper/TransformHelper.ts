@@ -157,7 +157,7 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   return byParentTransformedPointRelatedToCanvas;
 }
 
-export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: number, helperElement: HTMLDivElement, designerCanvas: IDesignerCanvas): DOMPoint[] {
+export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: number, designerCanvas: IDesignerCanvas): DOMPoint[] {
   const topleft = 0;
   const topright = 1;
   const bottomleft = 2;
@@ -228,8 +228,6 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y);
   transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y);
   transformedCornerPoints[3] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top3Transformed.x, designerCanvasNormalizedTransformOrigin.y + top3Transformed.y);
-
-  helperElement.replaceChildren();
 
   return transformedCornerPoints;
 }

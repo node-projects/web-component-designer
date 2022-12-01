@@ -30,7 +30,7 @@ export class RotateExtension extends AbstractExtension {
   }
 
   _drawRotateOverlay(itemRect: DOMRect, oldRotateIcon: any) {
-    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 10, this.designerCanvas.helperElement, this.designerCanvas);
+    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 10, this.designerCanvas);
     let rotateIconPosition: DOMPoint = transformedCornerPoints[0];
 
     if (!oldRotateIcon) {
@@ -96,7 +96,7 @@ export class RotateExtension extends AbstractExtension {
           const rotationMatrix3d = getRotationMatrix3d('z', angle);
           rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), rotationMatrix3d);
 
-          let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 30, this.designerCanvas.helperElement, this.designerCanvas);
+          let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 30, this.designerCanvas);
           let angleTextPosition: DOMPoint = transformedCornerPoints[0];
           this._textAngle = this._drawTextWithBackground(this._actualRotationAngle + '°', angleTextPosition.x, angleTextPosition.y, 'white', 'svg-rotate-text', this._textAngle);
           this._textAngle[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
