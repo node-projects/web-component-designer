@@ -98,27 +98,6 @@ export function addVectors(vectorA: [number, number], vectorB: [number, number])
   return [vectorA[0] + vectorB[0], vectorA[1] + vectorB[1]];
 }
 
-// export function getDesignerCanvasNormalizedTransformedOrigin(element: HTMLElement, designerCanvas: IDesignerCanvas): DOMPoint {
-//   const canvas = element.closest('#node-projects-designer-canvas-canvas');
-//   let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(element, <HTMLElement>canvas, true)
-
-//   const top0: DOMPointReadOnly = new DOMPointReadOnly(
-//     -parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]),
-//     -parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1]),
-//     0,
-//     0
-//   )
-
-//   const top0Transformed = top0.matrixTransform(originalElementAndAllAncestorsMultipliedMatrix.inverse());
-//   const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element);
-
-//   const transformOriginAbsolutRelatedToWindow = new DOMPoint(p0Offsets.offsetLeft - top0Transformed.x, p0Offsets.offsetTop - top0Transformed.y);
-//   const designerCanvasNormalizedTransformedOrigin = new DOMPoint(transformOriginAbsolutRelatedToWindow.x - designerCanvas.containerBoundingRect.x, transformOriginAbsolutRelatedToWindow.y - designerCanvas.containerBoundingRect.y);
-
-//   return designerCanvasNormalizedTransformedOrigin;
-
-// }
-
 export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransformation(element: HTMLElement, designerCanvas: IDesignerCanvas): DOMPoint {
   const top0: DOMPointReadOnly = new DOMPointReadOnly(
     -parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]),
@@ -230,9 +209,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
     }
   )
 
-  // const transformOriginRelatedToWindow = getByParentsTransformedPointRelatedToWindow(element, new DOMPoint(getElementsWindowOffsetWithoutSelfAndParentTransformations(element).offsetLeft + parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]), getElementsWindowOffsetWithoutSelfAndParentTransformations(element).offsetTop + parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1])));
   const designerCanvasNormalizedTransformOrigin = getByParentsTransformedPointRelatedToCanvas(element, new DOMPoint(getElementsWindowOffsetWithoutSelfAndParentTransformations(element).offsetLeft - designerCanvas.outerRect.left + parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]), getElementsWindowOffsetWithoutSelfAndParentTransformations(element).offsetTop - designerCanvas.outerRect.top + parseInt(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1])), designerCanvas);
-  // const designerCanvasNormalizedTransformOrigin = new DOMPoint(transformOriginRelatedToWindow.x - designerCanvas.containerBoundingRect.left, transformOriginRelatedToWindow.y - designerCanvas.containerBoundingRect.top);
 
   let top0 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topleft].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topleft].y));
   let top1 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topright].y));
