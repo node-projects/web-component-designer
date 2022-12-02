@@ -1,3 +1,4 @@
+import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
 import { getElementsWindowOffsetWithoutSelfAndParentTransformations, getParentElementIncludingSlots } from "./ElementHelper.js";
 
@@ -137,7 +138,7 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   const canvas = element.closest('#node-projects-designer-canvas-canvas');
   let actualElement: HTMLElement = element;
   let parentElementTransformOriginToPointVectorTransformed: DOMPointReadOnly;
-  let byParentTransformedPointRelatedToCanvas: DOMPointReadOnly;
+  let byParentTransformedPointRelatedToCanvas: IPoint = { x: 0, y: 0 };
   while (actualElement != canvas) {
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
     const parentElementTransformOrigin: DOMPointReadOnly = new DOMPointReadOnly(
@@ -223,7 +224,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top2Transformed = top2.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
   let top3Transformed = top3.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
 
-  let transformedCornerPoints: DOMPoint[] = [];
+  let transformedCornerPoints: [DOMPoint, DOMPoint, DOMPoint, DOMPoint] = <any>[];
   transformedCornerPoints[0] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top0Transformed.x, designerCanvasNormalizedTransformOrigin.y + top0Transformed.y);
   transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y);
   transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y);
