@@ -172,8 +172,24 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
     }
   )
 
-  const width = parseInt(getComputedStyle(element).width.replace('px', ''));
-  const height = parseInt(getComputedStyle(element).height.replace('px', ''));
+  let width = parseInt(getComputedStyle(element).width.replace('px', ''));
+  let height = parseInt(getComputedStyle(element).height.replace('px', ''));
+
+  if (getComputedStyle(element).boxSizing == 'content-box') {
+    width += parseInt(getComputedStyle(element).paddingLeft.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginLeft.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderLeft.replace('px', ''))
+      + parseInt(getComputedStyle(element).paddingRight.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginRight.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderRight.replace('px', ''));
+
+    height += parseInt(getComputedStyle(element).paddingTop.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginTop.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderTop.replace('px', ''))
+      + parseInt(getComputedStyle(element).paddingBottom.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginBottom.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderBottom.replace('px', ''));
+  }
 
   const elementWithoutTransformCornerDOMPoints: DOMPoint[] = [];
   elementWithoutTransformCornerDOMPoints[topleft] = DOMPoint.fromPoint(
