@@ -134,6 +134,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       width: 100%;
       height: 100%;
       transform-origin: 0 0;
+      position: relative;
     }
 
     #node-projects-designer-canvas-canvas.dragFileActive {
