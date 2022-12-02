@@ -19,4 +19,5 @@ export enum ExtensionType {
    */
   ContainerDrag = 10,
   Doubleclick = 11,
+  Placement = 12
 }

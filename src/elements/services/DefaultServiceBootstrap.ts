@@ -69,6 +69,7 @@ import { LineExtensionProvider } from '../widgets/designerView/extensions/svg/Li
 import { RectExtentionProvider } from '../widgets/designerView/extensions/svg/RectExtensionProvider.js';
 import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
 import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
+import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -120,6 +121,9 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new MouseOverExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.Placement, [
+    new PlacementExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
     new GrayOutExtensionProvider()

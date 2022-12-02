@@ -1,7 +1,7 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from "../../../../interfaces/ISize";
-import { convertCoordinates, getDomMatrix } from "../../../helper/TransformHelper.js";
+import { convertCoordinates, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
@@ -23,6 +23,8 @@ export class ResizeExtension extends AbstractExtension {
   private _circle6: SVGCircleElement;
   private _circle7: SVGCircleElement;
   private _circle8: SVGCircleElement;
+  private _initialComputedTransformOrigins: DOMPoint[];
+  private _initialTransformOrigins: string[];
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
     super(extensionManager, designerCanvas, extendedItem);
@@ -34,31 +36,22 @@ export class ResizeExtension extends AbstractExtension {
   }
 
   override refresh() {
-    const rect = this.extendedItem.element.getBoundingClientRect();
-    this._circle1 = this._drawResizerOverlay((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'nw-resize', this._circle1);
-    this._circle2 = this._drawResizerOverlay((rect.x + (rect.width / 2) - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'n-resize', this._circle2);
-    this._circle3 = this._drawResizerOverlay((rect.x + rect.width - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'ne-resize', this._circle3);
-    this._circle4 = this._drawResizerOverlay((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + rect.height - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'sw-resize', this._circle4);
-    this._circle5 = this._drawResizerOverlay((rect.x + (rect.width / 2) - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + rect.height - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 's-resize', this._circle5);
-    this._circle6 = this._drawResizerOverlay((rect.x + rect.width - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + rect.height - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'se-resize', this._circle6);
-    this._circle7 = this._drawResizerOverlay((rect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + (rect.height / 2) - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'w-resize', this._circle7);
-    this._circle8 = this._drawResizerOverlay((rect.x + rect.width - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, (rect.y + (rect.height / 2) - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor, 'e-resize', this._circle8);
-    if (rect.width < 12) {
-      this._circle2.style.display = 'none';
-      this._circle5.style.display = 'none';
-    } else {
-      this._circle2.style.display = '';
-      this._circle5.style.display = '';
-    }
-    if (rect.height < 12) {
-      this._circle7.style.display = 'none';
-      this._circle8.style.display = 'none';
-    } else {
-      this._circle8.style.display = '';
-      this._circle8.style.display = '';
-    }
-  }
+    //#region Resizer circles
+    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 0, this.designerCanvas);
 
+    this._circle1 = this._drawResizerOverlay(transformedCornerPoints[0].x, transformedCornerPoints[0].y, 'nw-resize', this._circle1);
+    this._circle2 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[1].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[1].y - transformedCornerPoints[0].y) / 2), 'n-resize', this._circle2);
+    this._circle3 = this._drawResizerOverlay(transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'ne-resize', this._circle3);
+
+    this._circle4 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[2].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[2].y - transformedCornerPoints[0].y) / 2), 'w-resize', this._circle4);
+    this._circle5 = this._drawResizerOverlay(transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'sw-resize', this._circle5);
+
+    this._circle6 = this._drawResizerOverlay((transformedCornerPoints[2].x + (transformedCornerPoints[3].x - transformedCornerPoints[2].x) / 2), (transformedCornerPoints[2].y + (transformedCornerPoints[3].y - transformedCornerPoints[2].y) / 2), 's-resize', this._circle6);
+    this._circle8 = this._drawResizerOverlay((transformedCornerPoints[1].x + (transformedCornerPoints[3].x - transformedCornerPoints[1].x) / 2), (transformedCornerPoints[1].y + (transformedCornerPoints[3].y - transformedCornerPoints[1].y) / 2), 'e-resize', this._circle8);
+
+    this._circle7 = this._drawResizerOverlay(transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'se-resize', this._circle7);
+    //#endregion Circles
+  }
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
     let circle = this._drawCircle(x, y, 3 / this.designerCanvas.zoomFactor, 'svg-primary-resizer', oldCircle);
@@ -72,7 +65,7 @@ export class ResizeExtension extends AbstractExtension {
     return circle;
   }
 
-  _pointerActionTypeResize(circle: SVGCircleElement, event: PointerEvent, actionMode: string = 'se-resize') {
+  _pointerActionTypeResize(circle: SVGCircleElement, event: PointerEvent, actionMode: string) {
     event.stopPropagation();
     const currentPoint = this.designerCanvas.getNormalizedEventCoordinates(event);
 
@@ -85,17 +78,104 @@ export class ResizeExtension extends AbstractExtension {
         this._initialPoint = currentPoint;
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
+        this._initialComputedTransformOrigins = [];
+        this._initialTransformOrigins = [];
 
-        let rect = this.designerCanvas.getNormalizedElementCoordinatesAndRealSizes(this.extendedItem.element);
-        this._initialSizes.push({ width: rect.realWidth, height: rect.realHeight });
+																											  
+																					
+        //#region Calc elements' dimension
+        const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
+        (<HTMLElement>this.extendedItem.element).style.transform = '';
+        let rect = this.extendedItem.element.getBoundingClientRect();
+        (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
+        //#endregion Calc element's dimension
+
+        this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+
+        (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[0].width + 'px';
+
+        const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseInt(x.replace('px', '')));
+        const transformOrigin: DOMPoint = new DOMPoint(toArr[0], toArr[1]);
+        this._initialComputedTransformOrigins.push(transformOrigin);
+        this._initialTransformOrigins.push((<HTMLElement>this.extendedItem.element).style.transformOrigin);
+
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-            rect = this.designerCanvas.getNormalizedElementCoordinatesAndRealSizes(designItem.element);
-            this._initialSizes.push({ width: rect.realWidth, height: rect.realHeight });
+            rect = designItem.element.getBoundingClientRect();
+            this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
           }
         }
         if (this.designerCanvas.alignOnSnap)
           this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+
+        let i = 0;
+        let top: string = null;
+        let bottom: string = null;
+        let left: string = null;
+        let right: string = null;
+
+        switch (this._actionModeStarted) {
+          case 'e-resize':
+            left = getComputedStyle(this.extendedItem.element).left;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
+            (<HTMLElement>this.extendedItem.element).style.left = left;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+            break;
+          case 'se-resize':
+            top = getComputedStyle(this.extendedItem.element).top;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
+            (<HTMLElement>this.extendedItem.element).style.top = top;
+            left = getComputedStyle(this.extendedItem.element).left;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
+            (<HTMLElement>this.extendedItem.element).style.left = left;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+            break;
+          case 's-resize':
+            top = getComputedStyle(this.extendedItem.element).top;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
+            (<HTMLElement>this.extendedItem.element).style.top = top;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+            break;
+          case 'sw-resize':
+            top = getComputedStyle(this.extendedItem.element).top;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
+            (<HTMLElement>this.extendedItem.element).style.top = top;
+            right = getComputedStyle(this.extendedItem.element).right;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
+            (<HTMLElement>this.extendedItem.element).style.right = right;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
+            break;
+          case 'w-resize':
+            right = getComputedStyle(this.extendedItem.element).right;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
+            (<HTMLElement>this.extendedItem.element).style.right = right;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
+            break;
+          case 'nw-resize':
+            bottom = getComputedStyle(this.extendedItem.element).bottom;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
+            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
+            right = getComputedStyle(this.extendedItem.element).right;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
+            (<HTMLElement>this.extendedItem.element).style.right = right;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+            break;
+          case 'n-resize':
+            bottom = getComputedStyle(this.extendedItem.element).bottom;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
+            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+            break;
+          case 'ne-resize':
+            bottom = getComputedStyle(this.extendedItem.element).bottom;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
+            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
+            left = getComputedStyle(this.extendedItem.element).left;
+            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
+            (<HTMLElement>this.extendedItem.element).style.left = left;
+            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+            break;
+        }
         break;
 
       case EventNames.PointerMove:
@@ -104,21 +184,39 @@ export class ResizeExtension extends AbstractExtension {
           const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
           const diff = containerService.placePoint(event, <IPlacementView><any>this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-
-          let trackX = diff.x - this._initialPoint.x - this._offsetPoint.x;
-          let trackY = diff.y - this._initialPoint.y - this._offsetPoint.y;
-
+          let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
+          let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
-          let transformedTrack = convertCoordinates({ x: trackX, y: trackY }, matrix)
+          let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY, 0, 0), matrix);
 
           let i = 0;
+
+          let width = null;
+          let height = null;
+
           switch (this._actionModeStarted) {
-            case 'se-resize':
-              (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
-              (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+            case 'e-resize':
+              width = (this._initialSizes[i].width + transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+
               if (this.resizeAllSelected) {
+                i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-                  i++;
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                  }
+                }
+              }
+              break;
+            case 'se-resize':
+              width = (this._initialSizes[i].width + transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height + transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+              console.log((<HTMLElement>this.extendedItem.element).style.transformOrigin);
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
                     (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
                     (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
@@ -127,7 +225,9 @@ export class ResizeExtension extends AbstractExtension {
               }
               break;
             case 's-resize':
-              (<HTMLElement>this.extendedItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+              height = (this._initialSizes[i].height + transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -137,8 +237,26 @@ export class ResizeExtension extends AbstractExtension {
                 }
               }
               break;
-            case 'e-resize':
-              (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+            case 'sw-resize':
+              width = (this._initialSizes[i].width - transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height + transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 'w-resize':
+              width = (this._initialSizes[i].width - transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -148,7 +266,51 @@ export class ResizeExtension extends AbstractExtension {
                 }
               }
               break;
-            //for other resize modes we need a replacement
+            case 'nw-resize':
+              width = (this._initialSizes[i].width - transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height - transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 'n-resize':
+              height = (this._initialSizes[i].height - transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
+            case 'ne-resize':
+              width = (this._initialSizes[i].width + transformedTrack.x);
+              (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
+              height = (this._initialSizes[i].height - transformedTrack.y);
+              (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
+
+              if (this.resizeAllSelected) {
+                i++;
+                for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+                  if (designItem !== this.extendedItem) {
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                  }
+                }
+              }
+              break;
           }
 
           const resizedElements = [this.extendedItem, this.extendedItem.parent];
@@ -163,6 +325,29 @@ export class ResizeExtension extends AbstractExtension {
         let cg = this.extendedItem.openGroup((this.resizeAllSelected && this.designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 1) ? "Resize Elements" : "Resize &lt;" + this.extendedItem.name + "&gt;");
         this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
         this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
+
+        this.extendedItem.setStyle('left', normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'left'));
+        this.extendedItem.setStyle('top', normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'top'));
+
+        let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
+        (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
+
+        let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
+        let p1 = new DOMPoint(p1Abs.x - p3Abs.x, -(p1Abs.y - p3Abs.y));
+        let matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
+        let deltaX = 0;
+        let deltaY = 0;
+
+        let p1transformed = p1.matrixTransform(matrix.inverse());
+        let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
+        let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
+        let p1p2transformed = p1p2.matrixTransform(matrix);
+        let p4Abs = new DOMPoint(p1Abs.x + p1p2transformed.x, p1Abs.y - p1p2transformed.y);
+        deltaX = p4Abs.x - p1Abs.x;
+        deltaY = p4Abs.y - p1Abs.y;
+
+        (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
+        this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
             if (designItem !== this.extendedItem) {

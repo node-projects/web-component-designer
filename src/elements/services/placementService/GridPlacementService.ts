@@ -58,6 +58,9 @@ export class GridPlacementService implements IPlacementService {
     return defaultPlacementService.placePoint(event, placementView, container, startPoint, offsetInControl, newPoint, items);
   }
 
+  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  }
+
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     const gridInformation = CalculateGridInformation(container);
     const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);

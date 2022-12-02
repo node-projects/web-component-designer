@@ -38,3 +38,30 @@ export function getActiveElement(): Element {
   }
   return activeElement;
 }
+
+export function getParentElementIncludingSlots(element: Element): Element {
+  if (element.assignedSlot)
+    return element.assignedSlot;
+  if (element.parentElement == null) {
+    if (element.parentNode instanceof ShadowRoot) {
+      return element.parentNode.host;
+    }
+  }
+  return element.parentElement;
+}
+
+export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element)
+{
+  var offsetLeft = 0;
+  var offsetTop  = 0;
+  
+  while (element)
+  {
+      offsetLeft += element.offsetLeft;
+      offsetTop  += element.offsetTop;
+  
+      element = element.offsetParent;
+  }
+  
+  return {offsetLeft: offsetLeft, offsetTop: offsetTop};
+}
