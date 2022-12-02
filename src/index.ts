@@ -194,6 +194,7 @@ export * from "./elements/widgets/designerView/extensions/CanvasExtensionProvide
 export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
 export * from "./elements/widgets/designerView/extensions/FlexboxExtension.js";
 export * from "./elements/widgets/designerView/extensions/FlexboxExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtension.js";

@@ -6,12 +6,14 @@ import { IExtensionManager } from "./IExtensionManger";
 import { css } from "@node-projects/base-custom-webcomponent";
 import { FlexboxExtension } from "./FlexboxExtension";
 
+export const flexboxExtensionShowOverlayOptionName = 'flexboxExtensionShowOverlay';
+
 export class FlexboxExtensionProvider implements IDesignerExtensionProvider {
 
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
     if (display == 'flex' || display == 'inline-flex')
-      return true;
+      return designerView.instanceServiceContainer.designContext.extensionOptions[flexboxExtensionShowOverlayOptionName] !== false;
     return false;
   }
 
