@@ -140,7 +140,7 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   let byParentTransformedPointRelatedToCanvas: DOMPointReadOnly;
   while (actualElement != canvas) {
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    let parentElementTransformOrigin: DOMPointReadOnly = new DOMPointReadOnly(
+    const parentElementTransformOrigin: DOMPointReadOnly = new DOMPointReadOnly(
       getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetLeft - designerCanvas.outerRect.x + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[0]) - extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x,
       getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetTop - designerCanvas.outerRect.y + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]) - extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y,
     )
