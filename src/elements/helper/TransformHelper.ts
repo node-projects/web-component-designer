@@ -141,10 +141,12 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   let byParentTransformedPointRelatedToCanvas: IPoint = { x: 0, y: 0 };
   while (actualElement != canvas) {
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    const parentElementTransformOrigin: DOMPointReadOnly = new DOMPointReadOnly(
-      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetLeft - designerCanvas.outerRect.x + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[0]) - extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x,
-      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetTop - designerCanvas.outerRect.y + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]) - extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y,
+    const parentElementTransformOrigin: DOMPoint = new DOMPoint(
+      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetLeft - designerCanvas.outerRect.x + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[0]),
+      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetTop - designerCanvas.outerRect.y + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]),
     )
+    parentElementTransformOrigin.x -=  extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x;
+    parentElementTransformOrigin.y -=  extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y;
     const parentElementTransformOriginToPointVector: DOMPointReadOnly = new DOMPointReadOnly(
       -parentElementTransformOrigin.x + (element == actualElement ? point.x : byParentTransformedPointRelatedToCanvas.x),
       -parentElementTransformOrigin.y + (element == actualElement ? point.y : byParentTransformedPointRelatedToCanvas.y)
