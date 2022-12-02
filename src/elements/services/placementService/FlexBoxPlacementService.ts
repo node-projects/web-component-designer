@@ -55,6 +55,10 @@ export class FlexBoxPlacementService implements IPlacementService {
     return defaultPlacementService.placePoint(event, placementView, container, startPoint, offsetInControl, newPoint, items);
   }
 
+  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+
+  }
+
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
     const style = getComputedStyle(container.element);

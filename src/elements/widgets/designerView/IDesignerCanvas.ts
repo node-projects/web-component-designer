@@ -33,8 +33,11 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly onContentChanged: TypedEvent<void>;
 
   zoomFactor: number;
+  designerOffsetWidth: number;
+  designerOffsetHeight: number;
   readonly scaleFactor: number;
-  canvasOffset: IPoint
+  canvasOffset: IPoint;
+  canvas: HTMLElement;
 
   eatEvents: Element;
 
@@ -44,6 +47,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   getViewportCoordinates(event: MouseEvent): IPoint;
   getNormalizedElementCoordinates(element: Element): IRect;
   getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number }
+  getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect;
 
   captureActiveTool(tool: ITool);
   releaseActiveTool();

@@ -3,14 +3,16 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { combineTransforms } from '../../helper/TransformHelper.js';
+import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransformationBetweenElementAndAllAncestors } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
+import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
+import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
     if (containerStyle.display === 'grid' || containerStyle.display === 'inline-grid' ||
-        containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
+      containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
       return false;
     return true;
   }
@@ -52,7 +54,7 @@ export class DefaultPlacementService implements IPlacementService {
       }
       else if (placementView.alignOnSnap) {
         let rect = item.element.getBoundingClientRect();
-        let newPos = placementView.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / placementView.scaleFactor, height: rect.height/ placementView.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        let newPos = placementView.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / placementView.scaleFactor, height: rect.height / placementView.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x - Math.round(startPoint.x) + Math.round(offsetInControl.x);
         } else {
@@ -95,16 +97,28 @@ export class DefaultPlacementService implements IPlacementService {
     return { x: trackX, y: trackY };
   }
 
+  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+
+  }
+
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
+    let filteredItems = filterChildPlaceItems(items);
+    for (const designItem of filteredItems) {     
+      const canvas = designItem.element.closest('#node-projects-designer-canvas-canvas');
+      let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(<HTMLElement>designItem.element.parentElement, <HTMLElement>canvas, true);
 
-    let filterdItems = filterChildPlaceItems(items);
-    //TODO: -> maybe get existing transform via getComputedStyle???
-    for (const designItem of filterdItems) {
-      const newTransform = 'translate(' + track.x + 'px, ' + track.y + 'px)';
-      combineTransforms(placementView.transformHelperElement, <HTMLElement>designItem.element, designItem.styles.get('transform'), newTransform);
+      let transformMatrixParentTransformsCompensated = null;
+      if (originalElementAndAllAncestorsMultipliedMatrix){
+        transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0).matrixTransform(originalElementAndAllAncestorsMultipliedMatrix.inverse());
+      } else {
+        transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0);
+      }
+
+      const translationMatrix = new DOMMatrix().translate(transformMatrixParentTransformsCompensated.x, transformMatrixParentTransformsCompensated.y);
+      combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), translationMatrix.toString());
     }
   }
 
@@ -124,12 +138,18 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
-
     let filterdItems = filterChildPlaceItems(items);
     for (const designItem of filterdItems) {
+      let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
+      const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.styles.get('transform') ?? ''));
       (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
-      placeDesignItem(container, designItem, track, 'position');
+      let track = {x: translation.x, y: translation.y};
+      placeDesignItem(container, designItem, {x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y}, 'position');
     }
+
+    for (const item of items) {
+      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
+    }
+
   }
 }

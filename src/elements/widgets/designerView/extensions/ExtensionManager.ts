@@ -276,6 +276,7 @@ export class ExtensionManager implements IExtensionManager {
       this.refreshExtensions(designItems, ExtensionType.ContainerDragOver, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.ContainerDrag, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Doubleclick, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Placement, ignoredExtension);
     }
   }
 
