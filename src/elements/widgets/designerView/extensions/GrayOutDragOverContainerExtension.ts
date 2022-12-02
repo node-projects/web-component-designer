@@ -1,3 +1,4 @@
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from "./AbstractExtension";
@@ -6,7 +7,7 @@ import { OverlayLayer } from "./OverlayLayer.js";
 
 export class GrayOutDragOverContainerExtension extends AbstractExtension {
 
-  private _rect: SVGRectElement;
+  private _rect: SVGPathElement;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -17,8 +18,8 @@ export class GrayOutDragOverContainerExtension extends AbstractExtension {
   }
 
   override refresh() {
-    let itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
-    this._rect = this._drawRect(itemRect.x, itemRect.y, itemRect.width,  itemRect.height, 'svg-rect-enter-container', this._rect, OverlayLayer.Foregorund);
+    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 0, this.designerCanvas);
+    this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-rect-enter-container', this._rect, OverlayLayer.Background);
   }
 
   override dispose() {
