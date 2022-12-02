@@ -21,8 +21,8 @@ export class TransformOriginExtension extends AbstractExtension {
     const y = 1;
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
     const toInPercentage = [];
-    toInPercentage[0] = parseInt(to[0]) / parseInt((<HTMLElement>this.extendedItem.element).style.width); // This value remains the same regardless of scalefactor
-    toInPercentage[1] = parseInt(to[1]) / parseInt((<HTMLElement>this.extendedItem.element).style.height); // This value remains the same regardless of scalefactor
+    toInPercentage[0] = parseInt(to[0]) / parseInt(getComputedStyle(<HTMLElement>this.extendedItem.element).width); // This value remains the same regardless of scalefactor
+    toInPercentage[1] = parseInt(to[1]) / parseInt(getComputedStyle(<HTMLElement>this.extendedItem.element).height); // This value remains the same regardless of scalefactor
 
     const toDOMPoint = new DOMPoint(rect.x + toInPercentage[x] * rect.width, rect.y + toInPercentage[y] * rect.height)
     
