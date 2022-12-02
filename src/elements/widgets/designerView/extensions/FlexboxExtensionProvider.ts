@@ -2,28 +2,24 @@ import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IDesignerExtension } from "./IDesignerExtension";
-import { GridExtension } from './GridExtension';
 import { IExtensionManager } from "./IExtensionManger";
 import { css } from "@node-projects/base-custom-webcomponent";
+import { FlexboxExtension } from "./FlexboxExtension";
 
-export const gridExtensionShowOverlayOptionName = 'gridExtensionShowOverlay';
-
-export class GridExtensionProvider implements IDesignerExtensionProvider {
+export class FlexboxExtensionProvider implements IDesignerExtensionProvider {
 
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
-    if (display == 'grid' || display == 'inline-grid')
-      return designerView.instanceServiceContainer.designContext.extensionOptions[gridExtensionShowOverlayOptionName] !== false;
+    if (display == 'flex' || display == 'inline-flex')
+      return true;
     return false;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new GridExtension(extensionManager, designerView, designItem);
+    return new FlexboxExtension(extensionManager, designerView, designItem);
   }
 
   readonly style = css`
-    .svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
-    .svg-grid-area { font-size: 8px; }
-    .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
+    .svg-flexbox { stroke: orange; fill: #9a47ff22; }
   `;
 }

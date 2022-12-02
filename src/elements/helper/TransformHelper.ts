@@ -145,8 +145,8 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
       getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetTop - designerCanvas.outerRect.y + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]) - extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y,
     )
     const parentElementTransformOriginToPointVector: DOMPointReadOnly = new DOMPointReadOnly(
-      -parentElementTransformOrigin.x + (element == actualElement ?  point.x : byParentTransformedPointRelatedToCanvas.x),
-      -parentElementTransformOrigin.y + (element == actualElement ?  point.y : byParentTransformedPointRelatedToCanvas.y)
+      -parentElementTransformOrigin.x + (element == actualElement ? point.x : byParentTransformedPointRelatedToCanvas.x),
+      -parentElementTransformOrigin.y + (element == actualElement ? point.y : byParentTransformedPointRelatedToCanvas.y)
     )
 
     parentElementTransformOriginToPointVectorTransformed = parentElementTransformOriginToPointVector.matrixTransform(new DOMMatrix(getComputedStyle((<HTMLElement>parentElement)).transform));
@@ -157,7 +157,7 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   return byParentTransformedPointRelatedToCanvas;
 }
 
-export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: number, designerCanvas: IDesignerCanvas): DOMPoint[] {
+export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: number, designerCanvas: IDesignerCanvas): [DOMPoint, DOMPoint, DOMPoint, DOMPoint] {
   const topleft = 0;
   const topright = 1;
   const bottomleft = 2;

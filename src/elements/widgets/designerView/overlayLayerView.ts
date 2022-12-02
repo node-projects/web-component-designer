@@ -158,6 +158,17 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return rect;
   }
 
+  drawPath(data: string, className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
+    if (!path) {
+      path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      this.addOverlay(path, overlayLayer);
+    }
+    path.setAttribute('d', data);
+    if (className)
+      path.setAttribute('class', className);
+    return path;
+  }
+
   drawText(text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {
     if (!textEl) {
       textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");

@@ -70,6 +70,7 @@ import { RectExtentionProvider } from '../widgets/designerView/extensions/svg/Re
 import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
 import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
+import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -103,6 +104,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
     new GridExtensionProvider(),
+    new FlexboxExtensionProvider(),
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
@@ -117,7 +119,8 @@ export function createDefaultServiceContainer() {
     new SelectionDefaultExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
-    new GridExtensionProvider()
+    new GridExtensionProvider(),
+    new FlexboxExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new MouseOverExtensionProvider()
