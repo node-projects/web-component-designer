@@ -215,4 +215,12 @@ export class CssPropertiesService extends CommonPropertiesService {
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
     return BindingTarget.css;
   }
+
+  override setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+    if (this.name == 'styles') {
+      super.setValue(designItems, { ...property, propertyType: PropertyType.cssValue }, value);
+    } else {
+      super.setValue(designItems, property, value);
+    }
+  }
 }
