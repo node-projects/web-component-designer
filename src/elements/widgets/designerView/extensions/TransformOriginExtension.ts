@@ -28,13 +28,13 @@ export class TransformOriginExtension extends AbstractExtension {
 
     const toDOMPoint = new DOMPoint(rect.x + toInPercentage[x] * rect.width, rect.y + toInPercentage[y] * rect.height)
 
-    this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.scaleFactor, 'svg-transform-origin');
+    this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
     this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
-    this._circle.setAttribute('style', 'cursor: pointer');
+    this._circle.style.cursor = 'pointer';
 
-    this._circle2 = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 1 / this.designerCanvas.scaleFactor, 'svg-transform-origin');
+    this._circle2 = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 1 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
     this._circle2.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
-    this._circle2.setAttribute('style', 'pointer-events: none');
+    this._circle2.style.pointerEvents = 'pointer-events: none';
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
