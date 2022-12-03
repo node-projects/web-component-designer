@@ -1,5 +1,6 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
+import { convertCssUnit, getCssUnit } from "../../../helper/CssUnitConverter";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
@@ -9,6 +10,7 @@ export class TransformOriginExtension extends AbstractExtension {
   private _startPos: IPoint;
   private _circle: SVGCircleElement;
   private _circle2: SVGCircleElement;
+  private _oldValue: string;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -25,7 +27,7 @@ export class TransformOriginExtension extends AbstractExtension {
     toInPercentage[1] = parseInt(to[1]) / parseInt(getComputedStyle(<HTMLElement>this.extendedItem.element).height); // This value remains the same regardless of scalefactor
 
     const toDOMPoint = new DOMPoint(rect.x + toInPercentage[x] * rect.width, rect.y + toInPercentage[y] * rect.height)
-    
+
     this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.scaleFactor, 'svg-transform-origin');
     this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     this._circle.setAttribute('style', 'cursor: pointer');
@@ -36,8 +38,8 @@ export class TransformOriginExtension extends AbstractExtension {
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
-    if (this.extendedItem.styles.get('transform-origin') == null || this.extendedItem.styles.get('transform-origin') == '') {
-      this.extendedItem.setStyle('transform-origin', this._circle.getAttribute('cx') + ' ' + this._circle.getAttribute('cy'));
+    if (this.extendedItem.styles.get('transform-origin')) {
+      this._oldValue = this.extendedItem.styles.get('transform-origin');
     }
   }
 
@@ -79,7 +81,21 @@ export class TransformOriginExtension extends AbstractExtension {
           const dy = normalized.y - this._startPos.y;
           const newX = (dx + parseFloat(to[x]));
           const newY = (dy + parseFloat(to[y]));
-          this.extendedItem.setStyle('transform-origin', newX + 'px' + ' ' + newY + 'px');
+          if (this._oldValue) { //Restore old units
+            try {
+              const oldSplit = this._oldValue.split(' ');
+              let newXs = convertCssUnit(newX, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]));
+              let newYs = convertCssUnit(newX, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]));
+              if (oldSplit.length > 1) {
+                newYs = convertCssUnit(newY, <HTMLElement>this.extendedItem.element, 'heigth', getCssUnit(oldSplit[1]));
+              }
+              this.extendedItem.setStyle('transform-origin', newXs + ' ' + newYs);
+            } catch (err) {
+              this.extendedItem.setStyle('transform-origin', newX + 'px' + ' ' + newY + 'px');
+            }
+          }
+          else
+            this.extendedItem.setStyle('transform-origin', newX + 'px' + ' ' + newY + 'px');
           this.refresh();
           this._startPos = null;
         }
