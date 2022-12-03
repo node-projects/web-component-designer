@@ -13,7 +13,7 @@ export class FlexboxExtension extends AbstractExtension {
   }
 
   override extend() {
-    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 0, this.designerCanvas);
+    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
     this._path = this._drawTransformedRect(transformedCornerPoints, 'svg-flexbox', this._path, OverlayLayer.Background);
   }
 

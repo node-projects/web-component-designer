@@ -145,8 +145,8 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
       getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetLeft - designerCanvas.outerRect.x + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[0]),
       getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetTop - designerCanvas.outerRect.y + parseInt(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]),
     )
-    parentElementTransformOrigin.x -=  extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x;
-    parentElementTransformOrigin.y -=  extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y;
+    parentElementTransformOrigin.x -= extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x;
+    parentElementTransformOrigin.y -= extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y;
     const parentElementTransformOriginToPointVector: DOMPointReadOnly = new DOMPointReadOnly(
       -parentElementTransformOrigin.x + (element == actualElement ? point.x : byParentTransformedPointRelatedToCanvas.x),
       -parentElementTransformOrigin.y + (element == actualElement ? point.y : byParentTransformedPointRelatedToCanvas.y)
@@ -160,11 +160,12 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   return byParentTransformedPointRelatedToCanvas;
 }
 
-export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: number, designerCanvas: IDesignerCanvas): [DOMPoint, DOMPoint, DOMPoint, DOMPoint] {
+export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: IPoint | null, designerCanvas: IDesignerCanvas): [DOMPoint, DOMPoint, DOMPoint, DOMPoint] {
   const topleft = 0;
   const topright = 1;
   const bottomleft = 2;
   const bottomright = 3;
+  const intUntransformedCornerPointsOffset = untransformedCornerPointsOffset ? { x: untransformedCornerPointsOffset.x / designerCanvas.scaleFactor, y: untransformedCornerPointsOffset.y / designerCanvas.scaleFactor } : { x: 0, y: 0 };
 
   const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element);
   const p0OffsetsRelatedToCanvas = DOMPoint.fromPoint(
@@ -196,26 +197,26 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   const elementWithoutTransformCornerDOMPoints: DOMPoint[] = [];
   elementWithoutTransformCornerDOMPoints[topleft] = DOMPoint.fromPoint(
     {
-      x: p0OffsetsRelatedToCanvas.x - untransformedCornerPointsOffset,
-      y: p0OffsetsRelatedToCanvas.y - untransformedCornerPointsOffset
+      x: p0OffsetsRelatedToCanvas.x - intUntransformedCornerPointsOffset.x,
+      y: p0OffsetsRelatedToCanvas.y - intUntransformedCornerPointsOffset.y
     }
   )
   elementWithoutTransformCornerDOMPoints[topright] = DOMPoint.fromPoint(
     {
-      x: p0OffsetsRelatedToCanvas.x + width + untransformedCornerPointsOffset,
-      y: p0OffsetsRelatedToCanvas.y - untransformedCornerPointsOffset
+      x: p0OffsetsRelatedToCanvas.x + width + intUntransformedCornerPointsOffset.x,
+      y: p0OffsetsRelatedToCanvas.y - intUntransformedCornerPointsOffset.y
     }
   )
   elementWithoutTransformCornerDOMPoints[bottomleft] = DOMPoint.fromPoint(
     {
-      x: p0OffsetsRelatedToCanvas.x - untransformedCornerPointsOffset,
-      y: p0OffsetsRelatedToCanvas.y + height + untransformedCornerPointsOffset
+      x: p0OffsetsRelatedToCanvas.x - intUntransformedCornerPointsOffset.x,
+      y: p0OffsetsRelatedToCanvas.y + height + intUntransformedCornerPointsOffset.y
     }
   )
   elementWithoutTransformCornerDOMPoints[bottomright] = DOMPoint.fromPoint(
     {
-      x: p0OffsetsRelatedToCanvas.x + width + untransformedCornerPointsOffset,
-      y: p0OffsetsRelatedToCanvas.y + height + untransformedCornerPointsOffset
+      x: p0OffsetsRelatedToCanvas.x + width + intUntransformedCornerPointsOffset.x,
+      y: p0OffsetsRelatedToCanvas.y + height + intUntransformedCornerPointsOffset.y
     }
   )
 

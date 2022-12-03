@@ -17,7 +17,7 @@ export class InvisibleDivExtension extends AbstractExtension {
   }
 
   override refresh() {
-    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, 0, this.designerCanvas);
+    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
     this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-invisible-div', this._rect, OverlayLayer.Background);
   }
 

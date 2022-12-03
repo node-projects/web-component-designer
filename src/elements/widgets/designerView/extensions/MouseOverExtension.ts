@@ -19,7 +19,7 @@ export class MouseOverExtension extends AbstractExtension {
   }
 
   override refresh() {
-    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, offset, this.designerCanvas);
+    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: offset, y: offset }, this.designerCanvas);
     this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect);
     this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
   }
