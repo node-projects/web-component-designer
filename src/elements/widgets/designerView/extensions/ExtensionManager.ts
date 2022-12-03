@@ -48,6 +48,7 @@ export class ExtensionManager implements IExtensionManager {
         this.removeExtensions(selectionChangedEvent.oldSelectedElements, ExtensionType.Selection);
       }
     }
+
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
@@ -55,7 +56,7 @@ export class ExtensionManager implements IExtensionManager {
       this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
     }
 
-    this.refreshExtensions(selectionChangedEvent.selectedElements);
+    //this.refreshExtensions(selectionChangedEvent.selectedElements);
   }
 
   applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive: boolean = false) {
