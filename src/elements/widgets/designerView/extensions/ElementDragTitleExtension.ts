@@ -1,4 +1,4 @@
-import { getFont, getTextWidth } from "../../../helper/TextHelper";
+import { getTextWidth } from "../../../helper/TextHelper";
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
