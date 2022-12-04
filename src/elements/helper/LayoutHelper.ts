@@ -69,9 +69,9 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
 
     if (!hasPositionedLayout)
       designItem.setStyle('position', 'absolute');
-    if (oldLeft)
+    if (oldLeft || oldRight == null)
       designItem.setStyle('left', (offset.x + (oldLeft ?? 0) + containerLeft) + "px");
-    if(oldTop)
+    if(oldTop || oldBottom == null)
       designItem.setStyle('top', (offset.y + (oldTop ?? 0) + containerTop) + "px");
     if (oldRight)
       designItem.setStyle('right', ((oldRight ?? 0) - offset.x + containerRight) + "px");

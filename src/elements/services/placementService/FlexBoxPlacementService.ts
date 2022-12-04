@@ -76,17 +76,21 @@ export class FlexBoxPlacementService implements IPlacementService {
       if (elBefore && elBefore[0] != items[0]) {
         if (posBefore + 1 === posDrag)
           return;
+        const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
         let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         elBefore[0].insertAdjacentElement(items[0], 'afterend');
         cg.commit();
+        container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       } else if (elBefore == null) {
         if (posDrag == 0)
           return;
+        const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
         let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         container.insertChild(items[0], 0);
         cg.commit();
+        container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       }
     } else if (style.flexDirection == 'column') {
       childrenWithPos.sort(x => x[1].y);
@@ -101,17 +105,21 @@ export class FlexBoxPlacementService implements IPlacementService {
       if (elBefore && elBefore[0] != items[0]) {
         if (posBefore + 1 === posDrag)
           return;
+        const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
         let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         elBefore[0].insertAdjacentElement(items[0], 'afterend');
         cg.commit();
+        container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       } else if (elBefore == null) {
         if (posDrag == 0)
           return;
+        const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
         let cg = items[0].openGroup('move in flexbox')
         items[0].remove();
         container.insertChild(items[0], 0);
         cg.commit();
+        container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       }
     }
 

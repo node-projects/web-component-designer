@@ -134,6 +134,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       width: 100%;
       height: 100%;
       transform-origin: 0 0;
+      position: relative;
     }
 
     #node-projects-designer-canvas-canvas.dragFileActive {
@@ -746,6 +747,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         di.setStyle('position', 'absolute');
         di.setStyle('left', (position.x - pos.x) + 'px');
         di.setStyle('top', (position.y - pos.y) + 'px');
+        const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, getComputedStyle(newContainer.element)))
+        containerService.enterContainer(newContainer, [di]);
         this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
         grp.commit();
         requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));

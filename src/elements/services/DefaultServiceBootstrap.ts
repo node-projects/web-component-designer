@@ -71,6 +71,7 @@ import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/sv
 import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
+import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -161,7 +162,8 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designViewConfigButtons.push(
     new ButtonSeperatorProvider(20),
-    new GridExtensionDesignViewConfigButtons()
+    new GridExtensionDesignViewConfigButtons(),
+    new FlexboxExtensionDesignViewConfigButtons()
   );
 
   serviceContainer.designViewToolbarButtons.push(
