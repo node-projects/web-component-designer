@@ -173,7 +173,7 @@ export function getElementSize(element: HTMLElement) {
   let height = element.offsetHeight;
   if (element instanceof SVGElement && (<any>element).width) {
     width = (<SVGAnimatedLength>(<any>element).width).baseVal.value
-    height = (<SVGAnimatedLength>(<any>element).width).baseVal.value
+    height = (<SVGAnimatedLength>(<any>element).height).baseVal.value
   } else if (element instanceof SVGGraphicsElement) {
     let bbox = element.getBBox()
     width = bbox.width;
