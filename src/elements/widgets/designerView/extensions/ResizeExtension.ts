@@ -81,8 +81,8 @@ export class ResizeExtension extends AbstractExtension {
         this._initialComputedTransformOrigins = [];
         this._initialTransformOrigins = [];
 
-																											  
-																					
+
+
         //#region Calc elements' dimension
         const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
         (<HTMLElement>this.extendedItem.element).style.transform = '';
@@ -338,7 +338,7 @@ export class ResizeExtension extends AbstractExtension {
         let deltaX = 0;
         let deltaY = 0;
 
-        let p1transformed = p1.matrixTransform(matrix.inverse());
+        let p1transformed = convertCoordinates(p1, matrix);
         let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
         let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
         let p1p2transformed = p1p2.matrixTransform(matrix);

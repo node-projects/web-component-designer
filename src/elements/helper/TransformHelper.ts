@@ -26,7 +26,11 @@ export function getDomMatrix(element: HTMLElement) {
 }
 
 export function convertCoordinates(point: DOMPoint, matrix: DOMMatrix) {
-  return point.matrixTransform(matrix.inverse());
+  const inverse = matrix.inverse();
+  //fix chrome bug: https://bugs.chromium.org/p/chromium/issues/detail?id=1395645
+  inverse.m33 = 1;
+  inverse.m44 = 1;
+  return point.matrixTransform(inverse);
 }
 
 export function getRotationMatrix3d(axisOfRotation: 'x' | 'y' | 'z' | 'X' | 'Y' | 'Z', angle: number) {
