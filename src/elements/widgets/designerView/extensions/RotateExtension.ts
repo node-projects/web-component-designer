@@ -93,6 +93,8 @@ export class RotateExtension extends AbstractExtension {
           let angle = Math.atan2(currentPoint.y - transformOriginInPx.y, currentPoint.x - transformOriginInPx.x) * (180 / Math.PI);
           angle = angle - this._initialOverlayAngle + this._initialElementAngle;
           angle *= -1;
+          if (!event.ctrlKey)
+            angle = Math.ceil(angle / 15) * 15
           const rotationMatrix3d = getRotationMatrix3d('z', angle);
           rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), rotationMatrix3d);
 
