@@ -189,6 +189,13 @@ export class ResizeExtension extends AbstractExtension {
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
           let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY, 0, 0), matrix);
 
+          let deltaX = transformedTrack.x;
+          let deltaY = transformedTrack.y;
+          if (event.shiftKey) {
+            deltaX = deltaX < deltaY ? deltaX : deltaY;
+            deltaY = deltaX;
+          }
+
           let i = 0;
 
           let width = null;
@@ -196,117 +203,117 @@ export class ResizeExtension extends AbstractExtension {
 
           switch (this._actionModeStarted) {
             case 'e-resize':
-              width = (this._initialSizes[i].width + transformedTrack.x);
+              width = (this._initialSizes[i].width + deltaX);
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
                   }
                 }
               }
               break;
             case 'se-resize':
-              width = (this._initialSizes[i].width + transformedTrack.x);
+              width = (this._initialSizes[i].width + deltaX);
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
-              height = (this._initialSizes[i].height + transformedTrack.y);
+              height = (this._initialSizes[i].height + deltaY);
               (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
               console.log((<HTMLElement>this.extendedItem.element).style.transformOrigin);
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
                   }
                 }
               }
               break;
             case 's-resize':
-              height = (this._initialSizes[i].height + transformedTrack.y);
+              height = (this._initialSizes[i].height + deltaY);
               (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
                   }
                 }
               }
               break;
             case 'sw-resize':
-              width = (this._initialSizes[i].width - transformedTrack.x);
+              width = (this._initialSizes[i].width - deltaX);
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
-              height = (this._initialSizes[i].height + transformedTrack.y);
+              height = (this._initialSizes[i].height + deltaY);
               (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
                   }
                 }
               }
               break;
             case 'w-resize':
-              width = (this._initialSizes[i].width - transformedTrack.x);
+              width = (this._initialSizes[i].width - deltaX);
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
                   }
                 }
               }
               break;
             case 'nw-resize':
-              width = (this._initialSizes[i].width - transformedTrack.x);
+              width = (this._initialSizes[i].width - deltaX);
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
-              height = (this._initialSizes[i].height - transformedTrack.y);
+              height = (this._initialSizes[i].height - deltaY);
               (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
                   }
                 }
               }
               break;
             case 'n-resize':
-              height = (this._initialSizes[i].height - transformedTrack.y);
+              height = (this._initialSizes[i].height - deltaY);
               (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
                   }
                 }
               }
               break;
             case 'ne-resize':
-              width = (this._initialSizes[i].width + transformedTrack.x);
+              width = (this._initialSizes[i].width + deltaX);
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
-              height = (this._initialSizes[i].height - transformedTrack.y);
+              height = (this._initialSizes[i].height - deltaY);
               (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
 
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + transformedTrack.x + 'px';
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + transformedTrack.y + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
                   }
                 }
               }
