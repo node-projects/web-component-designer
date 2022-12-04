@@ -186,22 +186,6 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let width = element.offsetWidth;
   let height = element.offsetHeight;
 
-  if (getComputedStyle(element).boxSizing == 'content-box') {
-    width += parseFloat(getComputedStyle(element).paddingLeft.replace('px', ''))
-      + parseFloat(getComputedStyle(element).marginLeft.replace('px', ''))
-      + parseFloat(getComputedStyle(element).borderLeft.replace('px', ''))
-      + parseFloat(getComputedStyle(element).paddingRight.replace('px', ''))
-      + parseFloat(getComputedStyle(element).marginRight.replace('px', ''))
-      + parseFloat(getComputedStyle(element).borderRight.replace('px', ''));
-
-    height += parseFloat(getComputedStyle(element).paddingTop.replace('px', ''))
-      + parseFloat(getComputedStyle(element).marginTop.replace('px', ''))
-      + parseFloat(getComputedStyle(element).borderTop.replace('px', ''))
-      + parseFloat(getComputedStyle(element).paddingBottom.replace('px', ''))
-      + parseFloat(getComputedStyle(element).marginBottom.replace('px', ''))
-      + parseFloat(getComputedStyle(element).borderBottom.replace('px', ''));
-  }
-
   const elementWithoutTransformCornerDOMPoints: DOMPoint[] = [];
   elementWithoutTransformCornerDOMPoints[topleft] = DOMPoint.fromPoint(
     {
