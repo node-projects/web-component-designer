@@ -1,7 +1,7 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from "../../../../interfaces/ISize";
-import { convertCoordinates, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition } from "../../../helper/TransformHelper.js";
+import { transformPointByInverseMatrix, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { IPlacementView } from "../IPlacementView";
@@ -187,7 +187,7 @@ export class ResizeExtension extends AbstractExtension {
           let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
           let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
           let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
-          let transformedTrack = convertCoordinates(new DOMPoint(trackX, trackY, 0, 0), matrix);
+          let transformedTrack = transformPointByInverseMatrix(new DOMPoint(trackX, trackY, 0, 0), matrix);
 
           let deltaX = transformedTrack.x;
           let deltaY = transformedTrack.y;
@@ -345,7 +345,7 @@ export class ResizeExtension extends AbstractExtension {
         let deltaX = 0;
         let deltaY = 0;
 
-        let p1transformed = convertCoordinates(p1, matrix);
+        let p1transformed = transformPointByInverseMatrix(p1, matrix);
         let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
         let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
         let p1p2transformed = p1p2.matrixTransform(matrix);

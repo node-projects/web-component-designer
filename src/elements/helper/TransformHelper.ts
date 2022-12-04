@@ -25,7 +25,7 @@ export function getDomMatrix(element: HTMLElement) {
   return new DOMMatrix(window.getComputedStyle(element).transform);
 }
 
-export function convertCoordinates(point: DOMPoint, matrix: DOMMatrix) {
+export function transformPointByInverseMatrix(point: DOMPoint, matrix: DOMMatrix) {
   const inverse = matrix.inverse();
   //fix chrome bug: https://bugs.chromium.org/p/chromium/issues/detail?id=1395645
   inverse.m33 = 1;
