@@ -98,8 +98,8 @@ export class RotateExtension extends AbstractExtension {
           const rotationMatrix3d = getRotationMatrix3d('z', angle);
           rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), rotationMatrix3d);
 
-          let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 30, y: 30 }, this.designerCanvas);
-          let angleTextPosition: DOMPoint = transformedCornerPoints[0];
+          const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 30, y: 30 }, this.designerCanvas);
+          const angleTextPosition = transformedCornerPoints[0];
           this._textAngle = this._drawTextWithBackground(this._actualRotationAngle + '°', angleTextPosition.x, angleTextPosition.y, 'white', 'svg-rotate-text', this._textAngle);
           this._textAngle[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
           this._textAngle[3].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
