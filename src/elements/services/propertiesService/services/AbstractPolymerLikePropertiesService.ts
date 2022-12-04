@@ -3,11 +3,12 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { PropertiesHelper } from './PropertiesHelper';
 import { AbstractPropertiesService } from "./AbstractPropertiesService";
 import { PropertyType } from '../PropertyType';
+import { RefreshMode } from '../IPropertiesService';
 
 export abstract class AbstractPolymerLikePropertiesService extends AbstractPropertiesService {
 
-  override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.full;
   }
   
   public override getProperties(designItem: IDesignItem): IProperty[] {

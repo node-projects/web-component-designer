@@ -2,11 +2,12 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { PropertyType } from "../PropertyType";
 import { AbstractPropertiesService } from "./AbstractPropertiesService";
+import { RefreshMode } from '../IPropertiesService';
 
 export class CommonPropertiesService extends AbstractPropertiesService {
 
-  public override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return false;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.none;
   }
 
   //@ts-ignore

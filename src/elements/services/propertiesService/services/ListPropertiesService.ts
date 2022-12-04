@@ -3,11 +3,12 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions';
 import { AbstractPropertiesService } from './AbstractPropertiesService';
 import { PropertyType } from '../PropertyType';
+import { RefreshMode } from '../IPropertiesService';
 
 export class ListPropertiesService extends AbstractPropertiesService {
 
-  listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.full;
   }
 
   public name = "list"

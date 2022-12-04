@@ -2,6 +2,7 @@ import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { CommonPropertiesService } from "./CommonPropertiesService";
 import { PropertyType } from '../PropertyType';
+import { RefreshMode } from '../IPropertiesService';
 
 export class NativeElementsPropertiesService extends CommonPropertiesService {
 
@@ -170,8 +171,8 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
 
   public override name = "native"
 
-  public override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.full;
   }
 
   override isHandledElement(designItem: IDesignItem): boolean {

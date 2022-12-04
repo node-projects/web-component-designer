@@ -1,7 +1,7 @@
 import { BindingTarget } from "../../item/BindingTarget";
 import { IElementDefinition } from "../elementsService/IElementDefinition";
 import { IElementsService } from "../elementsService/IElementsService";
-import { IPropertiesService } from "../propertiesService/IPropertiesService";
+import { IPropertiesService, RefreshMode } from "../propertiesService/IPropertiesService";
 import { IProperty } from "../propertiesService/IProperty";
 import { PropertyType } from "../propertiesService/PropertyType";
 import { IDesignItem } from "../../item/IDesignItem";
@@ -9,8 +9,8 @@ import { AbstractPropertiesService } from "../propertiesService/services/Abstrac
 
 export class WebcomponentManifestParserService extends AbstractPropertiesService implements IElementsService, IPropertiesService {
   
-  listNeedsRefresh(designItem: IDesignItem): boolean {
-    return false;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.none;
   }
 
   private _name: string;

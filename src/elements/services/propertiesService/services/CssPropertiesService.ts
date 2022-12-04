@@ -3,11 +3,12 @@ import { IDesignItem } from '../../../item/IDesignItem';
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType';
 import { CommonPropertiesService } from './CommonPropertiesService';
+import { RefreshMode } from '../IPropertiesService';
 
 export class CssPropertiesService extends CommonPropertiesService {
 
-  public override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return this.name == 'styles' ? true : false;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return this.name == 'styles' ? RefreshMode.fullOnValueChange : RefreshMode.none;
   }
 
   public layout: IProperty[] = [

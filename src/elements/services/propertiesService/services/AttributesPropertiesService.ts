@@ -1,4 +1,4 @@
-import { IPropertiesService } from "../IPropertiesService";
+import { IPropertiesService, RefreshMode } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
@@ -10,8 +10,8 @@ export class AttributesPropertiesService implements IPropertiesService {
 
   public name = "attributes"
 
-  public listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.fullOnValueChange;
   }
 
   isHandledElement(designItem: IDesignItem): boolean {

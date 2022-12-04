@@ -1,14 +1,14 @@
 import { BindingTarget } from "../../../item/BindingTarget.js";
 import { IDesignItem } from "../../../item/IDesignItem.js";
-import { IPropertiesService } from "../IPropertiesService.js";
+import { IPropertiesService, RefreshMode } from "../IPropertiesService.js";
 import { IProperty } from "../IProperty.js";
 import { PropertyType } from "../PropertyType.js";
 import { AbstractPropertiesService } from "./AbstractPropertiesService.js";
 
 export class WebcomponentManifestPropertiesService extends AbstractPropertiesService implements IPropertiesService {
 
-  listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.full;
   }
 
   private _name: string;
