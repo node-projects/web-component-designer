@@ -1,7 +1,7 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { IPoint } from "../../../../interfaces/IPoint";
 import { convertCssUnit, getCssUnit } from "../../../helper/CssUnitConverter";
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../helper/TransformHelper";
+import { getDesignerCanvasNormalizedTransformedPoint } from "../../../helper/TransformHelper";
 import { IDesignItem } from "../../../item/IDesignItem";
 import { IDesignerCanvas } from "../IDesignerCanvas";
 import { AbstractExtension } from './AbstractExtension';
@@ -20,16 +20,15 @@ export class TransformOriginExtension extends AbstractExtension {
   override extend() {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
-    const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: -parseFloat(to[0]), y: -parseFloat(to[1]) }, this.designerCanvas);
-    const toDOMPoint = transformedCornerPoints[0];
-
+    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]), y: parseFloat(to[1]) }, this.designerCanvas);
+   
     this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
     this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     this._circle.style.cursor = 'pointer';
 
     this._circle2 = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 1 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
     this._circle2.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
-    this._circle2.style.pointerEvents = 'pointer-events: none';
+    this._circle2.style.pointerEvents = 'none';
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window

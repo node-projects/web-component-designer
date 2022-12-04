@@ -160,6 +160,10 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   return byParentTransformedPointRelatedToCanvas;
 }
 
+export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement, point: IPoint, designerCanvas: IDesignerCanvas): IPoint {
+  return getDesignerCanvasNormalizedTransformedCornerDOMPoints(element, { x: -point.x, y: -point.y }, designerCanvas)[0];
+}
+
 export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: IPoint | null, designerCanvas: IDesignerCanvas): [DOMPoint, DOMPoint, DOMPoint, DOMPoint] {
   const topleft = 0;
   const topright = 1;
