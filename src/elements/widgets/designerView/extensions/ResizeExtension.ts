@@ -220,7 +220,6 @@ export class ResizeExtension extends AbstractExtension {
               (<HTMLElement>this.extendedItem.element).style.width = width + 'px';
               height = (this._initialSizes[i].height + deltaY);
               (<HTMLElement>this.extendedItem.element).style.height = height + 'px';
-              console.log((<HTMLElement>this.extendedItem.element).style.transformOrigin);
               if (this.resizeAllSelected) {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {

@@ -3,7 +3,7 @@ import { ServiceContainer } from '../../services/ServiceContainer';
 import { BaseCustomWebComponentLazyAppend, css, DomHelper } from '@node-projects/base-custom-webcomponent';
 import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor';
 import { IDesignItem } from '../../item/IDesignItem';
-import { IPropertiesService } from '../../services/propertiesService/IPropertiesService';
+import { IPropertiesService, RefreshMode } from '../../services/propertiesService/IPropertiesService';
 import { ValueType } from '../../services/propertiesService/ValueType';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
@@ -16,6 +16,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _serviceContainer: ServiceContainer;
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
+
+  public get propertiesService() {
+    return this._propertiesService;
+  }
 
   static override get style() {
     return css`
@@ -107,7 +111,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public createElements(designItem: IDesignItem) {
-    if (this._propertiesService && (this._propertiesService.listNeedsRefresh(designItem)) || this._propertyMap.size == 0) {
+    if (this._propertiesService && (this._propertiesService.getRefreshMode(designItem) != RefreshMode.none) || this._propertyMap.size == 0) {
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
       if (this._propertiesService) {

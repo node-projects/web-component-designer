@@ -1,4 +1,4 @@
-import { IPropertiesService } from "../IPropertiesService";
+import { IPropertiesService, RefreshMode } from "../IPropertiesService";
 import { IProperty } from '../IProperty';
 import { IDesignItem } from '../../../item/IDesignItem';
 import { ValueType } from "../ValueType";
@@ -10,7 +10,7 @@ import { NodeType } from "../../../item/NodeType";
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
-  abstract listNeedsRefresh(designItem: IDesignItem): boolean;
+  abstract getRefreshMode(designItem: IDesignItem): RefreshMode;
 
   abstract isHandledElement(designItem: IDesignItem): boolean;
 
@@ -29,6 +29,9 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       if (property.propertyType == PropertyType.cssValue) {
         d.styles.set(property.name, value);
         (<HTMLElement>d.element).style[property.name] = value;
+        //unkown css property names do not trigger the mutation observer of property grid, 
+        //fixed by assinging stle again to the attribute
+        (<HTMLElement>d.element).setAttribute('style',(<HTMLElement>d.element).getAttribute('style'));
       } else {
         let attributeName = property.attributeName
         if (!attributeName)

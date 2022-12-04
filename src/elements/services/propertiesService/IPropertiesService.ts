@@ -5,9 +5,15 @@ import { ValueType } from './ValueType';
 import { BindingTarget } from '../../item/BindingTarget';
 import { IBinding } from '../../item/IBinding';
 
+export enum RefreshMode {
+  none,
+  full,
+  fullOnValueChange
+}
+
 export interface IPropertiesService extends IService {
   //readonly name: string;
-  listNeedsRefresh(designItem: IDesignItem): boolean;
+  getRefreshMode(designItem: IDesignItem): RefreshMode;
 
   isHandledElement(designItem: IDesignItem): boolean;
   getProperties(designItem: IDesignItem): IProperty[];
