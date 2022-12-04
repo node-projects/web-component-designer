@@ -168,6 +168,20 @@ export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement
   return getDesignerCanvasNormalizedTransformedCornerDOMPoints(element, { x: -point.x, y: -point.y }, designerCanvas)[0];
 }
 
+export function getElementSize(element: HTMLElement) {
+  let width = element.offsetWidth;
+  let height = element.offsetHeight;
+  if (element instanceof SVGElement && (<any>element).width) {
+    width = (<SVGAnimatedLength>(<any>element).width).baseVal.value
+    height = (<SVGAnimatedLength>(<any>element).height).baseVal.value
+  } else if (element instanceof SVGGraphicsElement) {
+    let bbox = element.getBBox()
+    width = bbox.width;
+    height = bbox.height;
+  }
+  return { width, height }
+}
+
 export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: IPoint | null, designerCanvas: IDesignerCanvas): [DOMPoint, DOMPoint, DOMPoint, DOMPoint] {
   const topleft = 0;
   const topright = 1;
@@ -183,8 +197,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
     }
   )
 
-  let width = element.offsetWidth;
-  let height = element.offsetHeight;
+  let { width, height } = getElementSize(element);
 
   const elementWithoutTransformCornerDOMPoints: DOMPoint[] = [];
   elementWithoutTransformCornerDOMPoints[topleft] = DOMPoint.fromPoint(

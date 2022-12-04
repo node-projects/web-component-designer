@@ -26,7 +26,9 @@ export class DefaultModelCommandService implements IModelCommandService {
   }
 
   async executeCommand(designerCanvas: IDesignerCanvas, command: IUiCommand) {
+
     let sel = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
+    const selection = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
     if (command.type == CommandType.moveBackward) {
       let idx = sel.parent.indexOf(sel) - 1;
       if (idx >= 0)
@@ -50,7 +52,7 @@ export class DefaultModelCommandService implements IModelCommandService {
     else if (command.type == CommandType.arrangeLeft) {
       ArrangeHelper.arrangeElements(Orientation.LEFT, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
-    else if (command.type == CommandType.arrangeBottom){
+    else if (command.type == CommandType.arrangeBottom) {
       ArrangeHelper.arrangeElements(Orientation.BOTTOM, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     }
     else if (command.type == CommandType.arrangeCenter) {
@@ -75,26 +77,25 @@ export class DefaultModelCommandService implements IModelCommandService {
       }
       grp.commit();
     }
-    else if(command.type == CommandType.rotateCounterClockwise){
+    else if (command.type == CommandType.rotateCounterClockwise) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateCounterClockwise');
       var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
       let degree = 0;
       let rotation = "";
-      if(trf != null){
-        try{
-          if(trf.includes('-'))
+      if (trf != null) {
+        try {
+          if (trf.includes('-'))
             degree = parseInt(trf.match(/\d+/)[0]) * -1;
           else
             degree = parseInt(trf.match(/\d+/)[0]);
-  
-            rotation = "rotate(" + (degree - 90) + "deg)";
-          }
-          catch{
-            rotation = "rotate(-90deg)"
-          }
+
+          rotation = "rotate(" + (degree - 90) + "deg)";
+        }
+        catch {
+          rotation = "rotate(-90deg)"
+        }
       }
-      else
-      {
+      else {
         rotation = "rotate(-90deg)";
       }
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -102,26 +103,25 @@ export class DefaultModelCommandService implements IModelCommandService {
       }
       grp.commit();
     }
-    else if(command.type == CommandType.rotateClockwise){
+    else if (command.type == CommandType.rotateClockwise) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateClockwise');
       var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
       let degree = 0;
       let rotation = "";
-      if(trf != null){
-        try{
-        if(trf.includes('-'))
-          degree = parseInt(trf.match(/\d+/)[0]) * -1;
-        else
-          degree = parseInt(trf.match(/\d+/)[0]);
+      if (trf != null) {
+        try {
+          if (trf.includes('-'))
+            degree = parseInt(trf.match(/\d+/)[0]) * -1;
+          else
+            degree = parseInt(trf.match(/\d+/)[0]);
 
           rotation = "rotate(" + (degree + 90) + "deg)";
         }
-        catch{
+        catch {
           rotation = "rotate(90deg)"
         }
       }
-      else
-      {
+      else {
         rotation = "rotate(90deg)";
       }
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -131,6 +131,8 @@ export class DefaultModelCommandService implements IModelCommandService {
     }
     else
       return null;
+
+    designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(selection);
     return true;
   }
 }

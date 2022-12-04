@@ -50,18 +50,27 @@ export function getParentElementIncludingSlots(element: Element): Element {
   return element.parentElement;
 }
 
-export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element)
-{
+export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element) {
   var offsetLeft = 0;
-  var offsetTop  = 0;
-  
-  while (element)
-  {
+  var offsetTop = 0;
+
+  while (element) {
+    if (element instanceof SVGSVGElement) {
+      const bcEl = element.getBoundingClientRect();
+      const bcPar = element.parentElement.getBoundingClientRect();
+      offsetLeft += bcEl.left - bcPar.left;
+      offsetTop += bcEl.top - bcPar.top;
+      element = element.parentElement;
+    } else if (element instanceof SVGGraphicsElement) {
+      let bbox = element.getBBox();
+      offsetLeft += bbox.x;
+      offsetTop += bbox.y;
+      element = element.parentElement;
+    } else {
       offsetLeft += element.offsetLeft;
-      offsetTop  += element.offsetTop;
-  
+      offsetTop += element.offsetTop;
       element = element.offsetParent;
+    }
   }
-  
-  return {offsetLeft: offsetLeft, offsetTop: offsetTop};
+  return { offsetLeft: offsetLeft, offsetTop: offsetTop };
 }
