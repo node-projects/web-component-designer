@@ -34,7 +34,7 @@ export class MetricsEditor extends BaseCustomWebComponentConstructorAppend {
 }
 
 div.ct {
-  width:280px;height:180px;
+  width:280px;height:120px;
 }
 
 div span {
@@ -88,57 +88,48 @@ span {
 
   public static override readonly template = html`
   <div class="ct"><span title="position">position</span>
-  <div class="top">-</div><br><div class="left">-</div><div class="ct"><span title="margin">margin</span>
-  <div id="testdiv" [contentEditable]="contentEditable"  @dblclick="onDoubleClick" class="top">-</div><br><div class="left">-</div><div class="ct"><span title="border">border</span>
-  <div class="top">-</div><br><div class="left">-</div><div class="ct"><span title="padding">padding</span>
-  <div class="top">-</div><br><div class="left">-</div><div class="ct" style="font-size:6px"><div class="left">-</div>
-  x
-  <div class="right">-</div>
-  </div><div class="right">-</div><br><div class="bottom">-</div></div><div class="right">-</div><br><div class="bottom">-</div></div><div class="right">-</div><br><div class="bottom">-</div></div><div class="right">-</div><br><div class="bottom">-</div></div>
+  <div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct"><span title="margin">margin</span>
+  <div data-style="margin" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct"><span title="border">border</span>
+  <div data-style="border" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct"><span title="padding">padding</span>
+  <div data-style="padding" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct" style="font-size:6px"><div data-style="element" @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div>
+  &nbsp;x&nbsp;
+  <div data-style="element" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div>
+  </div><div data-style="padding" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="padding" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div><div data-style="border" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="border" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div><div data-style="margin" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="margin" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div><div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div>
   `;
 
   public property: string;
   public unsetValue: string;
-  //private _root: HTMLDivElement;
-  //private _contentEditable: HTMLDivElement;
-
-
-
-  _updateValue() {
-  }
 
   ready() {
-    //this._root = this._getDomElement<HTMLDivElement>("testdiv");
     this._parseAttributesToProperties();
-    this._updateValue();
     this._assignEvents();
   }
 
   onDoubleClick(event: PointerEvent) {
-
-    let element = this._getDomElement<HTMLDivElement>("testdiv");
-
-    // contentEditable setzten
+    const element = event.target as HTMLDivElement;
     element.setAttribute("contentEditable", "");
 
-    // - rausnehmen
-    element.innerHTML = "-";
-    // Input auswerten
+    const range = document.createRange();
+    const sel = window.getSelection();
+    range.setStart(element.firstChild, 0);
+    range.setEndAfter(element.lastChild);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
 
-    //Input in div schreiben
-
-    // contentEditable false setzen mit EnterTaste
-
-    element.onkeydown = (e) => {
-
-      if (e.key == "Enter") {
-        let _input = element.innerHTML;
-        //let value = document.createElement("input");
-        element.style.marginTop = _input;
-        element.removeAttribute("contentEditable");
-        element.innerHTML = "-";
-      }
-    };
+  onKeyDown(event: KeyboardEvent) {
+    const element = event.target as HTMLDivElement;
+    if (event.key == "Enter") {
+      element.removeAttribute("contentEditable");
+      const value = element.innerHTML;
+      const valueChangedEvent = new CustomEvent('value-changed', {
+        detail: {
+          style: element.dataset['style'],
+          value: value
+        }
+      });
+      this.dispatchEvent(valueChangedEvent);
+    }
   }
 }
 
