@@ -155,7 +155,7 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
     if (actualElement == element) {
       parentElementTransformOrigin.x -= extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x;
       parentElementTransformOrigin.y -= extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y;
-    } 
+    }
 
     const parentElementTransformOriginToPointVector: DOMPointReadOnly = new DOMPointReadOnly(
       -parentElementTransformOrigin.x + (element == actualElement ? point.x : byParentTransformedPointRelatedToCanvas.x),
@@ -248,7 +248,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top3 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[bottomright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[bottomright].y));
 
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(element, <HTMLElement>designerCanvas.canvas, true);
-  
+
   let top0Transformed = top0.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
   let top1Transformed = top1.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
   let top2Transformed = top2.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
