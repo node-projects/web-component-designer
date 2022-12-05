@@ -94,7 +94,7 @@ export class ResizeExtension extends AbstractExtension {
 
         (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[0].width + 'px';
 
-        const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseInt(x.replace('px', '')));
+        const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseFloat(x.replace('px', '')));
         const transformOrigin: DOMPoint = new DOMPoint(toArr[0], toArr[1]);
         this._initialComputedTransformOrigins.push(transformOrigin);
         this._initialTransformOrigins.push((<HTMLElement>this.extendedItem.element).style.transformOrigin);
@@ -335,10 +335,10 @@ export class ResizeExtension extends AbstractExtension {
         this.extendedItem.setStyle('left', normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'left'));
         this.extendedItem.setStyle('top', normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'top'));
 
-        let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
+        let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
         (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
 
-        let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseInt(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
+        let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
         let p1 = new DOMPoint(p1Abs.x - p3Abs.x, -(p1Abs.y - p3Abs.y));
         let matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
         let deltaX = 0;
