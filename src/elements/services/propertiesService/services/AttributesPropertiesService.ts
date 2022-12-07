@@ -37,8 +37,7 @@ export class AttributesPropertiesService implements IPropertiesService {
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
-      d.attributes.set(<string>property.name, value);
-      d.element.setAttribute(property.name, value);
+      d.setAttribute(<string>property.name, value);
     }
     cg.commit();
   }
@@ -49,8 +48,7 @@ export class AttributesPropertiesService implements IPropertiesService {
 
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
-      d.attributes.delete(<string>property.name);
-      d.element.removeAttribute(property.name);
+      d.removeAttribute(<string>property.name);
       d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
       });

@@ -27,8 +27,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        d.styles.set(property.name, value);
-        (<HTMLElement>d.element).style[property.name] = value;
+        d.setStyle(property.name, value);
         //unkown css property names do not trigger the mutation observer of property grid, 
         //fixed by assinging stle again to the attribute
         (<HTMLElement>d.element).setAttribute('style',(<HTMLElement>d.element).getAttribute('style'));
@@ -40,19 +39,15 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
 
         if (property.type === 'object') {
           const json = JSON.stringify(value);
-          d.attributes.set(attributeName, json);
-          d.element.setAttribute(attributeName, json);
-        } else if (property.type == 'boolean' && !value) {
-          d.attributes.delete(attributeName);
-          d.element.removeAttribute(attributeName);
+          d.setAttribute(attributeName, json);
+         } else if (property.type == 'boolean' && !value) {
+          d.removeAttribute(attributeName);
         }
         else if (property.type == 'boolean' && value) {
-          d.attributes.set(attributeName, "");
-          d.element.setAttribute(attributeName, "");
+          d.setAttribute(attributeName, "");
         }
         else {
-          d.attributes.set(attributeName, value);
-          d.element.setAttribute(attributeName, value);
+          d.setAttribute(attributeName, value);
         }
       }
       this._notifyChangedProperty(d, property, value);
@@ -68,16 +63,13 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     const cg = designItems[0].openGroup("properties cleared");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        d.styles.delete(property.name);
-        (<HTMLElement>d.element).style[property.name] = '';
+        d.removeStyle(property.name);
 
       } else {
         let attributeName = property.attributeName
         if (!attributeName)
           attributeName = PropertiesHelper.camelToDashCase(property.name);
-
-        d.attributes.delete(attributeName);
-        d.element.removeAttribute(attributeName);
+        d.removeAttribute(attributeName);
       }
       d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
