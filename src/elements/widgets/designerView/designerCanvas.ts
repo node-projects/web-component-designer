@@ -490,7 +490,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.instanceServiceContainer = new InstanceServiceContainer(this);
     this.instanceServiceContainer.register("undoService", new UndoService(this));
-    this.instanceServiceContainer.register("selectionService", new SelectionService);
+    this.instanceServiceContainer.register("selectionService", new SelectionService(this));
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
@@ -570,7 +570,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.rootDesignItem._removeChildInternal(i);
     this.addDesignItems(designItems);
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
-    this.instanceServiceContainer.selectionService.setSelectedElements(null);
+    (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
@@ -750,8 +750,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, getComputedStyle(newContainer.element)))
         containerService.enterContainer(newContainer, [di]);
         this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
-        grp.commit();
-        requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
+        requestAnimationFrame(() => {
+          this.instanceServiceContainer.selectionService.setSelectedElements([di]);
+          grp.commit();
+        });
       }
     }
   }

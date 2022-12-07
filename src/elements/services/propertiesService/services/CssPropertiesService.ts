@@ -206,7 +206,7 @@ export class CssPropertiesService extends CommonPropertiesService {
     if (this.name == 'styles') {
       if (!designItem)
         return [];
-      let arr: IProperty[] = Array.from(designItem.styles.keys(), x => ({ name: x, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue }));
+      let arr: IProperty[] = Array.from(designItem.styles(), ([key, value])  => ({ name: key, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue }));
       arr.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return arr;
     }

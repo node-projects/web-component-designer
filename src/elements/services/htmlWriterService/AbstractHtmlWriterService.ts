@@ -13,7 +13,7 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
   writeAttributes(indentedTextWriter: ITextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
     if (designItem.hasAttributes) {
-      for (const a of designItem.attributes) {
+      for (const a of designItem.attributes()) {
         indentedTextWriter.write(' ');
         if (typeof a[1] === 'string') {
           if (a[1] === "")
@@ -59,9 +59,9 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
   writeStyles(indentedTextWriter: ITextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
     if (designItem.hasStyles) {
       indentedTextWriter.write(' style="');
-      let styles = designItem.styles;
+      let styles = designItem.styles();
       if (options.compressCssToShorthandProperties)
-        styles = CssCombiner.combine(styles);
+        styles = CssCombiner.combine(new Map(styles));
       for (const s of styles) {
         if (s[0]) {
           indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');

@@ -63,7 +63,7 @@ export class DefaultModelCommandService implements IModelCommandService {
     }
     else if (command.type == CommandType.unifyHeight) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('unifyHeight');
-      const height = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('height');
+      const height = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('height');
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         s.setStyle('height', height);
       }
@@ -71,7 +71,7 @@ export class DefaultModelCommandService implements IModelCommandService {
     }
     else if (command.type == CommandType.unifyWidth) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('unifyWidth');
-      const width = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('width');
+      const width = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('width');
       for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         s.setStyle('width', width);
       }
@@ -79,7 +79,7 @@ export class DefaultModelCommandService implements IModelCommandService {
     }
     else if (command.type == CommandType.rotateCounterClockwise) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateCounterClockwise');
-      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
+      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('transform');
       let degree = 0;
       let rotation = "";
       if (trf != null) {
@@ -105,7 +105,7 @@ export class DefaultModelCommandService implements IModelCommandService {
     }
     else if (command.type == CommandType.rotateClockwise) {
       const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateClockwise');
-      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.styles.get('transform');
+      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('transform');
       let degree = 0;
       let rotation = "";
       if (trf != null) {

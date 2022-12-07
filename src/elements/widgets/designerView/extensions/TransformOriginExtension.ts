@@ -32,8 +32,8 @@ export class TransformOriginExtension extends AbstractExtension {
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
-    if (this.extendedItem.styles.get('transform-origin')) {
-      this._oldValue = this.extendedItem.styles.get('transform-origin');
+    if (this.extendedItem.getStyle('transform-origin')) {
+      this._oldValue = this.extendedItem.getStyle('transform-origin');
     }
   }
 
