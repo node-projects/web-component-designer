@@ -96,8 +96,29 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         minimap: {
           size: 'fill'
         },
-        fixedOverflowWidgets: true
+        fixedOverflowWidgets: true,
+        scrollbar: {
+          useShadows: false,
+          verticalHasArrows: true,
+          horizontalHasArrows: true,
+          vertical: 'visible',
+          horizontal: 'visible'
+        }
       });
+
+      //@ts-ignore
+      monaco.editor.defineTheme('myTheme', {
+        base: 'vs',
+        inherit: true,
+        //@ts-ignore
+        rules: [{ background: 'EDF9FA' }],
+        colors: {
+          'editor.selectionBackground': '#add6ff',
+          'editor.inactiveSelectionBackground': '#add6ff'
+        }
+      });
+      //@ts-ignore
+      monaco.editor.setTheme('myTheme');
 
       this._monacoEditor.layout();
       let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
