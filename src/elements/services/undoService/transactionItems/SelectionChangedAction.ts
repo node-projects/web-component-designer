@@ -16,7 +16,11 @@ export class SelectionChangedAction implements ITransactionItem {
     title?: string;
 
     get affectedItems() {
-        return [...this.oldSelection, ...this.newSelection];
+        if (this.oldSelection && this.newSelection)
+            return [...this.oldSelection, ...this.newSelection];
+        if (this.oldSelection)
+            return [...this.oldSelection];
+        return [...this.newSelection];
     }
 
     undo() {
