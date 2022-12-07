@@ -12,7 +12,7 @@ export class UndoService implements IUndoService {
   private _transactionStack: ChangeGroup[] = [];
   private _designerCanvas: IDesignerCanvas;
 
-  constructor(designerCanvas?: IDesignerCanvas) {
+  constructor(designerCanvas: IDesignerCanvas) {
     this._designerCanvas = designerCanvas;
   }
 

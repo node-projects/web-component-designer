@@ -2,12 +2,24 @@ import { ISelectionService } from './ISelectionService';
 import { IDesignItem } from '../../item/IDesignItem';
 import { ISelectionChangedEvent } from './ISelectionChangedEvent';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { SelectionChangedAction } from '../undoService/transactionItems/SelectionChangedAction';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas';
 
 export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;
   selectedElements: IDesignItem[] = [];
+  _designerCanvas: IDesignerCanvas
+
+  constructor(designerCanvas: IDesignerCanvas) {
+    this._designerCanvas = designerCanvas;
+  }
 
   setSelectedElements(designItems: IDesignItem[]) {
+    const action = new SelectionChangedAction(this.selectedElements, designItems, this);
+    this._designerCanvas.instanceServiceContainer.undoService.execute(action);
+  }
+
+  _withoutUndoSetSelectedElements(designItems: IDesignItem[]) {
     let oldSelectedElements = this.selectedElements;
     if (!designItems) {
       this.selectedElements = [];

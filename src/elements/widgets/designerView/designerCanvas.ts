@@ -490,7 +490,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.instanceServiceContainer = new InstanceServiceContainer(this);
     this.instanceServiceContainer.register("undoService", new UndoService(this));
-    this.instanceServiceContainer.register("selectionService", new SelectionService);
+    this.instanceServiceContainer.register("selectionService", new SelectionService(this));
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
