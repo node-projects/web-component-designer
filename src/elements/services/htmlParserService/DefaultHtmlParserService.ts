@@ -11,7 +11,7 @@ export class DefaultHtmlParserService implements IHtmlParserService {
     return this.createDesignItems(doc.body.childNodes, serviceContainer, instanceServiceContainer);
   }
 
-  public createDesignItems(elements: NodeListOf<ChildNode> | Node[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+  public createDesignItems(elements: NodeListOf<ChildNode> | Node[] | HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     let res: IDesignItem[] = [];
     for (let el of elements) {
       res.push(this._createDesignItemsRecursive(el, serviceContainer, instanceServiceContainer))
