@@ -8,10 +8,10 @@ export class DefaultHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    return this.createDesignItems(doc.body.children, serviceContainer, instanceServiceContainer);
+    return this.createDesignItems(doc.body.childNodes, serviceContainer, instanceServiceContainer);
   }
 
-  public createDesignItems(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+  public createDesignItems(elements: NodeListOf<ChildNode> | Node[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     let res: IDesignItem[] = [];
     for (let el of elements) {
       res.push(this._createDesignItemsRecursive(el, serviceContainer, instanceServiceContainer))
@@ -19,7 +19,7 @@ export class DefaultHtmlParserService implements IHtmlParserService {
     return res;
   }
 
-  private _createDesignItemsRecursive(element: Element, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
-    return DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
+  private _createDesignItemsRecursive(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+    return DesignItem.createDesignItemFromInstance(node, serviceContainer, instanceServiceContainer);
   }
 }
