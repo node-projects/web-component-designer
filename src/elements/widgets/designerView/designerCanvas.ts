@@ -570,7 +570,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.rootDesignItem._removeChildInternal(i);
     this.addDesignItems(designItems);
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
-    this.instanceServiceContainer.selectionService.setSelectedElements(null);
+    (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
