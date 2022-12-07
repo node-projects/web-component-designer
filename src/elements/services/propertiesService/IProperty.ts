@@ -4,6 +4,7 @@ import { PropertyType } from './PropertyType';
 
 export interface IProperty {
   name: string;
+  renamable?: boolean;
   propertyName?: string;// normaly camelCased name of property
   attributeName?: string; // normaly dash seperated name of property
   description?: string;

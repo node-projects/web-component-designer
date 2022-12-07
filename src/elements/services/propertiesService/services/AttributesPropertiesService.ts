@@ -26,7 +26,7 @@ export class AttributesPropertiesService implements IPropertiesService {
     if (designItem) {
       let p: IProperty[] = [];
       for (let a of designItem.attributes.keys()) {
-        p.push({ name: a, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
+        p.push({ name: a, renamable: true, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
       }
       p.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return p;

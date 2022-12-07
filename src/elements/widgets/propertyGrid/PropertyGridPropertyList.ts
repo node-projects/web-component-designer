@@ -158,11 +158,28 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
                 this._div.appendChild(label);
 
               } else {
-                let label = document.createElement("label");
-                label.htmlFor = p.name;
-                label.textContent = p.name;
-                label.title = p.name;
-                this._div.appendChild(label);
+                if (!p.renamable) {
+                  let label = document.createElement("label");
+                  label.htmlFor = p.name;
+                  label.textContent = p.name;
+                  label.title = p.name;
+                  this._div.appendChild(label);
+                } else {
+                  let label = document.createElement("input");
+                  let input = <HTMLInputElement>editor.element;
+                  label.value = p.name;
+                  label.onkeyup = e => {
+                    if (e.key == 'Enter' && label.value) {
+                      p.service.clearValue(this._designItems, p);
+                      p.name = label.value;
+                      p.service.setValue(this._designItems, p, input.value)
+                      this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
+                    }
+                  }
+                  this._div.appendChild(label);
+                }
+
+
               }
 
               editor.element.id = p.name;
@@ -178,7 +195,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   public openContextMenu(event: MouseEvent, property: IProperty) {
     const ctxMenu: IContextMenuItem[] = [
-      { title: 'clear', action: (e) => property.service.clearValue(this._designItems, property) },
+      {
+        title: 'clear', action: (e) => {
+          property.service.clearValue(this._designItems, property);
+          this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
+        }
+      },
     ];
     if (this._serviceContainer.config.openBindingsEditor) {
       ctxMenu.push(...[
