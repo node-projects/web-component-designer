@@ -11,7 +11,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
 
   getBindings(designItem: IDesignItem): IBinding[] {
     let bindings: IBinding[] = null;
-    for (let a of designItem.attributes) {
+    for (let a of designItem.attributes()) {
       const name = a[0];
       const value = a[1];
       if ((value.startsWith('[[') || value.startsWith('{{')) && (value.endsWith('}}') || value.endsWith(']]'))) {

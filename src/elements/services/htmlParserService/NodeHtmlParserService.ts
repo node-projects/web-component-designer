@@ -60,7 +60,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
       let attr = item.attributes;
       for (let a in attr) {
         if (a !== 'style') {
-          designItem.attributes.set(a, attr[a])
+          designItem._withoutUndoSetAttribute(a, attr[a])
           if (manualCreatedElement) {
             element.setAttribute(a, attr[a]);
           }
@@ -79,7 +79,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
         let styleParser = new CssAttributeParser();
         styleParser.parse(style);
         for (let s of styleParser.entries) {
-          designItem.styles.set(s.name, s.value);
+          designItem._withoutUndoSetStyle(s.name, s.value);
           if (manualCreatedElement) {
             element.style[s.name] = s.value;
           }

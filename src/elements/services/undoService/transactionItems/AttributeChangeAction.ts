@@ -21,7 +21,7 @@ export class AttributeChangeAction implements ITransactionItem {
 
   undo() {
     if (this.oldValue == null) {
-      this.designItem.attributes.delete(this.name);
+      this.designItem._withoutUndoRemoveAttribute(this.name);
       try {
         this.designItem.element.removeAttribute(this.name);
       }
@@ -30,7 +30,7 @@ export class AttributeChangeAction implements ITransactionItem {
       }
     }
     else {
-      this.designItem.attributes.set(<string>this.name, this.oldValue);
+      this.designItem._withoutUndoSetAttribute(<string>this.name, this.oldValue);
       if (this.name != "draggable") {
         try {
           if (typeof this.oldValue === 'string')
@@ -45,7 +45,7 @@ export class AttributeChangeAction implements ITransactionItem {
 
   do() {
     if (this.newValue == null) {
-      this.designItem.attributes.delete(<string>this.name);
+      this.designItem._withoutUndoRemoveAttribute(<string>this.name);
       try {
         this.designItem.element.removeAttribute(this.name);
       }
@@ -54,7 +54,7 @@ export class AttributeChangeAction implements ITransactionItem {
       }
     }
     else {
-      this.designItem.attributes.set(<string>this.name, this.newValue);
+      this.designItem._withoutUndoSetAttribute(<string>this.name, this.newValue);
       if (this.name != "draggable") {
         try {
           if (typeof this.newValue === 'string')

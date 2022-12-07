@@ -90,9 +90,9 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       designItems.forEach((x) => {
         let has = false;
         if (property.propertyType == PropertyType.cssValue)
-          has = x.styles.has(property.name);
+          has = x.hasStyle(property.name);
         else
-          has = x.attributes.has(attributeName);
+          has = x.hasAttribute(attributeName);
         all = all && has;
         some = some || has;
       });
@@ -117,9 +117,9 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   getValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
       if (property.propertyType == PropertyType.cssValue) {
-        let lastValue = designItems[0].styles.get(property.name);
+        let lastValue = designItems[0].getStyle(property.name);
         for (const x of designItems) {
-          let value = x.styles.get(property.name);
+          let value = x.getStyle(property.name);
           if (value != lastValue) {
             lastValue = null;
             break;
@@ -132,8 +132,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           attributeName = PropertiesHelper.camelToDashCase(property.name);
 
         if (property.type == 'boolean')
-          return designItems[0].attributes.has(attributeName);
-        let lastValue = designItems[0].attributes.get(attributeName);
+          return designItems[0].hasAttribute(attributeName);
+        let lastValue = designItems[0].getAttribute(attributeName);
         /*
         for (const x of designItems) {
           let value = x.attributes.get(attributeName);

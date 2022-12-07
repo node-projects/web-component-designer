@@ -118,7 +118,7 @@ export class DefaultPlacementService implements IPlacementService {
       }
 
       const translationMatrix = new DOMMatrix().translate(transformMatrixParentTransformsCompensated.x, transformMatrixParentTransformsCompensated.y);
-      combineTransforms((<HTMLElement>designItem.element), designItem.styles.get('transform'), translationMatrix.toString());
+      combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
   }
 
@@ -126,9 +126,9 @@ export class DefaultPlacementService implements IPlacementService {
     let filterdItems = filterChildPlaceItems(items);
     for (let i of filterdItems) {
       if (i.lastContainerSize) {
-        if (!i.styles.has('width'))
+        if (!i.hasStyle('width'))
           i.setStyle('width', i.lastContainerSize.width + 'px');
-        if (!i.styles.has('height'))
+        if (!i.hasStyle('height'))
           i.setStyle('height', i.lastContainerSize.height + 'px');
       }
     }
@@ -141,8 +141,8 @@ export class DefaultPlacementService implements IPlacementService {
     let filterdItems = filterChildPlaceItems(items);
     for (const designItem of filterdItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
-      const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.styles.get('transform') ?? ''));
-      (<HTMLElement>designItem.element).style.transform = designItem.styles.get('transform') ?? '';
+      const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.getStyle('transform') ?? ''));
+      (<HTMLElement>designItem.element).style.transform = designItem.getStyle('transform') ?? '';
       let track = {x: translation.x, y: translation.y};
       placeDesignItem(container, designItem, {x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y}, 'position');
     }

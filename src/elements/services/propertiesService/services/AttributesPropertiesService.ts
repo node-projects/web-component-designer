@@ -25,8 +25,8 @@ export class AttributesPropertiesService implements IPropertiesService {
   getProperties(designItem: IDesignItem): IProperty[] {
     if (designItem) {
       let p: IProperty[] = [];
-      for (let a of designItem.attributes.keys()) {
-        p.push({ name: a, renamable: true, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
+      for (let a of designItem.attributes()) {
+        p.push({ name: a[0], renamable: true, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
       }
       p.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return p;
@@ -59,11 +59,11 @@ export class AttributesPropertiesService implements IPropertiesService {
     let all = true;
     let some = false;
     if (designItems != null && designItems.length !== 0) {
-      if (designItems.length == 1 && typeof designItems[0].attributes.get(property.name) == 'object')
+      if (designItems.length == 1 && typeof designItems[0].getAttribute(property.name) == 'object')
         return ValueType.bound;
       let attributeName = property.name;
       designItems.forEach((x) => {
-        let has = x.attributes.has(attributeName);
+        let has = x.hasAttribute(attributeName);
         all = all && has;
         some = some || has;
       });
@@ -77,7 +77,7 @@ export class AttributesPropertiesService implements IPropertiesService {
   getValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
       let attributeName = property.name;
-      let lastValue = designItems[0].attributes.get(attributeName);
+      let lastValue = designItems[0].getAttribute(attributeName);
       if (typeof lastValue === 'object')
         return (<IBinding>lastValue).rawValue;
       /*
