@@ -4,11 +4,12 @@ import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { IDesignerExtension } from "../IDesignerExtension";
 import { IExtensionManager } from "../IExtensionManger";
 import { RectExtension } from "./RectExtension";
+import { isVisualSvgElement } from "../../../../helper/SvgHelper";
 
 export class RectExtentionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.node instanceof SVGRectElement) {
-      return true;
+      return isVisualSvgElement(designItem.node);;
     }
     return false;
   }

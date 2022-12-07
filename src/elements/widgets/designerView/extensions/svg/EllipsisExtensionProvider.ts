@@ -4,11 +4,12 @@ import { IDesignerCanvas } from "../../IDesignerCanvas";
 import { IDesignerExtension } from "../IDesignerExtension";
 import { IExtensionManager } from "../IExtensionManger";
 import { EllipsisExtension } from "./EllipsisExtension";
+import { isVisualSvgElement } from "../../../../helper/SvgHelper";
 
 export class EllipsisExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.node instanceof SVGEllipseElement) {
-      return true;
+      return isVisualSvgElement(designItem.node);
     }
     return false;
   }
