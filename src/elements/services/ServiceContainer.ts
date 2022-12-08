@@ -90,6 +90,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public readonly globalContext: GlobalContext = new GlobalContext(this);
 
+  public readonly options = {
+    zoomDesignerBackground : true
+  };
+
   public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
 
   get bindingService(): IBindingService {
