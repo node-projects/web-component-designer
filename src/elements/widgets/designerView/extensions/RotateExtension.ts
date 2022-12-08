@@ -110,7 +110,9 @@ export class RotateExtension extends AbstractExtension {
         let cg = this.extendedItem.openGroup("Rotate Elements");
         (<Element>event.target).releasePointerCapture(event.pointerId);
 
-        (<HTMLElement>this.extendedItem.element).style.transform = 'rotate(' + extractRotationAngleFromDOMMatrix(new DOMMatrix((<HTMLElement>this.extendedItem.element).style.transform)) + 'deg)';
+        let angle = extractRotationAngleFromDOMMatrix(new DOMMatrix((<HTMLElement>this.extendedItem.element).style.transform));
+        (<HTMLElement>this.extendedItem.element).style.transform = angle == 0 ? '' : 'rotate(' + angle + 'deg)';
+        
         this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
 
         cg.commit();
