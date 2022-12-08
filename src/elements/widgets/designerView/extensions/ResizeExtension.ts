@@ -81,8 +81,6 @@ export class ResizeExtension extends AbstractExtension {
         this._initialComputedTransformOrigins = [];
         this._initialTransformOrigins = [];
 
-
-
         //#region Calc elements' dimension
         const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
         (<HTMLElement>this.extendedItem.element).style.transform = '';
@@ -353,7 +351,12 @@ export class ResizeExtension extends AbstractExtension {
         deltaY = p4Abs.y - p1Abs.y;
 
         (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
-        this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
+        if (matrix.isIdentity) {
+          (<HTMLElement>this.extendedItem.element).style.removeProperty('transform');
+          this.extensionManager.refreshExtension(this.extendedItem);
+        } else {
+          this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
+        }        
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
             if (designItem !== this.extendedItem) {
