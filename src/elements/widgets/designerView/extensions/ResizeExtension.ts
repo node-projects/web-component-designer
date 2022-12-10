@@ -352,11 +352,9 @@ export class ResizeExtension extends AbstractExtension {
 
         (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
         if (matrix.isIdentity) {
-          (<HTMLElement>this.extendedItem.element).style.removeProperty('transform');
-          this.extensionManager.refreshExtension(this.extendedItem);
-        } else {
-          this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
-        }        
+          (<HTMLElement>this.extendedItem.element).style.transform = '';
+        }
+        this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
             if (designItem !== this.extendedItem) {

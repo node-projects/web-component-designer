@@ -1,6 +1,12 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 
-export interface IContentChanged {
-    changeType: "added" | "removed" | "moved" | 'parsed'
-    designItems?: IDesignItem[];
+interface IContentChangedParsed {
+    changeType: 'parsed'
 }
+
+interface IContentChangedWithDesignItems {
+    changeType: "added" | "removed" | "moved"
+    designItems: IDesignItem[];
+}
+
+export type IContentChanged = IContentChangedParsed | IContentChangedWithDesignItems;
