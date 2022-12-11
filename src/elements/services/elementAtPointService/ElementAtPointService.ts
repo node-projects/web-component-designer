@@ -1,6 +1,6 @@
-import { IElementAtPointService } from './IElementAtPointService';
-import { IDesignerCanvas } from '../../..';
-import { IPoint } from '../../../interfaces/IPoint';
+import { IElementAtPointService } from './IElementAtPointService.js';
+import { IPoint } from '../../../interfaces/IPoint.js';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 export class ElementAtPointService implements IElementAtPointService {
   getElementAtPoint(designerView: IDesignerCanvas, point: IPoint) {

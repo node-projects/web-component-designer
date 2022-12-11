@@ -1,9 +1,9 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions';
-import { AbstractPropertiesService } from './AbstractPropertiesService';
-import { PropertyType } from '../PropertyType';
-import { RefreshMode } from '../IPropertiesService';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions.js';
+import { AbstractPropertiesService } from './AbstractPropertiesService.js';
+import { PropertyType } from '../PropertyType.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class ListPropertiesService extends AbstractPropertiesService {
 

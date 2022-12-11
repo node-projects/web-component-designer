@@ -1,9 +1,9 @@
-import { ISelectionService } from './ISelectionService';
-import { IDesignItem } from '../../item/IDesignItem';
-import { ISelectionChangedEvent } from './ISelectionChangedEvent';
+import { ISelectionService } from './ISelectionService.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { ISelectionChangedEvent } from './ISelectionChangedEvent.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { SelectionChangedAction } from '../undoService/transactionItems/SelectionChangedAction';
-import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas';
+import { SelectionChangedAction } from '../undoService/transactionItems/SelectionChangedAction.js';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;

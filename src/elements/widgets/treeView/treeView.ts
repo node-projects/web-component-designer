@@ -1,8 +1,8 @@
 import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
-import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
-import { IDesignItem } from '../../item/IDesignItem';
-import { DesignItem } from '../../item/DesignItem';
-import { ITreeView } from './ITreeView';
+import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { DesignItem } from '../../item/DesignItem.js';
+import { ITreeView } from './ITreeView.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 
 export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeView {

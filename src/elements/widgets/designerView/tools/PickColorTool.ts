@@ -1,6 +1,6 @@
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
-import { ServiceContainer } from '../../../services/ServiceContainer';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
+import { ServiceContainer } from '../../../services/ServiceContainer.js';
 
 export class PickColorTool implements ITool {
 

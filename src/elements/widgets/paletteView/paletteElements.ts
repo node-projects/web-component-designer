@@ -1,8 +1,8 @@
-import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
-import { dragDropFormatNameElementDefinition } from '../../../Constants';
+import { IElementDefinition } from '../../services/elementsService/IElementDefinition.js';
+import { dragDropFormatNameElementDefinition } from '../../../Constants.js';
 import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { DrawElementTool } from '../designerView/tools/DrawElementTool';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { DrawElementTool } from '../designerView/tools/DrawElementTool.js';
 
 export class PaletteElements extends BaseCustomWebComponentLazyAppend {
 

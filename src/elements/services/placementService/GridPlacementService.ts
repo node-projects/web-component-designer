@@ -6,7 +6,7 @@ import { CalculateGridInformation } from '../../helper/GridHelper.js';
 import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
-import { DefaultPlacementService } from './DefaultPlacementService';
+import { DefaultPlacementService } from './DefaultPlacementService.js';
 
 export class GridPlacementService implements IPlacementService {
 

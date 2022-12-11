@@ -1,10 +1,10 @@
-import { getTextWidth } from "../../../helper/TextHelper";
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../helper/TransformHelper";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
+import { getTextWidth } from '../../../helper/TextHelper.js';
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { NamedTools } from "../tools/NamedTools.js";
-import { AbstractExtension } from './AbstractExtension';
-import { IExtensionManager } from "./IExtensionManger";
+import { AbstractExtension } from './AbstractExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 
 const extensionWidth = 60;
 

@@ -7,7 +7,7 @@ import { DesignerView } from "../../designerView.js";
 //import "../designerToolbarGenerics/designerToolsButtons.js";
 //import "./popups/DrawToolPopup.js";
 //import "./popups/SelectorToolsPopup.js";
-import { DesignerToolbarButton } from './DesignerToolbarButton';
+import { DesignerToolbarButton } from './DesignerToolbarButton.js';
 
 export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
   static override readonly style = css`

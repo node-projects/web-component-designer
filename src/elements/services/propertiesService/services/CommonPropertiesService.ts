@@ -1,8 +1,8 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { PropertyType } from "../PropertyType";
-import { AbstractPropertiesService } from "./AbstractPropertiesService";
-import { RefreshMode } from '../IPropertiesService';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { PropertyType } from '../PropertyType.js';
+import { AbstractPropertiesService } from './AbstractPropertiesService.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class CommonPropertiesService extends AbstractPropertiesService {
 

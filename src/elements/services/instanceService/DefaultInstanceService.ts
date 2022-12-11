@@ -1,13 +1,13 @@
-import { IInstanceService } from './IInstanceService';
-import { IElementDefinition } from '../elementsService/IElementDefinition';
-import { IDesignerInstance } from './IDesignerInstance';
-import type { ServiceContainer } from '../ServiceContainer';
-import type { InstanceServiceContainer } from '../InstanceServiceContainer';
-import { IPropertiesService } from '../propertiesService/IPropertiesService';
-import { IDesignItem } from '../../item/IDesignItem';
-import { DesignItem } from '../../item/DesignItem';
-import { encodeXMLChars } from '../../helper/XmlHelper';
-import { newElementFromString } from '../../helper/ElementHelper';
+import { IInstanceService } from './IInstanceService.js';
+import { IElementDefinition } from '../elementsService/IElementDefinition.js';
+import { IDesignerInstance } from './IDesignerInstance.js';
+import type { ServiceContainer } from '../ServiceContainer.js';
+import type { InstanceServiceContainer } from '../InstanceServiceContainer.js';
+import { IPropertiesService } from '../propertiesService/IPropertiesService.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { DesignItem } from '../../item/DesignItem.js';
+import { encodeXMLChars } from '../../helper/XmlHelper.js';
+import { newElementFromString } from '../../helper/ElementHelper.js';
 
 export class DefaultInstanceService implements IInstanceService {
   async getElement(definition: IElementDefinition, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem> {

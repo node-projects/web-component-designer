@@ -1,15 +1,15 @@
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { css, DomHelper, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
-import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
 import { DesignerCanvas } from "./designerCanvas.js";
 import { DomConverter } from './DomConverter.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
-import { PlainScrollbar } from '../../controls/PlainScrollbar';
+import { PlainScrollbar } from '../../controls/PlainScrollbar.js';
 import { DesignerToolbar } from './tools/toolBar/DesignerToolbar.js';
 
 

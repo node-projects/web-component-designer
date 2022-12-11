@@ -1,7 +1,7 @@
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { IDesignerExtension } from "./IDesignerExtension";
-import { IExtensionManager } from "./IExtensionManger";
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { IDesignerExtension } from './IDesignerExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 import { AbstractExtensionBase } from "./AbstractExtensionBase.js";
 
 export abstract class AbstractExtension extends AbstractExtensionBase implements IDesignerExtension {

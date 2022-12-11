@@ -1,13 +1,13 @@
-import { IProperty } from '../../services/propertiesService/IProperty';
-import { ServiceContainer } from '../../services/ServiceContainer';
+import { IProperty } from '../../services/propertiesService/IProperty.js';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { BaseCustomWebComponentLazyAppend, css, DomHelper } from '@node-projects/base-custom-webcomponent';
-import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor';
-import { IDesignItem } from '../../item/IDesignItem';
-import { IPropertiesService, RefreshMode } from '../../services/propertiesService/IPropertiesService';
-import { ValueType } from '../../services/propertiesService/ValueType';
-import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem';
-import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
-import { PropertyType } from '../../services/propertiesService/PropertyType';
+import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IPropertiesService, RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
+import { ValueType } from '../../services/propertiesService/ValueType.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+import { PropertyType } from '../../services/propertiesService/PropertyType.js';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 

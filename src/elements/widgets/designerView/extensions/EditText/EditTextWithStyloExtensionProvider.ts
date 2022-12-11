@@ -1,8 +1,8 @@
-import { IDesignerExtensionProvider } from "../IDesignerExtensionProvider";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { IDesignerExtension } from "../IDesignerExtension";
-import { IExtensionManager } from "../IExtensionManger";
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 import { EditTextWithStyloExtension } from "./EditTextWithStyloExtension.js";
 import { css } from "@node-projects/base-custom-webcomponent";
 

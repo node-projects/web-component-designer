@@ -1,8 +1,8 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { DomConverter } from "../../widgets/designerView/DomConverter.js";
 import { ICopyPasteService } from "./ICopyPasteService.js";
-import { ServiceContainer } from '../ServiceContainer';
-import { InstanceServiceContainer } from '../InstanceServiceContainer';
+import { ServiceContainer } from '../ServiceContainer.js';
+import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { IRect } from "../../../interfaces/IRect.js";
 
 export const positionsJsonMime = 'web text/positions';

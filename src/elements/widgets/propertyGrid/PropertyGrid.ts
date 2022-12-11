@@ -1,10 +1,10 @@
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { PropertyGridPropertyList } from './PropertyGridPropertyList';
-import { DesignerTabControl } from '../../controls/DesignerTabControl';
-import { IDesignItem } from '../../item/IDesignItem';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { PropertyGridPropertyList } from './PropertyGridPropertyList.js';
+import { DesignerTabControl } from '../../controls/DesignerTabControl.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
-import { RefreshMode } from '../../services/propertiesService/IPropertiesService';
+import { RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 

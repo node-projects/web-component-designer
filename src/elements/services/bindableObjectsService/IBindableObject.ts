@@ -1,4 +1,4 @@
-import { BindableObjectType } from "./BindableObjectType";
+import { BindableObjectType } from './BindableObjectType.js';
 
 export interface IBindableObject<T> {
     readonly type: BindableObjectType

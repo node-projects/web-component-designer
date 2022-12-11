@@ -1,5 +1,5 @@
-import { IService } from "../IService";
-import { IElementDefinition } from './IElementDefinition';
+import { IService } from '../IService.js';
+import { IElementDefinition } from './IElementDefinition.js';
 
 export interface IElementsService extends IService {
     readonly name: string

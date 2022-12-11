@@ -1,8 +1,8 @@
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { IExtensionManager } from "./IExtensionManger";
-import { OverlayLayerView } from '../overlayLayerView';
-import { OverlayLayer } from './OverlayLayer';
-import { IPoint } from "../../../../interfaces/IPoint";
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { IExtensionManager } from './IExtensionManger.js';
+import { OverlayLayerView } from '../overlayLayerView.js';
+import { OverlayLayer } from './OverlayLayer.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
 
 export abstract class AbstractExtensionBase {
   protected overlays: SVGElement[] = [];

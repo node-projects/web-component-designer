@@ -1,6 +1,6 @@
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
+import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 
 export type ContextmenuInitiator =  'designer' | 'treeView' | 'other';
 

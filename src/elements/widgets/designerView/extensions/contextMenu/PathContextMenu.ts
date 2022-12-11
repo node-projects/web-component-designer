@@ -1,8 +1,8 @@
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
-import { createPathD } from "../../../../helper/PathDataPolyfill";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";
+import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
+import { createPathD } from '../../../../helper/PathDataPolyfill.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
 
 export class PathContextMenu implements IContextMenuExtension {
 

@@ -1,12 +1,12 @@
-import { EventNames } from "../../../../enums/EventNames";
+import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from "../../../../interfaces/IPoint.js";
-import { ISize } from "../../../../interfaces/ISize";
+import { ISize } from '../../../../interfaces/ISize.js';
 import { transformPointByInverseMatrix, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition } from "../../../helper/TransformHelper.js";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { IPlacementView } from "../IPlacementView";
-import { AbstractExtension } from './AbstractExtension';
-import { IExtensionManager } from "./IExtensionManger";
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { IPlacementView } from '../IPlacementView.js';
+import { AbstractExtension } from './AbstractExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 
 export class ResizeExtension extends AbstractExtension {
 

@@ -1,9 +1,9 @@
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { ICodeView } from "./ICodeView";
-import { IActivateable } from '../../../interfaces/IActivateable';
-import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
-import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
+import { ICodeView } from './ICodeView.js';
+import { IActivateable } from '../../../interfaces/IActivateable.js';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
 
 export class CodeViewSimple extends BaseCustomWebComponentConstructorAppend implements ICodeView, IActivateable, IUiCommandHandler {
 

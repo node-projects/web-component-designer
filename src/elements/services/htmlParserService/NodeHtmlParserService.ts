@@ -1,10 +1,10 @@
-import { InstanceServiceContainer } from "../InstanceServiceContainer";
-import { ServiceContainer } from "../ServiceContainer";
-import { IHtmlParserService } from "./IHtmlParserService";
-import { IDesignItem } from '../../item/IDesignItem';
-import { DesignItem } from '../../item/DesignItem';
-import { CssAttributeParser } from "../../helper/CssAttributeParser";
-import { newElementFromString } from "../../helper/ElementHelper";
+import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
+import { ServiceContainer } from '../ServiceContainer.js';
+import { IHtmlParserService } from './IHtmlParserService.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { DesignItem } from '../../item/DesignItem.js';
+import { CssAttributeParser } from '../../helper/CssAttributeParser.js';
+import { newElementFromString } from '../../helper/ElementHelper.js';
 
 // Alternative Parser, cause when you use the Browser, it instanciates the CusomElements, and some Elemnts remove
 // attributes from their DOM, so you loose Data

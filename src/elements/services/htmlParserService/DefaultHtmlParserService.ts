@@ -1,8 +1,8 @@
-import { IDesignItem } from "../../..";
-import { InstanceServiceContainer } from "../InstanceServiceContainer";
-import { ServiceContainer } from "../ServiceContainer";
-import { IHtmlParserService } from "./IHtmlParserService";
-import { DesignItem } from '../../item/DesignItem';
+import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
+import { ServiceContainer } from '../ServiceContainer.js';
+import { IHtmlParserService } from './IHtmlParserService.js';
+import { DesignItem } from '../../item/DesignItem.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 
 export class DefaultHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {

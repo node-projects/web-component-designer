@@ -1,7 +1,7 @@
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { IDesignerExtension } from "./IDesignerExtension";
-import { IExtensionManager } from "./IExtensionManger";
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { IDesignerExtension } from './IDesignerExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 
 export interface IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean;

@@ -1,18 +1,18 @@
-import { ServiceContainer } from '../services/ServiceContainer';
-import { IDesignItem } from './IDesignItem';
-import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
-import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction';
-import { ChangeGroup } from '../services/undoService/ChangeGroup';
-import { NodeType } from './NodeType';
-import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction';
-import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
-import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
+import { ServiceContainer } from '../services/ServiceContainer.js';
+import { IDesignItem } from './IDesignItem.js';
+import { InstanceServiceContainer } from '../services/InstanceServiceContainer.js';
+import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction.js';
+import { ChangeGroup } from '../services/undoService/ChangeGroup.js';
+import { NodeType } from './NodeType.js';
+import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction.js';
+import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
+import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { CssAttributeParser } from '../helper/CssAttributeParser.js';
 import { ISize } from '../../interfaces/ISize.js';
 import { PropertiesHelper } from '../services/propertiesService/services/PropertiesHelper.js';
-import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction';
-import { DeleteAction } from '../..';
-import { DomConverter } from '../widgets/designerView/DomConverter';
+import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction.js';
+import { DomConverter } from '../widgets/designerView/DomConverter.js';
+import { DeleteAction } from '../services/undoService/transactionItems/DeleteAction.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'

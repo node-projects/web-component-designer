@@ -1,4 +1,4 @@
-import { ITextWriter } from './ITextWriter';
+import { ITextWriter } from './ITextWriter.js';
 
 export class SimpleTextWriter implements ITextWriter {
   private _textHolder: string = ''

@@ -1,40 +1,40 @@
-import { EventNames } from "../../../enums/EventNames";
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
-import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
-import { UndoService } from '../../services/undoService/UndoService';
-import { SelectionService } from '../../services/selectionService/SelectionService';
-import { DesignItem } from '../../item/DesignItem';
-import { IDesignItem } from '../../item/IDesignItem';
+import { EventNames } from '../../../enums/EventNames.js';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { IElementDefinition } from '../../services/elementsService/IElementDefinition.js';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
+import { UndoService } from '../../services/undoService/UndoService.js';
+import { SelectionService } from '../../services/selectionService/SelectionService.js';
+import { DesignItem } from '../../item/DesignItem.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
-import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants';
-import { ContentService } from '../../services/contentService/ContentService';
-import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
-import { IDesignerCanvas } from './IDesignerCanvas';
-import { Snaplines } from './Snaplines';
-import { IPlacementView } from './IPlacementView';
-import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
-import { CommandType } from '../../../commandHandling/CommandType';
-import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
-import { DefaultHtmlParserService } from "../../services/htmlParserService/DefaultHtmlParserService";
-import { ExtensionType } from "./extensions/ExtensionType";
-import { IExtensionManager } from "./extensions/IExtensionManger";
-import { ExtensionManager } from "./extensions/ExtensionManager";
-import { NamedTools } from "./tools/NamedTools";
-import { Screenshot } from '../../helper/Screenshot';
-import { dataURItoBlob, exportData, sleep } from "../../helper/Helper";
-import { IContextMenuItem } from "../../helper/contextMenu/IContextMenuItem";
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
-import { IPoint } from "../../../interfaces/IPoint";
-import { OverlayLayer } from "./extensions/OverlayLayer";
-import { OverlayLayerView } from './overlayLayerView';
-import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
+import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants.js';
+import { ContentService } from '../../services/contentService/ContentService.js';
+import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
+import { IDesignerCanvas } from './IDesignerCanvas.js';
+import { Snaplines } from './Snaplines.js';
+import { IPlacementView } from './IPlacementView.js';
+import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction.js';
+import { CommandType } from '../../../commandHandling/CommandType.js';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
+import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
+import { ExtensionType } from './extensions/ExtensionType.js';
+import { IExtensionManager } from './extensions/IExtensionManger.js';
+import { ExtensionManager } from './extensions/ExtensionManager.js';
+import { NamedTools } from './tools/NamedTools.js';
+import { Screenshot } from '../../helper/Screenshot.js';
+import { dataURItoBlob, exportData, sleep } from '../../helper/Helper.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
+import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
+import { IPoint } from '../../../interfaces/IPoint.js';
+import { OverlayLayer } from './extensions/OverlayLayer.js';
+import { OverlayLayerView } from './overlayLayerView.js';
+import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension.js';
 import { IRect } from "../../../interfaces/IRect.js";
 import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
-import { ContextMenu } from "../../helper/contextMenu/ContextMenu";
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -132,7 +132,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAFXmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjIwIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMjAiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIyMCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMjAiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSIKICAgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIKICAgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIgogICB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCIKICAgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCI+CiAgIDxkYzp0aXRsZT4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+QmFja2dyb3VuZGdyaWRfMTBweDwvcmRmOmxpPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnRpdGxlPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgRGVzaWduZXIgMS4xMC42IgogICAgICBzdEV2dDp3aGVuPSIyMDIyLTEyLTA4VDA5OjE1OjQ4KzAxOjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4fvgn+AAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kc8rRFEUxz8GjRhRLCiLl7BCftTExmLkV2ExnvJr8+bNvBk1b+b13kiyVbaKEhu/FvwFbJW1UkRKlrImNug5b2ZqJplzO/d87vfec7r3XPCpSd10KnrATGXs8FhImZtfUPwvBKjCTx/Nmu5YUzOjKiXt854yL952ebVKn/vXaqIxR4eyKuEh3bIzwuPCk6sZy+Md4UY9oUWFz4Q7bbmg8J2nR3L86nE8x98e22p4GHz1wkq8iCNFrCdsU1heTpuZXNHz9/FeEoilZmcktoq34BBmjBAKE4wwTJBeBmUO0iX96ZYVJfJ7svnTpCVXl9liDZtl4iTI0CnqilSPSTREj8lIsub1/29fHaO/L1c9EILKZ9d9bwf/Nvxsue7Xkev+HEP5E1ymCvnpQxj4EH2roLUdQN0GnF8VtMguXGxC06Ol2VpWKhf3GQa8nULtPDTcQPVirmf5fU4eQF2Xr7qGvX3okPN1S790cWfsRnax1QAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAC9JREFUOI1jfPr0KQNuICUlhUeWCY8cQTCqeWRoZvz//z8e6WfPntHK5lHNI0MzAMChCNMTuPcnAAAAAElFTkSuQmCC);
       image-rendering: pixelated;
       background-position: 0px 0px;
-      background-size: 3%;
       background-attachment: fixed;
       background-origin: -box;
       box-sizing: border-box;
@@ -522,6 +521,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
       this.addDesignItems(parser.createDesignItems(children, this.serviceContainer, this.instanceServiceContainer));
     }
+
+    if (!this.serviceContainer.options.zoomDesignerBackground) {
+      requestAnimationFrame(() => {
+        this._resizeBackgroundGrid();
+      });
+    }
   }
 
   connectedCallback() {
@@ -537,11 +542,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.KeyDown, this._onKeyDownBound, true);
       this.clickOverlay.addEventListener(EventNames.KeyUp, this._onKeyUpBound, true);
       this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClickBound, true);
-      if (!this.serviceContainer.options.zoomDesignerBackground) {
-        setTimeout(() => {
-          this._resizeBackgroundGrid();
-        }, 200);
-      }
     }
   }
 

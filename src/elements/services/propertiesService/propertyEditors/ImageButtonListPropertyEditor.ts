@@ -1,6 +1,6 @@
-import { IProperty } from "../IProperty";
-import { BasePropertyEditor } from './BasePropertyEditor';
-import { ValueType } from "../ValueType";
+import { IProperty } from '../IProperty.js';
+import { BasePropertyEditor } from './BasePropertyEditor.js';
+import { ValueType } from '../ValueType.js';
 import { ImageButtonListSelector } from "../../../controls/ImageButtonListSelector.js";
 import { PropertiesHelper } from "../services/PropertiesHelper.js";
 import { assetsPath } from "../../../../Constants.js";

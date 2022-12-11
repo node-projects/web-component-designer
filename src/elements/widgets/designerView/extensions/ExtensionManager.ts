@@ -1,12 +1,12 @@
-import { IContentChanged } from "../../../../index.js";
-import { DesignItem } from "../../../item/DesignItem";
-import { IDesignItem } from "../../../item/IDesignItem";
+import { DesignItem } from '../../../item/DesignItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 import { NodeType } from "../../../item/NodeType.js";
-import { ISelectionChangedEvent } from "../../../services/selectionService/ISelectionChangedEvent";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { ExtensionType } from './ExtensionType';
-import { IExtensionManager } from "./IExtensionManger";
-import { IDesignerExtension } from "./IDesignerExtension";
+import { ISelectionChangedEvent } from '../../../services/selectionService/ISelectionChangedEvent.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ExtensionType } from './ExtensionType.js';
+import { IExtensionManager } from './IExtensionManger.js';
+import { IDesignerExtension } from './IDesignerExtension.js';
+import { IContentChanged } from '../../../services/contentService/IContentChanged.js';
 
 export class ExtensionManager implements IExtensionManager {
 

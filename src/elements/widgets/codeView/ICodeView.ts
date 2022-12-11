@@ -1,6 +1,6 @@
-import { IUiCommandHandler } from "../../../commandHandling/IUiCommandHandler";
-import { IDisposable } from "../../../interfaces/IDisposable";
-import { IStringPosition } from "../../services/htmlWriterService/IStringPosition";
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IDisposable } from '../../../interfaces/IDisposable.js';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 
 export interface ICodeView extends IUiCommandHandler, IDisposable {

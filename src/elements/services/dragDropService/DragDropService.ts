@@ -1,6 +1,6 @@
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { IDragDropService } from "./IDragDropService.js";
-import { DesignItem } from '../../item/DesignItem';
+import { DesignItem } from '../../item/DesignItem.js';
 import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
 
 export class DragDropService implements IDragDropService {

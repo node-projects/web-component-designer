@@ -1,9 +1,9 @@
-import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { IDesignerExtension } from "./IDesignerExtension";
-import { TransformOriginExtension } from "./TransformOriginExtension";
-import { IExtensionManager } from "./IExtensionManger";
+import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { IDesignerExtension } from './IDesignerExtension.js';
+import { TransformOriginExtension } from './TransformOriginExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 
 export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {

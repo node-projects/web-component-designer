@@ -1,11 +1,11 @@
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { ICodeView } from "./ICodeView";
+import { ICodeView } from './ICodeView.js';
 import type * as monaco from 'monaco-editor';
-import { IActivateable } from '../../../interfaces/IActivateable';
-import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
-import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
-import { CommandType } from '../../../commandHandling/CommandType';
+import { IActivateable } from '../../../interfaces/IActivateable.js';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
+import { CommandType } from '../../../commandHandling/CommandType.js';
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
 

@@ -1,4 +1,4 @@
-import { IElementDefinition } from './IElementDefinition';
+import { IElementDefinition } from './IElementDefinition.js';
 
 export interface IElementsJson {
     "imports"?: string[],
