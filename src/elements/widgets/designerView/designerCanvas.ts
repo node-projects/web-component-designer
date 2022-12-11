@@ -116,11 +116,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       transform: translateZ(0);
       overflow: hidden;
 
-      font-family: initial;
-      font-size: initial;
-      font-weight: initial;
-      font-style: initial;
-      line-height: initial;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      font-style: inherit;
+      line-height: inherit;
     }
     * {
       touch-action: none;
