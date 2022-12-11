@@ -1,11 +1,11 @@
-import { ServiceContainer } from '../services/ServiceContainer';
+import { ServiceContainer } from '../services/ServiceContainer.js';
 import { LazyLoader } from '@node-projects/base-custom-webcomponent';
-import { IOldCustomElementsManifest } from './IOldCustomElementsManifest';
-import { IElementDefinition } from '../services/elementsService/IElementDefinition';
-import { PreDefinedElementsService } from '../services/elementsService/PreDefinedElementsService';
-import { ListPropertiesService } from '../services/propertiesService/services/ListPropertiesService';
-import { IJsonPropertyDefinitions } from '../services/propertiesService/services/IJsonPropertyDefinitions';
-import { IJsonPropertyDefinition } from '../services/propertiesService/services/IJsonPropertyDefinition';
+import { IOldCustomElementsManifest } from './IOldCustomElementsManifest.js';
+import { IElementDefinition } from '../services/elementsService/IElementDefinition.js';
+import { PreDefinedElementsService } from '../services/elementsService/PreDefinedElementsService.js';
+import { ListPropertiesService } from '../services/propertiesService/services/ListPropertiesService.js';
+import { IJsonPropertyDefinitions } from '../services/propertiesService/services/IJsonPropertyDefinitions.js';
+import { IJsonPropertyDefinition } from '../services/propertiesService/services/IJsonPropertyDefinition.js';
 
 export class OldCustomElementsManifestLoader {
   public static async loadManifest(serviceContainer: ServiceContainer, nodeModule: string, options?: { name?: string, dontLoadWidgets?: boolean, dontLoadProperties?: boolean }) {

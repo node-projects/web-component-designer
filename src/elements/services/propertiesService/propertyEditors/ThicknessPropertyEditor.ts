@@ -1,7 +1,7 @@
-import { IProperty } from "../IProperty";
-import { BasePropertyEditor } from './BasePropertyEditor';
-import { ValueType } from "../ValueType";
-import { ThicknessEditor } from '../../../controls/ThicknessEditor';
+import { IProperty } from '../IProperty.js';
+import { BasePropertyEditor } from './BasePropertyEditor.js';
+import { ValueType } from '../ValueType.js';
+import { ThicknessEditor } from '../../../controls/ThicknessEditor.js';
 
 export class ThicknessPropertyEditor extends BasePropertyEditor<ThicknessEditor> {
 

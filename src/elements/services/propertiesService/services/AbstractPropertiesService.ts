@@ -1,12 +1,12 @@
-import { IPropertiesService, RefreshMode } from "../IPropertiesService";
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { ValueType } from "../ValueType";
-import { PropertiesHelper } from './PropertiesHelper';
-import { BindingTarget } from "../../../item/BindingTarget";
-import { IBinding } from "../../../item/IBinding";
-import { PropertyType } from "../PropertyType";
-import { NodeType } from "../../../item/NodeType";
+import { IPropertiesService, RefreshMode } from '../IPropertiesService.js';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { ValueType } from '../ValueType.js';
+import { PropertiesHelper } from './PropertiesHelper.js';
+import { BindingTarget } from '../../../item/BindingTarget.js';
+import { IBinding } from '../../../item/IBinding.js';
+import { PropertyType } from '../PropertyType.js';
+import { NodeType } from '../../../item/NodeType.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 

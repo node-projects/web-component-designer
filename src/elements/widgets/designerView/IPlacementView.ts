@@ -1,6 +1,6 @@
-import { IDesignItem } from "../../item/IDesignItem";
-import { OverlayLayerView } from "./overlayLayerView";
-import { Snaplines } from './Snaplines';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { OverlayLayerView } from './overlayLayerView.js';
+import { Snaplines } from './Snaplines.js';
 
 export interface IPlacementView {
   alignOnSnap: boolean;

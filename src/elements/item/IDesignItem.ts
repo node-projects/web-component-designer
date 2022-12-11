@@ -1,9 +1,9 @@
-import { ServiceContainer } from "../services/ServiceContainer";
-import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
-import { ChangeGroup } from "../services/undoService/ChangeGroup";
-import { NodeType } from './NodeType';
-import { ExtensionType } from "../widgets/designerView/extensions/ExtensionType";
-import { IDesignerExtension } from "../widgets/designerView/extensions/IDesignerExtension";
+import { ServiceContainer } from '../services/ServiceContainer.js';
+import { InstanceServiceContainer } from '../services/InstanceServiceContainer.js';
+import { ChangeGroup } from '../services/undoService/ChangeGroup.js';
+import { NodeType } from './NodeType.js';
+import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
+import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { ISize } from "../../interfaces/ISize.js";
 
 export interface IDesignItem {

@@ -1,10 +1,10 @@
-import { EventNames } from "../../../../../enums/EventNames";
-import { IPoint } from "../../../../../interfaces/IPoint";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { AbstractExtension } from "../AbstractExtension";
-import { IExtensionManager } from "../IExtensionManger";
-import { IRect } from "../../../../../interfaces/IRect";
+import { EventNames } from '../../../../../enums/EventNames.js';
+import { IPoint } from '../../../../../interfaces/IPoint.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
+import { IRect } from '../../../../../interfaces/IRect.js';
 
 
 export class LineExtension extends AbstractExtension {

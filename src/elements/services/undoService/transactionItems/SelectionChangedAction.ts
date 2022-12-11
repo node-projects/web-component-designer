@@ -1,7 +1,7 @@
-import { ITransactionItem } from '../ITransactionItem';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { ISelectionService } from '../../selectionService/ISelectionService';
-import { SelectionService } from '../../selectionService/SelectionService';
+import { ITransactionItem } from '../ITransactionItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { ISelectionService } from '../../selectionService/ISelectionService.js';
+import { SelectionService } from '../../selectionService/SelectionService.js';
 
 export class SelectionChangedAction implements ITransactionItem {
 

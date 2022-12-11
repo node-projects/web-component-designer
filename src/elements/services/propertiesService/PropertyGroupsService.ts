@@ -1,9 +1,9 @@
-import { IDesignItem } from "../../item/IDesignItem";
-import { IPropertiesService } from "./IPropertiesService";
-import { IPropertyGroupsService } from "./IPropertyGroupsService";
-import { AttributesPropertiesService } from "./services/AttributesPropertiesService";
-import { CommonPropertiesService } from "./services/CommonPropertiesService";
-import { CssPropertiesService } from "./services/CssPropertiesService";
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IPropertiesService } from './IPropertiesService.js';
+import { IPropertyGroupsService } from './IPropertyGroupsService.js';
+import { AttributesPropertiesService } from './services/AttributesPropertiesService.js';
+import { CommonPropertiesService } from './services/CommonPropertiesService.js';
+import { CssPropertiesService } from './services/CssPropertiesService.js';
 
 export class PropertyGroupsService implements IPropertyGroupsService {
     protected _pgList: { name: string; propertiesService: IPropertiesService; }[] = [

@@ -1,10 +1,10 @@
-import { ServiceContainer } from '../../services/ServiceContainer';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { BaseCustomWebComponentLazyAppend, css, Disposable, html } from '@node-projects/base-custom-webcomponent';
-import { PropertyGrid } from './PropertyGrid';
-import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
+import { PropertyGrid } from './PropertyGrid.js';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { sleep } from '../../helper/Helper.js';
-import { DesignItem } from '../../item/DesignItem';
+import { DesignItem } from '../../item/DesignItem.js';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 

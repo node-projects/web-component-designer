@@ -1,6 +1,6 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService.js';
 
 export class PolymerPropertiesService extends AbstractPolymerLikePropertiesService {
 

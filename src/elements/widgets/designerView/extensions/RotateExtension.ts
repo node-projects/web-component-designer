@@ -1,10 +1,10 @@
-import { EventNames } from "../../../../enums/EventNames";
-import { IPoint } from "../../../../interfaces/IPoint";
-import { cssMatrixToMatrixArray, extractRotationAngleFromDOMMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from "../../../helper/TransformHelper";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { AbstractExtension } from './AbstractExtension';
-import { IExtensionManager } from "./IExtensionManger";
+import { EventNames } from '../../../../enums/EventNames.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
+import { cssMatrixToMatrixArray, extractRotationAngleFromDOMMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from '../../../helper/TransformHelper.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { AbstractExtension } from './AbstractExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 
 export class RotateExtension extends AbstractExtension {
 

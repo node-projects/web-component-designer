@@ -1,16 +1,16 @@
-import { IEditorTypesService } from "./IEditorTypesService";
-import { IProperty } from './IProperty';
-import { IPropertyEditor } from "./IPropertyEditor";
-import { ColorPropertyEditor } from './propertyEditors/ColorPropertyEditor';
-import { DatePropertyEditor } from './propertyEditors/DatePropertyEditor';
-import { JsonPropertyEditor } from "./propertyEditors/JsonPropertyEditor";
-import { NumberPropertyEditor } from "./propertyEditors/NumberPropertyEditor";
-import { SelectPropertyEditor } from "./propertyEditors/SelectPropertyEditor";
-import { TextPropertyEditor } from './propertyEditors/TextPropertyEditor';
-import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor';
-import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor';
+import { IEditorTypesService } from './IEditorTypesService.js';
+import { IProperty } from './IProperty.js';
+import { IPropertyEditor } from './IPropertyEditor.js';
+import { ColorPropertyEditor } from './propertyEditors/ColorPropertyEditor.js';
+import { DatePropertyEditor } from './propertyEditors/DatePropertyEditor.js';
+import { JsonPropertyEditor } from './propertyEditors/JsonPropertyEditor.js';
+import { NumberPropertyEditor } from './propertyEditors/NumberPropertyEditor.js';
+import { SelectPropertyEditor } from './propertyEditors/SelectPropertyEditor.js';
+import { TextPropertyEditor } from './propertyEditors/TextPropertyEditor.js';
+import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor.js';
+import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor.js';
 import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEditor.js";
-import { MetricsPropertyEditor } from "./propertyEditors/MetricsPropertyEditor";
+import { MetricsPropertyEditor } from './propertyEditors/MetricsPropertyEditor.js';
 
 export class DefaultEditorTypesService implements IEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {

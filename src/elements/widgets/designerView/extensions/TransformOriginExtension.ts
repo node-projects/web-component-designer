@@ -1,11 +1,11 @@
-import { EventNames } from "../../../../enums/EventNames";
-import { IPoint } from "../../../../interfaces/IPoint";
-import { convertCssUnit, getCssUnit } from "../../../helper/CssUnitConverter";
-import { getDesignerCanvasNormalizedTransformedPoint } from "../../../helper/TransformHelper";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { AbstractExtension } from './AbstractExtension';
-import { IExtensionManager } from "./IExtensionManger";
+import { EventNames } from '../../../../enums/EventNames.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
+import { convertCssUnit, getCssUnit } from '../../../helper/CssUnitConverter.js';
+import { getDesignerCanvasNormalizedTransformedPoint } from '../../../helper/TransformHelper.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { AbstractExtension } from './AbstractExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 
 export class TransformOriginExtension extends AbstractExtension {
   private _startPos: IPoint;

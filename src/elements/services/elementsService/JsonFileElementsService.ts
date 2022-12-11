@@ -1,6 +1,6 @@
-import { IElementsService } from './IElementsService';
-import { IElementsJson } from './IElementsJson';
-import { IElementDefinition } from './IElementDefinition';
+import { IElementsService } from './IElementsService.js';
+import { IElementsJson } from './IElementsJson.js';
+import { IElementDefinition } from './IElementDefinition.js';
 import { LazyLoader } from '@node-projects/base-custom-webcomponent';
 
 // Reads a Json File and provides the Elements listed there

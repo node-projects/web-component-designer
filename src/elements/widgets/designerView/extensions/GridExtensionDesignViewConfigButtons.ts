@@ -1,5 +1,5 @@
 import { DesignerView } from "../designerView.js";
-import { IDesignerCanvas } from "../IDesignerCanvas";
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { IDesignViewConfigButtonsProvider } from "../IDesignViewConfigButtonsProvider.js";
 import { gridExtensionShowOverlayOptionName } from "./GridExtensionProvider.js";
 

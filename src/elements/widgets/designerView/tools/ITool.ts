@@ -1,6 +1,6 @@
-import { IDisposable } from "../../../../interfaces/IDisposable";
+import { IDisposable } from '../../../../interfaces/IDisposable.js';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
-import { IDesignerCanvas } from "../IDesignerCanvas";
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
 
 //TODO: in tools dispose should be renamed, tools will be reused, so maybe cancel would be better
 export interface ITool extends IDisposable {

@@ -5,8 +5,8 @@ import { InsertAction } from '../../../services/undoService/transactionItems/Ins
 import { handlesPointerEvent } from '../extensions/EditText/EditTextExtension.js';
 import { ExtensionType } from '../extensions/ExtensionType.js';
 import { IDesignerExtension } from '../extensions/IDesignerExtension.js';
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
 
 export class TextTool implements ITool {
 

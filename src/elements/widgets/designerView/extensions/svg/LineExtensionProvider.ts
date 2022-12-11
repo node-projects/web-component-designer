@@ -1,10 +1,10 @@
-import { IDesignerExtensionProvider } from "../IDesignerExtensionProvider";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { IDesignerExtension } from "../IDesignerExtension";
-import { IExtensionManager } from "../IExtensionManger";
-import { LineExtension } from "./LineExtension";
-import { isVisualSvgElement } from "../../../../helper/SvgHelper";
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
+import { LineExtension } from './LineExtension.js';
+import { isVisualSvgElement } from '../../../../helper/SvgHelper.js';
 
 export class LineExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {

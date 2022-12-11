@@ -1,6 +1,6 @@
 import { BaseCustomWebComponentLazyAppend, css, html, DomHelper } from '@node-projects/base-custom-webcomponent';
-import { IDesignerCanvas } from "../designerView/IDesignerCanvas";
-import { IMiniatureView } from "./IMiniatureView";
+import { IDesignerCanvas } from '../designerView/IDesignerCanvas.js';
+import { IMiniatureView } from './IMiniatureView.js';
 
 export class Html2CanvasMiniatureView extends BaseCustomWebComponentLazyAppend implements IMiniatureView {
 

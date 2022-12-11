@@ -1,6 +1,6 @@
-import { IDesignItem } from "../../item/IDesignItem";
-import { IBinding } from "../../item/IBinding";
-import { IBindingService } from "./IBindingService";
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IBinding } from '../../item/IBinding.js';
+import { IBindingService } from './IBindingService.js';
 import { BindingTarget } from "../../item/BindingTarget.js";
 import { BindingMode } from "../../item/BindingMode.js";
 

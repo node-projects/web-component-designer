@@ -1,9 +1,9 @@
 import { html } from "@node-projects/base-custom-webcomponent";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension } from "../AbstractExtension.js";
 import { ExtensionType } from "../ExtensionType.js";
-import { IExtensionManager } from "../IExtensionManger";
+import { IExtensionManager } from '../IExtensionManger.js';
 import { OverlayLayer } from "../OverlayLayer.js";
 
 export type handlesPointerEvent = { handlesPointerEvent(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element): boolean }

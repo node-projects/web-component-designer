@@ -1,6 +1,6 @@
 import { css } from "@node-projects/base-custom-webcomponent";
-import { sleep } from "../Helper";
-import { IContextMenuItem } from "./IContextMenuItem";
+import { sleep } from '../Helper.js';
+import { IContextMenuItem } from './IContextMenuItem.js';
 
 export interface IContextMenuOptions {
 	defaultIcon?: string,

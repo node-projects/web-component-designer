@@ -1,5 +1,5 @@
-import { IService } from "../IService";
-import { IDesignItem } from "../../item/IDesignItem";
+import { IService } from '../IService.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 import { IRect } from "../../../interfaces/IRect.js";
 
 export interface ISnaplinesProviderService extends IService {

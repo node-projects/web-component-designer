@@ -1,9 +1,9 @@
-import { IProperty } from './IProperty';
-import { IService } from '../IService';
-import { IDesignItem } from '../../item/IDesignItem';
-import { ValueType } from './ValueType';
-import { BindingTarget } from '../../item/BindingTarget';
-import { IBinding } from '../../item/IBinding';
+import { IProperty } from './IProperty.js';
+import { IService } from '../IService.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { ValueType } from './ValueType.js';
+import { BindingTarget } from '../../item/BindingTarget.js';
+import { IBinding } from '../../item/IBinding.js';
 
 export enum RefreshMode {
   none,

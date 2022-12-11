@@ -1,5 +1,5 @@
-import { IContentChanged } from './IContentChanged';
-import { IDesignItem } from '../../item/IDesignItem';
+import { IContentChanged } from './IContentChanged.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 
 export interface IContentService {

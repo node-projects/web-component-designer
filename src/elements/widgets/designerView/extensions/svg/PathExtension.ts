@@ -1,14 +1,14 @@
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { AbstractExtension } from "../AbstractExtension";
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
 import "../../../../helper/PathDataPolyfill";
-import { IPoint } from "../../../../../interfaces/IPoint";
-import { IExtensionManager } from "../IExtensionManger";
-import { EventNames } from "../../../../../enums/EventNames";
-import { createPathD, PathData, PathDataL } from "../../../../helper/PathDataPolyfill";
-import { IContextMenuItem } from "../../../../..";
-import { ContextMenu } from "../../../../helper/contextMenu/ContextMenu";
-import { IRect } from "../../../../../interfaces/IRect";
+import { IPoint } from '../../../../../interfaces/IPoint.js';
+import { IExtensionManager } from '../IExtensionManger.js';
+import { EventNames } from '../../../../../enums/EventNames.js';
+import { createPathD, PathData, PathDataL } from '../../../../helper/PathDataPolyfill.js';
+import { ContextMenu } from '../../../../helper/contextMenu/ContextMenu.js';
+import { IRect } from '../../../../../interfaces/IRect.js';
+import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
 
 
 export class PathExtension extends AbstractExtension {

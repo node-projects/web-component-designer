@@ -1,5 +1,5 @@
-import { ITransactionItem } from './ITransactionItem';
-import { IDesignItem } from '../../item/IDesignItem';
+import { ITransactionItem } from './ITransactionItem.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 
 export class ChangeGroup implements ITransactionItem {
 

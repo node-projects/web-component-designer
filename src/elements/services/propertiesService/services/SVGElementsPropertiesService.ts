@@ -1,7 +1,7 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { CommonPropertiesService } from "./CommonPropertiesService";
-import { PropertyType } from '../PropertyType';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { CommonPropertiesService } from './CommonPropertiesService.js';
+import { PropertyType } from '../PropertyType.js';
 
 export class SVGElementsPropertiesService extends CommonPropertiesService {
 

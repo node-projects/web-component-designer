@@ -1,4 +1,4 @@
-import { IService } from './IService';
+import { IService } from './IService.js';
 
 
 export class BaseServiceContainer<NameMap> {

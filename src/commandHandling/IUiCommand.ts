@@ -1,4 +1,4 @@
-import { CommandType } from "./CommandType";
+import { CommandType } from './CommandType.js';
 
 export interface IUiCommand {
     type: CommandType;

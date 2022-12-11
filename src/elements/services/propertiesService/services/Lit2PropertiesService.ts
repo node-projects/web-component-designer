@@ -1,8 +1,8 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { AbstractPolymerLikePropertiesService } from "./AbstractPolymerLikePropertiesService";
-import { PropertiesHelper } from './PropertiesHelper';
-import { PropertyType } from '../PropertyType';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService.js';
+import { PropertiesHelper } from './PropertiesHelper.js';
+import { PropertyType } from '../PropertyType.js';
 
 export class Lit2PropertiesService extends AbstractPolymerLikePropertiesService {
 

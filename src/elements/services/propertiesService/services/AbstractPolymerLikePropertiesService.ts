@@ -1,9 +1,9 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { PropertiesHelper } from './PropertiesHelper';
-import { AbstractPropertiesService } from "./AbstractPropertiesService";
-import { PropertyType } from '../PropertyType';
-import { RefreshMode } from '../IPropertiesService';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { PropertiesHelper } from './PropertiesHelper.js';
+import { AbstractPropertiesService } from './AbstractPropertiesService.js';
+import { PropertyType } from '../PropertyType.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export abstract class AbstractPolymerLikePropertiesService extends AbstractPropertiesService {
 

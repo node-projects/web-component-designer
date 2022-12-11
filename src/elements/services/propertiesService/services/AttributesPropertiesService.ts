@@ -1,10 +1,10 @@
-import { IPropertiesService, RefreshMode } from "../IPropertiesService";
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { ValueType } from "../ValueType";
+import { IPropertiesService, RefreshMode } from '../IPropertiesService.js';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { ValueType } from '../ValueType.js';
 import { IBinding } from "../../../item/IBinding.js";
-import { BindingTarget } from "../../../item/BindingTarget";
-import { PropertyType } from "../PropertyType";
+import { BindingTarget } from '../../../item/BindingTarget.js';
+import { PropertyType } from '../PropertyType.js';
 
 export class AttributesPropertiesService implements IPropertiesService {
 

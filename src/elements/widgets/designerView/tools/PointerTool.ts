@@ -1,15 +1,15 @@
-import { EventNames } from "../../../../enums/EventNames";
-import { PointerActionType } from "../../../../enums/PointerActionType";
-import { IPoint } from "../../../../interfaces/IPoint";
-import { DesignItem } from "../../../item/DesignItem";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IPlacementService } from "../../../services/placementService/IPlacementService";
-import { ExtensionType } from "../extensions/ExtensionType";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { ITool } from "./ITool";
-import { NamedTools } from './NamedTools';
+import { EventNames } from '../../../../enums/EventNames.js';
+import { PointerActionType } from '../../../../enums/PointerActionType.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
+import { DesignItem } from '../../../item/DesignItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IPlacementService } from '../../../services/placementService/IPlacementService.js';
+import { ExtensionType } from '../extensions/ExtensionType.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
+import { NamedTools } from './NamedTools.js';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
-import { ChangeGroup } from "../../../services/undoService/ChangeGroup";
+import { ChangeGroup } from '../../../services/undoService/ChangeGroup.js';
 
 export class PointerTool implements ITool {
 

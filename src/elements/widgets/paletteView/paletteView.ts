@@ -1,9 +1,9 @@
 import '../../controls/DesignerTabControl.js';
-import { IElementsService } from '../../services/elementsService/IElementsService';
-import { PaletteElements } from './paletteElements';
-import { DesignerTabControl } from '../../controls/DesignerTabControl';
+import { IElementsService } from '../../services/elementsService/IElementsService.js';
+import { PaletteElements } from './paletteElements.js';
+import { DesignerTabControl } from '../../controls/DesignerTabControl.js';
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
-import { ServiceContainer } from '../../services/ServiceContainer';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
 
 export class PaletteView extends BaseCustomWebComponentLazyAppend {
 

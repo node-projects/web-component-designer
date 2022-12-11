@@ -1,12 +1,12 @@
-import { EventNames } from '../../../../enums/EventNames';
-import { moveSVGPath, straightenLine } from '../../../helper/PathDataPolyfill';
-import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
-import { DesignItem } from '../../../item/DesignItem';
+import { EventNames } from '../../../../enums/EventNames.js';
+import { moveSVGPath, straightenLine } from '../../../helper/PathDataPolyfill.js';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
+import { DesignItem } from '../../../item/DesignItem.js';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { IPoint } from '../../../../interfaces/IPoint';
+import { IPoint } from '../../../../interfaces/IPoint.js';
 
 export class DrawPathTool implements ITool {
 

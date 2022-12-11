@@ -1,7 +1,7 @@
-import { IPropertyEditorT } from "../IPropertyEditor";
-import { IDesignItem } from "../../../..";
-import { IProperty } from "../IProperty";
-import { ValueType } from '../ValueType';
+import { IPropertyEditorT } from '../IPropertyEditor.js';
+import { IProperty } from '../IProperty.js';
+import { ValueType } from '../ValueType.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 
 export abstract class BasePropertyEditor<T extends HTMLElement> implements IPropertyEditorT<T> {
 

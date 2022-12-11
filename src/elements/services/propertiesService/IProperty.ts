@@ -1,6 +1,6 @@
-import { IPropertiesService } from './IPropertiesService';
-import { IPropertyEditor } from './IPropertyEditor';
-import { PropertyType } from './PropertyType';
+import { IPropertiesService } from './IPropertiesService.js';
+import { IPropertyEditor } from './IPropertyEditor.js';
+import { PropertyType } from './PropertyType.js';
 
 export interface IProperty {
   name: string;

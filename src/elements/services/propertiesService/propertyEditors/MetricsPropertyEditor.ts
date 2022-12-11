@@ -1,7 +1,7 @@
-import { IProperty } from "../IProperty";
-import { BasePropertyEditor } from './BasePropertyEditor';
-import { ValueType } from "../ValueType";
-import { MetricsEditor } from "../../../controls/MetricsEditor";
+import { IProperty } from '../IProperty.js';
+import { BasePropertyEditor } from './BasePropertyEditor.js';
+import { ValueType } from '../ValueType.js';
+import { MetricsEditor } from '../../../controls/MetricsEditor.js';
 
 export class MetricsPropertyEditor extends BasePropertyEditor<MetricsEditor> {
 

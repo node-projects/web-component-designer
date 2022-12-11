@@ -1,11 +1,11 @@
-import { EventNames } from '../../../../enums/EventNames';
+import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
-import { DesignItem } from '../../../item/DesignItem';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { DesignItem } from '../../../item/DesignItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
 
 export class RectangleSelectorTool implements ITool {
   cursor: string = 'progress';

@@ -1,8 +1,8 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { CommonPropertiesService } from "./CommonPropertiesService";
-import { PropertyType } from '../PropertyType';
-import { RefreshMode } from '../IPropertiesService';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { CommonPropertiesService } from './CommonPropertiesService.js';
+import { PropertyType } from '../PropertyType.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class NativeElementsPropertiesService extends CommonPropertiesService {
 

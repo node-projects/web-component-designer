@@ -1,12 +1,12 @@
-import { EventNames } from '../../../../enums/EventNames';
-import { IPoint } from '../../../../interfaces/IPoint';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { IElementDefinition } from '../../../services/elementsService/IElementDefinition';
+import { EventNames } from '../../../../enums/EventNames.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IElementDefinition } from '../../../services/elementsService/IElementDefinition.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
 
 export class DrawElementTool implements ITool {
   private _elementDefinition: IElementDefinition;

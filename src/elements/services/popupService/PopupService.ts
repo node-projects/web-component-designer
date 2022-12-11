@@ -1,4 +1,4 @@
-import { IPopupService, Popup, PopupPlacement } from "./IPopupService";
+import { IPopupService, Popup, PopupPlacement } from './IPopupService.js';
 
 export class PopupService implements IPopupService {
   private container: Element;

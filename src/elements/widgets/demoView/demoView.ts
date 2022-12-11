@@ -1,7 +1,7 @@
-import { IDemoView } from "./IDemoView";
+import { IDemoView } from './IDemoView.js';
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
-import { ServiceContainer } from "../../services/ServiceContainer";
-import { InstanceServiceContainer } from "../../services/InstanceServiceContainer";
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 
 export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoView {
 

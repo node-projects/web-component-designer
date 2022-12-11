@@ -1,7 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
 
 export class PanTool implements ITool {
 

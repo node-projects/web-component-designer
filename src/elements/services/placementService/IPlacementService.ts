@@ -1,7 +1,7 @@
-import { IService } from "../IService";
-import { IDesignItem } from "../../item/IDesignItem";
-import { IPlacementView } from "../../widgets/designerView/IPlacementView";
-import { IPoint } from "../../../interfaces/IPoint";
+import { IService } from '../IService.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
+import { IPoint } from '../../../interfaces/IPoint.js';
 
 export interface IPlacementService extends IService {
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration)

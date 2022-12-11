@@ -1,8 +1,8 @@
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
-import { IDesignItem } from "../../../../item/IDesignItem";
+import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { NodeType } from "../../../../item/NodeType.js";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
 
 export class SelectAllChildrenContextMenu implements IContextMenuExtension {
 

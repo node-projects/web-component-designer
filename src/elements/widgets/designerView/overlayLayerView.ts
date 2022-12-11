@@ -1,6 +1,6 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { OverlayLayer } from './extensions/OverlayLayer.js';
-import { ServiceContainer } from '../../services/ServiceContainer';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
 
 export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
 

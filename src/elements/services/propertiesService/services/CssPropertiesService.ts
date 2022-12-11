@@ -1,9 +1,9 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 import { BindingTarget } from '../../../item/BindingTarget.js';
-import { PropertyType } from '../PropertyType';
-import { CommonPropertiesService } from './CommonPropertiesService';
-import { RefreshMode } from '../IPropertiesService';
+import { PropertyType } from '../PropertyType.js';
+import { CommonPropertiesService } from './CommonPropertiesService.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class CssPropertiesService extends CommonPropertiesService {
 

@@ -1,14 +1,14 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, Disposable } from '@node-projects/base-custom-webcomponent';
-import { ITreeView } from './ITreeView';
-import { IDesignItem } from '../../item/IDesignItem';
-import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent';
-import { NodeType } from '../../item/NodeType';
-import { assetsPath } from '../../../Constants';
+import { ITreeView } from './ITreeView.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { ISelectionChangedEvent } from '../../services/selectionService/ISelectionChangedEvent.js';
+import { NodeType } from '../../item/NodeType.js';
+import { assetsPath } from '../../../Constants.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
-import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
-import { switchContainer } from '../../helper/SwitchContainerHelper';
-import { DomConverter } from '../designerView/DomConverter';
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+import { switchContainer } from '../../helper/SwitchContainerHelper.js';
+import { DomConverter } from '../designerView/DomConverter.js';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
