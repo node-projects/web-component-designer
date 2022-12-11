@@ -25,7 +25,7 @@ import { NamedTools } from './tools/NamedTools.js';
 import { Screenshot } from '../../helper/Screenshot.js';
 import { dataURItoBlob, exportData, sleep } from '../../helper/Helper.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
+import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
 import { IPoint } from '../../../interfaces/IPoint.js';
 import { OverlayLayer } from './extensions/OverlayLayer.js';
 import { OverlayLayerView } from './overlayLayerView.js';

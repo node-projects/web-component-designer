@@ -1,6 +1,6 @@
 import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { ServiceContainer } from "../ServiceContainer.js";
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
+import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
 import { IDemoProviderService } from "./IDemoProviderService.js";
 
 export class DemoProviderService implements IDemoProviderService {
