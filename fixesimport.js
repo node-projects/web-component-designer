@@ -56,7 +56,7 @@ function replace(filePath, outFilePath, options) {
 
 			if (resolvedPath) {
 				console.log('\t', importPath, resolvedPath);
-				return `${action} ${imported} from '${resolvedPath}';`;
+				return `${action} ${imported} from '${resolvedPath.replaceAll('\\','/')}';`;
 			}
 
 			return found;
