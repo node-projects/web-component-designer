@@ -1,7 +1,7 @@
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension } from '../AbstractExtension.js';
-import "../../../../helper/PathDataPolyfill";
+import "../../../../helper/PathDataPolyfill.js";
 import { IPoint } from '../../../../../interfaces/IPoint.js';
 import { IExtensionManager } from '../IExtensionManger.js';
 import { EventNames } from '../../../../../enums/EventNames.js';
