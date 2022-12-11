@@ -521,6 +521,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
       this.addDesignItems(parser.createDesignItems(children, this.serviceContainer, this.instanceServiceContainer));
     }
+
+    if (!this.serviceContainer.options.zoomDesignerBackground) {
+      requestAnimationFrame(() => {
+        this._resizeBackgroundGrid();
+      });
+    }
   }
 
   connectedCallback() {
@@ -536,11 +542,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.KeyDown, this._onKeyDownBound, true);
       this.clickOverlay.addEventListener(EventNames.KeyUp, this._onKeyUpBound, true);
       this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClickBound, true);
-      if (!this.serviceContainer.options.zoomDesignerBackground) {
-        setTimeout(() => {
-          this._resizeBackgroundGrid();
-        }, 200);
-      }
     }
   }
 
