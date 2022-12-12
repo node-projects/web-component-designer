@@ -76,10 +76,10 @@ export class GridExtension extends AbstractExtension {
           this.extendedItem.element.getBoundingClientRect
           switch(circle.style.cursor){
             case "ew-resize":
-              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, elementStyle.gridTemplateColumns, event.clientX - this._initialPoint.x, gapColumn, elementStyle.width, null);
+              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, this._initialSizes.xUnit, event.clientX - this._initialPoint.x, gapColumn, parseFloat(elementStyle.width.substring(0, elementStyle.width.length - 2)), null);
               break;
             case "ns-resize":
-              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, elementStyle.gridTemplateRows, event.clientY - this._initialPoint.y, gapRow, null, elementStyle.height);
+              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, event.clientY - this._initialPoint.y, gapRow, null, parseFloat(elementStyle.height.substring(0, elementStyle.height.length - 2)));
               break;
           }
           this.refresh();
@@ -100,121 +100,142 @@ export class GridExtension extends AbstractExtension {
   _getInitialSizes(style: CSSStyleDeclaration){
     var retX = [];
     var retY = [];
-    var widths = style.gridTemplateColumns;
-    if(widths.includes("calc(")){
-      while(widths.length != 0){
-        if(widths.indexOf(" ") == 0)
-          widths = widths.substring(1, widths.length);
-        var end = widths.indexOf("calc(") == 0 ? widths.indexOf(")") + 1 : widths.includes(" ") ? widths.indexOf(" ") : widths.length;
-        retX.push(widths.substring(0, end));
-        widths = widths.substring(end + 1, widths.length);
-      }
-    } 
-    else
-      retX = widths.split(' ');
+    var retXUnit = [];
+    var retYUnit = [];
 
-    var heights = style.gridTemplateRows;
-    if(heights.includes("calc(")){
-      while(heights.length != 0){
-        if(heights.indexOf(" ") == 0)
-          heights = heights.substring(1, widths.length);
-        var end = heights.indexOf("calc(") == 0 ? heights.indexOf(")") + 1 : heights.includes(" ") ? heights.indexOf(" ") : heights.length;
-        retY.push(heights.substring(0, end));
-        heights = heights.substring(end + 1, heights.length);
-      }
-    } 
-    else 
-      retY = style.gridTemplateRows.split(' ');
-
-    return {x: retX, y: retY};
+    var tmpX = style.gridTemplateColumns.split(' ');
+    tmpX.forEach(x => {
+      var r = this._parseInitValue(x);
+      retX.push(r.value);
+      retXUnit.push(r.unit);
+    });
+    
+    var tmpY = style.gridTemplateRows.split(' ');
+    tmpY.forEach(y => {
+      var r = this._parseInitValue(y);
+      retY.push(r.value);
+      retYUnit.push(r.unit);
+    });
+    return {x: retX, y: retY, xUnit: retXUnit, yUnit: retYUnit};
   }
 
-  _calculateNewSize(initialSizes, prevSizes, diff, gapIndex, itemWidth?, itemHeight?){
-    var retVal = "";
-    const minPixelSize = 10;
-    for(var i = 0; i < initialSizes.length; i++) {
-      if(i + 1 == gapIndex || i == gapIndex) {
-        if(initialSizes[i].endsWith("px")){
-          var oldPx = parseFloat(initialSizes[i].slice(0, initialSizes[i].length - 2));
-          var newPx;
-          if(i + 1 == gapIndex) {
-            newPx = oldPx + diff;
-            if(newPx && newPx < minPixelSize){
-              retVal = ""
-              var newSizes = prevSizes.split(" ");
-              newSizes[i] = minPixelSize + "px";
-              newSizes[i + 1] = (parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 2)) + parseFloat(initialSizes[i+1].substring(0, initialSizes[i + 1].length - 2)) - minPixelSize) + "px";
-              newSizes.forEach(newSize => retVal += newSize + " ");
-              break;
-            }
-          }
-          else if (i == gapIndex) {
-            newPx = oldPx - diff;
-            if(newPx && newPx < minPixelSize){
-              retVal = ""
-              var newSizes = prevSizes.split(" ");
-              newSizes[i] = minPixelSize + "px";
-              newSizes[i - 1] = (parseFloat(initialSizes[i - 1].substring(0, initialSizes[i - 1].length - 2)) + parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 2)) - minPixelSize) + "px";              
-              newSizes.forEach(newSize => retVal += newSize + " ");
-              break;
-            }
-          }
-          retVal += newPx + "px";
-        }
-        else if(initialSizes[i].endsWith("%")) {
-          var oldPercent = parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1));
-          var newPercent;
-          var percentDiff;
-          var width;
-          var height;
-          var minPercentSize;
+  _parseInitValue(stringValue : string){
+    if(stringValue.endsWith("px"))
+      return {value: parseFloat(stringValue.substring(0, stringValue.length - 2)), unit: "px"}
+    
+    else if(stringValue.endsWith("%"))
+      return {value: parseFloat(stringValue.substring(0, stringValue.length - 1)), unit: "%"}
+    
+    else if(stringValue.endsWith("fr"))
+      return {value: parseFloat(stringValue.substring(0, stringValue.length - 2)), unit: "fr"}
+    
+    else{
+      console.error(stringValue + " - Unit not implemented!");
+      return null;
+    }
+  }
 
-          if(itemWidth && itemWidth.endsWith("px")){
-            width = parseFloat(itemWidth.substring(0, itemWidth.length - 2));
-            percentDiff = (1 - ((width - diff) / width)) * 100;
-            minPercentSize = minPixelSize / width * 100;
-          }
-          if(itemHeight && itemHeight.endsWith("px")){
-            height = parseFloat(itemHeight.substring(0, itemHeight.length - 2));
-            percentDiff = (1 - ((height - diff) / height)) * 100;
-            minPercentSize = minPixelSize / height * 100;
-          }
-          if(i + 1 == gapIndex){
-            newPercent = oldPercent + percentDiff; 
-            if(newPercent < minPercentSize){
-              retVal = "";
-              var newSizes = prevSizes.split(" ");
-              newSizes[i] = minPercentSize + "%";
-              newSizes[i + 1] = (parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) + parseFloat(initialSizes[i+1].substring(0, initialSizes[i + 1].length - 1)) - minPercentSize) + "%";
-              newSizes.forEach(newSize => retVal += newSize + " ");
-              break;
-            }
-          }
-          else if(i == gapIndex){
-            newPercent = oldPercent - percentDiff;
-            if(newPercent < minPercentSize){
-              retVal = "";
-              var newSizes = prevSizes.split(" ");
-              newSizes[i] = minPercentSize + "%";
-              newSizes[i - 1] = (parseFloat(initialSizes[i - 1].substring(0, initialSizes[i - 1].length - 1)) + parseFloat(initialSizes[i].substring(0, initialSizes[i].length - 1)) - minPercentSize) + "%";              
-              newSizes.forEach(newSize => retVal += newSize + " ");
-              break;
-            }
-          }
-          retVal += newPercent + "%";
+  _calculateNewSize(iSizes, iUnits, diff, gapIndex, itemWidth?: number, itemHeight?: number){
+    var newSizes = [];
+    var newUnits = [];
+    var edited = [];
+
+    for(var i = 0; i < iSizes.length; i++) {
+      if(i + 1 == gapIndex || i == gapIndex) {
+        if(iUnits[i] == "px") {
+          newSizes.push(i + 1 == gapIndex ? iSizes[i] + diff : i == gapIndex ? iSizes[i] - diff : null);
+          edited.push(true);
         }
-        else if(initialSizes[i].endsWith("fr")){
-          console.log("fr unit not implemented yet");
+        else if(iUnits[i] == "%") {
+          var percentDiff = itemWidth ? (1 - ((itemWidth - diff) / itemWidth)) * 100 : itemHeight ? (1 - ((itemHeight - diff) / itemHeight)) * 100 : null;
+          newSizes.push(i + 1 == gapIndex ? iSizes[i] + percentDiff : i == gapIndex ? iSizes[i] - percentDiff : null);
+          edited.push(true);
+        }
+        else if(iUnits[i] == "fr") {
+          newSizes.push(iSizes[i]);
+          edited.push(true);
         }
         else {
           console.error("Invalid Parameter!");
           return "";
         }
-      } else {
-        retVal += initialSizes[i];
+      } 
+      else {
+        newSizes.push(iSizes[i]);
+        edited.push(false);
       }
-      retVal += " ";
+      newUnits.push(iUnits[i]);
     }
+
+    var retVal = "";
+    var minPixelSize = 10;
+    var minPercentSize = itemHeight ? minPixelSize / itemHeight * 100 : itemWidth ? minPixelSize / itemWidth * 100 : null;
+
+    for(var i = 0; i < newSizes.length; i++){
+      if(newUnits[i] == "px" && newSizes[i] < minPixelSize){
+        if(edited[i + 1] && newUnits[i + 1] == "px"){
+          newSizes[i + 1] = iSizes[i] + iSizes[i + 1] - minPixelSize;
+          newSizes[i] = minPixelSize;
+          break;
+        }
+        else if(edited[i - 1] && newUnits[i - 1] == "px"){
+          newSizes[i - 1] = iSizes[i] + iSizes[i - 1] - minPixelSize; 
+          newSizes[i] = minPixelSize;
+          break;
+        }
+      }
+      else if(newUnits[i] == "%" && newSizes[i] < minPercentSize){
+        if(edited[i + 1] && newUnits[i + 1] == "%"){
+          newSizes[i + 1] = iSizes[i] + iSizes[i + 1] - minPercentSize;
+          newSizes[i] = minPercentSize;
+          break;
+        }
+        else if(edited[i - 1] && newUnits[i - 1] == "%"){
+          newSizes[i - 1] = iSizes[i] + iSizes[i - 1] - minPercentSize; 
+          newSizes[i] = minPercentSize;
+          break;
+        }
+      }
+      else if(newUnits[i] == "fr"){
+        var editedIndex;
+        if(edited[i + 1])
+          editedIndex = i + 1;
+        else if (edited[i - 1])
+          editedIndex = i - 1
+        else
+          continue;
+
+        if(newUnits[editedIndex] == "px"){
+          if(newSizes[editedIndex] < minPixelSize)
+            newSizes[editedIndex] = minPixelSize;
+          
+          var totalSize = itemWidth ? itemWidth : itemHeight ? itemHeight : null;
+          var totalSizeExceptFr = 0;
+          newSizes.forEach(newSize => totalSizeExceptFr += newSize)
+          var totalSizeExceptEdited = 0;
+          newSizes.forEach((newSize, k) => {if(!edited[k]) totalSizeExceptEdited += newSize});
+
+          if(totalSize - totalSizeExceptFr < minPixelSize)
+           newSizes[editedIndex] = totalSize - totalSizeExceptEdited - minPixelSize;
+        }
+        else if(newUnits[editedIndex] == "%"){
+          if(newSizes[editedIndex] < minPercentSize)
+            newSizes[editedIndex] = minPercentSize;
+
+          var totalSize = 100;
+          var totalSizeExceptFr = 0;
+          newSizes.forEach(newSize => totalSizeExceptFr += newSize)
+          var totalSizeExceptEdited = 0;
+          newSizes.forEach((newSize, k) => {if(!edited[k]) totalSizeExceptEdited += newSize});
+
+          if(totalSize - totalSizeExceptFr < minPercentSize)
+           newSizes[editedIndex] = totalSize - totalSizeExceptEdited - minPercentSize;
+        }
+      }
+    }
+    for(var i = 0; i < newSizes.length; i++)
+      retVal += newSizes[i] + newUnits[i] + " ";
+
     return retVal;
   }
 }
