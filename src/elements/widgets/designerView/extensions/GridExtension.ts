@@ -116,23 +116,14 @@ export class GridExtension extends AbstractExtension {
       retY.push(r.value);
       retYUnit.push(r.unit);
     });
+    console.log({x: retX, y: retY, xUnit: retXUnit, yUnit: retYUnit})
     return {x: retX, y: retY, xUnit: retXUnit, yUnit: retYUnit};
   }
 
   _parseInitValue(stringValue : string){
-    if(stringValue.endsWith("px"))
-      return {value: parseFloat(stringValue.substring(0, stringValue.length - 2)), unit: "px"}
-    
-    else if(stringValue.endsWith("%"))
-      return {value: parseFloat(stringValue.substring(0, stringValue.length - 1)), unit: "%"}
-    
-    else if(stringValue.endsWith("fr"))
-      return {value: parseFloat(stringValue.substring(0, stringValue.length - 2)), unit: "fr"}
-    
-    else{
-      console.error(stringValue + " - Unit not implemented!");
-      return null;
-    }
+      var i = stringValue.length;
+      while (isNaN(parseInt(stringValue.substring(i - 1, stringValue.length)))) i--;
+      return {value: parseFloat(stringValue.substring(0, i)), unit: stringValue.substring(i, stringValue.length)}
   }
 
   _calculateNewSize(iSizes, iUnits, diff, gapIndex, itemWidth?: number, itemHeight?: number){
@@ -142,11 +133,7 @@ export class GridExtension extends AbstractExtension {
 
     for(var i = 0; i < iSizes.length; i++) {
       if(i + 1 == gapIndex || i == gapIndex) {
-        if(iUnits[i] == "px") {
-          newSizes.push(i + 1 == gapIndex ? iSizes[i] + diff : i == gapIndex ? iSizes[i] - diff : null);
-          edited.push(true);
-        }
-        else if(iUnits[i] == "%") {
+        if(iUnits[i] == "%") {
           var percentDiff = itemWidth ? (1 - ((itemWidth - diff) / itemWidth)) * 100 : itemHeight ? (1 - ((itemHeight - diff) / itemHeight)) * 100 : null;
           newSizes.push(i + 1 == gapIndex ? iSizes[i] + percentDiff : i == gapIndex ? iSizes[i] - percentDiff : null);
           edited.push(true);
@@ -156,8 +143,9 @@ export class GridExtension extends AbstractExtension {
           edited.push(true);
         }
         else {
-          console.error("Invalid Parameter!");
-          return "";
+          newSizes.push(i + 1 == gapIndex ? iSizes[i] + diff : i == gapIndex ? iSizes[i] - diff : null);
+          edited.push(true);
+          
         }
       } 
       else {
@@ -236,6 +224,7 @@ export class GridExtension extends AbstractExtension {
     for(var i = 0; i < newSizes.length; i++)
       retVal += newSizes[i] + newUnits[i] + " ";
 
+    console.log(retVal)
     return retVal;
   }
 }
