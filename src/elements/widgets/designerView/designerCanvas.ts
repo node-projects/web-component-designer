@@ -180,15 +180,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   `;
 
   static override readonly template = html`
-    <div style="display: flex;flex-direction: column;width: 100%;height: 100%;">
-      <div style="width: 100%;height: 100%;">
-        <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative;">
+    <div style="display: flex;flex-direction: column;width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
+      <div style="width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
+        <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative; margin: 0 !important; padding: 0 !important; border: none !important;">
           <div id="node-projects-designer-canvas-canvasContainer"
-          style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none;">
-          <div id="node-projects-designer-canvas-canvas" part="canvas"></div>
+          style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <div id="node-projects-designer-canvas-canvas" part="canvas" style=" margin: 0 !important; padding: 0 !important; border: none !important;"></div>
         </div>
       </div>
-      <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;"></div>
+      <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;  margin: 0 !important; padding: 0 !important; border: none !important;"></div>
       </div>
     </div>`;
 
@@ -502,6 +502,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
+    this.overlayLayer.style.setProperty('margin', '0', 'important');
+    this.overlayLayer.style.setProperty('padding', '0', 'important');
+    this.overlayLayer.style.setProperty('border', 'none', 'important');
     this.clickOverlay.appendChild(this.overlayLayer);
     this.snapLines = new Snaplines(this.overlayLayer);
     this.snapLines.initialize(this.rootDesignItem);
