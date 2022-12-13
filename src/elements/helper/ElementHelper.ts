@@ -1,3 +1,5 @@
+import { IPoint } from "../../interfaces/IPoint";
+
 export function newElementFromString(text): Element {
   const range = document.createRange();
   range.selectNode(document.body);
@@ -83,4 +85,22 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
     }
   }
   return { offsetLeft: offsetLeft, offsetTop: offsetTop };
+}
+
+export function getContentBoxContentOffsets(element): IPoint {
+    let xOffset = parseInt(getComputedStyle(element).paddingLeft.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginLeft.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderLeft.replace('px', ''))
+      + parseInt(getComputedStyle(element).paddingRight.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginRight.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderRight.replace('px', ''));
+
+    let yOffset = parseInt(getComputedStyle(element).paddingTop.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginTop.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderTop.replace('px', ''))
+      + parseInt(getComputedStyle(element).paddingBottom.replace('px', ''))
+      + parseInt(getComputedStyle(element).marginBottom.replace('px', ''))
+      + parseInt(getComputedStyle(element).borderBottom.replace('px', ''));
+
+      return {x: xOffset, y: yOffset};
 }
