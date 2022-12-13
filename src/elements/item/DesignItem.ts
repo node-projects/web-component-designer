@@ -22,6 +22,8 @@ export class DesignItem implements IDesignItem {
 
   public lastContainerSize: ISize;
 
+  parsedNode: any;
+
   node: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
@@ -247,7 +249,7 @@ export class DesignItem implements IDesignItem {
   }
 
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
-    let designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
+    let designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
 
     if (designItem.nodeType == NodeType.Element) {
       for (let a of designItem.element.attributes) {
@@ -295,8 +297,9 @@ export class DesignItem implements IDesignItem {
     }
   }
 
-  constructor(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+  constructor(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     this.node = node;
+    this.parsedNode = parsedNode;
     this.serviceContainer = serviceContainer;
     this.instanceServiceContainer = instanceServiceContainer;
 
@@ -319,7 +322,7 @@ export class DesignItem implements IDesignItem {
       return null;
     let designItem: IDesignItem = DesignItem._designItemMap.get(node);
     if (!designItem) {
-      designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
+      designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
     }
     return designItem;
   }
