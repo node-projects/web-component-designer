@@ -78,11 +78,10 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       offsetLeft += bbox.x;
       offsetTop += bbox.y;
       element = element.ownerSVGElement;
-     } else if (element instanceof HTMLBodyElement) {
-        let bbox = element.getBoundingClientRect();
-        offsetLeft += bbox.x;
-        offsetTop += bbox.y;
-        element = element.offsetParent; 
+    } else if (element instanceof HTMLBodyElement) {
+      element = element.parentElement;
+    } else if (element instanceof HTMLHtmlElement) {
+      element = element.parentElement;
     } else {
       offsetLeft += element.offsetLeft;
       offsetTop += element.offsetTop;
@@ -93,19 +92,19 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 }
 
 export function getContentBoxContentOffsets(element): IPoint {
-    let xOffset = parseInt(getComputedStyle(element).paddingLeft.replace('px', ''))
-      + parseInt(getComputedStyle(element).marginLeft.replace('px', ''))
-      + parseInt(getComputedStyle(element).borderLeft.replace('px', ''))
-      + parseInt(getComputedStyle(element).paddingRight.replace('px', ''))
-      + parseInt(getComputedStyle(element).marginRight.replace('px', ''))
-      + parseInt(getComputedStyle(element).borderRight.replace('px', ''));
+  let xOffset = parseInt(getComputedStyle(element).paddingLeft.replace('px', ''))
+    + parseInt(getComputedStyle(element).marginLeft.replace('px', ''))
+    + parseInt(getComputedStyle(element).borderLeft.replace('px', ''))
+    + parseInt(getComputedStyle(element).paddingRight.replace('px', ''))
+    + parseInt(getComputedStyle(element).marginRight.replace('px', ''))
+    + parseInt(getComputedStyle(element).borderRight.replace('px', ''));
 
-    let yOffset = parseInt(getComputedStyle(element).paddingTop.replace('px', ''))
-      + parseInt(getComputedStyle(element).marginTop.replace('px', ''))
-      + parseInt(getComputedStyle(element).borderTop.replace('px', ''))
-      + parseInt(getComputedStyle(element).paddingBottom.replace('px', ''))
-      + parseInt(getComputedStyle(element).marginBottom.replace('px', ''))
-      + parseInt(getComputedStyle(element).borderBottom.replace('px', ''));
+  let yOffset = parseInt(getComputedStyle(element).paddingTop.replace('px', ''))
+    + parseInt(getComputedStyle(element).marginTop.replace('px', ''))
+    + parseInt(getComputedStyle(element).borderTop.replace('px', ''))
+    + parseInt(getComputedStyle(element).paddingBottom.replace('px', ''))
+    + parseInt(getComputedStyle(element).marginBottom.replace('px', ''))
+    + parseInt(getComputedStyle(element).borderBottom.replace('px', ''));
 
-      return {x: xOffset, y: yOffset};
+  return { x: xOffset, y: yOffset };
 }
