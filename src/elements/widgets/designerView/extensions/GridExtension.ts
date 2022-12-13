@@ -89,9 +89,10 @@ export class GridExtension extends AbstractExtension {
         circle.releasePointerCapture(event.pointerId);
         this._initialPoint = null;
         this._initialSizes = null;
-        if(this.extendedItem.styles.get("grid-template-columns") != (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns)
+
+        if(this.extendedItem.getStyle("grid-template-columns") != (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns)
           this.extendedItem.setStyle("grid-template-columns", (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns);
-        if(this.extendedItem.styles.get("grid-template-rows") != (<HTMLElement>this.extendedItem.element).style.gridTemplateRows)
+        if(this.extendedItem.getStyle("grid-template-rows") != (<HTMLElement>this.extendedItem.element).style.gridTemplateRows)
           this.extendedItem.setStyle("grid-template-rows", (<HTMLElement>this.extendedItem.element).style.gridTemplateRows);
         break;
     }
