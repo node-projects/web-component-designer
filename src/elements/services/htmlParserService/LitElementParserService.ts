@@ -65,7 +65,7 @@ export class LitElementParserService implements IHtmlParserService {
           element = document.createElement(item.rawTagName);
         manualCreatedElement = true;
       }
-      designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
+      designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
 
       let hideAtDesignTime = false;
       let hideAtRunTime = false;
@@ -119,10 +119,10 @@ export class LitElementParserService implements IHtmlParserService {
     } else if (item.nodeType == 3) {
       this._parseDiv.innerHTML = item.rawText;
       let element = this._parseDiv.childNodes[0];
-      designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
+      designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
     } else if (item.nodeType == 8) {
       let element = document.createComment(item.rawText);
-      designItem = new DesignItem(element, serviceContainer, instanceServiceContainer);
+      designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
     }
     return designItem;
   }

@@ -48,6 +48,8 @@ export interface IDesignItem {
   innerHTML?: string;
   readonly isEmptyTextNode: boolean;
 
+  /** Could be a special node if another parser is used */
+  readonly parsedNode: any;
   readonly node: Node;
   readonly element: Element;
 
