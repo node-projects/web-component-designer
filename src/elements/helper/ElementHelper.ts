@@ -78,6 +78,11 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       offsetLeft += bbox.x;
       offsetTop += bbox.y;
       element = element.ownerSVGElement;
+     } else if (element instanceof HTMLBodyElement) {
+        let bbox = element.getBoundingClientRect();
+        offsetLeft += bbox.x;
+        offsetTop += bbox.y;
+        element = element.offsetParent; 
     } else {
       offsetLeft += element.offsetLeft;
       offsetTop += element.offsetTop;
