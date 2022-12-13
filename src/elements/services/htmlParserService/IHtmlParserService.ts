@@ -1,7 +1,7 @@
-import { IService } from '../IService';
-import type { ServiceContainer } from '../ServiceContainer';
-import type { InstanceServiceContainer } from '../InstanceServiceContainer';
-import { IDesignItem } from '../../item/IDesignItem';
+import { IService } from '../IService.js';
+import type { ServiceContainer } from '../ServiceContainer.js';
+import type { InstanceServiceContainer } from '../InstanceServiceContainer.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 
 export interface IHtmlParserService extends IService {
   parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]>

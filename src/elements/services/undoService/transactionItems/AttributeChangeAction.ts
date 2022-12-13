@@ -1,11 +1,11 @@
-import { ITransactionItem } from '../ITransactionItem';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { ITransactionItem } from '../ITransactionItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IBinding } from '../../../item/IBinding.js';
 
 export class AttributeChangeAction implements ITransactionItem {
 
   constructor(designItem: IDesignItem, name: string, newValue: string | IBinding | null, oldValue: string | IBinding | null) {
-    this.title = "Change Attribute";
+    this.title = "Change Attribute " + name + " of &lt;" + designItem.name + "&gt;";
 
     this.designItem = designItem;
     this.name = name;
@@ -21,7 +21,7 @@ export class AttributeChangeAction implements ITransactionItem {
 
   undo() {
     if (this.oldValue == null) {
-      this.designItem.attributes.delete(this.name);
+      this.designItem._withoutUndoRemoveAttribute(this.name);
       try {
         this.designItem.element.removeAttribute(this.name);
       }
@@ -30,7 +30,7 @@ export class AttributeChangeAction implements ITransactionItem {
       }
     }
     else {
-      this.designItem.attributes.set(<string>this.name, this.oldValue);
+      this.designItem._withoutUndoSetAttribute(<string>this.name, this.oldValue);
       if (this.name != "draggable") {
         try {
           if (typeof this.oldValue === 'string')
@@ -45,7 +45,7 @@ export class AttributeChangeAction implements ITransactionItem {
 
   do() {
     if (this.newValue == null) {
-      this.designItem.attributes.delete(<string>this.name);
+      this.designItem._withoutUndoRemoveAttribute(<string>this.name);
       try {
         this.designItem.element.removeAttribute(this.name);
       }
@@ -54,7 +54,7 @@ export class AttributeChangeAction implements ITransactionItem {
       }
     }
     else {
-      this.designItem.attributes.set(<string>this.name, this.newValue);
+      this.designItem._withoutUndoSetAttribute(<string>this.name, this.newValue);
       if (this.name != "draggable") {
         try {
           if (typeof this.newValue === 'string')

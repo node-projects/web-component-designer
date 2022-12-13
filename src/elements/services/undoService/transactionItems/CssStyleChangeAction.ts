@@ -1,10 +1,10 @@
-import { ITransactionItem } from '../ITransactionItem';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { ITransactionItem } from '../ITransactionItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 
 export class CssStyleChangeAction implements ITransactionItem {
 
   constructor(designItem: IDesignItem, name: string, newValue: any, oldValue: any) {
-    this.title = "Change CSS Style";
+    this.title = "Change Css Style " + name + " of &lt;" + designItem.name + "&gt;";
 
     this.designItem = designItem;
     this.name = name;
@@ -20,19 +20,19 @@ export class CssStyleChangeAction implements ITransactionItem {
 
   undo() {
     if (this.oldValue === '' || this.oldValue == null) {
-      this.designItem.styles.delete(<string>this.name);
+      this.designItem._withoutUndoRemoveStyle(<string>this.name);
       (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = ''
     } else {
-      this.designItem.styles.set(<string>this.name, this.oldValue);
+      this.designItem._withoutUndoSetStyle(<string>this.name, this.oldValue);
       (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.oldValue;
     }
   }
   do() {
     if (this.newValue === '' || this.newValue == null) {
-      this.designItem.styles.delete(<string>this.name);
+      this.designItem._withoutUndoRemoveStyle(<string>this.name);
       (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = ''
     } else {
-      this.designItem.styles.set(<string>this.name, this.newValue);
+      this.designItem._withoutUndoSetStyle(<string>this.name, this.newValue);
       (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.newValue;
     }
   }

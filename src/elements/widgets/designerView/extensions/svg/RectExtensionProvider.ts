@@ -1,14 +1,15 @@
-import { IDesignerExtensionProvider } from "../IDesignerExtensionProvider";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { IDesignerExtension } from "../IDesignerExtension";
-import { IExtensionManager } from "../IExtensionManger";
-import { RectExtension } from "./RectExtension";
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
+import { RectExtension } from './RectExtension.js';
+import { isVisualSvgElement } from '../../../../helper/SvgHelper.js';
 
 export class RectExtentionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.node instanceof SVGRectElement) {
-      return true;
+      return isVisualSvgElement(designItem.node);;
     }
     return false;
   }

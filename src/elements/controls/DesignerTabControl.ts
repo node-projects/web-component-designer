@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentLazyAppend, css, TypedEvent, DomHelper } from '@node-projects/base-custom-webcomponent';
-import { IActivateable } from '../../interfaces/IActivateable';
+import { IActivateable } from '../../interfaces/IActivateable.js';
 
 export type DesignerTabControlIndexChangedEventArgs = { newIndex: number, oldIndex?: number, changedViaClick?: boolean };
 

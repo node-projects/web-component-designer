@@ -1,4 +1,4 @@
-import { IBinding } from "../../item/IBinding";
+import { IBinding } from '../../item/IBinding.js';
 
 export interface IElementDefinition {
   tag: string;

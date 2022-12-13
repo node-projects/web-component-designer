@@ -1,8 +1,8 @@
-import { IRect } from "../../../../interfaces/IRect";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { AbstractExtension } from "./AbstractExtension";
-import { IExtensionManager } from "./IExtensionManger";
+import { IRect } from '../../../../interfaces/IRect.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { AbstractExtension } from './AbstractExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 import { OverlayLayer } from "./OverlayLayer.js";
 
 export class GrayOutExtension extends AbstractExtension {

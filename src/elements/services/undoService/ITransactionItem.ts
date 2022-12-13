@@ -1,4 +1,4 @@
-import { IDesignItem } from "../../item/IDesignItem";
+import { IDesignItem } from '../../item/IDesignItem.js';
 
 export interface ITransactionItem {
   title?: string

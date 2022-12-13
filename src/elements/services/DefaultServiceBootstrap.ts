@@ -37,16 +37,16 @@ import { AltToEnterContainerExtensionProvider } from '../widgets/designerView/ex
 import { InvisibleDivExtensionProvider } from '../widgets/designerView/extensions/InvisibleDivExtensionProvider.js';
 import { ItemsBelowContextMenu } from '../widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js';
 import { GridPlacementService } from './placementService/GridPlacementService.js';
-import { ElementAtPointService } from './elementAtPointService/ElementAtPointService';
-import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementService';
-import { SnaplinesProviderService } from './placementService/SnaplinesProviderService';
-import { DragDropService } from './dragDropService/DragDropService';
+import { ElementAtPointService } from './elementAtPointService/ElementAtPointService.js';
+import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementService.js';
+import { SnaplinesProviderService } from './placementService/SnaplinesProviderService.js';
+import { DragDropService } from './dragDropService/DragDropService.js';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
-import { CopyPasteService } from './copyPasteService/CopyPasteService';
-import { DefaultModelCommandService } from './modelCommandService/DefaultModelCommandService';
-import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperatorProvider';
-import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons';
-import { DemoProviderService } from './demoProviderService/DemoProviderService';
+import { CopyPasteService } from './copyPasteService/CopyPasteService.js';
+import { DefaultModelCommandService } from './modelCommandService/DefaultModelCommandService.js';
+import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperatorProvider.js';
+import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons.js';
+import { DemoProviderService } from './demoProviderService/DemoProviderService.js';
 //import { CursorLinePointerExtensionProvider } from '../widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js';
 import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
@@ -57,7 +57,7 @@ import { PathContextMenu } from '../widgets/designerView/extensions/contextMenu/
 import { SeperatorContextMenu } from '../widgets/designerView/extensions/contextMenu/SeperatorContextMenu.js';
 import { ZoomToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js';
 import { RotateLeftAndRight } from '../widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js';
-import { SelectAllChildrenContextMenu } from '../widgets/designerView/extensions/contextMenu/SelectAllChildrenContextMenu';
+import { SelectAllChildrenContextMenu } from '../widgets/designerView/extensions/contextMenu/SelectAllChildrenContextMenu.js';
 import { PointerToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/PointerToolButtonProvider.js';
 import { SeperatorToolProvider } from '../widgets/designerView/tools/toolBar/buttons/SeperatorToolProvider.js';
 import { ZoomToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js';
@@ -69,6 +69,9 @@ import { LineExtensionProvider } from '../widgets/designerView/extensions/svg/Li
 import { RectExtentionProvider } from '../widgets/designerView/extensions/svg/RectExtensionProvider.js';
 import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
 import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
+import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
+import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
+import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -102,6 +105,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
     new GridExtensionProvider(),
+    new FlexboxExtensionProvider(),
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
@@ -116,10 +120,14 @@ export function createDefaultServiceContainer() {
     new SelectionDefaultExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
-    new GridExtensionProvider()
+    new GridExtensionProvider(),
+    new FlexboxExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new MouseOverExtensionProvider()
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.Placement, [
+    new PlacementExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
     new GrayOutExtensionProvider()
@@ -154,7 +162,8 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designViewConfigButtons.push(
     new ButtonSeperatorProvider(20),
-    new GridExtensionDesignViewConfigButtons()
+    new GridExtensionDesignViewConfigButtons(),
+    new FlexboxExtensionDesignViewConfigButtons()
   );
 
   serviceContainer.designViewToolbarButtons.push(

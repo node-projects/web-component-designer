@@ -1,7 +1,8 @@
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { IExtensionManager } from "./IExtensionManger";
-import { OverlayLayerView } from '../overlayLayerView';
-import { OverlayLayer } from './OverlayLayer';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { IExtensionManager } from './IExtensionManger.js';
+import { OverlayLayerView } from '../overlayLayerView.js';
+import { OverlayLayer } from './OverlayLayer.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
 
 export abstract class AbstractExtensionBase {
   protected overlays: SVGElement[] = [];
@@ -66,5 +67,14 @@ export abstract class AbstractExtensionBase {
       this.overlays.push(...newEls);
     }
     return newEls;
+  }
+
+  protected _drawTransformedRect(points: [IPoint, IPoint, IPoint, IPoint], className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
+    let data = "M" + points[0].x + " " + points[0].y + " L" + points[1].x + " " + points[1].y + " L" + points[3].x + " " + points[3].y + " L" + points[2].x + " " + points[2].y + "Z";
+    const newPath = this.overlayLayerView.drawPath(data, className, path, overlayLayer);
+    if (!path) {
+      this.overlays.push(newPath);
+    }
+    return newPath;
   }
 }

@@ -1,7 +1,7 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { IElementsService } from '../../services/elementsService/IElementsService';
-import { dragDropFormatNameElementDefinition } from '../../../Constants';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { IElementsService } from '../../services/elementsService/IElementsService.js';
+import { dragDropFormatNameElementDefinition } from '../../../Constants.js';
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _treeDiv: HTMLTableElement;

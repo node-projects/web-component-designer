@@ -1,10 +1,10 @@
 import { BaseCustomWebComponentLazyAppend, css, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { ICodeView } from "./ICodeView";
+import { ICodeView } from './ICodeView.js';
 import type { Ace } from "ace-builds";
-import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
-import { CommandType } from '../../../commandHandling/CommandType';
-import { IDisposable } from '../../../interfaces/IDisposable';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
+import { CommandType } from '../../../commandHandling/CommandType.js';
+import { IDisposable } from '../../../interfaces/IDisposable.js';
 
 class CodeViewAceCompleter {
   getCompletions(editor, session, pos, prefix, callback) {

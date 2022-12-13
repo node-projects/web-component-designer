@@ -1,6 +1,6 @@
 import { css } from '@node-projects/base-custom-webcomponent';
 import { OverlayLayer } from '../OverlayLayer.js';
-import { AbstractDesignerPointerExtension } from './AbstractDesignerPointerExtension';
+import { AbstractDesignerPointerExtension } from './AbstractDesignerPointerExtension.js';
 
 export class CursorLinePointerExtension extends AbstractDesignerPointerExtension {
   private _lineOffset = 5;

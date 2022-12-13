@@ -1,7 +1,7 @@
-import type { IDesignItem } from "../../item/IDesignItem";
-import type { IPoint } from "../../../interfaces/IPoint";
-import type { ISize } from '../../../interfaces/ISize';
-import { OverlayLayerView } from "./overlayLayerView";
+import type { IDesignItem } from '../../item/IDesignItem.js';
+import type { IPoint } from '../../../interfaces/IPoint.js';
+import type { ISize } from '../../../interfaces/ISize.js';
+import { OverlayLayerView } from './overlayLayerView.js';
 import { OverlayLayer } from "./extensions/OverlayLayer.js";
 import { IRect } from "../../../interfaces/IRect.js";
 

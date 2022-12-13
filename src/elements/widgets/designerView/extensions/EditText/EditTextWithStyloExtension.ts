@@ -1,12 +1,12 @@
 import { html } from "@node-projects/base-custom-webcomponent";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { TextTool } from "../../tools/TextTool";
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { TextTool } from '../../tools/TextTool.js';
 import { AbstractExtension } from "../AbstractExtension.js";
 import { ExtensionType } from "../ExtensionType.js";
-import { IExtensionManager } from "../IExtensionManger";
+import { IExtensionManager } from '../IExtensionManger.js';
 import { OverlayLayer } from "../OverlayLayer.js";
-import { handlesPointerEvent } from "./EditTextExtension";
+import { handlesPointerEvent } from './EditTextExtension.js';
 
 export class EditTextWithStyloExtension extends AbstractExtension implements handlesPointerEvent {
 

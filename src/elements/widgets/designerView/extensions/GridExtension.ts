@@ -1,9 +1,9 @@
 import { EventNames } from "../../../../enums/EventNames";
 import { CalculateGridInformation } from "../../../helper/GridHelper.js";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { AbstractExtension } from "./AbstractExtension";
-import { IExtensionManager } from "./IExtensionManger";
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { AbstractExtension } from './AbstractExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 import { OverlayLayer } from "./OverlayLayer.js";
 
 export class GridExtension extends AbstractExtension {

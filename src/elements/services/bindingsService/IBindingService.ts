@@ -1,6 +1,6 @@
-import { IDesignItem } from "../../item/IDesignItem";
-import { IBinding } from "../../item/IBinding";
-import { BindingTarget } from "../../item/BindingTarget";
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IBinding } from '../../item/IBinding.js';
+import { BindingTarget } from '../../item/BindingTarget.js';
 
 /**
  * Can be used to parse bindings wich are done via special HTML Attributes or special Elements

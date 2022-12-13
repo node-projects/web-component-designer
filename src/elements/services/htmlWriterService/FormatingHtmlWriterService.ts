@@ -27,7 +27,7 @@ interface IWriteContext {
 export class FormatingHtmlWriterService implements IHtmlWriterService {
   private writeAttributes(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasAttributes) {
-      for (const a of designItem.attributes) {
+      for (const a of designItem.attributes()) {
         writeContext.indentedTextWriter.write(' ');
         if (typeof a[1] === 'string') {
           if (a[1] === "")
@@ -46,9 +46,9 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
   private writeStyles(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasStyles) {
       writeContext.indentedTextWriter.write(' style="');
-      let styles = designItem.styles;
+      let styles = designItem.styles();
       if (writeContext.options.compressCssToShorthandProperties)
-        styles = CssCombiner.combine(styles);
+        styles = CssCombiner.combine(new Map(styles));
       for (const s of styles) {
         if (s[0]) {
           writeContext.indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');

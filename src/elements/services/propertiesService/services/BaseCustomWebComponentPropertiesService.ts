@@ -1,7 +1,7 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, BaseCustomWebComponentConstructorAppend, BaseCustomWebComponentNoAttachedTemplate, BaseCustomWebComponentConstructorAppendLazyReady } from '@node-projects/base-custom-webcomponent';
-import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService';
+import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService.js';
 
 export class BaseCustomWebComponentPropertiesService extends AbstractPolymerLikePropertiesService {
   

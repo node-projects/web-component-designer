@@ -1,7 +1,9 @@
-import { EventNames, IPoint, OverlayLayer } from '../../../../index.js';
+import { EventNames } from '../../../../enums/EventNames.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
+import { OverlayLayer } from '../extensions/OverlayLayer.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
 
 export class ZoomTool implements ITool {
 

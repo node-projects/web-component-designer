@@ -1,9 +1,9 @@
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { ICodeView } from "./ICodeView";
-import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
-import { CommandType } from '../../../commandHandling/CommandType';
-import { IDisposable } from '../../../interfaces/IDisposable';
+import { ICodeView } from './ICodeView.js';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
+import { CommandType } from '../../../commandHandling/CommandType.js';
+import { IDisposable } from '../../../interfaces/IDisposable.js';
 
 export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend implements ICodeView, IDisposable {
   canvasElement: HTMLElement;

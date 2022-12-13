@@ -1,9 +1,9 @@
-import { IDesignerExtensionProvider } from "./IDesignerExtensionProvider";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { IDesignerExtension } from "./IDesignerExtension";
-import { IExtensionManager } from "./IExtensionManger";
-import { GrayOutExtension } from "./GrayOutExtension";
+import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { IDesignerExtension } from './IDesignerExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
+import { GrayOutExtension } from './GrayOutExtension.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 
 export class GrayOutExtensionProvider implements IDesignerExtensionProvider {

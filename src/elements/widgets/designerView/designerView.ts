@@ -1,15 +1,15 @@
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { css, DomHelper, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
-import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
 import { DesignerCanvas } from "./designerCanvas.js";
 import { DomConverter } from './DomConverter.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
-import { PlainScrollbar } from '../../controls/PlainScrollbar';
+import { PlainScrollbar } from '../../controls/PlainScrollbar.js';
 import { DesignerToolbar } from './tools/toolBar/DesignerToolbar.js';
 
 
@@ -202,22 +202,25 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
     zoomIncrease.onclick = () => {
+      const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
+      const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
       if (this._designerCanvas.zoomFactor > 0.1)
-        this._designerCanvas.zoomFactor += 0.1;
+        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor + 0.1)
       else
-        this._designerCanvas.zoomFactor += 0.01;
+        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor + 0.01)
     }
     let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
     zoomDecrease.onclick = () => {
+      const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
+      const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
+
       if (this._designerCanvas.zoomFactor > 0.11)
-        this._designerCanvas.zoomFactor -= 0.1;
+        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor - 0.1)
       else
-        this._designerCanvas.zoomFactor -= 0.01;
+        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor - 0.01)
 
       if (this._designerCanvas.zoomFactor < 0.001)
-        this._designerCanvas.zoomFactor = 0.001
-
-      this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
+        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, 0.001)
     }
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
     zoomReset.onclick = () => {

@@ -82,7 +82,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   for (let xIdx = 0; xIdx < rows.length; xIdx++) {
     const r = rows[xIdx];
     let areas: string[] = null;
-    if (gridA) {
+    if (gridA && gridA[rw + 1]) {
       areas = gridA[rw + 1].split(' ');
     }
     let x = 0;
@@ -101,7 +101,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
         retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, column: yIdx, row: xIdx });
       }
       let name = null;
-      if (areas) {
+      if (areas && areas[cl]) {
         const nm = areas[cl].trim();
         if (nm != '.') {
           name = nm;

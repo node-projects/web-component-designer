@@ -1,5 +1,7 @@
-import { ChangeGroup, IDesignerCanvas, IDesignItem } from "../..";
-import { Orientation } from "../../enums/Orientation";
+import { Orientation } from '../../enums/Orientation.js';
+import { IDesignItem } from '../item/IDesignItem.js';
+import { ChangeGroup } from '../services/undoService/ChangeGroup.js';
+import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 export abstract class ArrangeHelper {
     public static arrangeElements(orientation: Orientation, designerCanvas: IDesignerCanvas, arrangeElements: IDesignItem[]) {

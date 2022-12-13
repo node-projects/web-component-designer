@@ -1,9 +1,9 @@
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
-import { switchContainer } from "../../../../helper/SwitchContainerHelper";
-import { DesignItem } from "../../../../item/DesignItem";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";
+import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
+import { switchContainer } from '../../../../helper/SwitchContainerHelper.js';
+import { DesignItem } from '../../../../item/DesignItem.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
 
 export class MultipleItemsSelectedContextMenu implements IContextMenuExtension {
 

@@ -1,13 +1,14 @@
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { AbstractExtension } from "./AbstractExtension";
-import { IExtensionManager } from "./IExtensionManger";
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { AbstractExtension } from './AbstractExtension.js';
+import { IExtensionManager } from './IExtensionManger.js';
 
 const offset = 3;
 
 export class MouseOverExtension extends AbstractExtension {
 
-  private _rect: SVGRectElement;
+  private _rect: SVGPathElement;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -18,12 +19,8 @@ export class MouseOverExtension extends AbstractExtension {
   }
 
   override refresh() {
-    let itemRect = this.extendedItem.element.getBoundingClientRect();
-
-    const xOffset = itemRect.x - this.designerCanvas.containerBoundingRect.x;
-    const yOffset = itemRect.y - this.designerCanvas.containerBoundingRect.y;
-
-    this._rect = this._drawRect((xOffset - offset) / this.designerCanvas.scaleFactor, (yOffset - offset) / this.designerCanvas.scaleFactor, (itemRect.width + offset + offset) / this.designerCanvas.scaleFactor, (itemRect.height + offset + offset) / this.designerCanvas.scaleFactor, 'svg-hover', this._rect);
+    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: offset, y: offset }, this.designerCanvas);
+    this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect);
     this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
   }
 

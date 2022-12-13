@@ -1,40 +1,40 @@
-import { EventNames } from "../../../enums/EventNames";
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { IElementDefinition } from '../../services/elementsService/IElementDefinition';
-import { InstanceServiceContainer } from '../../services/InstanceServiceContainer';
-import { UndoService } from '../../services/undoService/UndoService';
-import { SelectionService } from '../../services/selectionService/SelectionService';
-import { DesignItem } from '../../item/DesignItem';
-import { IDesignItem } from '../../item/IDesignItem';
+import { EventNames } from '../../../enums/EventNames.js';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { IElementDefinition } from '../../services/elementsService/IElementDefinition.js';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
+import { UndoService } from '../../services/undoService/UndoService.js';
+import { SelectionService } from '../../services/selectionService/SelectionService.js';
+import { DesignItem } from '../../item/DesignItem.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
-import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants';
-import { ContentService } from '../../services/contentService/ContentService';
-import { InsertAction } from '../../services/undoService/transactionItems/InsertAction';
-import { IDesignerCanvas } from './IDesignerCanvas';
-import { Snaplines } from './Snaplines';
-import { IPlacementView } from './IPlacementView';
-import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction';
-import { CommandType } from '../../../commandHandling/CommandType';
-import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
-import { DefaultHtmlParserService } from "../../services/htmlParserService/DefaultHtmlParserService";
-import { ExtensionType } from "./extensions/ExtensionType";
-import { IExtensionManager } from "./extensions/IExtensionManger";
-import { ExtensionManager } from "./extensions/ExtensionManager";
-import { NamedTools } from "./tools/NamedTools";
-import { Screenshot } from '../../helper/Screenshot';
-import { dataURItoBlob, exportData, sleep } from "../../helper/Helper";
-import { IContextMenuItem } from "../../helper/contextMenu/IContextMenuItem";
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper';
-import { IPoint } from "../../../interfaces/IPoint";
-import { OverlayLayer } from "./extensions/OverlayLayer";
-import { OverlayLayerView } from './overlayLayerView';
-import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension';
+import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants.js';
+import { ContentService } from '../../services/contentService/ContentService.js';
+import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
+import { IDesignerCanvas } from './IDesignerCanvas.js';
+import { Snaplines } from './Snaplines.js';
+import { IPlacementView } from './IPlacementView.js';
+import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction.js';
+import { CommandType } from '../../../commandHandling/CommandType.js';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
+import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
+import { ExtensionType } from './extensions/ExtensionType.js';
+import { IExtensionManager } from './extensions/IExtensionManger.js';
+import { ExtensionManager } from './extensions/ExtensionManager.js';
+import { NamedTools } from './tools/NamedTools.js';
+import { Screenshot } from '../../helper/Screenshot.js';
+import { dataURItoBlob, exportData, sleep } from '../../helper/Helper.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
+import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
+import { IPoint } from '../../../interfaces/IPoint.js';
+import { OverlayLayer } from './extensions/OverlayLayer.js';
+import { OverlayLayerView } from './overlayLayerView.js';
+import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension.js';
 import { IRect } from "../../../interfaces/IRect.js";
 import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
-import { ContextMenu } from "../../helper/contextMenu/ContextMenu";
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -54,7 +54,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public overlayLayer: OverlayLayerView;
   public rootDesignItem: IDesignItem;
   public eatEvents: Element;
-  public transformHelperElement: HTMLDivElement;
 
   private _zoomFactor = 1; //if scale or zoom css property is used this needs to be the value
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
@@ -90,6 +89,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();
 
+  public get canvas(): HTMLElement {
+    return this._canvas;
+  }
+
   // Private Variables
   private _canvas: HTMLDivElement;
   private _canvasContainer: HTMLDivElement;
@@ -113,11 +116,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       transform: translateZ(0);
       overflow: hidden;
 
-      font-family: initial;
-      font-size: initial;
-      font-weight: initial;
-      font-style: initial;
-      line-height: initial;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      font-style: inherit;
+      line-height: inherit;
     }
     * {
       touch-action: none;
@@ -125,19 +128,24 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     #node-projects-designer-canvas-canvas {
       background-color: var(--canvas-background, white);
       /* 10px grid, using http://www.patternify.com/ */
-      background-image: url(data:image/png;base64,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);
+      //background-image: url(data:image/png;base64,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);
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAFXmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjIwIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMjAiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIyMCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMjAiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSIKICAgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIKICAgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIgogICB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCIKICAgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCI+CiAgIDxkYzp0aXRsZT4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+QmFja2dyb3VuZGdyaWRfMTBweDwvcmRmOmxpPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnRpdGxlPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgRGVzaWduZXIgMS4xMC42IgogICAgICBzdEV2dDp3aGVuPSIyMDIyLTEyLTA4VDA5OjE1OjQ4KzAxOjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4fvgn+AAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kc8rRFEUxz8GjRhRLCiLl7BCftTExmLkV2ExnvJr8+bNvBk1b+b13kiyVbaKEhu/FvwFbJW1UkRKlrImNug5b2ZqJplzO/d87vfec7r3XPCpSd10KnrATGXs8FhImZtfUPwvBKjCTx/Nmu5YUzOjKiXt854yL952ebVKn/vXaqIxR4eyKuEh3bIzwuPCk6sZy+Md4UY9oUWFz4Q7bbmg8J2nR3L86nE8x98e22p4GHz1wkq8iCNFrCdsU1heTpuZXNHz9/FeEoilZmcktoq34BBmjBAKE4wwTJBeBmUO0iX96ZYVJfJ7svnTpCVXl9liDZtl4iTI0CnqilSPSTREj8lIsub1/29fHaO/L1c9EILKZ9d9bwf/Nvxsue7Xkev+HEP5E1ymCvnpQxj4EH2roLUdQN0GnF8VtMguXGxC06Ol2VpWKhf3GQa8nULtPDTcQPVirmf5fU4eQF2Xr7qGvX3okPN1S790cWfsRnax1QAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAC9JREFUOI1jfPr0KQNuICUlhUeWCY8cQTCqeWRoZvz//z8e6WfPntHK5lHNI0MzAMChCNMTuPcnAAAAAElFTkSuQmCC);
+      image-rendering: pixelated;
       background-position: 0px 0px;
+      background-attachment: fixed;
+      background-origin: -box;
       box-sizing: border-box;
       width: 100%;
       height: 100%;
       transform-origin: 0 0;
+      position: relative
     }
-
+    
     #node-projects-designer-canvas-canvas.dragFileActive {
       outline: blue 4px solid;
       outline-offset: -4px;
     }
-
+    
     node-projects-overlay-layer-view {
       box-sizing: border-box;
       width: 100%;
@@ -157,7 +165,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       user-select: none;
       -webkit-user-select: none;
     }
-
+    
     #node-projects-designer-canvas-clickOverlay {
       position: absolute;
       width: 100%;
@@ -165,23 +173,23 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       top: 0;
     }
     
-    #node-projects-designer-canvas-transformHelper {
+    #node-projects-designer-canvas-helper-element {
       height: 0;
       width: 0;
-    }`;
+    }  
+  `;
 
   static override readonly template = html`
     <div style="display: flex;flex-direction: column;width: 100%;height: 100%;">
       <div style="width: 100%;height: 100%;">
         <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative;">
           <div id="node-projects-designer-canvas-canvasContainer"
-            style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none;">
-            <div id="node-projects-designer-canvas-canvas" part="canvas"></div>
-          </div>
+          style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none;">
+          <div id="node-projects-designer-canvas-canvas" part="canvas"></div>
         </div>
-        <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;"></div>
       </div>
-      <div id="node-projects-designer-canvas-transformHelper"></div>
+      <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;"></div>
+      </div>
     </div>`;
 
   public extensionManager: IExtensionManager;
@@ -196,7 +204,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
     this.clickOverlay = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-clickOverlay');
-    this.transformHelperElement = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-transformHelper');
 
     this._onKeyDownBound = this.onKeyDown.bind(this);
     this._onKeyUpBound = this.onKeyUp.bind(this);
@@ -216,6 +223,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   get designerHeight(): string {
     return this._canvasContainer.style.height;
   }
+
   set designerHeight(value: string) {
     this._canvasContainer.style.height = value;
     this._zoomFactorChanged();
@@ -251,7 +259,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
                 t += ',';
               t += '#node-projects-designer-canvas-canvas ' + p;
             }
-            style += t + '{' + r.style.cssText + '}';
+            let cssText = r.style.cssText;
+            //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
+            if ((<any>r).styleMap && (<any>r).styleMap.get('grid-template') && (<any>r).styleMap.get('grid-template').toString().includes('repeat(')) {
+              let entr = (<any>r).styleMap.entries();
+              cssText = ''
+              for (let e of entr) {
+                cssText += e[0] + ':' + e[1].toString() + ';';
+              }
+            }
+            style += t + '{' + cssText + '}';
           }
         }
       }
@@ -477,7 +494,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.instanceServiceContainer = new InstanceServiceContainer(this);
     this.instanceServiceContainer.register("undoService", new UndoService(this));
-    this.instanceServiceContainer.register("selectionService", new SelectionService);
+    this.instanceServiceContainer.register("selectionService", new SelectionService(this));
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
@@ -503,6 +520,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       }
       const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
       this.addDesignItems(parser.createDesignItems(children, this.serviceContainer, this.instanceServiceContainer));
+    }
+
+    if (!this.serviceContainer.options.zoomDesignerBackground) {
+      requestAnimationFrame(() => {
+        this._resizeBackgroundGrid();
+      });
     }
   }
 
@@ -536,9 +559,19 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.extensionManager.refreshAllAppliedExtentions();
       setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 200);
     }
+    if (!this.serviceContainer.options.zoomDesignerBackground)
+      this._resizeBackgroundGrid();
   }
 
-  _updateTransform() {
+  private _resizeBackgroundGrid() {
+    const backgroundGridSize = 10;
+    const backgroundGridFactor = backgroundGridSize * 100 * 2;
+    let canvasWidth = this.canvas.getBoundingClientRect().width;
+    let backgroundGridZoom = backgroundGridFactor / canvasWidth;
+    this.canvas.style.backgroundSize = backgroundGridZoom.toString() + '%';
+  }
+
+  private _updateTransform() {
     this._scaleFactor = this._zoomFactor;
     this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + (isNaN(this._canvasOffset.x) ? '0' : this._canvasOffset.x) + 'px, ' + (isNaN(this._canvasOffset.y) ? '0' : this._canvasOffset.y) + 'px)';
     this._canvasContainer.style.transformOrigin = '0 0';
@@ -557,7 +590,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.rootDesignItem._removeChildInternal(i);
     this.addDesignItems(designItems);
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
-    this.instanceServiceContainer.selectionService.setSelectedElements(null);
+    (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
@@ -580,13 +613,22 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _onDragEnter(event: DragEvent) {
     this._fillCalculationrects();
     event.preventDefault();
+
     const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
     if (hasTransferDataBindingObject) {
       const ddService = this.serviceContainer.bindableObjectDragDropService;
       if (ddService) {
-        const effect = ddService.dragEnter(this, event);
-        event.dataTransfer.dropEffect = effect;
+        const el = this.getElementAtPoint({ x: event.x, y: event.y });
+        if (this._lastDdElement != el) {
+          ddService.dragLeave(this, event, this._lastDdElement);
+          ddService.dragEnter(this, event, el);
+          this._lastDdElement = el;
+        }
+      } else {
+        this._lastDdElement = null;
       }
+    } else {
+      this._lastDdElement = null;
     }
   }
 
@@ -594,14 +636,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._fillCalculationrects();
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
-    const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
-    if (hasTransferDataBindingObject) {
-      const ddService = this.serviceContainer.bindableObjectDragDropService;
-      if (ddService) {
-        const effect = ddService.dragLeave(this, event);
-        event.dataTransfer.dropEffect = effect;
-      }
-    }
 
     if (this._dragOverExtensionItem) {
       this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
@@ -609,6 +643,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
+  private _lastDdElement = null;
   private _onDragOver(event: DragEvent) {
     event.preventDefault();
     /*if (this.alignOnSnap) {
@@ -634,7 +669,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       if (hasTransferDataBindingObject) {
         const ddService = this.serviceContainer.bindableObjectDragDropService;
         if (ddService) {
-          const effect = ddService.dragOver(this, event);
+          const el = this.getElementAtPoint({ x: event.x, y: event.y });
+          if (this._lastDdElement != el) {
+            ddService.dragLeave(this, event, this._lastDdElement);
+            ddService.dragEnter(this, event, el);
+            this._lastDdElement = el;
+          }
+          const effect = ddService.dragOver(this, event, el);
           event.dataTransfer.dropEffect = effect;
         }
       } else {
@@ -680,6 +721,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private async _onDrop(event: DragEvent) {
+    this._lastDdElement = null;
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
 
@@ -697,7 +739,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const bo = JSON.parse(transferDataBindingObject);
         const ddService = this.serviceContainer.bindableObjectDragDropService;
         if (ddService) {
-          const effect = ddService.drop(this, event, bo);
+          const el = this.getElementAtPoint({ x: event.x, y: event.y });
+          const effect = ddService.drop(this, event, bo, el);
           event.dataTransfer.dropEffect = effect;
         }
       }
@@ -720,13 +763,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
         const elementDefinition = <IElementDefinition>JSON.parse(transferData);
         const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
-        const grp = di.openGroup("Insert");
+        const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
         di.setStyle('position', 'absolute');
         di.setStyle('left', (position.x - pos.x) + 'px');
         di.setStyle('top', (position.y - pos.y) + 'px');
+        const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, getComputedStyle(newContainer.element)))
+        containerService.enterContainer(newContainer, [di]);
         this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
-        grp.commit();
-        requestAnimationFrame(() => this.instanceServiceContainer.selectionService.setSelectedElements([di]));
+        requestAnimationFrame(() => {
+          this.instanceServiceContainer.selectionService.setSelectedElements([di]);
+          grp.commit();
+        });
       }
     }
   }
@@ -844,9 +891,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
-  public getNormalizedElementCoordinates(element: Element): IRect {
+  public getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect {
     const targetRect = element.getBoundingClientRect();
-    return { x: (targetRect.x - this.containerBoundingRect.x) / this.scaleFactor, y: (targetRect.y - this.containerBoundingRect.y) / this.scaleFactor, width: targetRect.width / this.scaleFactor, height: targetRect.height / this.scaleFactor };
+    return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
   }
 
   public getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number } {

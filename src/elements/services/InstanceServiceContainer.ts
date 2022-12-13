@@ -1,9 +1,9 @@
-import { ISelectionService } from './selectionService/ISelectionService';
-import { IUndoService } from './undoService/IUndoService';
-import { BaseServiceContainer } from './BaseServiceContainer';
-import { IContentService } from './contentService/IContentService';
-import { DesignContext } from '../widgets/designerView/DesignContext';
-import { IDesignContext } from '../widgets/designerView/IDesignContext';
+import { ISelectionService } from './selectionService/ISelectionService.js';
+import { IUndoService } from './undoService/IUndoService.js';
+import { BaseServiceContainer } from './BaseServiceContainer.js';
+import { IContentService } from './contentService/IContentService.js';
+import { DesignContext } from '../widgets/designerView/DesignContext.js';
+import { IDesignContext } from '../widgets/designerView/IDesignContext.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 interface InstanceServiceNameMap {

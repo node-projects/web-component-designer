@@ -69,8 +69,14 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
 
     if (!hasPositionedLayout)
       designItem.setStyle('position', 'absolute');
-    designItem.setStyle('left', (offset.x + (oldLeft ?? 0) + containerLeft) + "px");
-    designItem.setStyle('top', (offset.y + (oldTop ?? 0) + containerTop) + "px");
+    if (oldLeft || oldRight == null)
+      designItem.setStyle('left', (offset.x + (oldLeft ?? 0) + containerLeft) + "px");
+    if(oldTop || oldBottom == null)
+      designItem.setStyle('top', (offset.y + (oldTop ?? 0) + containerTop) + "px");
+    if (oldRight)
+      designItem.setStyle('right', ((oldRight ?? 0) - offset.x + containerRight) + "px");
+    if (oldBottom)
+      designItem.setStyle('bottom', ((oldBottom ?? 0) - offset.y + containerBottom) + "px");
   }
 }
 

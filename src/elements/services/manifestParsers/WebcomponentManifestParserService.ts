@@ -1,16 +1,16 @@
-import { BindingTarget } from "../../item/BindingTarget";
-import { IElementDefinition } from "../elementsService/IElementDefinition";
-import { IElementsService } from "../elementsService/IElementsService";
-import { IPropertiesService } from "../propertiesService/IPropertiesService";
-import { IProperty } from "../propertiesService/IProperty";
-import { PropertyType } from "../propertiesService/PropertyType";
-import { IDesignItem } from "../../item/IDesignItem";
-import { AbstractPropertiesService } from "../propertiesService/services/AbstractPropertiesService";
+import { BindingTarget } from '../../item/BindingTarget.js';
+import { IElementDefinition } from '../elementsService/IElementDefinition.js';
+import { IElementsService } from '../elementsService/IElementsService.js';
+import { IPropertiesService, RefreshMode } from '../propertiesService/IPropertiesService.js';
+import { IProperty } from '../propertiesService/IProperty.js';
+import { PropertyType } from '../propertiesService/PropertyType.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { AbstractPropertiesService } from '../propertiesService/services/AbstractPropertiesService.js';
 
 export class WebcomponentManifestParserService extends AbstractPropertiesService implements IElementsService, IPropertiesService {
   
-  listNeedsRefresh(designItem: IDesignItem): boolean {
-    return false;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.none;
   }
 
   private _name: string;

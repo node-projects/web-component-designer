@@ -1,12 +1,12 @@
-import { IDesignItem } from '../../item/IDesignItem';
-import { IHtmlWriterService } from './IHtmlWriterService';
-import { IHtmlWriterOptions } from './IHtmlWriterOptions';
-import { DomConverter } from '../../widgets/designerView/DomConverter';
-import { IndentedTextWriter } from '../../helper/IndentedTextWriter';
-import { CssCombiner } from '../../helper/CssCombiner';
-import { NodeType } from '../../item/NodeType';
-import { IStringPosition } from './IStringPosition';
-import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IHtmlWriterService } from './IHtmlWriterService.js';
+import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
+import { DomConverter } from '../../widgets/designerView/DomConverter.js';
+import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
+import { CssCombiner } from '../../helper/CssCombiner.js';
+import { NodeType } from '../../item/NodeType.js';
+import { IStringPosition } from './IStringPosition.js';
+import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
 
 export enum ElementContainerType {
@@ -25,7 +25,7 @@ export interface IWriteContext {
 export class SimpleHtmlWriterService implements IHtmlWriterService {
   protected writeAttributes(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasAttributes) {
-      for (const a of designItem.attributes) {
+      for (const a of designItem.attributes()) {
         writeContext.indentedTextWriter.write(' ');
         if (typeof a[1] === 'string') {
           if (a[1] === "")
@@ -44,9 +44,9 @@ export class SimpleHtmlWriterService implements IHtmlWriterService {
   protected writeStyles(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasStyles) {
       writeContext.indentedTextWriter.write(' style="');
-      let styles = designItem.styles;
+      let styles = designItem.styles();
       if (writeContext.options.compressCssToShorthandProperties)
-        styles = CssCombiner.combine(styles);
+        styles = CssCombiner.combine(new Map(styles));
       for (const s of styles) {
         if (s[0]) {
           writeContext.indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');

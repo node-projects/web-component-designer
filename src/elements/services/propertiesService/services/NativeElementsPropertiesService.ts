@@ -1,7 +1,8 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { CommonPropertiesService } from "./CommonPropertiesService";
-import { PropertyType } from '../PropertyType';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { CommonPropertiesService } from './CommonPropertiesService.js';
+import { PropertyType } from '../PropertyType.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class NativeElementsPropertiesService extends CommonPropertiesService {
 
@@ -170,8 +171,8 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
 
   public override name = "native"
 
-  public override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.full;
   }
 
   override isHandledElement(designItem: IDesignItem): boolean {

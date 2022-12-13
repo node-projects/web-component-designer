@@ -1,5 +1,5 @@
-import { BindingMode } from "./BindingMode";
-import { BindingTarget } from "./BindingTarget";
+import { BindingMode } from './BindingMode.js';
+import { BindingTarget } from './BindingTarget.js';
 
 export interface IBinding {
   targetName?: string; //Name of Attribute, CSS-Property, Event, ...

@@ -1,16 +1,16 @@
-import { IPropertiesService } from "../IPropertiesService";
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { ValueType } from "../ValueType";
-import { PropertiesHelper } from './PropertiesHelper';
-import { BindingTarget } from "../../../item/BindingTarget";
-import { IBinding } from "../../../item/IBinding";
-import { PropertyType } from "../PropertyType";
-import { NodeType } from "../../../item/NodeType";
+import { IPropertiesService, RefreshMode } from '../IPropertiesService.js';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { ValueType } from '../ValueType.js';
+import { PropertiesHelper } from './PropertiesHelper.js';
+import { BindingTarget } from '../../../item/BindingTarget.js';
+import { IBinding } from '../../../item/IBinding.js';
+import { PropertyType } from '../PropertyType.js';
+import { NodeType } from '../../../item/NodeType.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
-  abstract listNeedsRefresh(designItem: IDesignItem): boolean;
+  abstract getRefreshMode(designItem: IDesignItem): RefreshMode;
 
   abstract isHandledElement(designItem: IDesignItem): boolean;
 
@@ -27,8 +27,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        d.styles.set(property.name, value);
-        (<HTMLElement>d.element).style[property.name] = value;
+        d.setStyle(property.name, value);
+        //unkown css property names do not trigger the mutation observer of property grid, 
+        //fixed by assinging stle again to the attribute
+        (<HTMLElement>d.element).setAttribute('style',(<HTMLElement>d.element).getAttribute('style'));
       } else {
         let attributeName = property.attributeName
         if (!attributeName)
@@ -37,19 +39,15 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
 
         if (property.type === 'object') {
           const json = JSON.stringify(value);
-          d.attributes.set(attributeName, json);
-          d.element.setAttribute(attributeName, json);
-        } else if (property.type == 'boolean' && !value) {
-          d.attributes.delete(attributeName);
-          d.element.removeAttribute(attributeName);
+          d.setAttribute(attributeName, json);
+         } else if (property.type == 'boolean' && !value) {
+          d.removeAttribute(attributeName);
         }
         else if (property.type == 'boolean' && value) {
-          d.attributes.set(attributeName, "");
-          d.element.setAttribute(attributeName, "");
+          d.setAttribute(attributeName, "");
         }
         else {
-          d.attributes.set(attributeName, value);
-          d.element.setAttribute(attributeName, value);
+          d.setAttribute(attributeName, value);
         }
       }
       this._notifyChangedProperty(d, property, value);
@@ -65,16 +63,13 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     const cg = designItems[0].openGroup("properties cleared");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        d.styles.delete(property.name);
-        (<HTMLElement>d.element).style[property.name] = '';
+        d.removeStyle(property.name);
 
       } else {
         let attributeName = property.attributeName
         if (!attributeName)
           attributeName = PropertiesHelper.camelToDashCase(property.name);
-
-        d.attributes.delete(attributeName);
-        d.element.removeAttribute(attributeName);
+        d.removeAttribute(attributeName);
       }
       d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
@@ -95,9 +90,9 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       designItems.forEach((x) => {
         let has = false;
         if (property.propertyType == PropertyType.cssValue)
-          has = x.styles.has(property.name);
+          has = x.hasStyle(property.name);
         else
-          has = x.attributes.has(attributeName);
+          has = x.hasAttribute(attributeName);
         all = all && has;
         some = some || has;
       });
@@ -122,9 +117,9 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   getValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
       if (property.propertyType == PropertyType.cssValue) {
-        let lastValue = designItems[0].styles.get(property.name);
+        let lastValue = designItems[0].getStyle(property.name);
         for (const x of designItems) {
-          let value = x.styles.get(property.name);
+          let value = x.getStyle(property.name);
           if (value != lastValue) {
             lastValue = null;
             break;
@@ -137,8 +132,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           attributeName = PropertiesHelper.camelToDashCase(property.name);
 
         if (property.type == 'boolean')
-          return designItems[0].attributes.has(attributeName);
-        let lastValue = designItems[0].attributes.get(attributeName);
+          return designItems[0].hasAttribute(attributeName);
+        let lastValue = designItems[0].getAttribute(attributeName);
         /*
         for (const x of designItems) {
           let value = x.attributes.get(attributeName);

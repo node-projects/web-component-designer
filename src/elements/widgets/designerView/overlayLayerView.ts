@@ -1,6 +1,6 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { OverlayLayer } from './extensions/OverlayLayer.js';
-import { ServiceContainer } from '../../services/ServiceContainer';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
 
 export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
 
@@ -156,6 +156,17 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     if (className)
       rect.setAttribute('class', className);
     return rect;
+  }
+
+  drawPath(data: string, className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
+    if (!path) {
+      path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      this.addOverlay(path, overlayLayer);
+    }
+    path.setAttribute('d', data);
+    if (className)
+      path.setAttribute('class', className);
+    return path;
   }
 
   drawText(text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {

@@ -1,6 +1,6 @@
-import { IDesignItem } from "../../../item/IDesignItem";
-import { ExtensionType } from './ExtensionType';
-import { IDesignerExtension } from "./IDesignerExtension";
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { ExtensionType } from './ExtensionType.js';
+import { IDesignerExtension } from './IDesignerExtension.js';
 
 export interface IExtensionManager {
   applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive?: boolean) : IDesignerExtension[];

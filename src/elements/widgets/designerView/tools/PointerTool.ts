@@ -1,15 +1,15 @@
-import { EventNames } from "../../../../enums/EventNames";
-import { PointerActionType } from "../../../../enums/PointerActionType";
-import { IPoint } from "../../../../interfaces/IPoint";
-import { DesignItem } from "../../../item/DesignItem";
-import { IDesignItem } from "../../../item/IDesignItem";
-import { IPlacementService } from "../../../services/placementService/IPlacementService";
-import { ExtensionType } from "../extensions/ExtensionType";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { ITool } from "./ITool";
-import { NamedTools } from './NamedTools';
+import { EventNames } from '../../../../enums/EventNames.js';
+import { PointerActionType } from '../../../../enums/PointerActionType.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
+import { DesignItem } from '../../../item/DesignItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IPlacementService } from '../../../services/placementService/IPlacementService.js';
+import { ExtensionType } from '../extensions/ExtensionType.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
+import { NamedTools } from './NamedTools.js';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
-import { ChangeGroup } from "../../../services/undoService/ChangeGroup";
+import { ChangeGroup } from '../../../services/undoService/ChangeGroup.js';
 
 export class PointerTool implements ITool {
 
@@ -30,6 +30,7 @@ export class PointerTool implements ITool {
 
   private _moveItemsOffset: IPoint = { x: 0, y: 0 };
   private _initialOffset: IPoint;
+  private _started: boolean = false;;
 
   private _firstTimeInMove: boolean;
   private _secondTimeInMove: boolean;
@@ -202,6 +203,7 @@ export class PointerTool implements ITool {
       case EventNames.PointerDown:
         {
           this._actionStartedDesignItem = currentDesignItem;
+   
           this._moveItemsOffset = { x: 0, y: 0 };
 
           this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
@@ -251,11 +253,13 @@ export class PointerTool implements ITool {
             for (let i = 0; i < this._clonedItems.length; i++) {
               this._actionStartedDesignItems[i].insertAdjacentElement(this._clonedItems[i], 'beforebegin');
             }
+            designerCanvas.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'added', designItems: this._clonedItems });
           } else if (!event.ctrlKey && this._copiedItemsInserted) {
             for (let d of this._clonedItems) {
               d.remove();
             }
             this._copiedItemsInserted = false;
+            designerCanvas.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'removed', designItems: this._clonedItems });
           }
 
           // *** End Copy Items Part ***
@@ -319,6 +323,15 @@ export class PointerTool implements ITool {
                 newContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
               } else {
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
+                if (!this._started) {
+                  for (const item of this._actionStartedDesignItems) {
+                    designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
+                    designerCanvas.extensionManager.removeExtension(item, ExtensionType.MouseOver);
+                    designerCanvas.extensionManager.applyExtension(item, ExtensionType.Placement);
+                  }
+                  currentContainerService.startPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
+                  this._started = true;
+                }
                 currentContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
               }
               designerCanvas.extensionManager.refreshExtensions(this._actionStartedDesignItems);
@@ -328,6 +341,7 @@ export class PointerTool implements ITool {
         }
       case EventNames.PointerUp:
         {
+          this._started = false;
           if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
             if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey) {
               designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem]);
@@ -348,6 +362,10 @@ export class PointerTool implements ITool {
               containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
               this._changeGroup.commit();
               this._changeGroup = null;
+              for (const item of this._actionStartedDesignItems) {
+                designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver);
+                designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
+              }
             }
 
             designerCanvas.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);

@@ -1,4 +1,4 @@
-import { CommandType } from "../commandHandling/CommandType";
+import { CommandType } from '../commandHandling/CommandType.js';
 
 export interface ICommandHandler {
     executeCommand(type: CommandType, parameter: any): Promise<void>;

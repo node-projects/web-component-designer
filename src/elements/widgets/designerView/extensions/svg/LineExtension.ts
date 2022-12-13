@@ -1,9 +1,10 @@
-import { EventNames } from "../../../../../enums/EventNames";
-import { IPoint } from "../../../../../interfaces/IPoint";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { AbstractExtension } from "../AbstractExtension";
-import { IExtensionManager } from "../IExtensionManger";
+import { EventNames } from '../../../../../enums/EventNames.js';
+import { IPoint } from '../../../../../interfaces/IPoint.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
+import { IRect } from '../../../../../interfaces/IRect.js';
 
 
 export class LineExtension extends AbstractExtension {
@@ -15,6 +16,8 @@ export class LineExtension extends AbstractExtension {
     private _originalPoint: IPoint;
     private _newLinePoint: IPoint;
     private _newCirclePoint: IPoint;
+    private _parentCoordinates: IRect;
+    private _offsetSvg = 10.0;
 
 
     constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
@@ -46,6 +49,7 @@ export class LineExtension extends AbstractExtension {
                 this._startPos = cursorPos;
                 this._circlePos = { x: parseFloat(circle.getAttribute("cx")), y: parseFloat(circle.getAttribute("cy")) }
                 this._originalPoint = { x: parseFloat(l.getAttribute("x" + index)), y: parseFloat(l.getAttribute("y" + index)) };
+                this._parentCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._lineElement.parentElement);
                 break;
 
             case EventNames.PointerMove:
@@ -87,6 +91,16 @@ export class LineExtension extends AbstractExtension {
                 this._originalPoint = null;
                 this.extendedItem.setAttribute('x' + index, this._newLinePoint.x.toString());
                 this.extendedItem.setAttribute('y' + index, this._newLinePoint.y.toString());
+
+                if (getComputedStyle(this._lineElement.parentElement).position == "absolute") {
+                    let group = this.extendedItem.openGroup('rearrangeSvg');
+                    let newLineCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._lineElement);
+                    let newLineCoordinatesCloud = this._getPointsFromRect(newLineCoordinates);
+                    let newLineExtrema = this._getMinMaxValues(newLineCoordinatesCloud);
+                    this._rearrangeSvgParent(newLineExtrema);
+                    this._rearrangePointsFromElement(this._parentCoordinates);
+                    group.commit();
+                }
                 break;
         }
     }
@@ -94,13 +108,59 @@ export class LineExtension extends AbstractExtension {
     _drawPathCircle(x: number, y: number, l: SVGLineElement, index: number) {
         let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path');
         circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
-
-
         circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, l, index));
         circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, l, index));
         circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, l, index));
     }
 
+    _getPointsFromRect(elementCoords: IRect) {
+        let Coords: number[] = [];
+        Coords.push(elementCoords.x);
+        Coords.push(elementCoords.x + elementCoords.width);
+        Coords.push(elementCoords.y);
+        Coords.push(elementCoords.y + elementCoords.height);
+        Coords.push(elementCoords.height);
+        Coords.push(elementCoords.width);
+        return Coords;
+    }
+
+    _getMinMaxValues(coords) {
+        let extrema = { xMin: 0.0, xMax: 0.0, yMin: 0.0, yMax: 0.0 };
+        for (let i = 0; i < coords.length - 2; i++) {
+            if (coords[i] < coords[i + 1] && i <= 1) {
+                extrema.xMin = coords[i];
+            } else if (coords[i] < coords[i + 1] && i > 1 && i <= 3) {
+                extrema.yMin = coords[i];
+            }
+            if (coords[i] > coords[i + 1] && i <= 1) {
+                extrema.xMax = coords[i];
+            } else if (coords[i] > coords[i + 1] && i > 1 && i <= 3) {
+                extrema.yMax = coords[i];
+            }
+        }
+        return extrema;
+    }
+
+    _rearrangeSvgParent(newLineExtrema) {
+        let parentLeft = newLineExtrema.xMin - this._offsetSvg;
+        let parentTop = newLineExtrema.yMin - this._offsetSvg;
+        let widthLineElement = newLineExtrema.xMax - newLineExtrema.xMin + (2 * this._offsetSvg);
+        let heightLineElement = newLineExtrema.yMax - newLineExtrema.yMin + (2 * this._offsetSvg);
+        this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
+        this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
+        this.extendedItem.parent.setStyle("height", heightLineElement.toString() + "px");
+        this.extendedItem.parent.setStyle("width", widthLineElement.toString() + "px");
+    }
+
+    _rearrangePointsFromElement(oldParentCoords: IRect) {
+        let newParentCoords = this.designerCanvas.getNormalizedElementCoordinates(this._lineElement.parentElement);
+        let diffX = oldParentCoords.x - newParentCoords.x;
+        let diffY = oldParentCoords.y - newParentCoords.y;
+        this.extendedItem.setAttribute('x1', (this._lineElement.x1.baseVal.value + diffX).toString());
+        this.extendedItem.setAttribute('y1', (this._lineElement.y1.baseVal.value + diffY).toString());
+        this.extendedItem.setAttribute('x2', (this._lineElement.x2.baseVal.value + diffX).toString());
+        this.extendedItem.setAttribute('y2', (this._lineElement.y2.baseVal.value + diffY).toString());
+    }
 
     override refresh() {
         this._removeAllOverlays();

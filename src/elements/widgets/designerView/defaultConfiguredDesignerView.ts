@@ -1,4 +1,4 @@
-import { DesignerView } from "./designerView";
+import { DesignerView } from './designerView.js';
 
 export class DefaultConfiguredDesignerView extends DesignerView {
   constructor(){

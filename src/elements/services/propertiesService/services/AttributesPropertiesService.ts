@@ -1,17 +1,17 @@
-import { IPropertiesService } from "../IPropertiesService";
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { ValueType } from "../ValueType";
+import { IPropertiesService, RefreshMode } from '../IPropertiesService.js';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { ValueType } from '../ValueType.js';
 import { IBinding } from "../../../item/IBinding.js";
-import { BindingTarget } from "../../../item/BindingTarget";
-import { PropertyType } from "../PropertyType";
+import { BindingTarget } from '../../../item/BindingTarget.js';
+import { PropertyType } from '../PropertyType.js';
 
 export class AttributesPropertiesService implements IPropertiesService {
 
   public name = "attributes"
 
-  public listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.fullOnValueChange;
   }
 
   isHandledElement(designItem: IDesignItem): boolean {
@@ -25,8 +25,8 @@ export class AttributesPropertiesService implements IPropertiesService {
   getProperties(designItem: IDesignItem): IProperty[] {
     if (designItem) {
       let p: IProperty[] = [];
-      for (let a of designItem.attributes.keys()) {
-        p.push({ name: a, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
+      for (let a of designItem.attributes()) {
+        p.push({ name: a[0], renamable: true, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
       }
       p.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return p;
@@ -37,8 +37,7 @@ export class AttributesPropertiesService implements IPropertiesService {
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
-      d.attributes.set(<string>property.name, value);
-      d.element.setAttribute(property.name, value);
+      d.setAttribute(<string>property.name, value);
     }
     cg.commit();
   }
@@ -49,8 +48,7 @@ export class AttributesPropertiesService implements IPropertiesService {
 
   clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
-      d.attributes.delete(<string>property.name);
-      d.element.removeAttribute(property.name);
+      d.removeAttribute(<string>property.name);
       d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
       });
@@ -61,11 +59,11 @@ export class AttributesPropertiesService implements IPropertiesService {
     let all = true;
     let some = false;
     if (designItems != null && designItems.length !== 0) {
-      if (designItems.length == 1 && typeof designItems[0].attributes.get(property.name) == 'object')
+      if (designItems.length == 1 && typeof designItems[0].getAttribute(property.name) == 'object')
         return ValueType.bound;
       let attributeName = property.name;
       designItems.forEach((x) => {
-        let has = x.attributes.has(attributeName);
+        let has = x.hasAttribute(attributeName);
         all = all && has;
         some = some || has;
       });
@@ -79,7 +77,7 @@ export class AttributesPropertiesService implements IPropertiesService {
   getValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
       let attributeName = property.name;
-      let lastValue = designItems[0].attributes.get(attributeName);
+      let lastValue = designItems[0].getAttribute(attributeName);
       if (typeof lastValue === 'object')
         return (<IBinding>lastValue).rawValue;
       /*

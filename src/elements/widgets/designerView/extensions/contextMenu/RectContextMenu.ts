@@ -1,10 +1,10 @@
-import { DeleteAction } from "../../../../..";
-import { IContextMenuItem } from "../../../../helper/contextMenu/IContextMenuItem";
-import { DesignItem } from "../../../../item/DesignItem";
-import { IDesignItem } from "../../../../item/IDesignItem";
-import { InsertAction } from "../../../../services/undoService/transactionItems/InsertAction";
-import { IDesignerCanvas } from "../../IDesignerCanvas";
-import { ContextmenuInitiator, IContextMenuExtension } from "./IContextMenuExtension";
+import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
+import { DesignItem } from '../../../../item/DesignItem.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { DeleteAction } from '../../../../services/undoService/transactionItems/DeleteAction.js';
+import { InsertAction } from '../../../../services/undoService/transactionItems/InsertAction.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
 
 export class RectContextMenu implements IContextMenuExtension {
 

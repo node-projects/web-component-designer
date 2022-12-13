@@ -1,11 +1,11 @@
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { ICodeView } from "./ICodeView";
+import { ICodeView } from './ICodeView.js';
 import type * as monaco from 'monaco-editor';
-import { IActivateable } from '../../../interfaces/IActivateable';
-import { IStringPosition } from '../../services/htmlWriterService/IStringPosition';
-import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler';
-import { IUiCommand } from '../../../commandHandling/IUiCommand';
-import { CommandType } from '../../../commandHandling/CommandType';
+import { IActivateable } from '../../../interfaces/IActivateable.js';
+import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
+import { CommandType } from '../../../commandHandling/CommandType.js';
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
 
@@ -96,8 +96,29 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         minimap: {
           size: 'fill'
         },
-        fixedOverflowWidgets: true
+        fixedOverflowWidgets: true,
+        scrollbar: {
+          useShadows: false,
+          verticalHasArrows: true,
+          horizontalHasArrows: true,
+          vertical: 'visible',
+          horizontal: 'visible'
+        }
       });
+
+      //@ts-ignore
+      monaco.editor.defineTheme('myTheme', {
+        base: 'vs',
+        inherit: true,
+        //@ts-ignore
+        rules: [{ background: 'EDF9FA' }],
+        colors: {
+          'editor.selectionBackground': '#add6ff',
+          'editor.inactiveSelectionBackground': '#add6ff'
+        }
+      });
+      //@ts-ignore
+      monaco.editor.setTheme('myTheme');
 
       this._monacoEditor.layout();
       let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {

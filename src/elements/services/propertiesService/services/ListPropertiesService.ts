@@ -1,13 +1,14 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
-import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions';
-import { AbstractPropertiesService } from './AbstractPropertiesService';
-import { PropertyType } from '../PropertyType';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions.js';
+import { AbstractPropertiesService } from './AbstractPropertiesService.js';
+import { PropertyType } from '../PropertyType.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class ListPropertiesService extends AbstractPropertiesService {
 
-  listNeedsRefresh(designItem: IDesignItem): boolean {
-    return true;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.full;
   }
 
   public name = "list"

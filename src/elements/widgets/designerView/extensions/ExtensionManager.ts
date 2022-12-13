@@ -1,12 +1,12 @@
-import { IContentChanged } from "../../../../index.js";
-import { DesignItem } from "../../../item/DesignItem";
-import { IDesignItem } from "../../../item/IDesignItem";
+import { DesignItem } from '../../../item/DesignItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 import { NodeType } from "../../../item/NodeType.js";
-import { ISelectionChangedEvent } from "../../../services/selectionService/ISelectionChangedEvent";
-import { IDesignerCanvas } from "../IDesignerCanvas";
-import { ExtensionType } from './ExtensionType';
-import { IExtensionManager } from "./IExtensionManger";
-import { IDesignerExtension } from "./IDesignerExtension";
+import { ISelectionChangedEvent } from '../../../services/selectionService/ISelectionChangedEvent.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ExtensionType } from './ExtensionType.js';
+import { IExtensionManager } from './IExtensionManger.js';
+import { IDesignerExtension } from './IDesignerExtension.js';
+import { IContentChanged } from '../../../services/contentService/IContentChanged.js';
 
 export class ExtensionManager implements IExtensionManager {
 
@@ -48,6 +48,7 @@ export class ExtensionManager implements IExtensionManager {
         this.removeExtensions(selectionChangedEvent.oldSelectedElements, ExtensionType.Selection);
       }
     }
+
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
@@ -55,7 +56,7 @@ export class ExtensionManager implements IExtensionManager {
       this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
     }
 
-    this.refreshExtensions(selectionChangedEvent.selectedElements);
+    //this.refreshExtensions(selectionChangedEvent.selectedElements);
   }
 
   applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive: boolean = false) {
@@ -276,6 +277,7 @@ export class ExtensionManager implements IExtensionManager {
       this.refreshExtensions(designItems, ExtensionType.ContainerDragOver, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.ContainerDrag, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Doubleclick, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Placement, ignoredExtension);
     }
   }
 

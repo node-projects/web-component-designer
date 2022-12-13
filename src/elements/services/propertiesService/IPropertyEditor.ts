@@ -1,6 +1,6 @@
-import { IDesignItem } from "../../item/IDesignItem";
-import { IProperty } from "./IProperty";
-import { ValueType } from "./ValueType";
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IProperty } from './IProperty.js';
+import { ValueType } from './ValueType.js';
 
 export interface IPropertyEditor {
   readonly element: Element;

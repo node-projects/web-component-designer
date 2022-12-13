@@ -1,7 +1,7 @@
-import { IProperty } from "../IProperty";
-import { BasePropertyEditor } from './BasePropertyEditor';
-import { ValueType } from "../ValueType";
-import { w3color } from "../../../helper/w3color";
+import { IProperty } from '../IProperty.js';
+import { BasePropertyEditor } from './BasePropertyEditor.js';
+import { ValueType } from '../ValueType.js';
+import { w3color } from '../../../helper/w3color.js';
 
 export class ColorPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
   constructor(property: IProperty) {

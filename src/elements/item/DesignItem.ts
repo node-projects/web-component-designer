@@ -1,18 +1,18 @@
-import { ServiceContainer } from '../services/ServiceContainer';
-import { IDesignItem } from './IDesignItem';
-import { InstanceServiceContainer } from '../services/InstanceServiceContainer';
-import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction';
-import { ChangeGroup } from '../services/undoService/ChangeGroup';
-import { NodeType } from './NodeType';
-import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction';
-import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType';
-import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension';
+import { ServiceContainer } from '../services/ServiceContainer.js';
+import { IDesignItem } from './IDesignItem.js';
+import { InstanceServiceContainer } from '../services/InstanceServiceContainer.js';
+import { CssStyleChangeAction } from '../services/undoService/transactionItems/CssStyleChangeAction.js';
+import { ChangeGroup } from '../services/undoService/ChangeGroup.js';
+import { NodeType } from './NodeType.js';
+import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction.js';
+import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
+import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { CssAttributeParser } from '../helper/CssAttributeParser.js';
 import { ISize } from '../../interfaces/ISize.js';
 import { PropertiesHelper } from '../services/propertiesService/services/PropertiesHelper.js';
-import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction';
-import { DeleteAction } from '../..';
-import { DomConverter } from '../widgets/designerView/DomConverter';
+import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction.js';
+import { DomConverter } from '../widgets/designerView/DomConverter.js';
+import { DeleteAction } from '../services/undoService/transactionItems/DeleteAction.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -47,15 +47,49 @@ export class DesignItem implements IDesignItem {
     return NodeType.Element;
   }
 
+  private _attributes: Map<string, string>
   public get hasAttributes() {
-    return this.attributes.size > 0;
+    return this._attributes.size > 0;
   }
-  public attributes: Map<string, string>
+  public hasAttribute(name: string) {
+    return this._attributes.has(name);
+  }
+  public getAttribute(name: string) {
+    return this._attributes.get(name);
+  }
+  public *attributes() {
+    for (let s of this._attributes) {
+      yield s;
+    }
+  }
+  _withoutUndoSetAttribute(name: string, value: string) {
+    this._attributes.set(name, value);
+  }
+  _withoutUndoRemoveAttribute(name: string) {
+    this._attributes.delete(name);
+  }
 
+  private _styles: Map<string, string>
   public get hasStyles() {
-    return this.styles.size > 0;
+    return this._styles.size > 0;
   }
-  public styles: Map<string, string>
+  public hasStyle(name: string) {
+    return this._styles.has(name);
+  }
+  public getStyle(name: string) {
+    return this._styles.get(name);
+  }
+  public *styles() {
+    for (let s of this._styles) {
+      yield s;
+    }
+  }
+  _withoutUndoSetStyle(name: string, value: string) {
+    this._styles.set(name, value);
+  }
+  _withoutUndoRemoveStyle(name: string) {
+    this._styles.delete(name);
+  }
 
   private static _designItemMap = new WeakMap<Node, IDesignItem>();
 
@@ -165,12 +199,12 @@ export class DesignItem implements IDesignItem {
   public set hideAtDesignTime(value: boolean) {
     this._hideAtDesignTime = value;
     if (value)
-      this.attributes.set(hideAtDesignTimeAttributeName, "");
+      this._attributes.set(hideAtDesignTimeAttributeName, "");
     else
-      this.attributes.delete(hideAtDesignTimeAttributeName);
+      this._attributes.delete(hideAtDesignTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
-        this.element.style.display = <any>this.styles.get('display') ?? "";
+        this.element.style.display = <any>this._styles.get('display') ?? "";
       else
         this.element.style.display = 'none';
     }
@@ -183,12 +217,12 @@ export class DesignItem implements IDesignItem {
   public set hideAtRunTime(value: boolean) {
     this._hideAtRunTime = value;
     if (value)
-      this.attributes.set(hideAtRunTimeAttributeName, "");
+      this._attributes.set(hideAtRunTimeAttributeName, "");
     else
-      this.attributes.delete(hideAtRunTimeAttributeName);
+      this._attributes.delete(hideAtRunTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
-        this.element.style.opacity = <any>this.styles.get('opacity') ?? "";
+        this.element.style.opacity = <any>this._styles.get('opacity') ?? "";
       else
         this.element.style.opacity = '0.3';
     }
@@ -201,9 +235,9 @@ export class DesignItem implements IDesignItem {
   public set lockAtDesignTime(value: boolean) {
     this._lockAtDesignTime = value;
     if (value)
-      this.attributes.set(lockAtDesignTimeAttributeName, "");
+      this._attributes.set(lockAtDesignTimeAttributeName, "");
     else
-      this.attributes.delete(lockAtDesignTimeAttributeName);
+      this._attributes.delete(lockAtDesignTimeAttributeName);
     if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
       if (!value)
         this.element.style.pointerEvents = 'auto';
@@ -218,7 +252,7 @@ export class DesignItem implements IDesignItem {
     if (designItem.nodeType == NodeType.Element) {
       for (let a of designItem.element.attributes) {
         if (a.name !== 'style') {
-          designItem.attributes.set(a.name, a.value);
+          designItem._attributes.set(a.name, a.value);
           if (a.name === hideAtDesignTimeAttributeName)
             designItem._hideAtDesignTime = true;
           if (a.name === hideAtRunTimeAttributeName)
@@ -234,7 +268,7 @@ export class DesignItem implements IDesignItem {
         if (st) {
           cssParser.parse(st);
           for (let e of cssParser.entries) {
-            designItem.styles.set(<string>e.name, e.value);
+            designItem._styles.set(<string>e.name, e.value);
           }
         }
         if (!designItem._lockAtDesignTime) {
@@ -266,8 +300,8 @@ export class DesignItem implements IDesignItem {
     this.serviceContainer = serviceContainer;
     this.instanceServiceContainer = instanceServiceContainer;
 
-    this.attributes = new Map();
-    this.styles = new Map();
+    this._attributes = new Map();
+    this._styles = new Map();
 
     DesignItem._designItemMap.set(node, this);
   }
@@ -299,21 +333,21 @@ export class DesignItem implements IDesignItem {
 
   public setStyle(name: string, value?: string | null) {
     let nm = PropertiesHelper.camelToDashCase(name);
-    const action = new CssStyleChangeAction(this, nm, value, this.styles.get(nm));
+    const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
   public removeStyle(name: string) {
     let nm = PropertiesHelper.camelToDashCase(name);
-    const action = new CssStyleChangeAction(this, nm, '', this.styles.get(nm));
+    const action = new CssStyleChangeAction(this, nm, '', this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
 
   public setAttribute(name: string, value?: string | null) {
-    const action = new AttributeChangeAction(this, name, value, this.attributes.get(name));
+    const action = new AttributeChangeAction(this, name, value, this._attributes.get(name));
     this.instanceServiceContainer.undoService.execute(action);
   }
   public removeAttribute(name: string) {
-    const action = new AttributeChangeAction(this, name, null, this.attributes.get(name));
+    const action = new AttributeChangeAction(this, name, null, this._attributes.get(name));
     this.instanceServiceContainer.undoService.execute(action);
   }
 
@@ -336,6 +370,7 @@ export class DesignItem implements IDesignItem {
       this._childArray.splice(index, 0, designItem);
     }
 
+    //todo: is this still needed???
     if (this.instanceServiceContainer.selectionService.primarySelection == designItem)
       designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
   }

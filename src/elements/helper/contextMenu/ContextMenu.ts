@@ -1,6 +1,6 @@
 import { css } from "@node-projects/base-custom-webcomponent";
-import { sleep } from "../Helper";
-import { IContextMenuItem } from "./IContextMenuItem";
+import { sleep } from '../Helper.js';
+import { IContextMenuItem } from './IContextMenuItem.js';
 
 export interface IContextMenuOptions {
 	defaultIcon?: string,
@@ -207,7 +207,15 @@ export class ContextMenu {
 							this.close();
 						});
 					if (item.children != null) {
-						li.appendChild(this.renderLevel(item.children));
+						let childmenu = this.renderLevel(item.children);
+						li.appendChild(childmenu);
+						li.addEventListener('mouseenter', () => {
+							const childRect = childmenu.getBoundingClientRect();
+							if (childRect.top + childRect.height > window.innerHeight) {
+								childmenu.style.top = 'unset';
+								childmenu.style.bottom = '0';
+							}
+						})
 					}
 				}
 				lastWasDivider = false;
@@ -223,6 +231,8 @@ export class ContextMenu {
 
 		return ul_outer;
 	}
+
+
 
 	public display(event: MouseEvent) {
 		let menu = this._menuElement;

@@ -1,8 +1,8 @@
 //Service container should not be something with changeing information, so global context is for tool and color (and maybe more)
 
 import { PropertyChangedArgs, TypedEvent } from "@node-projects/base-custom-webcomponent";
-import { ITool } from "../widgets/designerView/tools/ITool";
-import { ServiceContainer } from './ServiceContainer';
+import { ITool } from '../widgets/designerView/tools/ITool.js';
+import { ServiceContainer } from './ServiceContainer.js';
 
 export class GlobalContext {
 

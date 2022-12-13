@@ -7,3 +7,7 @@
   https://github.com/chdh/plain-scrollbar
 - Thanks to @m-thalmann for contextmenujs
   https://github.com/m-thalmann/contextmenujs (also we have heavily modified it)
+- Levi Cole for parts of the cssUnits conversion code
+  https://stackoverflow.com/a/66569574/579623
+- Domi for text-width code
+  https://stackoverflow.com/a/21015393

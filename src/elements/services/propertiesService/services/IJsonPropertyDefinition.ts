@@ -1,4 +1,4 @@
-import { PropertyType } from "../PropertyType";
+import { PropertyType } from '../PropertyType.js';
 
 export interface IJsonPropertyDefinition {
   name: string;

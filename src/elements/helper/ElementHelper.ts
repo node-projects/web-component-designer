@@ -12,14 +12,20 @@ export enum ElementDisplayType {
 }
 
 export function isInline(element: HTMLElement): boolean {
+  if (element instanceof SVGElement)
+    return false;
   return element != null && window.getComputedStyle(element).display.startsWith('inline');
 }
 
 export function isInlineAfter(element: HTMLElement): boolean {
-  return element != null && window.getComputedStyle(element).display == 'inline';
+  if (element instanceof SVGElement)
+    return false;
+  return element != null && window.getComputedStyle(element).display.startsWith('inline');
 }
 
 export function getElementDisplaytype(element: HTMLElement): ElementDisplayType {
+  if (element instanceof SVGElement)
+    return ElementDisplayType.block;
   const display = window.getComputedStyle(element).display;
   return display == 'none' ? ElementDisplayType.none : display.startsWith('inline') ? ElementDisplayType.inline : ElementDisplayType.block;
 }
@@ -37,4 +43,44 @@ export function getActiveElement(): Element {
       activeElement = activeElement.shadowRoot.activeElement;
   }
   return activeElement;
+}
+
+export function getParentElementIncludingSlots(element: Element): Element {
+  if (element.assignedSlot)
+    return element.assignedSlot;
+  if (element.parentElement == null) {
+    if (element.parentNode instanceof ShadowRoot) {
+      return element.parentNode.host;
+    }
+  }
+  return element.parentElement;
+}
+
+export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element) {
+  let offsetLeft = 0;
+  let offsetTop = 0;
+
+  while (element) {
+    if (element instanceof SVGSVGElement) {
+      //todo - fix without transformation
+      let t = element.style.transform;
+      element.style.transform = '';
+      const bcEl = element.getBoundingClientRect();
+      const bcPar = element.parentElement.getBoundingClientRect();
+      element.style.transform = t;
+      offsetLeft += bcEl.left - bcPar.left;
+      offsetTop += bcEl.top - bcPar.top;
+      element = element.parentElement;
+    } else if (element instanceof SVGGraphicsElement) {
+      let bbox = element.getBBox();
+      offsetLeft += bbox.x;
+      offsetTop += bbox.y;
+      element = element.ownerSVGElement;
+    } else {
+      offsetLeft += element.offsetLeft;
+      offsetTop += element.offsetTop;
+      element = element.offsetParent;
+    }
+  }
+  return { offsetLeft: offsetLeft, offsetTop: offsetTop };
 }

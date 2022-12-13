@@ -1,13 +1,14 @@
-import { IProperty } from '../IProperty';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { IProperty } from '../IProperty.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 import { BindingTarget } from '../../../item/BindingTarget.js';
-import { PropertyType } from '../PropertyType';
-import { CommonPropertiesService } from './CommonPropertiesService';
+import { PropertyType } from '../PropertyType.js';
+import { CommonPropertiesService } from './CommonPropertiesService.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class CssPropertiesService extends CommonPropertiesService {
 
-  public override listNeedsRefresh(designItem: IDesignItem): boolean {
-    return this.name == 'styles' ? true : false;
+  public override getRefreshMode(designItem: IDesignItem) {
+    return this.name == 'styles' ? RefreshMode.fullOnValueChange : RefreshMode.none;
   }
 
   public layout: IProperty[] = [
@@ -205,7 +206,7 @@ export class CssPropertiesService extends CommonPropertiesService {
     if (this.name == 'styles') {
       if (!designItem)
         return [];
-      let arr = Array.from(designItem.styles.keys(), x => ({ name: x, type: 'string', service: this, propertyType: PropertyType.cssValue }));
+      let arr: IProperty[] = Array.from(designItem.styles(), ([key, value])  => ({ name: key, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue }));
       arr.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return arr;
     }
@@ -214,5 +215,13 @@ export class CssPropertiesService extends CommonPropertiesService {
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
     return BindingTarget.css;
+  }
+
+  override setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+    if (this.name == 'styles') {
+      super.setValue(designItems, { ...property, propertyType: PropertyType.cssValue }, value);
+    } else {
+      super.setValue(designItems, property, value);
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { IDesignItem } from "../item/IDesignItem";
+import { IDesignItem } from '../item/IDesignItem.js';
 
 export function switchContainer(items: IDesignItem[], newContainer: IDesignItem, resizeNewContainer: boolean = false, newContainerOffset: number = 0) {
     //todo...

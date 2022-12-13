@@ -1,8 +1,9 @@
-import { IDesignItem } from "../../item/IDesignItem";
-import { IBinding } from '../../item/IBinding';
-import { IBindingService } from "./IBindingService";
-import { BindingMode } from '../../item/BindingMode';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IBinding } from '../../item/IBinding.js';
+import { IBindingService } from './IBindingService.js';
+import { BindingMode } from '../../item/BindingMode.js';
 import { BindingTarget } from "../../item/BindingTarget.js";
+import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 
 export class BaseCustomWebcomponentBindingsService implements IBindingService {
 
@@ -10,7 +11,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
 
   getBindings(designItem: IDesignItem): IBinding[] {
     let bindings: IBinding[] = null;
-    for (let a of designItem.attributes) {
+    for (let a of designItem.attributes()) {
       const name = a[0];
       const value = a[1];
       if ((value.startsWith('[[') || value.startsWith('{{')) && (value.endsWith('}}') || value.endsWith(']]'))) {
@@ -34,7 +35,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
           bnd.target = BindingTarget.event;
           bnd.expression = value.substring(2, value.length - 4);
         } else {
-          bnd.targetName = name;
+          bnd.targetName = PropertiesHelper.dashToCamelCase(name);
           bnd.target = BindingTarget.property;
           bnd.expression = value.substring(2, value.length - 4);
         }

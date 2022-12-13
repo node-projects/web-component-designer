@@ -1,4 +1,4 @@
-import { IBindableObject } from "./IBindableObject";
+import { IBindableObject } from './IBindableObject.js';
 
 export interface IBindableObjectsService {
   readonly name: string;

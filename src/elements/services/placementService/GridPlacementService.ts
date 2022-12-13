@@ -6,7 +6,7 @@ import { CalculateGridInformation } from '../../helper/GridHelper.js';
 import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
-import { DefaultPlacementService } from './DefaultPlacementService';
+import { DefaultPlacementService } from './DefaultPlacementService.js';
 
 export class GridPlacementService implements IPlacementService {
 
@@ -56,6 +56,9 @@ export class GridPlacementService implements IPlacementService {
   placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
     const defaultPlacementService = container.serviceContainer.getLastServiceWhere('containerService', x => x instanceof DefaultPlacementService);
     return defaultPlacementService.placePoint(event, placementView, container, startPoint, offsetInControl, newPoint, items);
+  }
+
+  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {

@@ -12,7 +12,7 @@ export class UndoService implements IUndoService {
   private _transactionStack: ChangeGroup[] = [];
   private _designerCanvas: IDesignerCanvas;
 
-  constructor(designerCanvas?: IDesignerCanvas) {
+  constructor(designerCanvas: IDesignerCanvas) {
     this._designerCanvas = designerCanvas;
   }
 
@@ -107,5 +107,15 @@ export class UndoService implements IUndoService {
 
   canRedo(): boolean {
     return this._redoStack.length > 0;
+  }
+
+  *getUndoEntries(): Generator<string, void, unknown> {
+    for (let i = this._undoStack.length - 1; i >= 0; i--)
+      yield this._undoStack[i].title;
+  }
+
+  *getRedoEntries(): Generator<string, void, unknown> {
+    for (let i = this._redoStack.length - 1; i >= 0; i--)
+      yield this._redoStack[i].title;
   }
 }

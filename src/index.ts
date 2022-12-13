@@ -29,7 +29,6 @@ export type { IBindableObjectDragDropService } from "./elements/services/bindabl
 
 export type { IBindingService } from "./elements/services/bindingsService/IBindingService.js";
 export * from "./elements/services/bindingsService/BaseCustomWebcomponentBindingsService.js";
-export * from "./elements/services/bindingsService/SpecialTagsBindingService.js";
 
 export * from "./elements/services/placementService/DefaultPlacementService.js";
 export * from "./elements/services/placementService/FlexBoxPlacementService.js";
@@ -89,7 +88,7 @@ export * from "./elements/services/propertiesService/DefaultEditorTypesService.j
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
-export type { IPropertyGroupsService } from "./elements/services/propertiesService/IPropertyGroupsService";
+export type { IPropertyGroupsService } from './elements/services/propertiesService/IPropertyGroupsService.js';
 export * from "./elements/services/propertiesService/propertyEditors/BasePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/BooleanPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ColorPropertyEditor.js";
@@ -131,7 +130,6 @@ export * from "./elements/services/undoService/transactionItems/CssStyleChangeAc
 export * from "./elements/services/undoService/transactionItems/DeleteAction.js";
 export * from "./elements/services/undoService/transactionItems/InsertAction.js";
 export * from "./elements/services/undoService/transactionItems/InsertChildAction.js";
-export * from "./elements/services/undoService/transactionItems/PropertyChangeAction.js";
 
 export * from "./elements/services/BaseServiceContainer.js";
 export * from "./elements/services/InstanceServiceContainer.js";
@@ -151,6 +149,7 @@ export type { IPlacementView } from "./elements/widgets/designerView/IPlacementV
 export * from "./elements/widgets/designerView/designerView.js";
 export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";
+export * from "./elements/widgets/designerView/DomConverter.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/DrawToolButtonProvider.js";
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/PointerToolButtonProvider.js";
@@ -192,6 +191,9 @@ export * from "./elements/widgets/designerView/extensions/AltToEnterContainerExt
 export * from "./elements/widgets/designerView/extensions/CanvasExtension.js";
 export * from "./elements/widgets/designerView/extensions/CanvasExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
+export * from "./elements/widgets/designerView/extensions/FlexboxExtension.js";
+export * from "./elements/widgets/designerView/extensions/FlexboxExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtension.js";

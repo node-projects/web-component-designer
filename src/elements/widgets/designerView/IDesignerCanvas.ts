@@ -1,13 +1,13 @@
-//import { PointerActionType } from "../../../enums/PointerActionType";
-import { IDesignItem } from "../../item/IDesignItem";
-import { InstanceServiceContainer } from "../../services/InstanceServiceContainer";
-import { ServiceContainer } from "../../services/ServiceContainer";
-import { Snaplines } from "./Snaplines";
-import { IPlacementView } from './IPlacementView';
-import { IExtensionManager } from "./extensions/IExtensionManger";
-import { IUiCommandHandler } from "../../../commandHandling/IUiCommandHandler";
-import { IPoint } from "../../../interfaces/IPoint";
-import { OverlayLayerView } from "./overlayLayerView";
+//import { PointerActionType } from '../../../enums/PointerActionType.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { Snaplines } from './Snaplines.js';
+import { IPlacementView } from './IPlacementView.js';
+import { IExtensionManager } from './extensions/IExtensionManger.js';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IPoint } from '../../../interfaces/IPoint.js';
+import { OverlayLayerView } from './overlayLayerView.js';
 import { IRect } from "../../../interfaces/IRect.js";
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { ISize } from "../../../interfaces/ISize.js";
@@ -33,8 +33,11 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   readonly onContentChanged: TypedEvent<void>;
 
   zoomFactor: number;
+  designerOffsetWidth: number;
+  designerOffsetHeight: number;
   readonly scaleFactor: number;
-  canvasOffset: IPoint
+  canvasOffset: IPoint;
+  canvas: HTMLElement;
 
   eatEvents: Element;
 
@@ -44,6 +47,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   getViewportCoordinates(event: MouseEvent): IPoint;
   getNormalizedElementCoordinates(element: Element): IRect;
   getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number }
+  getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect;
 
   captureActiveTool(tool: ITool);
   releaseActiveTool();

@@ -1,13 +1,13 @@
-import { IProperty } from '../../services/propertiesService/IProperty';
-import { ServiceContainer } from '../../services/ServiceContainer';
+import { IProperty } from '../../services/propertiesService/IProperty.js';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { BaseCustomWebComponentLazyAppend, css, DomHelper } from '@node-projects/base-custom-webcomponent';
-import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor';
-import { IDesignItem } from '../../item/IDesignItem';
-import { IPropertiesService } from '../../services/propertiesService/IPropertiesService';
-import { ValueType } from '../../services/propertiesService/ValueType';
-import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem';
-import { ContextMenu } from '../../helper/contextMenu/ContextMenu';
-import { PropertyType } from '../../services/propertiesService/PropertyType';
+import { IPropertyEditor } from '../../services/propertiesService/IPropertyEditor.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { IPropertiesService, RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
+import { ValueType } from '../../services/propertiesService/ValueType.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+import { PropertyType } from '../../services/propertiesService/PropertyType.js';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -16,6 +16,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _serviceContainer: ServiceContainer;
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
+
+  public get propertiesService() {
+    return this._propertiesService;
+  }
 
   static override get style() {
     return css`
@@ -107,7 +111,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public createElements(designItem: IDesignItem) {
-    if (this._propertiesService && (this._propertiesService.listNeedsRefresh(designItem)) || this._propertyMap.size == 0) {
+    if (this._propertiesService && (this._propertiesService.getRefreshMode(designItem) != RefreshMode.none) || this._propertyMap.size == 0) {
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
       if (this._propertiesService) {
@@ -154,11 +158,30 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
                 this._div.appendChild(label);
 
               } else {
-                let label = document.createElement("label");
-                label.htmlFor = p.name;
-                label.textContent = p.name;
-                label.title = p.name;
-                this._div.appendChild(label);
+                if (!p.renamable) {
+                  let label = document.createElement("label");
+                  label.htmlFor = p.name;
+                  label.textContent = p.name;
+                  label.title = p.name;
+                  this._div.appendChild(label);
+                } else {
+                  let label = document.createElement("input");
+                  let input = <HTMLInputElement>editor.element;
+                  label.value = p.name;
+                  label.onkeyup = e => {
+                    if (e.key == 'Enter' && label.value) {
+                      const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
+                      p.service.clearValue(this._designItems, p);
+                      p.name = label.value;
+                      p.service.setValue(this._designItems, p, input.value);
+                      pg.commit();
+                      this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
+                    }
+                  }
+                  this._div.appendChild(label);
+                }
+
+
               }
 
               editor.element.id = p.name;
@@ -174,7 +197,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   public openContextMenu(event: MouseEvent, property: IProperty) {
     const ctxMenu: IContextMenuItem[] = [
-      { title: 'clear', action: (e) => property.service.clearValue(this._designItems, property) },
+      {
+        title: 'clear', action: (e) => {
+          property.service.clearValue(this._designItems, property);
+          this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
+        }
+      },
     ];
     if (this._serviceContainer.config.openBindingsEditor) {
       ctxMenu.push(...[

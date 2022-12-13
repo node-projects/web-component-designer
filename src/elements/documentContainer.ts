@@ -1,17 +1,17 @@
 import { BaseCustomWebComponentLazyAppend, css, cssFromString, debounce, TypedEvent } from "@node-projects/base-custom-webcomponent"
-import { DesignerTabControl } from "./controls/DesignerTabControl";
-import { DesignerView } from "./widgets/designerView/designerView";
-import { ServiceContainer } from "./services/ServiceContainer";
-import { InstanceServiceContainer } from "./services/InstanceServiceContainer";
-import { ICodeView } from '../elements/widgets/codeView/ICodeView';
-import { IDesignItem } from '../elements/item/IDesignItem';
-import { IStringPosition } from './services/htmlWriterService/IStringPosition';
-import { IDemoView } from './widgets/demoView/IDemoView';
-import { IUiCommandHandler } from "../commandHandling/IUiCommandHandler";
-import { IUiCommand } from "../commandHandling/IUiCommand";
-import { IDisposable } from "../interfaces/IDisposable";
+import { DesignerTabControl } from './controls/DesignerTabControl.js';
+import { DesignerView } from './widgets/designerView/designerView.js';
+import { ServiceContainer } from './services/ServiceContainer.js';
+import { InstanceServiceContainer } from './services/InstanceServiceContainer.js';
+import { ICodeView } from './widgets/codeView/ICodeView.js';
+import { IDesignItem } from './item/IDesignItem.js';
+import { IStringPosition } from './services/htmlWriterService/IStringPosition.js';
+import { IDemoView } from './widgets/demoView/IDemoView.js';
+import { IUiCommandHandler } from '../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../commandHandling/IUiCommand.js';
+import { IDisposable } from '../interfaces/IDisposable.js';
 import { ISelectionChangedEvent } from "./services/selectionService/ISelectionChangedEvent.js";
-import { SimpleSplitView } from './controls/SimpleSplitView';
+import { SimpleSplitView } from './controls/SimpleSplitView.js';
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;

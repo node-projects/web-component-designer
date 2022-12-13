@@ -1,12 +1,12 @@
-import { ITransactionItem } from '../ITransactionItem';
-import { IDesignItem } from '../../../item/IDesignItem';
+import { ITransactionItem } from '../ITransactionItem.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 
 export class InsertAction implements ITransactionItem {
 
-  constructor(designItem: IDesignItem, index: number, newItem: IDesignItem) {
+  constructor(containerItem: IDesignItem, index: number, newItem: IDesignItem) {
     this.title = "Insert Item";
 
-    this.designItem = designItem;
+    this.containerItem = containerItem;
     this.index = index;
     this.newItem = newItem;
   }
@@ -14,7 +14,7 @@ export class InsertAction implements ITransactionItem {
   title?: string;
 
   get affectedItems() {
-    return [this.designItem, this.newItem];
+    return [this.containerItem, this.newItem];
   }
 
   undo() {
@@ -23,11 +23,11 @@ export class InsertAction implements ITransactionItem {
   }
 
   do() {
-    this.designItem._insertChildInternal(this.newItem, this.index);
+    this.containerItem._insertChildInternal(this.newItem, this.index);
     this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'added', designItems: [this.newItem] });
   }
 
-  public designItem: IDesignItem;
+  public containerItem: IDesignItem;
   public index: number;
   public newItem: IDesignItem;
 

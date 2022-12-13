@@ -1,6 +1,6 @@
-import { IService } from '../IService';
-import { ChangeGroup } from './ChangeGroup';
-import { ITransactionItem } from './ITransactionItem';
+import { IService } from '../IService.js';
+import { ChangeGroup } from './ChangeGroup.js';
+import { ITransactionItem } from './ITransactionItem.js';
 
 export interface IUndoService extends IService {
   openGroup(title: string): ChangeGroup
@@ -10,4 +10,6 @@ export interface IUndoService extends IService {
   clear();
   undo();
   redo();
+  getUndoEntries(): Generator<string, void, unknown>
+  getRedoEntries(): Generator<string, void, unknown>
 }

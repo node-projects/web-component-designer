@@ -1,12 +1,12 @@
-import { EventNames } from '../../../../enums/EventNames';
-import { IDesignerCanvas } from '../IDesignerCanvas';
-import { ITool } from './ITool';
+import { EventNames } from '../../../../enums/EventNames.js';
+import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from './ITool.js';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { straightenLine } from '../../../helper/PathDataPolyfill';
-import { DesignItem } from '../../../item/DesignItem';
-import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction';
-import { IPoint } from '../../../../interfaces/IPoint';
+import { straightenLine } from '../../../helper/PathDataPolyfill.js';
+import { DesignItem } from '../../../item/DesignItem.js';
+import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
+import { IPoint } from '../../../../interfaces/IPoint.js';
 
 export class DrawLineTool implements ITool {
 

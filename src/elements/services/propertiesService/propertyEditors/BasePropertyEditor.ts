@@ -1,8 +1,7 @@
-import { IPropertyEditorT } from "../IPropertyEditor";
-import { IDesignItem } from "../../../..";
-import { IProperty } from "../IProperty";
-import { ValueType } from '../ValueType';
-import { PropertyChangeAction } from "../../undoService/transactionItems/PropertyChangeAction";
+import { IPropertyEditorT } from '../IPropertyEditor.js';
+import { IProperty } from '../IProperty.js';
+import { ValueType } from '../ValueType.js';
+import { IDesignItem } from '../../../item/IDesignItem.js';
 
 export abstract class BasePropertyEditor<T extends HTMLElement> implements IPropertyEditorT<T> {
 
@@ -21,9 +20,10 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
       if (this.designItems && this.designItems.length) {
         const cg = this.designItems[0].openGroup("set property: " + this.property.name);
         for (let d of this.designItems) {
-          const oldValue = this.property.service.getValue([d], this.property);
-          const action = new PropertyChangeAction(d, this.property, newValue, oldValue);
-          d.instanceServiceContainer.undoService.execute(action);
+          if (newValue == null)
+            this.property.service.clearValue([d], this.property);
+          else
+            this.property.service.setValue([d], this.property, newValue);
         }
         cg.commit();
       }

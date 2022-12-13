@@ -1,9 +1,10 @@
-import { ServiceContainer } from '../../services/ServiceContainer';
-import { PropertyGridPropertyList } from './PropertyGridPropertyList';
-import { DesignerTabControl } from '../../controls/DesignerTabControl';
-import { IDesignItem } from '../../item/IDesignItem';
+import { ServiceContainer } from '../../services/ServiceContainer.js';
+import { PropertyGridPropertyList } from './PropertyGridPropertyList.js';
+import { DesignerTabControl } from '../../controls/DesignerTabControl.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
+import { RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
@@ -44,6 +45,11 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
     this._itemsObserver = new MutationObserver((m) => {
       for (const a of this._propertyGridPropertyLists) {
+        if (a.propertiesService.getRefreshMode(this._selectedItems[0]) == RefreshMode.fullOnValueChange) {
+          a.createElements(this._selectedItems[0]);
+          a.designItemsChanged(this._selectedItems);
+        }
+
         a.refreshForDesignItems(this._selectedItems);
       }
     });

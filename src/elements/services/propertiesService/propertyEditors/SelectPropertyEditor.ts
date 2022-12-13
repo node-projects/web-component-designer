@@ -1,6 +1,6 @@
-import { IProperty } from "../IProperty";
-import { BasePropertyEditor } from './BasePropertyEditor';
-import { ValueType } from "../ValueType";
+import { IProperty } from '../IProperty.js';
+import { BasePropertyEditor } from './BasePropertyEditor.js';
+import { ValueType } from '../ValueType.js';
 
 export class SelectPropertyEditor extends BasePropertyEditor<HTMLSelectElement> {
 
