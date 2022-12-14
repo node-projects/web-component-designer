@@ -47,7 +47,6 @@ import { DefaultModelCommandService } from './modelCommandService/DefaultModelCo
 import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperatorProvider.js';
 import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons.js';
 import { DemoProviderService } from './demoProviderService/DemoProviderService.js';
-//import { CursorLinePointerExtensionProvider } from '../widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js';
 import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
 import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
