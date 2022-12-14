@@ -76,10 +76,10 @@ export class GridExtension extends AbstractExtension {
           this.extendedItem.element.getBoundingClientRect
           switch(circle.style.cursor){
             case "ew-resize":
-              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, this._initialSizes.xUnit, event.clientX - this._initialPoint.x, gapColumn, parseFloat(elementStyle.width.substring(0, elementStyle.width.length - 2)), null);
+              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, this._initialSizes.xUnit, (event.clientX - this._initialPoint.x) / this.designerCanvas.zoomFactor, gapColumn, parseFloat(elementStyle.width.substring(0, elementStyle.width.length - 2)), null);
               break;
             case "ns-resize":
-              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, event.clientY - this._initialPoint.y, gapRow, null, parseFloat(elementStyle.height.substring(0, elementStyle.height.length - 2)));
+              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, (event.clientY - this._initialPoint.y) / this.designerCanvas.zoomFactor, gapRow, null, parseFloat(elementStyle.height.substring(0, elementStyle.height.length - 2)));
               break;
           }
           this.refresh();
