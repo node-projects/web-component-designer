@@ -1,4 +1,5 @@
 import { EventNames } from "../../../../enums/EventNames";
+import { getCssUnit } from "../../../helper/CssUnitConverter";
 import { CalculateGridInformation } from "../../../helper/GridHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -19,7 +20,7 @@ export class GridExtension extends AbstractExtension {
   }
 
   override extend() {
-    var gridInformation = CalculateGridInformation(this.extendedItem);
+    let gridInformation = CalculateGridInformation(this.extendedItem);
     this._rects = new Array(gridInformation.cells.length);
     gridInformation.cells.forEach((cellRow, i) => {
       this._rects[i] = new Array(cellRow.length);
@@ -30,7 +31,7 @@ export class GridExtension extends AbstractExtension {
   }
 
   override refresh() {
-    var gridInformation = CalculateGridInformation(this.extendedItem);
+    let gridInformation = CalculateGridInformation(this.extendedItem);
     gridInformation.gaps.forEach((gap, i) => {
       this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
       this._resizeCircles[i] = this._drawResizeCircles(gap, this._resizeCircles[i]);
@@ -51,7 +52,7 @@ export class GridExtension extends AbstractExtension {
   }
 
   _drawResizeCircles(gap, oldCircle?: SVGCircleElement){
-    var resizeCircle = this._drawCircle((gap.x + (gap.width/2)), (gap.y + (gap.height/2)), 1.5, 'svg-grid-reziser', oldCircle, OverlayLayer.Foregorund);
+    let resizeCircle = this._drawCircle((gap.x + (gap.width/2)), (gap.y + (gap.height/2)), 1.5, 'svg-grid-reziser', oldCircle, OverlayLayer.Foregorund);
     resizeCircle.style.pointerEvents = "all";
     resizeCircle.style.cursor = gap.width < gap.height ? "ew-resize" : "ns-resize";
     if(!oldCircle) {
@@ -72,7 +73,7 @@ export class GridExtension extends AbstractExtension {
         break;
       case EventNames.PointerMove:
         if(this._initialPoint) {
-          var elementStyle = (<HTMLElement>this.extendedItem.element).style;
+          let elementStyle = (<HTMLElement>this.extendedItem.element).style;
           this.extendedItem.element.getBoundingClientRect
           switch(circle.style.cursor){
             case "ew-resize":
@@ -99,43 +100,37 @@ export class GridExtension extends AbstractExtension {
   }
 
   _getInitialSizes(style: CSSStyleDeclaration){
-    var retX = [];
-    var retY = [];
-    var retXUnit = [];
-    var retYUnit = [];
+    let retX = [];
+    let retY = [];
+    let retXUnit = [];
+    let retYUnit = [];
 
-    var tmpX = style.gridTemplateColumns.split(' ');
+    let tmpX = style.gridTemplateColumns.split(' ');
     tmpX.forEach(x => {
-      var r = this._parseInitValue(x);
+      let r = {value: parseFloat(x), unit: getCssUnit(x)}
       retX.push(r.value);
       retXUnit.push(r.unit);
     });
     
-    var tmpY = style.gridTemplateRows.split(' ');
+    let tmpY = style.gridTemplateRows.split(' ');
     tmpY.forEach(y => {
-      var r = this._parseInitValue(y);
+      let r = {value: parseFloat(y), unit: getCssUnit(y)}
       retY.push(r.value);
       retYUnit.push(r.unit);
     });
     return {x: retX, y: retY, xUnit: retXUnit, yUnit: retYUnit};
   }
 
-  _parseInitValue(stringValue : string){
-      var i = stringValue.length;
-      while (isNaN(parseInt(stringValue.substring(i - 1, stringValue.length)))) i--;
-      return {value: parseFloat(stringValue.substring(0, i)), unit: stringValue.substring(i, stringValue.length)}
-  }
-
   _calculateNewSize(iSizes, iUnits, diff, gapIndex, itemWidth?: number, itemHeight?: number){
-    var newSizes = [];
-    var newUnits = [];
-    var unitFactors = [];
-    var edited = [];
+    let newSizes = [];
+    let newUnits = [];
+    let unitFactors = [];
+    let edited = [];
 
-    for(var i = 0; i < iSizes.length; i++) {
+    for(let i = 0; i < iSizes.length; i++) {
       if(i + 1 == gapIndex || i == gapIndex) {
         if(iUnits[i] == "%") {
-          var percentDiff = itemWidth ? (1 - ((itemWidth - diff) / itemWidth)) * 100 : itemHeight ? (1 - ((itemHeight - diff) / itemHeight)) * 100 : null;
+          let percentDiff = itemWidth ? (1 - ((itemWidth - diff) / itemWidth)) * 100 : itemHeight ? (1 - ((itemHeight - diff) / itemHeight)) * 100 : null;
           newSizes.push(i + 1 == gapIndex ? iSizes[i] + percentDiff : i == gapIndex ? iSizes[i] - percentDiff : null);
           unitFactors.push(null);
           edited.push(true);
@@ -146,7 +141,7 @@ export class GridExtension extends AbstractExtension {
           edited.push(true);
         }
         else {
-          var unitFactor;
+          let unitFactor;
           switch(iUnits[i]){
             case "mm":
               unitFactor = 1 / 3.78;
@@ -180,11 +175,11 @@ export class GridExtension extends AbstractExtension {
       newUnits.push(iUnits[i]);
     }
 
-    var retVal = "";
-    var minPixelSize = 10;
-    var minPercentSize = itemHeight ? minPixelSize / itemHeight * 100 : itemWidth ? minPixelSize / itemWidth * 100 : null;
+    let retVal = "";
+    let minPixelSize = 10;
+    let minPercentSize = itemHeight ? minPixelSize / itemHeight * 100 : itemWidth ? minPixelSize / itemWidth * 100 : null;
 
-    for(var i = 0; i < newSizes.length; i++){
+    for(let i = 0; i < newSizes.length; i++){
       if(newUnits[i] == "%" && newSizes[i] < minPercentSize){
         if(edited[i + 1] && newUnits[i + 1] == "%"){
           newSizes[i + 1] = iSizes[i] + iSizes[i + 1] - minPercentSize;
@@ -198,7 +193,7 @@ export class GridExtension extends AbstractExtension {
         }
       }
       else if(newUnits[i] == "fr"){
-        var editedIndex;
+        let editedIndex;
         if(edited[i + 1])
           editedIndex = i + 1;
         else if (edited[i - 1])
@@ -210,10 +205,10 @@ export class GridExtension extends AbstractExtension {
           if(newSizes[editedIndex] < minPixelSize)
             newSizes[editedIndex] = minPixelSize;
           
-          var totalSize = itemWidth ? itemWidth : itemHeight ? itemHeight : null;
-          var totalSizeExceptFr = 0;
+          let totalSize = itemWidth ? itemWidth : itemHeight ? itemHeight : null;
+          let totalSizeExceptFr = 0;
           newSizes.forEach(newSize => totalSizeExceptFr += newSize)
-          var totalSizeExceptEdited = 0;
+          let totalSizeExceptEdited = 0;
           newSizes.forEach((newSize, k) => {if(!edited[k]) totalSizeExceptEdited += newSize});
 
           if(totalSize - totalSizeExceptFr < minPixelSize)
@@ -223,10 +218,10 @@ export class GridExtension extends AbstractExtension {
           if(newSizes[editedIndex] < minPercentSize)
             newSizes[editedIndex] = minPercentSize;
 
-          var totalSize = 100;
-          var totalSizeExceptFr = 0;
+          let totalSize = 100;
+          let totalSizeExceptFr = 0;
           newSizes.forEach(newSize => totalSizeExceptFr += newSize)
-          var totalSizeExceptEdited = 0;
+          let totalSizeExceptEdited = 0;
           newSizes.forEach((newSize, k) => {if(!edited[k]) totalSizeExceptEdited += newSize});
 
           if(totalSize - totalSizeExceptFr < minPercentSize)
@@ -248,7 +243,7 @@ export class GridExtension extends AbstractExtension {
         }
       }
     }
-    for(var i = 0; i < newSizes.length; i++)
+    for(let i = 0; i < newSizes.length; i++)
       retVal += newSizes[i] + newUnits[i] + " ";
     
     return retVal;
