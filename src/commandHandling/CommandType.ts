@@ -36,4 +36,9 @@ export enum CommandType {
   'setStrokeThickness' = 'setStrokeThickness',
   
   'screenshot' = 'screenshot',
+
+  'addRowToCssGrid' = 'addRowToCssGrid',
+  'deleteRowFromCssGrid' = 'deleteRowFromCssGrid',
+  'addColumnToCssGrid' = 'addColumnToCssGrid',
+  'deleteColumnFromCssGrid' = 'deleteColumnFromCssGrid' 
 }
