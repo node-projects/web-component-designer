@@ -117,7 +117,6 @@ export class GridExtension extends AbstractExtension {
       retY.push(r.value);
       retYUnit.push(r.unit);
     });
-    console.log({x: retX, y: retY, xUnit: retXUnit, yUnit: retYUnit})
     return {x: retX, y: retY, xUnit: retXUnit, yUnit: retYUnit};
   }
 
@@ -251,8 +250,7 @@ export class GridExtension extends AbstractExtension {
     }
     for(var i = 0; i < newSizes.length; i++)
       retVal += newSizes[i] + newUnits[i] + " ";
-
-    console.log(retVal)
+    
     return retVal;
   }
 }
