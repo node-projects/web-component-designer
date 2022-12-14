@@ -130,6 +130,7 @@ export class GridExtension extends AbstractExtension {
   _calculateNewSize(iSizes, iUnits, diff, gapIndex, itemWidth?: number, itemHeight?: number){
     var newSizes = [];
     var newUnits = [];
+    var unitFactors = [];
     var edited = [];
 
     for(var i = 0; i < iSizes.length; i++) {
@@ -137,20 +138,44 @@ export class GridExtension extends AbstractExtension {
         if(iUnits[i] == "%") {
           var percentDiff = itemWidth ? (1 - ((itemWidth - diff) / itemWidth)) * 100 : itemHeight ? (1 - ((itemHeight - diff) / itemHeight)) * 100 : null;
           newSizes.push(i + 1 == gapIndex ? iSizes[i] + percentDiff : i == gapIndex ? iSizes[i] - percentDiff : null);
+          unitFactors.push(null);
           edited.push(true);
         }
         else if(iUnits[i] == "fr") {
           newSizes.push(iSizes[i]);
+          unitFactors.push(null);
           edited.push(true);
         }
         else {
-          newSizes.push(i + 1 == gapIndex ? iSizes[i] + diff : i == gapIndex ? iSizes[i] - diff : null);
+          var unitFactor;
+          switch(iUnits[i]){
+            case "mm":
+              unitFactor = 1 / 3.78;
+              break;
+            case "cm":
+              unitFactor = 1 / 37.8;
+              break;
+            case "in":
+                unitFactor = 1 / 96
+                break;
+            case "px":
+              unitFactor = 1
+              break;
+            case "pt":
+              unitFactor = 3 
+              break;
+            case "pc":
+              unitFactor = 16
+              break;
+          }
+          newSizes.push(i + 1 == gapIndex ? iSizes[i] + diff * unitFactor : i == gapIndex ? iSizes[i] - diff * unitFactor : null);
+          unitFactors.push(unitFactor);
           edited.push(true);
-          
         }
       } 
       else {
         newSizes.push(iSizes[i]);
+        unitFactors.push(null)
         edited.push(false);
       }
       newUnits.push(iUnits[i]);
@@ -161,19 +186,7 @@ export class GridExtension extends AbstractExtension {
     var minPercentSize = itemHeight ? minPixelSize / itemHeight * 100 : itemWidth ? minPixelSize / itemWidth * 100 : null;
 
     for(var i = 0; i < newSizes.length; i++){
-      if(newUnits[i] == "px" && newSizes[i] < minPixelSize){
-        if(edited[i + 1] && newUnits[i + 1] == "px"){
-          newSizes[i + 1] = iSizes[i] + iSizes[i + 1] - minPixelSize;
-          newSizes[i] = minPixelSize;
-          break;
-        }
-        else if(edited[i - 1] && newUnits[i - 1] == "px"){
-          newSizes[i - 1] = iSizes[i] + iSizes[i - 1] - minPixelSize; 
-          newSizes[i] = minPixelSize;
-          break;
-        }
-      }
-      else if(newUnits[i] == "%" && newSizes[i] < minPercentSize){
+      if(newUnits[i] == "%" && newSizes[i] < minPercentSize){
         if(edited[i + 1] && newUnits[i + 1] == "%"){
           newSizes[i + 1] = iSizes[i] + iSizes[i + 1] - minPercentSize;
           newSizes[i] = minPercentSize;
@@ -219,6 +232,20 @@ export class GridExtension extends AbstractExtension {
 
           if(totalSize - totalSizeExceptFr < minPercentSize)
            newSizes[editedIndex] = totalSize - totalSizeExceptEdited - minPercentSize;
+        }
+      }
+      else {
+        if(newSizes[i] / unitFactors[i] < minPixelSize){
+          if(edited[i + 1]){
+            newSizes[i + 1] = iSizes[i] + iSizes[i + 1] - minPixelSize * unitFactors[i + 1];
+            newSizes[i] = minPixelSize * unitFactors[i];
+            break;
+          }
+          else if(edited[i - 1]){
+            newSizes[i - 1] = iSizes[i] + iSizes[i - 1] - minPixelSize * unitFactors[i - 1]; 
+            newSizes[i] = minPixelSize * unitFactors[i];
+            break;
+          }
         }
       }
     }
