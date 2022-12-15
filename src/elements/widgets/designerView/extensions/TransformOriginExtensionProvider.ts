@@ -7,10 +7,23 @@ import { IExtensionManager } from './IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 
 export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {
+  showOnlyWhenSet: boolean;
+  
+  constructor(showOnlyWhenSet = true) {
+    this.showOnlyWhenSet = showOnlyWhenSet;
+  }
+
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.node instanceof HTMLElement || (designItem.node instanceof SVGElement && designItem.node.localName === 'svg')) {
-      let r = designItem.element.getBoundingClientRect()
-      return r.width > 10 && r.height > 10;
+      if (!this.showOnlyWhenSet)
+        return true;
+      if (designItem.hasStyle('transformOrigin'))
+        return true;
+      if (getComputedStyle(designItem.element).display != 'inline' && designItem.element.getBoundingClientRect) {
+        const r = designItem.element.getBoundingClientRect();
+        if (getComputedStyle(designItem.element).transformOrigin != r.width / 2 + 'px ' + r.height / 2 + 'px')
+          return true;
+      }
     }
     return false;
   }

@@ -1,4 +1,4 @@
-import { EventNames } from "../../../../enums/EventNames";
+import { EventNames } from "../../../../enums/EventNames.js";
 import { CalculateGridInformation } from "../../../helper/GridHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';

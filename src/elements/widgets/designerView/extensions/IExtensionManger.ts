@@ -11,4 +11,5 @@ export interface IExtensionManager {
   refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType);
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: any);
   refreshAllAppliedExtentions();
+  reapplyAllAppliedExtentions();
 }
