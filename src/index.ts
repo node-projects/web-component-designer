@@ -202,6 +202,7 @@ export * from "./elements/widgets/designerView/extensions/GridExtension.js";
 export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtension.js";
 export * from "./elements/widgets/designerView/extensions/MouseOverExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/PathExtension.js";

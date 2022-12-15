@@ -71,6 +71,7 @@ import { PropertyGroupsService } from './propertiesService/PropertyGroupsService
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
+import { InvisibleDivExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/InvisibleDivExtensionDesignViewConfigButtons.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -162,7 +163,9 @@ export function createDefaultServiceContainer() {
   serviceContainer.designViewConfigButtons.push(
     new ButtonSeperatorProvider(20),
     new GridExtensionDesignViewConfigButtons(),
-    new FlexboxExtensionDesignViewConfigButtons()
+    new FlexboxExtensionDesignViewConfigButtons(),
+    new ButtonSeperatorProvider(10),
+    new InvisibleDivExtensionDesignViewConfigButtons()
   );
 
   serviceContainer.designViewToolbarButtons.push(

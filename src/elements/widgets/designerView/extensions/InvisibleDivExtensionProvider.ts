@@ -6,11 +6,15 @@ import { IExtensionManager } from './IExtensionManger.js';
 import { InvisibleDivExtension } from './InvisibleDivExtension.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 
+export const invisibleDivExtensionShowOverlayOptionName = 'invisibleDivExtensionShowOverlay';
+
 export class InvisibleDivExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designItem.name == 'div') {
-      const st = window.getComputedStyle(designItem.element);
-      return st.backgroundColor == 'rgba(0, 0, 0, 0)' && st.borderStyle == 'none'
+    if (designerCanvas.instanceServiceContainer.designContext.extensionOptions[invisibleDivExtensionShowOverlayOptionName] !== false) {
+      if (designItem.name == 'div') {
+        const st = window.getComputedStyle(designItem.element);
+        return st.backgroundColor == 'rgba(0, 0, 0, 0)' && st.borderStyle == 'none'
+      }
     }
     return false;
   }
