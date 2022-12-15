@@ -15,7 +15,7 @@ export class CssPropertiesService extends CommonPropertiesService {
     {
       name: "display",
       type: "list",
-      values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
+      values: ["block", "inline", "inline-block", "flex", "inline-flex", "contents", "grid", "inline-grid", "inherit", "initial", "none"],
       service: this,
       propertyType: PropertyType.cssValue
     },
