@@ -200,11 +200,11 @@ export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContain
 export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GridExtension.js";
 export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/InvisibleDivExtension.js";
-export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/InvisibleDivExtensionDesignViewConfigButtons.js";
-export * from "./elements/widgets/designerView/extensions/MouseOverExtension.js";
-export * from "./elements/widgets/designerView/extensions/MouseOverExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/InvisibleElementExtension.js";
+export * from "./elements/widgets/designerView/extensions/InvisibleElementExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/InvisibleElementExtensionDesignViewConfigButtons.js";
+export * from "./elements/widgets/designerView/extensions/HighlightElementExtension.js";
+export * from "./elements/widgets/designerView/extensions/HighlightElementExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/PathExtension.js";
 export * from "./elements/widgets/designerView/extensions/svg/PathExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/PositionExtension.js";

@@ -6,7 +6,7 @@ import { IExtensionManager } from './IExtensionManger.js';
 
 const offset = 3;
 
-export class MouseOverExtension extends AbstractExtension {
+export class HighlightElementExtension extends AbstractExtension {
 
   private _rect: SVGPathElement;
 

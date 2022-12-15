@@ -3,14 +3,14 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { IDesignerExtension } from './IDesignerExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
-import { InvisibleDivExtension } from './InvisibleDivExtension.js';
+import { InvisibleElementExtension as InvisibleElementExtension } from './InvisibleElementExtension.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 
-export const invisibleDivExtensionShowOverlayOptionName = 'invisibleDivExtensionShowOverlay';
+export const invisibleElementExtensionShowOverlayOptionName = 'invisibleElementExtensionShowOverlay';
 
-export class InvisibleDivExtensionProvider implements IDesignerExtensionProvider {
+export class InvisibleElementExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designerCanvas.instanceServiceContainer.designContext.extensionOptions[invisibleDivExtensionShowOverlayOptionName] !== false) {
+    if (designerCanvas.instanceServiceContainer.designContext.extensionOptions[invisibleElementExtensionShowOverlayOptionName] !== false) {
       if (designItem.name == 'div') {
         const st = window.getComputedStyle(designItem.element);
         return st.backgroundColor == 'rgba(0, 0, 0, 0)' && st.borderStyle == 'none'
@@ -20,7 +20,7 @@ export class InvisibleDivExtensionProvider implements IDesignerExtensionProvider
   }
 
   getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new InvisibleDivExtension(extensionManager, designerCanvas, designItem);
+    return new InvisibleElementExtension(extensionManager, designerCanvas, designItem);
   }
 
   readonly style = css`
