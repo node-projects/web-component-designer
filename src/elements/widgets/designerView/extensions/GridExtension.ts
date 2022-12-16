@@ -140,6 +140,9 @@ export class GridExtension extends AbstractExtension {
 
         //check if fr is smaller than 10px
         let totalSize = parseFloat(percentTarget == "width" ? (<HTMLElement>this.extendedItem.element).style.width : (<HTMLElement>this.extendedItem.element).style.height);
+        let totalGapSize = percentTarget == "width" ? 
+          parseFloat((<HTMLElement>this.extendedItem.element).style.columnGap) * (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns.split(' ').length - 1 :
+          parseFloat((<HTMLElement>this.extendedItem.element).style.rowGap) * (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns.split(' ').length - 1;
         let totalSizeExceptFr = 0;
         newSizes.forEach(newSize => {
           if(this._getCssUnit(newSize) != "fr") totalSizeExceptFr += convertCssUnitToPixel(newSize, <HTMLElement>this.extendedItem.element, percentTarget);
@@ -149,11 +152,10 @@ export class GridExtension extends AbstractExtension {
           if(!edited[k])
             totalSizeExceptEdited += convertCssUnitToPixel(newSize, <HTMLElement>this.extendedItem.element, percentTarget);
           });
-
-        if(totalSize - totalSizeExceptFr < this.minPixelSize){
-          newSizes[editedIndex] = convertCssUnit(totalSize - totalSizeExceptEdited - this.minPixelSize, <HTMLElement>this.extendedItem.element, percentTarget, this._getCssUnit(iSizes[editedIndex]));
+          
+        if(totalSize - totalSizeExceptFr - totalGapSize < this.minPixelSize){
+          newSizes[editedIndex] = convertCssUnit(totalSize - totalSizeExceptEdited - totalGapSize - this.minPixelSize, <HTMLElement>this.extendedItem.element, percentTarget, this._getCssUnit(iSizes[editedIndex]));
         }
-        
       }
       else {
         if(convertCssUnitToPixel(newSizes[i], <HTMLElement>this.extendedItem.element, percentTarget) < this.minPixelSize){
