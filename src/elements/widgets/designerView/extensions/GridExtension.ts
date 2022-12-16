@@ -53,7 +53,7 @@ export class GridExtension extends AbstractExtension {
   }
 
   _drawResizeCircles(gap, oldCircle?: SVGCircleElement){
-    let resizeCircle = this._drawCircle((gap.x + (gap.width/2)), (gap.y + (gap.height/2)), 1.5, 'svg-grid-reziser', oldCircle, OverlayLayer.Foregorund);
+    let resizeCircle = this._drawCircle((gap.x + (gap.width/2)), (gap.y + (gap.height/2)), 1.5, 'svg-grid-resizer', oldCircle, OverlayLayer.Foregorund);
     resizeCircle.style.pointerEvents = "all";
     resizeCircle.style.cursor = gap.width < gap.height ? "ew-resize" : "ns-resize";
     if(!oldCircle) {
@@ -134,7 +134,6 @@ export class GridExtension extends AbstractExtension {
 
         //check if newSize smaller than minimum
         if(convertCssUnitToPixel(newSizes[editedIndex], <HTMLElement>this.extendedItem.element, percentTarget) < this.minPixelSize) {
-          
           newSizes[editedIndex] = convertCssUnit(this.minPixelSize, <HTMLElement>this.extendedItem.element, percentTarget, this._getCssUnit(newSizes[editedIndex]));
         }
 
@@ -152,7 +151,7 @@ export class GridExtension extends AbstractExtension {
           if(!edited[k])
             totalSizeExceptEdited += convertCssUnitToPixel(newSize, <HTMLElement>this.extendedItem.element, percentTarget);
           });
-          
+
         if(totalSize - totalSizeExceptFr - totalGapSize < this.minPixelSize){
           newSizes[editedIndex] = convertCssUnit(totalSize - totalSizeExceptEdited - totalGapSize - this.minPixelSize, <HTMLElement>this.extendedItem.element, percentTarget, this._getCssUnit(iSizes[editedIndex]));
         }
