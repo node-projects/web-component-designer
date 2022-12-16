@@ -355,19 +355,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         break;
       case CommandType.selectAll:
         this.handleSelectAll();
-        break;
-      case CommandType.addRowToCssGrid:
-        //TBD
-        break;
-      case CommandType.deleteRowFromCssGrid:
-        //TBD
-        break;
-      case CommandType.addColumnToCssGrid:
-        //TBD
-        break;
-      case CommandType.deleteColumnFromCssGrid:
-        //TBD
-        break;      
+        break;   
     }
   }
 

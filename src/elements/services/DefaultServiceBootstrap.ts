@@ -72,7 +72,6 @@ import { PropertyGroupsService } from './propertiesService/PropertyGroupsService
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
-import { AddRemoveFromCssGridContextMenu } from '../widgets/designerView/extensions/contextMenu/AddRemoveFromCssGridContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -181,8 +180,6 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designerContextMenuExtensions = [
     new CopyPasteContextMenu(),
-    new SeperatorContextMenu(),
-    new AddRemoveFromCssGridContextMenu(),
     new SeperatorContextMenu(),
     new RotateLeftAndRight(),
     new SeperatorContextMenu(),
