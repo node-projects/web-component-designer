@@ -5,6 +5,7 @@ import { NodeType } from './NodeType.js';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { ISize } from "../../interfaces/ISize.js";
+import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
 
 export interface IDesignItem {
 
@@ -48,12 +49,15 @@ export interface IDesignItem {
   innerHTML?: string;
   readonly isEmptyTextNode: boolean;
 
+  /** Could be a special node if another parser is used */
+  readonly parsedNode: any;
   readonly node: Node;
   readonly element: Element;
 
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
   appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]>
+  shouldAppliedDesignerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]>
 
   getOrCreateDesignItem(node: Node);
 
