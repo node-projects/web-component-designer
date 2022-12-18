@@ -20,6 +20,7 @@ export class ContextMenu {
 		transform-origin: top left;
 		padding: 0;
 		z-index: 2147483647;
+		color: black;
 	  }
 	  
 	  .context_menu.display {

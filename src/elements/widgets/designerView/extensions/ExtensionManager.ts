@@ -172,7 +172,6 @@ export class ExtensionManager implements IExtensionManager {
         }
         designItem.appliedDesignerExtensions.clear();
         this.designItemsWithExtentions.delete(designItem);
-
       }
     }
   }
@@ -212,7 +211,6 @@ export class ExtensionManager implements IExtensionManager {
           }
           i.appliedDesignerExtensions.clear();
           this.designItemsWithExtentions.delete(i);
-
         }
       }
     }
