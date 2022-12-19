@@ -25,6 +25,7 @@ export class GridExtensionProvider implements IDesignerExtensionProvider {
     .svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
     .svg-grid-area { font-size: 8px; }
     .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
-    .svg-grid-resizer { fill: white; stroke: #3899ec }
+    .svg-grid-resizer { fill: white; stroke: #3899ec; }
+    .svg-grid-header { fill: #ff944722; stroke: orange; }
   `;
 }
