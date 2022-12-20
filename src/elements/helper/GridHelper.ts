@@ -1,4 +1,5 @@
 import { IDesignItem } from "../item/IDesignItem.js";
+import { getCssUnit } from "./CssUnitConverter.js";
 
 export function CalculateGridInformation(designItem: IDesignItem) {
 
@@ -10,6 +11,10 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');
   const columns = computedStyle.gridTemplateColumns.split(' ');
+  const rowUnits = [];
+  (<HTMLElement>designItem.element).style.gridTemplateRows.split(' ').forEach(rowWidth => rowUnits.push(getCssUnit(rowWidth)));
+  const columnUnits = [];
+  (<HTMLElement>designItem.element).style.gridTemplateColumns.split(' ').forEach(columnHeight => columnUnits.push(getCssUnit(columnHeight)));
 
   const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
   const paddingTop = Number.parseFloat(computedStyle.paddingTop);
@@ -75,7 +80,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   }
 
   const retVal: {
-    cells?: { x: number, y: number, width: number, height: number, name: string }[][];
+    cells?: { x: number, y: number, width: number, initWidthUnit: string, height: number, initHeightUnit: string, name: string }[][];
     gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number}[];
   } = { cells: [], gaps: [] };
 
@@ -88,7 +93,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
     let x = 0;
     let cl = 0;
     const currY = Number.parseFloat(r.replace('px', ''));
-    let cellList: { x: number, y: number, width: number, height: number, name: string }[] = [];
+    let cellList: { x: number, y: number, width: number, initWidthUnit: string, height: number, initHeightUnit: string, name: string }[] = [];
     retVal.cells.push(cellList);
     for (let yIdx = 0; yIdx < columns.length; yIdx++) {
       const c = columns[yIdx];
@@ -107,7 +112,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
           name = nm;
         }
       }
-      const cell = { x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: currX, height: currY, name: name };
+      const cell = { x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: currX, initWidthUnit: columnUnits[yIdx], height: currY, initHeightUnit: rowUnits[xIdx], name: name };
       cellList.push(cell);
       x += currX;
       cl++;
