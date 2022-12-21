@@ -1,6 +1,6 @@
 //unsupported: ex, ch, svw, svh, vw, lvh, dvw, dvh
 
-const units = ['px', 'cm', 'mm', 'q', 'in', 'pc', 'pt', 'rem', 'em', 'vw', 'vh', 'vmin', 'vmax', 'lh', 'rlh', '%', 'ms', 's', 'deg', 'rad', 'grad', 'turn'];
+const units = ['px', 'cm', 'mm', 'q', 'in', 'pc', 'pt', 'rem', 'em', 'vw', 'vh', 'vmin', 'vmax', 'lh', 'rlh', '%', 'ms', 's', 'deg', 'rad', 'grad', 'turn', 'fr'];
 const pattern = new RegExp(`^([\-\+]?(?:\\d+(?:\\.\\d+)?))(${units.join('|')})$`, 'i');
 
 export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, percentTarget: 'width' | 'heigth'): number {
@@ -57,8 +57,6 @@ export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, per
 }
 
 export function getCssUnit(cssValue: string) {
-    if(cssValue.substring(cssValue.length - 2, cssValue.length) == "fr")
-        return "fr";
     const matches = cssValue.trim().match(pattern);
     return matches[2].toLowerCase();
 }
