@@ -85,12 +85,12 @@ export class GridExtension extends AbstractExtension {
     //draw headers
     gridCells.forEach((row, i) => {
       this._headers[0][i] = this._drawRect(row[0].x - 25, row[0].y + 2.5, 20 , row[0].height - 5, "svg-grid-header", this._headers[0][i], OverlayLayer.Background);
-      this._headerTexts[0][i] = this._drawText(<string>this._convertCssUnit(row[0].height + "px", <HTMLElement>this.extendedItem.element, "heigth", row[0].initHeightUnit), row[0].x - 12.5, row[0].y + row[0].height / 2, null, this._headerTexts[0][i], OverlayLayer.Background);
+      this._headerTexts[0][i] = this._drawText(this._getHeaderText(row[0].height, row[0].initHeightUnit, "height"), row[0].x - 12.5, row[0].y + row[0].height / 2, null, this._headerTexts[0][i], OverlayLayer.Background);
       this._headerTexts[0][i].setAttribute("transform", "rotate(-90, " + (row[0].x - 12.5) + ", " + (row[0].y + row[0].height / 2) + ")");
     })
     gridCells[0].forEach((column, i) => {
       this._headers[1][i] = this._drawRect(column.x + 2.5, column.y - 25, column.width - 5 , 20, "svg-grid-header", this._headers[1][i], OverlayLayer.Background);
-      this._headerTexts[1][i] = this._drawText(<string>this._convertCssUnit(column.width + "px", <HTMLElement>this.extendedItem.element, "width", column.initWidthUnit), column.x + column.width / 2, column.y - 12.5 , null, this._headerTexts[1][i], OverlayLayer.Background);
+      this._headerTexts[1][i] = this._drawText(this._getHeaderText(column.width, column.initWidthUnit, "width"), column.x + column.width / 2, column.y - 12.5 , null, this._headerTexts[1][i], OverlayLayer.Background);
     })
 
     //draw plus-boxes
@@ -100,6 +100,10 @@ export class GridExtension extends AbstractExtension {
 
   override dispose() {
     this._removeAllOverlays();
+  }
+
+  _getHeaderText(size: number, unit: string, percentTarget: "width" | "height"){
+    return Math.round(parseFloat(<string>this._convertCssUnit(size, <HTMLElement>this.extendedItem.element, percentTarget, unit)) * 10) / 10 + unit;
   }
 
   _drawResizeCircles(gap, oldCircle?: SVGCircleElement){
@@ -147,7 +151,7 @@ export class GridExtension extends AbstractExtension {
               elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, this._initialSizes.xUnit, (event.clientX - this._initialPoint.x) / this.designerCanvas.zoomFactor, gapColumn, "width");
               break;
             case "ns-resize":
-              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, (event.clientY - this._initialPoint.y) / this.designerCanvas.zoomFactor, gapRow, "heigth");
+              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, (event.clientY - this._initialPoint.y) / this.designerCanvas.zoomFactor, gapRow, "height");
               break;
           }
           this.refresh();
@@ -166,7 +170,7 @@ export class GridExtension extends AbstractExtension {
     }
   }
 
-  _calculateNewSize(iSizes: number[], iUnits: string[], diff, gapIndex, percentTarget: 'width' | 'heigth'){
+  _calculateNewSize(iSizes: number[], iUnits: string[], diff, gapIndex, percentTarget: 'width' | 'height'){
     let newSizes: number[] = [];
     let edited = [];
 
@@ -188,7 +192,7 @@ export class GridExtension extends AbstractExtension {
     return retVal;
   }
 
-  _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'heigth', unit: string) : string | number{
+  _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) : string | number{
     if(unit == "fr"){
       let containerSize = convertCssUnitToPixel(target.style.width, target, percentTarget);
       let amountGaps = percentTarget == "width" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1

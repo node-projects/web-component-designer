@@ -81,7 +81,7 @@ export class TransformOriginExtension extends AbstractExtension {
               let newXs = convertCssUnit(newX, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]));
               let newYs = convertCssUnit(newX, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]));
               if (oldSplit.length > 1) {
-                newYs = convertCssUnit(newY, <HTMLElement>this.extendedItem.element, 'heigth', getCssUnit(oldSplit[1]));
+                newYs = convertCssUnit(newY, <HTMLElement>this.extendedItem.element, 'height', getCssUnit(oldSplit[1]));
               }
               this.extendedItem.setStyle('transform-origin', newXs + ' ' + newYs);
             } catch (err) {

@@ -3,7 +3,7 @@
 const units = ['px', 'cm', 'mm', 'q', 'in', 'pc', 'pt', 'rem', 'em', 'vw', 'vh', 'vmin', 'vmax', 'lh', 'rlh', '%', 'ms', 's', 'deg', 'rad', 'grad', 'turn', 'fr'];
 const pattern = new RegExp(`^([\-\+]?(?:\\d+(?:\\.\\d+)?))(${units.join('|')})$`, 'i');
 
-export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, percentTarget: 'width' | 'heigth'): number {
+export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, percentTarget: 'width' | 'height'): number {
 
     const supportedUnits = {
 
@@ -26,7 +26,7 @@ export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, per
         'vmax': value => value / 100 * (window.innerHeight > window.innerWidth ? window.innerHeight : window.innerWidth),
         'lh': value => value * parseFloat(getComputedStyle(target).lineHeight),
         'rlh': value => value * parseFloat(getComputedStyle(document.documentElement).lineHeight),
-        '%': value => value / 100 * (percentTarget == 'heigth' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
+        '%': value => value / 100 * (percentTarget == 'height' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
 
         // Times
         'ms': value => value,
@@ -61,7 +61,7 @@ export function getCssUnit(cssValue: string) {
     return matches[2].toLowerCase();
 }
 
-export function convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'heigth', unit: string) {
+export function convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) {
 
     const supportedUnits = {
 
@@ -83,7 +83,7 @@ export function convertCssUnit(cssValue: string | number, target: HTMLElement, p
         'vmax': value => value * 100 / (window.innerHeight > window.innerWidth ? window.innerHeight : window.innerWidth),
         'lh': value => value / parseFloat(getComputedStyle(target).lineHeight),
         'rlh': value => value / parseFloat(getComputedStyle(document.documentElement).lineHeight),
-        '%': value => value * 100 / (percentTarget == 'heigth' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
+        '%': value => value * 100 / (percentTarget == 'height' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
 
         // Times
         'ms': value => value,
