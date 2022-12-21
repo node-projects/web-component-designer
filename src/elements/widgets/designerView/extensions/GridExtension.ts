@@ -1,5 +1,5 @@
 import { EventNames } from "../../../../enums/EventNames";
-import { convertCssUnit } from "../../../helper/CssUnitConverter";
+import { convertCssUnit, convertCssUnitToPixel } from "../../../helper/CssUnitConverter";
 import { CalculateGridInformation } from "../../../helper/GridHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -85,12 +85,12 @@ export class GridExtension extends AbstractExtension {
     //draw headers
     gridCells.forEach((row, i) => {
       this._headers[0][i] = this._drawRect(row[0].x - 25, row[0].y + 2.5, 20 , row[0].height - 5, "svg-grid-header", this._headers[0][i], OverlayLayer.Background);
-      this._headerTexts[0][i] = this._drawText(<string>this._convertCssUnit(row[0].height, <HTMLElement>this.extendedItem.element, "heigth", row[0].initHeightUnit), row[0].x - 12.5, row[0].y + row[0].height / 2, null, this._headerTexts[0][i], OverlayLayer.Background);
+      this._headerTexts[0][i] = this._drawText(row[0].height + "px", row[0].x - 12.5, row[0].y + row[0].height / 2, null, this._headerTexts[0][i], OverlayLayer.Background);
       this._headerTexts[0][i].setAttribute("transform", "rotate(-90, " + (row[0].x - 12.5) + ", " + (row[0].y + row[0].height / 2) + ")");
     })
     gridCells[0].forEach((column, i) => {
       this._headers[1][i] = this._drawRect(column.x + 2.5, column.y - 25, column.width - 5 , 20, "svg-grid-header", this._headers[1][i], OverlayLayer.Background);
-      this._headerTexts[1][i] = this._drawText(<string>this._convertCssUnit(column.width, <HTMLElement>this.extendedItem.element, "width", column.initWidthUnit), column.x + column.width / 2, column.y - 12.5 , null, this._headerTexts[1][i], OverlayLayer.Background);
+      this._headerTexts[1][i] = this._drawText(column.width + "px", column.x + column.width / 2, column.y - 12.5 , null, this._headerTexts[1][i], OverlayLayer.Background);
     })
 
     //draw plus-boxes
@@ -182,15 +182,46 @@ export class GridExtension extends AbstractExtension {
         break;
       }
     }
-
+    
     let retVal = "";
     newSizes.forEach((newSize, i) => retVal += this._convertCssUnit(newSize + "px", <HTMLElement>this.extendedItem.element, percentTarget, iUnits[i]) + ' ');
     return retVal;
   }
 
-  _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'heigth', unit: string){
+  _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'heigth', unit: string) : string | number{
     if(unit == "fr"){
-      return 0
+      let containerSize = convertCssUnitToPixel(target.style.width, target, percentTarget);
+      let amountGaps = percentTarget == "width" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1
+      let gapSize = convertCssUnitToPixel(percentTarget == "width" ? target.style.columnGap : target.style.rowGap, target, percentTarget)
+      let containerSizeWithoutGaps = containerSize - gapSize * amountGaps;
+
+      let amountFrSizes = 0;
+      let leftOver = containerSizeWithoutGaps;
+      if(percentTarget == "width"){
+        this.gridInformation.cells[0].forEach((column, i) => {
+          if(column.initWidthUnit == "fr")
+            amountFrSizes++;
+          else
+            leftOver -= column.width;
+        }) 
+      }
+      else {
+        this.gridInformation.cells.forEach((row, i) => {
+          if(row[0].initHeightUnit == "fr")
+            amountFrSizes++;
+          else
+            leftOver -= row[0].height;
+        })
+      }
+
+      let frRatio = leftOver / amountFrSizes;
+      if(typeof cssValue == "number"){
+        //expected Value in Pixel
+        return (cssValue / frRatio) + "fr";
+      }
+      else {
+        return (convertCssUnitToPixel(cssValue, target, percentTarget) / frRatio) + "fr"
+      }
     }
     else
       return convertCssUnit(cssValue, target, percentTarget, unit);

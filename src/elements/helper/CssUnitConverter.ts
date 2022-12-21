@@ -57,6 +57,8 @@ export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, per
 }
 
 export function getCssUnit(cssValue: string) {
+    if(cssValue.substring(cssValue.length - 2, cssValue.length) == "fr")
+        return "fr";
     const matches = cssValue.trim().match(pattern);
     return matches[2].toLowerCase();
 }
