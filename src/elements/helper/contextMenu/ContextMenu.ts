@@ -41,7 +41,7 @@ export class ContextMenu {
 		list-style-type: none;
 		padding: 0;
 		margin: 0;
-		background-color: #ccc;
+		background-color: #ffffff;
 		box-shadow: 0 0 5px #333;
 	  }
 	  
@@ -56,15 +56,15 @@ export class ContextMenu {
 		background-color: #bbb;
 	  }
 	  
-	  .context_menu li .cm_icon_span {
+	  .context_menu li .cm_icon_span {	
 		width: 1.5em;
-		height: 1.2em;
-		vertical-align: bottom;
 		display: inline-block;
 		border-right: 1px solid #aaa;
-		margin-right: 5px;
-		padding-right: 5px;
-		text-align: center;
+		padding: 0px 3px;
+	  }
+
+	  .context_menu li .cm_icon_span {	
+		padding-left: 5px;
 	  }
 	  
 	  .context_menu li .cm_sub_span {
