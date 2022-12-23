@@ -13,7 +13,7 @@ export class GridExtension extends AbstractExtension {
   private _initialSizes : {
     x: any[];
     xUnit: any[];
-    y: any[];
+    y: any[]; 
     yUnit: any[];
 };
   private _cells: SVGRectElement[][];
@@ -63,16 +63,16 @@ export class GridExtension extends AbstractExtension {
 
   override refresh() {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
-    let gridCells = this.gridInformation.cells;
+    let gc = this.gridInformation.cells;
 
     //draw gaps
     this.gridInformation.gaps.forEach((gap, i) => {
       this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
-      this._resizeCircles[i] = this._drawResizeCircles(gap, this._resizeCircles[i]);
+      this._resizeCircles[i] = this._drawResizeCircle(gap, this._resizeCircles[i]);
     })
 
     //draw cells
-    gridCells.forEach((row, i) => {
+    gc.forEach((row, i) => {
       row.forEach((cell, j) => {
         this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
         if (cell.name) {
@@ -83,30 +83,25 @@ export class GridExtension extends AbstractExtension {
     })
 
     //draw headers
-    gridCells.forEach((row, i) => {
-      this._headers[0][i] = this._drawRect(row[0].x - 25, row[0].y + 2.5, 20 , row[0].height - 5, "svg-grid-header", this._headers[0][i], OverlayLayer.Background);
-      this._headerTexts[0][i] = this._drawText(this._getHeaderText(row[0].height, row[0].initHeightUnit, "height"), row[0].x - 12.5, row[0].y + row[0].height / 2, null, this._headerTexts[0][i], OverlayLayer.Background);
-      this._headerTexts[0][i].setAttribute("transform", "rotate(-90, " + (row[0].x - 12.5) + ", " + (row[0].y + row[0].height / 2) + ")");
+    gc.forEach((row, i) => {
+      this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], "vertical")
+      this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
     })
-    gridCells[0].forEach((column, i) => {
-      this._headers[1][i] = this._drawRect(column.x + 2.5, column.y - 25, column.width - 5 , 20, "svg-grid-header", this._headers[1][i], OverlayLayer.Background);
-      this._headerTexts[1][i] = this._drawText(this._getHeaderText(column.width, column.initWidthUnit, "width"), column.x + column.width / 2, column.y - 12.5 , null, this._headerTexts[1][i], OverlayLayer.Background);
+    gc[0].forEach((column, i) => {
+      this._headers[1][i] = this._drawHeader(column, this._headers[1][i], "horizontal")
+      this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
     })
 
     //draw plus-boxes
-    this._headers[0][gridCells.length] = this._drawRect(gridCells[0][0].x - 25, gridCells[gridCells.length - 1][0].y + gridCells[gridCells.length - 1][0].height + 2.5, 20, 20, "svg-grid-header", this._headers[0][gridCells.length], OverlayLayer.Foregorund);
-    this._headers[1][gridCells[0].length] = this._drawRect(gridCells[0][gridCells[0].length - 1].x + gridCells[0][gridCells[0].length - 1].width + 2.5, gridCells[0][gridCells.length - 1].y - 25, 20, 20, "svg-grid-header", this._headers[1][gridCells.length], OverlayLayer.Foregorund);
+    this._headers[0][gc.length] = this._drawPlusBox(gc, this._headers[0][gc.length], "vertical");
+    this._headers[1][gc[0].length] = this._drawPlusBox(gc, this._headers[1][gc[0].length], "horizontal");
   }
 
   override dispose() {
     this._removeAllOverlays();
   }
 
-  _getHeaderText(size: number, unit: string, percentTarget: "width" | "height"){
-    return Math.round(parseFloat(<string>this._convertCssUnit(size, <HTMLElement>this.extendedItem.element, percentTarget, unit)) * 10) / 10 + unit;
-  }
-
-  _drawResizeCircles(gap, oldCircle?: SVGCircleElement){
+  _drawResizeCircle(gap, oldCircle?: SVGCircleElement){
     let resizeCircle = this._drawCircle((gap.x + (gap.width/2)), (gap.y + (gap.height/2)), 1.5, 'svg-grid-resizer', oldCircle, OverlayLayer.Foregorund);
     resizeCircle.style.pointerEvents = "all";
     resizeCircle.style.cursor = gap.width < gap.height ? "ew-resize" : "ns-resize";
@@ -116,6 +111,66 @@ export class GridExtension extends AbstractExtension {
       resizeCircle.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeResize(event, resizeCircle, gap.column, gap.row));
     }
     return resizeCircle;
+  }
+
+  _drawHeader(cell, oldHeader, alignment: "vertical" | "horizontal"){
+    let xOffset;
+    let yOffset;
+    let width;
+    let height;
+    if(alignment == "vertical"){
+      xOffset = -25;
+      yOffset = 2.5;
+      width = 20;
+      height = cell.height - 5;
+    }
+    else {
+      xOffset = 2.5;
+      yOffset = -25;
+      width = cell.width - 5;
+      height = 20;
+    }
+    return this._drawRect(cell.x + xOffset, cell.y + yOffset, width , height, "svg-grid-header", oldHeader, OverlayLayer.Background);
+  }
+
+  _drawHeaderText(cell, oldHeaderText, alignment: "vertical" | "horizontal"){
+    let text;
+    let xOffset;
+    let yOffset;
+    if(alignment == "vertical"){
+      text = this._getHeaderText(cell.height, cell.initHeightUnit, "height");
+      xOffset = -12.5;
+      yOffset = cell.height / 2;
+    }
+    else {
+      text = this._getHeaderText(cell.width, cell.initWidthUnit, "width");
+      xOffset = cell.width / 2;
+      yOffset = -12.5;
+    }
+
+    let rText = this._drawText(text, cell.x + xOffset, cell.y + yOffset, null, oldHeaderText, OverlayLayer.Background);
+    
+    if(alignment == "vertical")
+      rText.setAttribute("transform", "rotate(-90, " + (cell.x + xOffset) + ", " + (cell.y + yOffset) + ")");
+
+    return rText;
+  }
+
+  _drawPlusBox(cells, oldPlusBox, alignment: "vertical" | "horizontal"){
+    let plusBox;
+    if(alignment == "vertical")
+      plusBox = this._drawRect(cells[0][0].x - 25, cells[cells.length - 1][0].y + cells[cells.length - 1][0].height + 2.5, 20, 20, "svg-grid-header", oldPlusBox, OverlayLayer.Foregorund);
+    else
+      plusBox = this._drawRect(cells[0][cells[0].length - 1].x + cells[0][cells[0].length - 1].width + 2.5, cells[0][cells.length - 1].y - 25, 20, 20, "svg-grid-header", oldPlusBox, OverlayLayer.Foregorund);
+    plusBox.style.pointerEvents = "all";
+    plusBox.style.cursor = "pointer";
+    if(!oldPlusBox)
+      plusBox.addEventListener(EventNames.PointerDown, event => this._addToGrid("final", alignment));
+    return plusBox;
+  }
+
+  _getHeaderText(size: number, unit: string, percentTarget: "width" | "height"){
+    return Math.round(parseFloat(<string>this._convertCssUnit(size, <HTMLElement>this.extendedItem.element, percentTarget, unit)) * 10) / 10 + unit;
   }
 
   _getInitialSizes(){
@@ -190,6 +245,20 @@ export class GridExtension extends AbstractExtension {
     let retVal = "";
     newSizes.forEach((newSize, i) => retVal += this._convertCssUnit(newSize + "px", <HTMLElement>this.extendedItem.element, percentTarget, iUnits[i]) + ' ');
     return retVal;
+  }
+
+  _addToGrid(pos: number | "final", alignment: "vertical" | "horizontal"){
+    if(alignment == "vertical"){
+      if(pos == "final")
+        pos = this.gridInformation.cells.length - 1;
+      //TBD add column
+    }
+    else {
+      if(pos == "final")
+        pos = this.gridInformation.cells[0].length - 1;
+      //TBD add row
+      
+    }
   }
 
   _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) : string | number{
