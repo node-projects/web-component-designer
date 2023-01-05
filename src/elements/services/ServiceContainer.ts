@@ -35,6 +35,7 @@ import { IBinding } from '../item/IBinding.js';
 import { BindingTarget } from '../item/BindingTarget.js';
 import { IPropertyGroupsService } from './propertiesService/IPropertyGroupsService.js';
 import { CodeViewSimple } from '../widgets/codeView/code-view-simple.js';
+import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -56,6 +57,7 @@ interface ServiceNameMap {
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
   "propertyGroupsService": IPropertyGroupsService;
+  "stylesheetService": IStylesheetService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -63,7 +65,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   readonly config: {
     codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
     demoViewWidget: new (...args: any[]) => IDemoView & HTMLElement;
-    openBindingsEditor?: (property:IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
+    openBindingsEditor?: (property: IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
   } = {
       codeViewWidget: CodeViewSimple,
       demoViewWidget: DemoView
@@ -91,7 +93,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   public readonly globalContext: GlobalContext = new GlobalContext(this);
 
   public readonly options = {
-    zoomDesignerBackground : true
+    zoomDesignerBackground: true
   };
 
   public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
@@ -170,5 +172,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get demoProviderService(): IDemoProviderService {
     return this.getLastService('demoProviderService');
+  }
+
+  get stylesheetService(): IStylesheetService {
+    return this.getLastService('stylesheetService');
   }
 }

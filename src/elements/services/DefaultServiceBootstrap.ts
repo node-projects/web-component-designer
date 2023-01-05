@@ -72,6 +72,7 @@ import { PlacementExtensionProvider } from '../widgets/designerView/extensions/P
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
 import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/InvisibleElementExtensionDesignViewConfigButtons.js';
+import { StylesheetService } from './stylesheetService/StylesheetService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -96,6 +97,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());
+  serviceContainer.register("stylesheetService", new StylesheetService("button, div { background-color: green; }"));
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),
