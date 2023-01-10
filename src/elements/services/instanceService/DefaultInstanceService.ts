@@ -3,7 +3,6 @@ import { IElementDefinition } from '../elementsService/IElementDefinition.js';
 import { IDesignerInstance } from './IDesignerInstance.js';
 import type { ServiceContainer } from '../ServiceContainer.js';
 import type { InstanceServiceContainer } from '../InstanceServiceContainer.js';
-import { IPropertiesService } from '../propertiesService/IPropertiesService.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { encodeXMLChars } from '../../helper/XmlHelper.js';
@@ -79,6 +78,9 @@ export class DefaultInstanceService implements IInstanceService {
 
     let designItem = DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
 
+    //todo, check if we need this? if so, we need to fin the service for each property,
+    //everyone could be handled by different one
+    /*
     if (definition.defaultProperties) {
       let propertiesService: IPropertiesService = null;
       if (definition.type) {
@@ -91,6 +93,7 @@ export class DefaultInstanceService implements IInstanceService {
         propertiesService.setValue([designItem], p, value);
       }
     }
+    */
 
     return designItem;
   }
