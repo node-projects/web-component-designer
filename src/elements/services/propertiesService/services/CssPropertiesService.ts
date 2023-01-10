@@ -4,6 +4,7 @@ import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export class CssPropertiesService extends CommonPropertiesService {
 
@@ -202,12 +203,20 @@ export class CssPropertiesService extends CommonPropertiesService {
     return this[this.name][name]
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] {
+  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     if (this.name == 'styles') {
       if (!designItem)
         return [];
-      let arr: IProperty[] = Array.from(designItem.styles(), ([key, value])  => ({ name: key, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue }));
-      arr.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
+      
+      let styles = designItem.getAllStyles();
+
+      let arr = styles.map(x=>({name: x.selector ?? '&lt;local&gt;', description:'test', properties: [
+        ...x.declarations.map(y=>({ name: y.name, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue })),
+        { name: '', type: 'addNew', service: this, propertyType: PropertyType.complex }
+      ]
+      }));
+      //let arr: IProperty[] = Array.from(designItem.styles(), ([key, value])  => ({ name: key, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue }));
+      //arr.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return arr;
     }
     return this[this.name];

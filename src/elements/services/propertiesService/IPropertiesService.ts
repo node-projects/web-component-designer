@@ -4,6 +4,7 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { ValueType } from './ValueType.js';
 import { BindingTarget } from '../../item/BindingTarget.js';
 import { IBinding } from '../../item/IBinding.js';
+import { IPropertyGroup } from './IPropertyGroup.js';
 
 export enum RefreshMode {
   none,
@@ -16,7 +17,7 @@ export interface IPropertiesService extends IService {
   getRefreshMode(designItem: IDesignItem): RefreshMode;
 
   isHandledElement(designItem: IDesignItem): boolean;
-  getProperties(designItem: IDesignItem): IProperty[];
+  getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
   getProperty(designItem: IDesignItem, name: string): IProperty;
   getBinding(designItems: IDesignItem[], property: IProperty): IBinding
   getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget;

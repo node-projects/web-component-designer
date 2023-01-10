@@ -67,7 +67,7 @@ import { GrayOutDragOverContainerExtensionProvider } from '../widgets/designerVi
 import { LineExtensionProvider } from '../widgets/designerView/extensions/svg/LineExtensionProvider.js';
 import { RectExtentionProvider } from '../widgets/designerView/extensions/svg/RectExtensionProvider.js';
 import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
-import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
+import { PropertyTabsService } from './propertiesService/PropertyTabsService.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
@@ -83,7 +83,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("propertyService", new SVGElementsPropertiesService());
   serviceContainer.register("propertyService", new Lit2PropertiesService());
   serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
-  serviceContainer.register("propertyGroupsService", new PropertyGroupsService());
+  serviceContainer.register("propertyGroupsService", new PropertyTabsService());
   serviceContainer.register("instanceService", new DefaultInstanceService());
   serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
   serviceContainer.register("htmlWriterService", new HtmlWriterService());
