@@ -1,10 +1,21 @@
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IProperty } from "../propertiesService/IProperty.js";
-import * as csstree from 'css-tree';
 
+export interface IStyleRule {
+    selector: string;
+    declarations: IStyleDeclaration[];
+    specificity: number;
+}
+
+export interface IStyleDeclaration {
+    name: string;
+    value: string;
+    important: boolean;
+}
 export interface IStylesheetService {
-    getDefiningRule(designItems: IDesignItem[], property: IProperty): csstree.RulePlain;
-    updateDefiningRule(designItems: IDesignItem[], prop: IProperty, value: string): boolean;
+    getAppliedRules(designItem: IDesignItem, property: IProperty): IStyleRule[];
+    getDeclarations(designItem: IDesignItem, property: IProperty): IStyleDeclaration[];
+    updateDefiningRule(designItem: IDesignItem, property: IProperty, value: string): boolean;
     stylesheetChanged: TypedEvent<{ stylesheet: string }>;
 }

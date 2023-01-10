@@ -97,7 +97,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());
-  serviceContainer.register("stylesheetService", new StylesheetService("button, div { background-color: green; }"));
+  serviceContainer.register("stylesheetService", new StylesheetService(["button, div { background-color: green; }"]));
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),

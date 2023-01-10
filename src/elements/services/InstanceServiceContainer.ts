@@ -10,6 +10,7 @@ interface InstanceServiceNameMap {
   "undoService": IUndoService;
   "selectionService": ISelectionService;
   "contentService": IContentService;
+  
 }
 
 export class InstanceServiceContainer extends BaseServiceContainer<InstanceServiceNameMap> {

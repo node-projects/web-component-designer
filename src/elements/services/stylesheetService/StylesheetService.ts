@@ -1,100 +1,127 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IProperty } from "../propertiesService/IProperty.js";
-import { IStylesheetService } from "./IStylesheetService.js";
+import { IStyleDeclaration, IStyleRule, IStylesheetService } from "./IStylesheetService.js";
 
 import * as csstree from 'css-tree';
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+import { calculate as calculateSpecifity } from "./SpecificityCalculator.js";
 
 type RuleWithSpecificity = {
     rule: csstree.RulePlain,
+    selector: string,
     specificity: number,
 }
 
 export class StylesheetService implements IStylesheetService {
 
-    stylesheet: string;
+    stylesheets: string[];
     stylesheetChanged: TypedEvent<{ stylesheet: string; }> = new TypedEvent<{ stylesheet: string; }>();
 
-    ruleset: csstree.StyleSheetPlain;
+    styles: RuleWithSpecificity[] = [];
 
-    constructor(stylesheet: string) {
-        this.stylesheet = stylesheet;
+    constructor(stylesheets: string[]) {
+        this.stylesheets = stylesheets;
     }
 
-    public updateDefiningRule(designItems: IDesignItem[], property: IProperty, value: string): boolean {
-        let highestSpecificityRule = this.getDefiningRule(designItems, property);
-        if (!highestSpecificityRule) return false;
+    public updateDefiningRule(designItem: IDesignItem, property: IProperty, value: string): boolean {
+        // let highestSpecificityRule = this.getAppliedRules(designItem, property);
+        // if (!highestSpecificityRule) return false;
 
-        let newRule = csstree.toPlainObject(csstree.parse("* {" + property.name + ": " + value + "}")) as csstree.StyleSheetPlain;
+        // let newRule = csstree.toPlainObject(csstree.parse("* {" + property.name + ": " + value + "}")) as csstree.StyleSheetPlain;
 
-        let index = this.returnRuleDeclarationIndex(highestSpecificityRule, property);
-        if (index > -1) highestSpecificityRule.block.children.splice(index, 1, (newRule.children[0] as csstree.RulePlain).block.children[0]);
-        else highestSpecificityRule.block.children.push((newRule.children[0] as csstree.RulePlain).block.children[0]);
+        // let index = this.returnRuleDeclarationIndex(highestSpecificityRule, property);
+        // if (index > -1) highestSpecificityRule.block.children.splice(index, 1, (newRule.children[0] as csstree.RulePlain).block.children[0]);
+        // else highestSpecificityRule.block.children.push((newRule.children[0] as csstree.RulePlain).block.children[0]);
 
-        if (!this.ruleset) this.ruleset = this.parseStylesheetToRuleset(this.stylesheet);
+        // if (!this.ruleset) this.ruleset = this.parseStylesheetToRuleset(this.stylesheet);
 
-        this.stylesheetChanged.emit({ stylesheet: csstree.generate(csstree.fromPlainObject(this.ruleset)) });
+        // this.stylesheetChanged.emit({ stylesheet: csstree.generate(csstree.fromPlainObject(this.ruleset)) });
         return true;
     }
 
-    /*
-        Do we want/need the defining rule or the rule, which already applies the property to the element?
-        The first one would guarantee that the property is applied to the element, 
-        but the second one would also allow to change the property and results in a minified stylesheet.
+    private getAppliedRulesInternal(designItem: IDesignItem, prop: IProperty): RuleWithSpecificity[] {
+        return this.parseStylesheetToRuleset(this.stylesheets).filter(item => designItem.element.matches(item.selector));
+    }
 
-        For example:
+    public getAppliedRules(designItem: IDesignItem, prop: IProperty): IStyleRule[] {
+        let rules = this.getAppliedRulesInternal(designItem, prop);
+        if (!rules) return [];
 
-        Element:
-        <button id="my-button"></button>
-
-        Changed property:
-        background-color: red;
-
-        #my-button {
-            border: 1px solid black;
-        }
-
-        button {
-            background-color: white;
-        }
-
-        To make sure the property is applied to the element, we would need to return the first rule. 
-        It has the highest specificity.
-
-        To make sure the stylesheet is minified, we would need to return the second rule.
-        It has a lower specificity, but we could make sure, that it is the rule, where the property is already declared,
-        but has a high enough specificity to be applied to the element.
-    */
-
-    public getDefiningRule(designItems: IDesignItem[], prop: IProperty): csstree.RulePlain {
-        let matches: RuleWithSpecificity[] = [];
-
-        this.ruleset = this.parseStylesheetToRuleset(this.stylesheet);
-
-        this.ruleset.children?.forEach((rule: csstree.RulePlain) => {
-            if (designItems[0].element.matches(this.buildSelectorString(rule.prelude as csstree.SelectorListPlain))) {
-                const specificity = this.getSpecificity(rule.prelude as csstree.SelectorListPlain);
-                matches.push({ rule, specificity });
+        return rules.map(r => {
+            return {
+                selector: r.selector,
+                declarations: r.rule.block.children.map(c => {
+                    return {
+                        // @ts-ignore
+                        name: c.property,
+                        // @ts-ignore
+                        value: (c.value as csstree.Raw).value,
+                        // @ts-ignore
+                        important: c.important == true
+                    }
+                }),
+                specificity: this.getSpecificity(r.rule.prelude as csstree.SelectorListPlain)
             }
         });
-
-        return this.findHighestSpecificity(matches).rule;
     }
 
-    private parseStylesheetToRuleset(stylesheet: string): csstree.StyleSheetPlain {
-        return csstree.toPlainObject(csstree.parse(stylesheet, { positions: true })) as csstree.StyleSheetPlain;
+    private getDeclarationInternal(designItem: IDesignItem, prop: IProperty): csstree.DeclarationPlain[] {
+        let rules = this.getAppliedRulesInternal(designItem, prop);
+        if (!rules) return null;
+
+        let declarations: csstree.DeclarationPlain[] = [];
+        rules.forEach(r => {
+            let index = this.returnRuleDeclarationIndex(r.rule, prop);
+            // @ts-ignore
+            if (index > -1) declarations.push(r.rule.block.children[index]);
+        });
+
+        return declarations;
     }
 
-    private buildSelectorString(selector: csstree.SelectorListPlain): string {
-        return this.stylesheet.substring(selector.loc.start.offset, selector.loc.end.offset);
+    public getDeclarations(designItem: IDesignItem, prop: IProperty): IStyleDeclaration[] {
+        let decl = this.getDeclarationInternal(designItem, prop);
+        if (!decl) return null;
+
+        let declarations: IStyleDeclaration[] = [];
+
+        decl.forEach(d => {
+            declarations.push({
+                name: d.property,
+                value: (d.value as csstree.Raw).value,
+                important: d.important == true
+            })
+        });
+
+        return declarations;
+    }
+
+    private parseStylesheetToRuleset(stylesheets: string[]): RuleWithSpecificity[] {
+        let styles: RuleWithSpecificity[] = [];
+        stylesheets.forEach(s => {
+            let stylesheetPlain = csstree.toPlainObject(csstree.parse(s, { positions: true, parseValue: false })) as csstree.StyleSheetPlain;
+            stylesheetPlain.children.forEach((rule: csstree.RulePlain) => {
+                styles.push({
+                    rule: rule,
+                    selector: this.buildSelectorString(s, rule.prelude as csstree.SelectorListPlain),
+                    specificity: this.getSpecificity(rule.prelude as csstree.SelectorListPlain)
+                });
+            });
+        });
+
+        return styles;
+    }
+
+    private buildSelectorString(stylesheet: string, selector: csstree.SelectorListPlain): string {
+        return stylesheet.substring(selector.loc.start.offset, selector.loc.end.offset);
     }
 
     private getSpecificity(selector: csstree.SelectorListPlain): number {
-        return 10;
-    }
+        const specificities = calculateSpecifity(selector);
+        let sum = 0;
+        specificities.forEach(specificity => sum += specificity.a * 10000 + specificity.b * 100 + specificity.c);
 
-    private findHighestSpecificity(rules: RuleWithSpecificity[]): RuleWithSpecificity {
-        return rules.find(r => r.specificity == Math.max(...rules.map(x => x.specificity)));
+        return sum;
     }
 
     private returnRuleDeclarationIndex(rule: csstree.RulePlain, property: IProperty): number {

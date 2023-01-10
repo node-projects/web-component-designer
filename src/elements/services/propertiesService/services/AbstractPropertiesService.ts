@@ -27,7 +27,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        const declaration = designItems[0].serviceContainer.stylesheetService?.updateDefiningRule(designItems, property, value);
+        const declaration = designItems[0].serviceContainer.stylesheetService?.getDeclarations(d, property);
+        const rules = designItems[0].serviceContainer.stylesheetService?.getAppliedRules(d, property);
         if (!declaration) {
           if (d.getStyle(property.name) != value) {
             d.setStyle(property.name, value);
