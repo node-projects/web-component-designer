@@ -499,6 +499,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
 
+    this.instanceServiceContainer.servicesChanged.on(e => {
+      /*if (e.serviceName == 'stylesheetParser') {
+        //new stylesheetparser added, use it and add stylesheets...
+      }*/
+    });
+
     this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
