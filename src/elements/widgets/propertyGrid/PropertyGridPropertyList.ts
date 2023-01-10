@@ -90,10 +90,15 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       color: white
     }
     .group-header {
-      grid-column: 1 / 4;
-      font-size: 12px;
-      font-weight: 700;
+      grid-column: 1 / 3;
+      font-size: 10px;
       font-family: monospace;
+    }
+    .group-desc {
+      display: inline-flex;
+      flex-direction: row-reverse;
+      font-size: 10px;
+      text-decoration: underline;
     }
     `;
   }
@@ -139,6 +144,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       header.innerHTML = g.name;
       header.className = 'group-header';
       this._div.appendChild(header);
+      let desc = document.createElement('span');
+      desc.innerHTML = g.description;
+      desc.className = 'group-desc';
+      this._div.appendChild(desc);
       this.createPropertyEditors(g.properties);
     }
   }

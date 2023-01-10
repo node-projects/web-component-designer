@@ -210,7 +210,7 @@ export class CssPropertiesService extends CommonPropertiesService {
       
       let styles = designItem.getAllStyles();
 
-      let arr = styles.map(x=>({name: x.selector ?? '&lt;local&gt;', description:'test', properties: [
+      let arr = styles.map(x=>({name: x.selector ?? '&lt;local&gt;', description: x.filename ?? '', properties: [
         ...x.declarations.map(y=>({ name: y.name, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue })),
         { name: '', type: 'addNew', service: this, propertyType: PropertyType.complex }
       ]

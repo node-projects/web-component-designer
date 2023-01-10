@@ -69,7 +69,7 @@ export interface IDesignItem {
   setStyle(name: string, value?: string | null, important?: boolean);
   removeStyle(name: string);
   updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean);
-  getAllStyles(): { selector: string, declarations: { name: string, value: string }[] }[];
+  getAllStyles(): { selector: string, filename?: string, declarations: { name: string, value: string }[] }[];
 
   attributes(): Iterable<[name: string, value: string]>
   getAttribute(name: string)

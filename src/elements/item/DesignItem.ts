@@ -367,10 +367,10 @@ export class DesignItem implements IDesignItem {
   //Should return all styles from all sheets wich match the element
   //including also the local styles
   //Should return alls css declarations, maybe a declartion with no selector are the local styles
-  public getAllStyles(): { selector: string, declarations: { name: string, value: string }[] }[] {
+  public getAllStyles(): { selector: string, filename?: string, declarations: { name: string, value: string }[] }[] {
     const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1] }));
     //const rules = this.serviceContainer.stylesheetService?.getAppliedRules(d);
-    const rules = [{ selector: 'button > a', declarations: [{ name: "display", value: "none" }] }];
+    const rules = [{ selector: 'button > a', filename: 'test.css', declarations: [{ name: "display", value: "none" }] }];
     return [{ selector: null, declarations: localStyles }, ...rules];
   }
 
