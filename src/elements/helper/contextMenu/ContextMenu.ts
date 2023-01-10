@@ -39,9 +39,9 @@ export class ContextMenu {
 	  
 	  .context_menu ul {
 		list-style-type: none;
-		padding: 0;
+		padding: 3px;
 		margin: 0;
-		background-color: #ffffff;
+		background-color: #f5f7f7;
 		box-shadow: 0 0 5px #333;
 	  }
 	  
