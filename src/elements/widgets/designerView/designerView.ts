@@ -124,6 +124,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       bottom: 16px;
       height: 16px;
       box-sizing: border-box;
+      z-index: 1;
     }
     .right-scroll {
       height: calc(100% - 32px);
@@ -132,6 +133,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       top: 0;
       width: 16px;
       box-sizing: border-box;
+      z-index: 1;
     }
     .bottom-right {
       width: 16px;
