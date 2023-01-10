@@ -1,5 +1,5 @@
 import { EventNames } from "../../../../enums/EventNames";
-import { convertCssUnit, convertCssUnitToPixel } from "../../../helper/CssUnitConverter";
+import { convertCssUnit, convertCssUnitToPixel, getCssUnit } from "../../../helper/CssUnitConverter";
 import { CalculateGridInformation } from "../../../helper/GridHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -15,11 +15,12 @@ export class GridExtension extends AbstractExtension {
     xUnit: any[];
     y: any[]; 
     yUnit: any[];
-};
+  };
   private _cells: SVGRectElement[][];
   private _gaps: SVGRectElement[];
   private _headers: SVGRectElement[][];
   private _headerTexts: SVGTextElement[][];
+  private _plusCircles: SVGCircleElement[][];
   private _resizeCircles: SVGCircleElement[];
   private minPixelSize = 10;
   private gridInformation : {
@@ -40,7 +41,13 @@ export class GridExtension extends AbstractExtension {
         column?: number;
         row?: number;
     }[];
-}
+  }
+
+  private defaultDepth = 20;
+  private defaultDistanceToBox = 5;
+  private defaultDistanceBetweenHeaders = 10;
+
+  private defaultSizeOfNewRowOrColumn = "50px";
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -57,6 +64,9 @@ export class GridExtension extends AbstractExtension {
     this._headerTexts = new Array(2);
     this._headerTexts[0] = new Array(this.gridInformation.cells.length + 1);
     this._headerTexts[1] = new Array(this.gridInformation.cells[0].length + 1);
+    this._plusCircles = new Array(2);
+    this._plusCircles[0] = new Array(this.gridInformation.cells.length + 1);
+    this._plusCircles[1] = new Array(this.gridInformation.cells[0].length + 1);
     this._resizeCircles = new Array(this.gridInformation.gaps.length);
     this.refresh();
   }
@@ -80,21 +90,31 @@ export class GridExtension extends AbstractExtension {
           text.setAttribute("dominant-baseline", "hanging");
         }
       })
-    })
+    })    
 
     //draw headers
-    gc.forEach((row, i) => {
+    gc.forEach((row, i) => {  //vertical headers
       this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], "vertical")
       this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
     })
+
     gc[0].forEach((column, i) => {
       this._headers[1][i] = this._drawHeader(column, this._headers[1][i], "horizontal")
       this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
     })
 
-    //draw plus-boxes
-    this._headers[0][gc.length] = this._drawPlusBox(gc, this._headers[0][gc.length], "vertical");
-    this._headers[1][gc[0].length] = this._drawPlusBox(gc, this._headers[1][gc[0].length], "horizontal");
+    //draw circles for adding rows/columns
+    for(let i = 0; i < this._plusCircles[0].length; i++)
+      if(i < this._plusCircles[0].length - 1)
+        this._plusCircles[0][i] = this._drawPlusCircle(gc[i][0].x, gc[i][0].y, this._plusCircles[0][i], i, "vertical");
+      else
+        this._plusCircles[0][i] = this._drawPlusCircle(gc[i - 1][0].x, gc[i - 1][0].y + gc[i - 1][0].height, this._plusCircles[0][i], i, "vertical");
+    for(let i = 0; i < this._plusCircles[1].length; i++) 
+      if(i < this._plusCircles[1].length - 1)
+        this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i].x, gc[0][i].y, this._plusCircles[1][i], i, "horizontal");
+      else
+        this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i - 1].x + gc[0][i - 1].width, gc[0][i - 1].y, this._plusCircles[1][i], i, "horizontal");
+    
   }
 
   override dispose() {
@@ -119,16 +139,16 @@ export class GridExtension extends AbstractExtension {
     let width;
     let height;
     if(alignment == "vertical"){
-      xOffset = -25;
-      yOffset = 2.5;
-      width = 20;
-      height = cell.height - 5;
+      xOffset = -(this.defaultDepth + this.defaultDistanceToBox);
+      yOffset = this.defaultDistanceBetweenHeaders / 2;
+      width = this.defaultDepth;
+      height = cell.height - this.defaultDistanceBetweenHeaders;
     }
     else {
-      xOffset = 2.5;
-      yOffset = -25;
-      width = cell.width - 5;
-      height = 20;
+      xOffset = this.defaultDistanceBetweenHeaders / 2;
+      yOffset = -(this.defaultDepth + this.defaultDistanceToBox);
+      width = cell.width - this.defaultDistanceBetweenHeaders;
+      height = this.defaultDepth;
     }
     return this._drawRect(cell.x + xOffset, cell.y + yOffset, width , height, "svg-grid-header", oldHeader, OverlayLayer.Background);
   }
@@ -156,16 +176,18 @@ export class GridExtension extends AbstractExtension {
     return rText;
   }
 
-  _drawPlusBox(cells, oldPlusBox, alignment: "vertical" | "horizontal"){
+  _drawPlusCircle(x, y, oldPlusBox, index, alignment: "vertical" | "horizontal"){
     let plusBox;
-    if(alignment == "vertical")
-      plusBox = this._drawRect(cells[0][0].x - 25, cells[cells.length - 1][0].y + cells[cells.length - 1][0].height + 2.5, 20, 20, "svg-grid-header", oldPlusBox, OverlayLayer.Foregorund);
-    else
-      plusBox = this._drawRect(cells[0][cells[0].length - 1].x + cells[0][cells[0].length - 1].width + 2.5, cells[0][cells.length - 1].y - 25, 20, 20, "svg-grid-header", oldPlusBox, OverlayLayer.Foregorund);
+    if(alignment == "vertical"){
+      plusBox = this._drawCircle(x - this.defaultDistanceToBox - this.defaultDepth / 2, y, this.defaultDepth / 2, 'svg-grid-resizer', oldPlusBox, OverlayLayer.Foregorund)
+    }
+    else {
+      plusBox = this._drawCircle(x, y - this.defaultDistanceToBox - this.defaultDepth / 2, this.defaultDepth / 2, 'svg-grid-resizer', oldPlusBox, OverlayLayer.Foregorund)
+    }
     plusBox.style.pointerEvents = "all";
     plusBox.style.cursor = "pointer";
     if(!oldPlusBox)
-      plusBox.addEventListener(EventNames.PointerDown, event => this._addToGrid("final", alignment));
+      plusBox.addEventListener(EventNames.PointerDown, event => this._addToGrid(index, alignment));
     return plusBox;
   }
 
@@ -247,18 +269,41 @@ export class GridExtension extends AbstractExtension {
     return retVal;
   }
 
-  _addToGrid(pos: number | "final", alignment: "vertical" | "horizontal"){
+  _addToGrid(pos: number, alignment: "vertical" | "horizontal"){
+    let cellTarget;
+    let elementTarget;
+    
     if(alignment == "vertical"){
-      if(pos == "final")
-        pos = this.gridInformation.cells.length - 1;
-      //TBD add column
+      cellTarget = "grid-template-rows";
+      elementTarget = "height";
     }
     else {
-      if(pos == "final")
-        pos = this.gridInformation.cells[0].length - 1;
-      //TBD add row
-      
+      cellTarget = "grid-template-columns";
+      elementTarget = "width";
     }
+
+    let sizes = this.extendedItem.getStyle(cellTarget).split(' ');
+    sizes.splice(pos, 0, this.defaultSizeOfNewRowOrColumn)
+    this.extendedItem.setStyle(cellTarget, sizes.join(' '));
+
+    let newElementSize = <string>convertCssUnit(this._calculateNewElementSize(elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget)));
+    
+    this.extendedItem.setStyle(elementTarget, newElementSize)
+  }
+
+  _calculateNewElementSize(elementTarget: "width" | "height") : string{
+    let gc = CalculateGridInformation(this.extendedItem);
+    let tmpSize = 0;
+
+    if(elementTarget == "width") {
+      gc.cells[0].forEach(cell => { tmpSize += cell.width })
+      tmpSize += convertCssUnitToPixel(this.extendedItem.getStyle("column-gap"), <HTMLElement>this.extendedItem.element, elementTarget) * (gc.cells[0].length - 1)
+    }
+    else {
+      gc.cells.forEach(row => { tmpSize += row[0].height })
+      tmpSize += convertCssUnitToPixel(this.extendedItem.getStyle("row-gap"), <HTMLElement>this.extendedItem.element, elementTarget) * (gc.cells.length - 1)
+    }
+    return tmpSize + "px";
   }
 
   _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) : string | number{
