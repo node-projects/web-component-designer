@@ -39,9 +39,9 @@ export class ContextMenu {
 	  
 	  .context_menu ul {
 		list-style-type: none;
-		padding: 0;
+		padding: 3px;
 		margin: 0;
-		background-color: #ccc;
+		background-color: #f5f7f7;
 		box-shadow: 0 0 5px #333;
 	  }
 	  
@@ -59,7 +59,6 @@ export class ContextMenu {
 	  .context_menu li .cm_icon_span {
 		width: 1.5em;
 		height: 1.2em;
-		vertical-align: bottom;
 		display: inline-block;
 		border-right: 1px solid #aaa;
 		margin-right: 5px;
