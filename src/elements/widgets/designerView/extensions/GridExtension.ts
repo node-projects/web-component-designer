@@ -197,7 +197,7 @@ export class GridExtension extends AbstractExtension {
     plusBox.style.display = "none";
     if(!oldPlusBox) {
       plusBox.addEventListener(EventNames.PointerMove, event => this._toggleDisplayPlusCircles(index, alignment));
-      plusBox.addEventListener(EventNames.PointerDown, event => this._addToGrid(index, alignment));
+      plusBox.addEventListener(EventNames.PointerDown, event => this._editGrid(index, alignment, "add"));
     }
     return plusBox;
   }
@@ -234,31 +234,27 @@ export class GridExtension extends AbstractExtension {
         if(this._initialPoint) {
           let elementStyle = (<HTMLElement>this.extendedItem.element).style;
           this.extendedItem.element.getBoundingClientRect
-          switch(circle.style.cursor){
-            case "ew-resize":
-              elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, this._initialSizes.xUnit, (event.clientX - this._initialPoint.x) / this.designerCanvas.zoomFactor, gapColumn, "width");
-              break;
-            case "ns-resize":
-              elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, (event.clientY - this._initialPoint.y) / this.designerCanvas.zoomFactor, gapRow, "height");
-              break;
-          }
+          if(circle.style.cursor == "ew-resize")
+            elementStyle.gridTemplateColumns = this._calculateNewSize(this._initialSizes.x, this._initialSizes.xUnit, (event.clientX - this._initialPoint.x) / this.designerCanvas.zoomFactor, gapColumn, "width");
+          else if(circle.style.cursor == "ns-resize")
+            elementStyle.gridTemplateRows = this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, (event.clientY - this._initialPoint.y) / this.designerCanvas.zoomFactor, gapRow, "height");
           this.refresh();
         }
         break;
       case EventNames.PointerUp:
         circle.releasePointerCapture(event.pointerId);
+        if(circle.style.cursor == "ew-resize")
+            this.extendedItem.setStyle("grid-template-columns", this._calculateNewSize(this._initialSizes.x, this._initialSizes.xUnit, (event.clientX - this._initialPoint.x) / this.designerCanvas.zoomFactor, gapColumn, "width", true));
+        else if(circle.style.cursor == "ns-resize")
+            this.extendedItem.setStyle("grid-template-rows", this._calculateNewSize(this._initialSizes.y, this._initialSizes.yUnit, (event.clientY - this._initialPoint.y) / this.designerCanvas.zoomFactor, gapRow, "height", true));
         this._initialPoint = null;
         this._initialSizes = null;
-        if(this.extendedItem.getStyle("grid-template-columns") != (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns)
-          this.extendedItem.setStyle("grid-template-columns", (<HTMLElement>this.extendedItem.element).style.gridTemplateColumns);
-        if(this.extendedItem.getStyle("grid-template-rows") != (<HTMLElement>this.extendedItem.element).style.gridTemplateRows)
-          this.extendedItem.setStyle("grid-template-rows", (<HTMLElement>this.extendedItem.element).style.gridTemplateRows);
         this.refresh();
         break;
     }
   }
 
-  _calculateNewSize(iSizes: number[], iUnits: string[], diff, gapIndex, percentTarget: 'width' | 'height'){
+  _calculateNewSize(iSizes: number[], iUnits: string[], diff, gapIndex, percentTarget: 'width' | 'height', pointerUp = false){
     let newSizes: number[] = [];
     let edited = [];
 
@@ -266,9 +262,17 @@ export class GridExtension extends AbstractExtension {
       newSizes.push(i + 1 == gapIndex ? iSizes[i] + diff : i == gapIndex ? iSizes[i] - diff : iSizes[i]);
       edited.push(i + 1 == gapIndex || i == gapIndex);      
     }
-    for(let i = 0; i < newSizes.length; i++){
-      if(newSizes[i] < this.minPixelSize){
-        let index = edited[i + 1] ? i + 1 : edited[i - 1] ? i - 1 : null
+    for(let i = 0; i < newSizes.length; i++) {
+      let index = edited[i + 1] ? i + 1 : edited[i - 1] ? i - 1 : null;
+      if(newSizes[i] < 0 && pointerUp) {
+        if(confirm("Do you want to delete this " + (percentTarget == "width" ? "column" : "row") + "?")){
+          this._editGrid(i, percentTarget == "width" ? "horizontal" : "vertical", "del")
+          newSizes[index] = iSizes[i] + iSizes[index];
+          newSizes.splice(i, 1);
+          break;
+        }
+      }
+      if(newSizes[i] < this.minPixelSize) {
         newSizes[index] = newSizes[i] + newSizes[index] - this.minPixelSize;
         newSizes[i] = this.minPixelSize;
         break;
@@ -280,7 +284,7 @@ export class GridExtension extends AbstractExtension {
     return retVal;
   }
 
-  _addToGrid(pos: number, alignment: "vertical" | "horizontal"){
+  _editGrid(pos: number, alignment: "vertical" | "horizontal", task: "add" | "del"){
     let cellTarget;
     let elementTarget;
     
@@ -294,12 +298,20 @@ export class GridExtension extends AbstractExtension {
     }
 
     let sizes = this.extendedItem.getStyle(cellTarget).split(' ');
-    sizes.splice(pos, 0, this.defaultSizeOfNewRowOrColumn)
+    if(task == "add")
+      sizes.splice(pos, 0, this.defaultSizeOfNewRowOrColumn)
+    else
+      sizes.splice(pos, 1);
+
     this.extendedItem.setStyle(cellTarget, sizes.join(' '));
 
-    let newElementSize = <string>convertCssUnit(this._calculateNewElementSize(elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget)));
-    
-    this.extendedItem.setStyle(elementTarget, newElementSize)
+    if(task == "add") {
+      this.extendedItem.setStyle(elementTarget, <string>convertCssUnit(this._calculateNewElementSize(elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget))))
+    }
+    else {
+      this.dispose();
+      this.extend();
+    }
   }
 
   _calculateNewElementSize(elementTarget: "width" | "height") : string{
