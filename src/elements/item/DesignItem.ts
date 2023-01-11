@@ -14,6 +14,7 @@ import { InsertChildAction } from '../services/undoService/transactionItems/Inse
 import { DomConverter } from '../widgets/designerView/DomConverter.js';
 import { DeleteAction } from '../services/undoService/transactionItems/DeleteAction.js';
 import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
+import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -364,14 +365,11 @@ export class DesignItem implements IDesignItem {
     //we need undo for modification of stylesheet, look how we do this
     //maybe undo in stylsheet service?
   }
-  //Should return all styles from all sheets wich match the element
-  //including also the local styles
-  //Should return alls css declarations, maybe a declartion with no selector are the local styles
-  public getAllStyles(): { selector: string, filename?: string, declarations: { name: string, value: string }[] }[] {
-    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1] }));
-    //const rules = this.serviceContainer.stylesheetService?.getAppliedRules(d);
-    const rules = [{ selector: 'button > a', filename: 'test.css', declarations: [{ name: "display", value: "none" }] }];
-    return [{ selector: null, declarations: localStyles }, ...rules];
+  
+  public getAllStyles(): IStyleRule[] {
+    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false }));
+    const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
+    return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
   }
 
   public setAttribute(name: string, value?: string | null) {

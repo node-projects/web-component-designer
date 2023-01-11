@@ -33,10 +33,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        d.updateStyleInSheetOrLocal(property.name, value)
-          //unkown css property names do not trigger the mutation observer of property grid, 
-          //fixed by assinging stle again to the attribute
-          (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
+        d.updateStyleInSheetOrLocal(property.name, value);
+        //unkown css property names do not trigger the mutation observer of property grid, 
+        //fixed by assinging stle again to the attribute
+        (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
       } else {
         let attributeName = property.attributeName
         if (!attributeName)

@@ -3,16 +3,16 @@ import { IDesignItem } from "../../item/IDesignItem.js";
 import { IProperty } from "../propertiesService/IProperty.js";
 
 export interface IStyleRule {
-    selectors: string[];
+    selector: string;
     declarations: IStyleDeclaration[];
     specificity: number;
+    stylesheetName?: string;
 }
 
 export interface IStyleDeclaration {
     name: string;
     value: string;
     important: boolean;
-    specificity: number;
 }
 
 export interface IStylesheet {
@@ -21,9 +21,11 @@ export interface IStylesheet {
 }
 
 export interface IStylesheetService {
-    getAppliedRules(designItem: IDesignItem, property: IProperty): IStyleRule[];
+    getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, property: IProperty): IStyleDeclaration[];
     // updateDefiningRule(designItem: IDesignItem, property: IProperty, value: string): boolean;
     setOrUpdateDeclaration(designItem: IDesignItem, property: IProperty, value: string): boolean
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
+
+    getAllStylesheets(): IStylesheet[];
 }

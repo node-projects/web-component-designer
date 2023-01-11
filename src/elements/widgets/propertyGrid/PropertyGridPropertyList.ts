@@ -141,7 +141,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private createPropertyGroups(groups: IPropertyGroup[]) {
     for (const g of groups) {
       let header = document.createElement('span');
-      header.innerHTML = g.name;
+      header.innerHTML = g.name.replaceAll("\n", "<br>");
       header.className = 'group-header';
       this._div.appendChild(header);
       let desc = document.createElement('span');

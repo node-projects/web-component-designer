@@ -6,6 +6,7 @@ import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { ISize } from "../../interfaces/ISize.js";
 import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
+import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 
 export interface IDesignItem {
 
@@ -69,7 +70,7 @@ export interface IDesignItem {
   setStyle(name: string, value?: string | null, important?: boolean);
   removeStyle(name: string);
   updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean);
-  getAllStyles(): { selector: string, filename?: string, declarations: { name: string, value: string }[] }[];
+  getAllStyles(): IStyleRule[];
 
   attributes(): Iterable<[name: string, value: string]>
   getAttribute(name: string)

@@ -19,8 +19,9 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public demoView: IDemoView & HTMLElement;
 
   public additionalData: any;
-
+  
   private _additionalStyle: string;
+
   public set additionalStyleString(style: string) {
     this._additionalStyle = style;
     this.designerView.additionalStyles = [cssFromString(style)];

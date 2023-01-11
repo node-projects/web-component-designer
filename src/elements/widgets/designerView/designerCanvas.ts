@@ -59,6 +59,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
   private _canvasOffset: IPoint = { x: 0, y: 0 };
 
+  private _additionalStyle: CSSStyleSheet[];
   private _currentContextMenu: ContextMenu
   private _backgroundImage: string;
 
@@ -247,37 +248,27 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   set additionalStyles(value: CSSStyleSheet[]) {
-    if (value) {
-      let style = '';
-      for (let s of value) {
-        for (let r of s.cssRules) {
-          if (r instanceof CSSStyleRule) {
-            let parts = r.selectorText.split(',');
-            let t = '';
-            for (let p of parts) {
-              if (t)
-                t += ',';
-              t += '#node-projects-designer-canvas-canvas ' + p;
-            }
-            let cssText = r.style.cssText;
-            //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
-            if ((<any>r).styleMap && (<any>r).styleMap.get('grid-template') && (<any>r).styleMap.get('grid-template').toString().includes('repeat(')) {
-              let entr = (<any>r).styleMap.entries();
-              cssText = ''
-              for (let e of entr) {
-                cssText += e[0] + ':' + e[1].toString() + ';';
-              }
-            }
-            style += t + '{' + cssText + '}';
-          }
-        }
-      }
-
-      this.shadowRoot.adoptedStyleSheets = [this.constructor.style, cssFromString(style)];
-    }
-    else
-      this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
+    this._additionalStyle = value;
+    this.applyAllStyles();
   }
+
+  get additionalStyles(): CSSStyleSheet[] {
+    return this._additionalStyle;
+  }
+
+  private applyAllStyles() {
+    let styles = [this.constructor.style]
+    if (this._additionalStyle)
+      styles.push(cssFromString(this.buildPatchedStyleSheet(this._additionalStyle)));
+    if (this.instanceServiceContainer.stylesheetService) {
+      styles.push(...this.instanceServiceContainer.stylesheetService
+        .getAllStylesheets()
+        .map(x => cssFromString(this.buildPatchedStyleSheet([cssFromString(x.stylesheet)]))));
+    }
+
+    this.shadowRoot.adoptedStyleSheets = styles;
+  }
+
 
   /* --- start IUiCommandHandler --- */
 
@@ -500,9 +491,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
 
     this.instanceServiceContainer.servicesChanged.on(e => {
-      /*if (e.serviceName == 'stylesheetParser') {
-        //new stylesheetparser added, use it and add stylesheets...
-      }*/
+      if (e.serviceName == 'stylesheetService') {
+        this.applyAllStyles();
+      }
     });
 
     this.extensionManager = new ExtensionManager(this);
@@ -1117,6 +1108,34 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.zoomFactor = newZoom;
     this.canvasOffsetUnzoomed = newCanvasOffset;
+  }
+
+  private buildPatchedStyleSheet(value: CSSStyleSheet[]): string {
+    let style = '';
+    for (let s of value) {
+      for (let r of s.cssRules) {
+        if (r instanceof CSSStyleRule) {
+          let parts = r.selectorText.split(',');
+          let t = '';
+          for (let p of parts) {
+            if (t)
+              t += ',';
+            t += '#node-projects-designer-canvas-canvas ' + p;
+          }
+          let cssText = r.style.cssText;
+          //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
+          if ((<any>r).styleMap && (<any>r).styleMap.get('grid-template') && (<any>r).styleMap.get('grid-template').toString().includes('repeat(')) {
+            let entr = (<any>r).styleMap.entries();
+            cssText = ''
+            for (let e of entr) {
+              cssText += e[0] + ':' + e[1].toString() + ';';
+            }
+          }
+          style += t + '{' + cssText + '}';
+        }
+      }
+    }
+    return style;
   }
 }
 

@@ -35,7 +35,6 @@ import { IBinding } from '../item/IBinding.js';
 import { BindingTarget } from '../item/BindingTarget.js';
 import { IPropertyTabsService } from './propertiesService/IPropertyTabsService.js';
 import { CodeViewSimple } from '../widgets/codeView/code-view-simple.js';
-import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -57,7 +56,6 @@ interface ServiceNameMap {
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
   "propertyGroupsService": IPropertyTabsService;
-  "stylesheetService": IStylesheetService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -172,9 +170,5 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get demoProviderService(): IDemoProviderService {
     return this.getLastService('demoProviderService');
-  }
-
-  get stylesheetService(): IStylesheetService {
-    return this.getLastService('stylesheetService');
   }
 }
