@@ -12,7 +12,7 @@ interface IRuleWithAST extends IStyleRule {
 
 interface IDeclarationWithAST extends IStyleDeclaration {
     ast: csstree.DeclarationPlain,
-    parent: csstree.RulePlain,
+    parent: IStyleRule,
 }
 
 export class CssTreeStylesheetService implements IStylesheetService {
@@ -35,13 +35,10 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return rules.map(r => {
             return {
                 selector: r.selector,
-                declarations: r.ast.block.children.map(c => {
+                declarations: r.ast.block.children.map((c: csstree.DeclarationPlain) => {
                     return {
-                        // @ts-ignore
                         name: c.property,
-                        // @ts-ignore
                         value: (c.value as csstree.Raw).value,
-                        // @ts-ignore
                         important: c.important == true,
                         specificity: r.specificity
                     }
@@ -57,33 +54,35 @@ export class CssTreeStylesheetService implements IStylesheetService {
         if (!rules) return null;
 
         let declarations: IDeclarationWithAST[] = [];
-        rules.forEach(r => {
-            let index = this.returnRuleDeclarationIndex(r.ast, prop);
-            // @ts-ignore
-            if (index > -1) declarations.push({
-                ast: r.ast.block.children[index] as csstree.DeclarationPlain,
-                parent: r.ast,
-            });
-        });
+        for (let rule of rules) {
+            let declaration = this.findDeclarationInRule(rule.ast, prop);
+            if (!declaration) continue;
+            declarations.push({
+                ast: declaration,
+                parent: rule,
+                name: prop.name,
+                value: (declaration.value as csstree.Raw).value,
+                important: declaration.important == true,
+            })
+        };
 
         return declarations;
     }
 
     public getDeclarations(designItem: IDesignItem, prop: IProperty): IStyleDeclaration[] {
-        let decl = this.getDeclarationInternal(designItem, prop);
-        if (!decl) return null;
+        let declarations = this.getDeclarationInternal(designItem, prop);
+        if (!declarations) return null;
 
-        let declarations: IStyleDeclaration[] = [];
-
-        decl.forEach(d => {
-            declarations.push({
+        return declarations
+            .sort((dec1, dec2) => {
+                if (dec1.parent.specificity > dec2.parent.specificity) return -1;
+                return 1;
+            })
+            .map(d => ({
                 name: d.ast.property,
                 value: (d.ast.value as csstree.Raw).value,
                 important: d.ast.important == true,
-            })
-        });
-
-        return declarations;
+            }));
     }
 
     public setOrUpdateDeclaration(designItem: IDesignItem, property: IProperty, value: string): boolean {
@@ -93,19 +92,16 @@ export class CssTreeStylesheetService implements IStylesheetService {
 
     private parseStylesheetToRuleset(stylesheets: IStylesheet[], designItem: IDesignItem): IRuleWithAST[] {
         let styles: IRuleWithAST[] = [];
-        stylesheets.forEach(item => {
+
+        for (let item of stylesheets) {
             // Parse the stylesheet to AST, keep positions and keep value raw
             let stylesheetPlain = csstree.toPlainObject(csstree.parse(item.stylesheet, { positions: true, parseValue: false })) as csstree.StyleSheetPlain;
-            if (!stylesheetPlain || !this.astHasChildren(stylesheetPlain)) return;
-
+            if (!stylesheetPlain || !this.astHasChildren(stylesheetPlain)) break;
 
             styles = styles.concat(Array.from(this.rulesFromAST(stylesheetPlain, item.stylesheet, item.name, designItem)));
-        });
-        console.log(styles);
+        };
         return styles;
     }
-
-
 
     private *rulesFromAST(ast: csstree.StyleSheetPlain | csstree.AtrulePlain, stylesheet: string, source: string, designItem: IDesignItem, previousCheck: string = ''): IterableIterator<IRuleWithAST> {
         let parent = ast["children"] != null ? ast : (ast as csstree.AtrulePlain).block;
@@ -145,13 +141,13 @@ export class CssTreeStylesheetService implements IStylesheetService {
 
     private buildSelectorString(selectorsAST: csstree.SelectorListPlain): string[] {
         let selectors: string[] = [];
-        selectorsAST.children.forEach((selector: csstree.SelectorPlain) => {
+        for(let selector of selectorsAST.children as csstree.SelectorPlain[]) {
             let sel = "";
-            selector.children.forEach((frac: csstree.TypeSelector) => {
-                sel += frac.name;
-            })
+            for (let fraction of selector.children as csstree.TypeSelector[]) {
+                sel += fraction.name;
+            }
             selectors.push(sel);
-        });
+        };
 
         return selectors;
     }
@@ -164,17 +160,8 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return sum;
     }
 
-    private returnRuleDeclarationIndex(rule: csstree.RulePlain, property: IProperty): number {
-        let decl: csstree.DeclarationPlain;
-        rule.block.children.forEach((child: csstree.DeclarationPlain) => {
-            if (child.property == property.name) {
-                decl = child;
-                return;
-            }
-        });
-
-        if (!decl) return -1;
-        return rule.block.children.indexOf(decl);
+    private findDeclarationInRule(rule: csstree.RulePlain, property: IProperty): csstree.DeclarationPlain {
+        return (rule.block.children as csstree.DeclarationPlain[]).find(declaration => declaration.property == property.name)
     }
 
     private elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {

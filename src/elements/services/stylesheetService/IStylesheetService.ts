@@ -23,9 +23,7 @@ export interface IStylesheet {
 export interface IStylesheetService {
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, property: IProperty): IStyleDeclaration[];
-    // updateDefiningRule(designItem: IDesignItem, property: IProperty, value: string): boolean;
     setOrUpdateDeclaration(designItem: IDesignItem, property: IProperty, value: string): boolean
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
-
     getAllStylesheets(): IStylesheet[];
 }
