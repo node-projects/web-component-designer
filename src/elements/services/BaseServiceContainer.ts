@@ -1,8 +1,10 @@
+import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IService } from './IService.js';
 
 
 export class BaseServiceContainer<NameMap> {
   protected _services: Map<string, IService[]> = new Map();
+  public servicesChanged = new TypedEvent<{ serviceName: keyof NameMap }>();
 
   getLastService<K extends keyof NameMap>(service: K): NameMap[K] {
     let list: [] = <any>this._services.get(<string>service);
@@ -19,6 +21,7 @@ export class BaseServiceContainer<NameMap> {
     if (!this._services.has(<string>name))
       this._services.set(<string>name, []);
     this._services.get(<string>name).push(service);
+    this.servicesChanged.emit({ serviceName: <keyof NameMap>name });
   }
 
   registerMultiple<K extends keyof NameMap>(names: K[], service: NameMap[K]) {
@@ -26,6 +29,7 @@ export class BaseServiceContainer<NameMap> {
       if (!this._services.has(<string>name))
         this._services.set(<string>name, []);
       this._services.get(<string>name).push(service);
+      this.servicesChanged.emit({ serviceName: <keyof NameMap>name });
     }
   }
 

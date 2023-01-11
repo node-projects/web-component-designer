@@ -7,6 +7,7 @@ import { BindingTarget } from '../../../item/BindingTarget.js';
 import { IBinding } from '../../../item/IBinding.js';
 import { PropertyType } from '../PropertyType.js';
 import { NodeType } from '../../../item/NodeType.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
@@ -18,28 +19,24 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
-    return this.getProperties(designItem).find(x => x.name == name);
+    let properties = this.getProperties(designItem);
+    if ('properties' in properties[0]) {
+      return (<IPropertyGroup[]>properties).flatMap(x => x.properties).find(x => x.name == name);
+    }
+    else
+      return (<IProperty[]>properties).find(x => x.name == name);
   }
 
-  abstract getProperties(designItem: IDesignItem): IProperty[];
+  abstract getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        const declaration = designItems[0].serviceContainer.stylesheetService?.getDeclarations(d, property);
-        const rules = designItems[0].serviceContainer.stylesheetService?.getAppliedRules(d, property);
-        designItems[0].serviceContainer.stylesheetService?.setOrUpdateDeclaration(d, property, value);
-        if (!declaration && !rules) {
-          if (d.getStyle(property.name) != value) {
-            d.setStyle(property.name, value);
-          } else {
-            this.clearValue(designItems, property)
-          }
+        d.updateStyleInSheetOrLocal(property.name, value)
           //unkown css property names do not trigger the mutation observer of property grid, 
           //fixed by assinging stle again to the attribute
           (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
-        }
       } else {
         let attributeName = property.attributeName
         if (!attributeName)
@@ -85,7 +82,6 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
         d.removeStyle(property.name);
-
       } else {
         let attributeName = property.attributeName
         if (!attributeName)

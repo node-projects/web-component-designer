@@ -33,7 +33,7 @@ import { IProperty } from "./propertiesService/IProperty.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 import { IBinding } from '../item/IBinding.js';
 import { BindingTarget } from '../item/BindingTarget.js';
-import { IPropertyGroupsService } from './propertiesService/IPropertyGroupsService.js';
+import { IPropertyTabsService } from './propertiesService/IPropertyTabsService.js';
 import { CodeViewSimple } from '../widgets/codeView/code-view-simple.js';
 import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 
@@ -56,7 +56,7 @@ interface ServiceNameMap {
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
-  "propertyGroupsService": IPropertyGroupsService;
+  "propertyGroupsService": IPropertyTabsService;
   "stylesheetService": IStylesheetService;
 }
 
@@ -118,7 +118,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getServices('propertyService');
   }
 
-  get propertyGroupService(): IPropertyGroupsService {
+  get propertyGroupService(): IPropertyTabsService {
     return this.getLastService('propertyGroupsService');
   }
 

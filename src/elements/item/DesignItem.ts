@@ -336,7 +336,7 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
-  public setStyle(name: string, value?: string | null) {
+  public setStyle(name: string, value?: string | null, important?: boolean) {
     let nm = PropertiesHelper.camelToDashCase(name);
     const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
@@ -345,6 +345,33 @@ export class DesignItem implements IDesignItem {
     let nm = PropertiesHelper.camelToDashCase(name);
     const action = new CssStyleChangeAction(this, nm, '', this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
+  }
+  public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean) {
+    let nm = PropertiesHelper.camelToDashCase(name);
+
+    const declaration = null;
+    //const declaration = this.serviceContainer.stylesheetService?.getDeclarations(d, property);
+    //const rules = this.serviceContainer.stylesheetService?.getAppliedRules(d, property);
+
+    if (!declaration) {
+      if (this.getStyle(nm) != value) {
+        this.setStyle(nm, value);
+      } else if (value == null) {
+        this.removeStyle(nm)
+      }
+    }
+    //todo -> modify stylesheet, or local css
+    //we need undo for modification of stylesheet, look how we do this
+    //maybe undo in stylsheet service?
+  }
+  //Should return all styles from all sheets wich match the element
+  //including also the local styles
+  //Should return alls css declarations, maybe a declartion with no selector are the local styles
+  public getAllStyles(): { selector: string, filename?: string, declarations: { name: string, value: string }[] }[] {
+    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1] }));
+    //const rules = this.serviceContainer.stylesheetService?.getAppliedRules(d);
+    const rules = [{ selector: 'button > a', filename: 'test.css', declarations: [{ name: "display", value: "none" }] }];
+    return [{ selector: null, declarations: localStyles }, ...rules];
   }
 
   public setAttribute(name: string, value?: string | null) {
