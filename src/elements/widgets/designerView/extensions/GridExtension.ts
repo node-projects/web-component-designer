@@ -94,12 +94,12 @@ export class GridExtension extends AbstractExtension {
 
     //draw headers
     gc.forEach((row, i) => {  //vertical headers
-      this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], "vertical")
+      this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], i, "vertical")
       this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
     })
 
     gc[0].forEach((column, i) => {
-      this._headers[1][i] = this._drawHeader(column, this._headers[1][i], "horizontal")
+      this._headers[1][i] = this._drawHeader(column, this._headers[1][i], i, "horizontal")
       this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
     })
 
@@ -114,7 +114,6 @@ export class GridExtension extends AbstractExtension {
         this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i].x, gc[0][i].y, this._plusCircles[1][i], i, "horizontal");
       else
         this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i - 1].x + gc[0][i - 1].width, gc[0][i - 1].y, this._plusCircles[1][i], i, "horizontal");
-    
   }
 
   override dispose() {
@@ -133,7 +132,7 @@ export class GridExtension extends AbstractExtension {
     return resizeCircle;
   }
 
-  _drawHeader(cell, oldHeader, alignment: "vertical" | "horizontal"){
+  _drawHeader(cell, oldHeader, index, alignment: "vertical" | "horizontal"){
     let xOffset;
     let yOffset;
     let width;
@@ -150,7 +149,16 @@ export class GridExtension extends AbstractExtension {
       width = cell.width - this.defaultDistanceBetweenHeaders;
       height = this.defaultDepth;
     }
-    return this._drawRect(cell.x + xOffset, cell.y + yOffset, width , height, "svg-grid-header", oldHeader, OverlayLayer.Background);
+
+    let tmpHeader = this._drawRect(cell.x + xOffset, cell.y + yOffset, width , height, "svg-grid-header", oldHeader, OverlayLayer.Foregorund);
+    tmpHeader.style.pointerEvents = "all";
+    if(!oldHeader){
+      tmpHeader.addEventListener(EventNames.PointerMove, event => {
+        this._toggleDisplayPlusCircles(index, alignment, true);
+      })
+    }
+
+    return tmpHeader
   }
 
   _drawHeaderText(cell, oldHeaderText, alignment: "vertical" | "horizontal"){
@@ -186,8 +194,11 @@ export class GridExtension extends AbstractExtension {
     }
     plusBox.style.pointerEvents = "all";
     plusBox.style.cursor = "pointer";
-    if(!oldPlusBox)
+    plusBox.style.display = "none";
+    if(!oldPlusBox) {
+      plusBox.addEventListener(EventNames.PointerMove, event => this._toggleDisplayPlusCircles(index, alignment));
       plusBox.addEventListener(EventNames.PointerDown, event => this._addToGrid(index, alignment));
+    }
     return plusBox;
   }
 
@@ -304,6 +315,20 @@ export class GridExtension extends AbstractExtension {
       tmpSize += convertCssUnitToPixel(this.extendedItem.getStyle("row-gap"), <HTMLElement>this.extendedItem.element, elementTarget) * (gc.cells.length - 1)
     }
     return tmpSize + "px";
+  }
+
+  _toggleDisplayPlusCircles(index, alignment: "vertical" | "horizontal", double = false){
+    this._plusCircles.forEach(alignment => {
+      alignment.forEach(circle => {
+        circle.style.display = "none";
+      })
+    })
+    if(index != -1) {
+      this._plusCircles[alignment == "vertical" ? 0 : 1][index].style.display = "inline"
+      if(double) {
+        this._plusCircles[alignment == "vertical" ? 0 : 1][index + 1].style.display = "inline"
+      }
+    }
   }
 
   _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) : string | number{
