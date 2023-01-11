@@ -72,7 +72,7 @@ import { PlacementExtensionProvider } from '../widgets/designerView/extensions/P
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
 import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/InvisibleElementExtensionDesignViewConfigButtons.js';
-import { StylesheetService } from './stylesheetService/StylesheetService.js';
+import { CssTreeStylesheetService } from './stylesheetService/CssTreeStylesheetService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -97,7 +97,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());
-  serviceContainer.register("stylesheetService", new StylesheetService(["button, div { background-color: green; }"]));
+  serviceContainer.register("stylesheetService", new CssTreeStylesheetService([{stylesheet: "@media screen and (min-width: 850px) {   .col {      width: 50%;   }   body {      background-color: mediumseagreen;   } body, div, button {  background-color: mediumseagreen;}} body, div, button {  background-color: red;}", name: "sheet-1"}]));
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),

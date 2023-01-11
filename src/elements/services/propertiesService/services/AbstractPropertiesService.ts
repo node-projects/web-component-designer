@@ -29,7 +29,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       if (property.propertyType == PropertyType.cssValue) {
         const declaration = designItems[0].serviceContainer.stylesheetService?.getDeclarations(d, property);
         const rules = designItems[0].serviceContainer.stylesheetService?.getAppliedRules(d, property);
-        if (!declaration) {
+        designItems[0].serviceContainer.stylesheetService?.setOrUpdateDeclaration(d, property, value);
+        if (!declaration && !rules) {
           if (d.getStyle(property.name) != value) {
             d.setStyle(property.name, value);
           } else {
