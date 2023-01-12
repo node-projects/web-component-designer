@@ -17,7 +17,6 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssTreeStylesheetService implements IStylesheetService {
-
     private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: csstree.StyleSheetPlain }>();
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet; }> = new TypedEvent<{ stylesheet: IStylesheet; }>();
 
@@ -31,11 +30,13 @@ export class CssTreeStylesheetService implements IStylesheetService {
         }
     }
 
+
+    /* Section covers the retrieval of rules and declarations */
+
     private getAppliedRulesInternal(designItem: IDesignItem): IRuleWithAST[] {
         let styles: IRuleWithAST[] = [];
         for (let item of this._stylesheets) {
             if (!item[1].ast || !this.astHasChildren(item[1].ast)) break;
-
             styles = styles.concat(Array.from(this.rulesFromAST(item[1].ast, item[1].stylesheet.stylesheet, item[0], designItem)));
         };
         return styles;
@@ -45,24 +46,23 @@ export class CssTreeStylesheetService implements IStylesheetService {
         let rules = this.getAppliedRulesInternal(designItem);
         if (!rules || rules.length == 0) return [];
 
-        return rules.map(r => {
-            return {
-                selector: r.selector,
-                declarations: r.ast.block.children.map((c: csstree.DeclarationPlain) => {
+        let retCollection: IRuleWithAST[] = [];
+        for (let rule of rules) {
+            retCollection.push({
+                ...rule,
+                declarations: rule.ast.block.children.map((declaration: csstree.DeclarationPlain) => {
                     return {
-                        name: c.property,
-                        value: (c.value as csstree.Raw).value,
-                        important: c.important == true,
-                        specificity: r.specificity,
-                        parent: r,
-                        ast: c,
+                        name: declaration.property,
+                        value: (declaration.value as csstree.Raw).value,
+                        important: declaration.important == true,
+                        specificity: rule.specificity,
+                        parent: rule,
+                        ast: declaration,
                     }
-                }),
-                ast: r.ast,
-                specificity: this.getSpecificity(r.ast.prelude as csstree.SelectorListPlain),
-                stylesheetName: r.stylesheetName,
-            }
-        });
+                })
+            });
+        }
+        return retCollection;
     }
 
     private getDeclarationInternal(designItem: IDesignItem, prop: IProperty): IDeclarationWithAST[] {
@@ -92,17 +92,14 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return this.sortDeclarations(declarations);
     }
 
+    /* Section covers the update of rules and declarations */
+
     public updateDeclarationWithProperty(designItem: IDesignItem, property: IProperty, value: string, important: boolean): boolean {
         let sortedDecl = this.sortDeclarations(this.getDeclarationInternal(designItem, property));
         if (!sortedDecl) {
             // no declaration of property yet
             return false;
         }
-        /*
-            TODO: 
-            * find all declarations of property, matching this element
-            * find rule 
-        */
         return false;
     }
 
@@ -112,6 +109,8 @@ export class CssTreeStylesheetService implements IStylesheetService {
         this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(declaration.parent.stylesheetName).stylesheet });
         return true;
     }
+
+    /* Section covers the internal traversal creation of rules and declarations */
 
     private *rulesFromAST(ast: csstree.StyleSheetPlain | csstree.AtrulePlain, stylesheet: string, source: string, designItem: IDesignItem, previousCheck: string = ''): IterableIterator<IRuleWithAST> {
         let parent = ast["children"] != null ? ast : (ast as csstree.AtrulePlain).block;
@@ -145,6 +144,10 @@ export class CssTreeStylesheetService implements IStylesheetService {
             }
         };
     }
+
+
+    /* Utility functions for building selectors, specificity and so on  */
+
     private astHasChildren(ast: csstree.CssNodePlain): boolean {
         return ast != null && ast["children"] != null && ast["children"].length > 0;
     }
@@ -181,34 +184,6 @@ export class CssTreeStylesheetService implements IStylesheetService {
     }
 
     private buildAtRuleString(ast: csstree.AtrulePlain, stylesheet: string): { sel: string, type: string } {
-        /* 
-            Keep this, in case some changes in the future needs the value to be parsed again
-            Currently its read from the stylesheet via start and end position
-        */
-
-        // let str = "";
-        // str += "@" + ast.name;
-        // for (let child of ((ast.prelude as csstree.AtrulePreludePlain).children[0] as any as csstree.MediaQueryListPlain).children) {
-        //     if (child.type == "MediaFeature") {
-        //         str += "(" + child.name + ": " + child.value + ")";
-        //         continue;
-        //     }
-        //     if (child.type == "Function") {
-        //         if (child.children[0].type == "Raw")
-        //             str += child.name + child.children[0].value;
-        //     }
-        //     if (child.type == "MediaQuery") {
-        //         for (let mq of child.children) {
-        //             if (mq.type == "MediaFeature") {
-        //                 if (mq.value.type == "Dimension") str += "(" + mq.name + ": " + mq.value.value + mq.value.unit + ")";
-        //                 else if(mq.value.type == "Ratio") str += "(" + mq.name + ": " + mq.value.left + "/" + mq.value.right + ")";
-        //                 else if(mq.value.type == "Identifier") str += "(" + mq.name + ": " + mq.value.name + ")";
-        //                 continue;
-        //             }
-        //         }
-        //     }
-        //     str += child
-        // }
         return {
             sel: stylesheet.slice(ast.prelude.loc.start.offset, ast.prelude.loc.end.offset),
             type: "@" + ast.name
