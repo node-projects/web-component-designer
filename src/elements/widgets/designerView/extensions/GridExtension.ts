@@ -43,7 +43,7 @@ export class GridExtension extends AbstractExtension {
     }[];
   }
 
-  private defaultDepth = 20;
+  private defaultHeaderSize = 20;
   private defaultDistanceToBox = 5;
   private defaultDistanceBetweenHeaders = 10;
 
@@ -100,12 +100,12 @@ export class GridExtension extends AbstractExtension {
       if(i < this._plusCircles[0].length - 1)
         this._plusCircles[0][i] = this._drawPlusCircle(gc[i][0].x, gc[i][0].y, this._plusCircles[0][i], i, "vertical");
       else
-        this._plusCircles[0][i] = this._drawPlusCircle(gc[i - 1][0].x, gc[i - 1][0].y + gc[i - 1][0].height, this._plusCircles[0][i], i, "vertical");
+        this._plusCircles[0][i] = this._drawPlusCircle(gc[i - 1][0].x, gc[i - 1][0].y + gc[i - 1][0].height, this._plusCircles[0][i], i, "vertical", true);
     for(let i = 0; i < this._plusCircles[1].length; i++) 
       if(i < this._plusCircles[1].length - 1)
         this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i].x, gc[0][i].y, this._plusCircles[1][i], i, "horizontal");
       else
-        this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i - 1].x + gc[0][i - 1].width, gc[0][i - 1].y, this._plusCircles[1][i], i, "horizontal");
+        this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i - 1].x + gc[0][i - 1].width, gc[0][i - 1].y, this._plusCircles[1][i], i, "horizontal", true);
   }
 
   override dispose() {
@@ -149,16 +149,16 @@ export class GridExtension extends AbstractExtension {
     let width;
     let height;
     if(alignment == "vertical"){
-      xOffset = -(this.defaultDepth + this.defaultDistanceToBox);
+      xOffset = -(this.defaultHeaderSize + this.defaultDistanceToBox);
       yOffset = this.defaultDistanceBetweenHeaders / 2;
-      width = this.defaultDepth;
+      width = this.defaultHeaderSize;
       height = cell.height - this.defaultDistanceBetweenHeaders;
     }
     else {
       xOffset = this.defaultDistanceBetweenHeaders / 2;
-      yOffset = -(this.defaultDepth + this.defaultDistanceToBox);
+      yOffset = -(this.defaultHeaderSize + this.defaultDistanceToBox);
       width = cell.width - this.defaultDistanceBetweenHeaders;
-      height = this.defaultDepth;
+      height = this.defaultHeaderSize;
     }
 
     let tmpHeader = this._drawRect(cell.x + xOffset, cell.y + yOffset, width , height, "svg-grid-header", oldHeader, OverlayLayer.Foregorund);
@@ -195,14 +195,23 @@ export class GridExtension extends AbstractExtension {
     return rText;
   }
 
-  _drawPlusCircle(x, y, oldPlusBox, index, alignment: "vertical" | "horizontal"){
+  _drawPlusCircle(x, y, oldPlusBox, index, alignment: "vertical" | "horizontal", final = false){
     let plusBox;
-    if(alignment == "vertical"){
-      plusBox = this._drawCircle(x - this.defaultDistanceToBox - this.defaultDepth / 2, y, this.defaultDepth / 2, 'svg-grid-resizer', oldPlusBox, OverlayLayer.Foregorund)
+    
+    let posX;
+    let posY;
+    let gapOffset = index == 0 || final ? 0 : -(convertCssUnitToPixel(this.extendedItem.getStyle(alignment == "vertical" ? "row-gap" : "column-gap"), <HTMLElement>this.extendedItem.element, alignment == "vertical" ? "height" : "width") / 2);
+
+    if(alignment == "vertical") {
+      posX = x - this.defaultDistanceToBox - this.defaultHeaderSize / 2;
+      posY = y + gapOffset;
     }
     else {
-      plusBox = this._drawCircle(x, y - this.defaultDistanceToBox - this.defaultDepth / 2, this.defaultDepth / 2, 'svg-grid-resizer', oldPlusBox, OverlayLayer.Foregorund)
+      posX = x + gapOffset;
+      posY = y - this.defaultDistanceToBox - this.defaultHeaderSize / 2;
     }
+
+    plusBox = this._drawCircle(posX, posY, this.defaultHeaderSize / 2, 'svg-grid-resizer', oldPlusBox, OverlayLayer.Foregorund)
     plusBox.style.pointerEvents = "all";
     plusBox.style.cursor = "pointer";
     plusBox.style.display = "none";
