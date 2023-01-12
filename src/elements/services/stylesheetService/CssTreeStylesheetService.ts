@@ -26,13 +26,19 @@ export class CssTreeStylesheetService implements IStylesheetService {
         for (let stylesheet of stylesheets) {
             this._stylesheets.set(stylesheet.name, {
                 stylesheet: stylesheet,
-                ast: <any>csstree.toPlainObject((csstree.parse(stylesheet.stylesheet, { context: 'stylesheet' })))
+                ast: <any>csstree.toPlainObject((csstree.parse(stylesheet.stylesheet, { positions: true, parseValue: false })))
             });
         }
     }
 
     private getAppliedRulesInternal(designItem: IDesignItem): IRuleWithAST[] {
-        return this.parseStylesheetToRuleset(designItem);
+        let styles: IRuleWithAST[] = [];
+        for (let item of this._stylesheets) {
+            if (!item[1].ast || !this.astHasChildren(item[1].ast)) break;
+
+            styles = styles.concat(Array.from(this.rulesFromAST(item[1].ast, item[1].stylesheet.stylesheet, item[0], designItem)));
+        };
+        return styles;
     }
 
     public getAppliedRules(designItem: IDesignItem): IRuleWithAST[] {
@@ -101,23 +107,10 @@ export class CssTreeStylesheetService implements IStylesheetService {
     }
 
     updateDeclarationWithDeclaration(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
-        declaration.ast.value = <any>csstree.toPlainObject(csstree.parse(value, { context: 'value', parseValue: false }));
+        declaration.ast.value = (<any>csstree.toPlainObject(csstree.parse(declaration.name + ": " + value, { context: 'declaration', parseValue: false }))).value;
         this._stylesheets.get(declaration.parent.stylesheetName).stylesheet.stylesheet = csstree.generate(csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
         this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(declaration.parent.stylesheetName).stylesheet });
         return true;
-    }
-
-    private parseStylesheetToRuleset(designItem: IDesignItem): IRuleWithAST[] {
-        let styles: IRuleWithAST[] = [];
-
-        for (let item of this._stylesheets) {
-            // Parse the stylesheet to AST, keep positions and keep value raw
-            let stylesheetPlain = csstree.toPlainObject(csstree.parse(item[1].stylesheet.stylesheet, { positions: true, parseValue: false })) as csstree.StyleSheetPlain;
-            if (!stylesheetPlain || !this.astHasChildren(stylesheetPlain)) break;
-
-            styles = styles.concat(Array.from(this.rulesFromAST(stylesheetPlain, item[1].stylesheet.stylesheet, item[0], designItem)));
-        };
-        return styles;
     }
 
     private *rulesFromAST(ast: csstree.StyleSheetPlain | csstree.AtrulePlain, stylesheet: string, source: string, designItem: IDesignItem, previousCheck: string = ''): IterableIterator<IRuleWithAST> {

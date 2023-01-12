@@ -365,7 +365,7 @@ export class DesignItem implements IDesignItem {
     //we need undo for modification of stylesheet, look how we do this
     //maybe undo in stylsheet service?
   }
-  
+
   public getAllStyles(): IStyleRule[] {
     const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false }));
     const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
