@@ -49,25 +49,14 @@ export class GridExtension extends AbstractExtension {
 
   private defaultSizeOfNewRowOrColumn = "50px";
 
+  private arraysEdited = false;
+
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 
   override extend() {
-    this.gridInformation = CalculateGridInformation(this.extendedItem);
-    this._cells = new Array(this.gridInformation.cells.length);
-    this.gridInformation.cells.forEach((row, i) => this._cells[i] = new Array(row.length));
-    this._gaps = new Array(this.gridInformation.gaps.length);
-    this._headers = new Array(2);
-    this._headers[0] = new Array(this.gridInformation.cells.length + 1);     //array for the headers of columns
-    this._headers[1] = new Array(this.gridInformation.cells[0].length + 1);  //array for the headers of rows
-    this._headerTexts = new Array(2);
-    this._headerTexts[0] = new Array(this.gridInformation.cells.length + 1);
-    this._headerTexts[1] = new Array(this.gridInformation.cells[0].length + 1);
-    this._plusCircles = new Array(2);
-    this._plusCircles[0] = new Array(this.gridInformation.cells.length + 1);
-    this._plusCircles[1] = new Array(this.gridInformation.cells[0].length + 1);
-    this._resizeCircles = new Array(this.gridInformation.gaps.length);
+    this._initSVGArrays();
     this.refresh();
   }
 
@@ -75,6 +64,9 @@ export class GridExtension extends AbstractExtension {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     let gc = this.gridInformation.cells;
 
+    if(this.arraysEdited)
+      this._initSVGArrays();
+      
     //draw gaps
     this.gridInformation.gaps.forEach((gap, i) => {
       this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
@@ -118,6 +110,25 @@ export class GridExtension extends AbstractExtension {
 
   override dispose() {
     this._removeAllOverlays();
+  }
+
+  _initSVGArrays(){
+    this._removeAllOverlays();
+    this.gridInformation = CalculateGridInformation(this.extendedItem);
+    this._cells = new Array(this.gridInformation.cells.length);
+    this.gridInformation.cells.forEach((row, i) => this._cells[i] = new Array(row.length));
+    this._gaps = new Array(this.gridInformation.gaps.length);
+    this._headers = new Array(2);
+    this._headers[0] = new Array(this.gridInformation.cells.length + 1);     //array for the headers of columns
+    this._headers[1] = new Array(this.gridInformation.cells[0].length + 1);  //array for the headers of rows
+    this._headerTexts = new Array(2);
+    this._headerTexts[0] = new Array(this.gridInformation.cells.length + 1);
+    this._headerTexts[1] = new Array(this.gridInformation.cells[0].length + 1);
+    this._plusCircles = new Array(2);
+    this._plusCircles[0] = new Array(this.gridInformation.cells.length + 1);
+    this._plusCircles[1] = new Array(this.gridInformation.cells[0].length + 1);
+    this._resizeCircles = new Array(this.gridInformation.gaps.length);
+    this.arraysEdited = false;
   }
 
   _drawResizeCircle(gap, oldCircle?: SVGCircleElement){
@@ -302,15 +313,10 @@ export class GridExtension extends AbstractExtension {
       sizes.splice(pos, 0, this.defaultSizeOfNewRowOrColumn)
     else
       sizes.splice(pos, 1);
-
+    this.arraysEdited = true;
     this.extendedItem.setStyle(cellTarget, sizes.join(' '));
-
     if(task == "add") {
       this.extendedItem.setStyle(elementTarget, <string>convertCssUnit(this._calculateNewElementSize(elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget))))
-    }
-    else {
-      this.dispose();
-      this.extend();
     }
   }
 
