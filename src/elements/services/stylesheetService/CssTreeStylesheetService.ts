@@ -30,7 +30,6 @@ export class CssTreeStylesheetService implements IStylesheetService {
         }
     }
 
-
     /* Section covers the retrieval of rules and declarations */
 
     private getAppliedRulesInternal(designItem: IDesignItem): IRuleWithAST[] {

@@ -108,6 +108,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
 
+  private cssprefixConstant = '#node-projects-designer-canvas-canvas ';
+
   static override readonly style = css`
     :host {
       display: block;
@@ -265,7 +267,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         .getAllStylesheets()
         .map(x => cssFromString(this.buildPatchedStyleSheet([cssFromString(x.stylesheet)]))));
     }
-
     this.shadowRoot.adoptedStyleSheets = styles;
   }
 
@@ -1113,29 +1114,45 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private buildPatchedStyleSheet(value: CSSStyleSheet[]): string {
     let style = '';
     for (let s of value) {
-      for (let r of s.cssRules) {
-        if (r instanceof CSSStyleRule) {
-          let parts = r.selectorText.split(',');
-          let t = '';
-          for (let p of parts) {
-            if (t)
-              t += ',';
-            t += '#node-projects-designer-canvas-canvas ' + p;
-          }
-          let cssText = r.style.cssText;
-          //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
-          if ((<any>r).styleMap && (<any>r).styleMap.get('grid-template') && (<any>r).styleMap.get('grid-template').toString().includes('repeat(')) {
-            let entr = (<any>r).styleMap.entries();
-            cssText = ''
-            for (let e of entr) {
-              cssText += e[0] + ':' + e[1].toString() + ';';
-            }
-          }
-          style += t + '{' + cssText + '}';
-        }
-      }
+      style += this.traverseAndCollectRules(s);
     }
     return style;
+  }
+
+  private traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule): string {
+    let ruleCollector: string[] = [];
+    for (let rule of ruleContainer.cssRules) {
+      if ((rule instanceof CSSContainerRule
+        || rule instanceof CSSSupportsRule
+        || rule instanceof CSSMediaRule)
+        && rule.cssRules) {
+        return rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
+      }
+      if (rule instanceof CSSStyleRule) {
+        let parts = rule.selectorText.split(',');
+        let t = '';
+        for (let p of parts) {
+          if (p.includes(this.cssprefixConstant)) {
+            t += p;
+            continue;
+          }
+          if (t)
+            t += ',';
+          t += this.cssprefixConstant + p;
+        }
+        let cssText = rule.style.cssText;
+        //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
+        if ((<any>rule).styleMap && (<any>rule).styleMap.get('grid-template') && (<any>rule).styleMap.get('grid-template').toString().includes('repeat(')) {
+          let entr = (<any>rule).styleMap.entries();
+          cssText = ''
+          for (let e of entr) {
+            cssText += e[0] + ':' + e[1].toString() + ';';
+          }
+        }
+        ruleCollector.push(t + '{' + cssText + '}');
+      }
+    }
+    return ruleCollector.join(' ');
   }
 }
 
