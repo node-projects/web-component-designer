@@ -327,6 +327,9 @@ export class GridExtension extends AbstractExtension {
     if(task == "add") {
       this.extendedItem.setStyle(elementTarget, <string>convertCssUnit(this._calculateNewElementSize(elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget))))
     }
+    else {
+      this.extendedItem.setStyle(elementTarget, <string>convertCssUnit(convertCssUnitToPixel(this.extendedItem.getStyle(elementTarget), this.designerCanvas.canvas, elementTarget) - convertCssUnitToPixel(this.extendedItem.getStyle(alignment == "vertical" ? "row-gap" : "column-gap"), <HTMLElement>this.extendedItem.element, elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget))));
+    }
   }
 
   _calculateNewElementSize(elementTarget: "width" | "height") : string{
