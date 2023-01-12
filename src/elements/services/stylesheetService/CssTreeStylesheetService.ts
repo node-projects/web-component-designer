@@ -8,6 +8,7 @@ import { calculate as calculateSpecifity } from "./SpecificityCalculator.js";
 
 interface IRuleWithAST extends IStyleRule {
     ast: csstree.RulePlain,
+    declarations: IDeclarationWithAST[],
 }
 
 interface IDeclarationWithAST extends IStyleDeclaration {
@@ -17,18 +18,24 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 
 export class CssTreeStylesheetService implements IStylesheetService {
 
-    stylesheets: IStylesheet[];
+    private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: csstree.StyleSheetPlain }>();
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet; }> = new TypedEvent<{ stylesheet: IStylesheet; }>();
 
     public constructor(stylesheets: IStylesheet[]) {
-        this.stylesheets = stylesheets;
+        this._stylesheets = new Map();
+        for (let stylesheet of stylesheets) {
+            this._stylesheets.set(stylesheet.name, {
+                stylesheet: stylesheet,
+                ast: <any>csstree.toPlainObject((csstree.parse(stylesheet.stylesheet, { context: 'stylesheet' })))
+            });
+        }
     }
 
     private getAppliedRulesInternal(designItem: IDesignItem): IRuleWithAST[] {
-        return this.parseStylesheetToRuleset(this.stylesheets, designItem);
+        return this.parseStylesheetToRuleset(designItem);
     }
 
-    public getAppliedRules(designItem: IDesignItem): IStyleRule[] {
+    public getAppliedRules(designItem: IDesignItem): IRuleWithAST[] {
         let rules = this.getAppliedRulesInternal(designItem);
         if (!rules || rules.length == 0) return [];
 
@@ -40,9 +47,12 @@ export class CssTreeStylesheetService implements IStylesheetService {
                         name: c.property,
                         value: (c.value as csstree.Raw).value,
                         important: c.important == true,
-                        specificity: r.specificity
+                        specificity: r.specificity,
+                        parent: r,
+                        ast: c,
                     }
                 }),
+                ast: r.ast,
                 specificity: this.getSpecificity(r.ast.prelude as csstree.SelectorListPlain),
                 stylesheetName: r.stylesheetName,
             }
@@ -69,36 +79,43 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return declarations;
     }
 
-    public getDeclarations(designItem: IDesignItem, prop: IProperty): IStyleDeclaration[] {
+    public getDeclarations(designItem: IDesignItem, prop: IProperty): IDeclarationWithAST[] {
         let declarations = this.getDeclarationInternal(designItem, prop);
         if (!declarations) return null;
 
-        return declarations
-            .sort((dec1, dec2) => {
-                if (dec1.parent.specificity > dec2.parent.specificity) return -1;
-                return 1;
-            })
-            .map(d => ({
-                name: d.ast.property,
-                value: (d.ast.value as csstree.Raw).value,
-                important: d.ast.important == true,
-            }));
+        return this.sortDeclarations(declarations);
     }
 
-    public setOrUpdateDeclaration(designItem: IDesignItem, property: IProperty, value: string): boolean {
-        // TODO
+    public updateDeclarationWithProperty(designItem: IDesignItem, property: IProperty, value: string, important: boolean): boolean {
+        let sortedDecl = this.sortDeclarations(this.getDeclarationInternal(designItem, property));
+        if (!sortedDecl) {
+            // no declaration of property yet
+            return false;
+        }
+        /*
+            TODO: 
+            * find all declarations of property, matching this element
+            * find rule 
+        */
         return false;
     }
 
-    private parseStylesheetToRuleset(stylesheets: IStylesheet[], designItem: IDesignItem): IRuleWithAST[] {
+    updateDeclarationWithDeclaration(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
+        declaration.ast.value = <any>csstree.toPlainObject(csstree.parse(value, { context: 'value', parseValue: false }));
+        this._stylesheets.get(declaration.parent.stylesheetName).stylesheet.stylesheet = csstree.generate(csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
+        this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(declaration.parent.stylesheetName).stylesheet });
+        return true;
+    }
+
+    private parseStylesheetToRuleset(designItem: IDesignItem): IRuleWithAST[] {
         let styles: IRuleWithAST[] = [];
 
-        for (let item of stylesheets) {
+        for (let item of this._stylesheets) {
             // Parse the stylesheet to AST, keep positions and keep value raw
-            let stylesheetPlain = csstree.toPlainObject(csstree.parse(item.stylesheet, { positions: true, parseValue: false })) as csstree.StyleSheetPlain;
+            let stylesheetPlain = csstree.toPlainObject(csstree.parse(item[1].stylesheet.stylesheet, { positions: true, parseValue: false })) as csstree.StyleSheetPlain;
             if (!stylesheetPlain || !this.astHasChildren(stylesheetPlain)) break;
 
-            styles = styles.concat(Array.from(this.rulesFromAST(stylesheetPlain, item.stylesheet, item.name, designItem)));
+            styles = styles.concat(Array.from(this.rulesFromAST(stylesheetPlain, item[1].stylesheet.stylesheet, item[0], designItem)));
         };
         return styles;
     }
@@ -141,7 +158,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
 
     private buildSelectorString(selectorsAST: csstree.SelectorListPlain): string[] {
         let selectors: string[] = [];
-        for(let selector of selectorsAST.children as csstree.SelectorPlain[]) {
+        for (let selector of selectorsAST.children as csstree.SelectorPlain[]) {
             let sel = "";
             for (let fraction of selector.children as csstree.TypeSelector[]) {
                 sel += fraction.name;
@@ -173,7 +190,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
     private buildAtRuleString(ast: csstree.AtrulePlain, stylesheet: string): { sel: string, type: string } {
         /* 
             Keep this, in case some changes in the future needs the value to be parsed again
-            Currently its ready from the stylesheet via start and end position
+            Currently its read from the stylesheet via start and end position
         */
 
         // let str = "";
@@ -206,6 +223,18 @@ export class CssTreeStylesheetService implements IStylesheetService {
     }
 
     getAllStylesheets(): IStylesheet[] {
-        return this.stylesheets;
+        let stylesheets: IStylesheet[] = [];
+        for (let item of this._stylesheets) {
+            stylesheets.push(item[1].stylesheet);
+        };
+        return stylesheets;
+    }
+
+    private sortDeclarations(declarations: IDeclarationWithAST[]): IDeclarationWithAST[] {
+        if (declarations == null || declarations.length == 0) return null;
+        return declarations.sort((dec1, dec2) => {
+            if (dec1.parent.specificity > dec2.parent.specificity) return -1;
+            return 1;
+        })
     }
 }
