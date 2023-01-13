@@ -122,6 +122,10 @@ export type { ISelectionChangedEvent } from "./elements/services/selectionServic
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";
 export * from "./elements/services/selectionService/SelectionService.js";
 
+export type { IStyleRule, IStyleDeclaration, IStylesheet, IStylesheetService } from "./elements/services/stylesheetService/IStylesheetService.js";
+export * from "./elements/services/stylesheetService/CssTreeStylesheetService.js";
+export * from "./elements/services/stylesheetService/SpecificityCalculator.js";
+
 export * from "./elements/services/undoService/ChangeGroup.js";
 export type { ITransactionItem } from "./elements/services/undoService/ITransactionItem.js";
 export type { IUndoService } from "./elements/services/undoService/IUndoService.js";
