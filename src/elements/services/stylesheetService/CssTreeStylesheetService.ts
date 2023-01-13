@@ -2,9 +2,20 @@ import { IDesignItem } from "../../item/IDesignItem.js";
 import { IProperty } from "../propertiesService/IProperty.js";
 import { IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from "./IStylesheetService.js";
 
-import * as csstree from 'css-tree';
+import type * as csstree from 'css-tree';
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { calculate as calculateSpecifity } from "./SpecificityCalculator.js";
+
+declare global {
+    interface Window {
+        csstree: {
+            fromPlainObject(node: csstree.CssNodePlain): csstree.CssNode;
+            toPlainObject(node: csstree.CssNode): csstree.CssNodePlain;
+            parse(text: string, options?: csstree.ParseOptions): csstree.CssNode;
+            generate(ast: csstree.CssNode, options?: csstree.GenerateOptions): string;
+        }
+    }
+}
 
 interface IRuleWithAST extends IStyleRule {
     ast: csstree.RulePlain,
@@ -25,7 +36,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
         for (let stylesheet of stylesheets) {
             this._stylesheets.set(stylesheet.name, {
                 stylesheet: stylesheet,
-                ast: <any>csstree.toPlainObject((csstree.parse(stylesheet.stylesheet, { positions: true, parseValue: false })))
+                ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.stylesheet, { positions: true, parseValue: false })))
             });
         }
     }
@@ -103,8 +114,8 @@ export class CssTreeStylesheetService implements IStylesheetService {
     }
 
     updateDeclarationWithDeclaration(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
-        declaration.ast.value = (<any>csstree.toPlainObject(csstree.parse(declaration.name + ": " + value, { context: 'declaration', parseValue: false }))).value;
-        this._stylesheets.get(declaration.parent.stylesheetName).stylesheet.stylesheet = csstree.generate(csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
+        declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value, { context: 'declaration', parseValue: false }))).value;
+        this._stylesheets.get(declaration.parent.stylesheetName).stylesheet.stylesheet = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
         this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(declaration.parent.stylesheetName).stylesheet });
         return true;
     }
