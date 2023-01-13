@@ -368,15 +368,13 @@ export class DesignItem implements IDesignItem {
 
   public getAllStyles(): IStyleRule[] {
     const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false }));
-    const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
-
-    /* 
-      How to call the update Declaration function 
-      
-      --> this.instanceServiceContainer.stylesheetService?.updateDeclarationWithDeclaration(rule.declaration, value, false);
-    */
-   
-    return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
+    if (this.instanceServiceContainer.stylesheetService) {
+      const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
+      if (rules) {
+        return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
+      }
+    }
+    return [{ selector: null, declarations: localStyles, specificity: -1 }];
   }
 
   public setAttribute(name: string, value?: string | null) {
