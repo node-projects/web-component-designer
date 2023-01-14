@@ -498,6 +498,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.instanceServiceContainer.servicesChanged.on(e => {
       if (e.serviceName == 'stylesheetService') {
         this.applyAllStyles();
+        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on(() => this.applyAllStyles());
+        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => this.applyAllStyles());
       }
     });
 
