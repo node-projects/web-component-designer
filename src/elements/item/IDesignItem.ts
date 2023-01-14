@@ -6,6 +6,7 @@ import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.
 import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { ISize } from "../../interfaces/ISize.js";
 import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
+import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 
 export interface IDesignItem {
 
@@ -35,7 +36,7 @@ export interface IDesignItem {
   _withoutUndoRemoveStyle(name: string);
   _withoutUndoSetAttribute(name: string, value: string);
   _withoutUndoRemoveAttribute(name: string);
-  
+
   indexOf(designItem: IDesignItem): number;
   insertAdjacentElement(designItem: IDesignItem, where: InsertPosition);
   insertChild(designItem: IDesignItem, index?: number);
@@ -66,8 +67,10 @@ export interface IDesignItem {
   styles(): Iterable<[name: string, value: string]>;
   getStyle(name: string);
   hasStyle(name: string);
-  setStyle(name: string, value?: string | null);
+  setStyle(name: string, value?: string | null, important?: boolean);
   removeStyle(name: string);
+  updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean);
+  getAllStyles(): IStyleRule[];
 
   attributes(): Iterable<[name: string, value: string]>
   getAttribute(name: string)

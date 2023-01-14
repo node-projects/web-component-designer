@@ -1,11 +1,11 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IPropertiesService } from './IPropertiesService.js';
-import { IPropertyGroupsService } from './IPropertyGroupsService.js';
+import { IPropertyTabsService } from './IPropertyTabsService.js';
 import { AttributesPropertiesService } from './services/AttributesPropertiesService.js';
 import { CommonPropertiesService } from './services/CommonPropertiesService.js';
 import { CssPropertiesService } from './services/CssPropertiesService.js';
 
-export class PropertyGroupsService implements IPropertyGroupsService {
+export class PropertyTabsService implements IPropertyTabsService {
     protected _pgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },

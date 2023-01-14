@@ -3,7 +3,6 @@ import { IElementDefinition } from '../elementsService/IElementDefinition.js';
 import { IDesignerInstance } from './IDesignerInstance.js';
 import type { ServiceContainer } from '../ServiceContainer.js';
 import type { InstanceServiceContainer } from '../InstanceServiceContainer.js';
-import { IPropertiesService } from '../propertiesService/IPropertiesService.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { encodeXMLChars } from '../../helper/XmlHelper.js';
@@ -78,20 +77,6 @@ export class DefaultInstanceService implements IInstanceService {
     }
 
     let designItem = DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
-
-    if (definition.defaultProperties) {
-      let propertiesService: IPropertiesService = null;
-      if (definition.type) {
-        propertiesService = serviceContainer.getLastServiceWhere('propertyService', (x) => x.isHandledElement(designItem));
-      }
-      let properties = propertiesService.getProperties(designItem);
-      for (let a in definition.defaultProperties) {
-        let value = definition.defaultProperties[a];
-        let p = properties.find(x => x.name == a)
-        propertiesService.setValue([designItem], p, value);
-      }
-    }
-
     return designItem;
   }
 }

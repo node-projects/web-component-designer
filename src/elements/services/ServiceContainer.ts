@@ -33,8 +33,13 @@ import { IProperty } from "./propertiesService/IProperty.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 import { IBinding } from '../item/IBinding.js';
 import { BindingTarget } from '../item/BindingTarget.js';
-import { IPropertyGroupsService } from './propertiesService/IPropertyGroupsService.js';
+import { IPropertyTabsService } from './propertiesService/IPropertyTabsService.js';
 import { CodeViewSimple } from '../widgets/codeView/code-view-simple.js';
+import { IUndoService } from './undoService/IUndoService.js';
+import { ISelectionService } from './selectionService/ISelectionService.js';
+import { IContentService } from './contentService/IContentService.js';
+import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
+import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -55,7 +60,13 @@ interface ServiceNameMap {
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
-  "propertyGroupsService": IPropertyGroupsService;
+  "propertyGroupsService": IPropertyTabsService;
+  
+  //Factories for Instance Service Containers
+  "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
+  "selectionService": (designerCanvas: IDesignerCanvas) => ISelectionService;
+  "contentService": (designerCanvas: IDesignerCanvas) => IContentService;
+  "stylesheetService": (designerCanvas: IDesignerCanvas) => IStylesheetService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
@@ -63,7 +74,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   readonly config: {
     codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
     demoViewWidget: new (...args: any[]) => IDemoView & HTMLElement;
-    openBindingsEditor?: (property:IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
+    openBindingsEditor?: (property: IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
   } = {
       codeViewWidget: CodeViewSimple,
       demoViewWidget: DemoView
@@ -91,7 +102,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   public readonly globalContext: GlobalContext = new GlobalContext(this);
 
   public readonly options = {
-    zoomDesignerBackground : true
+    zoomDesignerBackground: true
   };
 
   public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
@@ -116,7 +127,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getServices('propertyService');
   }
 
-  get propertyGroupService(): IPropertyGroupsService {
+  get propertyGroupService(): IPropertyTabsService {
     return this.getLastService('propertyGroupsService');
   }
 

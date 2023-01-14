@@ -88,7 +88,8 @@ export * from "./elements/services/propertiesService/DefaultEditorTypesService.j
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
-export type { IPropertyGroupsService } from './elements/services/propertiesService/IPropertyGroupsService.js';
+export type { IPropertyGroup } from "./elements/services/propertiesService/IPropertyGroup.js";
+export type { IPropertyTabsService as IPropertyGroupsService } from './elements/services/propertiesService/IPropertyTabsService.js';
 export * from "./elements/services/propertiesService/propertyEditors/BasePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/BooleanPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ColorPropertyEditor.js";
@@ -115,11 +116,15 @@ export * from "./elements/services/propertiesService/services/WebcomponentManife
 export * from "./elements/services/propertiesService/services/AttributesPropertiesService.js";
 export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
-export * from "./elements/services/propertiesService/PropertyGroupsService.js";
+export * from "./elements/services/propertiesService/PropertyTabsService.js";
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";
 export * from "./elements/services/selectionService/SelectionService.js";
+
+export type { IStyleRule, IStyleDeclaration, IStylesheet, IStylesheetService } from "./elements/services/stylesheetService/IStylesheetService.js";
+export * from "./elements/services/stylesheetService/CssTreeStylesheetService.js";
+export * from "./elements/services/stylesheetService/SpecificityCalculator.js";
 
 export * from "./elements/services/undoService/ChangeGroup.js";
 export type { ITransactionItem } from "./elements/services/undoService/ITransactionItem.js";
