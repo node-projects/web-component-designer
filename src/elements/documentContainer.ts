@@ -37,13 +37,14 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       const stylesheetService = this.designerView.serviceContainer.getLastService('stylesheetService')
       if (stylesheetService)
         this.instanceServiceContainer.register("stylesheetService", stylesheetService(this.designerView.designerCanvas));
+      this.designerView.instanceServiceContainer.stylesheetService.stylesheetChanged.on(s => this.additionalStylesheetChanged.emit(s))
     }
     this.designerView.instanceServiceContainer.stylesheetService.setStylesheets(stylesheets);
   };
   public get additionalStylesheets() {
     return this._additionalStylesheets;
   };
-  public additionalStylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
+  public additionalStylesheetChanged = new TypedEvent<{ stylesheet: IStylesheet }>;
 
   public onContentChanged = new TypedEvent<void>();
 
