@@ -9,7 +9,7 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 export class CssPropertiesService extends CommonPropertiesService {
 
   public override getRefreshMode(designItem: IDesignItem) {
-    return this.name == 'styles' ? RefreshMode.fullOnValueChange : RefreshMode.none;
+    return RefreshMode.none;
   }
 
   public layout: IProperty[] = [
@@ -197,40 +197,14 @@ export class CssPropertiesService extends CommonPropertiesService {
   }
 
   override getProperty(designItem: IDesignItem, name: string): IProperty {
-    if (this.name == 'styles') {
-      return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
-    }
     return this[this.name][name]
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
-    if (this.name == 'styles') {
-      if (!designItem)
-        return [];
-      
-      let styles = designItem.getAllStyles();
-
-      let arr = styles.map(x=>({name: x.selector ?? '&lt;local&gt;', description: x.stylesheetName ?? '', properties: [
-        ...x.declarations.map(y=>({ name: y.name, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue })),
-        { name: '', type: 'addNew', service: this, propertyType: PropertyType.complex }
-      ]
-      }));
-      //let arr: IProperty[] = Array.from(designItem.styles(), ([key, value])  => ({ name: key, renamable: true, type: 'string', service: this, propertyType: PropertyType.cssValue }));
-      //arr.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
-      return arr;
-    }
     return this[this.name];
   }
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
     return BindingTarget.css;
-  }
-
-  override setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-    if (this.name == 'styles') {
-      super.setValue(designItems, { ...property, propertyType: PropertyType.cssValue }, value);
-    } else {
-      super.setValue(designItems, property, value);
-    }
   }
 }

@@ -105,6 +105,7 @@ export * from "./elements/services/propertiesService/propertyEditors/ThicknessPr
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
+export * from "./elements/services/propertiesService/services/CssCurrentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
 export * from "./elements/services/propertiesService/services/ListPropertiesService.js";
 export * from "./elements/services/propertiesService/services/LitElementPropertiesService.js";
