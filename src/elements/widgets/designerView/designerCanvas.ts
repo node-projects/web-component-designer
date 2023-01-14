@@ -2,13 +2,11 @@ import { EventNames } from '../../../enums/EventNames.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
-import { UndoService } from '../../services/undoService/UndoService.js';
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants.js';
-import { ContentService } from '../../services/contentService/ContentService.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
 import { Snaplines } from './Snaplines.js';
@@ -264,7 +262,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       styles.push(cssFromString(this.buildPatchedStyleSheet(this._additionalStyle)));
     if (this.instanceServiceContainer.stylesheetService) {
       styles.push(...this.instanceServiceContainer.stylesheetService
-        .getAllStylesheets()
+        .getStylesheets()
         .map(x => cssFromString(this.buildPatchedStyleSheet([cssFromString(x.stylesheet)]))));
     }
     this.shadowRoot.adoptedStyleSheets = styles;
@@ -485,11 +483,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.serviceContainer = serviceContainer;
 
     this.instanceServiceContainer = new InstanceServiceContainer(this);
-    this.instanceServiceContainer.register("undoService", new UndoService(this));
-    this.instanceServiceContainer.register("selectionService", new SelectionService(this));
+    const undoService = this.serviceContainer.getLastService('undoService')
+    if (undoService)
+      this.instanceServiceContainer.register("undoService", undoService(this));
+    const selectionService = this.serviceContainer.getLastService('selectionService')
+    if (selectionService)
+      this.instanceServiceContainer.register("selectionService", selectionService(this));
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
-    this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
+    const contentService = this.serviceContainer.getLastService('contentService')
+    if (contentService)
+      this.instanceServiceContainer.register("contentService", contentService(this));
 
     this.instanceServiceContainer.servicesChanged.on(e => {
       if (e.serviceName == 'stylesheetService') {

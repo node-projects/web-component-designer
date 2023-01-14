@@ -21,10 +21,11 @@ export interface IStylesheet {
 }
 
 export interface IStylesheetService {
+    setStylesheets(stylesheets: IStylesheet[])
+    getStylesheets(): IStylesheet[];
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, property: IProperty): IStyleDeclaration[];
     updateDeclarationWithProperty(designItem: IDesignItem, property: IProperty, value: string, important: boolean): boolean;
     updateDeclarationWithDeclaration(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
-    getAllStylesheets(): IStylesheet[];
 }

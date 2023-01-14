@@ -31,18 +31,32 @@ export class CssTreeStylesheetService implements IStylesheetService {
     private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: csstree.StyleSheetPlain }>();
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet; }> = new TypedEvent<{ stylesheet: IStylesheet; }>();
 
-    public constructor(stylesheets: IStylesheet[]) {
-        this._stylesheets = new Map();
-        for (let stylesheet of stylesheets) {
-            this._stylesheets.set(stylesheet.name, {
-                stylesheet: stylesheet,
-                ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.stylesheet, { positions: true, parseValue: false })))
-            });
+    public constructor() { }
+
+    setStylesheets(stylesheets: IStylesheet[]) {
+        if (stylesheets != null) {
+            this._stylesheets = new Map();
+            for (let stylesheet of stylesheets) {
+                this._stylesheets.set(stylesheet.name, {
+                    stylesheet: stylesheet,
+                    ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.stylesheet, { positions: true, parseValue: false })))
+                });
+            }
+        }
+        else {
+            this._stylesheets = null;
         }
     }
 
-    /* Section covers the retrieval of rules and declarations */
+    getStylesheets(): IStylesheet[] {
+        let stylesheets: IStylesheet[] = [];
+        for (let item of this._stylesheets) {
+            stylesheets.push(item[1].stylesheet);
+        };
+        return stylesheets;
+    }
 
+    /* Section covers the retrieval of rules and declarations */
     private getAppliedRulesInternal(designItem: IDesignItem): IRuleWithAST[] {
         let styles: IRuleWithAST[] = [];
         for (let item of this._stylesheets) {
@@ -198,14 +212,6 @@ export class CssTreeStylesheetService implements IStylesheetService {
             sel: stylesheet.slice(ast.prelude.loc.start.offset, ast.prelude.loc.end.offset),
             type: "@" + ast.name
         }
-    }
-
-    getAllStylesheets(): IStylesheet[] {
-        let stylesheets: IStylesheet[] = [];
-        for (let item of this._stylesheets) {
-            stylesheets.push(item[1].stylesheet);
-        };
-        return stylesheets;
     }
 
     private sortDeclarations(declarations: IDeclarationWithAST[]): IDeclarationWithAST[] {

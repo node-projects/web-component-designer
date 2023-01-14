@@ -35,6 +35,11 @@ import { IBinding } from '../item/IBinding.js';
 import { BindingTarget } from '../item/BindingTarget.js';
 import { IPropertyTabsService } from './propertiesService/IPropertyTabsService.js';
 import { CodeViewSimple } from '../widgets/codeView/code-view-simple.js';
+import { IUndoService } from './undoService/IUndoService.js';
+import { ISelectionService } from './selectionService/ISelectionService.js';
+import { IContentService } from './contentService/IContentService.js';
+import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
+import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -56,6 +61,12 @@ interface ServiceNameMap {
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
   "propertyGroupsService": IPropertyTabsService;
+  
+  //Factories for Instance Service Containers
+  "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
+  "selectionService": (designerCanvas: IDesignerCanvas) => ISelectionService;
+  "contentService": (designerCanvas: IDesignerCanvas) => IContentService;
+  "stylesheetService": (designerCanvas: IDesignerCanvas) => IStylesheetService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {

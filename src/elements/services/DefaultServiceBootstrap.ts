@@ -72,6 +72,10 @@ import { PlacementExtensionProvider } from '../widgets/designerView/extensions/P
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
 import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/InvisibleElementExtensionDesignViewConfigButtons.js';
+import { UndoService } from './undoService/UndoService.js';
+import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
+import { SelectionService } from './selectionService/SelectionService.js';
+import { ContentService } from './contentService/ContentService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -96,6 +100,11 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());
+
+  serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
+  serviceContainer.register("selectionService",  (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas));
+  serviceContainer.register("contentService",  (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
+  //serviceContainer.register("stylesheetService", new DemoProviderService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),

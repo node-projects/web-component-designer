@@ -358,7 +358,7 @@ export class DesignItem implements IDesignItem {
       if (this.getStyle(nm) != value) {
         this.setStyle(nm, value);
       } else if (value == null) {
-        this.removeStyle(nm)
+        this.removeStyle(nm);
       }
     }
     //todo -> modify stylesheet, or local css
