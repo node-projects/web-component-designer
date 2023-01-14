@@ -27,5 +27,7 @@ export interface IStylesheetService {
     getDeclarations(designItem: IDesignItem, property: IProperty): IStyleDeclaration[];
     updateDeclarationWithProperty(designItem: IDesignItem, property: IProperty, value: string, important: boolean): boolean;
     updateDeclarationWithDeclaration(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
+    
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
+    stylesheetsChanged: TypedEvent<void>;
 }

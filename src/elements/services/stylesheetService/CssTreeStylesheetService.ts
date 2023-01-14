@@ -30,6 +30,7 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 export class CssTreeStylesheetService implements IStylesheetService {
     private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: csstree.StyleSheetPlain }>();
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet; }> = new TypedEvent<{ stylesheet: IStylesheet; }>();
+    stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();
 
     public constructor() { }
 
@@ -42,6 +43,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
                     ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.stylesheet, { positions: true, parseValue: false })))
                 });
             }
+            this.stylesheetsChanged.emit();
         }
         else {
             this._stylesheets = null;
