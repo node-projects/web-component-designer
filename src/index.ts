@@ -125,6 +125,7 @@ export * from "./elements/services/selectionService/SelectionService.js";
 
 export type { IStyleRule, IStyleDeclaration, IStylesheet, IStylesheetService } from "./elements/services/stylesheetService/IStylesheetService.js";
 export * from "./elements/services/stylesheetService/CssTreeStylesheetService.js";
+export * from "./elements/services/stylesheetService/CssToolsStylesheetService.js";
 export * from "./elements/services/stylesheetService/SpecificityCalculator.js";
 
 export * from "./elements/services/undoService/ChangeGroup.js";
