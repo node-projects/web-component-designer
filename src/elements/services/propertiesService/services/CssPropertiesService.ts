@@ -5,6 +5,7 @@ import { PropertyType } from '../PropertyType.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
+import cssProperties from './CssProperties.json' assert { type: 'json' };
 
 export class CssPropertiesService extends CommonPropertiesService {
 
@@ -12,182 +13,49 @@ export class CssPropertiesService extends CommonPropertiesService {
     return RefreshMode.none;
   }
 
-  public layout: IProperty[] = [
-    {
-      name: "display",
-      type: "list",
-      values: ["block", "inline", "inline-block", "flex", "inline-flex", "contents", "grid", "inline-grid", "inherit", "initial", "none"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    },
-    {
-      name: "color",
-      type: "color",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "background-color",
-      type: "color",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "box-sizing",
-      type: "list",
-      values: ["border-box", "content-box"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "border",
-      type: "string",
-      default: "0px none rbg(0,0,0)",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "box-shadow",
-      type: "string",
-      default: "none",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "opacity",
-      type: "number",
-      min: 0,
-      max: 1,
-      step: 0.1,
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "metrics",
-      type: "metrics",
-      service: this,
-      propertyType: PropertyType.complex
-    }, {
-      name: "position",
-      type: "list",
-      values: ["static", "relative", "absolute"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "font-size",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "font-weight",
-      type: "list",
-      values: ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900", "lighter", "bolder"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }
+  //metrics
+
+  public layout = [
+    "display",
+    "color",
+    "background-color",
+    "box-sizing",
+    "border",
+    "box-shadow",
+    "opacity",
+    "position",
+    "font-size",
+    "font-weight",
+    "inset",
+    "margin",
+    "border",
+    "padding"
+  ]
+
+  public grid = [
+    "display",
+    "position",
+    "grid-template-columns",
+    "grid-template-rows",
+    "column-gap",
+    "row-gap",
+    "align-content",
+    "justify-content",
+    "align-items",
+    "justify-items"
   ];
 
-  public grid: IProperty[] = [
-    {
-      name: "display",
-      type: "list",
-      values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "position",
-      type: "list",
-      values: ["static", "relative", "absolute"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "grid-template-columns",
-      type: "string",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "grid-template-rows",
-      type: "string",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "column-gap",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "row-gap",
-      type: "css-length",
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "align-content",
-      type: "img-list",
-      values: ["center", "space-between", "space-around", "space-evenly", "stretch"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "justify-content",
-      type: "img-list",
-      values: ["center", "start", "end", "space-between", "space-around", "space-evenly"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "align-items",
-      type: "img-list",
-      values: ["center", "start", "end", "stretch", "baseline"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "justify-items",
-      type: "img-list",
-      values: ["center", "start", "end", "stretch"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }
+  public flex = [
+    "display",
+    "position",
+    "flex-direction",
+    "flex-wrap",
+    "align-content",
+    "justify-content",
+    "align-items"
   ];
 
-  public flex: IProperty[] = [
-    {
-      name: "display",
-      type: "list",
-      values: ["block", "inline-block", "flex", "contents", "grid", "inherit", "initial", "none"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "position",
-      type: "list",
-      values: ["static", "relative", "absolute"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "flex-direction",
-      type: "img-list",
-      values: ["row", "column"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "flex-wrap",
-      type: "img-list",
-      values: ["nowrap", "wrap"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "align-content",
-      type: "img-list",
-      values: ["center", "flex-start", "flex-end", "space-between", "space-around", "stretch"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "justify-content",
-      type: "img-list",
-      values: ["center", "flex-start", "flex-end", "space-between", "space-around", "space-evenly"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }, {
-      name: "align-items",
-      type: "img-list",
-      values: ["center", "flex-start", "flex-end", "stretch", "baseline"],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }
-  ];
-
-  constructor(name: 'styles' | 'layout' | 'grid' | 'flex') {
+  constructor(name: 'layout' | 'grid' | 'flex') {
     super();
     this.name = name;
   }
@@ -201,7 +69,15 @@ export class CssPropertiesService extends CommonPropertiesService {
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
-    return this[this.name];
+    const propNames: string[] = this[this.name];
+    const propertiesList = propNames.map(x => ({
+      name: x,
+      type: cssProperties[x]?.type ?? 'string',
+      values: cssProperties[x]?.values ? [...cssProperties[x]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
+      service: this,
+      propertyType: PropertyType.cssValue
+    }));
+    return propertiesList;
   }
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
