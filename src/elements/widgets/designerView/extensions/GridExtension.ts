@@ -11,10 +11,10 @@ export class GridExtension extends AbstractExtension {
 
   private _initialPoint;
   private _initialSizes : {
-    x: any[];
-    xUnit: any[];
-    y: any[]; 
-    yUnit: any[];
+    x: number[];
+    xUnit: string[];
+    y: number[]; 
+    yUnit: string[];
   };
   private _cells: SVGRectElement[][];
   private _gaps: SVGRectElement[];
@@ -63,7 +63,7 @@ export class GridExtension extends AbstractExtension {
 
   override refresh() {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
-    let gc = this.gridInformation.cells;
+    let cells = this.gridInformation.cells;
 
     if(this.arraysEdited)
       this._initSVGArrays();
@@ -75,7 +75,7 @@ export class GridExtension extends AbstractExtension {
     })
 
     //draw cells
-    gc.forEach((row, i) => {
+    cells.forEach((row, i) => {
       row.forEach((cell, j) => {
         this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
         if (cell.name) {
@@ -86,12 +86,12 @@ export class GridExtension extends AbstractExtension {
     })    
 
     //draw headers
-    gc.forEach((row, i) => {  //vertical headers
+    cells.forEach((row, i) => {  //vertical headers
       this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], i, "vertical")
       this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
     })
 
-    gc[0].forEach((column, i) => {
+    cells[0].forEach((column, i) => {
       this._headers[1][i] = this._drawHeader(column, this._headers[1][i], i, "horizontal")
       this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
     })
@@ -99,14 +99,14 @@ export class GridExtension extends AbstractExtension {
     //draw circles for adding rows/columns
     for(let i = 0; i < this._plusCircles[0].length; i++)
       if(i < this._plusCircles[0].length - 1)
-        this._plusCircles[0][i] = this._drawPlusCircle(gc[i][0].x, gc[i][0].y, this._plusCircles[0][i], i, "vertical");
+        this._plusCircles[0][i] = this._drawPlusCircle(cells[i][0].x, cells[i][0].y, this._plusCircles[0][i], i, "vertical");
       else
-        this._plusCircles[0][i] = this._drawPlusCircle(gc[i - 1][0].x, gc[i - 1][0].y + gc[i - 1][0].height, this._plusCircles[0][i], i, "vertical", true);
+        this._plusCircles[0][i] = this._drawPlusCircle(cells[i - 1][0].x, cells[i - 1][0].y + cells[i - 1][0].height, this._plusCircles[0][i], i, "vertical", true);
     for(let i = 0; i < this._plusCircles[1].length; i++) 
       if(i < this._plusCircles[1].length - 1)
-        this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i].x, gc[0][i].y, this._plusCircles[1][i], i, "horizontal");
+        this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i].x, cells[0][i].y, this._plusCircles[1][i], i, "horizontal");
       else
-        this._plusCircles[1][i] = this._drawPlusCircle(gc[0][i - 1].x + gc[0][i - 1].width, gc[0][i - 1].y, this._plusCircles[1][i], i, "horizontal", true);
+        this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i - 1].x + cells[0][i - 1].width, cells[0][i - 1].y, this._plusCircles[1][i], i, "horizontal", true);
   }
 
   override dispose() {
