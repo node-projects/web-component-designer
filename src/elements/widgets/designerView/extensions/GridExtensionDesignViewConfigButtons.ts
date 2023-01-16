@@ -21,6 +21,7 @@ export class GridExtensionDesignViewConfigButtons implements IDesignViewConfigBu
         btn.classList.add('selected');
       else
         btn.classList.remove('selected');
+      designerCanvas.extensionManager.reapplyAllAppliedExtentions();
     }
     return [btn];
   }

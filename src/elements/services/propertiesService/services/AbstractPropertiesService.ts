@@ -7,6 +7,7 @@ import { BindingTarget } from '../../../item/BindingTarget.js';
 import { IBinding } from '../../../item/IBinding.js';
 import { PropertyType } from '../PropertyType.js';
 import { NodeType } from '../../../item/NodeType.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
@@ -18,19 +19,24 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
-    return this.getProperties(designItem).find(x => x.name == name);
+    let properties = this.getProperties(designItem);
+    if ('properties' in properties[0]) {
+      return (<IPropertyGroup[]>properties).flatMap(x => x.properties).find(x => x.name == name);
+    }
+    else
+      return (<IProperty[]>properties).find(x => x.name == name);
   }
-  
-  abstract getProperties(designItem: IDesignItem): IProperty[] ;
+
+  abstract getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
-        d.setStyle(property.name, value);
+        d.updateStyleInSheetOrLocal(property.name, value);
         //unkown css property names do not trigger the mutation observer of property grid, 
         //fixed by assinging stle again to the attribute
-        (<HTMLElement>d.element).setAttribute('style',(<HTMLElement>d.element).getAttribute('style'));
+        (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
       } else {
         let attributeName = property.attributeName
         if (!attributeName)
@@ -39,15 +45,27 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
 
         if (property.type === 'object') {
           const json = JSON.stringify(value);
-          d.setAttribute(attributeName, json);
-         } else if (property.type == 'boolean' && !value) {
-          d.removeAttribute(attributeName);
+          if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
+            d.setAttribute(attributeName, json);
+          if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
+            d.element[property.name] = value;
+        } else if (property.type == 'boolean' && !value) {
+          if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
+            d.removeAttribute(attributeName);
+          if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
+            d.element[property.name] = false;
         }
         else if (property.type == 'boolean' && value) {
-          d.setAttribute(attributeName, "");
+          if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
+            d.setAttribute(attributeName, "");
+          if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
+            d.element[property.name] = true;
         }
         else {
-          d.setAttribute(attributeName, value);
+          if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
+            d.setAttribute(attributeName, value);
+          if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
+            d.element[property.name] = value;
         }
       }
       this._notifyChangedProperty(d, property, value);
@@ -64,7 +82,6 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
         d.removeStyle(property.name);
-
       } else {
         let attributeName = property.attributeName
         if (!attributeName)

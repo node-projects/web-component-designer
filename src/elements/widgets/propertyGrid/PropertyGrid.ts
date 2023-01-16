@@ -45,7 +45,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
     this._itemsObserver = new MutationObserver((m) => {
       for (const a of this._propertyGridPropertyLists) {
-        if (a.propertiesService.getRefreshMode(this._selectedItems[0]) == RefreshMode.fullOnValueChange) {
+        if (a.propertiesService?.getRefreshMode(this._selectedItems[0]) == RefreshMode.fullOnValueChange) {
           a.createElements(this._selectedItems[0]);
           a.designItemsChanged(this._selectedItems);
         }

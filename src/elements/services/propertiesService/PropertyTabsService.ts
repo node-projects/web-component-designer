@@ -1,16 +1,17 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IPropertiesService } from './IPropertiesService.js';
-import { IPropertyGroupsService } from './IPropertyGroupsService.js';
+import { IPropertyTabsService } from './IPropertyTabsService.js';
 import { AttributesPropertiesService } from './services/AttributesPropertiesService.js';
 import { CommonPropertiesService } from './services/CommonPropertiesService.js';
+import { CssCurrentPropertiesService } from './services/CssCurrentPropertiesService.js';
 import { CssPropertiesService } from './services/CssPropertiesService.js';
 
-export class PropertyGroupsService implements IPropertyGroupsService {
+export class PropertyTabsService implements IPropertyTabsService {
     protected _pgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'common', propertiesService: new CommonPropertiesService() },
-        { name: 'styles', propertiesService: new CssPropertiesService("styles") },
+        { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
         { name: 'layout', propertiesService: new CssPropertiesService("layout") },
         { name: 'flex', propertiesService: new CssPropertiesService("flex") },
         { name: 'grid', propertiesService: new CssPropertiesService("grid") },
@@ -19,7 +20,7 @@ export class PropertyGroupsService implements IPropertyGroupsService {
     protected _svgPgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
-        { name: 'styles', propertiesService: new CssPropertiesService("styles") },
+        { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
         { name: 'layout', propertiesService: new CssPropertiesService("layout") },
     ];
 

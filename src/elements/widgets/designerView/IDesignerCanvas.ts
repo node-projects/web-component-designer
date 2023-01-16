@@ -25,7 +25,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   readonly snapLines: Snaplines;
 
-  readonly shadowRoot: ShadowRoot;
+  readonly shadowRoot: ShadowRoot | null;
 
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;

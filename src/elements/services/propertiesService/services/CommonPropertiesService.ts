@@ -3,6 +3,7 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { PropertyType } from '../PropertyType.js';
 import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export class CommonPropertiesService extends AbstractPropertiesService {
 
@@ -47,7 +48,7 @@ export class CommonPropertiesService extends AbstractPropertiesService {
     return this.commonProperties[name];
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] {
+  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     return this.commonProperties;
   }
 }

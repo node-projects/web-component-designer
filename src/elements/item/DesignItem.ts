@@ -13,6 +13,8 @@ import { PropertiesHelper } from '../services/propertiesService/services/Propert
 import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction.js';
 import { DomConverter } from '../widgets/designerView/DomConverter.js';
 import { DeleteAction } from '../services/undoService/transactionItems/DeleteAction.js';
+import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
+import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -22,10 +24,13 @@ export class DesignItem implements IDesignItem {
 
   public lastContainerSize: ISize;
 
+  parsedNode: any;
+
   node: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
   appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]> = new Map();
+  shouldAppliedDesignerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
 
   async clone() {
     const html = DomConverter.ConvertToString([this], null, false);
@@ -247,7 +252,7 @@ export class DesignItem implements IDesignItem {
   }
 
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
-    let designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
+    let designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
 
     if (designItem.nodeType == NodeType.Element) {
       for (let a of designItem.element.attributes) {
@@ -295,8 +300,9 @@ export class DesignItem implements IDesignItem {
     }
   }
 
-  constructor(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+  constructor(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     this.node = node;
+    this.parsedNode = parsedNode;
     this.serviceContainer = serviceContainer;
     this.instanceServiceContainer = instanceServiceContainer;
 
@@ -319,7 +325,7 @@ export class DesignItem implements IDesignItem {
       return null;
     let designItem: IDesignItem = DesignItem._designItemMap.get(node);
     if (!designItem) {
-      designItem = new DesignItem(node, serviceContainer, instanceServiceContainer);
+      designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
     }
     return designItem;
   }
@@ -331,7 +337,7 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
-  public setStyle(name: string, value?: string | null) {
+  public setStyle(name: string, value?: string | null, important?: boolean) {
     let nm = PropertiesHelper.camelToDashCase(name);
     const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
@@ -340,6 +346,35 @@ export class DesignItem implements IDesignItem {
     let nm = PropertiesHelper.camelToDashCase(name);
     const action = new CssStyleChangeAction(this, nm, '', this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
+  }
+  public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean) {
+    let nm = PropertiesHelper.camelToDashCase(name);
+
+    const declaration = null;
+    //const declaration = this.serviceContainer.stylesheetService?.getDeclarations(d, property);
+    //const rules = this.serviceContainer.stylesheetService?.getAppliedRules(d, property);
+
+    if (!declaration) {
+      if (this.getStyle(nm) != value) {
+        this.setStyle(nm, value);
+      } else if (value == null) {
+        this.removeStyle(nm);
+      }
+    }
+    //todo -> modify stylesheet, or local css
+    //we need undo for modification of stylesheet, look how we do this
+    //maybe undo in stylsheet service?
+  }
+
+  public getAllStyles(): IStyleRule[] {
+    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false }));
+    if (this.instanceServiceContainer.stylesheetService) {
+      const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
+      if (rules) {
+        return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
+      }
+    }
+    return [{ selector: null, declarations: localStyles, specificity: -1 }];
   }
 
   public setAttribute(name: string, value?: string | null) {

@@ -5,11 +5,13 @@ import { IContentService } from './contentService/IContentService.js';
 import { DesignContext } from '../widgets/designerView/DesignContext.js';
 import { IDesignContext } from '../widgets/designerView/IDesignContext.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
+import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 
 interface InstanceServiceNameMap {
   "undoService": IUndoService;
   "selectionService": ISelectionService;
   "contentService": IContentService;
+  "stylesheetService": IStylesheetService;
 }
 
 export class InstanceServiceContainer extends BaseServiceContainer<InstanceServiceNameMap> {
@@ -22,7 +24,7 @@ export class InstanceServiceContainer extends BaseServiceContainer<InstanceServi
     super();
     this.designerCanvas = designerCanvas;
   }
-  
+
   get undoService(): IUndoService {
     return this.getLastService('undoService');
   }
@@ -33,5 +35,9 @@ export class InstanceServiceContainer extends BaseServiceContainer<InstanceServi
 
   get contentService(): IContentService {
     return this.getLastService('contentService');
+  }
+
+  get stylesheetService(): IStylesheetService {
+    return this.getLastService('stylesheetService');
   }
 }
