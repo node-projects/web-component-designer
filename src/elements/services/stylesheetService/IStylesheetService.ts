@@ -1,6 +1,5 @@
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { IProperty } from "../propertiesService/IProperty.js";
 
 export interface IStyleRule {
     selector: string;
@@ -21,12 +20,13 @@ export interface IStylesheet {
 }
 
 export interface IStylesheetService {
-    setStylesheets(stylesheets: IStylesheet[])
+    setStylesheets(stylesheets: IStylesheet[]) : void;
     getStylesheets(): IStylesheet[];
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
-    getDeclarations(designItem: IDesignItem, property: IProperty): IStyleDeclaration[];
-    updateDeclarationWithProperty(designItem: IDesignItem, property: IProperty, value: string, important: boolean): boolean;
+    getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[];
     updateDeclarationWithDeclaration(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
+    insertDeclarationIntoRule(rule: IStyleRule, declaration: IStyleDeclaration, important : boolean): boolean;
+    removeDeclarationFromRule(rule: IStyleRule, declaration: IStyleDeclaration): boolean;
     
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
     stylesheetsChanged: TypedEvent<void>;
