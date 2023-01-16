@@ -65,6 +65,12 @@ export class ExtensionManager implements IExtensionManager {
       let extensions: IDesignerExtension[] = [];
       if (extProv) {
         for (let e of extProv) {
+          let shouldAppE = designItem.shouldAppliedDesignerExtensions.get(extensionType);
+          if (!shouldAppE)
+            shouldAppE = [];
+          shouldAppE.push(e);
+          designItem.shouldAppliedDesignerExtensions.set(extensionType, shouldAppE);
+
           if (e.shouldExtend(this, this.designerCanvas, designItem)) {
             let appE = designItem.appliedDesignerExtensions.get(extensionType);
             if (!appE)
@@ -100,6 +106,12 @@ export class ExtensionManager implements IExtensionManager {
       if (extProv) {
         for (let e of extProv) {
           for (let i of designItems) {
+            let shouldAppE = i.shouldAppliedDesignerExtensions.get(extensionType);
+            if (!shouldAppE)
+              shouldAppE = [];
+            shouldAppE.push(e);
+            i.shouldAppliedDesignerExtensions.set(extensionType, shouldAppE);
+
             if (i.nodeType == NodeType.Element && e.shouldExtend(this, this.designerCanvas, i)) {
               let appE = i.appliedDesignerExtensions.get(extensionType);
               if (!appE)
@@ -130,6 +142,8 @@ export class ExtensionManager implements IExtensionManager {
   removeExtension(designItem: IDesignItem, extensionType?: ExtensionType) {
     if (designItem) {
       if (extensionType) {
+        designItem.shouldAppliedDesignerExtensions.delete(extensionType);
+
         let exts = designItem.appliedDesignerExtensions.get(extensionType);
         if (exts) {
           for (let e of exts) {
@@ -145,6 +159,7 @@ export class ExtensionManager implements IExtensionManager {
             this.designItemsWithExtentions.delete(designItem);
         }
       } else {
+        designItem.shouldAppliedDesignerExtensions.clear();
         for (let appE of designItem.appliedDesignerExtensions) {
           for (let e of appE[1]) {
             try {
@@ -157,7 +172,6 @@ export class ExtensionManager implements IExtensionManager {
         }
         designItem.appliedDesignerExtensions.clear();
         this.designItemsWithExtentions.delete(designItem);
-
       }
     }
   }
@@ -166,6 +180,7 @@ export class ExtensionManager implements IExtensionManager {
     if (designItems) {
       if (extensionType) {
         for (let i of designItems) {
+          i.shouldAppliedDesignerExtensions.delete(extensionType);
           let exts = i.appliedDesignerExtensions.get(extensionType);
           if (exts) {
             for (let e of exts) {
@@ -183,6 +198,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         for (let i of designItems) {
+          i.shouldAppliedDesignerExtensions.clear();
           for (let appE of i.appliedDesignerExtensions) {
             for (let e of appE[1]) {
               try {
@@ -195,7 +211,6 @@ export class ExtensionManager implements IExtensionManager {
           }
           i.appliedDesignerExtensions.clear();
           this.designItemsWithExtentions.delete(i);
-
         }
       }
     }
@@ -283,5 +298,27 @@ export class ExtensionManager implements IExtensionManager {
 
   refreshAllAppliedExtentions() {
     this.refreshAllExtensions([...this.designItemsWithExtentions])
+  }
+
+  //todo does not work with permanant, when not applied... maybe we need to do in another way
+  //maybe store the "shouldAppliedExtensions??"
+  reapplyAllAppliedExtentions() {
+    for (let d of ExtensionManager.getAllChildElements(this.designerCanvas.rootDesignItem)) {
+      const keys = [...d.shouldAppliedDesignerExtensions.keys()];
+      for (let e of keys) {
+        this.removeExtension(d, e);
+        this.applyExtension(d, e);
+      }
+    }
+  }
+
+  private static *getAllChildElements(designItem: IDesignItem) {
+    if (designItem.nodeType == NodeType.Element)
+      yield designItem;
+    if (designItem.hasChildren) {
+      for (let c of designItem.children())
+        for (let di of ExtensionManager.getAllChildElements(c))
+          yield di;
+    }
   }
 }

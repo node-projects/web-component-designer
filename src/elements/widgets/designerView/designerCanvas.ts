@@ -2,13 +2,11 @@ import { EventNames } from '../../../enums/EventNames.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { IElementDefinition } from '../../services/elementsService/IElementDefinition.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
-import { UndoService } from '../../services/undoService/UndoService.js';
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants.js';
-import { ContentService } from '../../services/contentService/ContentService.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
 import { Snaplines } from './Snaplines.js';
@@ -59,6 +57,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
   private _canvasOffset: IPoint = { x: 0, y: 0 };
 
+  private _additionalStyle: CSSStyleSheet[];
   private _currentContextMenu: ContextMenu
   private _backgroundImage: string;
 
@@ -106,6 +105,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _onKeyDownBound: any;
   private _onKeyUpBound: any;
+
+  private cssprefixConstant = '#node-projects-designer-canvas-canvas ';
 
   static override readonly style = css`
     :host {
@@ -180,15 +181,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   `;
 
   static override readonly template = html`
-    <div style="display: flex;flex-direction: column;width: 100%;height: 100%;">
-      <div style="width: 100%;height: 100%;">
-        <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative;">
+    <div style="display: flex;flex-direction: column;width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
+      <div style="width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
+        <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative; margin: 0 !important; padding: 0 !important; border: none !important;">
           <div id="node-projects-designer-canvas-canvasContainer"
-          style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none;">
-          <div id="node-projects-designer-canvas-canvas" part="canvas"></div>
+          style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none; margin: 0 !important; padding: 0 !important; border: none !important;">
+          <div id="node-projects-designer-canvas-canvas" part="canvas" style=" margin: 0 !important; padding: 0 !important; border: none !important;"></div>
         </div>
       </div>
-      <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;"></div>
+      <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;  margin: 0 !important; padding: 0 !important; border: none !important;"></div>
       </div>
     </div>`;
 
@@ -247,37 +248,26 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   set additionalStyles(value: CSSStyleSheet[]) {
-    if (value) {
-      let style = '';
-      for (let s of value) {
-        for (let r of s.cssRules) {
-          if (r instanceof CSSStyleRule) {
-            let parts = r.selectorText.split(',');
-            let t = '';
-            for (let p of parts) {
-              if (t)
-                t += ',';
-              t += '#node-projects-designer-canvas-canvas ' + p;
-            }
-            let cssText = r.style.cssText;
-            //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
-            if ((<any>r).styleMap && (<any>r).styleMap.get('grid-template') && (<any>r).styleMap.get('grid-template').toString().includes('repeat(')) {
-              let entr = (<any>r).styleMap.entries();
-              cssText = ''
-              for (let e of entr) {
-                cssText += e[0] + ':' + e[1].toString() + ';';
-              }
-            }
-            style += t + '{' + cssText + '}';
-          }
-        }
-      }
-
-      this.shadowRoot.adoptedStyleSheets = [this.constructor.style, cssFromString(style)];
-    }
-    else
-      this.shadowRoot.adoptedStyleSheets = [this.constructor.style];
+    this._additionalStyle = value;
+    this.applyAllStyles();
   }
+
+  get additionalStyles(): CSSStyleSheet[] {
+    return this._additionalStyle;
+  }
+
+  private applyAllStyles() {
+    let styles = [this.constructor.style]
+    if (this._additionalStyle)
+      styles.push(cssFromString(this.buildPatchedStyleSheet(this._additionalStyle)));
+    if (this.instanceServiceContainer.stylesheetService) {
+      styles.push(...this.instanceServiceContainer.stylesheetService
+        .getStylesheets()
+        .map(x => cssFromString(this.buildPatchedStyleSheet([cssFromString(x.stylesheet)]))));
+    }
+    this.shadowRoot.adoptedStyleSheets = styles;
+  }
+
 
   /* --- start IUiCommandHandler --- */
 
@@ -493,15 +483,32 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.serviceContainer = serviceContainer;
 
     this.instanceServiceContainer = new InstanceServiceContainer(this);
-    this.instanceServiceContainer.register("undoService", new UndoService(this));
-    this.instanceServiceContainer.register("selectionService", new SelectionService(this));
+    const undoService = this.serviceContainer.getLastService('undoService')
+    if (undoService)
+      this.instanceServiceContainer.register("undoService", undoService(this));
+    const selectionService = this.serviceContainer.getLastService('selectionService')
+    if (selectionService)
+      this.instanceServiceContainer.register("selectionService", selectionService(this));
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
-    this.instanceServiceContainer.register("contentService", new ContentService(this.rootDesignItem));
+    const contentService = this.serviceContainer.getLastService('contentService')
+    if (contentService)
+      this.instanceServiceContainer.register("contentService", contentService(this));
+
+    this.instanceServiceContainer.servicesChanged.on(e => {
+      if (e.serviceName == 'stylesheetService') {
+        this.applyAllStyles();
+        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on(() => this.applyAllStyles());
+        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => this.applyAllStyles());
+      }
+    });
 
     this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
+    this.overlayLayer.style.setProperty('margin', '0', 'important');
+    this.overlayLayer.style.setProperty('padding', '0', 'important');
+    this.overlayLayer.style.setProperty('border', 'none', 'important');
     this.clickOverlay.appendChild(this.overlayLayer);
     this.snapLines = new Snaplines(this.overlayLayer);
     this.snapLines.initialize(this.rootDesignItem);
@@ -591,6 +598,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.addDesignItems(designItems);
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
     (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
+    setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 50);
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
@@ -1107,6 +1115,50 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.zoomFactor = newZoom;
     this.canvasOffsetUnzoomed = newCanvasOffset;
+  }
+
+  private buildPatchedStyleSheet(value: CSSStyleSheet[]): string {
+    let style = '';
+    for (let s of value) {
+      style += this.traverseAndCollectRules(s);
+    }
+    return style;
+  }
+
+  private traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule): string {
+    let ruleCollector: string[] = [];
+    for (let rule of ruleContainer.cssRules) {
+      if ((rule instanceof CSSContainerRule
+        || rule instanceof CSSSupportsRule
+        || rule instanceof CSSMediaRule)
+        && rule.cssRules) {
+        return rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
+      }
+      if (rule instanceof CSSStyleRule) {
+        let parts = rule.selectorText.split(',');
+        let t = '';
+        for (let p of parts) {
+          if (p.includes(this.cssprefixConstant)) {
+            t += p;
+            continue;
+          }
+          if (t)
+            t += ',';
+          t += this.cssprefixConstant + p;
+        }
+        let cssText = rule.style.cssText;
+        //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
+        if ((<any>rule).styleMap && (<any>rule).styleMap.get('grid-template') && (<any>rule).styleMap.get('grid-template').toString().includes('repeat(')) {
+          let entr = (<any>rule).styleMap.entries();
+          cssText = ''
+          for (let e of entr) {
+            cssText += e[0] + ':' + e[1].toString() + ';';
+          }
+        }
+        ruleCollector.push(t + '{' + cssText + '}');
+      }
+    }
+    return ruleCollector.join(' ');
   }
 }
 

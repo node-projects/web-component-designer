@@ -10,15 +10,15 @@ export const flexboxExtensionShowOverlayOptionName = 'flexboxExtensionShowOverla
 
 export class FlexboxExtensionProvider implements IDesignerExtensionProvider {
 
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
     if (display == 'flex' || display == 'inline-flex')
-      return designerView.instanceServiceContainer.designContext.extensionOptions[flexboxExtensionShowOverlayOptionName] !== false;
+      return designerCanvas.instanceServiceContainer.designContext.extensionOptions[flexboxExtensionShowOverlayOptionName] !== false;
     return false;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new FlexboxExtension(extensionManager, designerView, designItem);
+  getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
+    return new FlexboxExtension(extensionManager, designerCanvas, designItem);
   }
 
   readonly style = css`

@@ -1,4 +1,5 @@
 export interface IContextMenuItem {
+	readonly id?: string,
 	readonly title?: string,
 	readonly icon?: string,
 	readonly children?: IContextMenuItem[],

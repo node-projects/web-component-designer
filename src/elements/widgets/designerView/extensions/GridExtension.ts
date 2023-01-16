@@ -1,5 +1,5 @@
-import { EventNames } from "../../../../enums/EventNames";
-import { convertCssUnit, convertCssUnitToPixel, getCssUnit } from "../../../helper/CssUnitConverter";
+import { EventNames } from "../../../../enums/EventNames.js";
+import { convertCssUnit, convertCssUnitToPixel, getCssUnit } from "../../../helper/CssUnitConverter.js";
 import { CalculateGridInformation } from "../../../helper/GridHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';

@@ -8,6 +8,7 @@ import { ValueType } from '../../services/propertiesService/ValueType.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { PropertyType } from '../../services/propertiesService/PropertyType.js';
+import { IPropertyGroup } from '../../services/propertiesService/IPropertyGroup.js';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -88,6 +89,17 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     .unset-value:focus {
       color: white
     }
+    .group-header {
+      grid-column: 1 / 3;
+      font-size: 10px;
+      font-family: monospace;
+    }
+    .group-desc {
+      display: inline-flex;
+      flex-direction: row-reverse;
+      font-size: 10px;
+      text-decoration: underline;
+    }
     `;
   }
 
@@ -117,80 +129,99 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       if (this._propertiesService) {
         let properties = this._propertiesService.getProperties(designItem);
         if (properties) {
-          for (const p of properties) {
-            let editor: IPropertyEditor;
-            if (p.createEditor)
-              editor = p.createEditor(p);
-            else {
-              editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
-            }
-            if (editor) {
-              let rectContainer = document.createElement("div")
-              rectContainer.style.width = '20px';
-              rectContainer.style.height = '20px';
-              rectContainer.style.display = 'flex';
-              rectContainer.style.alignItems = 'center';
-              let rect = document.createElement("div")
-              rect.style.width = '7px';
-              rect.style.height = '7px';
-              rect.style.border = '1px white solid';
-              if (p.propertyType != PropertyType.complex)
-                rectContainer.appendChild(rect);
-              this._div.appendChild(rectContainer);
-              rect.oncontextmenu = (event) => {
-                event.preventDefault();
-                this.openContextMenu(event, p);
-              }
+          if ('properties' in properties[0])
+            this.createPropertyGroups(<IPropertyGroup[]>properties);
+          else
+            this.createPropertyEditors(<IProperty[]>properties);
+        }
+      }
+    }
+  }
 
-              if (p.type == 'addNew') {
-                let input = <HTMLInputElement>editor.element;
-                input.disabled = true;
-                let label = document.createElement("input");
-                label.value = p.name;
-                label.onkeyup = e => {
-                  if (e.key == 'Enter' && label.value) {
-                    p.name = label.value;
-                    label.disabled = true;
-                    input.disabled = false;
-                    input.focus();
-                  }
-                }
-                this._div.appendChild(label);
+  private createPropertyGroups(groups: IPropertyGroup[]) {
+    for (const g of groups) {
+      let header = document.createElement('span');
+      header.innerHTML = g.name.replaceAll("\n", "<br>");
+      header.className = 'group-header';
+      this._div.appendChild(header);
+      let desc = document.createElement('span');
+      desc.innerHTML = g.description;
+      desc.className = 'group-desc';
+      this._div.appendChild(desc);
+      this.createPropertyEditors(g.properties);
+    }
+  }
 
-              } else {
-                if (!p.renamable) {
-                  let label = document.createElement("label");
-                  label.htmlFor = p.name;
-                  label.textContent = p.name;
-                  label.title = p.name;
-                  this._div.appendChild(label);
-                } else {
-                  let label = document.createElement("input");
-                  let input = <HTMLInputElement>editor.element;
-                  label.value = p.name;
-                  label.onkeyup = e => {
-                    if (e.key == 'Enter' && label.value) {
-                      const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
-                      p.service.clearValue(this._designItems, p);
-                      p.name = label.value;
-                      p.service.setValue(this._designItems, p, input.value);
-                      pg.commit();
-                      this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
-                    }
-                  }
-                  this._div.appendChild(label);
-                }
+  private createPropertyEditors(properties: IProperty[]) {
+    for (const p of properties) {
+      let editor: IPropertyEditor;
+      if (p.createEditor)
+        editor = p.createEditor(p);
+      else {
+        editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
+      }
+      if (editor) {
+        let rectContainer = document.createElement("div")
+        rectContainer.style.width = '20px';
+        rectContainer.style.height = '20px';
+        rectContainer.style.display = 'flex';
+        rectContainer.style.alignItems = 'center';
+        let rect = document.createElement("div")
+        rect.style.width = '7px';
+        rect.style.height = '7px';
+        rect.style.border = '1px white solid';
+        if (p.propertyType != PropertyType.complex)
+          rectContainer.appendChild(rect);
+        this._div.appendChild(rectContainer);
+        rect.oncontextmenu = (event) => {
+          event.preventDefault();
+          this.openContextMenu(event, p);
+        }
 
-
-              }
-
-              editor.element.id = p.name;
-              this._div.appendChild(editor.element);
-
-              this._propertyMap.set(p, { isSetElement: rect, editor: editor });
+        if (p.type == 'addNew') {
+          let input = <HTMLInputElement>editor.element;
+          input.disabled = true;
+          let label = document.createElement("input");
+          label.value = p.name;
+          label.onkeyup = e => {
+            if (e.key == 'Enter' && label.value) {
+              p.name = label.value;
+              label.disabled = true;
+              input.disabled = false;
+              input.focus();
             }
           }
+          this._div.appendChild(label);
+
+        } else {
+          if (!p.renamable) {
+            let label = document.createElement("label");
+            label.htmlFor = p.name;
+            label.textContent = p.name;
+            label.title = p.name;
+            this._div.appendChild(label);
+          } else {
+            let label = document.createElement("input");
+            let input = <HTMLInputElement>editor.element;
+            label.value = p.name;
+            label.onkeyup = e => {
+              if (e.key == 'Enter' && label.value) {
+                const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
+                p.service.clearValue(this._designItems, p);
+                p.name = label.value;
+                p.service.setValue(this._designItems, p, input.value);
+                pg.commit();
+                this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
+              }
+            }
+            this._div.appendChild(label);
+          }
         }
+
+        editor.element.id = p.name;
+        this._div.appendChild(editor.element);
+
+        this._propertyMap.set(p, { isSetElement: rect, editor: editor });
       }
     }
   }

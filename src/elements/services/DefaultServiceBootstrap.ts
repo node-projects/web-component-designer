@@ -16,7 +16,7 @@ import { TransformOriginExtensionProvider } from '../widgets/designerView/extens
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider.js';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider.js';
 import { PathExtensionProvider } from '../widgets/designerView/extensions/svg/PathExtensionProvider.js';
-import { MouseOverExtensionProvider } from '../widgets/designerView/extensions/MouseOverExtensionProvider.js';
+import { HighlightElementExtensionProvider } from '../widgets/designerView/extensions/HighlightElementExtensionProvider.js';
 import { NamedTools } from '../widgets/designerView/tools/NamedTools.js';
 import { PointerTool } from '../widgets/designerView/tools/PointerTool.js';
 import { DrawPathTool } from '../widgets/designerView/tools/DrawPathTool.js';
@@ -34,7 +34,7 @@ import { PickColorTool } from '../widgets/designerView/tools/PickColorTool.js';
 import { TextTool } from '../widgets/designerView/tools/TextTool.js';
 import { GrayOutExtensionProvider } from '../widgets/designerView/extensions/GrayOutExtensionProvider.js';
 import { AltToEnterContainerExtensionProvider } from '../widgets/designerView/extensions/AltToEnterContainerExtensionProvider.js';
-import { InvisibleDivExtensionProvider } from '../widgets/designerView/extensions/InvisibleDivExtensionProvider.js';
+import { InvisibleElementExtensionProvider } from '../widgets/designerView/extensions/InvisibleElementExtensionProvider.js';
 import { ItemsBelowContextMenu } from '../widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js';
 import { GridPlacementService } from './placementService/GridPlacementService.js';
 import { ElementAtPointService } from './elementAtPointService/ElementAtPointService.js';
@@ -47,7 +47,6 @@ import { DefaultModelCommandService } from './modelCommandService/DefaultModelCo
 import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperatorProvider.js';
 import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons.js';
 import { DemoProviderService } from './demoProviderService/DemoProviderService.js';
-//import { CursorLinePointerExtensionProvider } from '../widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js';
 import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
 import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
@@ -68,10 +67,15 @@ import { GrayOutDragOverContainerExtensionProvider } from '../widgets/designerVi
 import { LineExtensionProvider } from '../widgets/designerView/extensions/svg/LineExtensionProvider.js';
 import { RectExtentionProvider } from '../widgets/designerView/extensions/svg/RectExtensionProvider.js';
 import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
-import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
+import { PropertyTabsService } from './propertiesService/PropertyTabsService.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
+import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/InvisibleElementExtensionDesignViewConfigButtons.js';
+import { UndoService } from './undoService/UndoService.js';
+import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
+import { SelectionService } from './selectionService/SelectionService.js';
+import { ContentService } from './contentService/ContentService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -82,7 +86,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("propertyService", new SVGElementsPropertiesService());
   serviceContainer.register("propertyService", new Lit2PropertiesService());
   serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
-  serviceContainer.register("propertyGroupsService", new PropertyGroupsService());
+  serviceContainer.register("propertyGroupsService", new PropertyTabsService());
   serviceContainer.register("instanceService", new DefaultInstanceService());
   serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
   serviceContainer.register("htmlWriterService", new HtmlWriterService());
@@ -97,9 +101,14 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());
 
+  serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
+  serviceContainer.register("selectionService",  (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas));
+  serviceContainer.register("contentService",  (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
+  //serviceContainer.register("stylesheetService", new DemoProviderService());
+
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),
-    new InvisibleDivExtensionProvider(),
+    new InvisibleElementExtensionProvider(),
     // new ElementDragTitleExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
@@ -124,7 +133,7 @@ export function createDefaultServiceContainer() {
     new FlexboxExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
-    new MouseOverExtensionProvider()
+    new HighlightElementExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Placement, [
     new PlacementExtensionProvider()
@@ -163,7 +172,9 @@ export function createDefaultServiceContainer() {
   serviceContainer.designViewConfigButtons.push(
     new ButtonSeperatorProvider(20),
     new GridExtensionDesignViewConfigButtons(),
-    new FlexboxExtensionDesignViewConfigButtons()
+    new FlexboxExtensionDesignViewConfigButtons(),
+    new ButtonSeperatorProvider(10),
+    new InvisibleElementExtensionDesignViewConfigButtons()
   );
 
   serviceContainer.designViewToolbarButtons.push(

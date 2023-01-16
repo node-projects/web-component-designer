@@ -1,6 +1,6 @@
 //unsupported: ex, ch, svw, svh, vw, lvh, dvw, dvh
 
-const units = ['px', 'cm', 'mm', 'q', 'in', 'pc', 'pt', 'rem', 'em', 'vw', 'vh', 'vmin', 'vmax', 'lh', 'rlh', '%', 'ms', 's', 'deg', 'rad', 'grad', 'turn', 'fr'];
+const units = ['px', 'cm', 'mm', 'q', 'in', 'pc', 'pt', 'rem', 'em', 'vw', 'vh', 'vmin', 'vmax', 'lh', 'rlh', '%', 'ms', 's', 'deg', 'rad', 'grad', 'turn', 'cqw', 'cqh', 'cqi', 'cqb', 'cqmin', 'cqmax', 'fr'];
 const pattern = new RegExp(`^([\-\+]?(?:\\d+(?:\\.\\d+)?))(${units.join('|')})$`, 'i');
 
 export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, percentTarget: 'width' | 'height'): number {
@@ -27,6 +27,17 @@ export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, per
         'lh': value => value * parseFloat(getComputedStyle(target).lineHeight),
         'rlh': value => value * parseFloat(getComputedStyle(document.documentElement).lineHeight),
         '%': value => value / 100 * (percentTarget == 'height' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
+
+        /* todo
+        //find parent with computed style where contaner-type is inline-size or size (regarding to query type)
+        //use this size for calculation
+        'cqw':
+        'cqh':
+        'cqi':
+        'cqb':
+        'cqmin':
+        'cqmax':
+        */
 
         // Times
         'ms': value => value,

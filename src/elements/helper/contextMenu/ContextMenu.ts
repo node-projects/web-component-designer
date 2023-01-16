@@ -20,9 +20,10 @@ export class ContextMenu {
 		transform-origin: top left;
 		padding: 0;
 		z-index: 2147483647;
+		color: black;
 	  }
 	  
-	  .context_menu.display {
+	  .context_menu.context_menu_display {
 		opacity: 1;
 		transform: scale(1);
 	  }
@@ -38,9 +39,9 @@ export class ContextMenu {
 	  
 	  .context_menu ul {
 		list-style-type: none;
-		padding: 0;
+		padding: 3px;
 		margin: 0;
-		background-color: #ccc;
+		background-color: #f5f7f7;
 		box-shadow: 0 0 5px #333;
 	  }
 	  
@@ -55,18 +56,18 @@ export class ContextMenu {
 		background-color: #bbb;
 	  }
 	  
-	  .context_menu li .cm_icon_span {
-		width: 1.5em;
-		height: 1.2em;
-		vertical-align: bottom;
+	  .context_menu li .context_menu_icon_span {	
+		width: 28px;
 		display: inline-block;
 		border-right: 1px solid #aaa;
-		margin-right: 5px;
-		padding-right: 5px;
-		text-align: center;
+	  }
+
+	  .context_menu li .context_menu_text {	
+		padding-left: 2px;
+		vertical-align: middle;
 	  }
 	  
-	  .context_menu li .cm_sub_span {
+	  .context_menu li .context_menu_sub_span {
 		width: 1em;
 		display: inline-block;
 		text-align: center;
@@ -90,23 +91,23 @@ export class ContextMenu {
 		visibility: visible;
 	  }
 	  
-	  .context_menu li.cm_divider {
+	  .context_menu li.context_menu_divider {
 		border-bottom: 1px solid #aaa;
 		margin: 5px;
 		padding: 0;
 		cursor: default;
 	  }
 	  
-	  .context_menu li.cm_divider:hover {
+	  .context_menu li.context_menu_divider:hover {
 		background-color: inherit;
 	  }
 	  
-	  .context_menu.cm_border_right>ul ul {
+	  .context_menu.context_menu_border_right>ul ul {
 		left: unset;
 		right: 100%;
 	  }
 	  
-	  .context_menu.cm_border_bottom>ul ul {
+	  .context_menu.context_menu_border_bottom>ul ul {
 		top: unset;
 		bottom: 0;
 	  }
@@ -148,7 +149,7 @@ export class ContextMenu {
 		if (this._menuElement == null) {
 			this._menuElement = document.createElement("div");
 			this._menuElement.className = "context_menu";
-			this._menuElement.id = "cm_" + this.num;
+			this._menuElement.id = "context_menu_" + this.num;
 
 			if (shadowRoot === document)
 				document.body.appendChild(this._menuElement);
@@ -174,7 +175,7 @@ export class ContextMenu {
 
 			if (item.title !== '-') {
 				let icon_span = document.createElement("span");
-				icon_span.className = 'cm_icon_span';
+				icon_span.className = 'context_menu_icon_span';
 
 				if ((item.icon ?? '') != '') {
 					icon_span.innerHTML = item.icon;
@@ -183,12 +184,12 @@ export class ContextMenu {
 				}
 
 				let text_span = document.createElement("span");
-				text_span.className = 'cm_text';
+				text_span.className = 'context_menu_text';
 
 				text_span.innerHTML = item.title;
 
 				let sub_span = document.createElement("span");
-				sub_span.className = 'cm_sub_span';
+				sub_span.className = 'context_menu_sub_span';
 
 				if (item.children != null) {
 					sub_span.innerHTML = this.options?.subIcon ?? '&#155;';
@@ -222,7 +223,7 @@ export class ContextMenu {
 				ul_outer.appendChild(li);
 			} else {
 				if (!lastWasDivider) {
-					li.className = "cm_divider";
+					li.className = "context_menu_divider";
 					lastWasDivider = true;
 					ul_outer.appendChild(li);
 				}
@@ -264,18 +265,18 @@ export class ContextMenu {
 		let sizes = ContextUtil.getSizes(menu);
 
 		if ((windowWidth - clickCoordsX) < sizes.width) {
-			menu.classList.add("cm_border_right");
+			menu.classList.add("context_menu_border_right");
 		} else {
-			menu.classList.remove("cm_border_right");
+			menu.classList.remove("context_menu_border_right");
 		}
 
 		if ((windowHeight - clickCoordsY) < sizes.height) {
-			menu.classList.add("cm_border_bottom");
+			menu.classList.add("context_menu_border_bottom");
 		} else {
-			menu.classList.remove("cm_border_bottom");
+			menu.classList.remove("context_menu_border_bottom");
 		}
 
-		menu.classList.add("display");
+		menu.classList.add("context_menu_display");
 
 		event.preventDefault();
 

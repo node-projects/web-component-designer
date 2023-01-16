@@ -12,6 +12,7 @@ import { IUiCommand } from '../commandHandling/IUiCommand.js';
 import { IDisposable } from '../interfaces/IDisposable.js';
 import { ISelectionChangedEvent } from "./services/selectionService/ISelectionChangedEvent.js";
 import { SimpleSplitView } from './controls/SimpleSplitView.js';
+import { IStylesheet } from "./services/stylesheetService/IStylesheetService.js";
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;
@@ -28,6 +29,27 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public get additionalStyleString() {
     return this._additionalStyle;
   };
+
+  private _additionalStylesheets: IStylesheet[];
+  public set additionalStylesheets(stylesheets: IStylesheet[]) {
+    this._additionalStylesheets = stylesheets;
+    if (!this.instanceServiceContainer.stylesheetService) {
+      const stylesheetService = this.designerView.serviceContainer.getLastService('stylesheetService')
+      if (stylesheetService) {
+        const instance = stylesheetService(this.designerView.designerCanvas);
+        this.instanceServiceContainer.register("stylesheetService", instance);
+        instance.stylesheetChanged.on(s => this.additionalStylesheetChanged.emit(s))
+      } else {
+        console.warn("no Stylesheet-Service registered, but additionalStylesheets are used.");
+      }
+    }
+    if (this.designerView.instanceServiceContainer.stylesheetService)
+      this.designerView.instanceServiceContainer.stylesheetService.setStylesheets(stylesheets);
+  };
+  public get additionalStylesheets() {
+    return this._additionalStylesheets;
+  };
+  public additionalStylesheetChanged = new TypedEvent<{ stylesheet: IStylesheet }>;
 
   public onContentChanged = new TypedEvent<void>();
 

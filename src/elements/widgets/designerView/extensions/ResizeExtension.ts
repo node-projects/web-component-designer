@@ -1,6 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
+import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
 import { transformPointByInverseMatrix, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -88,7 +89,11 @@ export class ResizeExtension extends AbstractExtension {
         (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
         //#endregion Calc element's dimension
 
-        this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+        let contentBoxOffset: IPoint = { x: 0, y: 0 };
+        if (getComputedStyle(<HTMLElement>this.extendedItem.element).boxSizing == 'content-box') {
+          contentBoxOffset = getContentBoxContentOffsets(<HTMLElement>this.extendedItem.element);
+        }
+        this._initialSizes.push({ width: (rect.width - contentBoxOffset.x * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor, height: (rect.height - contentBoxOffset.y * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor });
 
         (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[0].width + 'px';
 

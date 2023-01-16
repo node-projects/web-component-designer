@@ -20,7 +20,7 @@ export class TransformOriginExtension extends AbstractExtension {
   override extend() {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
-    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]), y: parseFloat(to[1]) }, this.designerCanvas);
+    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas);
    
     this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
     this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
@@ -46,8 +46,8 @@ export class TransformOriginExtension extends AbstractExtension {
     const y = 1;
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
     const toInPercentage = [];
-    toInPercentage[0] = parseInt(to[0]) / parseInt((<HTMLElement>this.extendedItem.element).style.width); // This value remains the same regardless of scalefactor
-    toInPercentage[1] = parseInt(to[1]) / parseInt((<HTMLElement>this.extendedItem.element).style.height); // This value remains the same regardless of scalefactor
+    toInPercentage[0] = parseFloat(to[0]) / parseFloat((<HTMLElement>this.extendedItem.element).style.width); // This value remains the same regardless of scalefactor
+    toInPercentage[1] = parseFloat(to[1]) / parseFloat((<HTMLElement>this.extendedItem.element).style.height); // This value remains the same regardless of scalefactor
 
     const toDOMPoint = new DOMPoint(rect.x + toInPercentage[x] * rect.width, rect.y + toInPercentage[y] * rect.height)
 

@@ -5,7 +5,7 @@ import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { OverlayLayer } from "./OverlayLayer.js";
 
-export class InvisibleDivExtension extends AbstractExtension {
+export class InvisibleElementExtension extends AbstractExtension {
   private _rect: SVGPathElement;
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem) {
