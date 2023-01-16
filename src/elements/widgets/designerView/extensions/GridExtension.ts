@@ -50,8 +50,6 @@ export class GridExtension extends AbstractExtension {
 
   private defaultSizeOfNewRowOrColumn = "50px";
 
-  private arraysEdited = false;
-
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
@@ -64,9 +62,7 @@ export class GridExtension extends AbstractExtension {
   override refresh() {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
-
-    if(this.arraysEdited)
-      this._initSVGArrays();
+    this._initSVGArrays();
     
     if(cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
       //draw gaps
@@ -131,7 +127,6 @@ export class GridExtension extends AbstractExtension {
     this._plusCircles[0] = new Array(this.gridInformation.cells.length + 1);
     this._plusCircles[1] = new Array(this.gridInformation.cells[0].length + 1);
     this._resizeCircles = new Array(this.gridInformation.gaps.length);
-    this.arraysEdited = false;
   }
 
   _drawResizeCircle(gap, oldCircle?: SVGCircleElement){
@@ -331,7 +326,6 @@ export class GridExtension extends AbstractExtension {
       sizes.splice(pos, 0, this.defaultSizeOfNewRowOrColumn)
     else
       sizes.splice(pos, 1);
-    this.arraysEdited = true;
     this.extendedItem.setStyle(cellTarget, sizes.join(' '));
     if(task == "add") {
       this.extendedItem.setStyle(elementTarget, <string>convertCssUnit(this._calculateNewElementSize(elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget))))
