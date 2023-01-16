@@ -1,5 +1,4 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { IProperty } from "../propertiesService/IProperty.js";
 import { IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from "./IStylesheetService.js";
 
 import type * as csstree from 'css-tree';
@@ -62,7 +61,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
     private getAppliedRulesInternal(designItem: IDesignItem): IRuleWithAST[] {
         let styles: IRuleWithAST[] = [];
         for (let item of this._stylesheets) {
-            if (!item[1].ast || !this.astHasChildren(item[1].ast)) break;
+            if (!item[1].ast || !this.astHasChildren(item[1].ast)) continue;
             styles = styles.concat(Array.from(this.rulesFromAST(item[1].ast, item[1].stylesheet.stylesheet, item[0], designItem)));
         };
         return styles;
@@ -91,18 +90,18 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return retCollection;
     }
 
-    private getDeclarationInternal(designItem: IDesignItem, prop: IProperty): IDeclarationWithAST[] {
+    private getDeclarationInternal(designItem: IDesignItem, styleName: string): IDeclarationWithAST[] {
         let rules = this.getAppliedRulesInternal(designItem);
         if (!rules) return null;
 
         let declarations: IDeclarationWithAST[] = [];
         for (let rule of rules) {
-            let declaration = this.findDeclarationInRule(rule.ast, prop);
+            let declaration = this.findDeclarationInRule(rule.ast, styleName);
             if (!declaration) continue;
             declarations.push({
                 ast: declaration,
                 parent: rule,
-                name: prop.name,
+                name: styleName,
                 value: (declaration.value as csstree.Raw).value,
                 important: declaration.important == true,
             })
@@ -111,28 +110,37 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return declarations;
     }
 
-    public getDeclarations(designItem: IDesignItem, prop: IProperty): IDeclarationWithAST[] {
-        let declarations = this.getDeclarationInternal(designItem, prop);
+    public getDeclarations(designItem: IDesignItem, stlyeName: string): IDeclarationWithAST[] {
+        let declarations = this.getDeclarationInternal(designItem, stlyeName);
         if (!declarations) return null;
 
         return this.sortDeclarations(declarations);
     }
 
     /* Section covers the update of rules and declarations */
-
-    public updateDeclarationWithProperty(designItem: IDesignItem, property: IProperty, value: string, important: boolean): boolean {
-        let sortedDecl = this.sortDeclarations(this.getDeclarationInternal(designItem, property));
-        if (!sortedDecl) {
-            // no declaration of property yet
-            return false;
-        }
-        return false;
-    }
-
     updateDeclarationWithDeclaration(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
         declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value, { context: 'declaration', parseValue: false }))).value;
         this._stylesheets.get(declaration.parent.stylesheetName).stylesheet.stylesheet = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
+        this._stylesheets.get(declaration.parent.stylesheetName).ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(window.csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
         this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(declaration.parent.stylesheetName).stylesheet });
+        return true;
+    }
+
+    insertDeclarationIntoRule(rule: IRuleWithAST, declaration: IStyleDeclaration, important: boolean): boolean {
+        rule.ast.block.children.push(window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + declaration.value + (declaration.important ? "!important" : ""), { context: 'declaration', parseValue: false })));
+        this._stylesheets.get(rule.stylesheetName).stylesheet.stylesheet = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        this._stylesheets.get(rule.stylesheetName).ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(rule.stylesheetName).stylesheet });
+        return true;
+    }
+
+    removeDeclarationFromRule(rule: IRuleWithAST, declaration: IDeclarationWithAST): boolean {
+        let index = rule.ast.block.children.indexOf(declaration.ast);
+        if (index == -1) return false;
+        rule.ast.block.children.splice(index, 1);
+        this._stylesheets.get(rule.stylesheetName).stylesheet.stylesheet = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        this._stylesheets.get(rule.stylesheetName).ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(rule.stylesheetName).stylesheet });
         return true;
     }
 
@@ -182,8 +190,10 @@ export class CssTreeStylesheetService implements IStylesheetService {
         let selectors: string[] = [];
         for (let selector of selectorsAST.children as csstree.SelectorPlain[]) {
             let sel = "";
-            for (let fraction of selector.children as csstree.TypeSelector[]) {
-                sel += fraction.name;
+            for (let fraction of selector.children) {
+                if(fraction.type == "IdSelector") sel += "#" + fraction.name;
+                else if(fraction.type == "ClassSelector") sel += "." + fraction.name;
+                else sel += (<csstree.TypeSelector>fraction).name;
             }
             selectors.push(sel);
         };
@@ -199,8 +209,8 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return sum;
     }
 
-    private findDeclarationInRule(rule: csstree.RulePlain, property: IProperty): csstree.DeclarationPlain {
-        return (rule.block.children as csstree.DeclarationPlain[]).find(declaration => declaration.property == property.name)
+    private findDeclarationInRule(rule: csstree.RulePlain, styleName: string): csstree.DeclarationPlain {
+        return (rule.block.children as csstree.DeclarationPlain[]).find(declaration => declaration.property == styleName);
     }
 
     private elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {

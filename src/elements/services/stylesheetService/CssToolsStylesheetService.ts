@@ -1,5 +1,4 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { IProperty } from "../propertiesService/IProperty.js";
 import { IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from "./IStylesheetService.js";
 
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
@@ -40,15 +39,19 @@ export class CssToolsStylesheetService implements IStylesheetService {
         return null;
     }
 
-    public getDeclarations(designItem: IDesignItem, prop: IProperty): IStyleDeclaration[] {
+    public getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[] {
         return null;
     }
 
-    public updateDeclarationWithProperty(designItem: IDesignItem, property: IProperty, value: string, important: boolean): boolean {
-        return false;
+    public updateDeclarationWithDeclaration(declaration: IStyleDeclaration, value: string, important: boolean): boolean {
+        return true;
     }
 
-    public updateDeclarationWithDeclaration(declaration: IStyleDeclaration, value: string, important: boolean): boolean {
+    public insertDeclarationIntoRule(rule: IStyleRule, declaration: IStyleDeclaration, important: boolean): boolean {
+        return true;
+    }
+
+    removeDeclarationFromRule(rule: IStyleRule, declaration: IStyleDeclaration): boolean {
         return true;
     }
 }

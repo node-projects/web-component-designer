@@ -51,10 +51,17 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
   }
 
   override setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
-    if (property.styleDeclaration) {
+    // No selector means local style, styleDeclaration is null means new property
+    if (property.styleRule?.selector !== null && property.styleDeclaration) {
       designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationWithDeclaration(property.styleDeclaration, value, false);
+      return;
     }
-    else
-      super.setValue(designItems, { ...property, propertyType: PropertyType.cssValue }, value);
+    if (property.styleRule?.selector !== null && !property.styleDeclaration) {
+      designItems[0].instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(property.styleRule, { name: property.name, value: value, important: false }, false);
+      return;
+    }
+
+    // Local style
+    super.setValue(designItems, { ...property, propertyType: PropertyType.cssValue }, value);
   }
 }

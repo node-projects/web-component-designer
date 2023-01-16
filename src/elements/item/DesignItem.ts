@@ -350,20 +350,24 @@ export class DesignItem implements IDesignItem {
   public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean) {
     let nm = PropertiesHelper.camelToDashCase(name);
 
-    const declaration = null;
-    //const declaration = this.serviceContainer.stylesheetService?.getDeclarations(d, property);
-    //const rules = this.serviceContainer.stylesheetService?.getAppliedRules(d, property);
+    // Pre-sorted by priority
+    let declerations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
 
-    if (!declaration) {
+    if (this.hasStyle(name) || !declerations) {
+      // Set style locally
       if (this.getStyle(nm) != value) {
         this.setStyle(nm, value);
       } else if (value == null) {
         this.removeStyle(nm);
       }
+    } else {
+      // Set style in sheet
+      this.instanceServiceContainer.stylesheetService.updateDeclarationWithDeclaration(declerations[0], value, important);
     }
-    //todo -> modify stylesheet, or local css
-    //we need undo for modification of stylesheet, look how we do this
-    //maybe undo in stylsheet service?
+  }
+
+  public getStyleFromSheetOrLocal(name: string) {
+    
   }
 
   public getAllStyles(): IStyleRule[] {
