@@ -62,9 +62,11 @@ export class GridExtension extends AbstractExtension {
   override refresh() {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
-    this._initSVGArrays();
     
     if(cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
+      if(this.gridInformation.cells.length != this._cells.length || this.gridInformation.cells[0].length != this._cells[0].length)
+        this._initSVGArrays();
+
       //draw gaps
       this.gridInformation.gaps.forEach((gap, i) => {
         this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
