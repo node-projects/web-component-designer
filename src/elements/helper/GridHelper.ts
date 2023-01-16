@@ -12,19 +12,18 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   const rows = computedStyle.gridTemplateRows.split(' ');
   const columns = computedStyle.gridTemplateColumns.split(' ');
   const rowUnits = [];
-  try {
-    designItem.getStyle("grid-template-rows").split(' ').forEach(rowWidth => rowUnits.push(getCssUnit(rowWidth)));
-  }
-  catch(e) {
+  let tmpStyle = designItem.getStyle("grid-template-rows");
+  if(tmpStyle)
+    tmpStyle.split(' ').forEach(rowWidth => { if(rowWidth != "") rowUnits.push(getCssUnit(rowWidth)) });
+  else
     rows.forEach(() => rowUnits.push("px"));
-  }
   const columnUnits = [];
-  try {
-    designItem.getStyle("grid-template-columns").split(' ').forEach(columnHeight => columnUnits.push(getCssUnit(columnHeight)));
-  }
-  catch(e) {
+  tmpStyle = designItem.getStyle("grid-template-columns");
+  if(tmpStyle)
+    tmpStyle.split(' ').forEach(columnHeight => { if(columnHeight != "") columnUnits.push(getCssUnit(columnHeight))});
+  else
     columns.forEach(() => columnUnits.push("px"));
-  }
+
   const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
   const paddingTop = Number.parseFloat(computedStyle.paddingTop);
 

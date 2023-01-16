@@ -9,8 +9,8 @@ import { OverlayLayer } from "./OverlayLayer.js";
 
 export class GridExtension extends AbstractExtension {
 
-  private _initialPoint;
-  private _initialSizes : {
+  private _initialPoint: {x: number, y:number};
+  private _initialSizes: {
     x: number[];
     xUnit: string[];
     y: number[]; 
@@ -50,8 +50,6 @@ export class GridExtension extends AbstractExtension {
 
   private defaultSizeOfNewRowOrColumn = "50px";
 
-  private arraysEdited = false;
-
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
@@ -64,49 +62,51 @@ export class GridExtension extends AbstractExtension {
   override refresh() {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
+    
+    if(cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
+      if(this.gridInformation.cells.length != this._cells.length || this.gridInformation.cells[0].length != this._cells[0].length)
+        this._initSVGArrays();
 
-    if(this.arraysEdited)
-      this._initSVGArrays();
-      
-    //draw gaps
-    this.gridInformation.gaps.forEach((gap, i) => {
-      this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
-      this._resizeCircles[i] = this._drawResizeCircle(gap, this._resizeCircles[i]);
-    })
-
-    //draw cells
-    cells.forEach((row, i) => {
-      row.forEach((cell, j) => {
-        this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
-        if (cell.name) {
-          const text = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', null, OverlayLayer.Background);
-          text.setAttribute("dominant-baseline", "hanging");
-        }
+      //draw gaps
+      this.gridInformation.gaps.forEach((gap, i) => {
+        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
+        this._resizeCircles[i] = this._drawResizeCircle(gap, this._resizeCircles[i]);
       })
-    })    
 
-    //draw headers
-    cells.forEach((row, i) => {  //vertical headers
-      this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], i, "vertical")
-      this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
-    })
+      //draw cells
+      cells.forEach((row, i) => {
+        row.forEach((cell, j) => {
+          this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
+          if (cell.name) {
+            const text = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', null, OverlayLayer.Background);
+            text.setAttribute("dominant-baseline", "hanging");
+          }
+        })
+      })    
 
-    cells[0].forEach((column, i) => {
-      this._headers[1][i] = this._drawHeader(column, this._headers[1][i], i, "horizontal")
-      this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
-    })
+      //draw headers
+      cells.forEach((row, i) => {  //vertical headers
+        this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], i, "vertical")
+        this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
+      })
 
-    //draw circles for adding rows/columns
-    for(let i = 0; i < this._plusCircles[0].length; i++)
-      if(i < this._plusCircles[0].length - 1)
-        this._plusCircles[0][i] = this._drawPlusCircle(cells[i][0].x, cells[i][0].y, this._plusCircles[0][i], i, "vertical");
-      else
-        this._plusCircles[0][i] = this._drawPlusCircle(cells[i - 1][0].x, cells[i - 1][0].y + cells[i - 1][0].height, this._plusCircles[0][i], i, "vertical", true);
-    for(let i = 0; i < this._plusCircles[1].length; i++) 
-      if(i < this._plusCircles[1].length - 1)
-        this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i].x, cells[0][i].y, this._plusCircles[1][i], i, "horizontal");
-      else
-        this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i - 1].x + cells[0][i - 1].width, cells[0][i - 1].y, this._plusCircles[1][i], i, "horizontal", true);
+      cells[0].forEach((column, i) => {
+        this._headers[1][i] = this._drawHeader(column, this._headers[1][i], i, "horizontal")
+        this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
+      })
+
+      //draw circles for adding rows/columns
+      for(let i = 0; i < this._plusCircles[0].length; i++)
+        if(i < this._plusCircles[0].length - 1)
+          this._plusCircles[0][i] = this._drawPlusCircle(cells[i][0].x, cells[i][0].y, this._plusCircles[0][i], i, "vertical");
+        else
+          this._plusCircles[0][i] = this._drawPlusCircle(cells[i - 1][0].x, cells[i - 1][0].y + cells[i - 1][0].height, this._plusCircles[0][i], i, "vertical", true);
+      for(let i = 0; i < this._plusCircles[1].length; i++) 
+        if(i < this._plusCircles[1].length - 1)
+          this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i].x, cells[0][i].y, this._plusCircles[1][i], i, "horizontal");
+        else
+          this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i - 1].x + cells[0][i - 1].width, cells[0][i - 1].y, this._plusCircles[1][i], i, "horizontal", true);
+    }
   }
 
   override dispose() {
@@ -129,7 +129,6 @@ export class GridExtension extends AbstractExtension {
     this._plusCircles[0] = new Array(this.gridInformation.cells.length + 1);
     this._plusCircles[1] = new Array(this.gridInformation.cells[0].length + 1);
     this._resizeCircles = new Array(this.gridInformation.gaps.length);
-    this.arraysEdited = false;
   }
 
   _drawResizeCircle(gap, oldCircle?: SVGCircleElement){
@@ -216,7 +215,10 @@ export class GridExtension extends AbstractExtension {
     plusElement.circle.style.display = "none";
     if(!oldPlusElement) {
       plusElement.circle.addEventListener(EventNames.PointerMove, event => this._toggleDisplayPlusCircles(index, alignment));
-      plusElement.circle.addEventListener(EventNames.PointerDown, event => this._editGrid(index, alignment, "add"));
+      plusElement.circle.addEventListener(EventNames.PointerDown, event => {
+        this._editGrid(index, alignment, "add");
+        event.stopPropagation();
+      });
     }
 
     plusElement.verticalLine = this._drawLine(posX, posY - this.defaultPlusSize / 2, posX, posY + this.defaultPlusSize / 2, "svg-grid-plus-sign", oldPlusElement ? oldPlusElement.verticalLine : null, OverlayLayer.Foregorund);
@@ -326,7 +328,6 @@ export class GridExtension extends AbstractExtension {
       sizes.splice(pos, 0, this.defaultSizeOfNewRowOrColumn)
     else
       sizes.splice(pos, 1);
-    this.arraysEdited = true;
     this.extendedItem.setStyle(cellTarget, sizes.join(' '));
     if(task == "add") {
       this.extendedItem.setStyle(elementTarget, <string>convertCssUnit(this._calculateNewElementSize(elementTarget), this.designerCanvas.canvas, elementTarget, getCssUnit(this.extendedItem.getStyle(elementTarget))))
