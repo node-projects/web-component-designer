@@ -84,6 +84,12 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
 
   private selectProperties: IProperty[] = [
     {
+      name: "value",
+      type: "string",
+      service: this,
+      propertyType: PropertyType.property
+    },
+    {
       name: "size",
       type: "number",
       service: this,
