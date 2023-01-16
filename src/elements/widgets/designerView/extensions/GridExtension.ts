@@ -216,7 +216,10 @@ export class GridExtension extends AbstractExtension {
     plusElement.circle.style.display = "none";
     if(!oldPlusElement) {
       plusElement.circle.addEventListener(EventNames.PointerMove, event => this._toggleDisplayPlusCircles(index, alignment));
-      plusElement.circle.addEventListener(EventNames.PointerDown, event => this._editGrid(index, alignment, "add"));
+      plusElement.circle.addEventListener(EventNames.PointerDown, event => {
+        this._editGrid(index, alignment, "add");
+        event.stopPropagation();
+      });
     }
 
     plusElement.verticalLine = this._drawLine(posX, posY - this.defaultPlusSize / 2, posX, posY + this.defaultPlusSize / 2, "svg-grid-plus-sign", oldPlusElement ? oldPlusElement.verticalLine : null, OverlayLayer.Foregorund);
