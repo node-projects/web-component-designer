@@ -345,7 +345,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         break;
       case CommandType.selectAll:
         this.handleSelectAll();
-        break;
+        break;   
     }
   }
 
