@@ -20,7 +20,7 @@ export class GridExtension extends AbstractExtension {
   private _gaps: SVGRectElement[];
   private _headers: SVGRectElement[][];
   private _headerTexts: SVGTextElement[][];
-  private _plusCircles: SVGCircleElement[][];
+  private _plusCircles: { circle: SVGCircleElement, verticalLine: SVGLineElement, horizontalLine: SVGLineElement }[][]
   private _resizeCircles: SVGCircleElement[];
   private minPixelSize = 10;
   private gridInformation : {
@@ -44,6 +44,7 @@ export class GridExtension extends AbstractExtension {
   }
 
   private defaultHeaderSize = 20;
+  private defaultPlusSize = this.defaultHeaderSize * 2 / 3;
   private defaultDistanceToBox = 5;
   private defaultDistanceBetweenHeaders = 10;
 
@@ -195,9 +196,8 @@ export class GridExtension extends AbstractExtension {
     return rText;
   }
 
-  _drawPlusCircle(x, y, oldPlusBox, index, alignment: "vertical" | "horizontal", final = false){
-    let plusBox;
-    
+  _drawPlusCircle(x, y, oldPlusElement: { circle: SVGCircleElement, verticalLine: SVGLineElement, horizontalLine: SVGLineElement }, index, alignment: "vertical" | "horizontal", final = false){
+    let plusElement = {circle: null, verticalLine: null, horizontalLine: null};
     let posX;
     let posY;
     let gapOffset = index == 0 || final ? 0 : -(convertCssUnitToPixel(this.extendedItem.getStyle(alignment == "vertical" ? "row-gap" : "column-gap"), <HTMLElement>this.extendedItem.element, alignment == "vertical" ? "height" : "width") / 2);
@@ -210,16 +210,20 @@ export class GridExtension extends AbstractExtension {
       posX = x + gapOffset;
       posY = y - this.defaultDistanceToBox - this.defaultHeaderSize / 2;
     }
-
-    plusBox = this._drawCircle(posX, posY, this.defaultHeaderSize / 2, 'svg-grid-resizer', oldPlusBox, OverlayLayer.Foregorund)
-    plusBox.style.pointerEvents = "all";
-    plusBox.style.cursor = "pointer";
-    plusBox.style.display = "none";
-    if(!oldPlusBox) {
-      plusBox.addEventListener(EventNames.PointerMove, event => this._toggleDisplayPlusCircles(index, alignment));
-      plusBox.addEventListener(EventNames.PointerDown, event => this._editGrid(index, alignment, "add"));
+    plusElement.circle = this._drawCircle(posX, posY, this.defaultHeaderSize / 2, 'svg-grid-resizer', oldPlusElement ? oldPlusElement.circle : null, OverlayLayer.Foregorund)
+    plusElement.circle.style.pointerEvents = "all";
+    plusElement.circle.style.cursor = "pointer";
+    plusElement.circle.style.display = "none";
+    if(!oldPlusElement) {
+      plusElement.circle.addEventListener(EventNames.PointerMove, event => this._toggleDisplayPlusCircles(index, alignment));
+      plusElement.circle.addEventListener(EventNames.PointerDown, event => this._editGrid(index, alignment, "add"));
     }
-    return plusBox;
+
+    plusElement.verticalLine = this._drawLine(posX, posY - this.defaultPlusSize / 2, posX, posY + this.defaultPlusSize / 2, "svg-grid-plus-sign", oldPlusElement ? oldPlusElement.verticalLine : null, OverlayLayer.Foregorund);
+    plusElement.verticalLine.style.display = "none";
+    plusElement.horizontalLine = this._drawLine(posX - this.defaultPlusSize / 2, posY, posX + this.defaultPlusSize / 2, posY, "svg-grid-plus-sign", oldPlusElement ? oldPlusElement.horizontalLine : null, OverlayLayer.Foregorund);
+    plusElement.horizontalLine.style.display = "none";
+    return plusElement;
   }
 
   _getHeaderText(size: number, unit: string, percentTarget: "width" | "height"){
@@ -347,16 +351,22 @@ export class GridExtension extends AbstractExtension {
     return tmpSize + "px";
   }
 
-  _toggleDisplayPlusCircles(index, alignment: "vertical" | "horizontal", double = false){
+  _toggleDisplayPlusCircles(index, alignment: "vertical" | "horizontal", double = false) {
     this._plusCircles.forEach(alignment => {
-      alignment.forEach(circle => {
-        circle.style.display = "none";
+      alignment.forEach(element => {
+        element.circle.style.display = "none";
+        element.verticalLine.style.display = "none";
+        element.horizontalLine.style.display = "none";
       })
     })
     if(index != -1) {
-      this._plusCircles[alignment == "vertical" ? 0 : 1][index].style.display = "inline"
+      this._plusCircles[alignment == "vertical" ? 0 : 1][index].circle.style.display = "inline";
+      this._plusCircles[alignment == "vertical" ? 0 : 1][index].verticalLine.style.display = "inline";
+      this._plusCircles[alignment == "vertical" ? 0 : 1][index].horizontalLine.style.display = "inline";
       if(double) {
-        this._plusCircles[alignment == "vertical" ? 0 : 1][index + 1].style.display = "inline"
+        this._plusCircles[alignment == "vertical" ? 0 : 1][index + 1].circle.style.display = "inline";
+        this._plusCircles[alignment == "vertical" ? 0 : 1][index + 1].verticalLine.style.display = "inline";
+        this._plusCircles[alignment == "vertical" ? 0 : 1][index + 1].horizontalLine.style.display = "inline";
       }
     }
   }
