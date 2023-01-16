@@ -14,13 +14,13 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   const rowUnits = [];
   let tmpStyle = designItem.getStyle("grid-template-rows");
   if(tmpStyle)
-    tmpStyle.split(' ').forEach(rowWidth => rowUnits.push(getCssUnit(rowWidth)));
+    tmpStyle.split(' ').forEach(rowWidth => { if(rowWidth != "") rowUnits.push(getCssUnit(rowWidth)) });
   else
     rows.forEach(() => rowUnits.push("px"));
   const columnUnits = [];
   tmpStyle = designItem.getStyle("grid-template-columns");
   if(tmpStyle)
-    tmpStyle.split(' ').forEach(columnHeight => rowUnits.push(getCssUnit(columnHeight)));
+    tmpStyle.split(' ').forEach(columnHeight => { if(columnHeight != "") columnUnits.push(getCssUnit(columnHeight))});
   else
     columns.forEach(() => columnUnits.push("px"));
 
