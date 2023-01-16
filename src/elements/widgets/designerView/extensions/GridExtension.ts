@@ -9,8 +9,8 @@ import { OverlayLayer } from "./OverlayLayer.js";
 
 export class GridExtension extends AbstractExtension {
 
-  private _initialPoint;
-  private _initialSizes : {
+  private _initialPoint: {x: number, y:number};
+  private _initialSizes: {
     x: number[];
     xUnit: string[];
     y: number[]; 
