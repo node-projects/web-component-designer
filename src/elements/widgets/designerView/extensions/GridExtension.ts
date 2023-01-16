@@ -67,46 +67,48 @@ export class GridExtension extends AbstractExtension {
 
     if(this.arraysEdited)
       this._initSVGArrays();
-      
-    //draw gaps
-    this.gridInformation.gaps.forEach((gap, i) => {
-      this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
-      this._resizeCircles[i] = this._drawResizeCircle(gap, this._resizeCircles[i]);
-    })
-
-    //draw cells
-    cells.forEach((row, i) => {
-      row.forEach((cell, j) => {
-        this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
-        if (cell.name) {
-          const text = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', null, OverlayLayer.Background);
-          text.setAttribute("dominant-baseline", "hanging");
-        }
+    
+    if(cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
+      //draw gaps
+      this.gridInformation.gaps.forEach((gap, i) => {
+        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
+        this._resizeCircles[i] = this._drawResizeCircle(gap, this._resizeCircles[i]);
       })
-    })    
 
-    //draw headers
-    cells.forEach((row, i) => {  //vertical headers
-      this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], i, "vertical")
-      this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
-    })
+      //draw cells
+      cells.forEach((row, i) => {
+        row.forEach((cell, j) => {
+          this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
+          if (cell.name) {
+            const text = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', null, OverlayLayer.Background);
+            text.setAttribute("dominant-baseline", "hanging");
+          }
+        })
+      })    
 
-    cells[0].forEach((column, i) => {
-      this._headers[1][i] = this._drawHeader(column, this._headers[1][i], i, "horizontal")
-      this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
-    })
+      //draw headers
+      cells.forEach((row, i) => {  //vertical headers
+        this._headers[0][i] = this._drawHeader(row[0], this._headers[0][i], i, "vertical")
+        this._headerTexts[0][i] = this._drawHeaderText(row[0], this._headerTexts[0][i], "vertical");
+      })
 
-    //draw circles for adding rows/columns
-    for(let i = 0; i < this._plusCircles[0].length; i++)
-      if(i < this._plusCircles[0].length - 1)
-        this._plusCircles[0][i] = this._drawPlusCircle(cells[i][0].x, cells[i][0].y, this._plusCircles[0][i], i, "vertical");
-      else
-        this._plusCircles[0][i] = this._drawPlusCircle(cells[i - 1][0].x, cells[i - 1][0].y + cells[i - 1][0].height, this._plusCircles[0][i], i, "vertical", true);
-    for(let i = 0; i < this._plusCircles[1].length; i++) 
-      if(i < this._plusCircles[1].length - 1)
-        this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i].x, cells[0][i].y, this._plusCircles[1][i], i, "horizontal");
-      else
-        this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i - 1].x + cells[0][i - 1].width, cells[0][i - 1].y, this._plusCircles[1][i], i, "horizontal", true);
+      cells[0].forEach((column, i) => {
+        this._headers[1][i] = this._drawHeader(column, this._headers[1][i], i, "horizontal")
+        this._headerTexts[1][i] = this._drawHeaderText(column, this._headerTexts[1][i], "horizontal");
+      })
+
+      //draw circles for adding rows/columns
+      for(let i = 0; i < this._plusCircles[0].length; i++)
+        if(i < this._plusCircles[0].length - 1)
+          this._plusCircles[0][i] = this._drawPlusCircle(cells[i][0].x, cells[i][0].y, this._plusCircles[0][i], i, "vertical");
+        else
+          this._plusCircles[0][i] = this._drawPlusCircle(cells[i - 1][0].x, cells[i - 1][0].y + cells[i - 1][0].height, this._plusCircles[0][i], i, "vertical", true);
+      for(let i = 0; i < this._plusCircles[1].length; i++) 
+        if(i < this._plusCircles[1].length - 1)
+          this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i].x, cells[0][i].y, this._plusCircles[1][i], i, "horizontal");
+        else
+          this._plusCircles[1][i] = this._drawPlusCircle(cells[0][i - 1].x + cells[0][i - 1].width, cells[0][i - 1].y, this._plusCircles[1][i], i, "horizontal", true);
+    }
   }
 
   override dispose() {
