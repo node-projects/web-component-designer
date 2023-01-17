@@ -263,7 +263,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this.instanceServiceContainer.stylesheetService) {
       styles.push(...this.instanceServiceContainer.stylesheetService
         .getStylesheets()
-        .map(x => cssFromString(this.buildPatchedStyleSheet([cssFromString(x.stylesheet)]))));
+        .map(x => cssFromString(this.buildPatchedStyleSheet([cssFromString(x.content)]))));
     }
     this.shadowRoot.adoptedStyleSheets = styles;
   }

@@ -135,8 +135,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     if (designItems != null && designItems.length !== 0) {
       if (property.propertyType == PropertyType.cssValue) {
         let lastValue = designItems[0].getStyle(property.name);
-        for (const x of designItems) {
-          let value = x.getStyle(property.name);
+        for (const d of designItems) {
+          let value = d.getStyle(property.name);
           if (value != lastValue) {
             lastValue = null;
             break;

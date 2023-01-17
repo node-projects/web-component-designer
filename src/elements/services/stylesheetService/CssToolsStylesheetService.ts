@@ -17,7 +17,7 @@ export class CssToolsStylesheetService implements IStylesheetService {
             for (let stylesheet of stylesheets) {
                 this._stylesheets.set(stylesheet.name, {
                     stylesheet: stylesheet,
-                    ast: tools.parse(stylesheet.stylesheet)
+                    ast: tools.parse(stylesheet.content)
                 });
             }
             this.stylesheetsChanged.emit();

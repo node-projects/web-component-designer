@@ -70,6 +70,7 @@ export interface IDesignItem {
   setStyle(name: string, value?: string | null, important?: boolean);
   removeStyle(name: string);
   updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean);
+  getStyleFromSheetOrLocal(name: string);
   getAllStyles(): IStyleRule[];
 
   attributes(): Iterable<[name: string, value: string]>
