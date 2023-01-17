@@ -64,4 +64,12 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
     // Local style
     super.setValue(designItems, { ...property, propertyType: PropertyType.cssValue }, value);
   }
+
+  override clearValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
+    if (property.styleRule?.selector !== null && property.styleDeclaration) {
+      designItems[0].instanceServiceContainer.stylesheetService.removeDeclarationFromRule(property.styleRule, property.styleDeclaration);
+      return;
+    }
+    super.clearValue(designItems, property);
+  }
 }

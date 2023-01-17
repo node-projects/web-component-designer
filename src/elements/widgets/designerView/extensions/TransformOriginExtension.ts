@@ -21,7 +21,7 @@ export class TransformOriginExtension extends AbstractExtension {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
     const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas);
-   
+
     this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
     this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     this._circle.style.cursor = 'pointer';
@@ -32,8 +32,9 @@ export class TransformOriginExtension extends AbstractExtension {
     this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
     this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
-    if (this.extendedItem.getStyle('transform-origin')) {
-      this._oldValue = this.extendedItem.getStyle('transform-origin');
+    let old = this.extendedItem.getStyleFromSheetOrLocal('transform-origin');
+    if (old) {
+      this._oldValue = old;
     }
   }
 
@@ -83,13 +84,13 @@ export class TransformOriginExtension extends AbstractExtension {
               if (oldSplit.length > 1) {
                 newYs = convertCssUnit(newY, <HTMLElement>this.extendedItem.element, 'height', getCssUnit(oldSplit[1]));
               }
-              this.extendedItem.setStyle('transform-origin', newXs + ' ' + newYs);
+              this.extendedItem.updateStyleInSheetOrLocal('transform-origin', newXs + ' ' + newYs);
             } catch (err) {
-              this.extendedItem.setStyle('transform-origin', newX + 'px' + ' ' + newY + 'px');
+              this.extendedItem.updateStyleInSheetOrLocal('transform-origin', newX + 'px' + ' ' + newY + 'px');
             }
           }
           else
-            this.extendedItem.setStyle('transform-origin', newX + 'px' + ' ' + newY + 'px');
+            this.extendedItem.updateStyleInSheetOrLocal('transform-origin', newX + 'px' + ' ' + newY + 'px');
           this.refresh();
           this._startPos = null;
         }
