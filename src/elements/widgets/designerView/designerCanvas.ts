@@ -197,6 +197,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _pointerextensions: IDesignerPointerExtension[];
   private _onDblClickBound: any;
 
+  private _lastCopiedPrimaryItem: IDesignItem;
+
   constructor() {
     super();
     this._restoreCachedInititalValues();
@@ -345,7 +347,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         break;
       case CommandType.selectAll:
         this.handleSelectAll();
-        break;   
+        break;
     }
   }
 
@@ -424,6 +426,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   async handleCopyCommand() {
+    this._lastCopiedPrimaryItem = this.instanceServiceContainer.selectionService.primarySelection;
     await this.serviceContainer.copyPasteService.copyItems(this.instanceServiceContainer.selectionService.selectedElements);
   }
 
@@ -433,7 +436,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     let grp = this.rootDesignItem.openGroup("Insert");
 
     let pasteContainer = this.rootDesignItem;
-    let pCon = this.instanceServiceContainer.selectionService.primarySelection;
+    let pCon = this._lastCopiedPrimaryItem?.parent ?? this.instanceServiceContainer.selectionService.primarySelection;
     while (pCon != null) {
       const containerStyle = getComputedStyle(pCon.element);
       let newContainerService: IPlacementService;
@@ -487,8 +490,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (undoService)
       this.instanceServiceContainer.register("undoService", undoService(this));
     const selectionService = this.serviceContainer.getLastService('selectionService')
-    if (selectionService)
+    if (selectionService) {
       this.instanceServiceContainer.register("selectionService", selectionService(this));
+      this.instanceServiceContainer.selectionService.onSelectionChanged.on(() => {
+        this._lastCopiedPrimaryItem = null;
+      })
+    }
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     const contentService = this.serviceContainer.getLastService('contentService')
