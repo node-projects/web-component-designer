@@ -15,19 +15,19 @@ export interface IStyleDeclaration {
 }
 
 export interface IStylesheet {
-    stylesheet: string,
+    content: string,
     name: string,
 }
 
 export interface IStylesheetService {
-    setStylesheets(stylesheets: IStylesheet[]) : void;
+    setStylesheets(stylesheets: IStylesheet[]): void;
     getStylesheets(): IStylesheet[];
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[];
     updateDeclarationWithDeclaration(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
-    insertDeclarationIntoRule(rule: IStyleRule, declaration: IStyleDeclaration, important : boolean): boolean;
+    insertDeclarationIntoRule(rule: IStyleRule, declaration: IStyleDeclaration, important: boolean): boolean;
     removeDeclarationFromRule(rule: IStyleRule, declaration: IStyleDeclaration): boolean;
-    
+
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
     stylesheetsChanged: TypedEvent<void>;
 }

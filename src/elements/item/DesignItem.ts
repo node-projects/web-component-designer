@@ -350,7 +350,7 @@ export class DesignItem implements IDesignItem {
   public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean) {
     let nm = PropertiesHelper.camelToDashCase(name);
 
-    // Pre-sorted by priority
+    // Pre-sorted by specificity
     let declerations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
 
     if (this.hasStyle(name) || !declerations) {
@@ -367,7 +367,18 @@ export class DesignItem implements IDesignItem {
   }
 
   public getStyleFromSheetOrLocal(name: string) {
-    
+    let nm = PropertiesHelper.camelToDashCase(name);
+
+    if (this.hasStyle(name))
+      // Get style locally
+      return this.getStyle(nm);
+
+    // Pre-sorted by specificity
+    let decls = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
+    if (decls && decls.length > 0)
+      return decls[0].value;
+
+    return null;
   }
 
   public getAllStyles(): IStyleRule[] {

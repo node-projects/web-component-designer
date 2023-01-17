@@ -39,7 +39,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
             for (let stylesheet of stylesheets) {
                 this._stylesheets.set(stylesheet.name, {
                     stylesheet: stylesheet,
-                    ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.stylesheet, { positions: true, parseValue: false })))
+                    ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.content, { positions: true, parseValue: false })))
                 });
             }
             this.stylesheetsChanged.emit();
@@ -62,7 +62,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
         let styles: IRuleWithAST[] = [];
         for (let item of this._stylesheets) {
             if (!item[1].ast || !this.astHasChildren(item[1].ast)) continue;
-            styles = styles.concat(Array.from(this.rulesFromAST(item[1].ast, item[1].stylesheet.stylesheet, item[0], designItem)));
+            styles = styles.concat(Array.from(this.rulesFromAST(item[1].ast, item[1].stylesheet.content, item[0], designItem)));
         };
         return styles;
     }
@@ -119,18 +119,24 @@ export class CssTreeStylesheetService implements IStylesheetService {
 
     /* Section covers the update of rules and declarations */
     updateDeclarationWithDeclaration(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
-        declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value, { context: 'declaration', parseValue: false }))).value;
-        this._stylesheets.get(declaration.parent.stylesheetName).stylesheet.stylesheet = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
-        this._stylesheets.get(declaration.parent.stylesheetName).ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(window.csstree.fromPlainObject(this._stylesheets.get(declaration.parent.stylesheetName).ast));
-        this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(declaration.parent.stylesheetName).stylesheet });
+        let sourceNode = this._stylesheets.get(declaration.parent.stylesheetName);
+        declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value + (important ? " !important" : ""), { context: 'declaration', parseValue: false }))).value;
+        sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
+
+        // After generating the stylesheet, the AST has to be transformed back into a plain object
+        sourceNode.ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(<any>sourceNode.ast);
+        this.stylesheetChanged.emit({ stylesheet: sourceNode.stylesheet });
         return true;
     }
 
     insertDeclarationIntoRule(rule: IRuleWithAST, declaration: IStyleDeclaration, important: boolean): boolean {
-        rule.ast.block.children.push(window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + declaration.value + (declaration.important ? "!important" : ""), { context: 'declaration', parseValue: false })));
-        this._stylesheets.get(rule.stylesheetName).stylesheet.stylesheet = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
-        this._stylesheets.get(rule.stylesheetName).ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
-        this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(rule.stylesheetName).stylesheet });
+        let sourceNode = this._stylesheets.get(rule.stylesheetName);
+        rule.ast.block.children.push(window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + declaration.value + (declaration.important ? " !important" : ""), { context: 'declaration', parseValue: false })));
+        sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
+
+        // After generating the stylesheet, the AST has to be transformed back into a plain object
+        sourceNode.ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(<any>sourceNode.ast);
+        this.stylesheetChanged.emit({ stylesheet: sourceNode.stylesheet });
         return true;
     }
 
@@ -138,7 +144,7 @@ export class CssTreeStylesheetService implements IStylesheetService {
         let index = rule.ast.block.children.indexOf(declaration.ast);
         if (index == -1) return false;
         rule.ast.block.children.splice(index, 1);
-        this._stylesheets.get(rule.stylesheetName).stylesheet.stylesheet = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        this._stylesheets.get(rule.stylesheetName).stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
         this._stylesheets.get(rule.stylesheetName).ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
         this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(rule.stylesheetName).stylesheet });
         return true;
@@ -191,8 +197,8 @@ export class CssTreeStylesheetService implements IStylesheetService {
         for (let selector of selectorsAST.children as csstree.SelectorPlain[]) {
             let sel = "";
             for (let fraction of selector.children) {
-                if(fraction.type == "IdSelector") sel += "#" + fraction.name;
-                else if(fraction.type == "ClassSelector") sel += "." + fraction.name;
+                if (fraction.type == "IdSelector") sel += "#" + fraction.name;
+                else if (fraction.type == "ClassSelector") sel += "." + fraction.name;
                 else sel += (<csstree.TypeSelector>fraction).name;
             }
             selectors.push(sel);
