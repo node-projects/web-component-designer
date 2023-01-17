@@ -11,9 +11,9 @@ export class CopyPasteService implements ICopyPasteService {
 
   async copyItems(designItems: IDesignItem[]): Promise<void> {
     const copyText = DomConverter.ConvertToString(designItems, null, false);
-    const positions = designItems.map(x => x.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(x.element));
-    const data = [new ClipboardItem({ ["text/html"]: new Blob([copyText], { type: 'text/html' }), [positionsJsonMime]: new Blob([JSON.stringify(positions)], { type: positionsJsonMime }) })];
     try {
+      const positions = designItems.map(x => x.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(x.element));
+      const data = [new ClipboardItem({ ["text/html"]: new Blob([copyText], { type: 'text/html' }), [positionsJsonMime]: new Blob([JSON.stringify(positions)], { type: positionsJsonMime }) })];   
       await navigator.clipboard.write(data);
     } catch (err) {
       await navigator.clipboard.writeText(copyText);
