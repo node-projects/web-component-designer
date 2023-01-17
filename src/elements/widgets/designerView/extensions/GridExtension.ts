@@ -375,7 +375,7 @@ export class GridExtension extends AbstractExtension {
   _convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) : string | number{
     if(unit == "fr"){
       let containerSize = convertCssUnitToPixel(target.style.width, target, percentTarget);
-      let amountGaps = percentTarget == "width" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1
+      let amountGaps = percentTarget == "height" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1
       let gapSize = convertCssUnitToPixel(percentTarget == "width" ? target.style.columnGap : target.style.rowGap, target, percentTarget)
       let containerSizeWithoutGaps = containerSize - gapSize * amountGaps;
 
