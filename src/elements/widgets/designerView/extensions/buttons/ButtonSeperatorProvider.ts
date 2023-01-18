@@ -10,7 +10,8 @@ export class ButtonSeperatorProvider implements IDesignViewConfigButtonsProvider
   }
   provideButtons(designerView: DesignerView, designerCanvas: IDesignerCanvas): HTMLElement[] {
     const div = document.createElement('div');
-    div.style.marginLeft = this._space + 'px';
+    div.style.width = this._space + 'px';
+    div.oncontextmenu = (e) => { e.preventDefault(); };
     return [div];
   }
 }
