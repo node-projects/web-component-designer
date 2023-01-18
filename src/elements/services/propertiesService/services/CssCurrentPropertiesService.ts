@@ -57,15 +57,22 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
     // No selector means local style, styleDeclaration is null means new property
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
       designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(property.styleDeclaration, value, false);
+      this._notifyChangedProperty(designItems[0], property, value);
       return;
     }
     if (property.styleRule?.selector !== null && !property.styleDeclaration) {
       designItems[0].instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(property.styleRule, property.name, value, false);
+      this._notifyChangedProperty(designItems[0], property, value);
       return;
     }
 
-    // Local style
-    super.setValue(designItems, { ...property, propertyType: PropertyType.cssValue }, value);
+    for (const d of designItems) {
+      // Local style
+      d.setStyle(property.name, value);
+      //unkown css property names do not trigger the mutation observer of property grid, 
+      //fixed by assinging stle again to the attribute
+      (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
+    }
   }
 
   override clearValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
@@ -80,6 +87,12 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
     if (property.styleRule?.selector && property.styleDeclaration)
       return property.styleDeclaration.value
     return super.getValue(designItems, property);
+  }
+
+  override getUnsetValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
+    if (property.styleRule?.selector && property.styleDeclaration)
+      return property.styleDeclaration.value
+    return super.getUnsetValue(designItems, property);
   }
 
   override isSet(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }): ValueType {

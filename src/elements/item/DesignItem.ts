@@ -361,7 +361,7 @@ export class DesignItem implements IDesignItem {
     // Pre-sorted by specificity
     let declerations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
 
-    if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declerations) {
+    if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declerations?.length) {
       // Set style locally
       if (this.getStyle(nm) != value) {
         this.setStyle(nm, value);
