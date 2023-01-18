@@ -91,6 +91,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       //@ts-ignore
       this._monacoEditor = monaco.editor.create(this._editor, {
         automaticLayout: true,
+        wordWrapColumn: 1000,
+        wordWrap: 'wordWrapColumn',
         value: this.code,
         language: 'html',
         minimap: {
