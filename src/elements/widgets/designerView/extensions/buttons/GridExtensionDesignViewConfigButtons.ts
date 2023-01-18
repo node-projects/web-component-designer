@@ -1,7 +1,7 @@
-import { DesignerView } from "../designerView.js";
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignViewConfigButtonsProvider } from "../IDesignViewConfigButtonsProvider.js";
-import { gridExtensionShowOverlayOptionName } from "./GridExtensionProvider.js";
+import { DesignerView } from "../../designerView.js";
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignViewConfigButtonsProvider } from "./IDesignViewConfigButtonsProvider.js";
+import { gridExtensionShowOverlayOptionName } from "../GridExtensionProvider.js";
 
 export class GridExtensionDesignViewConfigButtons implements IDesignViewConfigButtonsProvider {
 

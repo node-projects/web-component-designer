@@ -1,7 +1,7 @@
-import { DesignerView } from "../designerView.js";
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignViewConfigButtonsProvider } from "../IDesignViewConfigButtonsProvider.js";
-import { invisibleElementExtensionShowOverlayOptionName } from "./InvisibleElementExtensionProvider.js";
+import { DesignerView } from "../../designerView.js";
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignViewConfigButtonsProvider } from "./IDesignViewConfigButtonsProvider.js";
+import { invisibleElementExtensionShowOverlayOptionName } from "../InvisibleElementExtensionProvider.js";
 
 export class InvisibleElementExtensionDesignViewConfigButtons implements IDesignViewConfigButtonsProvider {
 

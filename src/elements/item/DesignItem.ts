@@ -15,6 +15,7 @@ import { DomConverter } from '../widgets/designerView/DomConverter.js';
 import { DeleteAction } from '../services/undoService/transactionItems/DeleteAction.js';
 import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
+import { enableStylesheetService } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -353,7 +354,7 @@ export class DesignItem implements IDesignItem {
     // Pre-sorted by specificity
     let declerations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
 
-    if (this.hasStyle(name) || !declerations) {
+    if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declerations) {
       // Set style locally
       if (this.getStyle(nm) != value) {
         this.setStyle(nm, value);

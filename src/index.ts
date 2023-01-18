@@ -200,7 +200,6 @@ export * from "./elements/widgets/designerView/extensions/CanvasExtensionProvide
 export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
 export * from "./elements/widgets/designerView/extensions/FlexboxExtension.js";
 export * from "./elements/widgets/designerView/extensions/FlexboxExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtension.js";
@@ -209,7 +208,6 @@ export * from "./elements/widgets/designerView/extensions/GridExtension.js";
 export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleElementExtension.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleElementExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/InvisibleElementExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/HighlightElementExtension.js";
 export * from "./elements/widgets/designerView/extensions/HighlightElementExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/PathExtension.js";
@@ -226,6 +224,14 @@ export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtens
 export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
+
+export * from "./elements/widgets/designerView/extensions/buttons/InvisibleElementExtensionDesignViewConfigButtons.js";
+export * from "./elements/widgets/designerView/extensions/buttons/FlexboxExtensionDesignViewConfigButtons.js";
+export * from "./elements/widgets/designerView/extensions/buttons/GridExtensionDesignViewConfigButtons.js";
+export * from "./elements/widgets/designerView/extensions/buttons/AbstractDesignViewConfigButton.js";
+export * from "./elements/widgets/designerView/extensions/buttons/ButtonSeperatorProvider.js";
+export * from "./elements/widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js";
+export type { IDesignViewConfigButtonsProvider } from "./elements/widgets/designerView/extensions/buttons/IDesignViewConfigButtonsProvider";
 
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtension.js";
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtensionProvider.js";

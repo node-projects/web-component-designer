@@ -1,5 +1,5 @@
-import { DesignerView } from "./designerView.js";
-import { IDesignerCanvas } from "./IDesignerCanvas.js";
+import { DesignerView } from "../../designerView.js";
+import { IDesignerCanvas } from "../../IDesignerCanvas.js";
 import { IDesignViewConfigButtonsProvider } from "./IDesignViewConfigButtonsProvider.js";
 
 export class ButtonSeperatorProvider implements IDesignViewConfigButtonsProvider {
