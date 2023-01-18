@@ -34,9 +34,16 @@ export class DesignItem implements IDesignItem {
   shouldAppliedDesignerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
 
   async clone() {
-    const html = DomConverter.ConvertToString([this], null, false);
-    const parsed = await this.serviceContainer.htmlParserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
-    return parsed[0];
+    try {
+      const html = DomConverter.ConvertToString([this], null, false);
+      const parsed = await this.serviceContainer.htmlParserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
+      return parsed[0];
+    }
+    catch (err) {
+      //TODO: clone service for design item, maybe refactor copy&paste to use this also...
+      console.warn("could not clone design item.", this);
+    }
+    return null;
   }
 
   public replaceNode(newNode: Node) {

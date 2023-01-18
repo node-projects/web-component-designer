@@ -123,8 +123,8 @@ export class CssTreeStylesheetService implements IStylesheetService {
         declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value + (important ? " !important" : ""), { context: 'declaration', parseValue: false }))).value;
         sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
 
-        // After generating the stylesheet, the AST has to be transformed back into a plain object
-        sourceNode.ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(<any>sourceNode.ast);
+        // After generating the stylesheet, parse again (so line numbers are correct)
+        sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
         this.stylesheetChanged.emit({ stylesheet: sourceNode.stylesheet });
         return true;
     }
@@ -134,8 +134,9 @@ export class CssTreeStylesheetService implements IStylesheetService {
         rule.ast.block.children.push(window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + declaration.value + (declaration.important ? " !important" : ""), { context: 'declaration', parseValue: false })));
         sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
 
-        // After generating the stylesheet, the AST has to be transformed back into a plain object
-        sourceNode.ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(<any>sourceNode.ast);
+        // After generating the stylesheet, parse again (so line numbers are correct)
+        sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
+
         this.stylesheetChanged.emit({ stylesheet: sourceNode.stylesheet });
         return true;
     }
@@ -145,7 +146,9 @@ export class CssTreeStylesheetService implements IStylesheetService {
         if (index == -1) return false;
         rule.ast.block.children.splice(index, 1);
         this._stylesheets.get(rule.stylesheetName).stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
-        this._stylesheets.get(rule.stylesheetName).ast = <csstree.StyleSheetPlain>window.csstree.toPlainObject(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        // After generating the stylesheet, parse again (so line numbers are correct)
+        this._stylesheets.get(rule.stylesheetName).ast = <any>window.csstree.toPlainObject((window.csstree.parse(this._stylesheets.get(rule.stylesheetName).stylesheet.content, { positions: true, parseValue: false })))
+
         this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(rule.stylesheetName).stylesheet });
         return true;
     }
@@ -164,19 +167,19 @@ export class CssTreeStylesheetService implements IStylesheetService {
                 let ruleCollection = this.rulesFromAST(child, stylesheet, source, designItem, previousCheck + currentCheck.type + " " + currentCheck.sel + "\n");
                 if (ruleCollection) {
                     for (const r of ruleCollection) {
-                        if (!this.elementMatchesASelector(designItem, this.buildSelectorString(r.ast.prelude as csstree.SelectorListPlain)))
+                        if (!this.elementMatchesASelector(designItem, this.buildSelectorString(r.ast.prelude as csstree.SelectorListPlain, stylesheet)))
                             continue;
                         yield r;
                     }
                 }
             }
             if (child.type == "Rule") {
-                let selectors = this.buildSelectorString((child as csstree.RulePlain).prelude as csstree.SelectorListPlain);
+                let selectors = this.buildSelectorString((child as csstree.RulePlain).prelude as csstree.SelectorListPlain, stylesheet);
                 if (!this.elementMatchesASelector(designItem, selectors)) continue;
 
                 yield ({
                     ast: (child as csstree.RulePlain),
-                    selector: previousCheck + this.buildSelectorString((child as csstree.RulePlain).prelude as csstree.SelectorListPlain).join(", "),
+                    selector: previousCheck + this.buildSelectorString((child as csstree.RulePlain).prelude as csstree.SelectorListPlain, stylesheet).join(", "),
                     specificity: this.getSpecificity((child as csstree.RulePlain).prelude as csstree.SelectorListPlain),
                     stylesheetName: source,
                     declarations: null,
@@ -192,19 +195,13 @@ export class CssTreeStylesheetService implements IStylesheetService {
         return ast != null && ast["children"] != null && ast["children"].length > 0;
     }
 
-    private buildSelectorString(selectorsAST: csstree.SelectorListPlain): string[] {
-        let selectors: string[] = [];
-        for (let selector of selectorsAST.children as csstree.SelectorPlain[]) {
-            let sel = "";
-            for (let fraction of selector.children) {
-                if (fraction.type == "IdSelector") sel += "#" + fraction.name;
-                else if (fraction.type == "ClassSelector") sel += "." + fraction.name;
-                else sel += (<csstree.TypeSelector>fraction).name;
-            }
-            selectors.push(sel);
-        };
-
-        return selectors;
+    private buildSelectorString(selectorsAST: csstree.SelectorListPlain, stylesheet: string): string[] {
+        if (selectorsAST.type == 'SelectorList') {
+            return [...selectorsAST.children.map(x => this.buildSelectorString(<csstree.SelectorListPlain>x, stylesheet)[0])];
+        }
+        else {
+            return [stylesheet.substring(selectorsAST.loc.start.offset, selectorsAST.loc.end.offset)];
+        }
     }
 
     private getSpecificity(selector: csstree.SelectorListPlain): number {

@@ -238,7 +238,7 @@ export class PointerTool implements ITool {
             this._clonedItems = [];
             for (let d of this._actionStartedDesignItems) {
               const clone = await d.clone();
-              if (this._clonedItems)
+              if (this._clonedItems && clone)
                 this._clonedItems.push(clone);
             }
           }
