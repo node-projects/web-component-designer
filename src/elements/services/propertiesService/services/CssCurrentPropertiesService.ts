@@ -56,11 +56,11 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
   override setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
     // No selector means local style, styleDeclaration is null means new property
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
-      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationWithDeclaration(property.styleDeclaration, value, false);
+      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(property.styleDeclaration, value, false);
       return;
     }
     if (property.styleRule?.selector !== null && !property.styleDeclaration) {
-      designItems[0].instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(property.styleRule, { name: property.name, value: value, important: false }, false);
+      designItems[0].instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(property.styleRule, property.name, value, false);
       return;
     }
 
@@ -70,7 +70,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
 
   override clearValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
-      designItems[0].instanceServiceContainer.stylesheetService.removeDeclarationFromRule(property.styleRule, property.styleDeclaration);
+      designItems[0].instanceServiceContainer.stylesheetService.removeDeclarationFromRule(property.styleRule, property.styleDeclaration.name);
       return;
     }
     super.clearValue(designItems, property);

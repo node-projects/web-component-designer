@@ -12,11 +12,12 @@ export interface IStyleDeclaration {
     name: string;
     value: string;
     important: boolean;
+    parent: IStyleRule;
 }
 
 export interface IStylesheet {
-    content: string,
-    name: string,
+    content: string;
+    name: string;
 }
 
 export interface IStylesheetService {
@@ -24,9 +25,9 @@ export interface IStylesheetService {
     getStylesheets(): IStylesheet[];
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[];
-    updateDeclarationWithDeclaration(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
-    insertDeclarationIntoRule(rule: IStyleRule, declaration: IStyleDeclaration, important: boolean): boolean;
-    removeDeclarationFromRule(rule: IStyleRule, declaration: IStyleDeclaration): boolean;
+    updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
+    insertDeclarationIntoRule(rule: IStyleRule, property: string, value: string, important: boolean): boolean;
+    removeDeclarationFromRule(rule: IStyleRule, property: string): boolean;
 
     stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
     stylesheetsChanged: TypedEvent<void>;
