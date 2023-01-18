@@ -6,6 +6,9 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStylesheetService.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import cssProperties from './CssProperties.json' assert { type: 'json' };
+import { ValueType } from '../ValueType.js';
+
+const localName = '&lt;local&gt;';
 
 export class CssCurrentPropertiesService extends CommonPropertiesService {
 
@@ -33,7 +36,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
     let styles = designItem.getAllStyles();
 
     let arr = styles.map(x => ({
-      name: x.selector ?? '&lt;local&gt;', description: x.stylesheetName ?? '', properties: [
+      name: x.selector ?? localName, description: x.stylesheetName ?? '', properties: [
         ...x.declarations.map(y => ({
           name: y.name,
           renamable: true,
@@ -71,5 +74,21 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
       return;
     }
     super.clearValue(designItems, property);
+  }
+
+  override getValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
+    if (property.styleRule?.selector && property.styleDeclaration)
+      return property.styleDeclaration.value
+    return super.getValue(designItems, property);
+  }
+
+  override isSet(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }): ValueType {
+    if (property.styleRule?.selector && property.styleDeclaration) {
+      if (designItems[0].hasStyle(property.name))
+        return ValueType.none;
+      //TODO: we need to check if this is the dec. with the highest specifity
+      return ValueType.all;
+    }
+    return super.isSet(designItems, property);
   }
 }

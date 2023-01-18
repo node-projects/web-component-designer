@@ -1,7 +1,7 @@
-import { DesignerView } from "../designerView.js";
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignViewConfigButtonsProvider } from "../IDesignViewConfigButtonsProvider.js";
-import { flexboxExtensionShowOverlayOptionName } from "./FlexboxExtensionProvider.js";
+import { DesignerView } from "../../designerView.js";
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignViewConfigButtonsProvider } from "./IDesignViewConfigButtonsProvider.js";
+import { flexboxExtensionShowOverlayOptionName } from "../FlexboxExtensionProvider.js";
 
 export class FlexboxExtensionDesignViewConfigButtons implements IDesignViewConfigButtonsProvider {
 

@@ -44,8 +44,8 @@ import { DragDropService } from './dragDropService/DragDropService.js';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
 import { CopyPasteService } from './copyPasteService/CopyPasteService.js';
 import { DefaultModelCommandService } from './modelCommandService/DefaultModelCommandService.js';
-import { ButtonSeperatorProvider } from '../widgets/designerView/ButtonSeperatorProvider.js';
-import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/GridExtensionDesignViewConfigButtons.js';
+import { ButtonSeperatorProvider } from '../widgets/designerView/extensions/buttons/ButtonSeperatorProvider.js';
+import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/GridExtensionDesignViewConfigButtons.js';
 import { DemoProviderService } from './demoProviderService/DemoProviderService.js';
 import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
@@ -70,12 +70,13 @@ import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/sv
 import { PropertyTabsService } from './propertiesService/PropertyTabsService.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
-import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/FlexboxExtensionDesignViewConfigButtons.js';
-import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/InvisibleElementExtensionDesignViewConfigButtons.js';
+import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/FlexboxExtensionDesignViewConfigButtons.js';
+import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/InvisibleElementExtensionDesignViewConfigButtons.js';
 import { UndoService } from './undoService/UndoService.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { SelectionService } from './selectionService/SelectionService.js';
 import { ContentService } from './contentService/ContentService.js';
+import { StylesheetServiceDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -174,7 +175,9 @@ export function createDefaultServiceContainer() {
     new GridExtensionDesignViewConfigButtons(),
     new FlexboxExtensionDesignViewConfigButtons(),
     new ButtonSeperatorProvider(10),
-    new InvisibleElementExtensionDesignViewConfigButtons()
+    new InvisibleElementExtensionDesignViewConfigButtons(),
+    new ButtonSeperatorProvider(10),
+    new StylesheetServiceDesignViewConfigButtons()
   );
 
   serviceContainer.designViewToolbarButtons.push(

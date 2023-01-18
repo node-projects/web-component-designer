@@ -23,7 +23,7 @@ import { IDragDropService } from './dragDropService/IDragDropService.js';
 import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
 import { IDesignerPointerExtensionProvider } from "../widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
 import { IModelCommandService } from "./modelCommandService/IModelCommandService.js";
-import { IDesignViewConfigButtonsProvider } from "../widgets/designerView/IDesignViewConfigButtonsProvider.js";
+import { IDesignViewConfigButtonsProvider } from "../widgets/designerView/extensions/buttons/IDesignViewConfigButtonsProvider.js";
 import { IDemoProviderService } from "./demoProviderService/IDemoProviderService.js";
 import { IBindableObjectsService } from "./bindableObjectsService/IBindableObjectsService.js";
 import { IBindableObjectDragDropService } from "./bindableObjectsService/IBindableObjectDragDropService.js";
