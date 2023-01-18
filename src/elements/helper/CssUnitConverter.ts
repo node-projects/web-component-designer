@@ -5,6 +5,9 @@ const pattern = new RegExp(`^([\-\+]?(?:\\d+(?:\\.\\d+)?))(${units.join('|')})$`
 
 export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, percentTarget: 'width' | 'height'): number {
 
+    if (!cssValue)
+        return null;
+
     const supportedUnits = {
 
         // Absolute sizes
@@ -69,10 +72,15 @@ export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, per
 
 export function getCssUnit(cssValue: string) {
     const matches = cssValue.trim().match(pattern);
-    return matches[2].toLowerCase();
+    if (matches)
+        return matches[2].toLowerCase();
+    return null;
 }
 
 export function convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) {
+
+    if (!cssValue)
+        return null;
 
     const supportedUnits = {
 
