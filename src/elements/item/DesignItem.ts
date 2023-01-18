@@ -366,7 +366,7 @@ export class DesignItem implements IDesignItem {
     }
   }
 
-  public getStyleFromSheetOrLocal(name: string) {
+  public getStyleFromSheetOrLocal(name: string, fallback: string = null) {
     let nm = PropertiesHelper.camelToDashCase(name);
 
     if (this.hasStyle(name))
@@ -379,6 +379,22 @@ export class DesignItem implements IDesignItem {
       return decls[0].value;
 
     return null;
+  }
+
+  getStyleFromSheetOrLocalOrComputed(name: string, fallback: string = null) {
+    let value = this.getStyleFromSheetOrLocal(name);
+    if (!value) {
+      value = getComputedStyle(this.element).getPropertyValue(name)
+    }
+    return value ?? fallback;
+  }
+
+  getComputedStyle(name: string, fallback: string = null) {
+    let value = this.getStyleFromSheetOrLocal(name);
+    if (!value) {
+      value = getComputedStyle(this.element).getPropertyValue(name)
+    }
+    return value ?? fallback;
   }
 
   public getAllStyles(): IStyleRule[] {
