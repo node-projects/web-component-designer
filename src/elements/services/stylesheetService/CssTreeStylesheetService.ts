@@ -32,10 +32,15 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         if (stylesheets != null) {
             this._stylesheets = new Map();
             for (let stylesheet of stylesheets) {
-                this._stylesheets.set(stylesheet.name, {
-                    stylesheet: stylesheet,
-                    ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.content, { positions: true, parseValue: false })))
-                });
+                try {
+                    this._stylesheets.set(stylesheet.name, {
+                        stylesheet: stylesheet,
+                        ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.content, { positions: true, parseValue: false })))
+                    });
+                }
+                catch (err) {
+                    console.warn("error parsing stylesheet", stylesheet, err)
+                }
             }
             this.stylesheetsChanged.emit();
         }

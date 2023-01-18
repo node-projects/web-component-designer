@@ -28,10 +28,15 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
             this._tools = await import('@adobe/css-tools');
             this._stylesheets = new Map();
             for (let stylesheet of stylesheets) {
-                this._stylesheets.set(stylesheet.name, {
-                    stylesheet: stylesheet,
-                    ast: this._tools.parse(stylesheet.content)
-                });
+                try {
+                    this._stylesheets.set(stylesheet.name, {
+                        stylesheet: stylesheet,
+                        ast: this._tools.parse(stylesheet.content)
+                    });
+                }
+                catch (err) {
+                    console.warn("error parsing stylesheet", stylesheet, err)
+                }
             }
             this.stylesheetsChanged.emit();
         }
