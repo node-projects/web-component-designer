@@ -361,7 +361,7 @@ export class DesignItem implements IDesignItem {
     // Pre-sorted by specificity
     let declerations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
 
-    if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declerations) {
+    if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declerations?.length) {
       // Set style locally
       if (this.getStyle(nm) != value) {
         this.setStyle(nm, value);
@@ -370,7 +370,7 @@ export class DesignItem implements IDesignItem {
       }
     } else {
       // Set style in sheet
-      this.instanceServiceContainer.stylesheetService.updateDeclarationWithDeclaration(declerations[0], value, important);
+      this.instanceServiceContainer.stylesheetService.updateDeclarationValue(declerations[0], value, important);
     }
   }
 
@@ -406,7 +406,7 @@ export class DesignItem implements IDesignItem {
   }
 
   public getAllStyles(): IStyleRule[] {
-    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false }));
+    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false, parent: null }));
     if (this.instanceServiceContainer.stylesheetService) {
       const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
       if (rules) {

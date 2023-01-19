@@ -42,6 +42,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
 
   private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
     let start = indentedTextWriter.position;
+    let end = indentedTextWriter.position;
 
     if (designItem.nodeType == NodeType.TextNode) {
       if (isEmptyTextNode(designItem.element) &&
@@ -49,12 +50,16 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
           (designItem.element.nextSibling instanceof HTMLElement && !isInline(designItem.element.nextSibling)))) {
       } else
         this.writeTextNode(indentedTextWriter, designItem, true);
+        end = indentedTextWriter.position;
     } else if (designItem.nodeType == NodeType.Comment) {
       this._conditionalyWriteIndent(indentedTextWriter, designItem);
+      start = indentedTextWriter.position;
       indentedTextWriter.write('<!--' + designItem.content + '-->');
+      end = indentedTextWriter.position;
       this._conditionalyWriteNewline(indentedTextWriter, designItem);
     } else {
       this._conditionalyWriteIndentBefore(indentedTextWriter, designItem);
+      start = indentedTextWriter.position;
       indentedTextWriter.write('<' + designItem.name);
 
       this.writeAttributes(indentedTextWriter, designItem, options);
@@ -92,15 +97,17 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
         //this._conditionalyWriteNewline(indentedTextWriter, designItem);
       }
 
+      end = indentedTextWriter.position;
       if (!DomConverter.IsSelfClosingElement(designItem.name))
         indentedTextWriter.write('</' + designItem.name + '>');
+        end = indentedTextWriter.position;
       //if (!contentSingleTextNode)
       if (!indentedTextWriter.isLastCharNewline() && (!designItem.parent || !isInlineAfter(<HTMLElement>designItem.parent.element)))
         this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
 
     if (designItemsAssignmentList) {
-      designItemsAssignmentList.set(designItem, { start: start, length: indentedTextWriter.position - start - 1 });
+      designItemsAssignmentList.set(designItem, { start: start, length: end - start });
     }
   }
 
