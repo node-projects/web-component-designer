@@ -64,6 +64,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   zoomTowardsPoint(point: IPoint, scalechange: number): void;
   zoomPoint(canvasPoint: IPoint, newZoom: number): void;
   zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint): void;
+  jumpPoint(canvasPoint: IPoint): void;
 
   showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent): void;
 }
