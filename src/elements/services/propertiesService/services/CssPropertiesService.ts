@@ -6,6 +6,7 @@ import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import cssProperties from './CssProperties.json' assert { type: 'json' };
+import { PropertiesHelper } from './PropertiesHelper.js';
 
 export class CssPropertiesService extends CommonPropertiesService {
 
@@ -70,13 +71,16 @@ export class CssPropertiesService extends CommonPropertiesService {
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     const propNames: string[] = this[this.name];
-    const propertiesList = propNames.map(x => ({
-      name: x,
-      type: cssProperties[x]?.type ?? 'string',
-      values: cssProperties[x]?.values ? [...cssProperties[x]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
-      service: this,
-      propertyType: PropertyType.cssValue
-    }));
+    const propertiesList = propNames.map(x => {
+      const camelName = PropertiesHelper.dashToCamelCase(x);
+      return {
+        name: x,
+        type: cssProperties[camelName]?.type ?? 'string',
+        values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
+        service: this,
+        propertyType: PropertyType.cssValue
+      }
+    });
     return propertiesList;
   }
 
