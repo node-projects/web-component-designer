@@ -77,7 +77,6 @@ import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { SelectionService } from './selectionService/SelectionService.js';
 import { ContentService } from './contentService/ContentService.js';
 import { StylesheetServiceDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
-import { JumpToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -198,7 +197,6 @@ export function createDefaultServiceContainer() {
     new SeperatorContextMenu(),
     new RotateLeftAndRight(),
     new SeperatorContextMenu(),
-    new JumpToElementContextMenu(),
     new ZoomToElementContextMenu(),
     new SeperatorContextMenu(),
     new ZMoveContextMenu(),

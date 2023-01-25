@@ -35,6 +35,12 @@ export class ZoomToElementContextMenu implements IContextMenuExtension {
           designerCanvas.zoomPoint({ x: coord.x + coord.width / 2, y: coord.y + coord.height / 2 }, zoomFactor);
         }
       },
+      {
+        title: 'jump to', action: () => {
+          const coord = designerCanvas.getNormalizedElementCoordinates(designItem.element);
+          designerCanvas.jumpPoint({x: coord.x + coord.width / 2, y: coord.y + coord.height / 2});
+        }
+      }
     ]
   }
 }
