@@ -1,4 +1,3 @@
-import { IRect } from '../../../../../interfaces/IRect.js';
 import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
