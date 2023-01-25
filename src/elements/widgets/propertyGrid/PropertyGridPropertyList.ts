@@ -128,7 +128,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       this._propertyMap.clear();
       if (this._propertiesService) {
         let properties = this._propertiesService.getProperties(designItem);
-        if (properties) {
+        if (properties?.length) {
           if ('properties' in properties[0])
             this.createPropertyGroups(<IPropertyGroup[]>properties);
           else

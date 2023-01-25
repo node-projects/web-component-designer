@@ -99,12 +99,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _lastHoverDesignItem: IDesignItem;
 
-  private _pointerEventHandlerBound: (event: PointerEvent) => void;
-
   private _firstConnect: boolean;
-
-  private _onKeyDownBound: any;
-  private _onKeyUpBound: any;
 
   private cssprefixConstant = '#node-projects-designer-canvas-canvas ';
 
@@ -195,7 +190,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public extensionManager: IExtensionManager;
   private _pointerextensions: IDesignerPointerExtension[];
-  private _onDblClickBound: any;
 
   private _lastCopiedPrimaryItem: IDesignItem;
 
@@ -208,10 +202,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
     this.clickOverlay = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-clickOverlay');
 
-    this._onKeyDownBound = this.onKeyDown.bind(this);
-    this._onKeyUpBound = this.onKeyUp.bind(this);
-    this._onDblClickBound = this._onDblClick.bind(this);
-    this._pointerEventHandlerBound = this._pointerEventHandler.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.onKeyUp = this.onKeyUp.bind(this);
+    this._onDblClick = this._onDblClick.bind(this);
+    this._pointerEventHandler = this._pointerEventHandler.bind(this);
 
     this.clickOverlay.oncontextmenu = (e) => e.preventDefault();
   }
@@ -546,16 +540,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   connectedCallback() {
     if (!this._firstConnect) {
       this._firstConnect = true;
-      this.clickOverlay.addEventListener(EventNames.PointerDown, this._pointerEventHandlerBound);
-      this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandlerBound);
-      this.clickOverlay.addEventListener(EventNames.PointerUp, this._pointerEventHandlerBound);
+      this.clickOverlay.addEventListener(EventNames.PointerDown, this._pointerEventHandler);
+      this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandler);
+      this.clickOverlay.addEventListener(EventNames.PointerUp, this._pointerEventHandler);
       this.clickOverlay.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event));
       this.clickOverlay.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
       this.clickOverlay.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this.clickOverlay.addEventListener(EventNames.Drop, event => this._onDrop(event));
-      this.clickOverlay.addEventListener(EventNames.KeyDown, this._onKeyDownBound, true);
-      this.clickOverlay.addEventListener(EventNames.KeyUp, this._onKeyUpBound, true);
-      this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClickBound, true);
+      this.clickOverlay.addEventListener(EventNames.KeyDown, this.onKeyDown, true);
+      this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp, true);
+      this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, true);
     }
   }
 
