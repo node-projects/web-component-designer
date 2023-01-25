@@ -1109,7 +1109,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
-
   public zoomTowardsPoint(canvasPoint: IPoint, newZoom: number) {
     const scaleChange = newZoom / this.zoomFactor;
 
