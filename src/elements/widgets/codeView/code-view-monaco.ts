@@ -1,6 +1,5 @@
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { ICodeView } from './ICodeView.js';
-import * as monaco from 'monaco-editor';
 import { IActivateable } from '../../../interfaces/IActivateable.js';
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
@@ -19,6 +18,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   public code: string;
   public onTextChanged = new TypedEvent<string>();
 
+  //@ts-ignore
   private _monacoEditor: monaco.editor.IStandaloneCodeEditor;
   private _editor: HTMLDivElement;
 
@@ -163,6 +163,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     let point1 = model.getPositionAt(position.start);
     let point2 = model.getPositionAt(position.start + position.length);
     this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
+    //@ts-ignore
     setTimeout(() => this._monacoEditor.revealRangeInCenter(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1));
   }
 }
