@@ -1,9 +1,23 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
-
-import type * as csstree from 'css-tree';
 import { calculate as calculateSpecifity } from "./SpecificityCalculator.js";
 import { AbstractStylesheetService } from "./AbstractStylesheetService.js";
+
+//import type * as csstree from 'css-tree';
+namespace csstree {
+    export type CssNodePlain = any;
+    export type CssNode = any;
+    export type ParseOptions = any;
+    export type GenerateOptions = any;
+    export type RulePlain = any;
+    export type DeclarationPlain = any;
+    export type StyleSheetPlain = any;
+    export type Raw = any;
+    export type Declaration = any;
+    export type AtrulePlain = any;
+    export type BlockPlain = any;
+    export type SelectorListPlain = any;
+}
 
 declare global {
     interface Window {

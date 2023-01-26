@@ -1,8 +1,12 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
-
-import type { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST } from "@adobe/css-tools";
 import { AbstractStylesheetService } from "./AbstractStylesheetService.js";
+
+//import type { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST } from "@adobe/css-tools";
+type CssRuleAST = any;
+type CssDeclarationAST = any;
+type CssStylesheetAST = any;
+type CssAtRuleAST = any;
 
 interface IRuleWithAST extends IStyleRule {
     ast: CssRuleAST,
