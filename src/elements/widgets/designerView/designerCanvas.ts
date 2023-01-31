@@ -901,6 +901,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
+  public getNormalizedTextNodeCoordinates(element: Text, ignoreScalefactor?: boolean): IRect {
+    let range = document.createRange();
+    range.selectNodeContents(element);
+    let targetRect = range.getBoundingClientRect();
+    return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
+  }
+
   public getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect {
     const targetRect = element.getBoundingClientRect();
     return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
