@@ -33,6 +33,7 @@ import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+import { NodeType } from '../../item/NodeType.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -452,7 +453,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         let di = designItems[i];
         let pos = positions ? positions[i] : null;
         this.instanceServiceContainer.undoService.execute(new InsertAction(pasteContainer, pasteContainer.childCount, di));
-        if (!disableRestoreOfPositions && pos) {
+        if (!disableRestoreOfPositions && pos && di.nodeType == NodeType.Element) {
           di.setStyle('left', (pos.x - containerPos.x) + 'px');
           di.setStyle('top', (pos.y - containerPos.y) + 'px');
         }
