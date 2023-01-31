@@ -190,6 +190,7 @@ export class DesignItem implements IDesignItem {
     return this.node.textContent;
   }
   public set content(value: string) {
+    //undo
     this.node.textContent = value;
   }
 
@@ -197,6 +198,7 @@ export class DesignItem implements IDesignItem {
     return this.element.innerHTML;
   }
   public set innerHTML(value: string) {
+    //undo
     this.element.innerHTML = value;
     this.updateChildrenFromNodesChildren();
   }
@@ -406,6 +408,9 @@ export class DesignItem implements IDesignItem {
   }
 
   public getAllStyles(): IStyleRule[] {
+    if (this.nodeType != NodeType.Element)
+      return [];
+
     const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false, parent: null }));
     if (this.instanceServiceContainer.stylesheetService) {
       const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
