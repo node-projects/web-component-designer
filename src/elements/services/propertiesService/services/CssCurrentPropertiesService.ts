@@ -7,6 +7,7 @@ import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStyleshe
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import cssProperties from './CssProperties.json' assert { type: 'json' };
 import { ValueType } from '../ValueType.js';
+import { NodeType } from '../../../item/NodeType.js';
 
 const localName = '&lt;local&gt;';
 
@@ -30,7 +31,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
-    if (!designItem)
+    if (!designItem || designItem.nodeType != NodeType.Element)
       return [];
 
     let styles = designItem.getAllStyles();
