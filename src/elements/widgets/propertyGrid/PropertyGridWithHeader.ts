@@ -5,6 +5,7 @@ import { InstanceServiceContainer } from '../../services/InstanceServiceContaine
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { sleep } from '../../helper/Helper.js';
 import { DesignItem } from '../../item/DesignItem.js';
+import { NodeType } from '../../item/NodeType.js';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
@@ -117,9 +118,14 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(async e => {
       this._pg.instanceServiceContainer = value;
       await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
-      this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
+      if (this._instanceServiceContainer.selectionService.primarySelection?.nodeType == NodeType.Element)
+        this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
+      else
+        this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
       this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
-      if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
+      if (this._instanceServiceContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
+        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+      } else if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
         this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
       else
         this._content.value = ''
