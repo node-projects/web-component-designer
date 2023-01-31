@@ -51,7 +51,7 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
     for (let m of this._packageData.modules) {
       for (let e of m.exports) {
         if (e.kind == 'custom-element-definition') {
-          this._elementList.push({ tag: e.name, import: this._importPrefix + '/' + e.declaration.module });
+          this._elementList.push({ tag: e.name, import: this._importPrefix + (this._importPrefix.endsWith('/') ? '' : '/') + e.declaration.module });
           let properties: IProperty[] = [];
           let declaration = m.declarations.find(x => x.name == e.declaration.name);
           for (let d of declaration.members) {
