@@ -33,6 +33,7 @@ import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+import { NodeType } from '../../item/NodeType.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -452,7 +453,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         let di = designItems[i];
         let pos = positions ? positions[i] : null;
         this.instanceServiceContainer.undoService.execute(new InsertAction(pasteContainer, pasteContainer.childCount, di));
-        if (!disableRestoreOfPositions && pos) {
+        if (!disableRestoreOfPositions && pos && di.nodeType == NodeType.Element) {
           di.setStyle('left', (pos.x - containerPos.x) + 'px');
           di.setStyle('top', (pos.y - containerPos.y) + 'px');
         }
@@ -900,8 +901,19 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     };
   }
 
+  public getNormalizedTextNodeCoordinates(element: Text, ignoreScalefactor?: boolean): IRect {
+    let range = document.createRange();
+    range.selectNodeContents(element);
+    let targetRect = range.getBoundingClientRect();
+    return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
+  }
+
   public getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect {
+    if (element.nodeType == NodeType.TextNode) {
+      return this.getNormalizedTextNodeCoordinates(<Text><any>element, ignoreScalefactor)
+    }
     const targetRect = element.getBoundingClientRect();
+
     return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
   }
 

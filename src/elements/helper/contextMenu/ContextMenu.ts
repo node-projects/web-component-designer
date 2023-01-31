@@ -169,11 +169,17 @@ export class ContextMenu {
 	renderLevel(level: IContextMenuItem[]) {
 		let ul_outer = document.createElement("ul");
 
-		let lastWasDivider = false;
+		let addDivider = false;
 		level.forEach((item) => {
-			let li = document.createElement("li");
-
 			if (item.title !== '-') {
+				if (addDivider) {
+					let li = document.createElement("li");
+					li.className = "context_menu_divider";
+					addDivider = false;
+					ul_outer.appendChild(li);
+				}
+
+				let li = document.createElement("li");
 				let icon_span = document.createElement("span");
 				icon_span.className = 'context_menu_icon_span';
 
@@ -219,14 +225,9 @@ export class ContextMenu {
 						})
 					}
 				}
-				lastWasDivider = false;
 				ul_outer.appendChild(li);
 			} else {
-				if (!lastWasDivider) {
-					li.className = "context_menu_divider";
-					lastWasDivider = true;
-					ul_outer.appendChild(li);
-				}
+				addDivider = true;
 			}
 		});
 
