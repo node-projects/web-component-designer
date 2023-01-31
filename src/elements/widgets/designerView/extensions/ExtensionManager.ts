@@ -112,7 +112,7 @@ export class ExtensionManager implements IExtensionManager {
             shouldAppE.push(e);
             i.shouldAppliedDesignerExtensions.set(extensionType, shouldAppE);
 
-            if (i.nodeType == NodeType.Element && e.shouldExtend(this, this.designerCanvas, i)) {
+            if (/*i.nodeType == NodeType.Element &&*/ e.shouldExtend(this, this.designerCanvas, i)) {
               let appE = i.appliedDesignerExtensions.get(extensionType);
               if (!appE)
                 appE = [];
