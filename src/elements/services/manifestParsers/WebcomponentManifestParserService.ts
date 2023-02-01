@@ -8,7 +8,7 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { AbstractPropertiesService } from '../propertiesService/services/AbstractPropertiesService.js';
 
 export class WebcomponentManifestParserService extends AbstractPropertiesService implements IElementsService, IPropertiesService {
-  
+
   public override getRefreshMode(designItem: IDesignItem) {
     return RefreshMode.none;
   }
@@ -59,7 +59,8 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
               let pType = PropertyType.property;
               if (declaration.attributes)
                 pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
-              properties.push({ name: d.name, service: this, propertyType: pType, type: this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text) });
+              const p = this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text);
+              properties.push({ name: d.name, service: this, propertyType: pType, type: p[0], values: p[1] });
             }
           }
           this._propertiesList[e.name] = properties;
@@ -73,14 +74,20 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
     }
   }
 
-  private manifestClassPropertyTypeToEditorPropertyType(type: string) {
+  private manifestClassPropertyTypeToEditorPropertyType(type: string): [type: string, values?: string[]] {
     if (type) {
       if (type.toLowerCase() === 'boolean')
-        return 'boolean';
+        return ['boolean'];
       if (type.toLowerCase() === 'number')
-        return 'number';
+        return ['number'];
+      if (type.toLowerCase() === 'string')
+        return ['string'];
+      if (type.startsWith("'") && type.includes("|")) {
+        const values = type.split("|").map(x => x.trim()).map(x => x.substring(1, x.length - 1));
+        return ['list', values]
+      }
     }
-    return type;
+    return [type];
   }
 
   async getElements(): Promise<IElementDefinition[]> {
