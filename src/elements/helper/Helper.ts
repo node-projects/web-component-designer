@@ -31,3 +31,15 @@ export function dataURItoBlob(dataURI) {
 export function pointInRect(point: IPoint, rect: IRect) {
   return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 }
+
+export function removeTrailing(text: string, char: string) {
+  if (text.endsWith('/'))
+    return text.substring(0, text.length - 1);
+  return text;
+}
+
+export function removeLeading(text: string, char: string) {
+  if (text.startsWith('/'))
+    return text.substring(1);
+  return text;
+}
