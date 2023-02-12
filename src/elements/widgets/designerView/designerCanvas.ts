@@ -62,6 +62,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _currentContextMenu: ContextMenu
   private _backgroundImage: string;
 
+  private _enableSelectTextNodesOnClick = false;
+
   public get zoomFactor(): number {
     return this._zoomFactor;
   }
@@ -1026,6 +1028,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
       if (!currentElement) {
         currentElement = this._canvas;
+      } else if (this._enableSelectTextNodesOnClick) {
+        const norm = this.getNormalizedEventCoordinates(event);
+        for (let n of currentElement.childNodes) {
+          if (n.nodeType == NodeType.TextNode) {
+            let nc = this.getNormalizedElementCoordinates(<Element>n);
+            if (nc.x <= norm.x && nc.x + nc.width >= norm.x && nc.y <= norm.y && nc.y + nc.height >= norm.y) {
+              currentElement = n;
+              break;
+            }
+          }
+        }
       }
     }
 
