@@ -46,6 +46,16 @@ export class DesignItem implements IDesignItem {
     return null;
   }
 
+  *allMatching(selectors: string) {
+    if (this.hasChildren) {
+      for (let d of this.children()) {
+        if (d.element.matches(selectors))
+          yield d;
+        yield* d.allMatching(selectors);
+      }
+    }
+  }
+
   public replaceNode(newNode: Node) {
     DesignItem._designItemMap.delete(this.node);
     DesignItem._designItemMap.set(newNode, this);
