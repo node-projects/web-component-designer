@@ -52,7 +52,7 @@ export class NpmPackageLoader {
     }
 
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
-    async loadNpmPackage(pkg: string, serviceContainer: ServiceContainer, paletteTree: PaletteTreeView, reportState?: (state: string) => void) {
+    async loadNpmPackage(pkg: string, serviceContainer: ServiceContainer, paletteTree: PaletteTreeView, loadAllImports: boolean, reportState?: (state: string) => void) {
         const baseUrl = window.location.protocol + this._packageSource + pkg + '/';
 
         const packageJsonUrl = baseUrl + 'package.json';
@@ -124,7 +124,7 @@ export class NpmPackageLoader {
             let properties = new WebcomponentManifestPropertiesService(packageJsonObj.name, customElementsJsonObj);
             serviceContainer.register('propertyService', properties);
 
-            if (window.location.search.includes("loadAllImports")) {
+            if (loadAllImports) {
                 for (let e of await elements.getElements()) {
                     //@ts-ignore
                     importShim(e.import);

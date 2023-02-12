@@ -26,6 +26,7 @@ export interface IDesignItem {
 
   readonly hasChildren: boolean;
   children(): IterableIterator<IDesignItem>
+  allMatching(selectors: string):IterableIterator<IDesignItem>
   readonly childCount: number;
   readonly firstChild: IDesignItem;
   readonly parent: IDesignItem;
