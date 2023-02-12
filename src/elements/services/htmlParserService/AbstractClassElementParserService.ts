@@ -45,6 +45,8 @@ export abstract class AbstractClassElementParserService implements IHtmlParserSe
     const taggedTemplate = <esprima.TaggedTemplateExpression>renderMethodStatement.argument;
     const templateLiteral = taggedTemplate.quasi
 
+    //@ts-ignore
+    const tmp = getChildNodes(parsedModule);
 
 
     const html = templateLiteral.quasis.map(x => x.value.raw).join();
