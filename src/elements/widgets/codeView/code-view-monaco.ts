@@ -8,6 +8,8 @@ import { CommandType } from '../../../commandHandling/CommandType.js';
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
 
+  private static _initalized: boolean;
+
   dispose(): void {
     this._monacoEditor.dispose();
   }
@@ -68,6 +70,38 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     return false;
   }
 
+  static initMonacoEditor() {
+    return new Promise<void>(async resolve => {
+      if (!CodeViewMonaco._initalized) {
+        CodeViewMonaco._initalized = true;
+
+        //@ts-ignore
+        require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' } });
+
+        //@ts-ignore
+        require(['vs/editor/editor.main'], () => {
+          //@ts-ignore
+          monaco.editor.defineTheme('webComponentDesignerTheme', {
+            base: 'vs',
+            inherit: true,
+            //@ts-ignore
+            rules: [{ background: 'EDF9FA' }],
+            colors: {
+              'editor.selectionBackground': '#add6ff',
+              'editor.inactiveSelectionBackground': '#add6ff'
+            }
+          });
+          //@ts-ignore
+          monaco.editor.setTheme('webComponentDesignerTheme');
+
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    })
+  }
+
   async ready() {
     let style: { default: CSSStyleSheet };
 
@@ -81,76 +115,70 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
     this.shadowRoot.adoptedStyleSheets = [style.default, this.constructor.style];
 
-    this._editor = this._getDomElement<HTMLDivElement>('container')
+    this._editor = this._getDomElement<HTMLDivElement>('container');
 
-    //@ts-ignore
-    require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' } });
+    await CodeViewMonaco.initMonacoEditor();
 
-    //@ts-ignore
-    require(['vs/editor/editor.main'], () => {
-      //@ts-ignore
-      this._monacoEditor = monaco.editor.create(this._editor, {
-        automaticLayout: true,
-        wordWrapColumn: 1000,
-        wordWrap: 'wordWrapColumn',
-        value: this.code,
-        language: 'html',
-        minimap: {
-          size: 'fill'
-        },
-        fixedOverflowWidgets: true,
-        scrollbar: {
-          useShadows: false,
-          verticalHasArrows: true,
-          horizontalHasArrows: true,
-          vertical: 'visible',
-          horizontal: 'visible'
-        }
-      });
-
-      //@ts-ignore
-      monaco.editor.defineTheme('myTheme', {
-        base: 'vs',
-        inherit: true,
+    const resizeObserver = new ResizeObserver(() => {
+      if (this._editor.offsetWidth > 0) {
         //@ts-ignore
-        rules: [{ background: 'EDF9FA' }],
-        colors: {
-          'editor.selectionBackground': '#add6ff',
-          'editor.inactiveSelectionBackground': '#add6ff'
-        }
-      });
-      //@ts-ignore
-      monaco.editor.setTheme('myTheme');
+        this._monacoEditor = monaco.editor.create(this._editor, {
+          automaticLayout: true,
+          wordWrapColumn: 1000,
+          wordWrap: 'wordWrapColumn',
+          value: this.code,
+          language: 'html',
+          minimap: {
+            size: 'fill'
+          },
+          fixedOverflowWidgets: true,
+          scrollbar: {
+            useShadows: false,
+            verticalHasArrows: true,
+            horizontalHasArrows: true,
+            vertical: 'visible',
+            horizontal: 'visible'
+          }
+        });
 
-      this._monacoEditor.layout();
-      let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-        this.onTextChanged.emit(this._monacoEditor.getValue())
-      })
-      this._monacoEditor.onDidChangeModel(e => {
-        changeContentListener.dispose();
-        changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
+        let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
           this.onTextChanged.emit(this._monacoEditor.getValue())
-        })
-      })
+        });
+        this._monacoEditor.onDidChangeModel(e => {
+          changeContentListener.dispose();
+          changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
+            this.onTextChanged.emit(this._monacoEditor.getValue())
+          });
+        });
+
+        this._monacoEditor.focus();
+
+        resizeObserver.disconnect();
+      };
     });
+
+    resizeObserver.observe(this._editor);
   }
 
   focusEditor() {
     requestAnimationFrame(() => {
       this.focus();
-      this._monacoEditor.focus();
+      if (this._monacoEditor)
+        this._monacoEditor.focus();
     });
   }
 
   activated() {
     if (this._monacoEditor)
-      this._monacoEditor.layout();
+      if (this._monacoEditor)
+        this._monacoEditor.layout();
   }
 
   update(code) {
     this.code = code;
     if (this._monacoEditor) {
-      this._monacoEditor.setValue(code);
+      if (this._monacoEditor)
+        this._monacoEditor.setValue(code);
     }
   }
 
@@ -159,12 +187,14 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   setSelection(position: IStringPosition) {
-    let model = this._monacoEditor.getModel();
-    let point1 = model.getPositionAt(position.start);
-    let point2 = model.getPositionAt(position.start + position.length);
-    this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
-    //@ts-ignore
-    setTimeout(() => this._monacoEditor.revealRangeInCenter(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1));
+    if (this._monacoEditor) {
+      let model = this._monacoEditor.getModel();
+      let point1 = model.getPositionAt(position.start);
+      let point2 = model.getPositionAt(position.start + position.length);
+      this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
+      //@ts-ignore
+      setTimeout(() => this._monacoEditor.revealRangeInCenter(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1));
+    }
   }
 }
 
