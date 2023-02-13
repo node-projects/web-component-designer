@@ -90,6 +90,7 @@ export * from "./elements/services/propertiesService/DefaultEditorTypesService.j
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
+export type { IPropertyEditor } from "./elements/services/propertiesService/IPropertyEditor.js";
 export type { IPropertyGroup } from "./elements/services/propertiesService/IPropertyGroup.js";
 export type { IPropertyTabsService as IPropertyGroupsService } from './elements/services/propertiesService/IPropertyTabsService.js';
 export * from "./elements/services/propertiesService/propertyEditors/BasePropertyEditor.js";

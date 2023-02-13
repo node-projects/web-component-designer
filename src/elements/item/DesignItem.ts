@@ -49,7 +49,7 @@ export class DesignItem implements IDesignItem {
   *allMatching(selectors: string) {
     if (this.hasChildren) {
       for (let d of this.children()) {
-        if (d.element.matches(selectors))
+        if (d.nodeType == NodeType.Element && d.element.matches(selectors))
           yield d;
         yield* d.allMatching(selectors);
       }
