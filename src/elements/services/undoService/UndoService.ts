@@ -51,7 +51,7 @@ export class UndoService implements IUndoService {
     if (this._transactionStack.length == 0) {
       item.do();
       this._undoStack.push(item);
-      this._redoStack = []
+      this._redoStack = [];
     } else {
       this._transactionStack[this._transactionStack.length - 1].execute(item);
     }
