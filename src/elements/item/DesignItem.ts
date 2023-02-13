@@ -467,7 +467,7 @@ export class DesignItem implements IDesignItem {
     if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
       designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
 
-    designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtensions([designItem]);
+    designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtensions([designItem], true);
 
     const index = this._childArray.indexOf(designItem);
     if (index > -1) {

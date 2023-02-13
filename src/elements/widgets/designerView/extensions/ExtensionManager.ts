@@ -33,7 +33,7 @@ export class ExtensionManager implements IExtensionManager {
           this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, true);
           break;
         case 'removed':
-          this.removeExtensions(contentChanged.designItems, ExtensionType.Permanent);
+          this.removeExtensions(contentChanged.designItems, true, ExtensionType.Permanent);
           break;
       }
     });
@@ -45,7 +45,7 @@ export class ExtensionManager implements IExtensionManager {
         const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
         this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
-        this.removeExtensions(selectionChangedEvent.oldSelectedElements, ExtensionType.Selection);
+        this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.Selection);
       }
     }
 
@@ -176,10 +176,13 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  removeExtensions(designItems: IDesignItem[], extensionType?: ExtensionType) {
+  removeExtensions(designItems: IDesignItem[], includeChildren: boolean, extensionType?: ExtensionType) {
     if (designItems) {
       if (extensionType) {
         for (let i of designItems) {
+          if (includeChildren && i.hasChildren) {
+            this.removeExtensions([...i.children()], true, extensionType);
+          }
           i.shouldAppliedDesignerExtensions.delete(extensionType);
           let exts = i.appliedDesignerExtensions.get(extensionType);
           if (exts) {
@@ -198,6 +201,9 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         for (let i of designItems) {
+          if (includeChildren && i.hasChildren) {
+            this.removeExtensions([...i.children()], true, extensionType);
+          }
           i.shouldAppliedDesignerExtensions.clear();
           for (let appE of i.appliedDesignerExtensions) {
             for (let e of appE[1]) {
