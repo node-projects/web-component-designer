@@ -5,9 +5,18 @@ import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStylesheetService.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
-import cssProperties from './CssProperties.json' assert { type: 'json' };
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
+
+let cssProperties: any;
+//@ts-ignore
+if (window.importShim) {
+  const cssPropertiesUrl = import.meta.resolve('./CssProperties.json')
+  //@ts-ignore
+  cssProperties = await importShim(cssPropertiesUrl, { assert: { type: 'json' } });
+} else
+  //@ts-ignore
+  cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
 
 const localName = '&lt;local&gt;';
 
