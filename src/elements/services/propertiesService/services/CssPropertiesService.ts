@@ -5,8 +5,17 @@ import { PropertyType } from '../PropertyType.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
-import cssProperties from './CssProperties.json' assert { type: 'json' };
 import { PropertiesHelper } from './PropertiesHelper.js';
+
+let cssProperties: any;
+//@ts-ignore
+if (window.importShim) {
+  const cssPropertiesUrl = import.meta.resolve('./CssProperties.json')
+  //@ts-ignore
+  cssProperties = await importShim(cssPropertiesUrl, { assert: { type: 'json' } });
+} else
+  //@ts-ignore
+  cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
 
 export class CssPropertiesService extends CommonPropertiesService {
 
