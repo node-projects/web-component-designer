@@ -2,6 +2,9 @@ export async function copyTextToClipboard(text) {
     copyToClipboard(['text/plain', text]);
 }
 
+//used, so you could copy internal if you have no clipboard access
+let internalClipboard = null;
+
 export async function copyToClipboard(items: [format: string, data: string][]) {
 
     if (navigator.clipboard) {
@@ -13,9 +16,12 @@ export async function copyToClipboard(items: [format: string, data: string][]) {
             await navigator.clipboard.write(data);
         } catch (err) {
             await navigator.clipboard.writeText(items[0][1]);
+            internalClipboard = items[0][1];
         }
         console.info('Copy to clipboard successful');
     } else {
+        internalClipboard = items[0][1];
+
         const textArea = document.createElement('textarea');
         textArea.style.position = 'fixed';
         textArea.style.top = '0';
@@ -67,6 +73,8 @@ export async function getTextFromClipboard(): Promise<string> {
             textArea.select();
             document.execCommand('paste');
             let value = textArea.value;
+            if (!value)
+                value = internalClipboard;
             document.body.removeChild(textArea);
             resolve(value);
         });
