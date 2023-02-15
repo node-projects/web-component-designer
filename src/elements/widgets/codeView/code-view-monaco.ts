@@ -30,10 +30,14 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       height: 100%;
       width: 100%;
     }
+
+    .monaco-editor .overflow-guard { 
+      overflow: visible;
+    }
     `;
 
   static override readonly template = html`
-      <div id="container" style="width: 100%; height: 100%; position: absolute;"></div>
+      <div id="container" style="overflow: hidden; width: 100%; height: 100%; position: absolute;"></div>
   `;
 
   executeCommand(command: IUiCommand) {
@@ -193,7 +197,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       let point2 = model.getPositionAt(position.start + position.length);
       this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
       //@ts-ignore
-      setTimeout(() => this._monacoEditor.revealRangeInCenter(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1));
+      this._monacoEditor.revealRangeInCenterIfOutsideViewport(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
     }
   }
 }
