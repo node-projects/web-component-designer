@@ -7,6 +7,7 @@ import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 
+//TODO: remove this code when import asserts are supported
 let cssProperties: any;
 //@ts-ignore
 if (window.importShim) {

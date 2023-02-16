@@ -1,5 +1,4 @@
 import { css } from "@node-projects/base-custom-webcomponent";
-import { sleep } from '../Helper.js';
 import { IContextMenuItem } from './IContextMenuItem.js';
 
 export interface IContextMenuOptions {
@@ -126,9 +125,6 @@ export class ContextMenu {
 	menu: IContextMenuItem[];
 	public options: IContextMenuOptions;
 	private num: number;
-	private _windowDownBound: any;
-	private _windowKeyUpBound: any;
-	private _windowResizeBound: any;
 	private _menuElement: HTMLDivElement;
 
 	constructor(menu: IContextMenuItem[], options?: IContextMenuOptions) {
@@ -138,9 +134,9 @@ export class ContextMenu {
 
 		this.reload();
 
-		this._windowDownBound = this._windowDown.bind(this);
-		this._windowKeyUpBound = this._windowKeyUp.bind(this);
-		this._windowResizeBound = this._windowResize.bind(this);
+		this._windowDown = this._windowDown.bind(this);
+		this._windowKeyUp = this._windowKeyUp.bind(this);
+		this._windowResize = this._windowResize.bind(this);
 	}
 
 	reload() {
@@ -281,10 +277,10 @@ export class ContextMenu {
 
 		event.preventDefault();
 
-		window.addEventListener("keyup", this._windowKeyUpBound);
-		window.addEventListener("mousedown", this._windowDownBound);
-		window.addEventListener("resize", this._windowResizeBound);
-		sleep(100).then(() => window.addEventListener("contextmenu", this._windowDownBound));
+		window.addEventListener("keyup", this._windowKeyUp);
+		window.addEventListener("mousedown", this._windowDown);
+		window.addEventListener("resize", this._windowResize);
+		setTimeout(() => window.addEventListener("contextmenu", this._windowDown), 100);
 	}
 
 	_windowResize() {
@@ -311,13 +307,12 @@ export class ContextMenu {
 
 	close() {
 		this._menuElement.remove();
-		window.removeEventListener("keyup", this._windowKeyUpBound);
-		window.removeEventListener("mousedown", this._windowDownBound);
-		window.removeEventListener("contextmenu", this._windowDownBound);
-		window.removeEventListener("resize", this._windowResizeBound);
+		window.removeEventListener("keyup", this._windowKeyUp);
+		window.removeEventListener("mousedown", this._windowDown);
+		window.removeEventListener("contextmenu", this._windowDown);
+		window.removeEventListener("resize", this._windowResize);
 	}
 }
-
 
 class ContextUtil {
 	static getSizes(obj) {
