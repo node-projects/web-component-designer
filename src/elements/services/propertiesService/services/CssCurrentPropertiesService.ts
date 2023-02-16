@@ -8,6 +8,7 @@ import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
 
+//TODO: remove this code when import asserts are supported
 let cssProperties: any;
 //@ts-ignore
 if (window.importShim) {

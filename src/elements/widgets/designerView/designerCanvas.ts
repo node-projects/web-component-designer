@@ -1151,17 +1151,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule): string {
-    let ruleCollector: string[] = [];
+    let t = '';
     for (let rule of ruleContainer.cssRules) {
       if ((rule instanceof CSSContainerRule
         || rule instanceof CSSSupportsRule
         || rule instanceof CSSMediaRule)
         && rule.cssRules) {
-        return rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
+        t += rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
       }
       if (rule instanceof CSSStyleRule) {
         let parts = rule.selectorText.split(',');
-        let t = '';
+
         for (let p of parts) {
           if (p.includes(this.cssprefixConstant)) {
             t += p;
@@ -1180,10 +1180,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
             cssText += e[0] + ':' + e[1].toString() + ';';
           }
         }
-        ruleCollector.push(t + '{' + cssText + '}');
+        t += '{' + cssText + '}';
       }
     }
-    return ruleCollector.join(' ');
+    return t;
   }
 }
 
