@@ -72,12 +72,11 @@ We have 2 tree components. One independent and one feature rich which uses Fancy
 
 ## DragDrop
 
-If you'd like to use the designer on mobile, you need the mobile-drag-drop npm library and include our polyfill.
+If you'd like to use the designer on mobile, you need the mobile-drag-drop npm library.
 Your index.html should be extended as follows:
 
     <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
-    <script src="/node_modules/@node-projects/web-component-designer/dist/polyfill/mobileDragDrop.js"></script>
 
 ## Copyright notice
 
