@@ -777,6 +777,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, getComputedStyle(newContainer.element)))
         containerService.enterContainer(newContainer, [di]);
         containerService.place(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, this.getNormalizedEventCoordinates(event), [di]);
+        containerService.finishPlace(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, this.getNormalizedEventCoordinates(event), [di]);
         this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
         requestAnimationFrame(() => {
           this.instanceServiceContainer.selectionService.setSelectedElements([di]);
