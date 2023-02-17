@@ -32,7 +32,7 @@ export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, per
         '%': value => value / 100 * (percentTarget == 'height' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
 
         /* todo
-        //find parent with computed style where contaner-type is inline-size or size (regarding to query type)
+        //find parent with computed style where container-type is inline-size or size (regarding to query type)
         //use this size for calculation
         'cqw':
         'cqh':

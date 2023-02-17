@@ -1161,16 +1161,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       }
       if (rule instanceof CSSStyleRule) {
         let parts = rule.selectorText.split(',');
-
+        let sel = "";
         for (let p of parts) {
           if (p.includes(this.cssprefixConstant)) {
-            t += p;
+            sel += p;
             continue;
           }
-          if (t)
-            t += ',';
-          t += this.cssprefixConstant + p;
+          if (sel)
+            sel += ',';
+          sel += this.cssprefixConstant + p.trimStart();
         }
+        t += sel;
         let cssText = rule.style.cssText;
         //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
         if ((<any>rule).styleMap && (<any>rule).styleMap.get('grid-template') && (<any>rule).styleMap.get('grid-template').toString().includes('repeat(')) {
