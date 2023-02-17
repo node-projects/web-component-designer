@@ -766,21 +766,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         if (!newContainer)
           newContainer = this.rootDesignItem;
 
-        let pos = this.getNormalizedElementCoordinates(newContainer.element);
-
         this._fillCalculationrects();
-        const position = this.getNormalizedEventCoordinates(event);
-
+        
         //TODO : we need to use container service for adding to element, so also grid and flexbox work correct
         const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
         const elementDefinition = <IElementDefinition>JSON.parse(transferData);
         const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
         const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
         di.setStyle('position', 'absolute');
-        di.setStyle('left', (position.x - pos.x) + 'px');
-        di.setStyle('top', (position.y - pos.y) + 'px');
         const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, getComputedStyle(newContainer.element)))
         containerService.enterContainer(newContainer, [di]);
+        containerService.place(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, this.getNormalizedEventCoordinates(event), [di]);
         this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
         requestAnimationFrame(() => {
           this.instanceServiceContainer.selectionService.setSelectedElements([di]);
