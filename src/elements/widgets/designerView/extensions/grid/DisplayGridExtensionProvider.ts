@@ -1,14 +1,14 @@
-import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignerExtension } from './IDesignerExtension.js';
-import { GridExtension } from './GridExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
+import { DisplayGridExtension } from './DisplayGridExtension.js';
 
 export const gridExtensionShowOverlayOptionName = 'gridExtensionShowOverlay';
 
-export class GridExtensionProvider implements IDesignerExtensionProvider {
+export class DisplayGridExtensionProvider implements IDesignerExtensionProvider {
 
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
@@ -18,7 +18,7 @@ export class GridExtensionProvider implements IDesignerExtensionProvider {
   }
 
   getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new GridExtension(extensionManager, designerCanvas, designItem);
+    return new DisplayGridExtension(extensionManager, designerCanvas, designItem);
   }
 
   readonly style = css`

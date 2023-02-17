@@ -11,7 +11,6 @@ import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserS
 import { Lit2PropertiesService } from './propertiesService/services/Lit2PropertiesService.js';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
 import { ElementDragTitleExtensionProvider } from '../widgets/designerView/extensions/ElementDragTitleExtensionProvider.js';
-import { GridExtensionProvider } from '../widgets/designerView/extensions/GridExtensionProvider.js';
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider.js';
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider.js';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider.js';
@@ -78,6 +77,8 @@ import { SelectionService } from './selectionService/SelectionService.js';
 import { ContentService } from './contentService/ContentService.js';
 import { StylesheetServiceDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { JumpToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js';
+import { EditGridExtensionProvider } from '../widgets/designerView/extensions/grid/EditGridExtensionProvider.js';
+import { DisplayGridExtensionProvider } from '../widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -115,7 +116,7 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
-    new GridExtensionProvider(),
+    new EditGridExtensionProvider(),
     new FlexboxExtensionProvider(),
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
@@ -131,7 +132,7 @@ export function createDefaultServiceContainer() {
     new SelectionDefaultExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
-    new GridExtensionProvider(),
+    new EditGridExtensionProvider(),
     new FlexboxExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
@@ -145,10 +146,12 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
     new GrayOutDragOverContainerExtensionProvider(),
-    new AltToEnterContainerExtensionProvider()
+    new AltToEnterContainerExtensionProvider(),
+    new DisplayGridExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerExternalDragOver, [
-    new GrayOutDragOverContainerExtensionProvider()
+    new GrayOutDragOverContainerExtensionProvider(),
+    new DisplayGridExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
     new EditTextExtensionProvider()

@@ -207,8 +207,6 @@ export * from "./elements/widgets/designerView/extensions/GrayOutExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtension.js";
 export * from "./elements/widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/GridExtension.js";
-export * from "./elements/widgets/designerView/extensions/GridExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleElementExtension.js";
 export * from "./elements/widgets/designerView/extensions/InvisibleElementExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/HighlightElementExtension.js";
@@ -227,6 +225,11 @@ export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtens
 export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
+
+export * from "./elements/widgets/designerView/extensions/grid/EditGridExtension.js";
+export * from "./elements/widgets/designerView/extensions/grid/EditGridExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/grid/DisplayGridExtension.js";
+export * from "./elements/widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js";
 
 export * from "./elements/widgets/designerView/extensions/buttons/InvisibleElementExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/buttons/FlexboxExtensionDesignViewConfigButtons.js";
