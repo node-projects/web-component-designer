@@ -34,12 +34,12 @@ export class DisplayGridExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend() {
+  override extend(event?: Event) {
     this._initSVGArrays();
-    this.refresh();
+    this.refresh(event);
   }
 
-  override refresh() {
+  override refresh(event?: Event) {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
 
@@ -50,7 +50,7 @@ export class DisplayGridExtension extends AbstractExtension {
       //draw gaps
       this.gridInformation.gaps.forEach((gap, i) => {
         this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
-      })
+      });
 
       //draw cells
       cells.forEach((row, i) => {
@@ -60,11 +60,14 @@ export class DisplayGridExtension extends AbstractExtension {
             const text = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', null, OverlayLayer.Background);
             text.setAttribute("dominant-baseline", "hanging");
           }
+          if (event && event instanceof MouseEvent) {
+            let crd = this.designerCanvas.getNormalizedEventCoordinates(event);
+            if (crd.x >= cell.x && crd.y >= cell.y && crd.x <= cell.x + cell.width && crd.y <= cell.y + cell.height) {
+              this._cells[i][j].setAttribute("class", "svg-grid-current-cell");
+            }
+          }
         })
-      })
-
-
-
+      });
     }
   }
 

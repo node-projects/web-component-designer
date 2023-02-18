@@ -231,6 +231,8 @@ export * from "./elements/widgets/designerView/extensions/grid/EditGridExtension
 export * from "./elements/widgets/designerView/extensions/grid/DisplayGridExtension.js";
 export * from "./elements/widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js";
 
+export * from "./elements/widgets/designerView/extensions/logic/ApplyFirstMachingExtensionProvider.js";
+
 export * from "./elements/widgets/designerView/extensions/buttons/InvisibleElementExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/buttons/FlexboxExtensionDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/buttons/GridExtensionDesignViewConfigButtons.js";

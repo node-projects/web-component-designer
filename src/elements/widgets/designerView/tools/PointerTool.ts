@@ -203,7 +203,7 @@ export class PointerTool implements ITool {
       case EventNames.PointerDown:
         {
           this._actionStartedDesignItem = currentDesignItem;
-   
+
           this._moveItemsOffset = { x: 0, y: 0 };
 
           this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
@@ -276,7 +276,7 @@ export class PointerTool implements ITool {
               const dragItem = this._actionStartedDesignItem.parent;
               if (this._dragExtensionItem != dragItem) {
                 designerCanvas.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
-                designerCanvas.extensionManager.applyExtension(dragItem, ExtensionType.ContainerDrag);
+                designerCanvas.extensionManager.applyExtension(dragItem, ExtensionType.ContainerDrag, event);
                 this._dragExtensionItem = dragItem;
               }
               else {
@@ -295,11 +295,11 @@ export class PointerTool implements ITool {
                 if (newContainerElementDesignItem != null) {
                   if (this._dragOverExtensionItem != newContainerElementDesignItem) {
                     designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
-                    designerCanvas.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
+                    designerCanvas.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver, event);
                     this._dragOverExtensionItem = newContainerElementDesignItem;
                   }
                   else {
-                    designerCanvas.extensionManager.refreshExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver);
+                    designerCanvas.extensionManager.refreshExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver, event);
                   }
                 } else {
                   if (this._dragOverExtensionItem) {
@@ -327,14 +327,14 @@ export class PointerTool implements ITool {
                   for (const item of this._actionStartedDesignItems) {
                     designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
                     designerCanvas.extensionManager.removeExtension(item, ExtensionType.MouseOver);
-                    designerCanvas.extensionManager.applyExtension(item, ExtensionType.Placement);
+                    designerCanvas.extensionManager.applyExtension(item, ExtensionType.Placement, event);
                   }
                   currentContainerService.startPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
                   this._started = true;
                 }
                 currentContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
               }
-              designerCanvas.extensionManager.refreshExtensions(this._actionStartedDesignItems);
+              designerCanvas.extensionManager.refreshExtensions(this._actionStartedDesignItems, null, event);
             }
           }
           break;
@@ -363,7 +363,7 @@ export class PointerTool implements ITool {
               this._changeGroup.commit();
               this._changeGroup = null;
               for (const item of this._actionStartedDesignItems) {
-                designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver);
+                designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver, event);
                 designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
               }
             }
@@ -375,7 +375,7 @@ export class PointerTool implements ITool {
             this._moveItemsOffset = { x: 0, y: 0 };
           }
 
-          designerCanvas.extensionManager.refreshExtensions(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+          designerCanvas.extensionManager.refreshExtensions(designerCanvas.instanceServiceContainer.selectionService.selectedElements, null, event);
 
           if (this._changeGroup) {
             this._changeGroup.abort();

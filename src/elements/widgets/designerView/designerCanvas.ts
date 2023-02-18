@@ -694,8 +694,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         let [newContainer] = this._getPossibleContainerForDrop(event);
         if (this._dragOverExtensionItem != newContainer) {
           this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
-          this.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver);
+          this.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
           this._dragOverExtensionItem = newContainer;
+        } else {
+          this.extensionManager.refreshExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
         }
       }
     }
@@ -767,7 +769,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           newContainer = this.rootDesignItem;
 
         this._fillCalculationrects();
-        
+
         //TODO : we need to use container service for adding to element, so also grid and flexbox work correct
         const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
         const elementDefinition = <IElementDefinition>JSON.parse(transferData);
@@ -802,7 +804,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _onDblClick(event: KeyboardEvent) {
     event.preventDefault();
-    this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick);
+    this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);
   }
 
   private onKeyUp(event: KeyboardEvent) {
@@ -996,13 +998,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return currentElement;
   }
 
-  public showHoverExtension(element: Element) {
+  public showHoverExtension(element: Element, event: Event) {
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(element, this.serviceContainer, this.instanceServiceContainer);
     if (this._lastHoverDesignItem != currentDesignItem) {
       if (this._lastHoverDesignItem)
         this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
       if (currentDesignItem && currentDesignItem != this.rootDesignItem && DomHelper.getHost(element.parentNode) !== this.overlayLayer)
-        this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver);
+        this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver, event);
       this._lastHoverDesignItem = currentDesignItem;
     }
   }
@@ -1047,7 +1049,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.clickOverlay.style.cursor = this._canvas.style.cursor;
 
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
-    this.showHoverExtension(currentDesignItem.element);
+    this.showHoverExtension(currentDesignItem.element, event);
 
     //TODO: needed ??
     if (currentElement && DomHelper.getHost(currentElement.parentNode) === this.overlayLayer) {

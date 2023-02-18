@@ -7,7 +7,7 @@ import { css } from "@node-projects/base-custom-webcomponent";
 import { GrayOutDragOverContainerExtension } from "./GrayOutDragOverContainerExtension.js";
 
 export class GrayOutDragOverContainerExtensionProvider implements IDesignerExtensionProvider {
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     return true;
   }
 
