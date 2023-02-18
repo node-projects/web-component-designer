@@ -219,7 +219,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             }
           }
         }
-        const disableExpand = (<MouseEvent>  event.originalEvent).ctrlKey || (<MouseEvent>  event.originalEvent).shiftKey;
+        const disableExpand = (<MouseEvent>event.originalEvent).ctrlKey || (<MouseEvent>event.originalEvent).shiftKey;
         return !disableExpand;
       },
 
@@ -230,8 +230,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           let designItem: IDesignItem = node.data.ref;
           node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
           if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
-            node.tr.onmouseenter = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(designItem.element);
-            node.tr.onmouseleave = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(null);
+            node.tr.onmouseenter = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(designItem.element, e);
+            node.tr.onmouseleave = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
 
             let d = document.createElement("div");
             d.className = "cmd"

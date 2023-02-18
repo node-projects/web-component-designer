@@ -79,6 +79,7 @@ import { StylesheetServiceDesignViewConfigButtons } from '../widgets/designerVie
 import { JumpToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js';
 import { EditGridExtensionProvider } from '../widgets/designerView/extensions/grid/EditGridExtensionProvider.js';
 import { DisplayGridExtensionProvider } from '../widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js';
+import { ApplyFirstMachingExtensionProvider } from '../widgets/designerView/extensions/logic/ApplyFirstMachingExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -105,8 +106,8 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("demoProviderService", new DemoProviderService());
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
-  serviceContainer.register("selectionService",  (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas));
-  serviceContainer.register("contentService",  (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
+  serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas));
+  serviceContainer.register("contentService", (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
   //serviceContainer.register("stylesheetService", new DemoProviderService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
@@ -145,13 +146,17 @@ export function createDefaultServiceContainer() {
     new GrayOutExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
-    new GrayOutDragOverContainerExtensionProvider(),
-    new AltToEnterContainerExtensionProvider(),
-    new DisplayGridExtensionProvider()
+    new ApplyFirstMachingExtensionProvider(
+      new DisplayGridExtensionProvider(),
+      new GrayOutDragOverContainerExtensionProvider(),
+    ),
+    new AltToEnterContainerExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.ContainerExternalDragOver, [
-    new GrayOutDragOverContainerExtensionProvider(),
-    new DisplayGridExtensionProvider()
+    new ApplyFirstMachingExtensionProvider(
+      new DisplayGridExtensionProvider(),
+      new GrayOutDragOverContainerExtensionProvider(),
+    ),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
     new EditTextExtensionProvider()

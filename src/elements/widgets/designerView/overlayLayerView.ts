@@ -56,7 +56,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     for (const extList of this._serviceContainer.designerExtensions) {
       for (const ext of extList[1]) {
         if (ext.style) {
-          styles.push(ext.style);
+          if (Array.isArray(ext.style))
+            styles.push(...ext.style);
+          else
+            styles.push(ext.style);
         }
       }
     }

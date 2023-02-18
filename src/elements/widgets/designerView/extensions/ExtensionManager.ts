@@ -24,13 +24,13 @@ export class ExtensionManager implements IExtensionManager {
     requestAnimationFrame(() => {
       switch (contentChanged.changeType) {
         case 'added':
-          this.applyExtensions(contentChanged.designItems, ExtensionType.Permanent, true);
+          this.applyExtensions(contentChanged.designItems, ExtensionType.Permanent, null, true);
           break;
         case 'moved':
           this.refreshExtensions(contentChanged.designItems, ExtensionType.Permanent);
           break;
         case 'parsed':
-          this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, true);
+          this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, null, true);
           break;
         case 'removed':
           this.removeExtensions(contentChanged.designItems, true, ExtensionType.Permanent);
@@ -59,7 +59,7 @@ export class ExtensionManager implements IExtensionManager {
     //this.refreshExtensions(selectionChangedEvent.selectedElements);
   }
 
-  applyExtension(designItem: IDesignItem, extensionType: ExtensionType, recursive: boolean = false) {
+  applyExtension(designItem: IDesignItem, extensionType: ExtensionType, event?: Event, recursive: boolean = false) {
     if (designItem && designItem.nodeType == NodeType.Element) {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       let extensions: IDesignerExtension[] = [];
@@ -77,7 +77,7 @@ export class ExtensionManager implements IExtensionManager {
               appE = [];
             const ext = e.getExtension(this, this.designerCanvas, designItem);
             try {
-              ext.extend();
+              ext.extend(event);
               extensions.push(ext);
             }
             catch (err) {
@@ -92,7 +92,7 @@ export class ExtensionManager implements IExtensionManager {
 
       if (recursive) {
         for (const d of designItem.children()) {
-          this.applyExtension(d, extensionType, recursive);
+          this.applyExtension(d, extensionType, event, recursive);
         }
       }
       return extensions;
@@ -100,7 +100,7 @@ export class ExtensionManager implements IExtensionManager {
     return null;
   }
 
-  applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType, recursive: boolean = false) {
+  applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType, event?: Event, recursive: boolean = false) {
     if (designItems) {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       if (extProv) {
@@ -112,13 +112,13 @@ export class ExtensionManager implements IExtensionManager {
             shouldAppE.push(e);
             i.shouldAppliedDesignerExtensions.set(extensionType, shouldAppE);
 
-            if (/*i.nodeType == NodeType.Element &&*/ e.shouldExtend(this, this.designerCanvas, i)) {
+            if (e.shouldExtend(this, this.designerCanvas, i)) {
               let appE = i.appliedDesignerExtensions.get(extensionType);
               if (!appE)
                 appE = [];
               const ext = e.getExtension(this, this.designerCanvas, i);
               try {
-                ext.extend();
+                ext.extend(event);
               }
               catch (err) {
                 console.error(err);
@@ -133,7 +133,7 @@ export class ExtensionManager implements IExtensionManager {
 
       if (recursive) {
         for (const d of designItems) {
-          this.applyExtensions(Array.from(d.children()), extensionType, recursive);
+          this.applyExtensions(Array.from(d.children()), extensionType, event, recursive);
         }
       }
     }
@@ -176,11 +176,11 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  removeExtensions(designItems: IDesignItem[], includeChildren: boolean, extensionType?: ExtensionType) {
+  removeExtensions(designItems: IDesignItem[], recursive: boolean, extensionType?: ExtensionType) {
     if (designItems) {
       if (extensionType) {
         for (let i of designItems) {
-          if (includeChildren && i.hasChildren) {
+          if (recursive && i.hasChildren) {
             this.removeExtensions([...i.children()], true, extensionType);
           }
           i.shouldAppliedDesignerExtensions.delete(extensionType);
@@ -201,7 +201,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         for (let i of designItems) {
-          if (includeChildren && i.hasChildren) {
+          if (recursive && i.hasChildren) {
             this.removeExtensions([...i.children()], true, extensionType);
           }
           i.shouldAppliedDesignerExtensions.clear();
@@ -222,14 +222,14 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType) {
+  refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType, event?: Event) {
     if (designItem) {
       if (extensionType) {
         let exts = designItem.appliedDesignerExtensions.get(extensionType);
         if (exts) {
           for (let e of exts) {
             try {
-              e.refresh();
+              e.refresh(event);
             }
             catch (err) {
               console.error(err);
@@ -240,7 +240,7 @@ export class ExtensionManager implements IExtensionManager {
         for (let appE of designItem.appliedDesignerExtensions) {
           for (let e of appE[1]) {
             try {
-              e.refresh();
+              e.refresh(event);
             }
             catch (err) {
               console.error(err);
@@ -251,7 +251,7 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, ignoredExtension?: any) {
+  refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, event?: Event, ignoredExtension?: IDesignerExtension) {
     if (designItems) {
       if (extensionType) {
         for (let i of designItems) {
@@ -260,7 +260,7 @@ export class ExtensionManager implements IExtensionManager {
             for (let e of exts) {
               try {
                 if (e != ignoredExtension)
-                  e.refresh();
+                  e.refresh(event);
               }
               catch (err) {
                 console.error(err);
@@ -274,7 +274,7 @@ export class ExtensionManager implements IExtensionManager {
             for (let e of appE[1]) {
               try {
                 if (e != ignoredExtension)
-                  e.refresh();
+                  e.refresh(event);
               }
               catch (err) {
                 console.error(err);
@@ -286,19 +286,19 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: any) {
+  refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension) {
     if (designItems) {
-      this.refreshExtensions(designItems, ExtensionType.Permanent, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.Selection, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelection, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.MouseOver, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.ContainerDragOver, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.ContainerDrag, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.Doubleclick, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.Placement, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Permanent, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Selection, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelection, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.MouseOver, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDragOver, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDrag, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Doubleclick, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Placement, null, ignoredExtension);
     }
   }
 

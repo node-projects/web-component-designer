@@ -46,7 +46,7 @@ export class TextTool implements ITool {
 
           //TODO - don't apply doubleclick extension (maybe it is not the doubleclick one) - apply edit text extesion directly
           //should we configure the editTextExtension anywhere??
-          this._textEditExtensions = designerCanvas.extensionManager.applyExtension(di, ExtensionType.Doubleclick);
+          this._textEditExtensions = designerCanvas.extensionManager.applyExtension(di, ExtensionType.Doubleclick, event);
 
           setTimeout(() => { span.focus(); }, 50);
         } else {

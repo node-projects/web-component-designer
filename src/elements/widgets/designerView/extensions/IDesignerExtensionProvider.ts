@@ -6,5 +6,5 @@ import { IExtensionManager } from './IExtensionManger.js';
 export interface IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean;
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension;
-  style?: CSSStyleSheet;
+  style?: CSSStyleSheet | CSSStyleSheet[];
 }
