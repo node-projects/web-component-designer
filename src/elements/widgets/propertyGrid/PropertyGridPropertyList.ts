@@ -33,7 +33,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     .content-wrapper {
       padding: .5em;
       display: grid;
-      grid-template-columns: 11px auto minmax(80px, min-content);
+      grid-template-columns: 11px minmax(80px, auto) minmax(80px, auto);
       align-items: center;
       grid-auto-rows: minmax(24px, auto);
       align-items: center;
