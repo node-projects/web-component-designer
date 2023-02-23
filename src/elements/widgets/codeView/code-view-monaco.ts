@@ -30,10 +30,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       height: 100%;
       width: 100%;
     }
-
-    .monaco-editor .overflow-guard { 
-      overflow: visible;
-    }
     `;
 
   static override readonly template = html`
@@ -129,7 +125,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor = monaco.editor.create(this._editor, {
           automaticLayout: true,
           wordWrapColumn: 1000,
-          wordWrap: 'wordWrapColumn',
+          //wordWrap: 'wordWrapColumn',
           value: this.code,
           language: 'html',
           minimap: {
