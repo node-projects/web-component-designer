@@ -69,17 +69,17 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
         const realStyle = this.extendedItem.getStyleFromSheetOrLocalOrComputed(templatePropertyName);
         const initialParts = this._initialSizes.split(' ');
         const parts = realStyle.split(' ');
-        const units = parts.map(x => getCssUnit(x));
-        if (parts.length == initialParts.length) {
-          (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = '';
-          const unit1 = units[index];
-          initialParts[index] = this._convertCssUnitIncludingFr(parseFloat(initialParts[index]) - diff, <HTMLElement>this.extendedItem.element, sizeType, unit1, units);
-          const unit2 = units[index + 1];
-          initialParts[index + 1] = this._convertCssUnitIncludingFr(parseFloat(initialParts[index + 1]) + diff, <HTMLElement>this.extendedItem.element, sizeType, unit2, units);
-          this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, initialParts.join(' '));
-        } else {
-          //use pixel
+        let units = parts.map(x => getCssUnit(x));
+        if (parts.length != initialParts.length) {
+          units = initialParts.map(x => getCssUnit(x));
         }
+        (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = '';
+        const unit1 = units[index];
+        initialParts[index] = this._convertCssUnitIncludingFr(parseFloat(initialParts[index]) - diff, <HTMLElement>this.extendedItem.element, sizeType, unit1, units);
+        const unit2 = units[index + 1];
+        initialParts[index + 1] = this._convertCssUnitIncludingFr(parseFloat(initialParts[index + 1]) + diff, <HTMLElement>this.extendedItem.element, sizeType, unit2, units);
+        this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, initialParts.join(' '));
+
         this._initalPos = null;
         this._initialSizes = null;
         this.extensionManager.refreshExtensions([this.extendedItem]);
