@@ -90,7 +90,8 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
   }
 
   _convertCssUnits(pixelSizes: number[], targetUnits: string[], target: HTMLElement, percentTarget: 'width' | 'height'): string[] {
-    let containerSize = convertCssUnitToPixel(target.style.width, target, percentTarget);
+    let bounding = target.getBoundingClientRect();
+    let containerSize = bounding[percentTarget];
     let amountGaps = percentTarget == "height" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1
     let gapSize = convertCssUnitToPixel(percentTarget == "width" ? target.style.columnGap : target.style.rowGap, target, percentTarget) ?? 0;
     let containerSizeWithoutGaps = containerSize - gapSize * amountGaps;
