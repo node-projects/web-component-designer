@@ -74,11 +74,13 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
           units = initialParts.map(x => getCssUnit(x));
         }
         (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = '';
-        const unit1 = units[index];
-        initialParts[index] = this._convertCssUnitIncludingFr(parseFloat(initialParts[index]) - diff, <HTMLElement>this.extendedItem.element, sizeType, unit1, units);
-        const unit2 = units[index + 1];
-        initialParts[index + 1] = this._convertCssUnitIncludingFr(parseFloat(initialParts[index + 1]) + diff, <HTMLElement>this.extendedItem.element, sizeType, unit2, units);
-        this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, initialParts.join(' '));
+
+        const targetPixelSizes = initialParts.map(x => parseFloat(x));
+        targetPixelSizes[index] -= diff;
+        targetPixelSizes[index + 1] += diff;
+        const newSizes = this._convertCssUnits(targetPixelSizes, units, <HTMLElement>this.extendedItem.element, sizeType);
+
+        this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, newSizes.join(' '));
 
         this._initalPos = null;
         this._initialSizes = null;
@@ -87,33 +89,27 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     }
   }
 
-  _convertCssUnitIncludingFr(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string, units: string[]): string {
-    if (unit == "fr") {
-      let containerSize = convertCssUnitToPixel(target.style.width, target, percentTarget);
-      let amountGaps = percentTarget == "height" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1
-      let gapSize = convertCssUnitToPixel(percentTarget == "width" ? target.style.columnGap : target.style.rowGap, target, percentTarget) ?? 0;
-      let containerSizeWithoutGaps = containerSize - gapSize * amountGaps;
+  _convertCssUnits(pixelSizes: number[], targetUnits: string[], target: HTMLElement, percentTarget: 'width' | 'height'): string[] {
+    let containerSize = convertCssUnitToPixel(target.style.width, target, percentTarget);
+    let amountGaps = percentTarget == "height" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1
+    let gapSize = convertCssUnitToPixel(percentTarget == "width" ? target.style.columnGap : target.style.rowGap, target, percentTarget) ?? 0;
+    let containerSizeWithoutGaps = containerSize - gapSize * amountGaps;
+    let sizeForFrs = containerSizeWithoutGaps;
 
-      let amountFrSizes = 0;
-      let leftOver = containerSizeWithoutGaps;
-      this.gridInformation.cells[0].forEach((column, i) => {
-        if (units[i] == "fr")
-          amountFrSizes++;
-        else
-          leftOver -= column[percentTarget];
-      })
+    for (let i = 0; i < pixelSizes.length; i++) {
+      if (targetUnits[i] != 'fr')
+        sizeForFrs -= pixelSizes[i];
+    }
 
-      let frRatio = leftOver / amountFrSizes;
-      if (typeof cssValue == "number") {
-        //expected Value in Pixel
-        return (cssValue / frRatio).toFixed(2) + "fr";
-      }
-      else {
-        return (convertCssUnitToPixel(cssValue, target, percentTarget) / frRatio).toFixed(2) + "fr"
+    let result: string[] = [];
+    for (let i = 0; i < pixelSizes.length; i++) {
+      if (targetUnits[i] != 'fr') {
+        result.push(convertCssUnit(pixelSizes[i], target, percentTarget, targetUnits[i]));
+      } else {
+        result.push((pixelSizes[i] / sizeForFrs).toFixed(2) + 'fr');
       }
     }
-    else
-      return convertCssUnit(cssValue, target, percentTarget, unit);
+    return result;
   }
 
   override dispose() {
