@@ -97,10 +97,12 @@ export class DesignItem implements IDesignItem {
     return this._styles.size > 0;
   }
   public hasStyle(name: string) {
-    return this._styles.has(name);
+    let nm = PropertiesHelper.camelToDashCase(name);
+    return this._styles.has(nm);
   }
   public getStyle(name: string) {
-    return this._styles.get(name);
+    let nm = PropertiesHelper.camelToDashCase(name);
+    return this._styles.get(nm);
   }
   public *styles() {
     for (let s of this._styles) {
@@ -108,10 +110,12 @@ export class DesignItem implements IDesignItem {
     }
   }
   _withoutUndoSetStyle(name: string, value: string) {
-    this._styles.set(name, value);
+    let nm = PropertiesHelper.camelToDashCase(name);
+    this._styles.set(nm, value);
   }
   _withoutUndoRemoveStyle(name: string) {
-    this._styles.delete(name);
+    let nm = PropertiesHelper.camelToDashCase(name);
+    this._styles.delete(nm);
   }
 
   private static _designItemMap = new WeakMap<Node, IDesignItem>();

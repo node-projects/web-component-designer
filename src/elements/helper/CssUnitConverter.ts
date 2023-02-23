@@ -77,7 +77,7 @@ export function getCssUnit(cssValue: string) {
     return null;
 }
 
-export function convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string) {
+export function convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string): string {
 
     if (!cssValue)
         return null;
@@ -121,5 +121,5 @@ export function convertCssUnit(cssValue: string | number, target: HTMLElement, p
         return supportedUnits[unit](cssValue) + unit;
     }
 
-    return cssValue;
+    return <any>cssValue;
 }

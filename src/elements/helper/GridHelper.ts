@@ -1,5 +1,4 @@
 import { IDesignItem } from "../item/IDesignItem.js";
-import { getCssUnit } from "./CssUnitConverter.js";
 
 export function CalculateGridInformation(designItem: IDesignItem) {
 
@@ -11,19 +10,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');
   const columns = computedStyle.gridTemplateColumns.split(' ');
-  const rowUnits = [];
-  let tmpStyle = designItem.getStyle("grid-template-rows");
-  if(tmpStyle)
-    tmpStyle.split(' ').forEach(rowWidth => { if(rowWidth != "") rowUnits.push(getCssUnit(rowWidth)) });
-  else
-    rows.forEach(() => rowUnits.push("px"));
-  const columnUnits = [];
-  tmpStyle = designItem.getStyle("grid-template-columns");
-  if(tmpStyle)
-    tmpStyle.split(' ').forEach(columnHeight => { if(columnHeight != "") columnUnits.push(getCssUnit(columnHeight))});
-  else
-    columns.forEach(() => columnUnits.push("px"));
-
+ 
   const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
   const paddingTop = Number.parseFloat(computedStyle.paddingTop);
 
@@ -88,8 +75,8 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   }
 
   const retVal: {
-    cells?: { x: number, y: number, width: number, initWidthUnit: string, height: number, initHeightUnit: string, name: string }[][];
-    gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number}[];
+    cells?: { x: number, y: number, width: number, height: number, name: string }[][];
+    gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number, type: 'h' | 'v' }[];
   } = { cells: [], gaps: [] };
 
   for (let xIdx = 0; xIdx < rows.length; xIdx++) {
@@ -101,17 +88,17 @@ export function CalculateGridInformation(designItem: IDesignItem) {
     let x = 0;
     let cl = 0;
     const currY = Number.parseFloat(r.replace('px', ''));
-    let cellList: { x: number, y: number, width: number, initWidthUnit: string, height: number, initHeightUnit: string, name: string }[] = [];
+    let cellList: { x: number, y: number, width: number, height: number, name: string }[] = [];
     retVal.cells.push(cellList);
     for (let yIdx = 0; yIdx < columns.length; yIdx++) {
       const c = columns[yIdx];
       if (x > 0) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY, column: yIdx, row: xIdx });
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY, column: yIdx, row: xIdx, type: 'v' });
         x += xGap
       }
       const currX = Number.parseFloat(c.replace('px', ''));
       if (y > 0) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, column: yIdx, row: xIdx });
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, column: yIdx, row: xIdx, type: 'h' });
       }
       let name = null;
       if (areas && areas[cl]) {
@@ -120,7 +107,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
           name = nm;
         }
       }
-      const cell = { x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: currX, initWidthUnit: columnUnits[yIdx], height: currY, initHeightUnit: rowUnits[xIdx], name: name };
+      const cell = { x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: currX, height: currY, name: name };
       cellList.push(cell);
       x += currX;
       cl++;

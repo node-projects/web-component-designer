@@ -77,7 +77,7 @@ import { SelectionService } from './selectionService/SelectionService.js';
 import { ContentService } from './contentService/ContentService.js';
 import { StylesheetServiceDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { JumpToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js';
-import { EditGridExtensionProvider } from '../widgets/designerView/extensions/grid/EditGridExtensionProvider.js';
+import { EditGridColumnRowSizesExtensionProvider } from '../widgets/designerView/extensions/grid/EditGridColumnRowSizesExtensionProvider.js';
 import { DisplayGridExtensionProvider } from '../widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js';
 import { ApplyFirstMachingExtensionProvider } from '../widgets/designerView/extensions/logic/ApplyFirstMachingExtensionProvider.js';
 
@@ -117,7 +117,8 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
-    new EditGridExtensionProvider(),
+    new DisplayGridExtensionProvider(),
+    new EditGridColumnRowSizesExtensionProvider(),
     new FlexboxExtensionProvider(),
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
@@ -133,7 +134,8 @@ export function createDefaultServiceContainer() {
     new SelectionDefaultExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
-    new EditGridExtensionProvider(),
+    new DisplayGridExtensionProvider(),
+    new EditGridColumnRowSizesExtensionProvider(),
     new FlexboxExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [

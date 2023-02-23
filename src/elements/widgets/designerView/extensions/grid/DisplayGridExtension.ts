@@ -10,25 +10,7 @@ export class DisplayGridExtension extends AbstractExtension {
   private _cells: SVGRectElement[][];
   private _gaps: SVGRectElement[];
 
-  private gridInformation: {
-    cells?: {
-      x: number;
-      y: number;
-      width: number;
-      initWidthUnit: string;
-      height: number;
-      initHeightUnit: string;
-      name: string;
-    }[][];
-    gaps?: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-      column?: number;
-      row?: number;
-    }[];
-  }
+  private gridInformation: ReturnType<typeof CalculateGridInformation>
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -49,7 +31,7 @@ export class DisplayGridExtension extends AbstractExtension {
 
       //draw gaps
       this.gridInformation.gaps.forEach((gap, i) => {
-        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
+        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Normal);
       });
 
       //draw cells
