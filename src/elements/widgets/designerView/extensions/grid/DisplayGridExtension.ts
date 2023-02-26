@@ -8,27 +8,10 @@ import { OverlayLayer } from "../OverlayLayer.js";
 export class DisplayGridExtension extends AbstractExtension {
 
   private _cells: SVGRectElement[][];
+  private _texts: SVGTextElement[][];
   private _gaps: SVGRectElement[];
 
-  private gridInformation: {
-    cells?: {
-      x: number;
-      y: number;
-      width: number;
-      initWidthUnit: string;
-      height: number;
-      initHeightUnit: string;
-      name: string;
-    }[][];
-    gaps?: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-      column?: number;
-      row?: number;
-    }[];
-  }
+  private gridInformation: ReturnType<typeof CalculateGridInformation>
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -49,7 +32,7 @@ export class DisplayGridExtension extends AbstractExtension {
 
       //draw gaps
       this.gridInformation.gaps.forEach((gap, i) => {
-        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Foregorund);
+        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Normal);
       });
 
       //draw cells
@@ -57,8 +40,8 @@ export class DisplayGridExtension extends AbstractExtension {
         row.forEach((cell, j) => {
           this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
           if (cell.name) {
-            const text = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', null, OverlayLayer.Background);
-            text.setAttribute("dominant-baseline", "hanging");
+            this._texts[i][j] = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', this._texts[i][j], OverlayLayer.Background);
+            this._texts[i][j].setAttribute("dominant-baseline", "hanging");
           }
           if (event && event instanceof MouseEvent) {
             let crd = this.designerCanvas.getNormalizedEventCoordinates(event);
@@ -80,6 +63,8 @@ export class DisplayGridExtension extends AbstractExtension {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     this._cells = new Array(this.gridInformation.cells.length);
     this.gridInformation.cells.forEach((row, i) => this._cells[i] = new Array(row.length));
+    this._texts = new Array(this.gridInformation.cells.length);
+    this.gridInformation.cells.forEach((row, i) => this._texts[i] = new Array(row.length));
     this._gaps = new Array(this.gridInformation.gaps.length);
   }
 }

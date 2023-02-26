@@ -2,12 +2,12 @@ import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { IDesignerExtension } from '../IDesignerExtension.js';
-import { EditGridExtension } from './EditGridExtension.js';
+import { EditGridColumnRowSizesExtension } from './EditGridColumnRowSizesExtension.js';
 import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 import { gridExtensionShowOverlayOptionName } from './DisplayGridExtensionProvider.js';
 
-export class EditGridExtensionProvider implements IDesignerExtensionProvider {
+export class EditGridColumnRowSizesExtensionProvider implements IDesignerExtensionProvider {
 
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
@@ -17,15 +17,13 @@ export class EditGridExtensionProvider implements IDesignerExtensionProvider {
   }
 
   getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new EditGridExtension(extensionManager, designerCanvas, designItem);
+    return new EditGridColumnRowSizesExtension(extensionManager, designerCanvas, designItem);
   }
 
   readonly style = css`
-    .svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
-    .svg-grid-area { font-size: 8px; }
-    .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
-    .svg-grid-resizer { fill: white; stroke: #3899ec; }
-    .svg-grid-header { fill: #ff944722; stroke: orange; }
-    .svg-grid-plus-sign { stroke: black; }
+    .svg-grid-resizer-v { fill: transparent; cursor: ew-resize; pointer-events: all; }
+    .svg-grid-resizer-v:hover { fill: #ff7f5052; }
+    .svg-grid-resizer-h { fill: transparent; cursor: ns-resize; pointer-events: all; }
+    .svg-grid-resizer-h:hover { fill: #ff7f5052; }
   `;
 }

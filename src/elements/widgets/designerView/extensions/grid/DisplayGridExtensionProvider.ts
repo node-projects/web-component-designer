@@ -26,7 +26,6 @@ export class DisplayGridExtensionProvider implements IDesignerExtensionProvider 
     .svg-grid-current-cell { stroke: orange; stroke-dasharray: 5; fill: #e3ff4722; }
     .svg-grid-area { font-size: 8px; }
     .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
-    .svg-grid-resizer { fill: white; stroke: #3899ec; }
     .svg-grid-header { fill: #ff944722; stroke: orange; }
     .svg-grid-plus-sign { stroke: black; }
   `;

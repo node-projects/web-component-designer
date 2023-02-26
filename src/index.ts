@@ -226,8 +226,8 @@ export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtens
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
 
-export * from "./elements/widgets/designerView/extensions/grid/EditGridExtension.js";
-export * from "./elements/widgets/designerView/extensions/grid/EditGridExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/grid/EditGridColumnRowSizesExtension.js";
+export * from "./elements/widgets/designerView/extensions/grid/EditGridColumnRowSizesExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/grid/DisplayGridExtension.js";
 export * from "./elements/widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js";
 
