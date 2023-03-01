@@ -11,7 +11,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   private static _initalized: boolean;
 
   dispose(): void {
-    this._monacoEditor.dispose();
+    this._monacoEditor?.dispose();
   }
 
   canvasElement: HTMLElement;
