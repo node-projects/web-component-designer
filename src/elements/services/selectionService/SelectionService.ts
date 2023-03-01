@@ -8,16 +8,22 @@ import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;
   selectedElements: IDesignItem[] = [];
-  _designerCanvas: IDesignerCanvas
+  _designerCanvas: IDesignerCanvas;
+  _undoSelectionChanges: boolean;
 
-  constructor(designerCanvas: IDesignerCanvas) {
+  constructor(designerCanvas: IDesignerCanvas, undoSelectionChanges: boolean) {
     this._designerCanvas = designerCanvas;
+    this._undoSelectionChanges = undoSelectionChanges;
   }
 
   setSelectedElements(designItems: IDesignItem[]) {
     if (this.selectedElements != designItems) {
-      const action = new SelectionChangedAction(this.selectedElements, designItems, this);
-      this._designerCanvas.instanceServiceContainer.undoService.execute(action);
+      if (this._undoSelectionChanges) {
+        const action = new SelectionChangedAction(this.selectedElements, designItems, this);
+        this._designerCanvas.instanceServiceContainer.undoService.execute(action);
+      } else {
+        this._withoutUndoSetSelectedElements(designItems);
+      }
     }
   }
 

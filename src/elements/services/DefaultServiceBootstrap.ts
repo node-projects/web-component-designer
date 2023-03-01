@@ -106,7 +106,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("demoProviderService", new DemoProviderService());
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
-  serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas));
+  serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
   serviceContainer.register("contentService", (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
   //serviceContainer.register("stylesheetService", new DemoProviderService());
 
