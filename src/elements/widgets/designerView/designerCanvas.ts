@@ -35,6 +35,7 @@ import { IPlacementService } from "../../services/placementService/IPlacementSer
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { NodeType } from '../../item/NodeType.js';
 import { StylesheetChangedAction } from '../../services/undoService/transactionItems/StylesheetChangedAction.js';
+import { SetDesignItemsAction } from '../../services/undoService/transactionItems/SetDesignItemsAction.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -600,10 +601,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.snapLines.clearSnaplines();
   }
 
-
   public setDesignItems(designItems: IDesignItem[]) {
+    const setItemsAction = new SetDesignItemsAction(designItems, [...this.rootDesignItem.children()]);
+    this.instanceServiceContainer.undoService.execute(setItemsAction);
+  }
+
+  public _internalSetDesignItems(designItems: IDesignItem[]) {
     this._fillCalculationrects();
-    this.instanceServiceContainer.undoService.clear();
+    //this.instanceServiceContainer.undoService.clear();
     this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
     for (let i of [...this.rootDesignItem.children()])
