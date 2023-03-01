@@ -427,10 +427,13 @@ export class DesignItem implements IDesignItem {
 
     const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false, parent: null }));
     if (this.instanceServiceContainer.stylesheetService) {
-      const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
-      if (rules) {
-        return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
+      try {
+        const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
+        if (rules) {
+          return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
+        }
       }
+      catch (err) { }
     }
     return [{ selector: null, declarations: localStyles, specificity: -1 }];
   }

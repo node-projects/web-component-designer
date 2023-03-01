@@ -2,11 +2,11 @@ import { IDesignItem } from "../../item/IDesignItem.js";
 import { IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
 import { AbstractStylesheetService } from "./AbstractStylesheetService.js";
 
-//import type { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST } from "@adobe/css-tools";
-type CssRuleAST = any;
+import type { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST } from "@adobe/css-tools";
+/*type CssRuleAST = any;
 type CssDeclarationAST = any;
 type CssStylesheetAST = any;
-type CssAtRuleAST = any;
+type CssAtRuleAST = any;*/
 
 interface IRuleWithAST extends IStyleRule {
     ast: CssRuleAST,
@@ -64,7 +64,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
             let rs = Array.from(this.getRulesFromAst(item[1].ast?.stylesheet?.rules, item[1].stylesheet, designItem))
                 .map(x => (<IRuleWithAST>{
                     selector: x.selectors.join(', '),
-                    declarations: x.declarations.map(y => ({
+                    declarations: x.declarations.filter(y => y.type == 'declaration').map(y => ({
                         name: (<CssDeclarationAST>y).property,
                         value: (<CssDeclarationAST>y).value.endsWith('!important') ? (<CssDeclarationAST>y).value.substring(0, (<CssDeclarationAST>y).value.length - 10).trimEnd() : (<CssDeclarationAST>y).value,
                         important: (<CssDeclarationAST>y).value.endsWith('!important'),
