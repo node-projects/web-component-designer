@@ -34,6 +34,7 @@ import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { NodeType } from '../../item/NodeType.js';
+import { StylesheetChangedAction } from '../../services/undoService/transactionItems/StylesheetChangedAction.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -502,8 +503,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.instanceServiceContainer.servicesChanged.on(e => {
       if (e.serviceName == 'stylesheetService') {
         this.applyAllStyles();
-        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on(() => this.applyAllStyles());
-        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => this.applyAllStyles());
+        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
+          if (ss.changeSource == 'extern') {
+            const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
+            this.instanceServiceContainer.undoService.execute(ssca);
+          }
+          this.applyAllStyles()
+        });
+        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
+          this.applyAllStyles()
+        });
       }
     });
 

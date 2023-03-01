@@ -140,6 +140,8 @@ export * from "./elements/services/undoService/transactionItems/CssStyleChangeAc
 export * from "./elements/services/undoService/transactionItems/DeleteAction.js";
 export * from "./elements/services/undoService/transactionItems/InsertAction.js";
 export * from "./elements/services/undoService/transactionItems/InsertChildAction.js";
+export * from "./elements/services/undoService/transactionItems/StylesheetChangedAction.js";
+export * from "./elements/services/undoService/transactionItems/StylesheetStyleChangeAction.js";
 
 export * from "./elements/services/BaseServiceContainer.js";
 export * from "./elements/services/InstanceServiceContainer.js";

@@ -28,7 +28,8 @@ export interface IStylesheetService {
     updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
     insertDeclarationIntoRule(rule: IStyleRule, property: string, value: string, important: boolean): boolean;
     removeDeclarationFromRule(rule: IStyleRule, property: string): boolean;
+    updateCompleteStylesheet(name: string, newStyle: string): void;
 
-    stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet }>;
+    stylesheetChanged: TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' }>;
     stylesheetsChanged: TypedEvent<void>;
 }
