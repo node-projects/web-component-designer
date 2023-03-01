@@ -778,8 +778,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         di.setStyle('position', 'absolute');
         const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, getComputedStyle(newContainer.element)))
         containerService.enterContainer(newContainer, [di]);
-        containerService.place(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, this.getNormalizedEventCoordinates(event), [di]);
-        containerService.finishPlace(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, this.getNormalizedEventCoordinates(event), [di]);
+
+        const containerPos = this.getNormalizedElementCoordinates(newContainer.element);
+        const evCoord = this.getNormalizedEventCoordinates(event);
+        const pos = { x: evCoord.x - containerPos.x, y: evCoord.y - containerPos.y };
+        containerService.place(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
+        containerService.finishPlace(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
         this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
         requestAnimationFrame(() => {
           this.instanceServiceContainer.selectionService.setSelectedElements([di]);
