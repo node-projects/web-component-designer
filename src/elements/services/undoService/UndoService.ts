@@ -109,13 +109,13 @@ export class UndoService implements IUndoService {
     return this._redoStack.length > 0;
   }
 
-  *getUndoEntries(): Generator<string, void, unknown> {
-    for (let i = this._undoStack.length - 1; i >= 0; i--)
+  *getUndoEntries(count: number = 999): Generator<string, void, unknown> {
+    for (let i = Math.min(this._undoStack.length, count) - 1; i >= 0; i--)
       yield this._undoStack[i].title;
   }
 
-  *getRedoEntries(): Generator<string, void, unknown> {
-    for (let i = this._redoStack.length - 1; i >= 0; i--)
+  *getRedoEntries(count: number = 999): Generator<string, void, unknown> {
+    for (let i = Math.min(this._redoStack.length, count) - 1; i >= 0; i--)
       yield this._redoStack[i].title;
   }
 }

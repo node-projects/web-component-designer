@@ -5,7 +5,8 @@ export interface IContextMenuOptions {
 	defaultIcon?: string,
 	subIcon?: string,
 	mouseOffset?: number,
-	shadowRoot?: ShadowRoot | Document
+	shadowRoot?: ShadowRoot | Document,
+	mode?: 'normal' | 'undo'
 }
 
 export class ContextMenu {
@@ -118,6 +119,10 @@ export class ContextMenu {
 	  
 	  .context_menu li[disabled=""]:hover {
 		background-color: inherit;
+	  }
+	  
+	  .context_menu li.context_menu_marked {
+		background-color: #5ebdec;
 	  }`;
 
 	static count = 0;
@@ -209,6 +214,12 @@ export class ContextMenu {
 							item.action(e, item);
 							this.close();
 						});
+					if (this.options?.mode == 'undo') {
+						li.addEventListener('mouseup', (e) => {
+							item.action(e, item);
+							this.close();
+						});
+					}
 					if (item.children != null) {
 						let childmenu = this.renderLevel(item.children);
 						li.appendChild(childmenu);
@@ -218,7 +229,32 @@ export class ContextMenu {
 								childmenu.style.top = 'unset';
 								childmenu.style.bottom = '0';
 							}
-						})
+							if (this.options?.mode == 'undo') {
+								let select = true;
+								for (let node of li.parentElement.children) {
+									if (select)
+										(<HTMLElement>node).classList.add('context_menu_marked')
+									else
+										(<HTMLElement>node).classList.remove('context_menu_marked')
+									if (node == li)
+										select = false
+								}
+							}
+						});
+					} else {
+						if (this.options?.mode == 'undo') {
+							li.addEventListener('mouseenter', () => {
+								let select = true;
+								for (let node of li.parentElement.children) {
+									if (select)
+										(<HTMLElement>node).classList.add('context_menu_marked')
+									else
+										(<HTMLElement>node).classList.remove('context_menu_marked')
+									if (node == li)
+										select = false
+								}
+							});
+						}
 					}
 				}
 				ul_outer.appendChild(li);
@@ -288,9 +324,11 @@ export class ContextMenu {
 	}
 
 	_windowDown(e: MouseEvent) {
+		e.preventDefault();
 		const p = e.composedPath();
 		if (p.indexOf(this._menuElement) < 0)
 			this.close();
+		return false;
 	}
 
 	_windowKeyUp(e: KeyboardEvent) {
@@ -309,8 +347,8 @@ export class ContextMenu {
 		this._menuElement.remove();
 		window.removeEventListener("keyup", this._windowKeyUp);
 		window.removeEventListener("mousedown", this._windowDown);
-		window.removeEventListener("contextmenu", this._windowDown);
 		window.removeEventListener("resize", this._windowResize);
+		setTimeout(() => window.removeEventListener("contextmenu", this._windowDown), 10);
 	}
 }
 
