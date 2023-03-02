@@ -28,8 +28,26 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
     };
 
     async setStylesheets(stylesheets: IStylesheet[]) {
-        if (stylesheets != null) {
+        if (!this._tools)
             this._tools = await import('@adobe/css-tools');
+
+        if (this._stylesheets != null && stylesheets != null && this._stylesheets.size == stylesheets.length && stylesheets.every(x => this._stylesheets.has(x.name))) {
+            for (let stylesheet of stylesheets) {
+                const old = this._stylesheets.get(stylesheet.name);
+                if (old.stylesheet.content != stylesheet.content) {
+                    try {
+                        this._stylesheets.set(stylesheet.name, {
+                            stylesheet: stylesheet,
+                            ast: this._tools.parse(stylesheet.content)
+                        });
+                    }
+                    catch (err) {
+                        console.warn("error parsing stylesheet", stylesheet, err)
+                    }
+                    this.stylesheetChanged.emit({ name: stylesheet.name, newStyle: stylesheet.content, oldStyle: old.stylesheet.content, changeSource: 'extern' });
+                }
+            }
+        } else if (stylesheets != null) {
             this._stylesheets = new Map();
             for (let stylesheet of stylesheets) {
                 try {
@@ -125,7 +143,17 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
     }
 
     private updateStylesheet(ss: { stylesheet: IStylesheet, ast: CssStylesheetAST }) {
+        const old = ss.stylesheet.content;
         ss.stylesheet.content = this._tools.stringify(ss.ast, { indent: '    ', compress: false, emptyDeclarations: true });
-        this.stylesheetChanged.emit({ stylesheet: ss.stylesheet });
+        this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+    }
+
+    updateCompleteStylesheet(name: string, newStyle: string) {
+        const ss = this._stylesheets.get(name);
+        if (ss.stylesheet.content != newStyle) {
+            const old = ss.stylesheet.content;
+            ss.stylesheet.content = newStyle;
+            this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+        }
     }
 }

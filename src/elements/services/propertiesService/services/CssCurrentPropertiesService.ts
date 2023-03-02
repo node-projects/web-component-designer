@@ -7,6 +7,7 @@ import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStyleshe
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
+import { StylesheetStyleChangeAction } from '../../undoService/transactionItems/StylesheetStyleChangeAction.js';
 
 //TODO: remove this code when import asserts are supported
 let cssProperties: any;
@@ -67,7 +68,13 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
   override setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
     // No selector means local style, styleDeclaration is null means new property
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
-      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(property.styleDeclaration, value, false);
+      // styleDeclaration stored Propertygrid is not refreshed after entering a new value, so we need to reload
+      // TODO: we do not respect if a same style is found in a media query or another @rule, maybe we need a refresh in the stylesheet parser
+      const decls = designItems[0].instanceServiceContainer.stylesheetService?.getDeclarations(designItems[0], property.styleDeclaration.name);
+      const currentDecl = decls.find(x => x.parent.selector == property.styleDeclaration.parent.selector && x.parent.stylesheetName == property.styleDeclaration.parent.stylesheetName);
+
+      const action = new StylesheetStyleChangeAction(designItems[0].instanceServiceContainer.stylesheetService, property.styleDeclaration, value, currentDecl.value);
+      designItems[0].instanceServiceContainer.undoService.execute(action);
       this._notifyChangedProperty(designItems[0], property, value);
       return;
     }

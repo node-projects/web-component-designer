@@ -61,6 +61,9 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
 
   showHoverExtension(element: Element, event: Event);
 
+  setDesignItems(designItems: IDesignItem[]);
+  _internalSetDesignItems(designItems: IDesignItem[]);
+
   zoomTowardsPoint(point: IPoint, scalechange: number): void;
   zoomPoint(canvasPoint: IPoint, newZoom: number): void;
   zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint): void;

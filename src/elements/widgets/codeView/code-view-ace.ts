@@ -49,7 +49,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     this.shadowRoot.appendChild(this._editor)
   }
   dispose(): void {
-    this._aceEditor.destroy();
+    this._aceEditor?.destroy();
   }
 
   executeCommand(command: IUiCommand) {

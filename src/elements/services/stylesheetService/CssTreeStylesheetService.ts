@@ -135,23 +135,25 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
     updateDeclarationValue(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
         let sourceNode = this._stylesheets.get(declaration.parent.stylesheetName);
         declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value + (important ? " !important" : ""), { context: 'declaration', parseValue: false }))).value;
+        const old = sourceNode.stylesheet.content;
         sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
 
         // After generating the stylesheet, parse again (so line numbers are correct)
         sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
-        this.stylesheetChanged.emit({ stylesheet: sourceNode.stylesheet });
+        this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
     }
 
     insertDeclarationIntoRule(rule: IRuleWithAST, property: string, value: string, important: boolean): boolean {
         let sourceNode = this._stylesheets.get(rule.stylesheetName);
         rule.ast.block.children.push(window.csstree.toPlainObject(window.csstree.parse(property + ": " + value + (important ? " !important" : ""), { context: 'declaration', parseValue: false })));
+        const old = sourceNode.stylesheet.content;
         sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
 
         // After generating the stylesheet, parse again (so line numbers are correct)
         sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
 
-        this.stylesheetChanged.emit({ stylesheet: sourceNode.stylesheet });
+        this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
     }
 
@@ -159,12 +161,23 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         let index = rule.ast.block.children.findIndex(x => (<csstree.Declaration>x).property == property);
         if (index == -1) return false;
         rule.ast.block.children.splice(index, 1);
-        this._stylesheets.get(rule.stylesheetName).stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        const ss = this._stylesheets.get(rule.stylesheetName);
+        const old = ss.stylesheet.content;
+        ss.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
         // After generating the stylesheet, parse again (so line numbers are correct)
-        this._stylesheets.get(rule.stylesheetName).ast = <any>window.csstree.toPlainObject((window.csstree.parse(this._stylesheets.get(rule.stylesheetName).stylesheet.content, { positions: true, parseValue: false })))
+        ss.ast = <any>window.csstree.toPlainObject((window.csstree.parse(this._stylesheets.get(rule.stylesheetName).stylesheet.content, { positions: true, parseValue: false })))
 
-        this.stylesheetChanged.emit({ stylesheet: this._stylesheets.get(rule.stylesheetName).stylesheet });
+        this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
+    }
+
+    updateCompleteStylesheet(name: string, newStyle: string) {
+        const ss = this._stylesheets.get(name);
+        if (ss.stylesheet.content != newStyle) {
+            const old = ss.stylesheet.content;
+            ss.stylesheet.content = newStyle;
+            this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+        }
     }
 
     /* Section covers the internal traversal creation of rules and declarations */

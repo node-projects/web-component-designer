@@ -3,7 +3,6 @@ import { IDesignItem } from "../../item/IDesignItem";
 import { IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from "./IStylesheetService";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
-
     abstract setStylesheets(stylesheets: IStylesheet[]): void
     abstract getStylesheets(): IStylesheet[]
     abstract getAppliedRules(designItem: IDesignItem): IStyleRule[]
@@ -11,8 +10,9 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
     abstract updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean): boolean
     abstract insertDeclarationIntoRule(rule: IStyleRule, property: string, value: string, important: boolean): boolean
     abstract removeDeclarationFromRule(rule: IStyleRule, property: string): boolean;
+    abstract updateCompleteStylesheet(name: string, newStyle: string);
 
-    public stylesheetChanged: TypedEvent<{ stylesheet: IStylesheet; }> = new TypedEvent<{ stylesheet: IStylesheet; }>();
+    public stylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' }>();
     public stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();
 
     protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {

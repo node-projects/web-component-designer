@@ -34,6 +34,8 @@ import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { NodeType } from '../../item/NodeType.js';
+import { StylesheetChangedAction } from '../../services/undoService/transactionItems/StylesheetChangedAction.js';
+import { SetDesignItemsAction } from '../../services/undoService/transactionItems/SetDesignItemsAction.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -502,8 +504,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.instanceServiceContainer.servicesChanged.on(e => {
       if (e.serviceName == 'stylesheetService') {
         this.applyAllStyles();
-        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on(() => this.applyAllStyles());
-        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => this.applyAllStyles());
+        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
+          if (ss.changeSource == 'extern') {
+            const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
+            this.instanceServiceContainer.undoService.execute(ssca);
+          }
+          this.applyAllStyles()
+        });
+        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
+          this.applyAllStyles()
+        });
       }
     });
 
@@ -591,10 +601,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.snapLines.clearSnaplines();
   }
 
-
   public setDesignItems(designItems: IDesignItem[]) {
+    const setItemsAction = new SetDesignItemsAction(designItems, [...this.rootDesignItem.children()]);
+    this.instanceServiceContainer.undoService.execute(setItemsAction);
+  }
+
+  public _internalSetDesignItems(designItems: IDesignItem[]) {
     this._fillCalculationrects();
-    this.instanceServiceContainer.undoService.clear();
+    //this.instanceServiceContainer.undoService.clear();
     this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
     for (let i of [...this.rootDesignItem.children()])

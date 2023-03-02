@@ -104,11 +104,15 @@ export class GridPlacementService implements IPlacementService {
       column = 0
       for (let cell of cellRow) {
         if (pointInRect(pos, cell)) {
+          //Grid Area is shorthand for grid row/column, to make undo work correctly we need to set befor and after clear
           if (cell.name) {
+            items[0].setStyle('grid-area', cell.name);
             items[0].removeStyle('grid-column');
             items[0].removeStyle('grid-row');
             items[0].setStyle('grid-area', cell.name);
           } else {
+            items[0].setStyle('grid-column', <string><any>column + 1);
+            items[0].setStyle('grid-row', <string><any>row + 1);
             items[0].removeStyle('grid-area');
             items[0].setStyle('grid-column', <string><any>column + 1);
             items[0].setStyle('grid-row', <string><any>row + 1);

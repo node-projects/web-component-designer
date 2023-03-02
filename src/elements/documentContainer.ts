@@ -38,7 +38,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       if (stylesheetService) {
         const instance = stylesheetService(this.designerView.designerCanvas);
         this.instanceServiceContainer.register("stylesheetService", instance);
-        instance.stylesheetChanged.on(s => this.additionalStylesheetChanged.emit(s))
+        instance.stylesheetChanged.on(e => this.additionalStylesheetChanged.emit({ name: e.name, newStyle: e.newStyle, oldStyle: e.oldStyle, changeSource: e.changeSource }));
       } else {
         console.warn("no Stylesheet-Service registered, but additionalStylesheets are used.");
       }
@@ -49,7 +49,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public get additionalStylesheets() {
     return this._additionalStylesheets;
   };
-  public additionalStylesheetChanged = new TypedEvent<{ stylesheet: IStylesheet }>;
+  public additionalStylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' }>;
 
   public onContentChanged = new TypedEvent<void>();
 
