@@ -30,7 +30,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   abstract getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
-    const cg = designItems[0].openGroup("properties changed");
+    const cg = designItems[0].openGroup("property changed: " + property.name + " to " + value);
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
         d.updateStyleInSheetOrLocal(property.name, value);
@@ -78,7 +78,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   }
 
   clearValue(designItems: IDesignItem[], property: IProperty) {
-    const cg = designItems[0].openGroup("properties cleared");
+    const cg = designItems[0].openGroup("property cleared: " + property.name);
     for (let d of designItems) {
       if (property.propertyType == PropertyType.cssValue) {
         d.removeStyle(property.name);
