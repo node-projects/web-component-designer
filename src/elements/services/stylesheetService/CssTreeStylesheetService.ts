@@ -40,35 +40,8 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssTreeStylesheetService extends AbstractStylesheetService {
-    private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: csstree.StyleSheetPlain }>();
-
-    setStylesheets(stylesheets: IStylesheet[]) {
-        if (stylesheets != null) {
-            this._stylesheets = new Map();
-            for (let stylesheet of stylesheets) {
-                try {
-                    this._stylesheets.set(stylesheet.name, {
-                        stylesheet: stylesheet,
-                        ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.content, { positions: true, parseValue: false })))
-                    });
-                }
-                catch (err) {
-                    console.warn("error parsing stylesheet", stylesheet, err)
-                }
-            }
-            this.stylesheetsChanged.emit();
-        }
-        else {
-            this._stylesheets = null;
-        }
-    }
-
-    getStylesheets(): IStylesheet[] {
-        let stylesheets: IStylesheet[] = [];
-        for (let item of this._stylesheets) {
-            stylesheets.push(item[1].stylesheet);
-        };
-        return stylesheets;
+    async internalParse(style: string) {
+        return <any>window.csstree.toPlainObject((window.csstree.parse(style, { positions: true, parseValue: false })));
     }
 
     /* Section covers the retrieval of rules and declarations */

@@ -20,59 +20,16 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssToolsStylesheetService extends AbstractStylesheetService {
-    private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: CssStylesheetAST }>();
-
+   
     _tools: {
         parse: (css: string, options?: { source?: string; silent?: boolean; }) => CssStylesheetAST;
         stringify: (node: CssStylesheetAST, options?: { indent?: string; compress?: boolean; emptyDeclarations?: boolean; }) => string;
     };
 
-    async setStylesheets(stylesheets: IStylesheet[]) {
+    async internalParse(style: string) {
         if (!this._tools)
-            this._tools = await import('@adobe/css-tools');
-
-        if (this._stylesheets != null && stylesheets != null && this._stylesheets.size == stylesheets.length && stylesheets.every(x => this._stylesheets.has(x.name))) {
-            for (let stylesheet of stylesheets) {
-                const old = this._stylesheets.get(stylesheet.name);
-                if (old.stylesheet.content != stylesheet.content) {
-                    try {
-                        this._stylesheets.set(stylesheet.name, {
-                            stylesheet: stylesheet,
-                            ast: this._tools.parse(stylesheet.content)
-                        });
-                    }
-                    catch (err) {
-                        console.warn("error parsing stylesheet", stylesheet, err)
-                    }
-                    this.stylesheetChanged.emit({ name: stylesheet.name, newStyle: stylesheet.content, oldStyle: old.stylesheet.content, changeSource: 'extern' });
-                }
-            }
-        } else if (stylesheets != null) {
-            this._stylesheets = new Map();
-            for (let stylesheet of stylesheets) {
-                try {
-                    this._stylesheets.set(stylesheet.name, {
-                        stylesheet: stylesheet,
-                        ast: this._tools.parse(stylesheet.content)
-                    });
-                }
-                catch (err) {
-                    console.warn("error parsing stylesheet", stylesheet, err)
-                }
-            }
-            this.stylesheetsChanged.emit();
-        }
-        else {
-            this._stylesheets = null;
-        }
-    }
-
-    getStylesheets(): IStylesheet[] {
-        let stylesheets: IStylesheet[] = [];
-        for (let item of this._stylesheets) {
-            stylesheets.push(item[1].stylesheet);
-        };
-        return stylesheets;
+        this._tools = await import('@adobe/css-tools');
+        return this._tools.parse(style);
     }
 
     public getAppliedRules(designItem: IDesignItem): IRuleWithAST[] {

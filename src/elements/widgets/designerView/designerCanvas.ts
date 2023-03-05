@@ -36,6 +36,8 @@ import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { NodeType } from '../../item/NodeType.js';
 import { StylesheetChangedAction } from '../../services/undoService/transactionItems/StylesheetChangedAction.js';
 import { SetDesignItemsAction } from '../../services/undoService/transactionItems/SetDesignItemsAction.js';
+import { IDocumentStylesheet } from '../../services/stylesheetService/IStylesheetService.js';
+import { AbstractStylesheetService } from '../../services/stylesheetService/AbstractStylesheetService.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -106,7 +108,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _firstConnect: boolean;
 
-  private cssprefixConstant = '#node-projects-designer-canvas-canvas ';
+  public static cssprefixConstant = '#node-projects-designer-canvas-canvas ';
 
   static override readonly style = css`
     :host {
@@ -260,11 +262,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private applyAllStyles() {
     let styles = [this.constructor.style]
     if (this._additionalStyle)
-      styles.push(cssFromString(this.buildPatchedStyleSheet(this._additionalStyle)));
+      styles.push(cssFromString(AbstractStylesheetService.buildPatchedStyleSheet(this._additionalStyle)));
     if (this.instanceServiceContainer.stylesheetService) {
       styles.push(...this.instanceServiceContainer.stylesheetService
         .getStylesheets()
-        .map(x => cssFromString(this.buildPatchedStyleSheet([cssFromString(x.content)]))));
+        .map(x => cssFromString(AbstractStylesheetService.buildPatchedStyleSheet([cssFromString(x.content)]))));
     }
     this.shadowRoot.adoptedStyleSheets = styles;
   }
@@ -608,12 +610,22 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public _internalSetDesignItems(designItems: IDesignItem[]) {
     this._fillCalculationrects();
-    //this.instanceServiceContainer.undoService.clear();
     this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
     for (let i of [...this.rootDesignItem.children()])
       this.rootDesignItem._removeChildInternal(i);
     this.addDesignItems(designItems);
+
+    if (this.instanceServiceContainer.stylesheetService) {
+      const styleElements = this.rootDesignItem.element.querySelectorAll('style');
+      let i = 1;
+      const intStyleSheets: IDocumentStylesheet[] = [...styleElements].map(x => ({ name: '&lt;style&gt; #' + i++, content: x.textContent, designItem: DesignItem.GetDesignItem(x) }));
+      //TODO: clear out style elements so they dont interfer with designer
+      this.instanceServiceContainer.stylesheetService.setDocumentStylesheets(intStyleSheets);
+    }
+
+
+
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
     (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
     setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 50);
@@ -1028,6 +1040,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
+    if (!this.serviceContainer)
+      return;
+
     this._fillCalculationrects();
 
     if (this._pointerextensions) {
@@ -1159,50 +1174,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.canvasOffsetUnzoomed = newCanvasOffset;
   }
 
-  private buildPatchedStyleSheet(value: CSSStyleSheet[]): string {
-    let style = '';
-    for (let s of value) {
-      style += this.traverseAndCollectRules(s);
-    }
-    return style;
-  }
-
-  private traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule): string {
-    let t = '';
-    for (let rule of ruleContainer.cssRules) {
-      if ((rule instanceof CSSContainerRule
-        || rule instanceof CSSSupportsRule
-        || rule instanceof CSSMediaRule)
-        && rule.cssRules) {
-        t += rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
-      }
-      if (rule instanceof CSSStyleRule) {
-        let parts = rule.selectorText.split(',');
-        let sel = "";
-        for (let p of parts) {
-          if (p.includes(this.cssprefixConstant)) {
-            sel += p;
-            continue;
-          }
-          if (sel)
-            sel += ',';
-          sel += this.cssprefixConstant + p.trimStart();
-        }
-        t += sel;
-        let cssText = rule.style.cssText;
-        //bugfix for chrome issue: https://bugs.chromium.org/p/chromium/issues/detail?id=1394353 
-        if ((<any>rule).styleMap && (<any>rule).styleMap.get('grid-template') && (<any>rule).styleMap.get('grid-template').toString().includes('repeat(')) {
-          let entr = (<any>rule).styleMap.entries();
-          cssText = ''
-          for (let e of entr) {
-            cssText += e[0] + ':' + e[1].toString() + ';';
-          }
-        }
-        t += '{' + cssText + '}';
-      }
-    }
-    return t;
-  }
+  
 }
 
 customElements.define('node-projects-designer-canvas', DesignerCanvas);
