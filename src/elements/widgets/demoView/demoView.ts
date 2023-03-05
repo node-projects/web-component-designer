@@ -2,8 +2,11 @@ import { IDemoView } from './IDemoView.js';
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
+import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
+import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
+import { IDisposable } from '../../../interfaces/IDisposable.js';
 
-export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoView {
+export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoView, IUiCommandHandler, IDisposable {
 
   private _placeholder: HTMLDivElement;
   private _loading: HTMLDivElement;
@@ -37,6 +40,12 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     this._loading.textContent = '🛀 Hold on, loading...';
     this.shadowRoot.appendChild(this._loading)
   }
+
+  dispose(): void {
+  }
+
+  executeCommand: (command: IUiCommand) => void;
+  canExecuteCommand: (command: IUiCommand) => boolean;
 
   async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
     this._loading.hidden = false;

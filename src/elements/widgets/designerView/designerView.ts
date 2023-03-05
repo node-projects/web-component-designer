@@ -350,7 +350,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     return '';
   }
 
-  public async parseHTML(html: string) {
+  public async parseHTML(html: string, disableUndo: boolean = false) {
     const parserService = this.serviceContainer.htmlParserService;
     if (!html) {
       this.instanceServiceContainer.undoService.clear();
@@ -360,7 +360,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
     else {
       const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
-      this._designerCanvas.setDesignItems(designItems)
+      if (disableUndo) {
+        this._designerCanvas._internalSetDesignItems(designItems);
+      } else {
+        this._designerCanvas.setDesignItems(designItems);
+      }
     }
   }
 

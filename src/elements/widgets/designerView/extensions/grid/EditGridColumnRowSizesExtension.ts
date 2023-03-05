@@ -93,8 +93,11 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     let cp = getComputedStyle(target);
     let bounding = target.getBoundingClientRect();
     let containerSize = bounding[percentTarget];
-    let amountGaps = percentTarget == "height" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1
-    let gapSize = convertCssUnitToPixel(percentTarget == "width" ? cp.columnGap : cp.rowGap, target, percentTarget) ?? 0;
+    let amountGaps = percentTarget == "height" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1;
+    let gapValue = percentTarget == "width" ? cp.columnGap : cp.rowGap;
+    if (gapValue == "normal")
+      gapValue = '0px';
+    let gapSize = convertCssUnitToPixel(gapValue, target, percentTarget) ?? 0;
     let containerSizeWithoutGaps = containerSize - gapSize * amountGaps;
     let sizeForFrs = containerSizeWithoutGaps;
 

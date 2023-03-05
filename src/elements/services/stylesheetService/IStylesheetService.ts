@@ -20,9 +20,18 @@ export interface IStylesheet {
     name: string;
 }
 
+export interface IDocumentStylesheet {
+    content: string;
+    name: string;
+    designItem: IDesignItem;
+}
+
 export interface IStylesheetService {
-    setStylesheets(stylesheets: IStylesheet[]): void;
+    setStylesheets(stylesheets: IStylesheet[]): Promise<void>;
     getStylesheets(): IStylesheet[];
+
+    setDocumentStylesheets(stylesheets: IDocumentStylesheet[]): Promise<void>;
+
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[];
     updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean): boolean;

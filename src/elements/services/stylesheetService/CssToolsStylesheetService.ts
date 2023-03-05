@@ -1,12 +1,12 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
+import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
 import { AbstractStylesheetService } from "./AbstractStylesheetService.js";
 
-import type { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST } from "@adobe/css-tools";
-/*type CssRuleAST = any;
+//import type { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST } from "@adobe/css-tools";
+type CssRuleAST = any;
 type CssDeclarationAST = any;
 type CssStylesheetAST = any;
-type CssAtRuleAST = any;*/
+type CssAtRuleAST = any;
 
 interface IRuleWithAST extends IStyleRule {
     ast: CssRuleAST,
@@ -20,64 +20,21 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssToolsStylesheetService extends AbstractStylesheetService {
-    private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: CssStylesheetAST }>();
 
     _tools: {
         parse: (css: string, options?: { source?: string; silent?: boolean; }) => CssStylesheetAST;
         stringify: (node: CssStylesheetAST, options?: { indent?: string; compress?: boolean; emptyDeclarations?: boolean; }) => string;
     };
 
-    async setStylesheets(stylesheets: IStylesheet[]) {
+    async internalParse(style: string) {
         if (!this._tools)
             this._tools = await import('@adobe/css-tools');
-
-        if (this._stylesheets != null && stylesheets != null && this._stylesheets.size == stylesheets.length && stylesheets.every(x => this._stylesheets.has(x.name))) {
-            for (let stylesheet of stylesheets) {
-                const old = this._stylesheets.get(stylesheet.name);
-                if (old.stylesheet.content != stylesheet.content) {
-                    try {
-                        this._stylesheets.set(stylesheet.name, {
-                            stylesheet: stylesheet,
-                            ast: this._tools.parse(stylesheet.content)
-                        });
-                    }
-                    catch (err) {
-                        console.warn("error parsing stylesheet", stylesheet, err)
-                    }
-                    this.stylesheetChanged.emit({ name: stylesheet.name, newStyle: stylesheet.content, oldStyle: old.stylesheet.content, changeSource: 'extern' });
-                }
-            }
-        } else if (stylesheets != null) {
-            this._stylesheets = new Map();
-            for (let stylesheet of stylesheets) {
-                try {
-                    this._stylesheets.set(stylesheet.name, {
-                        stylesheet: stylesheet,
-                        ast: this._tools.parse(stylesheet.content)
-                    });
-                }
-                catch (err) {
-                    console.warn("error parsing stylesheet", stylesheet, err)
-                }
-            }
-            this.stylesheetsChanged.emit();
-        }
-        else {
-            this._stylesheets = null;
-        }
-    }
-
-    getStylesheets(): IStylesheet[] {
-        let stylesheets: IStylesheet[] = [];
-        for (let item of this._stylesheets) {
-            stylesheets.push(item[1].stylesheet);
-        };
-        return stylesheets;
+        return this._tools.parse(style);
     }
 
     public getAppliedRules(designItem: IDesignItem): IRuleWithAST[] {
         let rules: IRuleWithAST[] = [];
-        for (let item of this._stylesheets.entries()) {
+        for (let item of this._allStylesheets.entries()) {
             if (!item[1].ast?.stylesheet?.rules) continue;
             let rs = Array.from(this.getRulesFromAst(item[1].ast?.stylesheet?.rules, item[1].stylesheet, designItem))
                 .map(x => (<IRuleWithAST>{
@@ -119,7 +76,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
 
     public updateDeclarationValue(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
         declaration.ast.value = important ? value + ' !important' : value;
-        let ss = this._stylesheets.get(declaration.parent.stylesheetName);
+        let ss = this._allStylesheets.get(declaration.parent.stylesheetName);
         this.updateStylesheet(ss);
         return true;
     }
@@ -130,7 +87,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
             property: property,
             value: important ? value + ' !important' : value
         });
-        this.updateStylesheet(this._stylesheets.get(rule.stylesheetName));
+        this.updateStylesheet(this._allStylesheets.get(rule.stylesheetName));
         return true;
     }
 
@@ -138,21 +95,27 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
         let idx = rule.ast.declarations.findIndex(x => (<CssDeclarationAST>x).property == property);
         if (idx == -1) return false;
         rule.ast.declarations.splice(idx, 1);
-        this.updateStylesheet(this._stylesheets.get(rule.stylesheetName));
+        this.updateStylesheet(this._allStylesheets.get(rule.stylesheetName));
         return true;
     }
 
     private updateStylesheet(ss: { stylesheet: IStylesheet, ast: CssStylesheetAST }) {
         const old = ss.stylesheet.content;
         ss.stylesheet.content = this._tools.stringify(ss.ast, { indent: '    ', compress: false, emptyDeclarations: true });
+        if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
+            (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
+        }
         this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
     }
 
     updateCompleteStylesheet(name: string, newStyle: string) {
-        const ss = this._stylesheets.get(name);
+        const ss = this._allStylesheets.get(name);
         if (ss.stylesheet.content != newStyle) {
             const old = ss.stylesheet.content;
             ss.stylesheet.content = newStyle;
+            if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
+                (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
+            }
             this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         }
     }

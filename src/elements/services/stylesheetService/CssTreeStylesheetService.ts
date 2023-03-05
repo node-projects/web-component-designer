@@ -1,5 +1,5 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
+import { IDocumentStylesheet, IStyleDeclaration, IStyleRule } from "./IStylesheetService.js";
 import { calculate as calculateSpecifity } from "./SpecificityCalculator.js";
 import { AbstractStylesheetService } from "./AbstractStylesheetService.js";
 
@@ -40,41 +40,14 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssTreeStylesheetService extends AbstractStylesheetService {
-    private _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: csstree.StyleSheetPlain }>();
-
-    setStylesheets(stylesheets: IStylesheet[]) {
-        if (stylesheets != null) {
-            this._stylesheets = new Map();
-            for (let stylesheet of stylesheets) {
-                try {
-                    this._stylesheets.set(stylesheet.name, {
-                        stylesheet: stylesheet,
-                        ast: <any>window.csstree.toPlainObject((window.csstree.parse(stylesheet.content, { positions: true, parseValue: false })))
-                    });
-                }
-                catch (err) {
-                    console.warn("error parsing stylesheet", stylesheet, err)
-                }
-            }
-            this.stylesheetsChanged.emit();
-        }
-        else {
-            this._stylesheets = null;
-        }
-    }
-
-    getStylesheets(): IStylesheet[] {
-        let stylesheets: IStylesheet[] = [];
-        for (let item of this._stylesheets) {
-            stylesheets.push(item[1].stylesheet);
-        };
-        return stylesheets;
+    async internalParse(style: string) {
+        return <any>window.csstree.toPlainObject((window.csstree.parse(style, { positions: true, parseValue: false })));
     }
 
     /* Section covers the retrieval of rules and declarations */
     private getAppliedRulesInternal(designItem: IDesignItem): IRuleWithAST[] {
         let styles: IRuleWithAST[] = [];
-        for (let item of this._stylesheets) {
+        for (let item of this._allStylesheets) {
             if (!item[1].ast || !this.astHasChildren(item[1].ast)) continue;
             styles = styles.concat(Array.from(this.rulesFromAST(item[1].ast, item[1].stylesheet.content, item[0], designItem)));
         };
@@ -133,26 +106,31 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
 
     /* Section covers the update of rules and declarations */
     updateDeclarationValue(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
-        let sourceNode = this._stylesheets.get(declaration.parent.stylesheetName);
+        let sourceNode = this._allStylesheets.get(declaration.parent.stylesheetName);
         declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value + (important ? " !important" : ""), { context: 'declaration', parseValue: false }))).value;
         const old = sourceNode.stylesheet.content;
         sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
 
         // After generating the stylesheet, parse again (so line numbers are correct)
         sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
+        if ((<IDocumentStylesheet>sourceNode.stylesheet).designItem) {
+            (<IDocumentStylesheet>sourceNode.stylesheet).designItem.content = sourceNode.stylesheet.content;
+        }
         this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
     }
 
     insertDeclarationIntoRule(rule: IRuleWithAST, property: string, value: string, important: boolean): boolean {
-        let sourceNode = this._stylesheets.get(rule.stylesheetName);
+        let sourceNode = this._allStylesheets.get(rule.stylesheetName);
         rule.ast.block.children.push(window.csstree.toPlainObject(window.csstree.parse(property + ": " + value + (important ? " !important" : ""), { context: 'declaration', parseValue: false })));
         const old = sourceNode.stylesheet.content;
         sourceNode.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(sourceNode.ast));
 
         // After generating the stylesheet, parse again (so line numbers are correct)
         sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
-
+        if ((<IDocumentStylesheet>sourceNode.stylesheet).designItem) {
+            (<IDocumentStylesheet>sourceNode.stylesheet).designItem.content = sourceNode.stylesheet.content;
+        }
         this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
     }
@@ -161,21 +139,26 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         let index = rule.ast.block.children.findIndex(x => (<csstree.Declaration>x).property == property);
         if (index == -1) return false;
         rule.ast.block.children.splice(index, 1);
-        const ss = this._stylesheets.get(rule.stylesheetName);
+        const ss = this._allStylesheets.get(rule.stylesheetName);
         const old = ss.stylesheet.content;
-        ss.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(this._stylesheets.get(rule.stylesheetName).ast));
+        ss.stylesheet.content = window.csstree.generate(window.csstree.fromPlainObject(this._allStylesheets.get(rule.stylesheetName).ast));
         // After generating the stylesheet, parse again (so line numbers are correct)
-        ss.ast = <any>window.csstree.toPlainObject((window.csstree.parse(this._stylesheets.get(rule.stylesheetName).stylesheet.content, { positions: true, parseValue: false })))
-
+        ss.ast = <any>window.csstree.toPlainObject((window.csstree.parse(this._allStylesheets.get(rule.stylesheetName).stylesheet.content, { positions: true, parseValue: false })))
+        if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
+            (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
+        }
         this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
     }
 
     updateCompleteStylesheet(name: string, newStyle: string) {
-        const ss = this._stylesheets.get(name);
+        const ss = this._allStylesheets.get(name);
         if (ss.stylesheet.content != newStyle) {
             const old = ss.stylesheet.content;
             ss.stylesheet.content = newStyle;
+            if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
+                (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
+            }
             this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         }
     }

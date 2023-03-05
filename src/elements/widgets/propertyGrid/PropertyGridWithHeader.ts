@@ -4,7 +4,6 @@ import { PropertyGrid } from './PropertyGrid.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { sleep } from '../../helper/Helper.js';
-import { DesignItem } from '../../item/DesignItem.js';
 import { NodeType } from '../../item/NodeType.js';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
@@ -84,12 +83,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     }
     this._content.onkeydown = e => {
       if (e.key == 'Enter') {
-        const grp = this._instanceServiceContainer.selectionService.primarySelection.openGroup('set content');
-        this._instanceServiceContainer.selectionService.primarySelection.clearChildren();
-        let t = document.createTextNode(this._content.value);
-        let di = DesignItem.GetOrCreateDesignItem(t, this._instanceServiceContainer.selectionService.primarySelection.serviceContainer, this._instanceServiceContainer)
-        this._instanceServiceContainer.selectionService.primarySelection.insertAdjacentElement(di, 'afterbegin');
-        grp.commit();
+        this._instanceServiceContainer.selectionService.primarySelection.content = this._content.value;
         this._content.title = this._content.value;
       } else if (e.key == 'Escape') {
         this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';

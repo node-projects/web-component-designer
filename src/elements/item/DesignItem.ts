@@ -205,17 +205,35 @@ export class DesignItem implements IDesignItem {
     return this.node.textContent;
   }
   public set content(value: string) {
-    //undo
-    this.node.textContent = value;
+    const grp = this.openGroup('set innerHTML');
+    this.clearChildren();
+    let t = document.createTextNode(value);
+    let di = DesignItem.GetOrCreateDesignItem(t, this.serviceContainer, this.instanceServiceContainer);
+    if (this.nodeType == NodeType.TextNode) {
+      const idx = this.parent.indexOf(this);
+      const parent = this.parent;
+      this.remove()
+      parent.insertChild(di, idx);
+    } else
+      this.insertChild(di);
+    grp.commit();
   }
 
   public get innerHTML(): string {
     return this.element.innerHTML;
   }
   public set innerHTML(value: string) {
-    //undo
-    this.element.innerHTML = value;
-    this.updateChildrenFromNodesChildren();
+    if (this.nodeType != NodeType.TextNode) {
+      const grp = this.openGroup('set innerHTML');
+      const range = document.createRange();
+      range.selectNode(document.body);
+      const fragment = range.createContextualFragment(value);
+      for (const n of fragment.childNodes) {
+        let di = DesignItem.GetOrCreateDesignItem(n, this.serviceContainer, this.instanceServiceContainer)
+        this.insertChild(di);
+      }
+      grp.commit();
+    }
   }
 
   public get isEmptyTextNode(): boolean {
@@ -386,7 +404,7 @@ export class DesignItem implements IDesignItem {
         this.removeStyle(nm);
       }
     } else {
-      const action = new StylesheetStyleChangeAction( this.instanceServiceContainer.stylesheetService, declarations[0], value, declarations[0].value);
+      const action = new StylesheetStyleChangeAction(this.instanceServiceContainer.stylesheetService, declarations[0], value, declarations[0].value);
       this.instanceServiceContainer.undoService.execute(action);
     }
   }

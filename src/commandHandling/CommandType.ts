@@ -6,6 +6,9 @@ export enum CommandType {
   'undo' = 'undo',
   'redo' = 'redo',
 
+  'holdUndo' = 'holdUndo',
+  'holdRedo' = 'holdRedo',
+
   'rotateCounterClockwise' = 'rotateCounterClockwise',
   'rotateClockwise' = 'rotateClockwise',
 
