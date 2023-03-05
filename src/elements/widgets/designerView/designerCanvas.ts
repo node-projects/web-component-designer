@@ -511,10 +511,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
             const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
             this.instanceServiceContainer.undoService.execute(ssca);
           }
-          this.applyAllStyles()
+          this.applyAllStyles();
         });
         this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
-          this.applyAllStyles()
+          this.applyAllStyles();
         });
       }
     });
@@ -619,8 +619,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this.instanceServiceContainer.stylesheetService) {
       const styleElements = this.rootDesignItem.element.querySelectorAll('style');
       let i = 1;
-      const intStyleSheets: IDocumentStylesheet[] = [...styleElements].map(x => ({ name: '&lt;style&gt; #' + i++, content: x.textContent, designItem: DesignItem.GetDesignItem(x) }));
-      //TODO: clear out style elements so they dont interfer with designer
+      const intStyleSheets: IDocumentStylesheet[] = [...styleElements].map(x => ({ name: '&lt;style&gt; #' + (x.id ? x.id + '(' + i++ + ')' : i++), content: x.textContent, designItem: DesignItem.GetDesignItem(x) }));
+      //TODO: clear out style elements so they don't interfer with designer
       this.instanceServiceContainer.stylesheetService.setDocumentStylesheets(intStyleSheets);
     }
 
@@ -1174,7 +1174,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.canvasOffsetUnzoomed = newCanvasOffset;
   }
 
-  
+
 }
 
 customElements.define('node-projects-designer-canvas', DesignerCanvas);

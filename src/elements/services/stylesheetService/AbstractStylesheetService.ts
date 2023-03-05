@@ -6,6 +6,7 @@ import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStyle
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
     protected _documentStylesheets = new Map<string, { stylesheet: IDocumentStylesheet, ast: any }>();
+    protected _allStylesheets = new Map<string, { stylesheet: IStylesheet | IDocumentStylesheet, ast: any }>();
 
     async setStylesheets(stylesheets: IStylesheet[]): Promise<void> {
         await this.internalSetStylesheets(stylesheets, this._stylesheets);
@@ -48,6 +49,14 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
             this.stylesheetsChanged.emit();
         } else {
             targetMap.clear();
+        }
+
+        this._allStylesheets.clear();
+        for (let s of this._documentStylesheets) {
+            this._allStylesheets.set(s[0], s[1]);
+        }
+        for (let s of this._stylesheets) {
+            this._allStylesheets.set(s[0], s[1]);
         }
     }
 
