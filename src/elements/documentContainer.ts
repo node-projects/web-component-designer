@@ -22,6 +22,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public additionalData: any;
 
   private _firstLoad = true;
+  private _stylesheetChangedEventRegistered: boolean;
 
   private _additionalStyle: string;
   public set additionalStyleString(style: string) {
@@ -35,18 +36,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _additionalStylesheets: IStylesheet[];
   public set additionalStylesheets(stylesheets: IStylesheet[]) {
     this._additionalStylesheets = stylesheets;
-    if (!this.instanceServiceContainer.stylesheetService) {
-      const stylesheetService = this.designerView.serviceContainer.getLastService('stylesheetService')
-      if (stylesheetService) {
-        const instance = stylesheetService(this.designerView.designerCanvas);
-        this.instanceServiceContainer.register("stylesheetService", instance);
-        instance.stylesheetChanged.on(e => this.additionalStylesheetChanged.emit({ name: e.name, newStyle: e.newStyle, oldStyle: e.oldStyle, changeSource: e.changeSource }));
-      } else {
-        console.warn("no Stylesheet-Service registered, but additionalStylesheets are used.");
-      }
-    }
     if (this.designerView.instanceServiceContainer.stylesheetService)
       this.designerView.instanceServiceContainer.stylesheetService.setStylesheets(stylesheets);
+    if (!this._stylesheetChangedEventRegistered) {
+      this._stylesheetChangedEventRegistered = true;
+      this.designerView.instanceServiceContainer.stylesheetService.stylesheetChanged.on(e => this.additionalStylesheetChanged.emit({ name: e.name, newStyle: e.newStyle, oldStyle: e.oldStyle, changeSource: e.changeSource }));
+    }
   };
   public get additionalStylesheets() {
     return this._additionalStylesheets;
@@ -174,6 +169,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   dispose(): void {
     this.codeView.dispose();
+    this.demoView.dispose();
   }
 
   executeCommand(command: IUiCommand) {

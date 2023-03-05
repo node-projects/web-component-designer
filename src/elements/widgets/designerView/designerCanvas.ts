@@ -503,21 +503,21 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (contentService)
       this.instanceServiceContainer.register("contentService", contentService(this));
 
-    this.instanceServiceContainer.servicesChanged.on(e => {
-      if (e.serviceName == 'stylesheetService') {
+    const stylesheetService = this.serviceContainer.getLastService('stylesheetService')
+    if (stylesheetService) {
+      const instance = stylesheetService(this);
+      this.instanceServiceContainer.register("stylesheetService", instance);
+      this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
+        if (ss.changeSource == 'extern') {
+          const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
+          this.instanceServiceContainer.undoService.execute(ssca);
+        }
         this.applyAllStyles();
-        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
-          if (ss.changeSource == 'extern') {
-            const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
-            this.instanceServiceContainer.undoService.execute(ssca);
-          }
-          this.applyAllStyles();
-        });
-        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
-          this.applyAllStyles();
-        });
-      }
-    });
+      });
+      this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
+        this.applyAllStyles();
+      });
+    }
 
     this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
