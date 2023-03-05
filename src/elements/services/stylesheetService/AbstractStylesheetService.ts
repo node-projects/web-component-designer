@@ -1,7 +1,7 @@
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
-import { IDesignItem } from "../../item/IDesignItem";
-import { DesignerCanvas } from "../../widgets/designerView/designerCanvas";
-import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from "./IStylesheetService";
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
+import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from './IStylesheetService.js';
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
