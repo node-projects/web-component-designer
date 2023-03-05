@@ -21,6 +21,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   public additionalData: any;
 
+  private _firstLoad = true;
+
   private _additionalStyle: string;
   public set additionalStyleString(style: string) {
     this._additionalStyle = style;
@@ -179,6 +181,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this.designerView.executeCommand(command);
     else if (this._tabControl.selectedIndex === 1)
       this.codeView.executeCommand(command);
+    else if (this._tabControl.selectedIndex === 3)
+      this.demoView.executeCommand(command);
   }
 
   canExecuteCommand(command: IUiCommand) {
@@ -186,6 +190,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       return this.designerView.canExecuteCommand(command);
     else if (this._tabControl.selectedIndex === 1)
       return this.codeView.canExecuteCommand(command);
+    else if (this._tabControl.selectedIndex === 3)
+      return this.demoView.canExecuteCommand(command);
     return false;
   }
 
@@ -194,7 +200,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
     if (this._tabControl) {
       if (this._tabControl.selectedIndex === 0)
-        this.designerView.parseHTML(this._content);
+        this.designerView.parseHTML(this._content, this._firstLoad);
       else if (this._tabControl.selectedIndex === 1)
         this.codeView.update(this._content);
       else if (this._tabControl.selectedIndex === 2) {
@@ -250,8 +256,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
       }
     });
-    if (this._content)
+    if (this._content) {
       this.content = this._content;
+      this._firstLoad = false;
+    }
   }
 
   public get instanceServiceContainer(): InstanceServiceContainer {
