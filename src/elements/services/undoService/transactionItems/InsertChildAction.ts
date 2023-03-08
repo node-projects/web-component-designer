@@ -20,11 +20,13 @@ export class InsertChildAction implements ITransactionItem {
   }
 
   undo() {
-    if (this.oldParent)
+    if (this.oldParent) {
       this.oldParent._insertChildInternal(this.designItem, this.oldIndex);
-    else
+      this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'moved', designItems: [this.designItem] });
+    } else {
       this.designItem.parent._removeChildInternal(this.designItem);
-    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'moved', designItems: [this.designItem] });
+      this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'removed', designItems: [this.designItem] });
+    }
   }
 
   do() {
@@ -32,7 +34,7 @@ export class InsertChildAction implements ITransactionItem {
     if (this.oldParent)
       this.oldIndex = this.designItem.parent.indexOf(this.designItem);
     this.newParent._insertChildInternal(this.designItem, this.newIndex);
-    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'moved', designItems: [this.designItem] });
+    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: this.oldParent ? 'moved' : 'added', designItems: [this.designItem] });
   }
 
   public designItem: IDesignItem;

@@ -1,7 +1,8 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { IDocumentStylesheet, IStyleDeclaration, IStyleRule } from "./IStylesheetService.js";
+import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
 import { calculate as calculateSpecifity } from "./SpecificityCalculator.js";
 import { AbstractStylesheetService } from "./AbstractStylesheetService.js";
+import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 
 //import type * as csstree from 'css-tree';
 namespace csstree {
@@ -33,6 +34,7 @@ declare global {
 interface IRuleWithAST extends IStyleRule {
     ast: csstree.RulePlain,
     declarations: IDeclarationWithAST[],
+    stylesheet: IStylesheet
 }
 
 interface IDeclarationWithAST extends IStyleDeclaration {
@@ -40,6 +42,11 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssTreeStylesheetService extends AbstractStylesheetService {
+
+    constructor(designerCanvas: IDesignerCanvas) {
+        super(designerCanvas)
+    }
+
     async internalParse(style: string) {
         return <any>window.csstree.toPlainObject((window.csstree.parse(style, { positions: true, parseValue: false })));
     }
@@ -91,6 +98,7 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
                 name: styleName,
                 value: (declaration.value as csstree.Raw).value,
                 important: declaration.important == true,
+                stylesheet: rule.stylesheet
             })
         };
 
@@ -105,7 +113,7 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
     }
 
     /* Section covers the update of rules and declarations */
-    updateDeclarationValue(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
+    updateDeclarationValueWithoutUndo(declaration: IDeclarationWithAST, value: string, important: boolean) {
         let sourceNode = this._allStylesheets.get(declaration.parent.stylesheetName);
         declaration.ast.value = (<any>window.csstree.toPlainObject(window.csstree.parse(declaration.name + ": " + value + (important ? " !important" : ""), { context: 'declaration', parseValue: false }))).value;
         const old = sourceNode.stylesheet.content;
@@ -115,9 +123,8 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
         if ((<IDocumentStylesheet>sourceNode.stylesheet).designItem) {
             (<IDocumentStylesheet>sourceNode.stylesheet).designItem.content = sourceNode.stylesheet.content;
-        }
-        this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
-        return true;
+        } else
+            this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
     }
 
     insertDeclarationIntoRule(rule: IRuleWithAST, property: string, value: string, important: boolean): boolean {
@@ -130,8 +137,8 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         sourceNode.ast = <any>window.csstree.toPlainObject((window.csstree.parse(sourceNode.stylesheet.content, { positions: true, parseValue: false })))
         if ((<IDocumentStylesheet>sourceNode.stylesheet).designItem) {
             (<IDocumentStylesheet>sourceNode.stylesheet).designItem.content = sourceNode.stylesheet.content;
-        }
-        this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+        } else
+            this.stylesheetChanged.emit({ name: sourceNode.stylesheet.name, newStyle: sourceNode.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
     }
 
@@ -146,8 +153,8 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         ss.ast = <any>window.csstree.toPlainObject((window.csstree.parse(this._allStylesheets.get(rule.stylesheetName).stylesheet.content, { positions: true, parseValue: false })))
         if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
             (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
-        }
-        this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+        } else
+            this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         return true;
     }
 
@@ -158,8 +165,8 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
             ss.stylesheet.content = newStyle;
             if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
                 (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
-            }
-            this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+            } else
+                this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         }
     }
 
@@ -193,6 +200,7 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
                     specificity: this.getSpecificity((child as csstree.RulePlain).prelude as csstree.SelectorListPlain),
                     stylesheetName: source,
                     declarations: null,
+                    stylesheet: this._allStylesheets.get(source).stylesheet
                 });
             }
         };

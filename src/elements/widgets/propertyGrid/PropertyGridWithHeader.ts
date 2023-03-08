@@ -118,9 +118,9 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
       this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
       if (this._instanceServiceContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
-        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
       } else if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
-        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.element?.textContent ?? '';
+        this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
       else
         this._content.value = ''
       this._content.title = this._content.value;

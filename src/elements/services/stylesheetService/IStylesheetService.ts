@@ -13,6 +13,7 @@ export interface IStyleDeclaration {
     value: string;
     important: boolean;
     parent: IStyleRule;
+    stylesheet?: IStylesheet;
 }
 
 export interface IStylesheet {
@@ -20,9 +21,7 @@ export interface IStylesheet {
     name: string;
 }
 
-export interface IDocumentStylesheet {
-    content: string;
-    name: string;
+export interface IDocumentStylesheet extends IStylesheet {
     designItem: IDesignItem;
 }
 
@@ -34,7 +33,9 @@ export interface IStylesheetService {
 
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[];
-    updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean): boolean;
+
+    updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean);
+    updateDeclarationValueWithoutUndo(declaration: IStyleDeclaration, value: string, important: boolean)
     insertDeclarationIntoRule(rule: IStyleRule, property: string, value: string, important: boolean): boolean;
     removeDeclarationFromRule(rule: IStyleRule, property: string): boolean;
     updateCompleteStylesheet(name: string, newStyle: string): void;

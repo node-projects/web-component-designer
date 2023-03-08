@@ -1,6 +1,7 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet } from "./IStylesheetService.js";
 import { AbstractStylesheetService } from "./AbstractStylesheetService.js";
+import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 
 //import type { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST } from "@adobe/css-tools";
 type CssRuleAST = any;
@@ -20,6 +21,10 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssToolsStylesheetService extends AbstractStylesheetService {
+
+    constructor(designerCanvas: IDesignerCanvas) {
+        super(designerCanvas)
+    }
 
     _tools: {
         parse: (css: string, options?: { source?: string; silent?: boolean; }) => CssStylesheetAST;
@@ -45,6 +50,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
                         important: (<CssDeclarationAST>y).value.endsWith('!important'),
                         parent: null,
                         ast: <CssDeclarationAST>y,
+                        stylesheet: item[1].stylesheet
                     })),
                     specificity: 0,
                     stylesheetName: item[0],
@@ -74,11 +80,10 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
         return this.getAppliedRules(designItem).flatMap(x => x.declarations).filter(x => x.name == styleName);
     }
 
-    public updateDeclarationValue(declaration: IDeclarationWithAST, value: string, important: boolean): boolean {
+    public updateDeclarationValueWithoutUndo(declaration: IDeclarationWithAST, value: string, important: boolean) {
         declaration.ast.value = important ? value + ' !important' : value;
         let ss = this._allStylesheets.get(declaration.parent.stylesheetName);
         this.updateStylesheet(ss);
-        return true;
     }
 
     public insertDeclarationIntoRule(rule: IRuleWithAST, property: string, value: string, important: boolean): boolean {
@@ -104,8 +109,8 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
         ss.stylesheet.content = this._tools.stringify(ss.ast, { indent: '    ', compress: false, emptyDeclarations: true });
         if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
             (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
-        }
-        this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+        } else
+            this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
     }
 
     updateCompleteStylesheet(name: string, newStyle: string) {
@@ -115,8 +120,8 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
             ss.stylesheet.content = newStyle;
             if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
                 (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
-            }
-            this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+            } else
+                this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
         }
     }
 }

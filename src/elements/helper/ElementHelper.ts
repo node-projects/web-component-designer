@@ -1,4 +1,4 @@
-import { IPoint } from "../../interfaces/IPoint";
+import { IPoint } from '../../interfaces/IPoint.js';
 
 export function newElementFromString(text): Element {
   const range = document.createRange();

@@ -500,24 +500,25 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     const contentService = this.serviceContainer.getLastService('contentService')
-    if (contentService)
+    if (contentService) {
       this.instanceServiceContainer.register("contentService", contentService(this));
+    }
 
-    this.instanceServiceContainer.servicesChanged.on(e => {
-      if (e.serviceName == 'stylesheetService') {
+    const stylesheetService = this.serviceContainer.getLastService('stylesheetService')
+    if (stylesheetService) {
+      const instance = stylesheetService(this);
+      this.instanceServiceContainer.register("stylesheetService", instance);
+      this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
+        if (ss.changeSource == 'extern') {
+          const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
+          this.instanceServiceContainer.undoService.execute(ssca);
+        }
         this.applyAllStyles();
-        this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
-          if (ss.changeSource == 'extern') {
-            const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
-            this.instanceServiceContainer.undoService.execute(ssca);
-          }
-          this.applyAllStyles();
-        });
-        this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
-          this.applyAllStyles();
-        });
-      }
-    });
+      });
+      this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
+        this.applyAllStyles();
+      });
+    }
 
     this.extensionManager = new ExtensionManager(this);
     this.overlayLayer = new OverlayLayerView(serviceContainer);
@@ -616,19 +617,31 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.rootDesignItem._removeChildInternal(i);
     this.addDesignItems(designItems);
 
-    if (this.instanceServiceContainer.stylesheetService) {
-      const styleElements = this.rootDesignItem.element.querySelectorAll('style');
-      let i = 1;
-      const intStyleSheets: IDocumentStylesheet[] = [...styleElements].map(x => ({ name: '&lt;style&gt; #' + (x.id ? x.id + '(' + i++ + ')' : i++), content: x.textContent, designItem: DesignItem.GetDesignItem(x) }));
-      //TODO: clear out style elements so they don't interfer with designer
-      this.instanceServiceContainer.stylesheetService.setDocumentStylesheets(intStyleSheets);
-    }
-
-
+    this.lazyTriggerReparseDocumentStylesheets();
 
     this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
     (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
     setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 50);
+  }
+
+  reparseTimeout: NodeJS.Timeout | null;
+  public lazyTriggerReparseDocumentStylesheets() {
+    if (this.reparseTimeout) {
+      clearTimeout(this.reparseTimeout);
+    }
+    this.reparseTimeout = setTimeout(async () => {
+      await this.reparseDocumentStylesheets();
+      clearTimeout(this.reparseTimeout);
+    }, 20);
+  }
+
+  private async reparseDocumentStylesheets() {
+    if (this.instanceServiceContainer.stylesheetService) {
+      const styleElements = this.rootDesignItem.element.querySelectorAll('style');
+      let i = 1;
+      const intStyleSheets: IDocumentStylesheet[] = [...styleElements].map(x => ({ name: '&lt;style&gt; #' + (x.id ? x.id + '(' + i++ + ')' : i++), content: DesignItem.GetDesignItem(x).content, designItem: DesignItem.GetDesignItem(x) }));
+      await this.instanceServiceContainer.stylesheetService.setDocumentStylesheets(intStyleSheets);
+    }
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
