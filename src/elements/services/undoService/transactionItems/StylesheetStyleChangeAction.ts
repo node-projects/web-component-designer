@@ -23,11 +23,11 @@ export class StylesheetStyleChangeAction implements ITransactionItem {
   }
 
   undo() {
-    this.stylesheetService.updateDeclarationValue(this.declaration, this.oldValue, false);
+    this.stylesheetService.updateDeclarationValueWithoutUndo(this.declaration, this.oldValue, false);
   }
 
   do() {
-    this.stylesheetService.updateDeclarationValue(this.declaration, this.newValue, false);
+    this.stylesheetService.updateDeclarationValueWithoutUndo(this.declaration, this.newValue, false);
   }
 
   public designItem: IDesignItem;

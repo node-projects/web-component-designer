@@ -379,7 +379,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     }
 
     const newNode = currentNode.addChildren({
-      title: item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
+      title: item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
       folder: item.children.length > 0 ? true : false,
       //@ts-ignore
       ref: item

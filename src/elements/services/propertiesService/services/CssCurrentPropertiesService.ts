@@ -7,7 +7,6 @@ import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStyleshe
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
-import { StylesheetStyleChangeAction } from '../../undoService/transactionItems/StylesheetStyleChangeAction.js';
 
 //TODO: remove this code when import asserts are supported
 let cssProperties: any;
@@ -73,8 +72,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
       const decls = designItems[0].instanceServiceContainer.stylesheetService?.getDeclarations(designItems[0], property.styleDeclaration.name);
       const currentDecl = decls.find(x => x.parent.selector == property.styleDeclaration.parent.selector && x.parent.stylesheetName == property.styleDeclaration.parent.stylesheetName);
 
-      const action = new StylesheetStyleChangeAction(designItems[0].instanceServiceContainer.stylesheetService, property.styleDeclaration, value, currentDecl.value);
-      designItems[0].instanceServiceContainer.undoService.execute(action);
+      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(currentDecl, value, false);      
       this._notifyChangedProperty(designItems[0], property, value);
       return;
     }

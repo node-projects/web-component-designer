@@ -69,4 +69,6 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   zoomOntoRectangle(startPoint: IPoint, endPoint: IPoint): void;
 
   showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent): void;
+
+  lazyTriggerReparseDocumentStylesheets();
 }

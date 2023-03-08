@@ -2,11 +2,20 @@ import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from './IStylesheetService.js';
+import { StylesheetStyleChangeAction } from "../undoService/transactionItems/StylesheetStyleChangeAction.js";
+import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
+import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
     protected _documentStylesheets = new Map<string, { stylesheet: IDocumentStylesheet, ast: any }>();
     protected _allStylesheets = new Map<string, { stylesheet: IStylesheet | IDocumentStylesheet, ast: any }>();
+
+    protected _instanceServiceContainer: InstanceServiceContainer;
+
+    constructor(designerCanvas: IDesignerCanvas) {
+        this._instanceServiceContainer = designerCanvas.instanceServiceContainer;
+    }
 
     async setStylesheets(stylesheets: IStylesheet[]): Promise<void> {
         await this.internalSetStylesheets(stylesheets, this._stylesheets);
@@ -30,7 +39,8 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
                     catch (err) {
                         console.warn("error parsing stylesheet", stylesheet, err)
                     }
-                    this.stylesheetChanged.emit({ name: stylesheet.name, newStyle: stylesheet.content, oldStyle: old.stylesheet.content, changeSource: 'extern' });
+                    if (targetMap == this._stylesheets)
+                        this.stylesheetChanged.emit({ name: stylesheet.name, newStyle: stylesheet.content, oldStyle: old.stylesheet.content, changeSource: 'extern' });
                 }
             }
         } else if (stylesheets != null) {
@@ -46,7 +56,8 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
                     console.warn("error parsing stylesheet", stylesheet, err)
                 }
             }
-            this.stylesheetsChanged.emit();
+            if (targetMap == this._stylesheets)
+                this.stylesheetsChanged.emit();
         } else {
             targetMap.clear();
         }
@@ -62,23 +73,36 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
 
     protected abstract internalParse(style: string): Promise<any>;
 
+    //todo: rename to externalStylesheets
     getStylesheets(): IStylesheet[] {
         let stylesheets: IStylesheet[] = [];
         for (let item of this._stylesheets) {
             stylesheets.push(item[1].stylesheet);
         };
-        for (let item of this._documentStylesheets) {
+        /*for (let item of this._documentStylesheets) {
             stylesheets.push(item[1].stylesheet);
-        };
+        };*/
         return stylesheets;
     }
 
     abstract getAppliedRules(designItem: IDesignItem): IStyleRule[]
     abstract getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[]
-    abstract updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean): boolean
+
+    public updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean) {
+        if (!(<IDocumentStylesheet>declaration.stylesheet).designItem) {
+            const action = new StylesheetStyleChangeAction(this, declaration, value, declaration.value);
+            this._instanceServiceContainer.undoService.execute(action);
+        }
+        else {
+            this.updateDeclarationValueWithoutUndo(declaration, value, important);
+        }
+    }
+
     abstract insertDeclarationIntoRule(rule: IStyleRule, property: string, value: string, important: boolean): boolean
     abstract removeDeclarationFromRule(rule: IStyleRule, property: string): boolean;
     abstract updateCompleteStylesheet(name: string, newStyle: string);
+
+    public abstract updateDeclarationValueWithoutUndo(declaration: IStyleDeclaration, value: string, important: boolean)
 
     public stylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' }>();
     public stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();

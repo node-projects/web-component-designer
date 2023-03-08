@@ -16,7 +16,8 @@ import { DeleteAction } from '../services/undoService/transactionItems/DeleteAct
 import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 import { enableStylesheetService } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
-import { StylesheetStyleChangeAction } from '../services/undoService/transactionItems/StylesheetStyleChangeAction.js';
+import { AbstractStylesheetService } from '../services/stylesheetService/AbstractStylesheetService.js';
+import { cssFromString } from '@node-projects/base-custom-webcomponent';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -88,9 +89,36 @@ export class DesignItem implements IDesignItem {
   }
   _withoutUndoSetAttribute(name: string, value: string) {
     this._attributes.set(name, value);
+    this._reparseSpecialAttributes(name);
   }
   _withoutUndoRemoveAttribute(name: string) {
     this._attributes.delete(name);
+    this._reparseSpecialAttributes(name);
+  }
+
+  _reparseSpecialAttributes(name: string) {
+    if (name == hideAtDesignTimeAttributeName) {
+      if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
+        if (!this._attributes.has(hideAtDesignTimeAttributeName))
+          this.element.style.display = <any>this._styles.get('display') ?? "";
+        else
+          this.element.style.display = 'none';
+      }
+    } else if (name == hideAtRunTimeAttributeName) {
+      if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
+        if (!this._attributes.has(hideAtRunTimeAttributeName))
+          this.element.style.opacity = <any>this._styles.get('opacity') ?? "";
+        else
+          this.element.style.opacity = '0.3';
+      }
+    } else if (name == lockAtDesignTimeAttributeName) {
+      if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
+        if (!this._attributes.has(lockAtDesignTimeAttributeName))
+          this.element.style.pointerEvents = 'auto';
+        else
+          this.element.style.pointerEvents = 'none';
+      }
+    }
   }
 
   private _styles: Map<string, string>
@@ -156,8 +184,9 @@ export class DesignItem implements IDesignItem {
   public get firstChild(): IDesignItem {
     return this._childArray[0];
   }
+  private _parent: IDesignItem;
   public get parent(): IDesignItem {
-    return this.getOrCreateDesignItem(this.element.parentNode);
+    return this._parent;
   }
 
   public indexOf(designItem: IDesignItem): number {
@@ -202,10 +231,13 @@ export class DesignItem implements IDesignItem {
     return this.nodeType == NodeType.TextNode || (this._childArray.length === 0 && this.content !== null);
   }
   public get content(): string {
-    return this.node.textContent;
+    if (!this.hasChildren)
+      return this.node.textContent;
+    else
+      return this._childArray.map(x => x.content).join();
   }
   public set content(value: string) {
-    const grp = this.openGroup('set innerHTML');
+    const grp = this.openGroup('set content');
     this.clearChildren();
     let t = document.createTextNode(value);
     let di = DesignItem.GetOrCreateDesignItem(t, this.serviceContainer, this.instanceServiceContainer);
@@ -240,58 +272,34 @@ export class DesignItem implements IDesignItem {
     return this.nodeType === NodeType.TextNode && this.content?.trim() == '';
   }
 
-  private _hideAtDesignTime: boolean;
   public get hideAtDesignTime() {
-    return this._hideAtDesignTime;
+    return this.hasAttribute(hideAtDesignTimeAttributeName);
   }
   public set hideAtDesignTime(value: boolean) {
-    this._hideAtDesignTime = value;
     if (value)
-      this._attributes.set(hideAtDesignTimeAttributeName, "");
+      this.setAttribute(hideAtDesignTimeAttributeName, "");
     else
-      this._attributes.delete(hideAtDesignTimeAttributeName);
-    if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
-      if (!value)
-        this.element.style.display = <any>this._styles.get('display') ?? "";
-      else
-        this.element.style.display = 'none';
-    }
+      this.removeAttribute(hideAtDesignTimeAttributeName);
   }
 
-  private _hideAtRunTime: boolean;
   public get hideAtRunTime() {
-    return this._hideAtRunTime;
+    return this.hasAttribute(hideAtRunTimeAttributeName);
   }
   public set hideAtRunTime(value: boolean) {
-    this._hideAtRunTime = value;
     if (value)
-      this._attributes.set(hideAtRunTimeAttributeName, "");
+      this.setAttribute(hideAtRunTimeAttributeName, "");
     else
-      this._attributes.delete(hideAtRunTimeAttributeName);
-    if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
-      if (!value)
-        this.element.style.opacity = <any>this._styles.get('opacity') ?? "";
-      else
-        this.element.style.opacity = '0.3';
-    }
+      this.removeAttribute(hideAtRunTimeAttributeName);
   }
 
-  private _lockAtDesignTime: boolean;
   public get lockAtDesignTime() {
-    return this._lockAtDesignTime;
+    return this.hasAttribute(lockAtDesignTimeAttributeName);
   }
   public set lockAtDesignTime(value: boolean) {
-    this._lockAtDesignTime = value;
     if (value)
-      this._attributes.set(lockAtDesignTimeAttributeName, "");
+      this.setAttribute(lockAtDesignTimeAttributeName, "")
     else
-      this._attributes.delete(lockAtDesignTimeAttributeName);
-    if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
-      if (!value)
-        this.element.style.pointerEvents = 'auto';
-      else
-        this.element.style.pointerEvents = 'none';
-    }
+      this.removeAttribute(lockAtDesignTimeAttributeName);
   }
 
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
@@ -301,12 +309,6 @@ export class DesignItem implements IDesignItem {
       for (let a of designItem.element.attributes) {
         if (a.name !== 'style') {
           designItem._attributes.set(a.name, a.value);
-          if (a.name === hideAtDesignTimeAttributeName)
-            designItem._hideAtDesignTime = true;
-          if (a.name === hideAtRunTimeAttributeName)
-            designItem._hideAtRunTime = true;
-          if (a.name === lockAtDesignTimeAttributeName)
-            designItem._lockAtDesignTime = true;
         }
       }
 
@@ -319,12 +321,10 @@ export class DesignItem implements IDesignItem {
             designItem._styles.set(<string>e.name, e.value);
           }
         }
-        if (!designItem._lockAtDesignTime) {
+        if (!designItem.lockAtDesignTime) {
           requestAnimationFrame(() => node.style.pointerEvents = 'auto');
         } else
           node.style.pointerEvents = 'none';
-
-        //node.style.cursor = 'pointer';
       }
 
       (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
@@ -338,9 +338,13 @@ export class DesignItem implements IDesignItem {
   updateChildrenFromNodesChildren() {
     this._childArray = [];
     if (this.nodeType == NodeType.Element) {
-      for (const c of this.element.childNodes)
-        this._childArray.push(DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer));
+      for (const c of this.element.childNodes) {
+        const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
+        this._childArray.push(di);
+        (<DesignItem>di)._parent = this;
+      }
     }
+    this._refreshIfStyleSheet();
   }
 
   constructor(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
@@ -404,8 +408,7 @@ export class DesignItem implements IDesignItem {
         this.removeStyle(nm);
       }
     } else {
-      const action = new StylesheetStyleChangeAction(this.instanceServiceContainer.stylesheetService, declarations[0], value, declarations[0].value);
-      this.instanceServiceContainer.undoService.execute(action);
+      this.instanceServiceContainer.stylesheetService.updateDeclarationValue(declarations[0], value, false);
     }
   }
 
@@ -484,10 +487,13 @@ export class DesignItem implements IDesignItem {
       this.node.insertBefore(designItem.node, el.element)
       this._childArray.splice(index, 0, designItem);
     }
+    (<DesignItem>designItem)._parent = this;
 
     //todo: is this still needed???
     if (this.instanceServiceContainer.selectionService.primarySelection == designItem)
       designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+
+    this._refreshIfStyleSheet();
   }
   public _removeChildInternal(designItem: IDesignItem) {
     if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
@@ -499,6 +505,22 @@ export class DesignItem implements IDesignItem {
     if (index > -1) {
       this._childArray.splice(index, 1);
       designItem.element.remove();
+      (<DesignItem>designItem)._parent = null;
+    }
+
+    this._refreshIfStyleSheet();
+  }
+
+  _refreshIfStyleSheet() {
+    if (this.name == 'style' || this.parent?.name == 'style') {
+      //Update Stylesheetservice with sheet info
+      //Patch this sheetdata
+
+      const realContent = this._childArray.reduce((a, b) => a + b.content, '');
+      this.node.textContent = AbstractStylesheetService.buildPatchedStyleSheet([cssFromString(realContent)]);
+      this.instanceServiceContainer.designerCanvas.lazyTriggerReparseDocumentStylesheets();
+    } else if (this.name == 'link') {
+
     }
   }
 }
