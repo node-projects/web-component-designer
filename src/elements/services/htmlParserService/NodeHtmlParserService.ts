@@ -51,10 +51,6 @@ export class NodeHtmlParserService implements IHtmlParserService {
       }
       designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
 
-      let hideAtDesignTime = false;
-      let hideAtRunTime = false;
-      let lockAtDesignTime = false;
-
       let style = '';
 
       let attr = item.attributes;
@@ -64,12 +60,6 @@ export class NodeHtmlParserService implements IHtmlParserService {
           if (manualCreatedElement) {
             element.setAttribute(a, attr[a]);
           }
-          if (a === 'node-projects-hide-at-design-time')
-            hideAtDesignTime = true;
-          else if (a === 'node-projects-hide-at-run-time')
-            hideAtRunTime = true;
-          else if (a === 'node-projects-lock-at-design-time')
-            lockAtDesignTime = true;
         } else {
           style = attr[a];
         }
@@ -85,14 +75,6 @@ export class NodeHtmlParserService implements IHtmlParserService {
           }
         }
       }
-
-      if (!lockAtDesignTime && (element instanceof HTMLElement || element instanceof SVGElement)) {
-        requestAnimationFrame(() => (<HTMLElement>element).style.pointerEvents = 'auto');
-      }
-
-      designItem.hideAtDesignTime = hideAtDesignTime;
-      designItem.hideAtRunTime = hideAtRunTime;
-      designItem.lockAtDesignTime = lockAtDesignTime;
 
       (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
 
