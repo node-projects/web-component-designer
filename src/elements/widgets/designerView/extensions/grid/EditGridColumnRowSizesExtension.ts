@@ -39,7 +39,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     });
   }
 
-  _pointerActionTypeResize(event: PointerEvent, rect: SVGRectElement, gap: ReturnType<typeof CalculateGridInformation>['gaps'][0]) {
+  private _pointerActionTypeResize(event: PointerEvent, rect: SVGRectElement, gap: ReturnType<typeof CalculateGridInformation>['gaps'][0]) {
     event.stopPropagation();
 
     const templatePropertyName = gap.type == 'h' ? 'gridTemplateRows' : 'gridTemplateColumns';
@@ -89,7 +89,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     }
   }
 
-  _convertCssUnits(pixelSizes: number[], targetUnits: string[], target: HTMLElement, percentTarget: 'width' | 'height'): string[] {
+  private _convertCssUnits(pixelSizes: number[], targetUnits: string[], target: HTMLElement, percentTarget: 'width' | 'height'): string[] {
     let cp = getComputedStyle(target);
     let bounding = target.getBoundingClientRect();
     let containerSize = bounding[percentTarget];
