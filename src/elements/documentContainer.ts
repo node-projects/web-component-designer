@@ -4,7 +4,6 @@ import { DesignerView } from './widgets/designerView/designerView.js';
 import { ServiceContainer } from './services/ServiceContainer.js';
 import { InstanceServiceContainer } from './services/InstanceServiceContainer.js';
 import { ICodeView } from './widgets/codeView/ICodeView.js';
-import { IDesignItem } from './item/IDesignItem.js';
 import { IStringPosition } from './services/htmlWriterService/IStringPosition.js';
 import { IDemoView } from './widgets/demoView/IDemoView.js';
 import { IUiCommandHandler } from '../commandHandling/IUiCommandHandler.js';
@@ -137,11 +136,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     if (this._tabControl.selectedIndex === 2) {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (primarySelection) {
-        let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
-        this._content = this.designerView.getHTML(designItemsAssignmentList);
-        this._selectionPosition = designItemsAssignmentList.get(primarySelection);
-        this.codeView.setSelection(this._selectionPosition);
-        this._selectionPosition = null;
+        this._content = this.designerView.getHTML();
+        if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
+          this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
+          this.codeView.setSelection(this._selectionPosition);
+          this._selectionPosition = null;
+        }
       }
     }
   }
@@ -153,14 +153,15 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this._disableChangeNotificationDesigner = true;
       if (this._tabControl.selectedIndex === 2) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
-        this._content = this.designerView.getHTML(designItemsAssignmentList);
+        this._content = this.designerView.getHTML();
         this.codeView.update(this._content);
         if (primarySelection) {
-          this._selectionPosition = designItemsAssignmentList.get(primarySelection);
-          if (this._selectionPosition)
-            this.codeView.setSelection(this._selectionPosition);
-          this._selectionPosition = null;
+          if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
+            this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
+            if (this._selectionPosition)
+              this.codeView.setSelection(this._selectionPosition);
+            this._selectionPosition = null;
+          }
         }
       }
       this._disableChangeNotificationDesigner = false;
@@ -222,9 +223,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
       if (i.oldIndex === 0) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        let designItemsAssignmentList: Map<IDesignItem, IStringPosition> = new Map();
-        this._content = this.designerView.getHTML(designItemsAssignmentList);
-        this._selectionPosition = designItemsAssignmentList.get(primarySelection);
+        this._content = this.designerView.getHTML();
+        if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
+          this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
+        }
       } else if (i.oldIndex === 1) {
         this._content = this.codeView.getText();
       } else if (i.oldIndex === 2) {

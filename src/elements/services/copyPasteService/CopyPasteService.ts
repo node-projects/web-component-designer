@@ -10,7 +10,7 @@ export const positionsJsonMime = 'web text/positions';
 
 export class CopyPasteService implements ICopyPasteService {
   async copyItems(designItems: IDesignItem[]): Promise<void> {
-    const copyText = DomConverter.ConvertToString(designItems, null, false);
+    const copyText = DomConverter.ConvertToString(designItems, false);
     const positions = designItems.map(x => x.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(x.element));
     copyToClipboard([["text/html", copyText], [positionsJsonMime, JSON.stringify(positions)]]);
   }

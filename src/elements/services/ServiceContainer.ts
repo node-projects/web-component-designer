@@ -40,6 +40,7 @@ import { ISelectionService } from './selectionService/ISelectionService.js';
 import { IContentService } from './contentService/IContentService.js';
 import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
+import { IDesignItemDocumentPositionService } from './designItemDocumentPositionService/IDesignItemDocumentPositionService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -67,6 +68,7 @@ interface ServiceNameMap {
   "selectionService": (designerCanvas: IDesignerCanvas) => ISelectionService;
   "contentService": (designerCanvas: IDesignerCanvas) => IContentService;
   "stylesheetService": (designerCanvas: IDesignerCanvas) => IStylesheetService;
+  "designItemDocumentPositionService": (designerCanvas: IDesignerCanvas) => IDesignItemDocumentPositionService;
 }
 
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {

@@ -80,6 +80,7 @@ import { JumpToElementContextMenu } from '../widgets/designerView/extensions/con
 import { EditGridColumnRowSizesExtensionProvider } from '../widgets/designerView/extensions/grid/EditGridColumnRowSizesExtensionProvider.js';
 import { DisplayGridExtensionProvider } from '../widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js';
 import { ApplyFirstMachingExtensionProvider } from '../widgets/designerView/extensions/logic/ApplyFirstMachingExtensionProvider.js';
+import { DesignItemDocumentPositionService } from './designItemDocumentPositionService/DesignItemDocumentPositionService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -108,6 +109,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
   serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
   serviceContainer.register("contentService", (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
+  serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
   //serviceContainer.register("stylesheetService", new DemoProviderService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [

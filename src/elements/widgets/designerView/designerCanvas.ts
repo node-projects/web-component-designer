@@ -497,6 +497,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this._lastCopiedPrimaryItem = null;
       })
     }
+    const designItemDocumentPositionService = this.serviceContainer.getLastService('designItemDocumentPositionService')
+    if (designItemDocumentPositionService) {
+      this.instanceServiceContainer.register("designItemDocumentPositionService", designItemDocumentPositionService(this));
+    }
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
     const contentService = this.serviceContainer.getLastService('contentService')

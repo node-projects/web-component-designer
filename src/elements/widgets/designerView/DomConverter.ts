@@ -1,7 +1,6 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IndentedTextWriter } from "../../helper/IndentedTextWriter.js";
 import { IHtmlWriterOptions } from "../../services/htmlWriterService/IHtmlWriterOptions.js";
-import { IStringPosition } from "../../services/htmlWriterService/IStringPosition.js";
 import { SimpleTextWriter } from "../../helper/SimpleTextWriter.js";
 
 export class DomConverter {
@@ -41,10 +40,10 @@ export class DomConverter {
       tag === 'wbr';
   }
 
-  public static ConvertToString(designItems: IDesignItem[], designItemsAssignmentList?: Map<IDesignItem, IStringPosition>, beautifyOutput?: boolean) {
+  public static ConvertToString(designItems: IDesignItem[], beautifyOutput?: boolean) {
     let itw = beautifyOutput !== false ? new IndentedTextWriter() : new SimpleTextWriter();
     let options: IHtmlWriterOptions = { beautifyOutput: beautifyOutput !== false, writeDesignerProperties: true, compressCssToShorthandProperties: true, parseJsonInAttributes: true, jsonWriteMode: 'beauty' };
-    designItems[0].serviceContainer.htmlWriterService.write(itw, designItems, true, options, designItemsAssignmentList);
+    designItems[0].serviceContainer.htmlWriterService.write(itw, designItems, true, options);
     return itw.getString();
   }
 }

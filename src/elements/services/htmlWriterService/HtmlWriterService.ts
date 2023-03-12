@@ -3,7 +3,6 @@ import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 import { NodeType } from '../../item/NodeType.js';
-import { IStringPosition } from './IStringPosition.js';
 import { isEmptyTextNode, isInline, isInlineAfter } from '../../helper/ElementHelper.js';
 import { AbstractHtmlWriterService } from './AbstractHtmlWriterService.js';
 
@@ -34,13 +33,13 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       indentedTextWriter.writeNewline();
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
     for (const d of designItems) {
-      this.internalWrite(indentedTextWriter, d, options, designItemsAssignmentList);
+      this.internalWrite(indentedTextWriter, d, options);
     }
   }
 
-  private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+  private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
     let start = indentedTextWriter.position;
     let end = indentedTextWriter.position;
 
@@ -79,7 +78,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
             indentedTextWriter.levelRaise();
           }
           for (const c of children) {
-            this.internalWrite(indentedTextWriter, c, options, designItemsAssignmentList);
+            this.internalWrite(indentedTextWriter, c, options);
             let childSingleTextNode = c.childCount === 1 && c.firstChild.nodeType === NodeType.TextNode;
             if (childSingleTextNode)
               if (!indentedTextWriter.isLastCharNewline())
@@ -106,8 +105,8 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
         this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
 
-    if (designItemsAssignmentList) {
-      designItemsAssignmentList.set(designItem, { start: start, length: end - start });
+    if (designItem.instanceServiceContainer.designItemDocumentPositionService) {
+      designItem.instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: start, length: end - start });
     }
   }
 

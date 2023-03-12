@@ -37,7 +37,7 @@ export class DesignItem implements IDesignItem {
 
   async clone() {
     try {
-      const html = DomConverter.ConvertToString([this], null, false);
+      const html = DomConverter.ConvertToString([this], false);
       const parsed = await this.serviceContainer.htmlParserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
       return parsed[0];
     }

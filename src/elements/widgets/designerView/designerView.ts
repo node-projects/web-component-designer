@@ -6,7 +6,6 @@ import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
 import { DesignerCanvas } from "./designerCanvas.js";
 import { DomConverter } from './DomConverter.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
-import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar.js';
@@ -343,10 +342,10 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._toolbar.initialize(this.serviceContainer, this);
   }
 
-  public getHTML(designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+  public getHTML() {
     //this.instanceServiceContainer.selectionService.setSelectedElements(null);
     if (this._designerCanvas.rootDesignItem.childCount > 0)
-      return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), designItemsAssignmentList);
+      return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()));
     return '';
   }
 

@@ -15,7 +15,7 @@ export interface IDesignItem {
   replaceNode(newNode: Node);
   clone(): Promise<IDesignItem>
 
-  readonly nodeType: NodeType
+  readonly nodeType: NodeType;
 
   readonly name: string;
   id: string;
