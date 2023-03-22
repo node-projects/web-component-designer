@@ -36,6 +36,10 @@ export class UndoService implements IUndoService {
         this._redoStack = [];
       }
     }
+    if (this._transactionStack.length == 0) {
+      this._designerCanvas.extensionManager.refreshAllExtensions(transactionItem.affectedItems);
+      this._designerCanvas.onContentChanged.emit();
+    }
   }
 
   private abortTransactionItem(transactionItem: ITransactionItem) {
@@ -55,8 +59,10 @@ export class UndoService implements IUndoService {
     } else {
       this._transactionStack[this._transactionStack.length - 1].execute(item);
     }
-    this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
-    this._designerCanvas.onContentChanged.emit();
+    if (this._transactionStack.length == 0) {
+      this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
+      this._designerCanvas.onContentChanged.emit();
+    }
   }
 
   clear() {

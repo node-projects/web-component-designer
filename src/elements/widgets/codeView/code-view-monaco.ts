@@ -126,6 +126,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           automaticLayout: true,
           wordWrapColumn: 1000,
           //wordWrap: 'wordWrapColumn',
+          fontLigatures: '',
           value: this.code,
           language: 'html',
           minimap: {

@@ -155,8 +155,8 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
     return ElementContainerType.complex;
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
-    const context: IWriteContext = { indentedTextWriter, options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block, designItemsAssignmentList };
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
+    const context: IWriteContext = { indentedTextWriter, options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block };
     this._writeDesignItemList(ElementDisplayType.inline, context, designItems);
   }
 }

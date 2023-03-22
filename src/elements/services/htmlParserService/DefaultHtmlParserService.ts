@@ -5,7 +5,7 @@ import { DesignItem } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 
 export class DefaultHtmlParserService implements IHtmlParserService {
-  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
+  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     return this.createDesignItems(doc.body.childNodes, serviceContainer, instanceServiceContainer);

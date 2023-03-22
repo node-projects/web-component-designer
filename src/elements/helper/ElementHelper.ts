@@ -1,5 +1,12 @@
 import { IPoint } from '../../interfaces/IPoint.js';
 
+export function inDesigner(element: Element): boolean {
+  let node = element.getRootNode();
+  if ((<ShadowRoot>node)?.host?.localName == "node-projects-designer-canvas")
+    return true;
+  return false;
+}
+
 export function newElementFromString(text): Element {
   const range = document.createRange();
   range.selectNode(document.body);

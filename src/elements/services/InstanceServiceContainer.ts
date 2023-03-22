@@ -6,12 +6,14 @@ import { DesignContext } from '../widgets/designerView/DesignContext.js';
 import { IDesignContext } from '../widgets/designerView/IDesignContext.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
+import { IDesignItemDocumentPositionService } from './designItemDocumentPositionService/IDesignItemDocumentPositionService.js';
 
 interface InstanceServiceNameMap {
   "undoService": IUndoService;
   "selectionService": ISelectionService;
   "contentService": IContentService;
   "stylesheetService": IStylesheetService;
+  "designItemDocumentPositionService": IDesignItemDocumentPositionService;
 }
 
 export class InstanceServiceContainer extends BaseServiceContainer<InstanceServiceNameMap> {
@@ -39,5 +41,9 @@ export class InstanceServiceContainer extends BaseServiceContainer<InstanceServi
 
   get stylesheetService(): IStylesheetService {
     return this.getLastService('stylesheetService');
+  }
+
+  get designItemDocumentPositionService(): IDesignItemDocumentPositionService {
+    return this.getLastService('designItemDocumentPositionService');
   }
 }
