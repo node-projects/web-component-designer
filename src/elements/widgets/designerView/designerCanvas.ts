@@ -179,7 +179,86 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     #node-projects-designer-canvas-helper-element {
       height: 0;
       width: 0;
-    }  
+    }
+
+    #node-projects-designer-search-container {
+      position:absolute;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      justify-content: left;
+      gap: 8px;
+      width: auto;
+      right: 10px;
+      top: 0;
+      background:rgb(242, 242, 242);
+      padding: 5px 6px;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+    }
+    
+    #node-projects-designer-search-container > #node-projects-designer-search-bar {
+      border: 1px solid black;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      background-color: white;
+      padding: 1px 2px;
+    }
+    
+    #node-projects-designer-search-container > div > input {
+      height:20px;
+      padding-left: 6px;
+      font-size: 13px;
+      border: none;
+      outline: none;
+    }
+    
+    #node-projects-designer-search-container > div > #node-projects-designer-search-start {
+      height:22px;
+      border: none;
+      background-color: white;
+      font-size: 13px;
+    }
+    
+    #node-projects-designer-search-container > div > #node-projects-designer-search-start:hover {
+      background-color: #D3D3D3;
+      transition: 0.9s;
+      border-radius: 2px;
+    }
+    
+    #node-projects-designer-search-container > #node-projects-designer-search-close {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      border: none;
+      background-color: transparent;
+    }
+    
+    #node-projects-designer-search-container > span {
+      font-family:sans-serif;
+      font-size: 12px;
+    }
+    
+    #node-projects-designer-search-container > #node-projects-designer-search-close::before,
+    #node-projects-designer-search-container > #node-projects-designer-search-close::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60%;
+      background-color: black;
+      height: 1px;
+    }
+    
+    #node-projects-designer-search-container > #node-projects-designer-search-close::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+    
+    #node-projects-designer-search-container > #node-projects-designer-search-close::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
   `;
 
   static override readonly template = html`
@@ -192,6 +271,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         </div>
       </div>
       <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;  margin: 0 !important; padding: 0 !important; border: none !important;"></div>
+      </div>
+      
+      <div id="node-projects-designer-search-container" style="display: none;">
+        <div id="node-projects-designer-search-bar">
+          <input id="node-projects-designer-search-input">
+          <button id="node-projects-designer-search-start">&darr;</button>
+        </div>
+        <span id="node-projects-designer-search-result">0 selected</span>
+        <button id="node-projects-designer-search-close"></button>
       </div>
     </div>`;
 
@@ -214,6 +302,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._onDblClick = this._onDblClick.bind(this);
     this._pointerEventHandler = this._pointerEventHandler.bind(this);
 
+    this._getDomElement<HTMLElement>('node-projects-designer-search-close').onclick = () => this._searchHideOverlay();
+    this._getDomElement<HTMLElement>('node-projects-designer-search-start').onclick = () => this._searchRun();
+    this._getDomElement<HTMLElement>('node-projects-designer-search-container').onkeydown = (event) => {
+      if (event.key === "Enter")
+        this._searchRun();
+    };
     this.clickOverlay.oncontextmenu = (e) => e.preventDefault();
   }
 
@@ -850,6 +944,33 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);
   }
 
+  private _searchShowOverlay() {
+    let divElement = this._getDomElement('node-projects-designer-search-container') as HTMLDivElement;
+    divElement.style.display = '';
+    this._getDomElement<HTMLInputElement>('node-projects-designer-search-input').focus();
+  }
+  private _searchHideOverlay() {
+    let divElement = this._getDomElement('node-projects-designer-search-container') as HTMLDivElement;
+    divElement.style.display = 'none';
+  }
+
+  private _searchRun() {
+    let input = this._getDomElement<HTMLInputElement>('node-projects-designer-search-input');
+    this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = "0 selected";
+    if (input.value != "") {
+      let selectedElements = this.shadowRoot.querySelectorAll(input.value);
+      let designItems = [];
+      for (let i = 0; i <= selectedElements.length; i++) {
+        if (this._canvasContainer.contains(selectedElements[i]))
+          designItems.push(DesignItem.GetDesignItem(selectedElements[i]));
+      }
+      if (designItems.length > 0) {
+        this.instanceServiceContainer.selectionService.setSelectedElements(designItems);
+        this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = designItems.length.toString() + " selected";
+      }
+    }
+  }
+
   private onKeyUp(event: KeyboardEvent) {
     if (event.composedPath().indexOf(this.eatEvents) >= 0)
       return;
@@ -875,6 +996,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.executeCommand({ type: CommandType.paste, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'x')
       this.executeCommand({ type: CommandType.cut, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if ((event.ctrlKey || event.metaKey) && event.key === 'f')
+      this._searchShowOverlay();
     else {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (!primarySelection) {
