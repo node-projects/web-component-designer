@@ -17,7 +17,7 @@
     "construct-style-sheets-polyfill": "^3.1.0"
   },
   "devDependencies": {
-    "@adobe/css-tools": "^4.3.0-beta.2",
+    "@adobe/css-tools": "4.3.0-beta.1",
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^6.1.5",
     "@papyrs/stylo": "^0.0.42",
