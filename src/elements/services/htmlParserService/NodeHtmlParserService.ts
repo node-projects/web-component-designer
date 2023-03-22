@@ -16,14 +16,14 @@ export class NodeHtmlParserService implements IHtmlParserService {
     this._parserUrl = parserUrl;
   }
 
-  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
+  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
     //@ts-ignore
     let parser: parser = await import(this._parserUrl);
     const parsed = parser.parse(html, { comment: true });
 
     let designItems: IDesignItem[] = [];
     for (let p of parsed.childNodes) {
-      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null);
+      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null, parseSnippet);
 
       if (di != null)
         designItems.push(di)
@@ -35,7 +35,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
   private _parseDiv = document.createElement("div");
 
-  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string): IDesignItem {
+  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string, snippet: boolean): IDesignItem {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
       let element: Element;
@@ -50,7 +50,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
         manualCreatedElement = true;
       }
       designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
-      if (instanceServiceContainer.designItemDocumentPositionService)
+      if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
 
       let style = '';
@@ -81,19 +81,19 @@ export class NodeHtmlParserService implements IHtmlParserService {
       (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
 
       for (let c of item.childNodes) {
-        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null);
+        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null, snippet);
         designItem._insertChildInternal(di);
       }
     } else if (item.nodeType == 3) {
       this._parseDiv.innerHTML = item.rawText;
       let element = this._parseDiv.childNodes[0];
       designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
-      if (instanceServiceContainer.designItemDocumentPositionService)
+      if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
     } else if (item.nodeType == 8) {
       let element = document.createComment(item.rawText);
       designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
-      if (instanceServiceContainer.designItemDocumentPositionService)
+      if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
     }
     return designItem;

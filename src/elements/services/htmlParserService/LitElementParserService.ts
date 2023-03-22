@@ -19,7 +19,7 @@ export class LitElementParserService implements IHtmlParserService {
     this._esprimaUrl = esprimaUrl;
   }
 
-  async parse(module: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem[]> {
+  async parse(module: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
     let esprima: typeof import('esprima-next/dist/esm/esprima') = await import(this._esprimaUrl);
 
     const parsedModule = esprima.parseModule(module);

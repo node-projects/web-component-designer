@@ -5,16 +5,12 @@ import { IDesignItemDocumentPositionService } from "./IDesignItemDocumentPositio
 
 export class DesignItemDocumentPositionService implements IDesignItemDocumentPositionService {
 
-    private _designItemsAssignmentList?: Map<IDesignItem, IStringPosition> = new Map();
+    private _designItemsAssignmentList?: WeakMap<IDesignItem, IStringPosition> = new WeakMap();
 
     constructor(designerCanvas: IDesignerCanvas) { }
 
     setPosition(designItem: IDesignItem, position: IStringPosition) {
         this._designItemsAssignmentList.set(designItem, position);
-    }
-
-    clearPositions() {
-        this._designItemsAssignmentList.clear();
     }
 
     getPosition(designItem: IDesignItem): IStringPosition {

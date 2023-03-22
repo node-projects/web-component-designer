@@ -33,13 +33,13 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       indentedTextWriter.writeNewline();
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, updatePositions: boolean = false) {
     for (const d of designItems) {
-      this.internalWrite(indentedTextWriter, d, options);
+      this.internalWrite(indentedTextWriter, d, options, updatePositions);
     }
   }
 
-  private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
+  private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, options: IHtmlWriterOptions, updatePositions: boolean) {
     let start = indentedTextWriter.position;
     let end = indentedTextWriter.position;
 
@@ -78,7 +78,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
             indentedTextWriter.levelRaise();
           }
           for (const c of children) {
-            this.internalWrite(indentedTextWriter, c, options);
+            this.internalWrite(indentedTextWriter, c, options, updatePositions);
             let childSingleTextNode = c.childCount === 1 && c.firstChild.nodeType === NodeType.TextNode;
             if (childSingleTextNode)
               if (!indentedTextWriter.isLastCharNewline())
@@ -105,7 +105,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
         this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
 
-    if (designItem.instanceServiceContainer.designItemDocumentPositionService) {
+    if (updatePositions && designItem.instanceServiceContainer.designItemDocumentPositionService) {
       designItem.instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: start, length: end - start });
     }
   }

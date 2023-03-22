@@ -2,14 +2,13 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { IHtmlWriterService } from './IHtmlWriterService.js';
 import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { IStringPosition } from './IStringPosition.js';
 import { CssCombiner } from '../../helper/CssCombiner.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ITextWriter } from '../../helper/ITextWriter.js';
 
 export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
-  abstract write(indentedTextWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>);
+  abstract write(indentedTextWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, updatePositions?: boolean);
 
   writeAttributes(indentedTextWriter: ITextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
     if (designItem.hasAttributes) {

@@ -5,7 +5,6 @@ import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 import { CssCombiner } from '../../helper/CssCombiner.js';
 import { NodeType } from '../../item/NodeType.js';
-import { IStringPosition } from './IStringPosition.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
 
@@ -19,7 +18,6 @@ export interface IWriteContext {
   indentedTextWriter: IndentedTextWriter;
   lastElementDisplayType: ElementDisplayType | null;
   containerDisplayType: ElementContainerType;
-  designItemsAssignmentList?: Map<IDesignItem, IStringPosition>;
 }
 
 export class SimpleHtmlWriterService implements IHtmlWriterService {
@@ -96,22 +94,16 @@ export class SimpleHtmlWriterService implements IHtmlWriterService {
   }
 
   private _writeInternal(writeContext: IWriteContext, designItem: IDesignItem) {
-    const start = writeContext.indentedTextWriter.position;
-
     if (designItem.nodeType === NodeType.TextNode)
       this._writeTextNode(writeContext, designItem);
     else if (designItem.nodeType === NodeType.Comment)
       this._writeCommentNode(writeContext, designItem);
     else if (designItem.nodeType === NodeType.Element)
       this._writeElementNode(writeContext, designItem);
-
-    if (writeContext.designItemsAssignmentList) {
-      writeContext.designItemsAssignmentList.set(designItem, { start: start, length: writeContext.indentedTextWriter.position - start - 1 });
-    }
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
-    const context: IWriteContext = { indentedTextWriter, options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block, designItemsAssignmentList };
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
+    const context: IWriteContext = { indentedTextWriter, options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block };
     this._writeDesignItemList(ElementDisplayType.inline, context, designItems);
   }
 }

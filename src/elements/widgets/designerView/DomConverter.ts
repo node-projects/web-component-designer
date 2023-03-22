@@ -40,10 +40,10 @@ export class DomConverter {
       tag === 'wbr';
   }
 
-  public static ConvertToString(designItems: IDesignItem[], beautifyOutput?: boolean) {
+  public static ConvertToString(designItems: IDesignItem[], beautifyOutput?: boolean, updatePositions:boolean = false) {
     let itw = beautifyOutput !== false ? new IndentedTextWriter() : new SimpleTextWriter();
     let options: IHtmlWriterOptions = { beautifyOutput: beautifyOutput !== false, writeDesignerProperties: true, compressCssToShorthandProperties: true, parseJsonInAttributes: true, jsonWriteMode: 'beauty' };
-    designItems[0].serviceContainer.htmlWriterService.write(itw, designItems, true, options);
+    designItems[0].serviceContainer.htmlWriterService.write(itw, designItems, true, options, updatePositions);
     return itw.getString();
   }
 }

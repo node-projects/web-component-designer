@@ -2,11 +2,10 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { IHtmlWriterService } from './IHtmlWriterService.js';
 import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
-import { IStringPosition } from './IStringPosition.js';
 
 //needs InternalBindinsgStorrageService -> keeps bindings
 export class LitTsElementWriterService implements IHtmlWriterService {
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, designItemsAssignmentList?: Map<IDesignItem, IStringPosition>) {
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
     throw new Error('Method not implemented.');
   }
 

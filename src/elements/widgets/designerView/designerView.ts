@@ -344,8 +344,10 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   public getHTML() {
     //this.instanceServiceContainer.selectionService.setSelectedElements(null);
-    if (this._designerCanvas.rootDesignItem.childCount > 0)
-      return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()));
+    if (this._designerCanvas.rootDesignItem.childCount > 0) {
+      return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), true, true);
+     
+    }
     return '';
   }
 
@@ -358,7 +360,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       this._designerCanvas.rootDesignItem.clearChildren();
     }
     else {
-      const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer);
+      const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer, false);
       if (disableUndo) {
         this._designerCanvas._internalSetDesignItems(designItems);
       } else {

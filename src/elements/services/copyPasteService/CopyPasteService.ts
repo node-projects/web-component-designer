@@ -33,6 +33,6 @@ export class CopyPasteService implements ICopyPasteService {
       html = await getTextFromClipboard();
     }
     const parserService = serviceContainer.htmlParserService;
-    return [await parserService.parse(html, serviceContainer, instanceServiceContainer), positions];
+    return [await parserService.parse(html, serviceContainer, instanceServiceContainer, true), positions];
   }
 }
