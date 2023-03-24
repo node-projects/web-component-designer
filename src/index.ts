@@ -74,6 +74,7 @@ export * from "./elements/services/htmlWriterService/FormatingHtmlWriterService.
 export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/LitTsElementWriterService.js";
 
+export * from "./elements/services/htmlParserService/BaseCustomWebcomponentParserService.js";
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
 export * from "./elements/services/htmlParserService/LitElementParserService.js";
