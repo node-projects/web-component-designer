@@ -4,7 +4,7 @@ import { IHtmlParserService } from './IHtmlParserService.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import type ts from 'typescript'
 
-function* findAllNodesOfKind(node: ts.Node, kind: number) {
+function* findAllNodesOfKind(node: ts.Node, kind: ts.SyntaxKind) {
   if (node.kind == kind)
     yield node;
   for (const c of node.getChildren())
@@ -23,7 +23,8 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
 
     let htmlCode = "";
     let cssStyle = "";
-    const nodes = findAllNodesOfKind(sourceFile, 212);
+    //@ts-ignore
+    const nodes = findAllNodesOfKind(sourceFile, ts.SyntaxKind.TaggedTemplateExpression);
     for (let nd of nodes) {
       if (nd.tag.escapedText == 'html' && nd.parent.name.escapedText == "template")
         htmlCode = nd.template.rawText;
