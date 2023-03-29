@@ -78,6 +78,7 @@ export * from "./elements/services/htmlParserService/BaseCustomWebcomponentParse
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
 export * from "./elements/services/htmlParserService/LitElementParserService.js";
+export * from "./elements/services/htmlParserService/VueParserService.js";
 export type { IHtmlParserService } from "./elements/services/htmlParserService/IHtmlParserService.js";
 
 export type { IIntializationService } from "./elements/services/initializationService/IIntializationService.js";
