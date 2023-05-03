@@ -19,7 +19,23 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   public code: string;
   public onTextChanged = new TypedEvent<string>();
+  public language: string = 'html';
+  private _theme: string = 'webComponentDesignerTheme';
+  public get theme(): string {
+    return this._theme;
+  }
+  public set theme(value: string) {
+    this._theme = value;
+    //@ts-ignore
+    monaco.editor.setTheme(value);
+  }
 
+  static readonly properties= {
+    code: String,
+    language: String,
+    theme: String
+  }
+  
   //@ts-ignore
   private _monacoEditor: monaco.editor.IStandaloneCodeEditor;
   private _editor: HTMLDivElement;
@@ -102,7 +118,14 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     })
   }
 
+  constructor() {
+    super();
+    this._restoreCachedInititalValues();
+  }
+
   async ready() {
+    this._parseAttributesToProperties();
+
     let style: { default: CSSStyleSheet };
 
     //@ts-ignore
@@ -128,7 +151,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           //wordWrap: 'wordWrapColumn',
           fontLigatures: '',
           value: this.code,
-          language: 'html',
+          language: this.language,
           minimap: {
             size: 'fill'
           },
@@ -178,8 +201,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   update(code) {
     this.code = code;
     if (this._monacoEditor) {
-      if (this._monacoEditor)
+      if (this._monacoEditor)      
         this._monacoEditor.setValue(code);
+        //@ts-ignore
+        monaco.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
+         //@ts-ignore
+        monaco.editor.setTheme(this.theme);
     }
   }
 

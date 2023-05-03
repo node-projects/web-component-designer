@@ -78,6 +78,8 @@ export class NodeHtmlParserService implements IHtmlParserService {
         }
       }
 
+      if (!designItem.lockAtDesignTime && (<HTMLElement>element).style)
+        (<HTMLElement>element).style.pointerEvents = 'auto';
       (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
 
       for (let c of item.childNodes) {
