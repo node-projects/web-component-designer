@@ -30,12 +30,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     monaco.editor.setTheme(value);
   }
 
-  static readonly properties= {
+  static readonly properties = {
     code: String,
     language: String,
     theme: String
   }
-  
+
   //@ts-ignore
   private _monacoEditor: monaco.editor.IStandaloneCodeEditor;
   private _editor: HTMLDivElement;
@@ -165,6 +165,9 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           }
         });
 
+        //@ts-ignore
+        monaco.editor.setTheme(value);
+
         let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
           this.onTextChanged.emit(this._monacoEditor.getValue())
         });
@@ -201,12 +204,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   update(code) {
     this.code = code;
     if (this._monacoEditor) {
-      if (this._monacoEditor)      
+      if (this._monacoEditor)
         this._monacoEditor.setValue(code);
-        //@ts-ignore
-        monaco.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
-         //@ts-ignore
-        monaco.editor.setTheme(this.theme);
+      //@ts-ignore
+      monaco.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
+      //@ts-ignore
+      monaco.editor.setTheme(this.theme);
     }
   }
 
