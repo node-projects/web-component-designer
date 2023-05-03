@@ -166,7 +166,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         });
 
         //@ts-ignore
-        monaco.editor.setTheme(value);
+        monaco.editor.setTheme(this.theme);
 
         let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
           this.onTextChanged.emit(this._monacoEditor.getValue())
