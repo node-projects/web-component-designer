@@ -1,5 +1,5 @@
 export async function copyTextToClipboard(text) {
-    copyToClipboard(['text/plain', text]);
+    copyToClipboard([['text/plain', text]]);
 }
 
 //used, so you could copy internal if you have no clipboard access
