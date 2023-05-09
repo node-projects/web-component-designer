@@ -65,7 +65,7 @@ export function getParentElementIncludingSlots(element: Element): Element {
   return element.parentElement;
 }
 
-export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element) {
+export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element, zoom: number) {
   let offsetLeft = 0;
   let offsetTop = 0;
 
@@ -77,8 +77,8 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       const bcEl = element.getBoundingClientRect();
       const bcPar = element.parentElement.getBoundingClientRect();
       element.style.transform = t;
-      offsetLeft += bcEl.left - bcPar.left;
-      offsetTop += bcEl.top - bcPar.top;
+      offsetLeft += (bcEl.left - bcPar.left) / zoom;
+      offsetTop += (bcEl.top - bcPar.top) / zoom;
       element = element.parentElement;
     } else if (element instanceof SVGGraphicsElement) {
       let bbox = element.getBBox();

@@ -111,7 +111,7 @@ export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransfo
     0
   )
 
-  const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element);
+  const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element, designerCanvas.zoomFactor);
 
   const transformOriginAbsolutRelatedToWindowWithoutAnyTransformation = new DOMPoint(p0Offsets.offsetLeft - top0.x, p0Offsets.offsetTop - top0.y);
   const designerCanvasNormalizedTransformedOrigin = new DOMPoint(transformOriginAbsolutRelatedToWindowWithoutAnyTransformation.x - designerCanvas.containerBoundingRect.x, transformOriginAbsolutRelatedToWindowWithoutAnyTransformation.y - designerCanvas.containerBoundingRect.y);
@@ -149,8 +149,8 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   while (actualElement != canvas) {
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
     const parentElementTransformOrigin: DOMPoint = new DOMPoint(
-      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetLeft - designerCanvas.outerRect.x + parseFloat(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[0]),
-      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement).offsetTop - designerCanvas.outerRect.y + parseFloat(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]),
+      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement, designerCanvas.zoomFactor).offsetLeft - designerCanvas.outerRect.x + parseFloat(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[0]),
+      getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement, designerCanvas.zoomFactor).offsetTop - designerCanvas.outerRect.y + parseFloat(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]),
     )
     if (actualElement == element) {
       parentElementTransformOrigin.x -= extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x;
@@ -195,7 +195,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   const bottomright = 3;
   const intUntransformedCornerPointsOffset = untransformedCornerPointsOffset ? { x: untransformedCornerPointsOffset.x / designerCanvas.scaleFactor, y: untransformedCornerPointsOffset.y / designerCanvas.scaleFactor } : { x: 0, y: 0 };
 
-  const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element);
+  const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element, designerCanvas.zoomFactor);
   const p0OffsetsRelatedToCanvas = DOMPoint.fromPoint(
     {
       x: p0Offsets.offsetLeft - designerCanvas.containerBoundingRect.left,
@@ -240,7 +240,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
     }
   )
 
-  const designerCanvasNormalizedTransformOrigin = getByParentsTransformedPointRelatedToCanvas(element, new DOMPoint(getElementsWindowOffsetWithoutSelfAndParentTransformations(element).offsetLeft - designerCanvas.outerRect.left + parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]), getElementsWindowOffsetWithoutSelfAndParentTransformations(element).offsetTop - designerCanvas.outerRect.top + parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1])), designerCanvas);
+  const designerCanvasNormalizedTransformOrigin = getByParentsTransformedPointRelatedToCanvas(element, new DOMPoint(getElementsWindowOffsetWithoutSelfAndParentTransformations(element, designerCanvas.zoomFactor).offsetLeft - designerCanvas.outerRect.left + parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]), getElementsWindowOffsetWithoutSelfAndParentTransformations(element, designerCanvas.zoomFactor).offsetTop - designerCanvas.outerRect.top + parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1])), designerCanvas);
 
   let top0 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topleft].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topleft].y));
   let top1 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topright].y));
