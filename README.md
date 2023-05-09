@@ -7,6 +7,8 @@ Meanwhile polymer is not used anymore.
 
 ![image](https://user-images.githubusercontent.com/364896/117482820-358e2d80-af65-11eb-97fd-9d15ebf1966f.png)
 
+There is also a Preview VS-Code Addon using the Designer: https://github.com/node-projects/vs-code-designer-addon
+
 ## NPM Package
 
 https://www.npmjs.com/package/@node-projects/web-component-designer
