@@ -7,6 +7,7 @@ import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransfo
 import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
+import { straightenLine } from '../../helper/PathDataPolyfill.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -105,13 +106,16 @@ export class DefaultPlacementService implements IPlacementService {
     //TODO:, this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
+    if (event.shiftKey) {
+      track = straightenLine({ x: 0, y: 0 }, track);
+    }
     let filteredItems = filterChildPlaceItems(items);
-    for (const designItem of filteredItems) {     
+    for (const designItem of filteredItems) {
       const canvas = designItem.element.closest('#node-projects-designer-canvas-canvas');
       let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(<HTMLElement>designItem.element.parentElement, <HTMLElement>canvas, true);
 
       let transformMatrixParentTransformsCompensated = null;
-      if (originalElementAndAllAncestorsMultipliedMatrix){
+      if (originalElementAndAllAncestorsMultipliedMatrix) {
         transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0).matrixTransform(originalElementAndAllAncestorsMultipliedMatrix.inverse());
       } else {
         transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0);
@@ -143,8 +147,8 @@ export class DefaultPlacementService implements IPlacementService {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
       const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.getStyle('transform') ?? ''));
       (<HTMLElement>designItem.element).style.transform = designItem.getStyle('transform') ?? '';
-      let track = {x: translation.x, y: translation.y};
-      placeDesignItem(container, designItem, {x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y}, 'position');
+      let track = { x: translation.x, y: translation.y };
+      placeDesignItem(container, designItem, { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y }, 'position');
     }
 
     for (const item of items) {
