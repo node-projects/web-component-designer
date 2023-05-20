@@ -179,7 +179,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
   drawText(overlaySource: string, text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {
     if (!textEl) {
       textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      //text.setAttribute("overlay-source", overlaySource);
+      textEl.setAttribute("overlay-source", overlaySource);
       this.addOverlay(textEl, overlayLayer);
     }
     textEl.setAttribute('x', <string><any>x);
@@ -213,6 +213,8 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
       this.addOverlay(textEl2, overlayLayer);
       filter.setAttribute("overlay-source", overlaySource);
       flood.setAttribute("overlay-source", overlaySource);
+      textEl1.setAttribute("overlay-source", overlaySource);
+      textEl2.setAttribute("overlay-source", overlaySource);
       existingEls = [filter, flood, textEl1, textEl2]
     }
     existingEls[2].setAttribute('x', <string><any>x);
