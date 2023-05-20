@@ -26,7 +26,7 @@ export class MagicWandSelectorTool implements ITool {
         this._path.style.strokeDasharray = '' + (2 / designerCanvas.scaleFactor);
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
         this._path.setAttribute("D", this._pathD);
-        designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
+        designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foregorund);
         break;
 
       case EventNames.PointerMove:

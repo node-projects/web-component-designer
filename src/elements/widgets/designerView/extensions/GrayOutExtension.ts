@@ -21,8 +21,7 @@ export class GrayOutExtension extends AbstractExtension {
     if (!this._path) {
       this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       this._path.setAttribute('class', 'svg-gray-out');
-      this.overlayLayerView.addOverlay(this._path, OverlayLayer.Background);
-      this.overlays.push(this._path);
+      this._addOverlay(this._path, OverlayLayer.Background);
     }
     let normalizedRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
 

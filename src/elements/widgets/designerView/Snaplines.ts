@@ -161,7 +161,7 @@ export class Snaplines {
           line.setAttribute('y1', <string><any>(minY));
           line.setAttribute('y2', <string><any>(maxY));
           line.setAttribute('class', 'svg-snapline');
-          this._overlayLayerView.addOverlay(line, overlayLayer);
+          this._overlayLayerView.addOverlay(this.constructor.name, line, overlayLayer);
         }
 
         if (r.x - this._outerRect.left + r.width == position.x || (size && r.x - this._outerRect.left + r.width == position.x + size.width)) {
@@ -171,7 +171,7 @@ export class Snaplines {
           line.setAttribute('y1', <string><any>(minY));
           line.setAttribute('y2', <string><any>(maxY));
           line.setAttribute('class', 'svg-snapline');
-          this._overlayLayerView.addOverlay(line, overlayLayer);
+          this._overlayLayerView.addOverlay(this.constructor.name, line, overlayLayer);
         }
 
         if (size && r.x - this._outerRect.left + r.width / 2 == position.x + size.width / 2) {
@@ -181,7 +181,7 @@ export class Snaplines {
           line.setAttribute('y1', <string><any>(minY));
           line.setAttribute('y2', <string><any>(maxY));
           line.setAttribute('class', 'svg-snapline');
-          this._overlayLayerView.addOverlay(line, overlayLayer);
+          this._overlayLayerView.addOverlay(this.constructor.name, line, overlayLayer);
         }
 
         let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -190,7 +190,7 @@ export class Snaplines {
         rect.setAttribute('y', <string><any>(r.y - this._outerRect.y));
         rect.setAttribute('height', <string><any>(r.height));
         rect.setAttribute('class', 'svg-snapline');
-        this._overlayLayerView.addOverlay(rect, overlayLayer);
+        this._overlayLayerView.addOverlay(this.constructor.name, rect, overlayLayer);
       }
     }
 
@@ -210,7 +210,7 @@ export class Snaplines {
           line.setAttribute('y1', <string><any>(r.y - this._outerRect.y));
           line.setAttribute('y2', <string><any>(r.y - this._outerRect.y));
           line.setAttribute('class', 'svg-snapline');
-          this._overlayLayerView.addOverlay(line, overlayLayer);
+          this._overlayLayerView.addOverlay(this.constructor.name, line, overlayLayer);
         }
 
         if (r.y - this._outerRect.top + r.height == position.y || (size && r.y - this._outerRect.top + r.height == position.y + size.height)) {
@@ -220,7 +220,7 @@ export class Snaplines {
           line.setAttribute('y1', <string><any>(r.y - this._outerRect.y + r.height));
           line.setAttribute('y2', <string><any>(r.y - this._outerRect.y + r.height));
           line.setAttribute('class', 'svg-snapline');
-          this._overlayLayerView.addOverlay(line, overlayLayer);
+          this._overlayLayerView.addOverlay(this.constructor.name, line, overlayLayer);
         }
 
         if (size && r.y - this._outerRect.top + r.height / 2 == position.y + size.height / 2) {
@@ -230,7 +230,7 @@ export class Snaplines {
           line.setAttribute('y1', <string><any>(r.y - this._outerRect.y + r.height / 2));
           line.setAttribute('y2', <string><any>(r.y - this._outerRect.y + r.height / 2));
           line.setAttribute('class', 'svg-snapline');
-          this._overlayLayerView.addOverlay(line, overlayLayer);
+          this._overlayLayerView.addOverlay(this.constructor.name, line, overlayLayer);
         }
 
         let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -239,7 +239,7 @@ export class Snaplines {
         rect.setAttribute('y', <string><any>(r.y - this._outerRect.y));
         rect.setAttribute('height', <string><any>(r.height));
         rect.setAttribute('class', 'svg-snapline');
-        this._overlayLayerView.addOverlay(rect, overlayLayer);
+        this._overlayLayerView.addOverlay(this.constructor.name, rect, overlayLayer);
       }
     }
   }

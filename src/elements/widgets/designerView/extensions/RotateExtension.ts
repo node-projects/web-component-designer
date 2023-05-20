@@ -54,8 +54,7 @@ export class RotateExtension extends AbstractExtension {
 
       g.setAttribute('class', 'svg-primary-rotate');
       g.setAttribute('transform', 'translate(' + rotateIconPosition.x + ',' + rotateIconPosition.y + ') scale(' + 1 / this.designerCanvas.scaleFactor + ')');
-      this.overlayLayerView.addOverlay(g);
-      this.overlays.push(g);
+      this._addOverlay(g);
       return g;
     } else {
       oldRotateIcon.setAttribute('transform', 'translate(' + rotateIconPosition.x + ',' + rotateIconPosition.y + ') scale(' + 1 / this.designerCanvas.scaleFactor + ')');

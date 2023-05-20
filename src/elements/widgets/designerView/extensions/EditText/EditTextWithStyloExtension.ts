@@ -47,8 +47,7 @@ export class EditTextWithStyloExtension extends AbstractExtension implements han
     foreignObject.setAttribute('width', '100%');
     foreignObject.setAttribute('height', '100%');
     foreignObject.appendChild(elements)
-    this.overlayLayerView.addOverlay(foreignObject, OverlayLayer.Foregorund);
-    this.overlays.push(foreignObject);
+    this._addOverlay(foreignObject, OverlayLayer.Foregorund);
 
     this._drawClickOverlayRects();
     this._rect1.addEventListener('pointerdown', (e) => this._clickOutside(e));

@@ -73,7 +73,8 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     this.shadowRoot.adoptedStyleSheets = styles;
   }
 
-  public addOverlay(element: SVGGraphicsElement, overlayLayer: OverlayLayer = OverlayLayer.Normal) {
+  public addOverlay(overlaySource: string, element: SVGGraphicsElement, overlayLayer: OverlayLayer = OverlayLayer.Normal) {
+    element.setAttribute("overlay-source", overlaySource);
     switch (overlayLayer) {
       case OverlayLayer.Background:
         this._gBackground.appendChild(element);
@@ -119,10 +120,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return this.shadowRoot.elementFromPoint(x, y);
   }
 
-  drawLine(x1: number, y1: number, x2: number, y2: number, className?: string, line?: SVGLineElement, overlayLayer?: OverlayLayer) {
+  drawLine(overlaySource: string, x1: number, y1: number, x2: number, y2: number, className?: string, line?: SVGLineElement, overlayLayer?: OverlayLayer) {
     if (!line) {
       line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      this.addOverlay(line, overlayLayer);
+      this.addOverlay(overlaySource, line, overlayLayer);
     }
     line.setAttribute('x1', <string><any>x1);
     line.setAttribute('y1', <string><any>y1);
@@ -134,10 +135,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return line;
   }
 
-  drawCircle(x: number, y: number, radius: number, className?: string, circle?: SVGCircleElement, overlayLayer?: OverlayLayer) {
+  drawCircle(overlaySource: string, x: number, y: number, radius: number, className?: string, circle?: SVGCircleElement, overlayLayer?: OverlayLayer) {
     if (!circle) {
       circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      this.addOverlay(circle, overlayLayer);
+      this.addOverlay(overlaySource, circle, overlayLayer);
     }
     circle.setAttribute('cx', <string><any>x);
     circle.setAttribute('cy', <string><any>y);
@@ -147,10 +148,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return circle;
   }
 
-  drawRect(x: number, y: number, w: number, h: number, className?: string, rect?: SVGRectElement, overlayLayer?: OverlayLayer) {
+  drawRect(overlaySource: string, x: number, y: number, w: number, h: number, className?: string, rect?: SVGRectElement, overlayLayer?: OverlayLayer) {
     if (!rect) {
       rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      this.addOverlay(rect, overlayLayer);
+      this.addOverlay(overlaySource, rect, overlayLayer);
     }
     rect.setAttribute('x', <string><any>x);
     rect.setAttribute('y', <string><any>y);
@@ -161,10 +162,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return rect;
   }
 
-  drawPath(data: string, className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
+  drawPath(overlaySource: string, data: string, className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
     if (!path) {
       path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      this.addOverlay(path, overlayLayer);
+      this.addOverlay(overlaySource, path, overlayLayer);
     }
     path.setAttribute('d', data);
     if (className)
@@ -172,10 +173,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return path;
   }
 
-  drawText(text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {
+  drawText(overlaySource: string, text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {
     if (!textEl) {
       textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      this.addOverlay(textEl, overlayLayer);
+      this.addOverlay(overlaySource, textEl, overlayLayer);
     }
     textEl.setAttribute('x', <string><any>x);
     textEl.setAttribute('y', <string><any>y);
@@ -185,7 +186,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return textEl;
   }
 
-  drawTextWithBackground(text: string, x: number, y: number, backgroundColor: string, className?: string, existingEls?: [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement], overlayLayer?: OverlayLayer): [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement] {
+  drawTextWithBackground(overlaySource: string, text: string, x: number, y: number, backgroundColor: string, className?: string, existingEls?: [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement], overlayLayer?: OverlayLayer): [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement] {
     if (!existingEls) {
       let filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
       filter.setAttribute("x", "0");
@@ -204,8 +205,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
       let textEl1 = document.createElementNS("http://www.w3.org/2000/svg", "text");
       textEl1.setAttribute("filter", "url(#solid_" + this._id + ")");
       let textEl2 = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      this.addOverlay(textEl1, overlayLayer);
-      this.addOverlay(textEl2, overlayLayer);
+      this.addOverlay(overlaySource, textEl1, overlayLayer);
+      this.addOverlay(overlaySource, textEl2, overlayLayer);
+      filter.setAttribute("overlay-source", overlaySource);
+      flood.setAttribute("overlay-source", overlaySource);
       existingEls = [filter, flood, textEl1, textEl2]
     }
     existingEls[2].setAttribute('x', <string><any>x);
