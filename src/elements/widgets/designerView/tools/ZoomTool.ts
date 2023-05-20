@@ -35,7 +35,7 @@ export class ZoomTool implements ITool {
         this._rect.setAttribute('height', <string><any>0);
         this._rect.style.strokeWidth = '' + (1 / designerCanvas.scaleFactor);
         this._rect.style.strokeDasharray = '' + (2 / designerCanvas.scaleFactor);
-        designerCanvas.overlayLayer.addOverlay(this._rect, OverlayLayer.Foregorund);
+        designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._rect, OverlayLayer.Foregorund);
         break;
 
       case EventNames.PointerMove:

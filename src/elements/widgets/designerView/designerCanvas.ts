@@ -25,7 +25,6 @@ import { dataURItoBlob, exportData, sleep } from '../../helper/Helper.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
 import { IPoint } from '../../../interfaces/IPoint.js';
-import { OverlayLayer } from './extensions/OverlayLayer.js';
 import { OverlayLayerView } from './overlayLayerView.js';
 import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension.js';
 import { IRect } from "../../../interfaces/IRect.js";
@@ -1248,10 +1247,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _fillCalculationrects() {
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
     this.outerRect = this._outercanvas2.getBoundingClientRect();
-  }
-
-  public addOverlay(element: SVGGraphicsElement, overlayLayer: OverlayLayer = OverlayLayer.Normal) {
-    this.overlayLayer.addOverlay(element, overlayLayer);
   }
 
   public removeOverlay(element: SVGGraphicsElement) {

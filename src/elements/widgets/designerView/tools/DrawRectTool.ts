@@ -50,7 +50,7 @@ export class DrawRectTool implements ITool {
         this._path.setAttribute("width", "0");
         this._path.setAttribute("height", "0");
 
-        designerCanvas.overlayLayer.addOverlay(this._path, OverlayLayer.Foregorund);
+        designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foregorund);
         break;
 
 

@@ -29,6 +29,11 @@ export abstract class AbstractExtensionBase {
     this.overlays = [];
   }
 
+  protected _addOverlay(element: SVGGraphicsElement, overlayLayer: OverlayLayer = OverlayLayer.Normal) {
+    this.overlayLayerView.addOverlay(this.constructor.name, element, overlayLayer);
+    this.overlays.push(element);
+  }
+
   protected _drawLine(x1: number, y1: number, x2: number, y2: number, className?: string, line?: SVGLineElement, overlayLayer?: OverlayLayer) {
     const newLine = this.overlayLayerView.drawLine(this.constructor.name, x1, y1, x2, y2, className, line, overlayLayer);
     if (!line) {
