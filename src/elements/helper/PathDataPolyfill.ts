@@ -1108,39 +1108,44 @@ export declare type PathDataQ = { type: 'Q' | 'q', values: [x1: number, y1: numb
 export declare type PathDataA = { type: 'A' | 'a', values: [rx: number, ry: number, ang: number, flag1: 0 | 1, flag2: 0 | 1, x: number, y: number] }
 export declare type PathData = { type: string } & (PathDataM | PathDataL | PathDataH | PathDataV | PathDataZ | PathDataC | PathDataS | PathDataQ | PathDataT | PathDataA)[];
 
-export function straightenLine(p1: IPoint, p2: IPoint): IPoint {
+export function straightenLine(p1: IPoint, p2: IPoint, only90Steps = false): IPoint {
   let newP: IPoint;
 
   let alpha = calculateAlpha(p1, p2);
   let normLength;
 
-  if ((alpha >= 337.5 && alpha < 360 || alpha >= 0 && alpha < 22.5)) { // 0
-    newP = { x: p2.x, y: p1.y }
-  }
-  else if ((alpha >= 22.5 && alpha < 67.5)) {   // 45
-    normLength = calculateNormLegth(p1, p2);
-    newP = { x: p1.x + normLength, y: p1.y - normLength }
-  }
-  else if ((alpha >= 67.5 && alpha < 112.5)) {  // 90
-    newP = { x: p1.x, y: p2.y }
-  }
-  else if ((alpha >= 112.5 && alpha < 157.5)) { // 135
-    normLength = calculateNormLegth(p1, p2);
-    newP = { x: p1.x - normLength, y: p1.y - normLength }
-  }
-  else if ((alpha >= 157.5 && alpha < 202.5)) { // 180
-    newP = { x: p2.x, y: p1.y }
-  }
-  else if ((alpha >= 202.5 && alpha < 247.5)) { // 225
-    normLength = calculateNormLegth(p1, p2);
-    newP = { x: p1.x - normLength, y: p1.y + normLength }
-  }
-  else if ((alpha >= 247.5 && alpha < 292.5)) { // 270
-    newP = { x: p1.x, y: p2.y }
-  }
-  else if ((alpha >= 292.5 && alpha < 337.5)) { // 315
-    normLength = calculateNormLegth(p1, p2);
-    newP = { x: p1.x + normLength, y: p1.y + normLength }
+  if (only90Steps) {
+    if (alpha >= 315 && alpha < 360 || alpha >= 0 && alpha < 45) { // 0
+      newP = { x: p2.x, y: p1.y }
+    } else if (alpha >= 45 && alpha < 135) {  // 90
+      newP = { x: p1.x, y: p2.y }
+    } else if (alpha >= 135 && alpha < 225) { // 180
+      newP = { x: p2.x, y: p1.y }
+    } else if (alpha >= 225 && alpha < 315) { // 270
+      newP = { x: p1.x, y: p2.y }
+    }
+  } else {
+    if (alpha >= 337.5 && alpha < 360 || alpha >= 0 && alpha < 22.5) { // 0
+      newP = { x: p2.x, y: p1.y }
+    } else if (alpha >= 22.5 && alpha < 67.5) {   // 45
+      normLength = calculateNormLegth(p1, p2);
+      newP = { x: p1.x + normLength, y: p1.y - normLength }
+    } else if (alpha >= 67.5 && alpha < 112.5) {  // 90
+      newP = { x: p1.x, y: p2.y }
+    } else if (alpha >= 112.5 && alpha < 157.5) { // 135
+      normLength = calculateNormLegth(p1, p2);
+      newP = { x: p1.x - normLength, y: p1.y - normLength }
+    } else if (alpha >= 157.5 && alpha < 202.5) { // 180
+      newP = { x: p2.x, y: p1.y }
+    } else if (alpha >= 202.5 && alpha < 247.5) { // 225
+      normLength = calculateNormLegth(p1, p2);
+      newP = { x: p1.x - normLength, y: p1.y + normLength }
+    } else if (alpha >= 247.5 && alpha < 292.5) { // 270
+      newP = { x: p1.x, y: p2.y }
+    } else if (alpha >= 292.5 && alpha < 337.5) { // 315
+      normLength = calculateNormLegth(p1, p2);
+      newP = { x: p1.x + normLength, y: p1.y + normLength }
+    }
   }
 
   return newP;

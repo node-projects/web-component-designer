@@ -107,7 +107,7 @@ export class DefaultPlacementService implements IPlacementService {
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
     if (event.shiftKey) {
-      track = straightenLine({ x: 0, y: 0 }, track);
+      track = straightenLine({ x: 0, y: 0 }, track, true);
     }
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
