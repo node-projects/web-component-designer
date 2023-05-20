@@ -362,8 +362,10 @@ export class PointerTool implements ITool {
               containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
               this._changeGroup.commit();
               this._changeGroup = null;
+              let elements = designerCanvas.elementsFromPoint(event.x, event.y);
               for (const item of this._actionStartedDesignItems) {
-                designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver, event);
+                if (elements.includes(item.element))
+                  designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver, event);
                 designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
               }
             }
