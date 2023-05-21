@@ -20,6 +20,14 @@ https://www.npmjs.com/package/@node-projects/web-component-designer
   - At the moment Chrome, and Firefox Nightly with Experimental Import Assertions enabled.
   But when import Assertions are landing in Safari and Firefox they will work again.
   And you could transpile them away in the meantime.
+  
+## Projects using it
+
+A ZPL Designer included in a comercial Application:
+![image](https://github.com/node-projects/web-component-designer/assets/364896/e1f1e3cc-29a3-4749-a676-389577fab69a)
+
+A Materialflow Layout Editor in a comercial Application:
+![image](https://github.com/node-projects/web-component-designer/assets/364896/0062562a-4224-4b11-aaa4-03e31494fcfa)
 
 ## Demo
 
