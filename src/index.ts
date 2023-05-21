@@ -15,6 +15,7 @@ export * from "./elements/loader/OldCustomElementsManifestLoader.js"
 export * from "./elements/helper/w3color.js";
 export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
+export * from "./elements/helper/SwitchContainerHelper.js";
 export * from "./elements/helper/NpmPackageLoader.js";
 export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextMenuItem.js";
 
