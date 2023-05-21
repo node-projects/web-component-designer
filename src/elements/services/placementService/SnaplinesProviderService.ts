@@ -41,9 +41,13 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
           if (provideWithDist)
             positionsH.push([pRight + provideWithDistDist, transformedP])
 
+          if (provideWithDist)
+            positionsV.push([pTop - provideWithDistDist, transformedP])
           positionsV.push([pTop, transformedP])
           positionsMiddleV.push([pMidV, transformedP])
           positionsV.push([pBottom, transformedP])
+          if (provideWithDist)
+            positionsV.push([pBottom + provideWithDistDist, transformedP])
         }
       }
       positionsH.push([0, { x: 0, y: 0, width: 0, height: 0 }]);
