@@ -91,27 +91,43 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
           }
         }
         else if (!elementDefintion.import) {
-          let elem = document.createElement(elementDefintion.tag);
-          if (elementDefintion.defaultContent)
-            elem.innerHTML = elementDefintion.defaultContent;
-          if (elementDefintion.defaultWidth)
-            elem.style.width = elementDefintion.defaultWidth;
-          if (elementDefintion.defaultHeight)
-            elem.style.height = elementDefintion.defaultHeight;
-          elem.style.position = "absolute";
-          if (elementDefintion.defaultWidth)
-            elem.style.top = "-" + (parseInt(elementDefintion.defaultHeight) + 500) + 'px';
-          else
-            elem.style.top = "-500px";
-          if (elementDefintion.defaultWidth)
-            elem.style.left = "-" + (parseInt(elementDefintion.defaultWidth) + 500) + 'px';
-          else
-            elem.style.left = "-500px";
-          document.body.appendChild(elem);
-          let rect = elem.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0)
-            e.dataTransfer.setDragImage(elem, 0, 0);
-          requestAnimationFrame(() => document.body.removeChild(elem));
+          try {
+            let elem = document.createElement(elementDefintion.tag);
+            if (elementDefintion.defaultContent)
+              elem.innerHTML = elementDefintion.defaultContent;
+            if (elementDefintion.defaultWidth)
+              elem.style.width = elementDefintion.defaultWidth;
+            if (elementDefintion.defaultHeight)
+              elem.style.height = elementDefintion.defaultHeight;
+            if (elementDefintion.defaultAttributes) {
+              for (let a in elementDefintion.defaultAttributes) {
+                elem.setAttribute(a, elementDefintion.defaultAttributes[a]);
+              }
+            }
+            if (elementDefintion.defaultStyles) {
+              for (let s in elementDefintion.defaultStyles) {
+                elem.style[s] = elementDefintion.defaultStyles[s];
+              }
+            }
+            elem.style.position = "absolute";
+            if (elementDefintion.defaultWidth)
+              elem.style.top = "-" + (parseInt(elementDefintion.defaultHeight) + 500) + 'px';
+            else
+              elem.style.top = "-500px";
+            if (elementDefintion.defaultWidth)
+              elem.style.left = "-" + (parseInt(elementDefintion.defaultWidth) + 500) + 'px';
+            else
+              elem.style.left = "-500px";
+            document.body.appendChild(elem);
+
+            let rect = elem.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0)
+              e.dataTransfer.setDragImage(elem, 0, 0);
+            requestAnimationFrame(() => document.body.removeChild(elem));
+          }
+          catch (err) {
+            console.warn("error creating gost elment", err);
+          }
         }
       }
       button.ondragend = (e) => {
