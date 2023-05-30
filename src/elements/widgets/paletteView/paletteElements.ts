@@ -90,7 +90,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
             e.dataTransfer.setDragImage(elementDefintion.ghostElement, 0, 0);
           }
         }
-        else if (elementDefintion.defaultWidth && elementDefintion.defaultHeight && !elementDefintion.import) {
+        else if (!elementDefintion.import) {
           let elem = document.createElement(elementDefintion.tag);
           if (elementDefintion.defaultContent)
             elem.innerHTML = elementDefintion.defaultContent;
