@@ -50,6 +50,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   // IPlacementView
   public gridSize = 10;
+  public pasteOffset = 10;
   public alignOnGrid = false;
   public alignOnSnap = true;
   public snapLines: Snaplines;
@@ -57,6 +58,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public rootDesignItem: IDesignItem;
   public eatEvents: Element;
 
+  private _currentPasteOffset = this.pasteOffset;
   private _zoomFactor = 1; //if scale or zoom css property is used this needs to be the value
   private _scaleFactor = 1; //if scale css property is used this need to be the scale value
   private _canvasOffset: IPoint = { x: 0, y: 0 };
@@ -520,6 +522,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   async handleCopyCommand() {
+    this._currentPasteOffset = this.pasteOffset;
     this._lastCopiedPrimaryItem = this.instanceServiceContainer.selectionService.primarySelection;
     await this.serviceContainer.copyPasteService.copyItems(this.instanceServiceContainer.selectionService.selectedElements);
   }
@@ -528,9 +531,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     const [designItems, positions] = await this.serviceContainer.copyPasteService.getPasteItems(this.serviceContainer, this.instanceServiceContainer);
 
     let grp = this.rootDesignItem.openGroup("Insert");
-
+    let lastCopiedPrimaryItemBackup = this._lastCopiedPrimaryItem;
+    let nextPasteOffset = this._currentPasteOffset + this.pasteOffset;
     let pasteContainer = this.rootDesignItem;
-    let pCon = this._lastCopiedPrimaryItem?.parent ?? this.instanceServiceContainer.selectionService.primarySelection;
+    let pCon = lastCopiedPrimaryItemBackup?.parent ?? this.instanceServiceContainer.selectionService.primarySelection;
     while (pCon != null) {
       const containerStyle = getComputedStyle(pCon.element);
       let newContainerService: IPlacementService;
@@ -553,8 +557,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         let pos = positions ? positions[i] : null;
         this.instanceServiceContainer.undoService.execute(new InsertAction(pasteContainer, pasteContainer.childCount, di));
         if (!disableRestoreOfPositions && pos && di.nodeType == NodeType.Element) {
-          di.setStyle('left', (pos.x - containerPos.x) + 'px');
-          di.setStyle('top', (pos.y - containerPos.y) + 'px');
+          di.setStyle('left', (pos.x - containerPos.x + this._currentPasteOffset) + 'px');
+          di.setStyle('top', (pos.y - containerPos.y + this._currentPasteOffset) + 'px');
         }
       }
 
@@ -568,6 +572,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     grp.commit();
 
     this.snapLines.clearSnaplines();
+    this._lastCopiedPrimaryItem = lastCopiedPrimaryItemBackup;
+    this._currentPasteOffset = nextPasteOffset;
   }
 
   handleDeleteCommand() {
@@ -588,7 +594,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.instanceServiceContainer.register("selectionService", selectionService(this));
       this.instanceServiceContainer.selectionService.onSelectionChanged.on(() => {
         this._lastCopiedPrimaryItem = null;
-      })
+        this._currentPasteOffset = this.pasteOffset;
+      });
     }
     const designItemDocumentPositionService = this.serviceContainer.getLastService('designItemDocumentPositionService')
     if (designItemDocumentPositionService) {
@@ -871,6 +878,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private async _onDrop(event: DragEvent) {
+    this.serviceContainer.globalContext.tool =  this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._lastDdElement = null;
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
