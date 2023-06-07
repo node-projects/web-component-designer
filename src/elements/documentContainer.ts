@@ -192,7 +192,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     } else if (this._tabControl.selectedIndex === 3) {
       if (this.demoView?.canExecuteCommand)
         return this.demoView.canExecuteCommand(command);
-    } return false;
+    }
+    return false;
   }
 
   set content(value: string) {
