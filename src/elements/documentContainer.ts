@@ -183,13 +183,16 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   canExecuteCommand(command: IUiCommand) {
-    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2)
-      return this.designerView?.canExecuteCommand(command);
-    else if (this._tabControl.selectedIndex === 1)
-      return this.codeView?.canExecuteCommand(command);
-    else if (this._tabControl.selectedIndex === 3)
-      return this.demoView?.canExecuteCommand(command);
-    return false;
+    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2) {
+      if (this.designerView?.canExecuteCommand)
+        return this.designerView.canExecuteCommand(command);
+    } else if (this._tabControl.selectedIndex === 1) {
+      if (this.codeView?.canExecuteCommand)
+        return this.codeView.canExecuteCommand(command);
+    } else if (this._tabControl.selectedIndex === 3) {
+      if (this.demoView?.canExecuteCommand)
+        return this.demoView.canExecuteCommand(command);
+    } return false;
   }
 
   set content(value: string) {
