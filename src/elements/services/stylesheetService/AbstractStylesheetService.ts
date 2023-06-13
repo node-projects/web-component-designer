@@ -122,7 +122,7 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
         return style;
     }
 
-    private static traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule): string {
+    private static traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule | CSSSupportsRule): string {
         let t = '';
         for (let rule of ruleContainer.cssRules) {
             if ((rule instanceof CSSContainerRule
@@ -154,6 +154,10 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
                     }
                 }
                 t += '{' + cssText + '}';
+
+                /*if (rule.cssRules) {
+                    t += rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
+                }*/
             }
         }
         return t;
