@@ -48,6 +48,7 @@ export type { IContentChanged } from "./elements/services/contentService/IConten
 export type { IContentService } from "./elements/services/contentService/IContentService.js";
 
 export * from "./elements/services/copyPasteService/CopyPasteService.js";
+export * from "./elements/services/copyPasteService/CopyPasteAsJsonService.js";
 export type { ICopyPasteService } from "./elements/services/copyPasteService/ICopyPasteService.js";
 
 export * from "./elements/services/demoProviderService/DemoProviderService.js";

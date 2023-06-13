@@ -19,6 +19,9 @@ if (window.importShim) {
   //@ts-ignore
   cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
 
+if (cssProperties.default)
+  cssProperties = cssProperties.default;
+
 const localName = '&lt;local&gt;';
 
 export class CssCurrentPropertiesService extends CommonPropertiesService {
@@ -72,7 +75,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
       const decls = designItems[0].instanceServiceContainer.stylesheetService?.getDeclarations(designItems[0], property.styleDeclaration.name);
       const currentDecl = decls.find(x => x.parent.selector == property.styleDeclaration.parent.selector && x.parent.stylesheetName == property.styleDeclaration.parent.stylesheetName);
 
-      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(currentDecl, value, false);      
+      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(currentDecl, value, false);
       this._notifyChangedProperty(designItems[0], property, value);
       return;
     }
