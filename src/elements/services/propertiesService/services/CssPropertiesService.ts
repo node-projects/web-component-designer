@@ -18,6 +18,9 @@ if (window.importShim) {
   //@ts-ignore
   cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
 
+if (cssProperties.default)
+  cssProperties = cssProperties.default;
+
 export class CssPropertiesService extends CommonPropertiesService {
 
   public override getRefreshMode(designItem: IDesignItem) {
