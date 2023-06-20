@@ -22,6 +22,8 @@ export class PathExtension extends AbstractExtension {
   private _offsetSvg = 10.0;
   private _pathElement: SVGPathElement;
   private _parentCoordinates: IRect;
+  private _startScrollOffset: IPoint;
+  private _deltaScrollOffset: IPoint;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -32,6 +34,10 @@ export class PathExtension extends AbstractExtension {
     this._pathdata = (<SVGGraphicsElement>this.extendedItem.node).getPathData({ normalize: false });
     this._pathElement = (<SVGPathElement>this.extendedItem.node);
     this._lastPos = { x: 0, y: 0 };
+    this._startScrollOffset = this.designerCanvas.canvasOffset;
+    if (!this._deltaScrollOffset)
+      this._deltaScrollOffset = { x: 0, y: 0 }
+
     for (let p of this._pathdata) {
       switch (p.type) {
         case 'M':
@@ -132,6 +138,10 @@ export class PathExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._startPos && event.buttons > 0) {
+          this._deltaScrollOffset = {
+            x: this._startScrollOffset.x - this.designerCanvas.canvasOffset.x,
+            y: this._startScrollOffset.y - this.designerCanvas.canvasOffset.y
+          }
           this._lastPos = { x: this._startPos.x, y: this._startPos.y };
           const cx = cursorPos.x - this._lastPos.x + this._circlePos.x;
           const cy = cursorPos.y - this._lastPos.y + this._circlePos.y;
@@ -189,7 +199,11 @@ export class PathExtension extends AbstractExtension {
   }
 
   _drawPathCircle(x: number, y: number, p: PathData, index: number) {
-    let circle = this._drawCircle((this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x, (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y, 5 / this.designerCanvas.scaleFactor, 'svg-path');
+    let circle = this._drawCircle(
+      (this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x,
+      (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y,
+      5 / this.designerCanvas.scaleFactor,
+      'svg-path');
     circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
 
     let circlePos = { x: x, y: y };
@@ -321,8 +335,8 @@ export class PathExtension extends AbstractExtension {
     let newElementCoords = (<SVGGeometryElement>this.extendedItem.element).getBoundingClientRect();
     let parentLeft = (newElementCoords.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor - this._offsetSvg;
     let parentTop = (newElementCoords.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - this._offsetSvg;
-    let heightSvgElement = newElementCoords.height + (2 * this._offsetSvg);
-    let widthSvgElement = newElementCoords.width + (2 * this._offsetSvg);
+    let heightSvgElement = newElementCoords.height / this.designerCanvas.scaleFactor + (2 * this._offsetSvg);
+    let widthSvgElement = newElementCoords.width / this.designerCanvas.scaleFactor + (2 * this._offsetSvg);
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("left", parentLeft.toString() + "px");
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("top", parentTop.toString() + "px");
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("height", heightSvgElement.toString() + "px");
@@ -331,8 +345,8 @@ export class PathExtension extends AbstractExtension {
 
   _rearrangePointsFromElement(oldParentCoords: IRect, pathData: PathData[]) {
     let newParentCoords = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
-    let diffX = oldParentCoords.x - newParentCoords.x;
-    let diffY = oldParentCoords.y - newParentCoords.y;
+    let diffX = (oldParentCoords.x - newParentCoords.x) / this.designerCanvas.scaleFactor - this._deltaScrollOffset.x;
+    let diffY = (oldParentCoords.y - newParentCoords.y) / this.designerCanvas.scaleFactor - this._deltaScrollOffset.y;
     for (let i = 0; i < pathData.length; i++) {
       pathData[i].values[0] = pathData[i].values[0] + diffX;
       pathData[i].values[1] = pathData[i].values[1] + diffY;
