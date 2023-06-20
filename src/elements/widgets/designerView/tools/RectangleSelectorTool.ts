@@ -63,7 +63,7 @@ export class RectangleSelectorTool implements ITool {
         designerCanvas.releaseActiveTool();
 
         const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
-        const inSelectionElements: IDesignItem[] = [];
+        let inSelectionElements: IDesignItem[] = [];
 
         let point = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
@@ -82,6 +82,8 @@ export class RectangleSelectorTool implements ITool {
           const p4 = p3 && this._rect.isPointInFill(point);
           if (p4) {
             const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
+            if(designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+                inSelectionElements.push(... designerCanvas.instanceServiceContainer.selectionService.selectedElements);
             inSelectionElements.push(desItem);
           }
         }

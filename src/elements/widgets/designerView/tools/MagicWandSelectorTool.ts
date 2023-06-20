@@ -19,7 +19,7 @@ export class MagicWandSelectorTool implements ITool {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
         designerCanvas.captureActiveTool(this);
-        
+
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this._path.setAttribute('class', 'svg-selector');
         this._path.style.strokeWidth = '' + (1 / designerCanvas.scaleFactor);
@@ -60,6 +60,8 @@ export class MagicWandSelectorTool implements ITool {
           const p4 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
           if (p1 && p2 && p3 && p4) {
             const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
+            if (designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+              inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
             inSelectionElements.push(desItem);
           }
         }
