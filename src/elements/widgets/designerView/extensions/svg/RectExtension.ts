@@ -244,8 +244,8 @@ export class RectExtension extends AbstractExtension {
         let heightRectElement = newRectExtrema.yMax - newRectExtrema.yMin + (2 * this._offsetSvg);
         this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
         this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
-        this.extendedItem.parent.setStyle("height", heightRectElement.toString() + "px");
-        this.extendedItem.parent.setStyle("width", widthRectElement.toString() + "px");
+        this.extendedItem.parent.setStyle("height", Math.round(heightRectElement).toString() + "px");
+        this.extendedItem.parent.setStyle("width", Math.round(widthRectElement).toString() + "px");
     }
 
     _rearrangePointsFromElement(oldParentCoords: IRect) {

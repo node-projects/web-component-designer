@@ -339,8 +339,8 @@ export class PathExtension extends AbstractExtension {
     let widthSvgElement = newElementCoords.width / this.designerCanvas.scaleFactor + (2 * this._offsetSvg);
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("left", parentLeft.toString() + "px");
     (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("top", parentTop.toString() + "px");
-    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("height", heightSvgElement.toString() + "px");
-    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("width", widthSvgElement.toString() + "px");
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("height", Math.round(heightSvgElement).toString() + "px");
+    (<SVGGeometryElement>this.extendedItem.element).parentElement.style.setProperty("width", Math.round(widthSvgElement).toString() + "px");
   }
 
   _rearrangePointsFromElement(oldParentCoords: IRect, pathData: PathData[]) {
