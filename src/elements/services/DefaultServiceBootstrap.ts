@@ -82,6 +82,7 @@ import { DisplayGridExtensionProvider } from '../widgets/designerView/extensions
 import { ApplyFirstMachingExtensionProvider } from '../widgets/designerView/extensions/logic/ApplyFirstMachingExtensionProvider.js';
 import { DesignItemDocumentPositionService } from './designItemDocumentPositionService/DesignItemDocumentPositionService.js';
 import { TransformToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js';
+import { MultipleSelectionRectExtensionProvider } from '../widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -132,6 +133,7 @@ export function createDefaultServiceContainer() {
     new RectExtentionProvider(),
     new ResizeExtensionProvider(true),
     new RotateExtensionProvider(),
+    new MultipleSelectionRectExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Selection, [
     new SelectionDefaultExtensionProvider()

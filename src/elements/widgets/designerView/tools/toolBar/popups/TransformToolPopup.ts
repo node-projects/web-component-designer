@@ -1,8 +1,16 @@
 import { html, BaseCustomWebComponentConstructorAppend, css } from '@node-projects/base-custom-webcomponent';
 import { DesignerToolbar } from '../DesignerToolbar';
 import { filterChildPlaceItems } from '../../../../../helper/LayoutHelper';
+import { IRect } from '../../../../../../interfaces/IRect';
+import { IDesignItem } from '../../../../../item/IDesignItem';
+import { IPoint } from '../../../../../../interfaces/IPoint';
+import { DesignerView } from '../../../designerView';
+import { IDesignerCanvas } from '../../../IDesignerCanvas';
 
 export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend {
+  private _designerView: DesignerView;
+  private _previousSelectionRect: IRect;
+  private _selectionChanged: boolean;
 
   private _relativeButton: HTMLButtonElement;
   private _absoluteButton: HTMLButtonElement;
@@ -22,7 +30,7 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
   private _originBotMid: HTMLInputElement;
   private _originBotRight: HTMLInputElement;
 
-  private _positionMode: "relative" | "absolute";
+  private _transformMode: "relative" | "absolute";
   private _transformOrigin: "topLeft" | "topMid" | "topRight" | "midLeft" | "midMid" | "midRight" | "botLeft" | "botMid" | "botRight";
 
   static override style = css`
@@ -166,8 +174,8 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
     this._absoluteButton.onclick = () => this._changePositionMode("absolute");
     this._applyButton.onclick = () => this._applyTransform();
 
-    this._positionMode = "relative";
-    this._changePositionMode(this._positionMode);
+    this._transformMode = "relative";
+    this._changePositionMode(this._transformMode);
   }
 
   private _changePositionMode(mode: "relative" | "absolute") {
@@ -183,33 +191,119 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
       this._relativeButton.style.backgroundColor = "#A4B5C1";
       this._relativeButton.style.color = "#77716E"
     }
-    this._positionMode = mode;
+    this._transformMode = mode;
   }
 
   private _applyTransform() {
     this._checkOrigin();
-    let designerView = (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).designerView;
-    let selection = designerView.instanceServiceContainer.selectionService.selectedElements;
+    this._designerView = (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).designerView;
+    let selection = this._designerView.instanceServiceContainer.selectionService.selectedElements;
     selection = filterChildPlaceItems(selection);
-    console.log("Mode: ", this._positionMode);
-    console.log(selection)
+
+    this._selectionChanged = false;
+    this._designerView.instanceServiceContainer.selectionService.onSelectionChanged.once(() => {
+      this._selectionChanged = true;
+      this._previousSelectionRect = null;
+    });
+
+
     if (selection) {
-      let x = this._inputX.valueAsNumber;
-      let y = this._inputY.valueAsNumber;
-      let r = this._inputR.valueAsNumber;
-      if (this._positionMode == "absolute") {
-        x = x - designerView.designerCanvas.getNormalizedElementCoordinates(selection[0].element).x;
-        y = y - designerView.designerCanvas.getNormalizedElementCoordinates(selection[0].element).y;
+      let inputPos: IPoint = {
+        x: this._inputX.valueAsNumber ? this._inputX.valueAsNumber : 0,
+        y: this._inputY.valueAsNumber ? this._inputY.valueAsNumber : 0
       }
+      let inputRotation = this._inputR.valueAsNumber ? this._inputR.valueAsNumber : 0;
+
       let grp = selection[0].openGroup("Transform selection")
+      if (!this._previousSelectionRect || this._selectionChanged)
+        this._previousSelectionRect = TransformToolPopup.calculateSelectionRect(selection, this._designerView.designerCanvas);
+      let origin = this._calculateTransformOriginPosition(this._previousSelectionRect);
       for (let item of selection) {
-        let itemX = parseFloat(item.getStyle("left"));
-        let itemY = parseFloat(item.getStyle("top"));
-        item.setStyle("left", (itemX + x).toString() + "px");
-        item.setStyle("top", (itemY + y).toString() + "px");
-        item.setStyle("transform", "rotate(" + r + "deg)");
+        let itemPos: IRect = {
+          x: parseFloat(item.getStyle("left")),
+          y: parseFloat(item.getStyle("top")),
+          width: parseFloat(item.getStyle("width")),
+          height: parseFloat(item.getStyle("height"))
+        }
+        let itemRotStyle = item.getStyle("transform")
+        let itemRotation = 0;
+        if (itemRotStyle)
+          itemRotation = parseFloat(item.getStyle("transform").replaceAll("rotate(", "").replaceAll("deg)", ""));
+        let newPos = this._calculateTransform(this._previousSelectionRect, origin, itemPos, inputRotation, inputPos, this._transformMode)
+
+        item.setStyle("left", newPos.x.toString() + "px");
+        item.setStyle("top", newPos.y.toString() + "px");
+
+        let rotation: number;
+        if (this._transformMode == 'relative')
+          rotation = itemRotation + inputRotation;
+        else
+          rotation = inputRotation;
+
+        while (rotation >= 360)
+          rotation -= 360;
+        if (rotation != 0)
+          item.setStyle("transform", "rotate(" + rotation + "deg)");
+        else
+          item.removeStyle("transform");
       }
       grp.commit();
+    }
+  }
+
+  public static calculateSelectionRect(selection: IDesignItem[], designerCanvas: IDesignerCanvas): IRect {
+    let min: IPoint = { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
+    let max: IPoint = { x: Number.MIN_VALUE, y: Number.MIN_VALUE };
+    let elementRect: IRect;
+
+    for (let s of selection) {
+      elementRect = {
+        x: designerCanvas.getNormalizedElementCoordinates(s.element).x,
+        y: designerCanvas.getNormalizedElementCoordinates(s.element).y,
+        width: designerCanvas.getNormalizedElementCoordinates(s.element).width,
+        height: designerCanvas.getNormalizedElementCoordinates(s.element).height
+      }
+
+      // calculate min and max of selection
+      if (elementRect.x < min.x)
+        min.x = elementRect.x;
+      if (elementRect.y < min.y)
+        min.y = elementRect.y;
+      if (elementRect.x + elementRect.width > max.x)
+        max.x = elementRect.x + elementRect.width;
+      if (elementRect.y + elementRect.height > max.y)
+        max.y = elementRect.y + elementRect.height;
+    }
+
+    // calculate reckt around selection
+    return {
+      x: min.x,
+      y: min.y,
+      width: max.x - min.x,
+      height: max.y - min.y
+    }
+  }
+
+  private _calculateTransformOriginPosition(selectionRect: IRect): IPoint {
+    switch (this._transformOrigin) {
+      case "topLeft":
+        return { x: selectionRect.x, y: selectionRect.y }
+      case "topMid":
+        return { x: selectionRect.x + selectionRect.width / 2, y: selectionRect.y }
+      case "topRight":
+        return { x: selectionRect.x + selectionRect.width, y: selectionRect.y }
+      case "midLeft":
+        return { x: selectionRect.x, y: selectionRect.y + selectionRect.height / 2 }
+      case "midMid":
+        return { x: selectionRect.x + selectionRect.width / 2, y: selectionRect.y + selectionRect.height / 2 }
+      case "midRight":
+        return { x: selectionRect.x + selectionRect.width, y: selectionRect.y + selectionRect.height / 2 }
+      case "botLeft":
+        return { x: selectionRect.x, y: selectionRect.y + selectionRect.height }
+      case "botMid":
+        return { x: selectionRect.x + selectionRect.width / 2, y: selectionRect.y + selectionRect.height }
+      case "botRight":
+        return { x: selectionRect.x + selectionRect.width, y: selectionRect.y + selectionRect.height }
     }
   }
 
@@ -232,6 +326,34 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
       this._transformOrigin = "botMid";
     else if (this._originBotRight.checked)
       this._transformOrigin = "botRight";
+  }
+
+
+  private _calculateTransform(selectionRect: IRect, origin: IPoint, itemRect: IRect, rotation: number, inputPos: IPoint, transformMode: 'relative' | 'absolute'): IPoint {
+    let newPoint: IPoint;
+    // convert deg in rad
+    rotation = rotation * (Math.PI / 180);
+    if (transformMode == 'absolute') {
+      inputPos = {
+        x: inputPos.x - selectionRect.x,
+        y: inputPos.y - selectionRect.y
+      }
+    }
+    origin = {
+      x: origin.x - itemRect.width / 2,
+      y: origin.y - itemRect.height / 2
+    }
+    let diffItemPosToOrigin: IPoint = {
+      x: itemRect.x - origin.x,
+      y: itemRect.y - origin.y
+    }
+
+    newPoint = {
+      x: Math.cos(rotation) * diffItemPosToOrigin.x - Math.sin(rotation) * diffItemPosToOrigin.y + origin.x + inputPos.x,
+      y: Math.sin(rotation) * diffItemPosToOrigin.x + Math.cos(rotation) * diffItemPosToOrigin.y + origin.y + inputPos.y
+    }
+
+    return newPoint;
   }
 }
 
