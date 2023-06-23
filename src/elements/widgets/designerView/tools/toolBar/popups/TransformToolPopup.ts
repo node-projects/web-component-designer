@@ -1,11 +1,10 @@
 import { html, BaseCustomWebComponentConstructorAppend, css } from '@node-projects/base-custom-webcomponent';
-import { DesignerToolbar } from '../DesignerToolbar';
-import { filterChildPlaceItems } from '../../../../../helper/LayoutHelper';
-import { IRect } from '../../../../../../interfaces/IRect';
-import { IDesignItem } from '../../../../../item/IDesignItem';
-import { IPoint } from '../../../../../../interfaces/IPoint';
-import { DesignerView } from '../../../designerView';
-import { IDesignerCanvas } from '../../../IDesignerCanvas';
+import { DesignerToolbar } from '../DesignerToolbar.js';
+import { filterChildPlaceItems } from '../../../../../helper/LayoutHelper.js';
+import { IRect } from '../../../../../../interfaces/IRect.js';
+import { IPoint } from '../../../../../../interfaces/IPoint.js';
+import { DesignerView } from '../../../designerView.js';
+import { calculateOuterRect } from '../../../../../helper/ElementHelper.js';
 
 export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend {
   private _designerView: DesignerView;
@@ -216,7 +215,7 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
 
       let grp = selection[0].openGroup("Transform selection")
       if (!this._previousSelectionRect || this._selectionChanged)
-        this._previousSelectionRect = TransformToolPopup.calculateSelectionRect(selection, this._designerView.designerCanvas);
+        this._previousSelectionRect = calculateOuterRect(selection, this._designerView.designerCanvas);
       let origin = this._calculateTransformOriginPosition(this._previousSelectionRect);
       for (let item of selection) {
         let itemPos: IRect = {
@@ -248,39 +247,6 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
           item.removeStyle("transform");
       }
       grp.commit();
-    }
-  }
-
-  public static calculateSelectionRect(selection: IDesignItem[], designerCanvas: IDesignerCanvas): IRect {
-    let min: IPoint = { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
-    let max: IPoint = { x: Number.MIN_VALUE, y: Number.MIN_VALUE };
-    let elementRect: IRect;
-
-    for (let s of selection) {
-      elementRect = {
-        x: designerCanvas.getNormalizedElementCoordinates(s.element).x,
-        y: designerCanvas.getNormalizedElementCoordinates(s.element).y,
-        width: designerCanvas.getNormalizedElementCoordinates(s.element).width,
-        height: designerCanvas.getNormalizedElementCoordinates(s.element).height
-      }
-
-      // calculate min and max of selection
-      if (elementRect.x < min.x)
-        min.x = elementRect.x;
-      if (elementRect.y < min.y)
-        min.y = elementRect.y;
-      if (elementRect.x + elementRect.width > max.x)
-        max.x = elementRect.x + elementRect.width;
-      if (elementRect.y + elementRect.height > max.y)
-        max.y = elementRect.y + elementRect.height;
-    }
-
-    // calculate reckt around selection
-    return {
-      x: min.x,
-      y: min.y,
-      width: max.x - min.x,
-      height: max.y - min.y
     }
   }
 
