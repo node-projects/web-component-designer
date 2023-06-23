@@ -199,8 +199,8 @@ export class EllipsisExtension extends AbstractExtension {
         let heightEllipseElement = newEllipseExtrema.yMax - newEllipseExtrema.yMin + (2 * this._offsetSvg);
         this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
         this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
-        this.extendedItem.parent.setStyle("height", heightEllipseElement.toString() + "px");
-        this.extendedItem.parent.setStyle("width", widthEllipseElement.toString() + "px");
+        this.extendedItem.parent.setStyle("height", Math.round(heightEllipseElement).toString() + "px");
+        this.extendedItem.parent.setStyle("width", Math.round(widthEllipseElement).toString() + "px");
     }
 
     _rearrangePointsFromElement(oldParentCoords: IRect) {

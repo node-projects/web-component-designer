@@ -148,8 +148,8 @@ export class LineExtension extends AbstractExtension {
         let heightLineElement = newLineExtrema.yMax - newLineExtrema.yMin + (2 * this._offsetSvg);
         this.extendedItem.parent.setStyle("left", parentLeft.toString() + "px");
         this.extendedItem.parent.setStyle("top", parentTop.toString() + "px");
-        this.extendedItem.parent.setStyle("height", heightLineElement.toString() + "px");
-        this.extendedItem.parent.setStyle("width", widthLineElement.toString() + "px");
+        this.extendedItem.parent.setStyle("height", Math.round(heightLineElement).toString() + "px");
+        this.extendedItem.parent.setStyle("width", Math.round(widthLineElement).toString() + "px");
     }
 
     _rearrangePointsFromElement(oldParentCoords: IRect) {

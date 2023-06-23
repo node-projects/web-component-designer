@@ -81,6 +81,8 @@ import { EditGridColumnRowSizesExtensionProvider } from '../widgets/designerView
 import { DisplayGridExtensionProvider } from '../widgets/designerView/extensions/grid/DisplayGridExtensionProvider.js';
 import { ApplyFirstMachingExtensionProvider } from '../widgets/designerView/extensions/logic/ApplyFirstMachingExtensionProvider.js';
 import { DesignItemDocumentPositionService } from './designItemDocumentPositionService/DesignItemDocumentPositionService.js';
+import { TransformToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js';
+import { MultipleSelectionRectExtensionProvider } from '../widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -131,6 +133,7 @@ export function createDefaultServiceContainer() {
     new RectExtentionProvider(),
     new ResizeExtensionProvider(true),
     new RotateExtensionProvider(),
+    new MultipleSelectionRectExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Selection, [
     new SelectionDefaultExtensionProvider()
@@ -201,8 +204,10 @@ export function createDefaultServiceContainer() {
     new ZoomToolButtonProvider(),
     new SeperatorToolProvider(22),
     new DrawToolButtonProvider(),
-    new SeperatorToolProvider(5),
-    new TextToolButtonProvider()
+    new SeperatorToolProvider(22),
+    new TextToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new TransformToolButtonProvider()
   );
 
   serviceContainer.designerContextMenuExtensions = [

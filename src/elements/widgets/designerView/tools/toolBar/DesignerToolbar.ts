@@ -30,7 +30,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
   private _toolButtonsElem: HTMLDivElement;
   private _serviceContainer: ServiceContainer;
   private _popupContainer: HTMLDivElement;
-  private _designerView: DesignerView;
+  public designerView: DesignerView;
 
   constructor() {
     super();
@@ -40,7 +40,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
 
   public initialize(serviceContainer: ServiceContainer, designerView: DesignerView) {
     this._serviceContainer = serviceContainer;
-    this._designerView = designerView;
+    this.designerView = designerView;
 
     for (let tb of this._serviceContainer.designViewToolbarButtons) {
       this._toolButtonsElem.appendChild(tb.provideButton(designerView.designerCanvas));
@@ -73,28 +73,28 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
     if (this._popupContainer.children.length) {
       this._popupContainer.innerHTML = '';
     }
-    this._designerView.designerCanvas.executeCommand({ type: CommandType.setTool, parameter: tool });
+    this.designerView.designerCanvas.executeCommand({ type: CommandType.setTool, parameter: tool });
   }
 
   public setStrokeColor(color: string){
     if (this._popupContainer.children.length) {
       this._popupContainer.innerHTML = '';
     }
-    this._designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeColor, parameter: color });
+    this.designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeColor, parameter: color });
   }
 
   public setFillBrush(color: string){
     if (this._popupContainer.children.length) {
       this._popupContainer.innerHTML = '';
     }
-    this._designerView.designerCanvas.executeCommand({ type: CommandType.setFillBrush, parameter: color });
+    this.designerView.designerCanvas.executeCommand({ type: CommandType.setFillBrush, parameter: color });
   }
 
   public setStrokeThickness(input: string){
     if (this._popupContainer.children.length) {
       this._popupContainer.innerHTML = '';
     }
-    this._designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeThickness, parameter: input });
+    this.designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeThickness, parameter: input });
   }
 }
 
