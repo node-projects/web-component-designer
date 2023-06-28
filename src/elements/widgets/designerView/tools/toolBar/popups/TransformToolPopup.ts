@@ -207,10 +207,10 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
     });
 
 
-    if (selection) {
+    if (selection.length != 0) {
       let inputPos: IPoint = {
-        x: this._inputX.valueAsNumber ? this._inputX.valueAsNumber : 0,
-        y: this._inputY.valueAsNumber ? this._inputY.valueAsNumber : 0
+        x: isNaN(this._inputX.valueAsNumber) ? null : this._inputX.valueAsNumber,
+        y: isNaN(this._inputY.valueAsNumber) ? null : this._inputY.valueAsNumber
       }
       let inputRotation = this._inputR.valueAsNumber ? this._inputR.valueAsNumber : 0;
 
@@ -334,10 +334,11 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
     // convert deg in rad
     rotation = rotation * (Math.PI / 180);
     if (transformMode == 'absolute') {
-      inputPos = {
-        x: inputPos.x - selectionRect.x,
-        y: inputPos.y - selectionRect.y
-      }
+      if (inputPos.x)
+        inputPos.x = inputPos.x - selectionRect.x;
+      if (inputPos.y)
+        inputPos.y = inputPos.y - selectionRect.y;
+
     }
     origin = {
       x: origin.x - itemRect.width / 2,
