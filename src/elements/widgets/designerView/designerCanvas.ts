@@ -1,12 +1,11 @@
 import { EventNames } from '../../../enums/EventNames.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
-import { IElementDefinition } from '../../services/elementsService/IElementDefinition.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
-import { dragDropFormatNameElementDefinition, dragDropFormatNameBindingObject } from '../../../Constants.js';
+import { dragDropFormatNameBindingObject } from '../../../Constants.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
 import { Snaplines } from './Snaplines.js';
@@ -764,7 +763,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.snapLines.clearSnaplines();
   }
 
-  _dragOverExtensionItem: IDesignItem;
   private _onDragEnter(event: DragEvent) {
     this._fillCalculationrects();
     event.preventDefault();
@@ -784,6 +782,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       }
     } else {
       this._lastDdElement = null;
+
+      const dragDropService = this.serviceContainer.dragDropService;
+      if (dragDropService) {
+        dragDropService.dragEnter(this, event);
+      }
     }
   }
 
@@ -792,9 +795,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
 
-    if (this._dragOverExtensionItem) {
-      this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
-      this._dragOverExtensionItem = null;
+    const dragDropService = this.serviceContainer.dragDropService;
+    if (dragDropService) {
+      dragDropService.dragLeave(this, event);
     }
   }
 
@@ -812,7 +815,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._fillCalculationrects();
 
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
-      const ddService = this.serviceContainer.dragDropService;
+      const ddService = this.serviceContainer.externalDragDropService;
       if (ddService) {
         const effect = ddService.dragOver(event);
         event.dataTransfer.dropEffect = effect;
@@ -822,60 +825,26 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     } else {
       const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
       if (hasTransferDataBindingObject) {
-        const ddService = this.serviceContainer.bindableObjectDragDropService;
-        if (ddService) {
+        const bindableDdService = this.serviceContainer.bindableObjectDragDropService;
+        if (bindableDdService) {
           const el = this.getElementAtPoint({ x: event.x, y: event.y });
           if (this._lastDdElement != el) {
-            ddService.dragLeave(this, event, this._lastDdElement);
-            ddService.dragEnter(this, event, el);
+            bindableDdService.dragLeave(this, event, this._lastDdElement);
+            bindableDdService.dragEnter(this, event, el);
             this._lastDdElement = el;
           }
-          const effect = ddService.dragOver(this, event, el);
+          const effect = bindableDdService.dragOver(this, event, el);
           event.dataTransfer.dropEffect = effect;
         }
       } else {
-        let [newContainer] = this._getPossibleContainerForDrop(event);
-        if (this._dragOverExtensionItem != newContainer) {
-          this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
-          this.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
-          this._dragOverExtensionItem = newContainer;
-        } else {
-          this.extensionManager.refreshExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
+        const dragDropService = this.serviceContainer.dragDropService;
+        if (dragDropService) {
+          dragDropService.dragOver(this, event);
         }
       }
     }
   }
 
-  private _getPossibleContainerForDrop(event: DragEvent): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService] {
-    let newContainerElementDesignItem: IDesignItem = null;
-    let newContainerService: IPlacementService = null;
-
-    const elementsFromPoint = this.elementsFromPoint(event.x, event.y);
-    for (let e of elementsFromPoint) {
-      if (e == this.rootDesignItem.element) {
-        newContainerElementDesignItem = this.rootDesignItem;
-        const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-        newContainerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
-        break;
-      } else if (false) {
-        //check we don't try to move a item over one of its children..
-      } else {
-        newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, this.serviceContainer, this.instanceServiceContainer);
-        const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-        newContainerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
-        if (newContainerService) {
-          if (newContainerService.canEnterByDrop(newContainerElementDesignItem) && !(newContainerElementDesignItem.element instanceof SVGElement)) {
-            break;
-          } else {
-            newContainerElementDesignItem = null;
-            newContainerService = null;
-            continue;
-          }
-        }
-      }
-    }
-    return [newContainerElementDesignItem, newContainerService];
-  }
 
   private async _onDrop(event: DragEvent) {
     this.serviceContainer.globalContext.tool = this.serviceContainer.designerTools.get(NamedTools.Pointer);
@@ -886,7 +855,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._fillCalculationrects();
 
     if (event.dataTransfer.files?.length > 0) {
-      const ddService = this.serviceContainer.dragDropService;
+      const ddService = this.serviceContainer.externalDragDropService;
       if (ddService) {
         ddService.drop(this, event);
       }
@@ -903,36 +872,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         }
       }
       else {
-        if (this._dragOverExtensionItem) {
-          this.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
-          this._dragOverExtensionItem = null;
+        const dragDropService = this.serviceContainer.dragDropService;
+        if (dragDropService) {
+          this._fillCalculationrects();
+          dragDropService.drop(this, event);
         }
-
-        let [newContainer] = this._getPossibleContainerForDrop(event);
-        if (!newContainer)
-          newContainer = this.rootDesignItem;
-
-        this._fillCalculationrects();
-
-        //TODO : we need to use container service for adding to element, so also grid and flexbox work correct
-        const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
-        const elementDefinition = <IElementDefinition>JSON.parse(transferData);
-        const di = await this.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, this.serviceContainer, this.instanceServiceContainer));
-        const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
-        di.setStyle('position', 'absolute');
-        const containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, getComputedStyle(newContainer.element)))
-        containerService.enterContainer(newContainer, [di]);
-
-        const containerPos = this.getNormalizedElementCoordinates(newContainer.element);
-        const evCoord = this.getNormalizedEventCoordinates(event);
-        const pos = { x: evCoord.x - containerPos.x, y: evCoord.y - containerPos.y };
-        containerService.place(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
-        containerService.finishPlace(event, this, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
-        this.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
-        requestAnimationFrame(() => {
-          this.instanceServiceContainer.selectionService.setSelectedElements([di]);
-          grp.commit();
-        });
       }
     }
   }
@@ -1023,28 +967,24 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         case 'Backspace':
           this.executeCommand({ type: CommandType.delete, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
           break;
-        case 'ArrowUp':
-          {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) - moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-          }
-          break;
         case 'ArrowDown':
-          {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) + moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-          }
-          break;
+        case 'ArrowUp':
         case 'ArrowLeft':
-          {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) - moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-          }
-          break;
         case 'ArrowRight':
           {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) + moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
+            let offset = { x: 0, y: 0 };
+            if (event.key == 'ArrowDown')
+              offset.y = moveOffset;
+            if (event.key == 'ArrowUp')
+              offset.y = -moveOffset;
+            if (event.key == 'ArrowRight')
+              offset.x = moveOffset;
+            if (event.key == 'ArrowLeft')
+              offset.x = -moveOffset;
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => {
+              const containerStyle = getComputedStyle(x.parent.element);
+              x.serviceContainer.getLastServiceWhere('containerService', y => y.serviceForContainer(x.parent, containerStyle)).moveElements([x], offset, false);
+            });
           }
           break;
       }

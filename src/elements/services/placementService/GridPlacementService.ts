@@ -124,4 +124,7 @@ export class GridPlacementService implements IPlacementService {
     }
     (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
   }
+
+  moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
+  }
 }

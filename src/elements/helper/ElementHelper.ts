@@ -1,4 +1,7 @@
 import { IPoint } from '../../interfaces/IPoint.js';
+import { IRect } from '../../interfaces/IRect.js';
+import { IDesignItem } from '../item/IDesignItem.js';
+import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 export function inDesigner(element: Element): boolean {
   let node = element.getRootNode();
@@ -114,4 +117,37 @@ export function getContentBoxContentOffsets(element): IPoint {
     + parseInt(getComputedStyle(element).borderBottom.replace('px', ''));
 
   return { x: xOffset, y: yOffset };
+}
+
+export function calculateOuterRect(designItems: IDesignItem[], designerCanvas: IDesignerCanvas): IRect {
+  let min: IPoint = { x: Number.MAX_VALUE, y: Number.MAX_VALUE };
+  let max: IPoint = { x: Number.MIN_VALUE, y: Number.MIN_VALUE };
+  let elementRect: IRect;
+
+  for (let s of designItems) {
+    elementRect = {
+      x: designerCanvas.getNormalizedElementCoordinates(s.element).x,
+      y: designerCanvas.getNormalizedElementCoordinates(s.element).y,
+      width: designerCanvas.getNormalizedElementCoordinates(s.element).width,
+      height: designerCanvas.getNormalizedElementCoordinates(s.element).height
+    }
+
+    // calculate min and max of selection
+    if (elementRect.x < min.x)
+      min.x = elementRect.x;
+    if (elementRect.y < min.y)
+      min.y = elementRect.y;
+    if (elementRect.x + elementRect.width > max.x)
+      max.x = elementRect.x + elementRect.width;
+    if (elementRect.y + elementRect.height > max.y)
+      max.y = elementRect.y + elementRect.height;
+  }
+
+  // calculate reckt around selection
+  return {
+    x: min.x,
+    y: min.y,
+    width: max.x - min.x,
+    height: max.y - min.y
+  }
 }

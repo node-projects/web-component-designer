@@ -19,7 +19,7 @@ import { GlobalContext } from './GlobalContext.js';
 import { IBindingService } from './bindingsService/IBindingService.js';
 import { IElementAtPointService } from './elementAtPointService/IElementAtPointService.js';
 import { ISnaplinesProviderService } from "./placementService/ISnaplinesProviderService.js";
-import { IDragDropService } from './dragDropService/IDragDropService.js';
+import { IExternalDragDropService } from './dragDropService/IExternalDragDropService.js';
 import { ICopyPasteService } from "./copyPasteService/ICopyPasteService.js";
 import { IDesignerPointerExtensionProvider } from "../widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";
 import { IModelCommandService } from "./modelCommandService/IModelCommandService.js";
@@ -41,6 +41,7 @@ import { IContentService } from './contentService/IContentService.js';
 import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { IDesignItemDocumentPositionService } from './designItemDocumentPositionService/IDesignItemDocumentPositionService.js';
+import { IDragDropService } from './dragDropService/IDragDropService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -56,12 +57,13 @@ interface ServiceNameMap {
   "bindableObjectsService": IBindableObjectsService;
   "bindableObjectDragDropService": IBindableObjectDragDropService;
   "elementAtPointService": IElementAtPointService;
-  "dragDropService": IDragDropService;
+  "externalDragDropService": IExternalDragDropService;
   "copyPasteService": ICopyPasteService;
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
   "propertyGroupsService": IPropertyTabsService;
+  "dragDropService": IDragDropService
   
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
@@ -121,6 +123,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getLastService('bindableObjectDragDropService');
   }
 
+  get dragDropService(): IDragDropService {
+    return this.getLastService('dragDropService');
+  }
+
   get elementInteractionServices(): IElementInteractionService[] {
     return this.getServices('elementInteractionService');
   }
@@ -169,8 +175,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getLastService('elementAtPointService');
   }
 
-  get dragDropService(): IDragDropService {
-    return this.getLastService('dragDropService');
+  get externalDragDropService(): IExternalDragDropService {
+    return this.getLastService('externalDragDropService');
   }
 
   get copyPasteService(): ICopyPasteService {
