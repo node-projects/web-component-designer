@@ -83,6 +83,7 @@ import { ApplyFirstMachingExtensionProvider } from '../widgets/designerView/exte
 import { DesignItemDocumentPositionService } from './designItemDocumentPositionService/DesignItemDocumentPositionService.js';
 import { TransformToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js';
 import { MultipleSelectionRectExtensionProvider } from '../widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js';
+import { DragDropService } from './dragDropService/DragDropService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -104,6 +105,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
   serviceContainer.register("externalDragDropService", new ExternalDragDropService());
+  serviceContainer.register("dragDropService", new DragDropService());
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());

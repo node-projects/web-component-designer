@@ -60,6 +60,9 @@ export type { IDesignItemDocumentPositionService } from "./elements/services/des
 export * from "./elements/services/dragDropService/ExternalDragDropService.js";
 export type { IExternalDragDropService } from "./elements/services/dragDropService/IExternalDragDropService.js";
 
+export * from "./elements/services/dragDropService/DragDropService.js";
+export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";
+
 export type { IElementInteractionService } from "./elements/services/elementInteractionService/IElementInteractionService.js";
 
 export type { IElementDefinition } from "./elements/services/elementsService/IElementDefinition.js";
