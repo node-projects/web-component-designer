@@ -864,7 +864,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
         newContainerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
         if (newContainerService) {
-          if (newContainerService.canEnterByDrop(newContainerElementDesignItem)) {
+          if (newContainerService.canEnterByDrop(newContainerElementDesignItem) && !(newContainerElementDesignItem.element instanceof SVGElement)) {
             break;
           } else {
             newContainerElementDesignItem = null;
