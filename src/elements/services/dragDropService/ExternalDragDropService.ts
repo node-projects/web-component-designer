@@ -1,9 +1,9 @@
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
-import { IDragDropService } from "./IDragDropService.js";
+import { IExternalDragDropService } from "./IExternalDragDropService.js";
 import { DesignItem } from '../../item/DesignItem.js';
 import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
 
-export class DragDropService implements IDragDropService {
+export class ExternalDragDropService implements IExternalDragDropService {
 
   public dragOver(event: DragEvent): 'none' | 'copy' | 'link' | 'move' {
     if (event.dataTransfer.items[0].type.startsWith('image/'))

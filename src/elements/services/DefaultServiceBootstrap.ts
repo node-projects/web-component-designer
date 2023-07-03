@@ -39,7 +39,7 @@ import { GridPlacementService } from './placementService/GridPlacementService.js
 import { ElementAtPointService } from './elementAtPointService/ElementAtPointService.js';
 import { FlexBoxPlacementService } from './placementService/FlexBoxPlacementService.js';
 import { SnaplinesProviderService } from './placementService/SnaplinesProviderService.js';
-import { DragDropService } from './dragDropService/DragDropService.js';
+import { ExternalDragDropService } from './dragDropService/ExternalDragDropService.js';
 import { EditTextExtensionProvider } from '../widgets/designerView/extensions/EditText/EditTextExtensionProvider.js';
 import { CopyPasteService } from './copyPasteService/CopyPasteService.js';
 import { DefaultModelCommandService } from './modelCommandService/DefaultModelCommandService.js';
@@ -103,7 +103,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
-  serviceContainer.register("dragDropService", new DragDropService());
+  serviceContainer.register("externalDragDropService", new ExternalDragDropService());
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());

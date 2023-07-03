@@ -812,7 +812,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._fillCalculationrects();
 
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
-      const ddService = this.serviceContainer.dragDropService;
+      const ddService = this.serviceContainer.externalDragDropService;
       if (ddService) {
         const effect = ddService.dragOver(event);
         event.dataTransfer.dropEffect = effect;
@@ -822,15 +822,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     } else {
       const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
       if (hasTransferDataBindingObject) {
-        const ddService = this.serviceContainer.bindableObjectDragDropService;
-        if (ddService) {
+        const bindableDdService = this.serviceContainer.bindableObjectDragDropService;
+        if (bindableDdService) {
           const el = this.getElementAtPoint({ x: event.x, y: event.y });
           if (this._lastDdElement != el) {
-            ddService.dragLeave(this, event, this._lastDdElement);
-            ddService.dragEnter(this, event, el);
+            bindableDdService.dragLeave(this, event, this._lastDdElement);
+            bindableDdService.dragEnter(this, event, el);
             this._lastDdElement = el;
           }
-          const effect = ddService.dragOver(this, event, el);
+          const effect = bindableDdService.dragOver(this, event, el);
           event.dataTransfer.dropEffect = effect;
         }
       } else {
@@ -886,7 +886,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._fillCalculationrects();
 
     if (event.dataTransfer.files?.length > 0) {
-      const ddService = this.serviceContainer.dragDropService;
+      const ddService = this.serviceContainer.externalDragDropService;
       if (ddService) {
         ddService.drop(this, event);
       }
