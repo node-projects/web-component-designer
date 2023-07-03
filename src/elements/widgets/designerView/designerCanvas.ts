@@ -878,7 +878,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private async _onDrop(event: DragEvent) {
-    this.serviceContainer.globalContext.tool =  this.serviceContainer.designerTools.get(NamedTools.Pointer);
+    this.serviceContainer.globalContext.tool = this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._lastDdElement = null;
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
@@ -1023,28 +1023,24 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         case 'Backspace':
           this.executeCommand({ type: CommandType.delete, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
           break;
-        case 'ArrowUp':
-          {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) - moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-          }
-          break;
         case 'ArrowDown':
-          {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('top', parseInt((<HTMLElement>x.element).style.top) + moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-          }
-          break;
+        case 'ArrowUp':
         case 'ArrowLeft':
-          {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) - moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
-          }
-          break;
         case 'ArrowRight':
           {
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => x.setStyle('left', parseInt((<HTMLElement>x.element).style.left) + moveOffset + 'px'));
-            this.extensionManager.refreshExtensions(this.instanceServiceContainer.selectionService.selectedElements);
+            let offset = { x: 0, y: 0 };
+            if (event.key == 'ArrowDown')
+              offset.y = moveOffset;
+            if (event.key == 'ArrowUp')
+              offset.y = -moveOffset;
+            if (event.key == 'ArrowRight')
+              offset.x = moveOffset;
+            if (event.key == 'ArrowLeft')
+              offset.x = -moveOffset;
+            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => {
+              const containerStyle = getComputedStyle(x.parent.element);
+              x.serviceContainer.getLastServiceWhere('containerService', y => y.serviceForContainer(x.parent, containerStyle)).moveElements([x], offset, false);
+            });
           }
           break;
       }

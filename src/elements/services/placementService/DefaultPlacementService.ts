@@ -99,7 +99,6 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
@@ -124,6 +123,19 @@ export class DefaultPlacementService implements IPlacementService {
       const translationMatrix = new DOMMatrix().translate(transformMatrixParentTransformsCompensated.x, transformMatrixParentTransformsCompensated.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
+  }
+
+  moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
+    //TODO: Check if we set left or right
+    //TODO: Use CSS units
+
+    for (let d of designItems) {
+      if (position.x)
+        d.setStyle('left', parseInt((<HTMLElement>d.element).style.left) - position.x + 'px');
+      if (position.y)
+        d.setStyle('top', parseInt((<HTMLElement>d.element).style.top) - position.y + 'px');
+    }
+    designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshExtensions(designItems);
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
@@ -154,6 +166,5 @@ export class DefaultPlacementService implements IPlacementService {
     for (const item of items) {
       (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
     }
-
   }
 }

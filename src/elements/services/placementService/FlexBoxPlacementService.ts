@@ -126,7 +126,9 @@ export class FlexBoxPlacementService implements IPlacementService {
     (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
   }
 
-  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) { 
+  }
 
+  moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
   }
 }
