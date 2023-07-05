@@ -180,6 +180,7 @@ export * from "./elements/widgets/designerView/tools/toolBar/buttons/SelectorToo
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/SeperatorToolProvider.js";
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js";
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js";
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/popups/DrawToolPopup.js";
 
