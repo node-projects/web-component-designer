@@ -69,7 +69,6 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._selectionChangedHandler?.dispose()
     this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
       this.selectedItems = e.selectedElements;
-
     });
     this.selectedItems = this._instanceServiceContainer.selectionService.selectedElements;
   }

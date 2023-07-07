@@ -264,7 +264,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   static override readonly template = html`
     <div style="display: flex;flex-direction: column;width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
       <div style="width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
-        <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative; margin: 0 !important; padding: 0 !important; border: none !important;">
+        <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative; margin: 0 !important; padding: 0 !important; border: none !important; isolation: isolate !important;">
           <div id="node-projects-designer-canvas-canvasContainer"
           style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none; margin: 0 !important; padding: 0 !important; border: none !important;">
           <div id="node-projects-designer-canvas-canvas" part="canvas" style=" margin: 0 !important; padding: 0 !important; border: none !important;"></div>
@@ -974,13 +974,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           {
             let offset = { x: 0, y: 0 };
             if (event.key == 'ArrowDown')
-              offset.y = moveOffset;
-            if (event.key == 'ArrowUp')
               offset.y = -moveOffset;
+            if (event.key == 'ArrowUp')
+              offset.y = moveOffset;
             if (event.key == 'ArrowRight')
-              offset.x = moveOffset;
-            if (event.key == 'ArrowLeft')
               offset.x = -moveOffset;
+            if (event.key == 'ArrowLeft')
+              offset.x = moveOffset;
             this.instanceServiceContainer.selectionService.selectedElements.forEach(x => {
               const containerStyle = getComputedStyle(x.parent.element);
               x.serviceContainer.getLastServiceWhere('containerService', y => y.serviceForContainer(x.parent, containerStyle)).moveElements([x], offset, false);

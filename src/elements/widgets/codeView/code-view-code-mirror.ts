@@ -23,7 +23,7 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
     }`;
 
   static override readonly template = html`
-    <div  style="width: 100%; height: 100%;">
+    <div  style="width: 100%; height: 100%; overflow: auto;">
       <div id="textarea"></div>
     </div>`;
 
@@ -33,10 +33,10 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
     //@ts-ignore
     if (window.importShim)
       //@ts-ignore
-      importShim("./codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+      importShim("codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
     else
       //@ts-ignore
-      import("./codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+      import("codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this.style.display = 'block';
     this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');

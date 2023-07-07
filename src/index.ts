@@ -11,7 +11,7 @@ export * from "./elements/helper/PathDataPolyfill.js";
 export * from "./elements/helper/Screenshot.js";
 export * from "./elements/helper/ClipboardHelper.js";
 export * from "./elements/loader/OldCustomElementsManifestLoader.js"
-
+export type { ITextWriter } from "./elements/helper/ITextWriter.js";
 export * from "./elements/helper/w3color.js";
 export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
@@ -278,6 +278,8 @@ export type { IDesignerPointerExtensionProvider } from "./elements/widgets/desig
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/AbstractDesignerPointerExtension.js";
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtension.js";
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js";
+
+export * from "./elements/widgets/debugView/debug-view.js";
 
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";
