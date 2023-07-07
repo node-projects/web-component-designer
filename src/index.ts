@@ -279,6 +279,8 @@ export * from "./elements/widgets/designerView/extensions/pointerExtensions/Abst
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtension.js";
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js";
 
+export * from "./elements/widgets/debugView/debug-view.js";
+
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";
 export * from "./elements/widgets/paletteView/paletteView.js";
