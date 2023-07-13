@@ -11,6 +11,7 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
 
   public code: string;
   public onTextChanged = new TypedEvent<string>();
+  public mode: string = 'xml';
 
   private _codeMirrorEditor: CodeMirror.Editor;
   private _editor: HTMLTextAreaElement;
