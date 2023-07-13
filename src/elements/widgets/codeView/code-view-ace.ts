@@ -40,6 +40,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     this.style.display = 'block';
     this._editor = document.createElement("div");

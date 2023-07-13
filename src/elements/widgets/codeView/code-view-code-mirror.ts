@@ -29,14 +29,20 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
 
     //@ts-ignore
-    if (window.importShim)
+    if (window.importShim) {
       //@ts-ignore
-      importShim("codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
-    else
+      importShim("codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
       //@ts-ignore
-      import("codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+      importShim("codemirror/addon/fold/foldgutter.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
+    } else {
+      //@ts-ignore
+      import("codemirror/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
+      //@ts-ignore
+      import("codemirror/addon/fold/foldgutter.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
+    }
 
     this.style.display = 'block';
     this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');
@@ -97,9 +103,14 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
     const config: CodeMirror.EditorConfiguration = {
       tabSize: 3,
       lineNumbers: true,
-      mode: 'xml',
+      mode: this.mode,
       //@ts-ignore
-      htmlMode: true
+      htmlMode: true,
+      lineWrapping: true,
+      //@ts-ignore
+      extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
+      foldGutter: true,
+      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     };
 
     //@ts-ignore
