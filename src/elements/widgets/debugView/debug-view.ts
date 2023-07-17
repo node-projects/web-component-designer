@@ -1,5 +1,6 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from "../../item/IDesignItem.js";
+import { DesignItem } from "../../item/DesignItem.js";
 
 
 function generateSelector(element) {
@@ -132,29 +133,59 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
     public static override readonly template = html`
         <div>
             <table>
-                <tr><td colspan="2">Styling</td></tr>
-                <tr><td>display</td><td>[[this.computedStyle.display]]</td></tr>
-                <tr><td>position</td><td>[[this.computedStyle.position]]</td></tr>
-                <tr><td>visibility</td><td>[[this.computedStyle.visibity]]</td></tr>
-                <tr><td>pointerEvents</td><td>[[this.computedStyle.pointerEvents]]</td></tr>
-                <tr><td>zIndex</td><td>[[this.computedStyle.zIndex]]</td></tr>
-                <tr><td colspan="2">Context</td></tr>
-                <tr><td>offsetParent</td><td>[[this.selectedElementOffsetParent]]</td></tr>
-                <tr><td>createsStackingContext</td><td>[[this.createsStackingContext]]</td></tr>
-                <tr><td>stackingContextReason</td><td>[[this.createsStackingContextReason]]</td></tr>
-                <tr><td>stackingContextParent</td><td>[[this.parentStackingContext]]</td></tr>
+                    <tr><th colspan="2">Styling</th></tr>
+                    <tr><td>display</td><td>[[?this.computedStyle.display]]</td></tr>
+                    <tr><td>position</td><td>[[?this.computedStyle.position]]</td></tr>
+                    <tr><td>visibility</td><td>[[?this.computedStyle.visibility]]</td></tr>
+                    <tr><td>pointerEvents</td><td>[[?this.computedStyle.pointerEvents]]</td></tr>
+                    <tr><td>zIndex</td><td>[[?this.computedStyle.zIndex]]</td></tr>
+                    <tr><th colspan="2">Context</th></tr>
+                    <tr><td>offsetParent</td><td class="lnk" @click="[[this._clickLink(event, 'offsetParent')]]">[[?this.selectedElementOffsetParentText]]</td></tr>
+                    <tr><td>createsStackingContext</td><td>[[this.createsStackingContext]]</td></tr>
+                    <tr><td>stackingContextReason</td><td>[[this.createsStackingContextReason]]</td></tr>
+                    <tr><td>stackingContextParent</td><td class="lnk" @click="[[this._clickLink(event, 'stackingContextParent')]]">[[?this.parentStackingContextText]]</td></tr>
             </table>
         </div> 
     `;
 
-    public static override readonly style = css``;
+    public static override readonly style = css`
+    table {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      
+      table td, table th {
+        border: 1px solid #ddd;
+        padding: 2px 4px;
+      }
+      
+      table tr:nth-child(even){background-color: #f2f2f2;}
+      
+      table tr:hover {background-color: #ddd;}
+      
+      table th {
+        text-align: left;
+        background-color: #989898;
+        color: white;
+      }
+      
+      .lnk {
+        color: blue;
+      }
+      .lnk:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }`;
 
     private _ready: boolean;
     computedStyle: CSSStyleDeclaration;
     createsStackingContext: boolean;
-    createsStackingContextReason: any;
-    parentStackingContext: any;
+    createsStackingContextReason: string;
+    parentStackingContext: Element;
+    parentStackingContextText: string;
     selectedElementOffsetParent: Element;
+    selectedElementOffsetParentText: string;
 
     constructor() {
         super();
@@ -168,22 +199,57 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
         this._ready = true;
     }
 
+    _clickLink(e: MouseEvent, target: 'offsetParent' | 'stackingContextParent') {
+        if (target == 'offsetParent') {
+            if (this.selectedElementOffsetParent) {
+                let di = DesignItem.GetDesignItem(this.selectedElementOffsetParent);
+                di.instanceServiceContainer.selectionService.setSelectedElements([di]);
+            }
+        } else if (target == 'stackingContextParent') {
+            if (this.parentStackingContext) {
+                let di = DesignItem.GetDesignItem(this.parentStackingContext);
+                di.instanceServiceContainer.selectionService.setSelectedElements([di]);
+            }
+        }
+    }
+
     update(designItem: IDesignItem) {
         if (this._ready) {
             requestAnimationFrame(() => {
-                let element = designItem.element;
-                this.computedStyle = getComputedStyle(designItem.element);
-                this.selectedElementOffsetParent = generateSelector((<HTMLElement>designItem.element).offsetParent);
+                let element = designItem?.element;
+                if (element) {
+                    this.computedStyle = getComputedStyle(designItem.element);
+                    this.selectedElementOffsetParent = (<HTMLElement>designItem.element).offsetParent;
+                    if (this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element) {
+                        this.selectedElementOffsetParentText = null;
+                        this.selectedElementOffsetParent = null;
+                    } else
+                        this.selectedElementOffsetParentText = generateSelector((<HTMLElement>designItem.element).offsetParent);
 
-                if (element && element.nodeType === 1) {
-                    const closest = getClosestStackingContext(element);
-                    this.createsStackingContext = element === closest.node;
-                    this.createsStackingContextReason = this.createsStackingContext ? closest.reason : 'not a stacking context';
-                    let parentContext = closest.node;
-                    if (this.createsStackingContext && element.nodeName !== 'HTML') {
-                        parentContext = getClosestStackingContext(element.parentNode).node;
+                    if (element && element.nodeType === 1) {
+                        const closest = getClosestStackingContext(element);
+                        this.createsStackingContext = element === closest.node;
+                        this.createsStackingContextReason = this.createsStackingContext ? closest.reason : 'not a stacking context';
+                        this.parentStackingContext = closest.node;
+                        if (this.createsStackingContext && element.nodeName !== 'HTML') {
+                            this.parentStackingContext = getClosestStackingContext(element.parentNode).node;
+                        }
+                        if (this.parentStackingContext == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.parentElement.parentElement) {
+                            this.parentStackingContextText = null;
+                            this.parentStackingContext = null;
+                        } else
+                            this.parentStackingContextText = generateSelector(this.parentStackingContext);
                     }
-                    this.parentStackingContext = generateSelector(parentContext);
+                } else {
+                    //@ts-ignore
+                    this.computedStyle = {};
+                    this.createsStackingContext = false;
+                    this.createsStackingContextReason = '';
+                    this.createsStackingContext = false;
+                    this.selectedElementOffsetParent = null;
+                    this.selectedElementOffsetParentText = null;
+                    this.parentStackingContext = null;
+                    this.parentStackingContextText = null;
                 }
 
                 this._bindingsRefresh();
