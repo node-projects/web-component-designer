@@ -252,7 +252,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
   private _selectDesignerElement(item: any) {
     let index = item.dataset.index;
     let el = this._items[index].ref;
-    let d = DesignItem.GetOrCreateDesignItem(el, this._rootItem.serviceContainer, this._rootItem.instanceServiceContainer);
+    let d = DesignItem.GetOrCreateDesignItem(el, el, this._rootItem.serviceContainer, this._rootItem.instanceServiceContainer);
     d.instanceServiceContainer.selectionService.setSelectedElements([d]);
   }
 

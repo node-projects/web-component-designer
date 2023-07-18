@@ -49,7 +49,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
           element = document.createElement(item.rawTagName);
         manualCreatedElement = true;
       }
-      designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
+      designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
 
@@ -89,12 +89,12 @@ export class NodeHtmlParserService implements IHtmlParserService {
     } else if (item.nodeType == 3) {
       this._parseDiv.innerHTML = item.rawText;
       let element = this._parseDiv.childNodes[0];
-      designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
+      designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
     } else if (item.nodeType == 8) {
       let element = document.createComment(item.rawText);
-      designItem = new DesignItem(element, item, serviceContainer, instanceServiceContainer);
+      designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
     }

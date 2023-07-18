@@ -42,7 +42,7 @@ export class ExtensionManager implements IExtensionManager {
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
     if (selectionChangedEvent.oldSelectedElements && selectionChangedEvent.oldSelectedElements.length) {
       if (selectionChangedEvent.oldSelectedElements[0].parent) {
-        const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
+        const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
         this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
         this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.Selection);
@@ -52,7 +52,7 @@ export class ExtensionManager implements IExtensionManager {
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
-      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
+      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
       this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
     }
 

@@ -56,7 +56,7 @@ export class PointerTool implements ITool {
         }
       }
       let newEl = designerCanvas.serviceContainer.elementAtPointService.getElementAtPoint(designerCanvas, { x: event.x, y: event.y });
-      const designItem = DesignItem.GetOrCreateDesignItem(newEl, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+      const designItem = DesignItem.GetOrCreateDesignItem(newEl, newEl, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
       if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
         designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
       }
@@ -123,7 +123,7 @@ export class PointerTool implements ITool {
       return;
 
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
-    const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+    const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
@@ -195,7 +195,7 @@ export class PointerTool implements ITool {
           }
           let currentElement = elements[idx];
           if (currentElement)
-            currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+            currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         }
       }
     }
@@ -428,7 +428,7 @@ export class PointerTool implements ITool {
       } else if (false) {
         //check we don't try to move a item over one of its children..
       } else {
-        newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+        newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
         newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
         if (newContainerService) {

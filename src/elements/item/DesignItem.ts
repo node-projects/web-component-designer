@@ -240,7 +240,7 @@ export class DesignItem implements IDesignItem {
     const grp = this.openGroup('set content');
     this.clearChildren();
     let t = document.createTextNode(value);
-    let di = DesignItem.GetOrCreateDesignItem(t, this.serviceContainer, this.instanceServiceContainer);
+    let di = DesignItem.GetOrCreateDesignItem(t, t, this.serviceContainer, this.instanceServiceContainer);
     if (this.nodeType == NodeType.TextNode) {
       const idx = this.parent.indexOf(this);
       const parent = this.parent;
@@ -261,7 +261,7 @@ export class DesignItem implements IDesignItem {
       range.selectNode(document.body);
       const fragment = range.createContextualFragment(value);
       for (const n of fragment.childNodes) {
-        let di = DesignItem.GetOrCreateDesignItem(n, this.serviceContainer, this.instanceServiceContainer)
+        let di = DesignItem.GetOrCreateDesignItem(n, n, this.serviceContainer, this.instanceServiceContainer)
         this.insertChild(di);
       }
       grp.commit();
@@ -347,7 +347,7 @@ export class DesignItem implements IDesignItem {
     this._refreshIfStyleSheet();
   }
 
-  constructor(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+  public constructor(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     this.node = node;
     this.parsedNode = parsedNode;
     this.serviceContainer = serviceContainer;
@@ -364,15 +364,19 @@ export class DesignItem implements IDesignItem {
   }
 
   public getOrCreateDesignItem(node: Node) {
-    return DesignItem.GetOrCreateDesignItem(node, this.serviceContainer, this.instanceServiceContainer);
+    return DesignItem.GetOrCreateDesignItem(node, node, this.serviceContainer, this.instanceServiceContainer);
   }
 
-  static GetOrCreateDesignItem(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
+  static GetOrCreateDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     if (!node)
       return null;
     let designItem: IDesignItem = DesignItem._designItemMap.get(node);
     if (!designItem) {
-      designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
+      let dis = serviceContainer.designItemService;
+      if (dis)
+        designItem = dis.createDesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
+      else
+        designItem = new DesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
     }
     return designItem;
   }

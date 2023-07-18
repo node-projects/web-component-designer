@@ -81,7 +81,7 @@ export class RectangleSelectorTool implements ITool {
           point.y = elementRect.y + elementRect.height;
           const p4 = p3 && this._rect.isPointInFill(point);
           if (p4) {
-            const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
+            const desItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
             if(designerCanvas.instanceServiceContainer.selectionService.selectedElements)
                 inSelectionElements.push(... designerCanvas.instanceServiceContainer.selectionService.selectedElements);
             inSelectionElements.push(desItem);

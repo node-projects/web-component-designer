@@ -10,6 +10,7 @@ export class SimpleSplitView extends BaseCustomWebComponentConstructorAppend {
       height: 100%;
       width: 100%;
       grid-template-rows: calc(var(--split) * 1%) 5px calc(((100 - var(--split)) * 1%) - 5px);
+      grid-template-columns: 100%;
       display: grid;
       align-items: center;
     }

@@ -601,7 +601,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.instanceServiceContainer.register("designItemDocumentPositionService", designItemDocumentPositionService(this));
     }
 
-    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this.serviceContainer, this.instanceServiceContainer);
+    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this._canvas, this.serviceContainer, this.instanceServiceContainer);
     const contentService = this.serviceContainer.getLastService('contentService')
     if (contentService) {
       this.instanceServiceContainer.register("contentService", contentService(this));
@@ -1116,7 +1116,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public showHoverExtension(element: Element, event: Event) {
-    const currentDesignItem = DesignItem.GetOrCreateDesignItem(element, this.serviceContainer, this.instanceServiceContainer);
+    const currentDesignItem = DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer);
     if (this._lastHoverDesignItem != currentDesignItem) {
       if (this._lastHoverDesignItem)
         this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
@@ -1168,7 +1168,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.clickOverlay.style.cursor = this._canvas.style.cursor;
 
-    const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, this.serviceContainer, this.instanceServiceContainer);
+    const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, currentElement, this.serviceContainer, this.instanceServiceContainer);
     this.showHoverExtension(currentDesignItem.element, event);
 
     //TODO: needed ??
