@@ -57,6 +57,9 @@ export type { IDemoProviderService } from "./elements/services/demoProviderServi
 export * from "./elements/services/designItemDocumentPositionService/DesignItemDocumentPositionService.js";
 export type { IDesignItemDocumentPositionService } from "./elements/services/designItemDocumentPositionService/IDesignItemDocumentPositionService.js";
 
+export * from "./elements/services/designItemService/DesignItemService.js";
+export type { IDesignItemService } from "./elements/services/designItemService/IDesignItemService.js";
+
 export * from "./elements/services/dragDropService/ExternalDragDropService.js";
 export type { IExternalDragDropService } from "./elements/services/dragDropService/IExternalDragDropService.js";
 

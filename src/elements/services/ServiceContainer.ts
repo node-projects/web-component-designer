@@ -42,6 +42,7 @@ import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { IDesignItemDocumentPositionService } from './designItemDocumentPositionService/IDesignItemDocumentPositionService.js';
 import { IDragDropService } from './dragDropService/IDragDropService.js';
+import { IDesignItemService } from './designItemService/IDesignItemService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -63,7 +64,8 @@ interface ServiceNameMap {
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
   "propertyGroupsService": IPropertyTabsService;
-  "dragDropService": IDragDropService
+  "dragDropService": IDragDropService;
+  "designItemService": IDesignItemService;
   
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
@@ -189,5 +191,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get demoProviderService(): IDemoProviderService {
     return this.getLastService('demoProviderService');
+  }
+
+  get designItemService(): IDesignItemService {
+    return this.getLastService('designItemService');
   }
 }

@@ -77,7 +77,7 @@ export class DragDropService implements IDragDropService {
       } else if (false) {
         //check we don't try to move a item over one of its children..
       } else {
-        newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+        newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
         newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
         if (newContainerService) {

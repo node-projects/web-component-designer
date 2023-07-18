@@ -59,7 +59,7 @@ export class MagicWandSelectorTool implements ITool {
           point.y = elementRect.y + elementRect.height;
           const p4 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
           if (p1 && p2 && p3 && p4) {
-            const desItem = DesignItem.GetOrCreateDesignItem(e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
+            const desItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
             if (designerCanvas.instanceServiceContainer.selectionService.selectedElements)
               inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
             inSelectionElements.push(desItem);
