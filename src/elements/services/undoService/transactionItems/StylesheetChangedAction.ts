@@ -21,11 +21,11 @@ export class StylesheetChangedAction implements ITransactionItem {
   }
 
   undo() {
-    this.stylesheetService.updateCompleteStylesheet(this.name, this.oldValue);
+    this.stylesheetService.updateCompleteStylesheetWithoutUndo(this.name, this.oldValue);
   }
 
   do() {
-    this.stylesheetService.updateCompleteStylesheet(this.name, this.newValue);
+    this.stylesheetService.updateCompleteStylesheetWithoutUndo(this.name, this.newValue);
   }
 
   public name: string;

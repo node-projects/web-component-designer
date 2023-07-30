@@ -2,7 +2,6 @@ import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from './IStylesheetService.js';
-import { StylesheetStyleChangeAction } from "../undoService/transactionItems/StylesheetStyleChangeAction.js";
 import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 
@@ -89,22 +88,17 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
     abstract getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[]
 
     public updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean) {
-        if (!(<IDocumentStylesheet>declaration.stylesheet).designItem) {
-            const action = new StylesheetStyleChangeAction(this, declaration, value, declaration.value);
-            this._instanceServiceContainer.undoService.execute(action);
-        }
-        else {
-            this.updateDeclarationValueWithoutUndo(declaration, value, important);
-        }
+        this.updateDeclarationValueWithoutUndo(declaration, value, important);
     }
 
     abstract insertDeclarationIntoRule(rule: IStyleRule, property: string, value: string, important: boolean): boolean
     abstract removeDeclarationFromRule(rule: IStyleRule, property: string): boolean;
     abstract updateCompleteStylesheet(name: string, newStyle: string);
+    abstract updateCompleteStylesheetWithoutUndo(name: string, newStyle: string);
 
     public abstract updateDeclarationValueWithoutUndo(declaration: IStyleDeclaration, value: string, important: boolean)
 
-    public stylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' }>();
+    public stylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' | 'undo' }>();
     public stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();
 
     protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {

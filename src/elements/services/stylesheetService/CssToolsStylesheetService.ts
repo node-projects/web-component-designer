@@ -84,6 +84,15 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
         declaration.ast.value = important ? value + ' !important' : value;
         let ss = this._allStylesheets.get(declaration.parent.stylesheetName);
         this.updateStylesheet(ss);
+        /*
+        declaration.ast.value = important ? value + ' !important' : value;
+        let ss = declaration.ast;
+        while (ss?.parent)
+            ss = ss?.parent;
+        let obj = { ast: ss, stylesheet: declaration.stylesheet };
+        this._allStylesheets.set(declaration.parent.stylesheetName, obj)
+        this.updateStylesheet(obj);
+        */
     }
 
     public insertDeclarationIntoRule(rule: IRuleWithAST, property: string, value: string, important: boolean): boolean {
@@ -114,6 +123,14 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
     }
 
     updateCompleteStylesheet(name: string, newStyle: string) {
+        this.updateCompleteStylesheetInternal(name, newStyle, 'styleupdate');
+    }
+
+    updateCompleteStylesheetWithoutUndo(name: string, newStyle: string, noUndo = false) {
+        this.updateCompleteStylesheetInternal(name, newStyle, 'undo');
+    }
+
+    private updateCompleteStylesheetInternal(name: string, newStyle: string, changeSource: 'undo' | 'styleupdate') {
         const ss = this._allStylesheets.get(name);
         if (ss.stylesheet.content != newStyle) {
             const old = ss.stylesheet.content;
@@ -121,7 +138,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
             if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
                 (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
             } else
-                this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+                this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource });
         }
     }
 }
