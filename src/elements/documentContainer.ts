@@ -45,7 +45,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public get additionalStylesheets() {
     return this._additionalStylesheets;
   };
-  public additionalStylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' }>;
+  public additionalStylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' | 'undo' }>;
 
   public onContentChanged = new TypedEvent<void>();
 

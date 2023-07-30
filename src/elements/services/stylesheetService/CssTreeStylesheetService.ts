@@ -159,6 +159,14 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
     }
 
     updateCompleteStylesheet(name: string, newStyle: string) {
+        this.updateCompleteStylesheetInternal(name, newStyle, 'styleupdate');
+    }
+
+    updateCompleteStylesheetWithoutUndo(name: string, newStyle: string, noUndo = false) {
+        this.updateCompleteStylesheetInternal(name, newStyle, 'undo');
+    }
+
+    private updateCompleteStylesheetInternal(name: string, newStyle: string, changeSource: 'undo' | 'styleupdate') {
         const ss = this._allStylesheets.get(name);
         if (ss.stylesheet.content != newStyle) {
             const old = ss.stylesheet.content;
@@ -166,7 +174,7 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
             if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
                 (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
             } else
-                this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
+                this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource });
         }
     }
 

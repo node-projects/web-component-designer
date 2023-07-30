@@ -39,7 +39,8 @@ export interface IStylesheetService {
     insertDeclarationIntoRule(rule: IStyleRule, property: string, value: string, important: boolean): boolean;
     removeDeclarationFromRule(rule: IStyleRule, property: string): boolean;
     updateCompleteStylesheet(name: string, newStyle: string): void;
+    updateCompleteStylesheetWithoutUndo(name: string, newStyle: string): void;
 
-    stylesheetChanged: TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' }>;
+    stylesheetChanged: TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' | 'undo' }>;
     stylesheetsChanged: TypedEvent<void>;
 }
