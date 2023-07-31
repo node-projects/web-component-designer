@@ -30,18 +30,7 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
     this._importPrefix = importPrefix;
     if (typeof fileOrObject === 'string') {
       this._importPrefix = this._importPrefix ?? fileOrObject.split('/').slice(0, -1).join('/');
-
-
-      let importOfFile: Promise<any>;
-      //@ts-ignore
-      if (window.importShim)
-        //@ts-ignore
-        importOfFile = importShim(fileOrObject, { assert: { type: 'json' } });
-      else
-        //@ts-ignore
-        importOfFile = import(fileOrObject, { assert: { type: 'json' } });
-
-      importOfFile.then(module => {
+      import(fileOrObject, { with: { type: 'json' } }).then(module => {
         this._packageData = module.default;
         this._parseManifest();
       }).catch(err => {

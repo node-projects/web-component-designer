@@ -4,8 +4,9 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
 import { CommandType } from '../../../commandHandling/CommandType.js';
 import { IDisposable } from '../../../interfaces/IDisposable.js';
+import type { EditorView } from 'codemirror';
 
-export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend implements ICodeView, IDisposable {
+export class CodeViewCodeMirror6 extends BaseCustomWebComponentLazyAppend implements ICodeView, IDisposable {
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 
@@ -13,42 +14,54 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
   public onTextChanged = new TypedEvent<string>();
   public mode: string = 'xml';
 
-  private _codeMirrorEditor: CodeMirror.Editor;
-  private _editor: HTMLTextAreaElement;
+  private _editor: EditorView;
 
   static override readonly style = css`
     :host {
       display: block;
       height: 100%;
       width: 100%;
+      background: white;
+    }
+    .cm-editor {
+      height: 100%
     }`;
 
   static override readonly template = html`
-    <div  style="width: 100%; height: 100%; overflow: auto;">
-      <div id="textarea"></div>
+    <div id="container" style="width: 100%; height: 100%; overflow: auto;">
     </div>`;
+  private _cm: any;
 
   constructor() {
     super();
     this._restoreCachedInititalValues();
 
-    import("codemirror/lib/codemirror.css", { with: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
-    import("codemirror/addon/fold/foldgutter.css", { with: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
+    import("codemirror").then(async cm => {
+      this._cm = cm;
+      let js = await import("@codemirror/lang-javascript");
+      let html = await import("@codemirror/lang-html");
+      this._editor = new cm.EditorView({
+        extensions: [cm.basicSetup, js.javascript(), html.html()],
+        parent: this._getDomElement<HTMLTextAreaElement>('container')
+      })
+    });
+  }
 
-    this.style.display = 'block';
-    this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');
+  ready() {
+    /* this._codeMirrorEditor.on('change', () => this.onTextChanged.emit(this._codeMirrorEditor.getValue()))*/
   }
 
   dispose(): void {
   }
 
-  executeCommand(command: IUiCommand) {
+  async executeCommand(command: IUiCommand) {
+    let cmds = await import("@codemirror/commands");
     switch (command.type) {
       case CommandType.undo:
-        this._codeMirrorEditor.undo();
+        cmds.undo(this._editor);
         break;
       case CommandType.redo:
-        this._codeMirrorEditor.redo();
+        cmds.redo(this._editor);
         break;
       case CommandType.copy:
         const text = this._codeMirrorEditor.getSelection();
@@ -86,43 +99,24 @@ export class CodeViewCodeMirror extends BaseCustomWebComponentLazyAppend impleme
   focusEditor() {
     requestAnimationFrame(() => {
       this.focus();
-      this._codeMirrorEditor.focus();
+      this._editor.focus();
     });
   }
 
-  ready() {
-    const config: CodeMirror.EditorConfiguration = {
-      tabSize: 3,
-      lineNumbers: true,
-      mode: this.mode,
-      //@ts-ignore
-      htmlMode: true,
-      lineWrapping: true,
-      //@ts-ignore
-      extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
-      foldGutter: true,
-      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-    };
-
-    //@ts-ignore
-    this._codeMirrorEditor = CodeMirror(this._editor, config);
-    this._codeMirrorEditor.setSize('100%', '100%');
-    this._codeMirrorEditor.on('change', () => this.onTextChanged.emit(this._codeMirrorEditor.getValue()))
-  }
-
   update(code) {
-    this._codeMirrorEditor.setValue(code);
+    this._editor.dispatch({
+      changes: { from: 0, to: this._editor.state.doc.length, insert: code }
+    });
   }
   getText() {
-    return this._codeMirrorEditor.getValue();
+    return this._editor.state.doc.toString();
   }
 
   setSelection(position: IStringPosition) {
-
-    let point1 = this._codeMirrorEditor.posFromIndex(position.start);
-    let point2 = this._codeMirrorEditor.posFromIndex(position.start + position.length);
-    this._codeMirrorEditor.setSelection(point1, point2);
+    this._editor.dispatch({
+      selection: { anchor: position.start, head: position.start + position.length }
+    });
   }
 }
 
-customElements.define('node-projects-code-view-code-mirror', CodeViewCodeMirror);
+customElements.define('node-projects-code-view-code-mirror-6', CodeViewCodeMirror6);

@@ -13,7 +13,7 @@ function generateSelector(element) {
     return selector ? tag + selector : tag;
 }
 
-const getClosestStackingContext = function (node) {
+const getClosestStackingContext = (node) => {
     // the root element (HTML).
     if (!node || node.nodeName === 'HTML') {
         return { node: document.documentElement, reason: 'root' };
@@ -149,34 +149,43 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
     `;
 
     public static override readonly style = css`
-    table {
-        font-family: Arial, Helvetica, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-      }
-      
-      table td, table th {
-        border: 1px solid #ddd;
-        padding: 2px 4px;
-      }
-      
-      table tr:nth-child(even){background-color: #f2f2f2;}
-      
-      table tr:hover {background-color: #ddd;}
-      
-      table th {
-        text-align: left;
-        background-color: #989898;
-        color: white;
-      }
-      
-      .lnk {
-        color: blue;
-      }
-      .lnk:hover {
-        text-decoration: underline;
-        cursor: pointer;
-      }`;
+        :host {
+            display: block;
+            height: 100%;
+        }
+        div {
+            height: 100%;
+            overflow-y: auto;
+        }
+        table {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 11px;
+        }
+        
+        table td, table th {
+            border: 1px solid #ddd;
+            padding: 1px 4px;
+        }
+        
+        table tr:nth-child(even){background-color: #f2f2f2;}
+        
+        table tr:hover {background-color: #ddd;}
+        
+        table th {
+            text-align: left;
+            background-color: #989898;
+            color: white;
+        }
+        
+        .lnk {
+            color: blue;
+        }
+        .lnk:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }`;
 
     private _ready: boolean;
     computedStyle: CSSStyleDeclaration;
