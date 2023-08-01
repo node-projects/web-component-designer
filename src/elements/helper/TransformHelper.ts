@@ -9,6 +9,26 @@ let identityMatrix: number[] = [
   0, 0, 0, 1
 ];
 
+export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
+  //https://www.w3.org/TR/css-transforms-2/#ctm
+  let s = getComputedStyle(element);
+
+  let m = new DOMMatrix();
+  if (s.translate != 'none') {
+    m = m.multiply(new DOMMatrix('translate(' + s.translate + ')'));
+  }
+  if (s.rotate != 'none') {
+    m = m.multiply(new DOMMatrix('rotate(' + s.rotate + ')'));
+  }
+  if (s.scale != 'none') {
+    m = m.multiply(new DOMMatrix('scale(' + s.rotate + ')'));
+  }
+  if (s.transform != 'none') {
+    m = m.multiply(new DOMMatrix(s.transform));
+  }
+  return m;
+}
+
 export function combineTransforms(element: HTMLElement, actualTransforms: string, requestedTransformation: string) {
   if (actualTransforms == null || actualTransforms == '') {
     element.style.transform = requestedTransformation;
