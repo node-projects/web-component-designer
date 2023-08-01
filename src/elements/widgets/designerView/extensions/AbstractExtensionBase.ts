@@ -34,6 +34,14 @@ export abstract class AbstractExtensionBase {
     this.overlays.push(element);
   }
 
+  protected _drawGroup(className?: string, group?: SVGGElement, overlayLayer?: OverlayLayer) {
+    const newGroup = this.overlayLayerView.drawGroup(this.constructor.name, className, group, overlayLayer);
+    if (!group) {
+      this.overlays.push(newGroup);
+    }
+    return newGroup;
+  }
+
   protected _drawLine(x1: number, y1: number, x2: number, y2: number, className?: string, line?: SVGLineElement, overlayLayer?: OverlayLayer) {
     const newLine = this.overlayLayerView.drawLine(this.constructor.name, x1, y1, x2, y2, className, line, overlayLayer);
     if (!line) {
