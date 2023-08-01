@@ -146,8 +146,8 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
   while (actualElement != ancestor) {
     const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    actualElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>actualElement)).transform);
-    newElementMatrix = new DOMMatrix(getComputedStyle((<HTMLElement>newElement)).transform);
+    actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
+    newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
     newElementMatrix.m41 = newElementMatrix.m42 = 0;
     if (actualElement == element) {
       originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(newElementMatrix);
