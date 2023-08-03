@@ -129,13 +129,15 @@ export class ContextMenu {
 
 	menu: IContextMenuItem[];
 	public options: IContextMenuOptions;
+	public context: any
 	private num: number;
 	private _menuElement: HTMLDivElement;
 
-	constructor(menu: IContextMenuItem[], options?: IContextMenuOptions) {
+	constructor(menu: IContextMenuItem[], options?: IContextMenuOptions, context?: any) {
 		this.num = ContextMenu.count++;
 		this.menu = menu;
 		this.options = options;
+		this.context = context;
 
 		this.reload();
 
@@ -211,12 +213,12 @@ export class ContextMenu {
 				} else {
 					if (item.action)
 						li.addEventListener('click', (e) => {
-							item.action(e, item);
+							item.action(e, item, this.context);
 							this.close();
 						});
 					if (this.options?.mode == 'undo') {
 						li.addEventListener('mouseup', (e) => {
-							item.action(e, item);
+							item.action(e, item, this.context);
 							this.close();
 						});
 					}
@@ -265,8 +267,6 @@ export class ContextMenu {
 
 		return ul_outer;
 	}
-
-
 
 	public display(event: MouseEvent) {
 		let menu = this._menuElement;
@@ -337,8 +337,8 @@ export class ContextMenu {
 		}
 	}
 
-	static show(menu: IContextMenuItem[], event: MouseEvent, options?: IContextMenuOptions) {
-		let ctxMenu = new ContextMenu(menu, options);
+	static show(menu: IContextMenuItem[], event: MouseEvent, options?: IContextMenuOptions, context?: any) {
+		let ctxMenu = new ContextMenu(menu, options, context);
 		ctxMenu.display(event);
 		return ctxMenu;
 	}
