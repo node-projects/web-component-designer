@@ -1,4 +1,5 @@
 import { IDesignItem } from "../item/IDesignItem.js";
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "./TransformHelper.js";
 
 export function CalculateGridInformation(designItem: IDesignItem) {
 
@@ -6,7 +7,8 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   //same name should combine columns/rows
 
   let itemRect = designItem.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(designItem.element);
-  //let itemRect = designItem.element.getBoundingClientRect();
+  let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>designItem.element, null, designItem.instanceServiceContainer.designerCanvas);
+
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');
   const columns = computedStyle.gridTemplateColumns.split(' ');
@@ -18,8 +20,8 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   let xGap = 0;
   let yGap = 0;
   let rw = 0;
-  let xOffset = itemRect.x;// - designItem.instanceServiceContainer.designerCanvas.containerBoundingRect.x;
-  let yOffset = itemRect.y;// - designItem.instanceServiceContainer.designerCanvas.containerBoundingRect.y;
+  let xOffset = transformedCornerPoints[0].x;
+  let yOffset = transformedCornerPoints[0].y;
 
   let gridA: string[] = null;
   if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')

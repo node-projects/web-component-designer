@@ -1,6 +1,7 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { convertCssUnit, convertCssUnitToPixel, getCssUnit } from "../../../../helper/CssUnitConverter.js";
 import { CalculateGridInformation } from "../../../../helper/GridHelper.js";
+import { getElementCombinedTransform } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension } from '../AbstractExtension.js';
@@ -14,6 +15,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
   private _resizers: SVGRectElement[] = [];
   private _initalPos: number;
   private _initialSizes: string;
+  private _group: SVGGElement;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -25,11 +27,16 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
 
   override refresh(event?: Event) {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
-
+    this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
+    this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
+    this._group.style.transformOrigin = '0 0';
+    this._group.style.transformBox = 'fill-box';
+    
     this.gridInformation.gaps.forEach((gap, i) => {
       if (gap.width < 3) { gap.width = 3; gap.x--; }
       if (gap.height < 3) { gap.height = 3; gap.y--; }
       let rect = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-resizer-' + gap.type, this._resizers[i], OverlayLayer.Normal);
+      this._group.appendChild(rect);
       if (!this._resizers[i]) {
         this._resizers[i] = rect;
         rect.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(event, rect, gap));

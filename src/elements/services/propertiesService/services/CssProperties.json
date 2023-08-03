@@ -3,7 +3,26 @@
         "type": "color"
     },
     "additiveSymbols": {},
-    "alignContent": {},
+    "alignContent": {
+        "type": "list",
+        "values": [
+            "start",
+            "end",
+            "flex-start",
+            "flex-end",
+            "center",
+            "normal",
+            "baseline",
+            "first baseline",
+            "last baseline",
+            "space-between",
+            "space-around",
+            "space-evenly",
+            "stretch",
+            "safe",
+            "unsafe"
+        ]
+    },
     "alignItems": {},
     "alignSelf": {},
     "alignmentBaseline": {},
@@ -229,11 +248,30 @@
     "filter": {},
     "flex": {},
     "flexBasis": {},
-    "flexDirection": {},
+    "flexDirection": {
+        "type": "list",
+        "values": [
+            "row",
+            "column",
+            "row-reverse",
+            "column-reverse"
+        ]
+    },
     "flexFlow": {},
-    "flexGrow": {},
-    "flexShrink": {},
-    "flexWrap": {},
+    "flexGrow": {
+        "type": "number"
+    },
+    "flexShrink": {
+        "type": "number"
+    },
+    "flexWrap": {
+        "type": "list",
+        "values": [
+            "nowrap",
+            "wrap",
+            "wrap-reverse"
+        ]
+    },
     "float": {},
     "floodColor": {
         "type": "color"
@@ -412,8 +450,12 @@
     "placeSelf": {},
     "pointerEvents": {},
     "position": {
-        "type":"list",
-        "values": ["static", "relative", "absolute"]
+        "type": "list",
+        "values": [
+            "static",
+            "relative",
+            "absolute"
+        ]
     },
     "prefix": {},
     "quotes": {},

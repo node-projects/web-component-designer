@@ -6,5 +6,5 @@ export interface IContextMenuItem {
 	readonly disabled?: boolean,
 	readonly shortCut?: string;
 
-	action?: (event: MouseEvent, item: IContextMenuItem) => void
+	action?: (event: MouseEvent, item: IContextMenuItem, context?: any) => void
 };

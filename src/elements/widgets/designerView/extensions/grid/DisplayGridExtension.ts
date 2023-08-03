@@ -1,4 +1,5 @@
 import { CalculateGridInformation } from "../../../../helper/GridHelper.js";
+import { getElementCombinedTransform } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension } from '../AbstractExtension.js';
@@ -10,6 +11,7 @@ export class DisplayGridExtension extends AbstractExtension {
   private _cells: SVGRectElement[][];
   private _texts: SVGTextElement[][];
   private _gaps: SVGRectElement[];
+  private _group: SVGGElement;
 
   private gridInformation: ReturnType<typeof CalculateGridInformation>
 
@@ -25,6 +27,10 @@ export class DisplayGridExtension extends AbstractExtension {
   override refresh(event?: Event) {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
+    this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
+    this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
+    this._group.style.transformOrigin = '0 0';
+    this._group.style.transformBox = 'fill-box';
 
     if (cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
       if (this.gridInformation.cells.length != this._cells.length || this.gridInformation.cells[0].length != this._cells[0].length)
@@ -32,13 +38,15 @@ export class DisplayGridExtension extends AbstractExtension {
 
       //draw gaps
       this.gridInformation.gaps.forEach((gap, i) => {
-        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Normal);
+        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Background);
+        this._group.appendChild(this._gaps[i]);
       });
 
       //draw cells
       cells.forEach((row, i) => {
         row.forEach((cell, j) => {
           this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
+          this._group.appendChild(this._cells[i][j]);
           if (cell.name) {
             this._texts[i][j] = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', this._texts[i][j], OverlayLayer.Background);
             this._texts[i][j].setAttribute("dominant-baseline", "hanging");

@@ -63,61 +63,86 @@ export class FlexBoxPlacementService implements IPlacementService {
     const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
     const style = getComputedStyle(container.element);
     const childrenWithPos: [IDesignItem, IRect][] = Array.from(container.children()).filter(x => !x.isEmptyTextNode).map(x => [x, (<IDesignerCanvas><unknown>placementView).getNormalizedElementCoordinates(x.element)]);
-    if (style.flexDirection == 'row') {
+    if (style.flexDirection == 'row' || style.flexDirection == 'row-reverse') {
       childrenWithPos.sort(x => x[1].x);
       let elBefore: [IDesignItem, IRect] = null;
       for (let c of childrenWithPos) {
         if (c[1].x + c[1].width / 2 < pos.x) {
           elBefore = c;
+          if (style.flexDirection == 'row-reverse')
+            break;
         }
       }
+
       let posBefore = childrenWithPos.indexOf(elBefore);
       let posDrag = childrenWithPos.indexOf(childrenWithPos.find(x => x[0] == items[0]));
       if (elBefore && elBefore[0] != items[0]) {
-        if (posBefore + 1 === posDrag)
+        if (style.flexDirection == 'row-reverse' && posBefore - 1 === posDrag)
+          return;
+        if (style.flexDirection == 'row' && posBefore + 1 === posDrag)
           return;
         const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
-        let cg = items[0].openGroup('move in flexbox')
-        items[0].remove();
-        elBefore[0].insertAdjacentElement(items[0], 'afterend');
+        let cg = items[0].openGroup('move in flexbox');
+        if (items[0].parent)
+          items[0].remove();
+        if (style.flexDirection == 'row-reverse')
+          elBefore[0].insertAdjacentElement(items[0], 'beforebegin');
+        else
+          elBefore[0].insertAdjacentElement(items[0], 'afterend');
         cg.commit();
         container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       } else if (elBefore == null) {
         if (posDrag == 0)
           return;
         const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
-        let cg = items[0].openGroup('move in flexbox')
-        items[0].remove();
-        container.insertChild(items[0], 0);
+        let cg = items[0].openGroup('move in flexbox');
+        if (items[0].parent)
+          items[0].remove();
+        if (style.flexDirection == 'row-reverse')
+          container.insertChild(items[0]);
+        else
+          container.insertChild(items[0], 0);
         cg.commit();
         container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       }
-    } else if (style.flexDirection == 'column') {
+    } else if (style.flexDirection == 'column' || style.flexDirection == 'column-reverse') {
       childrenWithPos.sort(x => x[1].y);
       let elBefore: [IDesignItem, IRect] = null;
       for (let c of childrenWithPos) {
         if (c[1].y + c[1].height / 2 < pos.y) {
           elBefore = c;
+          if (style.flexDirection == 'column-reverse')
+            break;
         }
       }
       let posBefore = childrenWithPos.indexOf(elBefore);
       let posDrag = childrenWithPos.indexOf(childrenWithPos.find(x => x[0] == items[0]));
       if (elBefore && elBefore[0] != items[0]) {
-        if (posBefore + 1 === posDrag)
+        if (style.flexDirection == 'column-reverse' && posBefore - 1 === posDrag)
+          return;
+        if (style.flexDirection == 'column' && posBefore + 1 === posDrag)
           return;
         const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
-        let cg = items[0].openGroup('move in flexbox')
-        items[0].remove();
-        elBefore[0].insertAdjacentElement(items[0], 'afterend');
+        let cg = items[0].openGroup('move in flexbox');
+        if (items[0].parent)
+          items[0].remove();
+        if (style.flexDirection == 'column-reverse')
+          elBefore[0].insertAdjacentElement(items[0], 'beforebegin');
+        else
+          elBefore[0].insertAdjacentElement(items[0], 'afterend');
         cg.commit();
         container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       } else if (elBefore == null) {
         if (posDrag == 0)
           return;
         const sel = [...container.instanceServiceContainer.selectionService.selectedElements];
-        let cg = items[0].openGroup('move in flexbox')
-        items[0].remove();
-        container.insertChild(items[0], 0);
+        let cg = items[0].openGroup('move in flexbox');
+        if (items[0].parent)
+          items[0].remove();
+        if (style.flexDirection == 'column-reverse')
+          container.insertChild(items[0]);
+        else
+          container.insertChild(items[0], 0);
         cg.commit();
         container.instanceServiceContainer.selectionService.setSelectedElements(sel);
       }
@@ -126,7 +151,7 @@ export class FlexBoxPlacementService implements IPlacementService {
     (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
   }
 
-  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) { 
+  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
   }
 
   moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
