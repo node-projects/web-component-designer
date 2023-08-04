@@ -40,7 +40,6 @@ repository: https://github.com/node-projects/web-component-designer-simple-demo
 ## What is needed
 
 - @node-projects/base-custom-webcomponent a very small basic webcomponent library (maybe this will be included directly later, to be dependecy free)
-- constructable-stylesheets-polyfill on browser not yet supporting these (for Safari & Firefox)
 - optional - ace code editor
 - optional - monaco code editor (if you use code-view-monaco)
 - optional - code mirror code editor (if you use code-view-codemirror) (workin but buggy)
