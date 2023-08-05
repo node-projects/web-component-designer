@@ -101,7 +101,7 @@ export class NpmPackageLoader {
 
         fetch(webComponentDesignerUrl).then(async x => {
             if (x.ok) {
-                const webComponentDesignerJson = <IDesignerAddonJson> await x.json();
+                const webComponentDesignerJson = <IDesignerAddonJson>await x.json();
                 if (webComponentDesignerJson.services) {
                     for (let o in webComponentDesignerJson.services) {
                         for (let s of webComponentDesignerJson.services[o]) {
@@ -223,15 +223,19 @@ export class NpmPackageLoader {
     }
 
     async addToImportmap(baseUrl: string, packageJsonObj: { name?: string, module?: string, main?: string, exports?: Record<string, string> }) {
-        //todo - use exports of package.json for importMap
-        const importMap = { imports: {}, scopes: {} };
-        let mainImport = packageJsonObj.main;
-        if (packageJsonObj.module)
-            mainImport = packageJsonObj.module;
-        importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(mainImport, '/');
-        importMap.imports[packageJsonObj.name + '/'] = baseUrl;
-
         //@ts-ignore
-        importShim.addImportMap(importMap);
+        const map = importShim.getImportMap().imports;
+        if (!map.hasOwnProperty(packageJsonObj.name)) {
+            //todo - use exports of package.json for importMap
+            const importMap = { imports: {}, scopes: {} };
+            let mainImport = packageJsonObj.main;
+            if (packageJsonObj.module)
+                mainImport = packageJsonObj.module;
+            importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(mainImport, '/');
+            importMap.imports[packageJsonObj.name + '/'] = baseUrl;
+
+            //@ts-ignore
+            importShim.addImportMap(importMap);
+        }
     }
 }
