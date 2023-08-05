@@ -43,7 +43,8 @@ export class CssPropertiesService extends CommonPropertiesService {
     "inset",
     "margin",
     "border",
-    "padding"
+    "padding",
+    "overflow"
   ]
 
   public grid = [
