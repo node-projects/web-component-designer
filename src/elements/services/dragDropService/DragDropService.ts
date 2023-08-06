@@ -10,6 +10,8 @@ import { dragDropFormatNameElementDefinition } from "../../../Constants.js";
 
 export class DragDropService implements IDragDropService {
   private _dragOverExtensionItem: IDesignItem;
+  private _oldX: number;
+  private _oldY: number;
 
   public dragEnter(designerCanvas: IDesignerCanvas, event: DragEvent) {
   }
@@ -28,7 +30,11 @@ export class DragDropService implements IDragDropService {
       designerCanvas.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
       this._dragOverExtensionItem = newContainer;
     } else {
-      designerCanvas.extensionManager.refreshExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
+      if (event.x != this._oldX && event.y != this._oldY) {
+        this._oldX = event.x;
+        this._oldY = event.y;
+        designerCanvas.extensionManager.refreshExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
+      }
     }
   }
 
