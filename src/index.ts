@@ -310,4 +310,8 @@ export type { IRect } from "./interfaces/IRect.js";
 export type { ISize } from "./interfaces/ISize.js";
 export type { ICommandHandler } from "./interfaces/ICommandHandler.js";
 
+export * from "./commandHandling/CommandType.js"
+export type { IUiCommand } from "./commandHandling/IUiCommand.js"
+export type { IUiCommandHandler } from "./commandHandling/IUiCommandHandler.js"
+
 export * from './Constants.js'

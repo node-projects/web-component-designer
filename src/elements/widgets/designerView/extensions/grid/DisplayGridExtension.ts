@@ -27,10 +27,13 @@ export class DisplayGridExtension extends AbstractExtension {
   override refresh(event?: Event) {
     this.gridInformation = CalculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
+
+    if (!this._group) {
     this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
     this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
     this._group.style.transformOrigin = '0 0';
     this._group.style.transformBox = 'fill-box';
+    }
 
     if (cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
       if (this.gridInformation.cells.length != this._cells.length || this.gridInformation.cells[0].length != this._cells[0].length)
