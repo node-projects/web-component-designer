@@ -242,7 +242,9 @@
     "dominantBaseline": {},
     "emptyCells": {},
     "fallback": {},
-    "fill": {},
+    "fill": {
+        "type": "color"
+    },
     "fillOpacity": {},
     "fillRule": {},
     "filter": {},
@@ -536,14 +538,18 @@
         "type": "color"
     },
     "stopOpacity": {},
-    "stroke": {},
+    "stroke": {
+        "type": "color"
+    },
     "strokeDasharray": {},
     "strokeDashoffset": {},
     "strokeLinecap": {},
     "strokeLinejoin": {},
     "strokeMiterlimit": {},
     "strokeOpacity": {},
-    "strokeWidth": {},
+    "strokeWidth": {
+        "type": "number"
+    },
     "suffix": {},
     "symbols": {},
     "syntax": {},
