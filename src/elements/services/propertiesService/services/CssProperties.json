@@ -413,12 +413,39 @@
     "outlineOffset": {},
     "outlineStyle": {},
     "outlineWidth": {},
-    "overflow": {},
+    "overflow": {
+        "type": "list",
+        "values": [
+            "visible",
+            "hidden",
+            "clip",
+            "scoll",
+            "auto"
+        ]
+    },
     "overflowAnchor": {},
     "overflowClipMargin": {},
     "overflowWrap": {},
-    "overflowX": {},
-    "overflowY": {},
+    "overflowX": {
+        "type": "list",
+        "values": [
+            "visible",
+            "hidden",
+            "clip",
+            "scoll",
+            "auto"
+        ]
+    },
+    "overflowY": {
+        "type": "list",
+        "values": [
+            "visible",
+            "hidden",
+            "clip",
+            "scoll",
+            "auto"
+        ]
+    },
     "overrideColors": {},
     "overscrollBehavior": {},
     "overscrollBehaviorBlock": {},
