@@ -22,6 +22,7 @@ export class PropertyTabsService implements IPropertyTabsService {
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
         { name: 'layout', propertiesService: new CssPropertiesService("layout") },
+        { name: 'svg', propertiesService: new CssPropertiesService("svg") },
     ];
 
     getPropertygroups(designItems: IDesignItem[]): { name: string; propertiesService: IPropertiesService; }[] {

@@ -70,7 +70,18 @@ export class CssPropertiesService extends CommonPropertiesService {
     "align-items"
   ];
 
-  constructor(name: 'layout' | 'grid' | 'flex') {
+  public svg = [
+    "fill",
+    "fill-rule",
+    "fill-opacity",
+    "stroke",
+    "stroke-width",
+    "stroke-dash-array",
+    "stroke-opacity"
+  ];
+
+
+  constructor(name: 'layout' | 'grid' | 'flex' | 'svg') {
     super();
     this.name = name;
   }
