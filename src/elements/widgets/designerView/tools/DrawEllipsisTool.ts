@@ -53,7 +53,7 @@ export class DrawEllipsisTool implements ITool {
       case EventNames.PointerMove:
         if (this._path) {
           this._radius = { x: Math.abs(currentPoint.x - this._startPoint.x), y: Math.abs(currentPoint.y - this._startPoint.y) }
-          
+
           if (event.ctrlKey) {
             this._path.setAttribute("cx", this._startPoint.x.toString());
             this._path.setAttribute("cy", this._startPoint.y.toString());
@@ -72,7 +72,7 @@ export class DrawEllipsisTool implements ITool {
           else {
             if (event.shiftKey) {
               const radius = calculateNormLegth(this._startPoint, currentPoint);
-              this._radius = {x: radius, y: radius};
+              this._radius = { x: radius, y: radius };
             }
             this._cx = currentPoint.x < this._startPoint.x ? this._startPoint.x - this._radius.x / 2 : this._startPoint.x + this._radius.x / 2;
             this._cy = currentPoint.y < this._startPoint.y ? this._startPoint.y - this._radius.y / 2 : this._startPoint.y + this._radius.y / 2;
@@ -97,12 +97,16 @@ export class DrawEllipsisTool implements ITool {
         svg.appendChild(this._path);
         this._path.setAttribute("cx", (this._cx - mvX).toString());
         this._path.setAttribute("cy", (this._cy - mvY).toString());
+        this._path.removeAttribute("stroke");
+        this._path.removeAttribute("stroke-width");
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';
         svg.style.position = 'absolute';
         svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
         svg.style.height = Math.round(coords.height + 2 * offset) + 'px';
         svg.style.overflow = 'visible';
+        svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
+        svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
         this._path = null;
         const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
@@ -111,6 +115,5 @@ export class DrawEllipsisTool implements ITool {
     }
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
-  { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 }

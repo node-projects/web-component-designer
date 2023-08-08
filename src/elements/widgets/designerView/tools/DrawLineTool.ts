@@ -35,7 +35,7 @@ export class DrawLineTool implements ITool {
         this._startPoint = currentPoint;
         (<Element>event.target).setPointerCapture(event.pointerId);
         designerCanvas.captureActiveTool(this);
-        
+
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "line");
         // this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
         // this._path.setAttribute("d", this._pathD);
@@ -79,6 +79,8 @@ export class DrawLineTool implements ITool {
         this._path.setAttribute("y1", (this._startPoint.y - mvY).toString());
         this._path.setAttribute("x2", (this._endPoint.x - mvX).toString());
         this._path.setAttribute("y2", (this._endPoint.y - mvY).toString());
+        this._path.removeAttribute("stroke");
+        this._path.removeAttribute("stroke-width");
         svg.appendChild(this._path);
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';
@@ -86,6 +88,8 @@ export class DrawLineTool implements ITool {
         svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
         svg.style.height = Math.round(coords.height + 2 * offset) + 'px';
         svg.style.overflow = 'visible';
+        svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
+        svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
         this._path = null;
         const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
@@ -94,6 +98,5 @@ export class DrawLineTool implements ITool {
     }
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
-  { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 }
