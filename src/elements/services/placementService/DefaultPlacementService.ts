@@ -18,20 +18,18 @@ export class DefaultPlacementService implements IPlacementService {
     return true;
   }
 
-  canEnter(container: IDesignItem, items: IDesignItem[]) {
+  isEnterableContainer(container: IDesignItem) {
     if (DomConverter.IsSelfClosingElement(container.element.localName))
       return false;
     if (container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
-      return false;
-    if (!items.every(x => !x.element.contains(container.element)))
       return false;
     return true;
   }
 
-  canEnterByDrop(container: IDesignItem) {
-    if (DomConverter.IsSelfClosingElement(container.element.localName))
+  canEnter(container: IDesignItem, items: IDesignItem[]) {
+    if (!this.isEnterableContainer(container))
       return false;
-    if (container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
+    if (!items.every(x => !x.element.contains(container.element)))
       return false;
     return true;
   }

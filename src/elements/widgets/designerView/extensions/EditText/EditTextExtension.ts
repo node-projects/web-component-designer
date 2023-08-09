@@ -38,6 +38,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     //maybe use a html edit framework
     this.extendedItem.instanceServiceContainer.selectionService.clearSelectedElements();
     //this.extensionManager.removeExtension(this.extendedItem, ExtensionType.PrimarySelection);
+    //this.extensionManager.removeExtension(this.extendedItem, ExtensionType.PrimarySelectionAndCanBeEntered);
     //this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Selection);
     this.extendedItem.element.setAttribute('contenteditable', '');
     this.extendedItem.element.addEventListener('input', this._contentEditedBound);

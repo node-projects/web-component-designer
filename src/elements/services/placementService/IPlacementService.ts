@@ -5,7 +5,7 @@ import { IPoint } from '../../../interfaces/IPoint.js';
 
 export interface IPlacementService extends IService {
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration): boolean;
-  canEnterByDrop(container: IDesignItem) : boolean;
+  isEnterableContainer(container: IDesignItem) : boolean;
   canEnter(container: IDesignItem, items: IDesignItem[]): boolean;
   canLeave(container: IDesignItem, items: IDesignItem[]): boolean;
   enterContainer(container: IDesignItem, items: IDesignItem[]);

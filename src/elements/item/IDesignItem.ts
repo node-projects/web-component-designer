@@ -7,6 +7,7 @@ import { IDesignerExtension } from '../widgets/designerView/extensions/IDesigner
 import { ISize } from "../../interfaces/ISize.js";
 import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
+import { IPlacementService } from '../services/placementService/IPlacementService.js';
 
 export interface IDesignItem {
 
@@ -84,4 +85,6 @@ export interface IDesignItem {
   hideAtDesignTime: boolean;
   hideAtRunTime: boolean;
   lockAtDesignTime: boolean;
+
+  getPlacementService(style?: CSSStyleDeclaration): IPlacementService;
 }

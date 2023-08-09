@@ -88,6 +88,11 @@ import { DragDropService } from './dragDropService/DragDropService.js';
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
 
+  let defaultPlacementService=new DefaultPlacementService();
+  serviceContainer.register("containerService", defaultPlacementService);
+  serviceContainer.register("containerService", new GridPlacementService(defaultPlacementService));
+  serviceContainer.register("containerService", new FlexBoxPlacementService(defaultPlacementService));
+
   serviceContainer.register("propertyService", new PolymerPropertiesService());
   serviceContainer.register("propertyService", new LitElementPropertiesService());
   serviceContainer.register("propertyService", new NativeElementsPropertiesService());
@@ -98,9 +103,6 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("instanceService", new DefaultInstanceService());
   serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
   serviceContainer.register("htmlWriterService", new HtmlWriterService());
-  serviceContainer.register("containerService", new DefaultPlacementService());
-  serviceContainer.register("containerService", new GridPlacementService());
-  serviceContainer.register("containerService", new FlexBoxPlacementService());
   serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
@@ -123,9 +125,6 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
-    new DisplayGridExtensionProvider(),
-    new EditGridColumnRowSizesExtensionProvider(),
-    new FlexboxExtensionProvider(),
     new TransformOriginExtensionProvider(),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
@@ -137,10 +136,15 @@ export function createDefaultServiceContainer() {
     new RotateExtensionProvider(),
     new MultipleSelectionRectExtensionProvider(),
   ]);
+  serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionAndCanBeEntered, [
+    new DisplayGridExtensionProvider(),
+    new EditGridColumnRowSizesExtensionProvider(),
+    new FlexboxExtensionProvider(),
+  ]);
   serviceContainer.designerExtensions.set(ExtensionType.Selection, [
     new SelectionDefaultExtensionProvider()
   ]);
-  serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
+  serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainerAndCanBeEntered, [
     new DisplayGridExtensionProvider(),
     new EditGridColumnRowSizesExtensionProvider(),
     new FlexboxExtensionProvider()
@@ -154,14 +158,14 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
     new GrayOutExtensionProvider()
   ]);
-  serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOver, [
+  serviceContainer.designerExtensions.set(ExtensionType.ContainerDragOverAndCanBeEntered, [
     new ApplyFirstMachingExtensionProvider(
       new DisplayGridExtensionProvider(),
       new GrayOutDragOverContainerExtensionProvider(),
     ),
     new AltToEnterContainerExtensionProvider()
   ]);
-  serviceContainer.designerExtensions.set(ExtensionType.ContainerExternalDragOver, [
+  serviceContainer.designerExtensions.set(ExtensionType.ContainerExternalDragOverAndCanBeEntered, [
     new ApplyFirstMachingExtensionProvider(
       new DisplayGridExtensionProvider(),
       new GrayOutDragOverContainerExtensionProvider(),
