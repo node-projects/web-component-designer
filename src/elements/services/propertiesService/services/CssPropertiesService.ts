@@ -44,7 +44,8 @@ export class CssPropertiesService extends CommonPropertiesService {
     "margin",
     "border",
     "padding",
-    "overflow"
+    "overflow",
+    "metrics"
   ]
 
   public grid = [
@@ -113,13 +114,24 @@ export class CssPropertiesService extends CommonPropertiesService {
       const camelName = PropertiesHelper.dashToCamelCase(x);
       return {
         name: x,
-        type: cssProperties[camelName]?.type ?? 'string',
+        type: this.getPropertyType(camelName),
         values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
         service: this,
         propertyType: PropertyType.cssValue
       }
     });
     return propertiesList;
+  }
+
+  getPropertyType(camelName: string): string {
+    switch (camelName) {
+      case 'assignedRowColumn':
+        return 'assigned-row-column';
+      case 'metrics':
+        return 'metrics';
+      default:
+        return cssProperties[camelName]?.type ?? 'string';
+    }
   }
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
