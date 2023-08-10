@@ -1,8 +1,6 @@
 import { IProperty } from '../IProperty.js';
 import { BasePropertyEditor } from './BasePropertyEditor.js';
 import { ValueType } from '../ValueType.js';
-import { html } from '@node-projects/base-custom-webcomponent';
-import { IDesignItem } from '../../../item/IDesignItem.js';
 
 export class GridAssignedRowColumnPropertyEditor extends BasePropertyEditor<HTMLDivElement> {
 
