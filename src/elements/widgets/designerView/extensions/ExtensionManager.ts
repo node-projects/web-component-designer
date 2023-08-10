@@ -54,11 +54,11 @@ export class ExtensionManager implements IExtensionManager {
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
-      if (selectionChangedEvent.selectedElements[0].getPlacementService().isEnterableContainer(selectionChangedEvent.selectedElements[0]))
+      if (selectionChangedEvent.selectedElements[0].getPlacementService()?.isEnterableContainer(selectionChangedEvent.selectedElements[0]))
         this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
       const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
       this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
-      if (primaryContainer.getPlacementService().isEnterableContainer(primaryContainer))
+      if (primaryContainer.getPlacementService()?.isEnterableContainer(primaryContainer))
         this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
     }
 

@@ -218,15 +218,18 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
             requestAnimationFrame(() => {
                 let element = designItem?.element;
                 if (element) {
-                    this.computedStyle = getComputedStyle(designItem.element);
-                    this.selectedElementOffsetParent = (<HTMLElement>designItem.element).offsetParent;
+                    if (element.nodeType == 3)
+                        element = element.parentNode as Element;
+                    this.computedStyle = getComputedStyle(element);
+                    this.selectedElementOffsetParent = (<HTMLElement>element).offsetParent;
                     if (this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element) {
                         this.selectedElementOffsetParentText = null;
                         this.selectedElementOffsetParent = null;
                     } else
-                        this.selectedElementOffsetParentText = generateSelector((<HTMLElement>designItem.element).offsetParent);
+                        this.selectedElementOffsetParentText = generateSelector((<HTMLElement>element).offsetParent);
 
                     if (element && element.nodeType === 1) {
+
                         const closest = getClosestStackingContext(element);
                         this.createsStackingContext = element === closest.node;
                         this.createsStackingContextReason = this.createsStackingContext ? closest.reason : 'not a stacking context';

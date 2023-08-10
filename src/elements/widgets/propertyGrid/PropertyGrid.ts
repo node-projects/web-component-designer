@@ -108,13 +108,15 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
         this._designerTabControl.selectedIndex = 0;
 
       for (const a of this._propertyGridPropertyLists) {
-        a.designItemsChanged(items);
+        if (visibleDict.has(a.title))
+          a.designItemsChanged(items);
       }
 
       if (items) {
         if (items.length == 1) {
           for (const a of this._propertyGridPropertyLists) {
-            a.refreshForDesignItems(items);
+            if (visibleDict.has(a.title))
+              a.refreshForDesignItems(items);
           }
 
           this._observeItems();

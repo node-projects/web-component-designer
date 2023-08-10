@@ -535,6 +535,8 @@ export class DesignItem implements IDesignItem {
   }
 
   getPlacementService(style?: CSSStyleDeclaration): IPlacementService {
+    if (this.nodeType != NodeType.Element)
+      return null;
     style ??= getComputedStyle(this.element);
     return this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this, style));
   }
