@@ -6,6 +6,8 @@ import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
+import { GridAssignedRowColumnPropertyEditor } from '../propertyEditors/special/GridAssignedRowColumnPropertyEditor.js';
+import { MetricsPropertyEditor } from '../propertyEditors/special/MetricsPropertyEditor.js';
 
 //TODO: remove this code when import asserts are supported
 let cssProperties: any;
@@ -110,27 +112,25 @@ export class CssPropertiesService extends CommonPropertiesService {
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     const propNames: string[] = this[this.name];
-    const propertiesList = propNames.map(x => {
-      const camelName = PropertiesHelper.dashToCamelCase(x);
-      return {
-        name: x,
-        type: this.getPropertyType(camelName),
-        values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
-        service: this,
-        propertyType: PropertyType.cssValue
-      }
-    });
+    const propertiesList = propNames.map(x => this._getPropertyDef(x));
     return propertiesList;
   }
 
-  getPropertyType(camelName: string): string {
+  _getPropertyDef(name: string): IProperty {
+    const camelName = PropertiesHelper.dashToCamelCase(name);
     switch (camelName) {
       case 'assignedRowColumn':
-        return 'assigned-row-column';
+        return { name, service: this, propertyType: PropertyType.complex, createEditor: (p) => new GridAssignedRowColumnPropertyEditor(p) };
       case 'metrics':
-        return 'metrics';
+        return { name, service: this, propertyType: PropertyType.complex, createEditor: (p) => new MetricsPropertyEditor(p) };
       default:
-        return cssProperties[camelName]?.type ?? 'string';
+        return {
+          name,
+          type: cssProperties[camelName]?.type ?? 'string',
+          values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
+          service: this,
+          propertyType: PropertyType.cssValue
+        }
     }
   }
 

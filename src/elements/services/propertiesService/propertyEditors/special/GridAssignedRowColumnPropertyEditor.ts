@@ -1,9 +1,11 @@
-import { IProperty } from '../IProperty.js';
-import { BasePropertyEditor } from './BasePropertyEditor.js';
-import { ValueType } from '../ValueType.js';
+import { IProperty } from '../../IProperty.js';
+import { BasePropertyEditor } from '../BasePropertyEditor.js';
+import { ValueType } from '../../ValueType.js';
 
 export class GridAssignedRowColumnPropertyEditor extends BasePropertyEditor<HTMLDivElement> {
 
+  //Todo: multiple cell selection, grid area support, span support
+  
   _root: HTMLDivElement;
 
   constructor(property: IProperty) {

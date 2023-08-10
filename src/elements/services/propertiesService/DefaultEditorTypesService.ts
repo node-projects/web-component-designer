@@ -10,8 +10,6 @@ import { TextPropertyEditor } from './propertyEditors/TextPropertyEditor.js';
 import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor.js';
 import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor.js';
 import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEditor.js";
-import { MetricsPropertyEditor } from './propertyEditors/MetricsPropertyEditor.js';
-import { GridAssignedRowColumnPropertyEditor } from './propertyEditors/GridAssignedRowColumnPropertyEditor.js';
 
 export class DefaultEditorTypesService implements IEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
@@ -54,14 +52,6 @@ export class DefaultEditorTypesService implements IEditorTypesService {
       case "thickness":
         {
           return new ThicknessPropertyEditor(property);
-        }
-      case "metrics":
-        {
-          return new MetricsPropertyEditor(property);
-        }
-      case "assigned-row-column":
-        {
-          return new GridAssignedRowColumnPropertyEditor(property);
         }
       case "css-length":
       case "string":

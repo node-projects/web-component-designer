@@ -1,9 +1,11 @@
-import { IProperty } from '../IProperty.js';
-import { BasePropertyEditor } from './BasePropertyEditor.js';
-import { ValueType } from '../ValueType.js';
-import { MetricsEditor } from '../../../controls/MetricsEditor.js';
+import { IProperty } from '../../IProperty.js';
+import { BasePropertyEditor } from '../BasePropertyEditor.js';
+import { ValueType } from '../../ValueType.js';
+import { MetricsEditor } from '../../../../controls/MetricsEditor.js';
 
 export class MetricsPropertyEditor extends BasePropertyEditor<MetricsEditor> {
+
+  //Todo: metrics editor does not work at all yet
 
   constructor(property: IProperty) {
     super(property);

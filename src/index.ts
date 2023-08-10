@@ -113,11 +113,14 @@ export * from "./elements/services/propertiesService/propertyEditors/DatePropert
 export * from "./elements/services/propertiesService/propertyEditors/ImageButtonListPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyPopupEditor.js";
-export * from "./elements/services/propertiesService/propertyEditors/MetricsPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/NumberPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/SelectPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/TextPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ThicknessPropertyEditor.js";
+
+export * from "./elements/services/propertiesService/propertyEditors/special/MetricsPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/special/GridAssignedRowColumnPropertyEditor.js";
+
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
