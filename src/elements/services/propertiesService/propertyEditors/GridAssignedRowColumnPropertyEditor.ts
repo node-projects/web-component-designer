@@ -12,7 +12,7 @@ export class GridAssignedRowColumnPropertyEditor extends BasePropertyEditor<HTML
     this._root.style.display = 'grid';
     this._root.style.padding = '4px 0px';
     this._root.style.boxSizing = 'border-box';
-    this._root.style.height = '50px';
+    this._root.style.minHeight = '50px';
     this.element = this._root;
   }
 
@@ -34,6 +34,7 @@ export class GridAssignedRowColumnPropertyEditor extends BasePropertyEditor<HTML
       for (let p = 1; p <= cntRow; p++) {
         for (let n = 1; n <= cntCol; n++) {
           const b = document.createElement('button');
+          b.style.minHeight = '10px';
           b.onclick = () => {
             let grp = this.designItems[0].openGroup('Change grid row/column');
             this.designItems[0].setStyle("grid-row", p + ' / ' + (p + 1));
