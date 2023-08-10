@@ -77,49 +77,51 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     return this._selectedItems;
   }
   set selectedItems(items: IDesignItem[]) {
-    this._selectedItems = items;
+    if (this._selectedItems != items) {
+      this._selectedItems = items;
 
-    const pgGroups = this._serviceContainer.propertyGroupService.getPropertygroups(items);
-    const visibleDict = new Set<string>()
-    for (let p of pgGroups) {
-      let lst = this._propertyGridPropertyListsDict[p.name];
-      if (!lst) {
-        lst = new PropertyGridPropertyList(this.serviceContainer);
-        lst.title = p.name;
-        this._designerTabControl.appendChild(lst);
-        this._propertyGridPropertyLists.push(lst);
-        this._propertyGridPropertyListsDict[p.name] = lst;
-      }
-      lst.setPropertiesService(p.propertiesService);
-      lst.createElements(items[0]);
-      visibleDict.add(p.name);
-    }
-
-    this._designerTabControl.refreshItems();
-    if (this._designerTabControl.selectedIndex < 0)
-      this._designerTabControl.selectedIndex = 0;
-
-    for (let p of this._propertyGridPropertyLists) {
-      if (visibleDict.has(p.title))
-        p.style.display = 'block';
-      else
-        p.style.display = 'none';
-    }
-
-    for (const a of this._propertyGridPropertyLists) {
-      a.designItemsChanged(items);
-    }
-
-    if (items) {
-      if (items.length == 1) {
-        for (const a of this._propertyGridPropertyLists) {
-          a.refreshForDesignItems(items);
+      const pgGroups = this._serviceContainer.propertyGroupService.getPropertygroups(items);
+      const visibleDict = new Set<string>()
+      for (let p of pgGroups) {
+        let lst = this._propertyGridPropertyListsDict[p.name];
+        if (!lst) {
+          lst = new PropertyGridPropertyList(this.serviceContainer);
+          lst.title = p.name;
+          this._designerTabControl.appendChild(lst);
+          this._propertyGridPropertyLists.push(lst);
+          this._propertyGridPropertyListsDict[p.name] = lst;
         }
-
-        this._observeItems();
+        lst.setPropertiesService(p.propertiesService);
+        lst.createElements(items[0]);
+        visibleDict.add(p.name);
       }
-    } else {
-      this._itemsObserver.disconnect();
+
+      for (let p of this._propertyGridPropertyLists) {
+        if (visibleDict.has(p.title))
+          p.style.display = 'block';
+        else
+          p.style.display = 'none';
+      }
+
+      this._designerTabControl.refreshItems();
+      if (this._designerTabControl.selectedIndex < 0)
+        this._designerTabControl.selectedIndex = 0;
+
+      for (const a of this._propertyGridPropertyLists) {
+        a.designItemsChanged(items);
+      }
+
+      if (items) {
+        if (items.length == 1) {
+          for (const a of this._propertyGridPropertyLists) {
+            a.refreshForDesignItems(items);
+          }
+
+          this._observeItems();
+        }
+      } else {
+        this._itemsObserver.disconnect();
+      }
     }
   }
 

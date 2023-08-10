@@ -57,7 +57,15 @@ export class CssPropertiesService extends CommonPropertiesService {
     "align-content",
     "justify-content",
     "align-items",
-    "justify-items"
+    "justify-items",
+  ];
+
+  public gridChild = [
+    "grid-row",
+    "grid-column",
+    "assigned-row-column",
+    "align-self",
+    "justify-self"
   ];
 
   public flex = [
@@ -68,6 +76,11 @@ export class CssPropertiesService extends CommonPropertiesService {
     "align-content",
     "justify-content",
     "align-items"
+  ];
+
+  public flexChild = [
+    "align-self",
+    "justify-self"
   ];
 
   public svg = [
@@ -81,7 +94,7 @@ export class CssPropertiesService extends CommonPropertiesService {
   ];
 
 
-  constructor(name: 'layout' | 'grid' | 'flex' | 'svg') {
+  constructor(name: 'layout' | 'grid' | 'gridChild' | 'flex' | 'flexChild' | 'svg') {
     super();
     this.name = name;
   }

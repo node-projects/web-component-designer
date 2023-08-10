@@ -17,7 +17,7 @@ export class SelectionService implements ISelectionService {
   }
 
   setSelectedElements(designItems: IDesignItem[]) {
-    if (this.selectedElements != designItems) {
+    if (this.selectedElements != designItems && !(this.selectedElements.length === 0 && (designItems == null || designItems.length === 0))) {
       if (this._undoSelectionChanges) {
         const action = new SelectionChangedAction(this.selectedElements, designItems, this);
         this._designerCanvas.instanceServiceContainer.undoService.execute(action);

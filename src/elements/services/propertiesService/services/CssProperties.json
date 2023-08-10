@@ -612,5 +612,12 @@
     "x": {},
     "y": {},
     "zIndex": {},
-    "zoom": {}
+    "zoom": {},
+
+
+    
+    
+    "assignedRowColumn": {
+        "type": "assigned-row-column"
+    }
 }

@@ -25,13 +25,31 @@ export class PropertyTabsService implements IPropertyTabsService {
         { name: 'svg', propertiesService: new CssPropertiesService("svg") },
     ];
 
+    protected _gridChild: { name: string; propertiesService: IPropertiesService; }[] = [
+        { name: 'gridChild', propertiesService: new CssPropertiesService("gridChild") },
+    ];
+
+    protected _flexChild: { name: string; propertiesService: IPropertiesService; }[] = [
+        { name: 'flexChild', propertiesService: new CssPropertiesService("flexChild") },
+    ];
+
     getPropertygroups(designItems: IDesignItem[]): { name: string; propertiesService: IPropertiesService; }[] {
         if (designItems == null || designItems.length == 0)
             return [];
         this._pgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
         this._svgPgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
+
+        let lst = this._pgList;
         if (designItems[0].element instanceof SVGElement)
-            return this._svgPgList;
-        return this._pgList;
+            lst = this._svgPgList;
+
+        const parentStyle = getComputedStyle(designItems[0].element.parentElement);
+        if (parentStyle.display.includes('grid'))
+            lst = [...lst, this._gridChild[0]];
+        else if (parentStyle.display.includes('flex'))
+            lst = [...lst, this._flexChild[0]];
+        return lst;
+
+
     }
 }
