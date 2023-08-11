@@ -1,12 +1,12 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IHtmlWriterService } from './IHtmlWriterService.js';
-import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 import { CssCombiner } from '../../helper/CssCombiner.js';
 import { NodeType } from '../../item/NodeType.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
+import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 
 export enum ElementContainerType {
   block,
@@ -21,6 +21,17 @@ export interface IWriteContext {
 }
 
 export class SimpleHtmlWriterService implements IHtmlWriterService {
+  public options: IHtmlWriterOptions;
+
+  constructor(options?: IHtmlWriterOptions) {
+    this.options = options ?? {};
+    this.options.beautifyOutput ??= true;
+    this.options.compressCssToShorthandProperties ??= true;
+    this.options.writeDesignerProperties ??= true;
+    this.options.parseJsonInAttributes ??= true;
+    this.options.jsonWriteMode ??= 'min';
+  }
+
   protected writeAttributes(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasAttributes) {
       for (const a of designItem.attributes()) {
@@ -102,8 +113,8 @@ export class SimpleHtmlWriterService implements IHtmlWriterService {
       this._writeElementNode(writeContext, designItem);
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
-    const context: IWriteContext = { indentedTextWriter, options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block };
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean) {
+    const context: IWriteContext = { indentedTextWriter, options: this.options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block };
     this._writeDesignItemList(ElementDisplayType.inline, context, designItems);
   }
 }

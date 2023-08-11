@@ -8,9 +8,20 @@ import { ITextWriter } from '../../helper/ITextWriter.js';
 
 export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
-  abstract write(indentedTextWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions, updatePositions?: boolean);
+  public options: IHtmlWriterOptions;
 
-  writeAttributes(indentedTextWriter: ITextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
+  constructor(options?: IHtmlWriterOptions) {
+    this.options = options ?? {};
+    this.options.beautifyOutput ??= true;
+    this.options.compressCssToShorthandProperties ??= true;
+    this.options.writeDesignerProperties ??= true;
+    this.options.parseJsonInAttributes ??= true;
+    this.options.jsonWriteMode ??= 'min';
+  }
+
+  abstract write(indentedTextWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, updatePositions?: boolean);
+
+  writeAttributes(indentedTextWriter: ITextWriter, designItem: IDesignItem) {
     if (designItem.hasAttributes) {
       for (const a of designItem.attributes()) {
         indentedTextWriter.write(' ');
@@ -18,15 +29,15 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
           if (a[1] === "")
             indentedTextWriter.write(a[0]);
           else {
-            if (options.parseJsonInAttributes && 
-                (
-                  (a[1].startsWith('{') && !a[1].startsWith('{{') && a[1].endsWith('}')) ||
-                  (a[1].startsWith('[') && !a[1].startsWith('[[') && a[1].endsWith(']')))
-                ) {
+            if (this.options.parseJsonInAttributes &&
+              (
+                (a[1].startsWith('{') && !a[1].startsWith('{{') && a[1].endsWith('}')) ||
+                (a[1].startsWith('[') && !a[1].startsWith('[[') && a[1].endsWith(']')))
+            ) {
               try {
                 let j = JSON.parse(a[1]);
                 let txt;
-                if (options.jsonWriteMode == 'beauty')
+                if (this.options.jsonWriteMode == 'beauty')
                   txt = JSON.stringify(j, null, 2);
                 else
                   txt = JSON.stringify(j);
@@ -55,11 +66,11 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
     }
   }
 
-  writeStyles(indentedTextWriter: ITextWriter, designItem: IDesignItem, options: IHtmlWriterOptions) {
+  writeStyles(indentedTextWriter: ITextWriter, designItem: IDesignItem) {
     if (designItem.hasStyles) {
       indentedTextWriter.write(' style="');
       let styles = designItem.styles();
-      if (options.compressCssToShorthandProperties)
+      if (this.options.compressCssToShorthandProperties)
         styles = CssCombiner.combine(new Map(styles));
       for (const s of styles) {
         if (s[0]) {
