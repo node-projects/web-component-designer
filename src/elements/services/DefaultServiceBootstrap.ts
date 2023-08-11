@@ -84,6 +84,7 @@ import { DesignItemDocumentPositionService } from './designItemDocumentPositionS
 import { TransformToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js';
 import { MultipleSelectionRectExtensionProvider } from '../widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js';
 import { DragDropService } from './dragDropService/DragDropService.js';
+import { EventsService } from './eventsService/EventsService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -111,12 +112,12 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
   serviceContainer.register("demoProviderService", new DemoProviderService());
+  serviceContainer.register("eventsService", new EventsService());
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
   serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
   serviceContainer.register("contentService", (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
   serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
-  //serviceContainer.register("stylesheetService", new DemoProviderService());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     // new ResizeExtensionProvider(false),

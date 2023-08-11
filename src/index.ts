@@ -75,6 +75,10 @@ export * from "./elements/services/elementsService/JsonFileElementsService.js";
 export * from "./elements/services/elementsService/PreDefinedElementsService.js";
 export * from "./elements/services/elementsService/WebcomponentManifestElementsService.js";
 
+export type { IEvent } from "./elements/services/eventsService/IEvent.js";
+export type { IEventsService } from "./elements/services/eventsService/IEventsService.js";
+export * from "./elements/services/eventsService/EventsService.js";
+
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
 export * from "./elements/services/htmlWriterService/AbstractHtmlWriterService.js";
