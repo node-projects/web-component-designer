@@ -27,7 +27,7 @@ export interface IDesignItem {
 
   readonly hasChildren: boolean;
   children(): IterableIterator<IDesignItem>
-  allMatching(selectors: string):IterableIterator<IDesignItem>
+  allMatching(selectors: string): IterableIterator<IDesignItem>
   readonly childCount: number;
   readonly firstChild: IDesignItem;
   readonly parent: IDesignItem;
@@ -67,8 +67,8 @@ export interface IDesignItem {
   openGroup(title: string): ChangeGroup
 
   styles(): Iterable<[name: string, value: string]>;
-  getStyle(name: string);
-  hasStyle(name: string);
+  getStyle(name: string): string
+  hasStyle(name: string): boolean
   setStyle(name: string, value?: string | null, important?: boolean);
   removeStyle(name: string);
   updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean);
@@ -77,8 +77,8 @@ export interface IDesignItem {
   getAllStyles(): IStyleRule[];
 
   attributes(): Iterable<[name: string, value: string]>
-  getAttribute(name: string)
-  hasAttribute(name: string)
+  getAttribute(name: string): string
+  hasAttribute(name: string): boolean
   setAttribute(name: string, value?: string | null);
   removeAttribute(name: string);
 

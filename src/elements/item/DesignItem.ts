@@ -80,7 +80,7 @@ export class DesignItem implements IDesignItem {
   public hasAttribute(name: string) {
     return this._attributes.has(name);
   }
-  public getAttribute(name: string) {
+  public getAttribute(name: string): string {
     return this._attributes.get(name);
   }
   public *attributes() {
