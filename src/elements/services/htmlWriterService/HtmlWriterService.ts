@@ -4,8 +4,13 @@ import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 import { NodeType } from '../../item/NodeType.js';
 import { isEmptyTextNode, isInline, isInlineAfter } from '../../helper/ElementHelper.js';
 import { AbstractHtmlWriterService } from './AbstractHtmlWriterService.js';
+import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 
 export class HtmlWriterService extends AbstractHtmlWriterService {
+  constructor(options?: IHtmlWriterOptions) {
+    super(options);
+  }
+  
   private _conditionalyWriteIndent(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem) {
     if ((designItem.element instanceof HTMLElement && !isInlineAfter(designItem.element)) ||
       (designItem.element.previousElementSibling instanceof HTMLElement && !isInline(designItem.element.previousElementSibling)) ||
