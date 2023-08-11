@@ -242,7 +242,9 @@
     "dominantBaseline": {},
     "emptyCells": {},
     "fallback": {},
-    "fill": {},
+    "fill": {
+        "type": "color"
+    },
     "fillOpacity": {},
     "fillRule": {},
     "filter": {},
@@ -413,12 +415,39 @@
     "outlineOffset": {},
     "outlineStyle": {},
     "outlineWidth": {},
-    "overflow": {},
+    "overflow": {
+        "type": "list",
+        "values": [
+            "visible",
+            "hidden",
+            "clip",
+            "scoll",
+            "auto"
+        ]
+    },
     "overflowAnchor": {},
     "overflowClipMargin": {},
     "overflowWrap": {},
-    "overflowX": {},
-    "overflowY": {},
+    "overflowX": {
+        "type": "list",
+        "values": [
+            "visible",
+            "hidden",
+            "clip",
+            "scoll",
+            "auto"
+        ]
+    },
+    "overflowY": {
+        "type": "list",
+        "values": [
+            "visible",
+            "hidden",
+            "clip",
+            "scoll",
+            "auto"
+        ]
+    },
     "overrideColors": {},
     "overscrollBehavior": {},
     "overscrollBehaviorBlock": {},
@@ -509,14 +538,18 @@
         "type": "color"
     },
     "stopOpacity": {},
-    "stroke": {},
+    "stroke": {
+        "type": "color"
+    },
     "strokeDasharray": {},
     "strokeDashoffset": {},
     "strokeLinecap": {},
     "strokeLinejoin": {},
     "strokeMiterlimit": {},
     "strokeOpacity": {},
-    "strokeWidth": {},
+    "strokeWidth": {
+        "type": "number"
+    },
     "suffix": {},
     "symbols": {},
     "syntax": {},

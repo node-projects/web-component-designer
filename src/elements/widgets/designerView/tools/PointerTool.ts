@@ -295,16 +295,16 @@ export class PointerTool implements ITool {
                 //if we found a new enterable container create extensions 
                 if (newContainerElementDesignItem != null) {
                   if (this._dragOverExtensionItem != newContainerElementDesignItem) {
-                    designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
-                    designerCanvas.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver, event);
+                    designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOverAndCanBeEntered);
+                    designerCanvas.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOverAndCanBeEntered, event);
                     this._dragOverExtensionItem = newContainerElementDesignItem;
                   }
                   else {
-                    designerCanvas.extensionManager.refreshExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOver, event);
+                    designerCanvas.extensionManager.refreshExtension(newContainerElementDesignItem, ExtensionType.ContainerDragOverAndCanBeEntered, event);
                   }
                 } else {
                   if (this._dragOverExtensionItem) {
-                    designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
+                    designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOverAndCanBeEntered);
                     this._dragOverExtensionItem = null;
                   }
                 }
@@ -373,7 +373,7 @@ export class PointerTool implements ITool {
 
             designerCanvas.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
             this._dragExtensionItem = null;
-            designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOver);
+            designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOverAndCanBeEntered);
             this._dragOverExtensionItem = null;
             this._moveItemsOffset = { x: 0, y: 0 };
           }

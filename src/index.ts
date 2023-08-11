@@ -75,6 +75,10 @@ export * from "./elements/services/elementsService/JsonFileElementsService.js";
 export * from "./elements/services/elementsService/PreDefinedElementsService.js";
 export * from "./elements/services/elementsService/WebcomponentManifestElementsService.js";
 
+export type { IEvent } from "./elements/services/eventsService/IEvent.js";
+export type { IEventsService } from "./elements/services/eventsService/IEventsService.js";
+export * from "./elements/services/eventsService/EventsService.js";
+
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
 export * from "./elements/services/htmlWriterService/AbstractHtmlWriterService.js";
@@ -113,11 +117,14 @@ export * from "./elements/services/propertiesService/propertyEditors/DatePropert
 export * from "./elements/services/propertiesService/propertyEditors/ImageButtonListPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyPopupEditor.js";
-export * from "./elements/services/propertiesService/propertyEditors/MetricsPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/NumberPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/SelectPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/TextPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ThicknessPropertyEditor.js";
+
+export * from "./elements/services/propertiesService/propertyEditors/special/MetricsPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/special/GridAssignedRowColumnPropertyEditor.js";
+
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
@@ -308,7 +315,6 @@ export type { IDisposable } from "./interfaces/IDisposable.js";
 export type { IPoint } from "./interfaces/IPoint.js";
 export type { IRect } from "./interfaces/IRect.js";
 export type { ISize } from "./interfaces/ISize.js";
-export type { ICommandHandler } from "./interfaces/ICommandHandler.js";
 
 export * from "./commandHandling/CommandType.js"
 export type { IUiCommand } from "./commandHandling/IUiCommand.js"

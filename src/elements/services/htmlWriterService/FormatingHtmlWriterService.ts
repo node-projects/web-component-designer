@@ -25,6 +25,17 @@ interface IWriteContext {
 // const defaultDisplayNoneContainerDisplayType: ElementContainerType = ElementContainerType.complex;
 
 export class FormatingHtmlWriterService implements IHtmlWriterService {
+  public options: IHtmlWriterOptions;
+
+  constructor(options?: IHtmlWriterOptions) {
+    this.options = options ?? {};
+    this.options.beautifyOutput ??= true;
+    this.options.compressCssToShorthandProperties ??= true;
+    this.options.writeDesignerProperties ??= true;
+    this.options.parseJsonInAttributes ??= true;
+    this.options.jsonWriteMode ??= 'min';
+  }
+
   private writeAttributes(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasAttributes) {
       for (const a of designItem.attributes()) {
@@ -155,8 +166,8 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
     return ElementContainerType.complex;
   }
 
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
-    const context: IWriteContext = { indentedTextWriter, options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block };
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean) {
+    const context: IWriteContext = { indentedTextWriter, options: this.options, lastElementDisplayType: null, containerDisplayType: ElementContainerType.block };
     this._writeDesignItemList(ElementDisplayType.inline, context, designItems);
   }
 }

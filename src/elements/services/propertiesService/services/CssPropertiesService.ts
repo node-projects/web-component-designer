@@ -6,6 +6,8 @@ import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
+import { GridAssignedRowColumnPropertyEditor } from '../propertyEditors/special/GridAssignedRowColumnPropertyEditor.js';
+import { MetricsPropertyEditor } from '../propertyEditors/special/MetricsPropertyEditor.js';
 
 //TODO: remove this code when import asserts are supported
 let cssProperties: any;
@@ -44,7 +46,8 @@ export class CssPropertiesService extends CommonPropertiesService {
     "margin",
     "border",
     "padding",
-    "overflow"
+    "overflow",
+    "metrics"
   ]
 
   public grid = [
@@ -57,7 +60,15 @@ export class CssPropertiesService extends CommonPropertiesService {
     "align-content",
     "justify-content",
     "align-items",
-    "justify-items"
+    "justify-items",
+  ];
+
+  public gridChild = [
+    "grid-row",
+    "grid-column",
+    "assigned-row-column",
+    "align-self",
+    "justify-self"
   ];
 
   public flex = [
@@ -70,7 +81,23 @@ export class CssPropertiesService extends CommonPropertiesService {
     "align-items"
   ];
 
-  constructor(name: 'layout' | 'grid' | 'flex') {
+  public flexChild = [
+    "align-self",
+    "justify-self"
+  ];
+
+  public svg = [
+    "fill",
+    "fill-rule",
+    "fill-opacity",
+    "stroke",
+    "stroke-width",
+    "stroke-dash-array",
+    "stroke-opacity"
+  ];
+
+
+  constructor(name: 'layout' | 'grid' | 'gridChild' | 'flex' | 'flexChild' | 'svg') {
     super();
     this.name = name;
   }
@@ -85,17 +112,26 @@ export class CssPropertiesService extends CommonPropertiesService {
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     const propNames: string[] = this[this.name];
-    const propertiesList = propNames.map(x => {
-      const camelName = PropertiesHelper.dashToCamelCase(x);
-      return {
-        name: x,
-        type: cssProperties[camelName]?.type ?? 'string',
-        values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
-        service: this,
-        propertyType: PropertyType.cssValue
-      }
-    });
+    const propertiesList = propNames.map(x => this._getPropertyDef(x));
     return propertiesList;
+  }
+
+  _getPropertyDef(name: string): IProperty {
+    const camelName = PropertiesHelper.dashToCamelCase(name);
+    switch (camelName) {
+      case 'assignedRowColumn':
+        return { name, service: this, propertyType: PropertyType.complex, createEditor: (p) => new GridAssignedRowColumnPropertyEditor(p) };
+      case 'metrics':
+        return { name, service: this, propertyType: PropertyType.complex, createEditor: (p) => new MetricsPropertyEditor(p) };
+      default:
+        return {
+          name,
+          type: cssProperties[camelName]?.type ?? 'string',
+          values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
+          service: this,
+          propertyType: PropertyType.cssValue
+        }
+    }
   }
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {

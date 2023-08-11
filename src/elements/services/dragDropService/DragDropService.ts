@@ -18,7 +18,7 @@ export class DragDropService implements IDragDropService {
 
   public dragLeave(designerCanvas: IDesignerCanvas, event: DragEvent) {
     if (this._dragOverExtensionItem) {
-      designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
+      designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOverAndCanBeEntered);
       this._dragOverExtensionItem = null;
     }
   }
@@ -26,21 +26,21 @@ export class DragDropService implements IDragDropService {
   public dragOver(designerCanvas: IDesignerCanvas, event: DragEvent) {
     let [newContainer] = this.getPossibleContainerForDragDrop(designerCanvas, event);
     if (this._dragOverExtensionItem != newContainer) {
-      designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
-      designerCanvas.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
+      designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOverAndCanBeEntered);
+      designerCanvas.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOverAndCanBeEntered, event);
       this._dragOverExtensionItem = newContainer;
     } else {
       if (event.x != this._oldX && event.y != this._oldY) {
         this._oldX = event.x;
         this._oldY = event.y;
-        designerCanvas.extensionManager.refreshExtension(newContainer, ExtensionType.ContainerExternalDragOver, event);
+        designerCanvas.extensionManager.refreshExtension(newContainer, ExtensionType.ContainerExternalDragOverAndCanBeEntered, event);
       }
     }
   }
 
   public async drop(designerCanvas: IDesignerCanvas, event: DragEvent) {
     if (this._dragOverExtensionItem) {
-      designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOver);
+      designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOverAndCanBeEntered);
       this._dragOverExtensionItem = null;
     }
 
@@ -88,7 +88,7 @@ export class DragDropService implements IDragDropService {
         newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
         if (newContainerService) {
           //TODO: Maybe the check for SVG Elemnt should be in "canEnterByDrop"?
-          if (newContainerService.canEnterByDrop(newContainerElementDesignItem) && !(newContainerElementDesignItem.element instanceof SVGElement)) {
+          if (newContainerService.isEnterableContainer(newContainerElementDesignItem) && !(newContainerElementDesignItem.element instanceof SVGElement)) {
             break;
           } else {
             newContainerElementDesignItem = null;

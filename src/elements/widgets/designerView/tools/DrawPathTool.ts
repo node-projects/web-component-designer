@@ -127,6 +127,8 @@ export class DrawPathTool implements ITool {
           
           const d = moveSVGPath(this._path, mvX, mvY);
           this._path.setAttribute("d", d);
+          this._path.removeAttribute("stroke");
+          this._path.removeAttribute("stroke-width");
           svg.appendChild(this._path);
           svg.style.left = (mvX) + 'px';
           svg.style.top = (mvY) + 'px';
@@ -134,6 +136,8 @@ export class DrawPathTool implements ITool {
           svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
           svg.style.height = Math.round(coords.height + 2 * offset) + 'px';
           svg.style.overflow = 'visible';
+          svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
+          svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
           //designerView.rootDesignItem.element.appendChild(svg);
           this._path = null;
           this._pathD = null;

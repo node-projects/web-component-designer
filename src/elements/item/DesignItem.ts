@@ -18,6 +18,7 @@ import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js'
 import { enableStylesheetService } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { AbstractStylesheetService } from '../services/stylesheetService/AbstractStylesheetService.js';
 import { cssFromString } from '@node-projects/base-custom-webcomponent';
+import { IPlacementService } from '../services/placementService/IPlacementService.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -79,7 +80,7 @@ export class DesignItem implements IDesignItem {
   public hasAttribute(name: string) {
     return this._attributes.has(name);
   }
-  public getAttribute(name: string) {
+  public getAttribute(name: string): string {
     return this._attributes.get(name);
   }
   public *attributes() {
@@ -476,9 +477,10 @@ export class DesignItem implements IDesignItem {
   // Internal implementations wich don't use undo/redo
 
   public _insertChildInternal(designItem: IDesignItem, index?: number) {
-    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
+    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
       designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
-
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
+    }
     if (designItem.parent) {
       designItem.parent._removeChildInternal(designItem);
     }
@@ -494,14 +496,18 @@ export class DesignItem implements IDesignItem {
     (<DesignItem>designItem)._parent = this;
 
     //todo: is this still needed???
-    if (this.instanceServiceContainer.selectionService.primarySelection == designItem)
+    if (this.instanceServiceContainer.selectionService.primarySelection == designItem) {
       designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
-
+      if (designItem.getPlacementService().isEnterableContainer(this))
+        designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
+    }
     this._refreshIfStyleSheet();
   }
   public _removeChildInternal(designItem: IDesignItem) {
-    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem)
+    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
       designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionAndCanBeEntered);
+    }
 
     designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtensions([designItem], true);
 
@@ -526,5 +532,12 @@ export class DesignItem implements IDesignItem {
     } else if (this.name == 'link') {
 
     }
+  }
+
+  getPlacementService(style?: CSSStyleDeclaration): IPlacementService {
+    if (this.nodeType != NodeType.Element)
+      return null;
+    style ??= getComputedStyle(this.element);
+    return this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this, style));
   }
 }

@@ -44,7 +44,9 @@ export class ExtensionManager implements IExtensionManager {
       if (selectionChangedEvent.oldSelectedElements[0].parent) {
         const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
+        this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
         this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
+        this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
         this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.Selection);
       }
     }
@@ -52,8 +54,12 @@ export class ExtensionManager implements IExtensionManager {
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
+      if (selectionChangedEvent.selectedElements[0].getPlacementService()?.isEnterableContainer(selectionChangedEvent.selectedElements[0]))
+        this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
       const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
       this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
+      if (primaryContainer.getPlacementService()?.isEnterableContainer(primaryContainer))
+        this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
     }
 
     //this.refreshExtensions(selectionChangedEvent.selectedElements);
@@ -295,10 +301,12 @@ export class ExtensionManager implements IExtensionManager {
       this.refreshExtensions(designItems, ExtensionType.MouseOver, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.ContainerDragOver, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDragOverAndCanBeEntered, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.ContainerDrag, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Doubleclick, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Placement, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionAndCanBeEntered, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainerAndCanBeEntered, null, ignoredExtension);
     }
   }
 

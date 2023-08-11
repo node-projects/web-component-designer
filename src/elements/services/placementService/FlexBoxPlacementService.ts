@@ -9,6 +9,12 @@ import { IPlacementService } from './IPlacementService.js';
 
 export class FlexBoxPlacementService implements IPlacementService {
 
+  private _basePlacementService;
+
+  public constructor(basePlacementService: IPlacementService) {
+    this._basePlacementService = basePlacementService ?? new DefaultPlacementService();
+  }
+
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
     for (let i of items) {
       i.removeStyle("position");
@@ -34,12 +40,12 @@ export class FlexBoxPlacementService implements IPlacementService {
     return false;
   }
 
-  canEnter(container: IDesignItem, items: IDesignItem[]) {
-    return true;
+  isEnterableContainer(container: IDesignItem) {
+    return this._basePlacementService.isEnterableContainer(container);
   }
 
-  canEnterByDrop(container: IDesignItem) {
-    return true;
+  canEnter(container: IDesignItem, items: IDesignItem[]) {
+    return this._basePlacementService.canEnter(container, items);
   }
 
   canLeave(container: IDesignItem, items: IDesignItem[]) {

@@ -1,11 +1,22 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IHtmlWriterService } from './IHtmlWriterService.js';
-import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
+import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 
 //needs InternalBindinsgStorrageService -> keeps bindings
 export class LitTsElementWriterService implements IHtmlWriterService {
-  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, options: IHtmlWriterOptions) {
+  public options: IHtmlWriterOptions;
+
+  constructor(options?: IHtmlWriterOptions) {
+    this.options = options ?? {};
+    this.options.beautifyOutput ??= true;
+    this.options.compressCssToShorthandProperties ??= true;
+    this.options.writeDesignerProperties ??= true;
+    this.options.parseJsonInAttributes ??= true;
+    this.options.jsonWriteMode ??= 'min';
+  }
+  
+  write(indentedTextWriter: IndentedTextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean) {
     throw new Error('Method not implemented.');
   }
 

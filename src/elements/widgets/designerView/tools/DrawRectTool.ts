@@ -40,7 +40,7 @@ export class DrawRectTool implements ITool {
         this._startPoint = currentPoint;
         (<Element>event.target).setPointerCapture(event.pointerId);
         designerCanvas.captureActiveTool(this);
-        
+
         this._path = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         this._path.setAttribute("stroke", designerCanvas.serviceContainer.globalContext.strokeColor);
         this._path.setAttribute("fill", designerCanvas.serviceContainer.globalContext.fillBrush);
@@ -112,6 +112,8 @@ export class DrawRectTool implements ITool {
         const mvY = coords.y - offset;
         this._path.setAttribute("x", (this._px - mvX).toString());
         this._path.setAttribute("y", (this._py - mvY).toString());
+        this._path.removeAttribute("stroke");
+        this._path.removeAttribute("stroke-width");
         svg.appendChild(this._path);
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';
@@ -119,6 +121,8 @@ export class DrawRectTool implements ITool {
         svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
         svg.style.height = Math.round(coords.height + 2 * offset) + 'px';
         svg.style.overflow = 'visible';
+        svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
+        svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
         this._path = null;
         const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
@@ -127,6 +131,5 @@ export class DrawRectTool implements ITool {
     }
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) 
-  { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 }

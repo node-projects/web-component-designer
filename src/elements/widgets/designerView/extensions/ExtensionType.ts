@@ -9,15 +9,23 @@ export enum ExtensionType {
   /**
    * Extension for the Container wich the dragged element is draged over.
    */
-  ContainerDragOver = 8,
+  ContainerDragOverAndCanBeEntered = 8,
    /**
    * Extension for the Container on wich a new element is draged over.
    */
-  ContainerExternalDragOver = 9,
+  ContainerExternalDragOverAndCanBeEntered = 9,
   /**
    * Extension for the Current Container wich the dragged element is contained.
    */
   ContainerDrag = 10,
   Doubleclick = 11,
-  Placement = 12
+  Placement = 12,
+
+  /**
+   * Extensions only when the container can be Entered.
+   * So for Example on a custome webcomponent wich uses a grid layout for it's root, but can not show children,
+   * do not display grid extension.
+   */
+  PrimarySelectionAndCanBeEntered = 13,
+  PrimarySelectionContainerAndCanBeEntered = 14,
 }

@@ -81,8 +81,8 @@ export function CalculateGridInformation(designItem: IDesignItem) {
     gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number, type: 'h' | 'v' }[];
   } = { cells: [], gaps: [] };
 
-  for (let xIdx = 0; xIdx < rows.length; xIdx++) {
-    const r = rows[xIdx];
+  for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+    const r = rows[rowIdx];
     let areas: string[] = null;
     if (gridA && gridA[rw + 1]) {
       areas = gridA[rw + 1].split(' ');
@@ -92,15 +92,15 @@ export function CalculateGridInformation(designItem: IDesignItem) {
     const currY = Number.parseFloat(r.replace('px', ''));
     let cellList: { x: number, y: number, width: number, height: number, name: string }[] = [];
     retVal.cells.push(cellList);
-    for (let yIdx = 0; yIdx < columns.length; yIdx++) {
-      const c = columns[yIdx];
-      if (x > 0) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY, column: yIdx, row: xIdx, type: 'v' });
+    for (let colIdx = 0; colIdx < columns.length; colIdx++) {
+      const c = columns[colIdx];
+      if (colIdx > 0) {
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY, column: colIdx, row: rowIdx, type: 'v' });
         x += xGap
       }
       const currX = Number.parseFloat(c.replace('px', ''));
-      if (y > 0) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, column: yIdx, row: xIdx, type: 'h' });
+      if (rowIdx > 0) {
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, column: colIdx, row: rowIdx, type: 'h' });
       }
       let name = null;
       if (areas && areas[cl]) {
