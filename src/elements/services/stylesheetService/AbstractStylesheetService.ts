@@ -102,8 +102,12 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
     public stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();
 
     protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {
-        for (const selector of selectors)
+        for (let selector of selectors) {
+            if (selector == ':host') {
+                selector = DesignerCanvas.cssprefixConstant;
+            }
             if (designItem.element.matches(selector)) return true;
+        }
         return false;
     }
 
