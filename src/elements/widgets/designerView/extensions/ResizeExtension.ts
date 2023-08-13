@@ -95,8 +95,6 @@ export class ResizeExtension extends AbstractExtension {
         }
         this._initialSizes.push({ width: (rect.width - contentBoxOffset.x * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor, height: (rect.height - contentBoxOffset.y * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor });
 
-        (<HTMLElement>this.extendedItem.element).style.width = this._initialSizes[0].width + 'px';
-
         const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseFloat(x.replace('px', '')));
         const transformOrigin: DOMPoint = new DOMPoint(toArr[0], toArr[1]);
         this._initialComputedTransformOrigins.push(transformOrigin);
