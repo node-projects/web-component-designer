@@ -391,6 +391,8 @@ export class DesignItem implements IDesignItem {
 
   public setStyle(name: string, value?: string | null, important?: boolean) {
     let nm = PropertiesHelper.camelToDashCase(name);
+    if (this.isRootItem)
+      throw 'not allowed to set style on root item';
     const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
@@ -466,6 +468,8 @@ export class DesignItem implements IDesignItem {
   }
 
   public setAttribute(name: string, value?: string | null) {
+    if (this.isRootItem)
+      throw 'not allowed to set attribute on root item';
     const action = new AttributeChangeAction(this, name, value, this._attributes.get(name));
     this.instanceServiceContainer.undoService.execute(action);
   }
