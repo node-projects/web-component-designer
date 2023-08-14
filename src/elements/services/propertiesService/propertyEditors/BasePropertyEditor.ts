@@ -21,7 +21,7 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
         const cg = this.designItems[0].openGroup("set property: " + this.property.name);
         for (let d of this.designItems) {
           if (newValue == null)
-            this.property.service.clearValue([d], this.property);
+            this.property.service.clearValue([d], this.property, 'value');
           else
             this.property.service.setValue([d], this.property, newValue);
         }

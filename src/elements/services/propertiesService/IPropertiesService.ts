@@ -23,7 +23,7 @@ export interface IPropertiesService extends IService {
   getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget;
 
   setValue(designItems: IDesignItem[], property: IProperty, value: any);
-  clearValue(designItems: IDesignItem[], property: IProperty);
+  clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value');
   isSet(designItems: IDesignItem[], property: IProperty): ValueType;
   getValue(designItems: IDesignItem[], property: IProperty): any;
   getUnsetValue(designItems: IDesignItem[], property: IProperty): any;

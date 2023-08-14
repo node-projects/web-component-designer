@@ -207,7 +207,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             label.onkeyup = e => {
               if (e.key == 'Enter' && label.value) {
                 const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
-                p.service.clearValue(this._designItems, p);
+                p.service.clearValue(this._designItems, p, 'all');
                 p.name = label.value;
                 p.service.setValue(this._designItems, p, input.value);
                 pg.commit();
@@ -234,7 +234,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     const ctxMenu: IContextMenuItem[] = [
       {
         title: 'clear', action: (e) => {
-          property.service.clearValue(designItems, property);
+          property.service.clearValue(designItems, property, 'value');
           designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
         }
       },
@@ -247,6 +247,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             let target = property.service.getPropertyTarget(designItems[0], property);
             let binding = property.service.getBinding(designItems, property);
             designItems[0].serviceContainer.config.openBindingsEditor(property, designItems, binding, target);
+          }
+        },
+        {
+          title: 'clear binding', action: () => {
+            property.service.clearValue(designItems, property, 'binding');
+            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
           }
         }
       ]);
@@ -268,20 +274,24 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public static refreshIsSetElementAndEditorForDesignItems(isSetElement: HTMLElement, property: IProperty, items: IDesignItem[], propertiesService: IPropertiesService, editor?: IPropertyEditor) {
-    let s = propertiesService.isSet(items, property);
-    let v = propertiesService.getValue(items, property);
-    isSetElement.title = s;
-    if (s == ValueType.none) {
+    if (items) {
+      let s = propertiesService.isSet(items, property);
+      let v = propertiesService.getValue(items, property);
+      isSetElement.title = s;
+      if (s == ValueType.none) {
+        isSetElement.style.background = '';
+        v = propertiesService.getUnsetValue(items, property);
+      }
+      else if (s == ValueType.all)
+        isSetElement.style.background = 'white';
+      else if (s == ValueType.some)
+        isSetElement.style.background = 'gray';
+      else if (s == ValueType.bound)
+        isSetElement.style.background = 'orange';
+      editor?.refreshValueWithoutNotification(s, v);
+    } else {
       isSetElement.style.background = '';
-      v = propertiesService.getUnsetValue(items, property);
     }
-    else if (s == ValueType.all)
-      isSetElement.style.background = 'white';
-    else if (s == ValueType.some)
-      isSetElement.style.background = 'gray';
-    else if (s == ValueType.bound)
-      isSetElement.style.background = 'orange';
-    editor?.refreshValueWithoutNotification(s, v);
   }
 }
 
