@@ -94,12 +94,12 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
     }
   }
 
-  override clearValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
+  override clearValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }, clearType: 'all' | 'binding' | 'value') {
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
       designItems[0].instanceServiceContainer.stylesheetService.removeDeclarationFromRule(property.styleRule, property.styleDeclaration.name);
       return;
     }
-    super.clearValue(designItems, property);
+    super.clearValue(designItems, property, clearType);
   }
 
   override getValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {

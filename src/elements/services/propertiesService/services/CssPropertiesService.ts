@@ -107,7 +107,7 @@ export class CssPropertiesService extends CommonPropertiesService {
   }
 
   override getProperty(designItem: IDesignItem, name: string): IProperty {
-    return this[this.name][name]
+    return this._getPropertyDef(name);
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {

@@ -207,7 +207,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             label.onkeyup = e => {
               if (e.key == 'Enter' && label.value) {
                 const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
-                p.service.clearValue(this._designItems, p);
+                p.service.clearValue(this._designItems, p, 'all');
                 p.name = label.value;
                 p.service.setValue(this._designItems, p, input.value);
                 pg.commit();
@@ -227,22 +227,32 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public openContextMenu(event: MouseEvent, property: IProperty) {
+    PropertyGridPropertyList.openContextMenu(event, this._designItems, property);
+  }
+
+  public static openContextMenu(event: MouseEvent, designItems: IDesignItem[], property: IProperty) {
     const ctxMenu: IContextMenuItem[] = [
       {
         title: 'clear', action: (e) => {
-          property.service.clearValue(this._designItems, property);
-          this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
+          property.service.clearValue(designItems, property, 'value');
+          designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
         }
       },
     ];
-    if (this._serviceContainer.config.openBindingsEditor) {
+    if (designItems[0].serviceContainer.config.openBindingsEditor) {
       ctxMenu.push(...[
         { title: '-' },
         {
           title: 'edit binding', action: () => {
-            let target = this._propertiesService.getPropertyTarget(this._designItems[0], property);
-            let binding = this._propertiesService.getBinding(this._designItems, property);
-            this._serviceContainer.config.openBindingsEditor(property, this._designItems, binding, target);
+            let target = property.service.getPropertyTarget(designItems[0], property);
+            let binding = property.service.getBinding(designItems, property);
+            designItems[0].serviceContainer.config.openBindingsEditor(property, designItems, binding, target);
+          }
+        },
+        {
+          title: 'clear binding', action: () => {
+            property.service.clearValue(designItems, property, 'binding');
+            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
           }
         }
       ]);
@@ -259,21 +269,28 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   public refreshForDesignItems(items: IDesignItem[]) {
     for (let m of this._propertyMap) {
-      let s = this._propertiesService.isSet(items, m[0]);
-      let v = this._propertiesService.getValue(items, m[0]);
-      m[1].isSetElement.title = s;
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(m[1].isSetElement, m[0], items, this._propertiesService, m[1].editor);
+    }
+  }
+
+  public static refreshIsSetElementAndEditorForDesignItems(isSetElement: HTMLElement, property: IProperty, items: IDesignItem[], propertiesService: IPropertiesService, editor?: IPropertyEditor) {
+    if (items && items.length) {
+      let s = propertiesService.isSet(items, property);
+      let v = propertiesService.getValue(items, property);
+      isSetElement.title = property.name + ': ' + s;
       if (s == ValueType.none) {
-        m[1].isSetElement.style.background = '';
-        v = this._propertiesService.getUnsetValue(items, m[0]);
+        isSetElement.style.background = '';
+        v = propertiesService.getUnsetValue(items, property);
       }
       else if (s == ValueType.all)
-        m[1].isSetElement.style.background = 'white';
+        isSetElement.style.background = 'white';
       else if (s == ValueType.some)
-        m[1].isSetElement.style.background = 'gray';
+        isSetElement.style.background = 'gray';
       else if (s == ValueType.bound)
-        m[1].isSetElement.style.background = 'orange';
-
-      m[1].editor.refreshValueWithoutNotification(s, v);
+        isSetElement.style.background = 'orange';
+      editor?.refreshValueWithoutNotification(s, v);
+    } else {
+      isSetElement.style.background = '';
     }
   }
 }

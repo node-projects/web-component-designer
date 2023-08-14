@@ -45,7 +45,7 @@ export class CommonPropertiesService extends AbstractPropertiesService {
   }
 
   override getProperty(designItem: IDesignItem, name: string): IProperty {
-    return this.commonProperties[name];
+    return this.commonProperties.find(x => x.name == name);
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {

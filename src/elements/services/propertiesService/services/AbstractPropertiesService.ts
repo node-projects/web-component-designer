@@ -77,20 +77,24 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     return BindingTarget.property;
   }
 
-  clearValue(designItems: IDesignItem[], property: IProperty) {
+  clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value') {
     const cg = designItems[0].openGroup("property cleared: " + property.name);
     for (let d of designItems) {
-      if (property.propertyType == PropertyType.cssValue) {
-        d.removeStyle(property.name);
-      } else {
-        let attributeName = property.attributeName
-        if (!attributeName)
-          attributeName = PropertiesHelper.camelToDashCase(property.name);
-        d.removeAttribute(attributeName);
+      if (clearType != 'binding') {
+        if (property.propertyType == PropertyType.cssValue) {
+          d.removeStyle(property.name);
+        } else {
+          let attributeName = property.attributeName
+          if (!attributeName)
+            attributeName = PropertiesHelper.camelToDashCase(property.name);
+          d.removeAttribute(attributeName);
+        }
       }
-      d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
-        return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
-      });
+      if (clearType != 'value') {
+        d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+          return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+        });
+      }
       this._notifyChangedProperty(d, property, undefined);
     }
     cg.commit();
