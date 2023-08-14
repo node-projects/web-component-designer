@@ -199,7 +199,7 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
   }
 
   override getProperty(designItem: IDesignItem, name: string): IProperty {
-    return this.getProperties(designItem)[name];
+    return this.getProperties(designItem).find(x => x.name == name);
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] {

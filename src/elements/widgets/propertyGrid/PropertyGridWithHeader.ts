@@ -5,6 +5,8 @@ import { InstanceServiceContainer } from '../../services/InstanceServiceContaine
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { sleep } from '../../helper/Helper.js';
 import { NodeType } from '../../item/NodeType.js';
+import { PropertyGridPropertyList } from './PropertyGridPropertyList.js';
+import { ContentAndIdPropertiesService } from '../../services/propertiesService/services/ContentAndIdPropertiesService.js';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
@@ -17,9 +19,9 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       background: var(--medium-grey, #2f3545);
       color: white;
     }
-    div {
+    div.root {
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 15px auto 1fr;
       padding: 3px 6px;
       font-family: monospace; 
       align-items: center;
@@ -48,9 +50,11 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     `;
 
   static override readonly template = html`
-  <div>
-    <span class="desc">Type:</span><span id="type"></span>
+  <div class="root">
+    <span style="grid-column: span 2;" class="desc">Type:</span><span id="type"></span>
+    <div id="idRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
     <span class="desc">Id:</span><input type="text" id="id">
+    <div id="contentRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
     <span class="desc">Content:</span><input type="text" id="content">
   </div>
   <node-projects-property-grid id="pg"></node-projects-property-grid>
@@ -61,6 +65,9 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   private _pg: PropertyGrid;
   private _selectionChangedHandler: Disposable;
   private _instanceServiceContainer: InstanceServiceContainer;
+  private _idRect: HTMLDivElement;
+  private _contentRect: HTMLDivElement;
+  private _propertiesService: ContentAndIdPropertiesService;
 
 
   constructor() {
@@ -71,6 +78,18 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._id = this._getDomElement<HTMLInputElement>('id');
     this._content = this._getDomElement<HTMLInputElement>('content');
     this._pg = this._getDomElement<PropertyGrid>('pg');
+    this._idRect = this._getDomElement<HTMLDivElement>('idRect');
+    this._contentRect = this._getDomElement<HTMLDivElement>('contentRect');
+
+    this._propertiesService = new ContentAndIdPropertiesService();
+    this._idRect.oncontextmenu = (event) => {
+      event.preventDefault();
+      PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.idProperty);
+    };
+    this._contentRect.oncontextmenu = (event) => {
+      event.preventDefault();
+      PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.contentProperty);
+    };
 
     this._id.onkeydown = e => {
       if (e.key == 'Enter')
@@ -103,7 +122,6 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
   public set serviceContainer(value: ServiceContainer) {
     this._waitForChildrenReady().then(() => this._pg.serviceContainer = value);
-
   }
 
   public set instanceServiceContainer(value: InstanceServiceContainer) {
@@ -124,6 +142,9 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       else
         this._content.value = ''
       this._content.title = this._content.value;
+
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
     });
   }
 }
