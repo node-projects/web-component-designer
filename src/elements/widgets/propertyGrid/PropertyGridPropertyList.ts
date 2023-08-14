@@ -245,7 +245,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     if (hasTransferDataBindingObject) {
       const ddService = this._serviceContainer.bindableObjectDragDropService;
       if (ddService) {
-        const effect = ddService.dragOverOnProperty(event, property);
+        const effect = ddService.dragOverOnProperty(event, property, this._designItems);
         if ((effect ?? 'none') != 'none') {
           label.classList.add('createBinding');
           event.dataTransfer.dropEffect = effect;
@@ -263,7 +263,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     if (hasTransferDataBindingObject) {
       const ddService = this._serviceContainer.bindableObjectDragDropService;
       if (ddService) {
-        ddService.dropOnProperty(event, property);
+        ddService.dropOnProperty(event, property, this._designItems);
       }
     }
   }
