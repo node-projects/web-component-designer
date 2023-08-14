@@ -10,5 +10,5 @@ export interface IBindableObjectDragDropService {
   drop(designerCanvas: IDesignerCanvas, event: DragEvent, bindableObject: IBindableObject<any>, element: Element): void;
 
   dragOverOnProperty?(event: DragEvent, property: IProperty, designItems: IDesignItem[]): 'none' | 'copy' | 'link' | 'move';
-  dropOnProperty?(event: DragEvent, property: IProperty, designItems: IDesignItem[]): void;
+  dropOnProperty?(event: DragEvent, property: IProperty, bindableObject: IBindableObject<any>, designItems: IDesignItem[]): void;
 }

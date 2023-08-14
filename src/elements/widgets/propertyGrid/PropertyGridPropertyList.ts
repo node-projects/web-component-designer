@@ -259,11 +259,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _onDrop(event: DragEvent, property: IProperty, label: HTMLLabelElement) {
     event.preventDefault();
     label.classList.remove('createBinding');
-    const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
-    if (hasTransferDataBindingObject) {
+    const transferDataBindingObject = event.dataTransfer.getData(dragDropFormatNameBindingObject)
+    if (transferDataBindingObject) {
+      const bo = JSON.parse(transferDataBindingObject);
       const ddService = this._serviceContainer.bindableObjectDragDropService;
       if (ddService) {
-        ddService.dropOnProperty(event, property, this._designItems);
+        ddService.dropOnProperty(event, property, bo, this._designItems);
       }
     }
   }
