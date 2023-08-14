@@ -77,7 +77,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     return BindingTarget.property;
   }
 
-  clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value' = 'all') {
+  clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value') {
     const cg = designItems[0].openGroup("property cleared: " + property.name);
     for (let d of designItems) {
       if (clearType != 'binding') {

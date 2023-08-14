@@ -43,11 +43,21 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
     return [this.idProperty, this.contentProperty];
   }
 
-  override clearValue(designItems: IDesignItem[], property: IProperty): void {
+  override clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value' = 'all'): void {
     if (property.name == this.contentProperty.name) {
-      designItems[0].clearChildren();
+      for (let d of designItems) {
+        if (clearType != 'binding') {
+          d.clearChildren();
+        }
+        if (clearType != 'value') {
+          d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+            return s.clearBinding(d, property.name, this.getPropertyTarget(d, property));
+          });
+        }
+        this._notifyChangedProperty(d, property, undefined);
+      }
     } else {
-      super.clearValue(designItems, property);
+      super.clearValue(designItems, property, clearType);
     }
   }
 

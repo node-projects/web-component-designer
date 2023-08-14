@@ -274,7 +274,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public static refreshIsSetElementAndEditorForDesignItems(isSetElement: HTMLElement, property: IProperty, items: IDesignItem[], propertiesService: IPropertiesService, editor?: IPropertyEditor) {
-    if (items) {
+    if (items && items.length) {
       let s = propertiesService.isSet(items, property);
       let v = propertiesService.getValue(items, property);
       isSetElement.title = s;
