@@ -29,6 +29,14 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
       propertyType: PropertyType.propertyAndAttribute
     };
 
+  public innerHtmlProperty: IProperty =
+    {
+      name: "innerHTML",
+      type: "string",
+      service: this,
+      propertyType: PropertyType.property
+    };
+
   public name = "content"
 
   override isHandledElement(designItem: IDesignItem): boolean {
@@ -40,11 +48,11 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
-    return [this.idProperty, this.contentProperty];
+    return [this.idProperty, this.contentProperty, this.innerHtmlProperty];
   }
 
   override clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value' = 'all'): void {
-    if (property.name == this.contentProperty.name) {
+    if (property.name == this.contentProperty.name || property.name == this.innerHtmlProperty.name) {
       for (let d of designItems) {
         if (clearType != 'binding') {
           d.clearChildren();
@@ -62,7 +70,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
   }
 
   override isSet(designItems: IDesignItem[], property: IProperty): ValueType {
-    if (property.name == this.contentProperty.name) {
+    if (property.name == this.contentProperty.name || property.name == this.innerHtmlProperty.name) {
       let all = true;
       let some = false;
       if (designItems != null && designItems.length !== 0) {
@@ -86,7 +94,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
   }
 
   override getValue(designItems: IDesignItem[], property: IProperty): string | boolean {
-    if (property.name == this.contentProperty.name) {
+    if (property.name == this.contentProperty.name || property.name == this.innerHtmlProperty.name) {
       return designItems[0].element.textContent;
     }
     return super.getValue(designItems, property);

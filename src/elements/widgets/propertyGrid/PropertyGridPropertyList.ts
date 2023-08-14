@@ -277,7 +277,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     if (items && items.length) {
       let s = propertiesService.isSet(items, property);
       let v = propertiesService.getValue(items, property);
-      isSetElement.title = s;
+      isSetElement.title = property.name + ': ' + s;
       if (s == ValueType.none) {
         isSetElement.style.background = '';
         v = propertiesService.getUnsetValue(items, property);

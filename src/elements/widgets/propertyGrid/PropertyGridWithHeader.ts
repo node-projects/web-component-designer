@@ -21,7 +21,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     }
     div.root {
       display: grid;
-      grid-template-columns: 15px auto 1fr;
+      grid-template-columns: 15px  15px auto 1fr;
       padding: 3px 6px;
       font-family: monospace; 
       align-items: center;
@@ -51,10 +51,11 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
   static override readonly template = html`
   <div class="root">
-    <span style="grid-column: span 2;" class="desc">Type:</span><span id="type"></span>
-    <div id="idRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
-    <span class="desc">Id:</span><input type="text" id="id">
-    <div id="contentRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
+    <span style="grid-column: span 3;" class="desc">Type:</span><span id="type"></span>
+    <div title="id" id="idRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
+    <span style="grid-column: span 2;" class="desc">Id:</span><input type="text" id="id">
+    <div title="innerHTML" id="innerRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
+    <div title="textContent" id="contentRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
     <span class="desc">Content:</span><input type="text" id="content">
   </div>
   <node-projects-property-grid id="pg"></node-projects-property-grid>
@@ -67,6 +68,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   private _instanceServiceContainer: InstanceServiceContainer;
   private _idRect: HTMLDivElement;
   private _contentRect: HTMLDivElement;
+  private _innerRect: HTMLDivElement;
   private _propertiesService: ContentAndIdPropertiesService;
 
 
@@ -80,6 +82,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._pg = this._getDomElement<PropertyGrid>('pg');
     this._idRect = this._getDomElement<HTMLDivElement>('idRect');
     this._contentRect = this._getDomElement<HTMLDivElement>('contentRect');
+    this._innerRect = this._getDomElement<HTMLDivElement>('innerRect');
 
     this._propertiesService = new ContentAndIdPropertiesService();
     this._idRect.oncontextmenu = (event) => {
@@ -87,6 +90,10 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.idProperty);
     };
     this._contentRect.oncontextmenu = (event) => {
+      event.preventDefault();
+      PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.contentProperty);
+    };
+    this._innerRect.oncontextmenu = (event) => {
       event.preventDefault();
       PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.contentProperty);
     };
@@ -145,6 +152,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
       PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
       PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
     });
   }
 }
