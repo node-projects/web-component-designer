@@ -5,6 +5,7 @@ import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { ValueType } from '../ValueType.js';
+import { BindingTarget } from '../../../item/BindingTarget.js';
 
 export class ContentAndIdPropertiesService extends AbstractPropertiesService {
 
@@ -14,10 +15,10 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
 
   public contentProperty: IProperty =
     {
-      name: "content",
+      name: "textContent",
       type: "string",
       service: this,
-      propertyType: PropertyType.complex
+      propertyType: PropertyType.property
     };
 
   public idProperty: IProperty =
@@ -43,7 +44,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
   }
 
   override clearValue(designItems: IDesignItem[], property: IProperty): void {
-    if (property.name == 'content') {
+    if (property.name == this.contentProperty.name) {
       designItems[0].clearChildren();
     } else {
       super.clearValue(designItems, property);
@@ -51,7 +52,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
   }
 
   override isSet(designItems: IDesignItem[], property: IProperty): ValueType {
-    if (property.name == 'content') {
+    if (property.name == this.contentProperty.name) {
       let all = true;
       let some = false;
       if (designItems != null && designItems.length !== 0) {
@@ -63,16 +64,11 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
           some = some || has;
         });
         //todo: optimize perf, do not call bindings service for each property. 
-        /*const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
           return s.getBindings(designItems[0]);
         });
-        if (property.propertyType == PropertyType.cssValue) {
-          if (bindings && bindings.find(x => x.target == BindingTarget.css && x.targetName == property.name))
-            return ValueType.bound;
-        } else {
-          if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
-            return ValueType.bound;
-        }*/
+        if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+          return ValueType.bound;
       }
       return all ? ValueType.all : some ? ValueType.some : ValueType.none;
     }
@@ -80,7 +76,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
   }
 
   override getValue(designItems: IDesignItem[], property: IProperty): string | boolean {
-    if (property.name == 'content') {
+    if (property.name == this.contentProperty.name) {
       return designItems[0].element.textContent;
     }
     return super.getValue(designItems, property);
