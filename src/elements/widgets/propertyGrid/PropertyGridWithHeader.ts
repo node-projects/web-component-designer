@@ -95,7 +95,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     };
     this._innerRect.oncontextmenu = (event) => {
       event.preventDefault();
-      PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.contentProperty);
+      PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.innerHtmlProperty);
     };
 
     this._id.onkeydown = e => {
