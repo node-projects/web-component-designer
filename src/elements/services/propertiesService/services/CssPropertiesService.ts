@@ -40,6 +40,7 @@ export class CssPropertiesService extends CommonPropertiesService {
     "box-shadow",
     "opacity",
     "position",
+    "font-family",
     "font-size",
     "font-weight",
     "inset",

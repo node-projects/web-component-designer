@@ -281,7 +281,9 @@
     "floodOpacity": {},
     "font": {},
     "fontDisplay": {},
-    "fontFamily": {},
+    "fontFamily": {
+        "type": "font"
+    },
     "fontFeatureSettings": {},
     "fontKerning": {},
     "fontOpticalSizing": {},

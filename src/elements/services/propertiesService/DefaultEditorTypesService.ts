@@ -10,6 +10,7 @@ import { TextPropertyEditor } from './propertyEditors/TextPropertyEditor.js';
 import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor.js';
 import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor.js';
 import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEditor.js";
+import { FontPropertyEditor } from './propertyEditors/FontPropertyEditor.js';
 
 export class DefaultEditorTypesService implements IEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
@@ -25,6 +26,10 @@ export class DefaultEditorTypesService implements IEditorTypesService {
         {
           return new ColorPropertyEditor(property);
         }
+      case "font":
+      {
+        return new FontPropertyEditor(property);
+      }
       case "date":
         {
           return new DatePropertyEditor(property);
