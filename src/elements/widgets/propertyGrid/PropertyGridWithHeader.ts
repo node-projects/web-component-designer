@@ -21,7 +21,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     }
     div.root {
       display: grid;
-      grid-template-columns: 15px  15px auto 1fr;
+      grid-template-columns: 11px 11px auto 1fr;
       padding: 3px 6px;
       font-family: monospace; 
       align-items: center;
