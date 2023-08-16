@@ -5,6 +5,7 @@ import { ServiceContainer } from '../ServiceContainer.js';
 import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { IRect } from "../../../interfaces/IRect.js";
 import { copyToClipboard, getFromClipboard, getTextFromClipboard } from "../../helper/ClipboardHelper.js";
+import { DesignItem } from "../../item/DesignItem.js";
 
 export class CopyPasteAsJsonService implements ICopyPasteService {
   async copyItems(designItems: IDesignItem[]): Promise<void> {
@@ -30,6 +31,14 @@ export class CopyPasteAsJsonService implements ICopyPasteService {
       try {
         data = await (await items[0].getType('application/json'))?.text();
       } catch { }
+      try {
+        let imageFmt = items[0].types.find(x => x.startsWith("image/"))
+        if (imageFmt) {
+          let imgData = await items[0].getType(imageFmt);
+          let di = await DesignItem.createDesignItemFromImageBlob(serviceContainer, instanceServiceContainer, imgData);
+          return [[di]];
+        }
+      } catch { }
     } else {
       data = await getTextFromClipboard();
     }
@@ -43,4 +52,6 @@ export class CopyPasteAsJsonService implements ICopyPasteService {
     const parserService = serviceContainer.htmlParserService;
     return [await parserService.parse(html, serviceContainer, instanceServiceContainer, true), positions];
   }
+
+
 }
