@@ -544,4 +544,17 @@ export class DesignItem implements IDesignItem {
     style ??= getComputedStyle(this.element);
     return this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this, style));
   }
+
+  static createDesignItemFromImageBlob(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, data: Blob): Promise<IDesignItem> {
+    return new Promise<IDesignItem>(resolve => {
+      let reader = new FileReader();
+      reader.onloadend = () => {
+        const img = document.createElement('img');
+        img.src = <string>reader.result;
+        const di = DesignItem.createDesignItemFromInstance(img, serviceContainer, instanceServiceContainer);
+        return resolve(di)
+      }
+      reader.readAsDataURL(data);
+    })
+  }
 }

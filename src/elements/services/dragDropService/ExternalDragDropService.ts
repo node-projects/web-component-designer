@@ -11,23 +11,17 @@ export class ExternalDragDropService implements IExternalDragDropService {
     return 'none';
   }
 
-  drop(designerCanvas: IDesignerCanvas, event: DragEvent) {
+  async drop(designerCanvas: IDesignerCanvas, event: DragEvent) {
     if (event.dataTransfer.files[0].type.startsWith('image/')) {
-      let reader = new FileReader();
-      reader.onloadend = () => {
-        const img = document.createElement('img');
-        img.src = <string>reader.result;
-        const di = DesignItem.createDesignItemFromInstance(img, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-        let grp = di.openGroup("Insert of &lt;img&gt;");
-        di.setStyle('position', 'absolute')
-        const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-        di.setStyle('top', event.offsetY + targetRect.top - designerCanvas.containerBoundingRect.y + 'px')
-        di.setStyle('left', event.offsetX + targetRect.left - designerCanvas.containerBoundingRect.x + 'px')
-        designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
-        grp.commit();
-        requestAnimationFrame(() => designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di]));
-      }
-      reader.readAsDataURL(event.dataTransfer.files[0]);
+      let di = await DesignItem.createDesignItemFromImageBlob(designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer, event.dataTransfer.files[0]);
+      let grp = di.openGroup("Insert of &lt;img&gt;");
+      di.setStyle('position', 'absolute')
+      const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+      di.setStyle('top', event.offsetY + targetRect.top - designerCanvas.containerBoundingRect.y + 'px')
+      di.setStyle('left', event.offsetX + targetRect.left - designerCanvas.containerBoundingRect.x + 'px')
+      designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
+      grp.commit();
+      requestAnimationFrame(() => designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di]));
     }
   }
 }

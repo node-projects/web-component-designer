@@ -873,8 +873,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         const ddService = this.serviceContainer.bindableObjectDragDropService;
         if (ddService) {
           const el = this.getElementAtPoint({ x: event.x, y: event.y });
-          const effect = ddService.drop(this, event, bo, el);
-          event.dataTransfer.dropEffect = effect;
+          ddService.drop(this, event, bo, el);
         }
       }
       else {
