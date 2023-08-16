@@ -149,7 +149,12 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
     `;
 
     public static override readonly style = css`
-    table {
+      :host {
+        overflow: auto;
+        height: 100%;
+        display: block;
+      }
+      table {
         font-family: Arial, Helvetica, sans-serif;
         border-collapse: collapse;
         width: 100%;
