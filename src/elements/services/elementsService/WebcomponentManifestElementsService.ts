@@ -27,6 +27,12 @@ export class WebcomponentManifestElementsService implements IElementsService {
           this._elementList.push(elDef);
         }
       }
+      for (let d of m.declarations) {
+        if (d.tagName) {
+          let elDef: IElementDefinition = { tag: d.tagName, import: removeTrailing(this._importPrefix, '/') + '/' + removeLeading(m.path, '/'), defaultWidth: "200px", defaultHeight: "200px", className: d.name }
+          this._elementList.push(elDef);
+        }
+      }
       if (this._resolveStored) {
         this._resolveStored.forEach(x => x(this._elementList));
         this._resolveStored = null;
