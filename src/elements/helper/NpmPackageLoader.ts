@@ -290,7 +290,7 @@ export class NpmPackageLoader {
                 let imp = getImport(packageJsonObj.exports);
                 if (imp) {
                     importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
-                } else if (imp = getImport(packageJsonObj?.['.'])) {
+                } else if (imp = getImport(packageJsonObj.exports?.['.'])) {
                     importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
                 }
             }
