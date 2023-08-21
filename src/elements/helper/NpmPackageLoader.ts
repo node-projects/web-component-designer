@@ -52,7 +52,7 @@ export class NpmPackageLoader {
     }
 
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
-    async loadNpmPackage(pkg: string, serviceContainer: ServiceContainer, paletteTree: PaletteTreeView, loadAllImports: boolean, reportState?: (state: string) => void) {
+    async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: PaletteTreeView, loadAllImports?: boolean, reportState?: (state: string) => void) {
         const baseUrl = window.location.protocol + this._packageSource + pkg + '/';
 
         const packageJsonUrl = baseUrl + 'package.json';
@@ -99,30 +99,35 @@ export class NpmPackageLoader {
             }
         }
 
-        fetch(webComponentDesignerUrl).then(async x => {
-            if (x.ok) {
-                const webComponentDesignerJson = <IDesignerAddonJson>await x.json();
-                if (webComponentDesignerJson.services) {
-                    for (let o in webComponentDesignerJson.services) {
-                        for (let s of webComponentDesignerJson.services[o]) {
-                            if (s.startsWith('./'))
-                                s = s.substring(2);
-                            //@ts-ignore
-                            const classDefinition = (await importShim(baseUrl + s)).default;
-                            //@ts-ignore
-                            serviceContainer.register(o, new classDefinition());
+        if (serviceContainer) {
+            fetch(webComponentDesignerUrl).then(async x => {
+                if (x.ok) {
+                    const webComponentDesignerJson = <IDesignerAddonJson>await x.json();
+                    if (webComponentDesignerJson.services) {
+                        for (let o in webComponentDesignerJson.services) {
+                            for (let s of webComponentDesignerJson.services[o]) {
+                                if (s.startsWith('./'))
+                                    s = s.substring(2);
+                                //@ts-ignore
+                                const classDefinition = (await importShim(baseUrl + s)).default;
+                                //@ts-ignore
+                                serviceContainer.register(o, new classDefinition());
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
 
         if (customElementsJson.ok) {
             const customElementsJsonObj = await customElementsJson.json();
             let elements = new WebcomponentManifestElementsService(packageJsonObj.name, elementsRootPath, customElementsJsonObj);
-            serviceContainer.register('elementsService', elements);
-            let properties = new WebcomponentManifestPropertiesService(packageJsonObj.name, customElementsJsonObj);
-            serviceContainer.register('propertyService', properties);
+            if (serviceContainer)
+                serviceContainer.register('elementsService', elements);
+            if (serviceContainer) {
+                let properties = new WebcomponentManifestPropertiesService(packageJsonObj.name, customElementsJsonObj);
+                serviceContainer.register('propertyService', properties);
+            }
 
             if (loadAllImports) {
                 for (let e of await elements.getElements()) {
@@ -131,8 +136,10 @@ export class NpmPackageLoader {
                 }
             }
 
-            //todo: should be retriggered by service container, or changeing list in container
-            paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
+            if (serviceContainer && paletteTree) {
+                //todo: should be retriggered by service container, or changeing list in container
+                paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
+            }
         }
         else {
             console.warn('npm package: ' + pkg + ' - no custom-elements.json found, only loading javascript module');
@@ -173,7 +180,7 @@ export class NpmPackageLoader {
                 console.warn('npm package: ' + pkg + ' - no entry point in package found.');
             }
 
-            if (newElements.length > 0) {
+            if (newElements.length > 0 && serviceContainer && paletteTree) {
                 const elementsCfg: IElementsJson = {
                     elements: newElements
                 }
@@ -222,16 +229,81 @@ export class NpmPackageLoader {
         this.addToImportmap(baseUrl, packageJsonObj);
     }
 
-    async addToImportmap(baseUrl: string, packageJsonObj: { name?: string, module?: string, main?: string, exports?: Record<string, string> }) {
+    async addToImportmap(baseUrl: string, packageJsonObj: { name?: string, module?: string, main?: string, unpkg?: string, exports?: Record<string, string> }) {
         //@ts-ignore
         const map = importShim.getImportMap().imports;
+        const importMap = { imports: {}, scopes: {} };
+
         if (!map.hasOwnProperty(packageJsonObj.name)) {
             //todo - use exports of package.json for importMap
-            const importMap = { imports: {}, scopes: {} };
+            if (packageJsonObj.exports) {
+
+                /* "exports": {
+                ".": {
+                    "browser": "./index.browser.js",
+                    "default": "./index.js"
+                },
+                "./async": {
+                    "browser": "./async/index.browser.js",
+                    "default": "./async/index.js"
+                },
+                "./non-secure": "./non-secure/index.js",
+                "./package.json": "./package.json"
+            }
+           
+            "exports": {
+                "node": {
+                  "import": "./feature-node.mjs",
+                  "require": "./feature-node.cjs"
+                },
+                "default": "./feature.mjs"
+              }
+            
+            
+               "exports": {
+                ".": "./index.js",
+                "./feature.js": {
+                  "node": "./feature-node.js",
+                  "default": "./feature.js"
+                }
+              }
+            
+            */
+
+                /*  
+                "exports": {
+                    "import": "./index-module.js",
+                    "require": "./index-require.cjs"
+                }, 
+                */
+
+                let getImport = (obj: any) => {
+                    if (obj?.browser)
+                        return obj.browser;
+                    if (obj?.import)
+                        return obj.import;
+                    if (obj?.default)
+                        return obj.default;
+                    return obj?.node;
+                }
+                //Names to use: browser, import, default, node
+                let imp = getImport(packageJsonObj.exports);
+                if (imp) {
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
+                } else if (imp = getImport(packageJsonObj?.['.'])) {
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
+                }
+            }
+
             let mainImport = packageJsonObj.main;
             if (packageJsonObj.module)
                 mainImport = packageJsonObj.module;
-            importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(mainImport, '/');
+            if (packageJsonObj.unpkg && !mainImport)
+                mainImport = packageJsonObj.unpkg;
+            if (!importMap.imports[packageJsonObj.name]) {
+                importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(mainImport, '/');
+            }
+
             importMap.imports[packageJsonObj.name + '/'] = baseUrl;
 
             //@ts-ignore

@@ -51,7 +51,8 @@ export * from "./elements/services/copyPasteService/CopyPasteService.js";
 export * from "./elements/services/copyPasteService/CopyPasteAsJsonService.js";
 export type { ICopyPasteService } from "./elements/services/copyPasteService/ICopyPasteService.js";
 
-export * from "./elements/services/demoProviderService/DemoProviderService.js";
+export * from "./elements/services/demoProviderService/IframeDemoProviderService.js";
+export * from "./elements/services/demoProviderService/SimpleDemoProviderService.js";
 export type { IDemoProviderService } from "./elements/services/demoProviderService/IDemoProviderService.js";
 
 export * from "./elements/services/designItemDocumentPositionService/DesignItemDocumentPositionService.js";

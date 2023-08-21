@@ -3,7 +3,7 @@ import { ServiceContainer } from "../ServiceContainer.js";
 import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
 import { IDemoProviderService } from "./IDemoProviderService.js";
 
-export class DemoProviderService implements IDemoProviderService {
+export class IframeDemoProviderService implements IDemoProviderService {
   provideDemo(container: HTMLElement, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
     return new Promise<void>(resolve => {
       const iframe = document.createElement('iframe');
@@ -22,8 +22,17 @@ export class DemoProviderService implements IDemoProviderService {
       const doc = iframe.contentWindow.document;
       doc.open();
       doc.write('<script type="module">');
-      for (let i of instanceServiceContainer.designContext.imports) {
-        doc.write("import '" + i + "';");
+      if (instanceServiceContainer.designContext.npmPackages?.length) {
+        doc.write("import { NpmPackageLoader } from '../../helper/NpmPackageLoader.js'");
+        doc.write("let loader =  new NpmPackageLoader();");
+        for (let p of instanceServiceContainer.designContext.npmPackages) {
+          doc.write("loader.loadNpmPackage('" + p + "', null, null, true);");
+        }
+      }
+      if (instanceServiceContainer.designContext.imports?.length) {
+        for (let i of instanceServiceContainer.designContext.imports) {
+          doc.write("import '" + i + "';");
+        }
       }
       doc.write("document.body.style.display='';");
       doc.write('</script>');
