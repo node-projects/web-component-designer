@@ -45,7 +45,6 @@ import { CopyPasteService } from './copyPasteService/CopyPasteService.js';
 import { DefaultModelCommandService } from './modelCommandService/DefaultModelCommandService.js';
 import { ButtonSeperatorProvider } from '../widgets/designerView/extensions/buttons/ButtonSeperatorProvider.js';
 import { GridExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/GridExtensionDesignViewConfigButtons.js';
-import { DemoProviderService } from './demoProviderService/DemoProviderService.js';
 import { DrawRectTool } from '../widgets/designerView/tools/DrawRectTool.js';
 import { DrawEllipsisTool } from '../widgets/designerView/tools/DrawEllipsisTool.js';
 import { DrawLineTool } from '../widgets/designerView/tools/DrawLineTool.js';
@@ -85,6 +84,7 @@ import { TransformToolButtonProvider } from '../widgets/designerView/tools/toolB
 import { MultipleSelectionRectExtensionProvider } from '../widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js';
 import { DragDropService } from './dragDropService/DragDropService.js';
 import { EventsService } from './eventsService/EventsService.js';
+import { SimpleDemoProviderService } from './demoProviderService/SimpleDemoProviderService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -111,7 +111,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("dragDropService", new DragDropService());
   serviceContainer.register("copyPasteService", new CopyPasteService());
   serviceContainer.register("modelCommandService", new DefaultModelCommandService());
-  serviceContainer.register("demoProviderService", new DemoProviderService());
+  serviceContainer.register("demoProviderService", new SimpleDemoProviderService());
   serviceContainer.register("eventsService", new EventsService());
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
