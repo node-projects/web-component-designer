@@ -320,14 +320,16 @@ export class NpmPackageLoader {
                         i = getImport(i);
                     if (!(typeof i == 'string'))
                         i = getImport(i);
+                    if (!(typeof i == 'string'))
+                        i = null;
                     return i;
                 }
                 //Names to use: browser, import, default, node
                 let imp = getImportFlat(packageJsonObj.exports);
                 if (imp) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeTrailing(imp, '/'), '.');
                 } else if (imp = getImportFlat(packageJsonObj.exports?.['.'])) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeTrailing(imp, '/'), '.');
                 }
             }
 
