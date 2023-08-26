@@ -1,6 +1,22 @@
 import { IDesignItem } from "../item/IDesignItem.js";
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "./TransformHelper.js";
 
+export function GetElementGridInformation(element: HTMLElement) {
+  let cs = getComputedStyle(element);
+  let rowSpan = 1;
+  let colSpan = 1;
+  if (cs.gridRowEnd.startsWith('span'))
+    rowSpan = parseInt(cs.gridRowEnd.substring(4));
+  else
+    rowSpan = parseInt(cs.gridRowEnd) - parseInt(cs.gridRowStart);
+  if (cs.gridColumnEnd.startsWith('span'))
+    colSpan = parseInt(cs.gridColumnEnd.substring(4));
+  else
+    colSpan = parseInt(cs.gridColumnEnd) - parseInt(cs.gridColumnStart);
+
+  return { colSpan, rowSpan };
+}
+
 export function CalculateGridInformation(designItem: IDesignItem) {
 
   //todo:
@@ -12,7 +28,7 @@ export function CalculateGridInformation(designItem: IDesignItem) {
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');
   const columns = computedStyle.gridTemplateColumns.split(' ');
- 
+
   const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
   const paddingTop = Number.parseFloat(computedStyle.paddingTop);
 

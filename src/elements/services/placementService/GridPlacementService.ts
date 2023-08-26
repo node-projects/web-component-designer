@@ -2,11 +2,12 @@ import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
-import { CalculateGridInformation } from '../../helper/GridHelper.js';
+import { CalculateGridInformation, GetElementGridInformation } from '../../helper/GridHelper.js';
 import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { DefaultPlacementService } from './DefaultPlacementService.js';
+
 
 export class GridPlacementService implements IPlacementService {
 
@@ -70,30 +71,27 @@ export class GridPlacementService implements IPlacementService {
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     const gridInformation = CalculateGridInformation(container);
     const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
-    const posElement = (<IDesignerCanvas><unknown>placementView).getNormalizedElementCoordinates(items[0].element)
-
+    
     let row = 0;
     let column = 0;
-    if (!pointInRect(pos, posElement)) {
-      row = 0;
-      for (let cellRow of gridInformation.cells) {
-        column = 0
-        for (let cell of cellRow) {
-          if (pointInRect(pos, cell)) {
-            if (cell.name) {
-              (<HTMLElement>items[0].element).style.gridColumn = '';
-              (<HTMLElement>items[0].element).style.gridRow = '';
-              (<HTMLElement>items[0].element).style.gridArea = cell.name;
-            } else {
-              (<HTMLElement>items[0].element).style.gridArea = '';
-              (<HTMLElement>items[0].element).style.gridColumn = <string><any>column + 1;
-              (<HTMLElement>items[0].element).style.gridRow = <string><any>row + 1;
-            }
+    for (let cellRow of gridInformation.cells) {
+      column = 0
+      for (let cell of cellRow) {
+        if (pointInRect(pos, cell)) {
+          let info = GetElementGridInformation(<HTMLElement>items[0].element);
+          if (cell.name) {
+            (<HTMLElement>items[0].element).style.gridColumn = '';
+            (<HTMLElement>items[0].element).style.gridRow = '';
+            (<HTMLElement>items[0].element).style.gridArea = cell.name;
+          } else {
+            (<HTMLElement>items[0].element).style.gridArea = '';
+            (<HTMLElement>items[0].element).style.gridColumn = (column + 1) + (info.colSpan > 1 ? ' / span ' + info.colSpan : '');
+            (<HTMLElement>items[0].element).style.gridRow = (row + 1) + (info.rowSpan > 1 ? ' / span ' + info.rowSpan : '');
           }
-          column++;
         }
-        row++;
+        column++;
       }
+      row++;
     }
 
     (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
@@ -110,6 +108,7 @@ export class GridPlacementService implements IPlacementService {
       column = 0
       for (let cell of cellRow) {
         if (pointInRect(pos, cell)) {
+          let info = GetElementGridInformation(<HTMLElement>items[0].element);
           //Grid Area is shorthand for grid row/column, to make undo work correctly we need to set befor and after clear
           if (cell.name) {
             items[0].setStyle('grid-area', cell.name);
@@ -117,11 +116,11 @@ export class GridPlacementService implements IPlacementService {
             items[0].removeStyle('grid-row');
             items[0].setStyle('grid-area', cell.name);
           } else {
-            items[0].setStyle('grid-column', <string><any>column + 1);
-            items[0].setStyle('grid-row', <string><any>row + 1);
+            items[0].setStyle('grid-column', (column + 1) + (info.colSpan > 1 ? ' / span ' + info.colSpan : ''));
+            items[0].setStyle('grid-row', (row + 1) + (info.rowSpan > 1 ? ' / span ' + info.rowSpan : ''));
             items[0].removeStyle('grid-area');
-            items[0].setStyle('grid-column', <string><any>column + 1);
-            items[0].setStyle('grid-row', <string><any>row + 1);
+            items[0].setStyle('grid-column', (column + 1) + (info.colSpan > 1 ? ' / span ' + info.colSpan : ''));
+            items[0].setStyle('grid-row', (row + 1) + (info.rowSpan > 1 ? ' / span ' + info.rowSpan : ''));
           }
         }
         column++;
