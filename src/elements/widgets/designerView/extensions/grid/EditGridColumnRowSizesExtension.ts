@@ -1,6 +1,6 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { convertCssUnit, convertCssUnitToPixel, getCssUnit } from "../../../../helper/CssUnitConverter.js";
-import { CalculateGridInformation } from "../../../../helper/GridHelper.js";
+import { calculateGridInformation } from "../../../../helper/GridHelper.js";
 import { getElementCombinedTransform } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
@@ -10,7 +10,7 @@ import { OverlayLayer } from "../OverlayLayer.js";
 
 export class EditGridColumnRowSizesExtension extends AbstractExtension {
 
-  gridInformation: ReturnType<typeof CalculateGridInformation>;
+  gridInformation: ReturnType<typeof calculateGridInformation>;
 
   private _resizers: SVGRectElement[] = [];
   private _initalPos: number;
@@ -26,7 +26,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
   }
 
   override refresh(event?: Event) {
-    this.gridInformation = CalculateGridInformation(this.extendedItem);
+    this.gridInformation = calculateGridInformation(this.extendedItem);
     this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
     this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
     this._group.style.transformOrigin = '0 0';
@@ -46,7 +46,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     });
   }
 
-  private _pointerActionTypeResize(event: PointerEvent, rect: SVGRectElement, gap: ReturnType<typeof CalculateGridInformation>['gaps'][0]) {
+  private _pointerActionTypeResize(event: PointerEvent, rect: SVGRectElement, gap: ReturnType<typeof calculateGridInformation>['gaps'][0]) {
     event.stopPropagation();
 
     const templatePropertyName = gap.type == 'h' ? 'gridTemplateRows' : 'gridTemplateColumns';

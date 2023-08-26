@@ -1,15 +1,19 @@
 import { IDesignItem } from "../item/IDesignItem.js";
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "./TransformHelper.js";
 
-export function GetElementGridInformation(element: HTMLElement) {
+export function getElementGridInformation(element: HTMLElement) {
   let cs = getComputedStyle(element);
   let rowSpan = 1;
   let colSpan = 1;
-  if (cs.gridRowEnd.startsWith('span'))
+  if (cs.gridRowEnd == 'auto')
+    rowSpan = 1
+  else if (cs.gridRowEnd.startsWith('span'))
     rowSpan = parseInt(cs.gridRowEnd.substring(4));
   else
     rowSpan = parseInt(cs.gridRowEnd) - parseInt(cs.gridRowStart);
-  if (cs.gridColumnEnd.startsWith('span'))
+  if (cs.gridColumnEnd == 'auto')
+    colSpan = 1
+  else if (cs.gridColumnEnd.startsWith('span'))
     colSpan = parseInt(cs.gridColumnEnd.substring(4));
   else
     colSpan = parseInt(cs.gridColumnEnd) - parseInt(cs.gridColumnStart);
@@ -17,7 +21,7 @@ export function GetElementGridInformation(element: HTMLElement) {
   return { colSpan, rowSpan };
 }
 
-export function CalculateGridInformation(designItem: IDesignItem) {
+export function calculateGridInformation(designItem: IDesignItem) {
 
   //todo:
   //same name should combine columns/rows
