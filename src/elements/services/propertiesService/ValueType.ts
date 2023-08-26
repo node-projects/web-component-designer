@@ -2,5 +2,6 @@ export enum ValueType {
   'none' = 'none',
   'all' = 'all',
   'some' = 'some',
-  'bound' = 'bound'
+  'bound' = 'bound',
+  'fromStylesheet' = 'fromStylesheet'
 }

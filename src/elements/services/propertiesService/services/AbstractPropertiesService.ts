@@ -11,6 +11,9 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
+  _stylesCache = new Map<IDesignItem, Set<string>>;
+  _cacheClearTimer: NodeJS.Timeout;
+
   abstract getRefreshMode(designItem: IDesignItem): RefreshMode;
 
   abstract isHandledElement(designItem: IDesignItem): boolean;
@@ -107,8 +110,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       let attributeName = property.attributeName
       if (!attributeName)
         attributeName = PropertiesHelper.camelToDashCase(property.name);
-
-      designItems.forEach((x) => {
+      for (let x of designItems) {
         let has = false;
         if (property.propertyType == PropertyType.cssValue)
           has = x.hasStyle(property.name);
@@ -116,7 +118,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           has = x.hasAttribute(attributeName);
         all = all && has;
         some = some || has;
-      });
+        if (!all && some)
+          break;
+      };
+
       //todo: optimize perf, do not call bindings service for each property. 
       const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.getBindings(designItems[0]);
@@ -127,6 +132,20 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       } else {
         if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
           return ValueType.bound;
+      }
+
+      if (!all && property.propertyType == PropertyType.cssValue) {
+        let styles = this._stylesCache.get(designItems[0]);
+        if (!styles) {
+          styles = new Set(designItems[0].getAllStyles().filter(x => x.selector != null).flatMap(x => x.declarations).map(x => x.name));
+          this._stylesCache.set(designItems[0], styles);
+          clearTimeout(this._cacheClearTimer);
+          this._cacheClearTimer = setTimeout(() => this._stylesCache.clear(), 30);
+        }
+
+        let cssValue = styles.has(property.name);
+        if (cssValue)
+          return ValueType.fromStylesheet;
       }
     }
     else
@@ -182,7 +201,6 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     }
   }
 
-  //todo: optimize perf, call window.getComputedStyle only once per item, and not per property
   getUnsetValue(designItems: IDesignItem[], property: IProperty) {
     if (property.propertyType == PropertyType.cssValue) {
       if (designItems != null && designItems.length !== 0) {

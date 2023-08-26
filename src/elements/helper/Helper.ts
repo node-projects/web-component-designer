@@ -33,13 +33,13 @@ export function pointInRect(point: IPoint, rect: IRect) {
 }
 
 export function removeTrailing(text: string, char: string) {
-  if (text.endsWith('/'))
+  if (text.endsWith(char ?? '/'))
     return text.substring(0, text.length - 1);
   return text;
 }
 
 export function removeLeading(text: string, char: string) {
-  if (text.startsWith('/'))
+  if (text.startsWith(char ?? '/'))
     return text.substring(1);
   return text;
 }

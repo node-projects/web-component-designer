@@ -118,7 +118,6 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
             if (visibleDict.has(a.title))
               a.refreshForDesignItems(items);
           }
-
           this._observeItems();
         }
       } else {

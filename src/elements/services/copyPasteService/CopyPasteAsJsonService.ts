@@ -52,6 +52,4 @@ export class CopyPasteAsJsonService implements ICopyPasteService {
     const parserService = serviceContainer.htmlParserService;
     return [await parserService.parse(html, serviceContainer, instanceServiceContainer, true), positions];
   }
-
-
 }

@@ -331,6 +331,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         isSetElement.style.background = 'gray';
       else if (s == ValueType.bound)
         isSetElement.style.background = 'orange';
+      else if (s == ValueType.fromStylesheet) {
+        v = propertiesService.getUnsetValue(items, property);
+        isSetElement.style.background = 'yellow';
+      }
       editor?.refreshValueWithoutNotification(s, v);
     } else {
       isSetElement.style.background = '';

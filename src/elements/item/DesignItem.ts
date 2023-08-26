@@ -450,7 +450,13 @@ export class DesignItem implements IDesignItem {
     return value ?? fallback;
   }
 
+  _stylesCache: IStyleRule[] = null;
+  _cacheClearTimer: NodeJS.Timeout;
+
   public getAllStyles(): IStyleRule[] {
+    let styles = this._stylesCache;
+    if (styles)
+      return styles;
     if (this.nodeType != NodeType.Element)
       return [];
 
@@ -464,7 +470,11 @@ export class DesignItem implements IDesignItem {
       }
       catch (err) { }
     }
-    return [{ selector: null, declarations: localStyles, specificity: -1 }];
+    styles = [{ selector: null, declarations: localStyles, specificity: -1 }];
+    this._stylesCache = styles;
+    clearTimeout(this._cacheClearTimer);
+    this._cacheClearTimer = setTimeout(() => this._stylesCache = null, 30);
+    return styles;
   }
 
   public setAttribute(name: string, value?: string | null) {

@@ -267,6 +267,22 @@ export class NpmPackageLoader {
                   "default": "./feature.js"
                 }
               }
+
+            "exports": {
+                ".": {
+                    "types": "./dist/index.d.ts",
+                    "import": {
+                        "browser": {
+                            "development": "./dist/composed-offset-position.browser.mjs",
+                            "default": "./dist/composed-offset-position.browser.min.mjs"
+                        },
+                        "default": "./dist/composed-offset-position.mjs"
+                    },
+                    "module": "./dist/composed-offset-position.esm.js",
+                    "default": "./dist/composed-offset-position.umd.js"
+                },
+                "./package.json": "./package.json"
+            }
             
             */
 
@@ -276,22 +292,44 @@ export class NpmPackageLoader {
                     "require": "./index-require.cjs"
                 }, 
                 */
-
                 let getImport = (obj: any) => {
                     if (obj?.browser)
                         return obj.browser;
                     if (obj?.import)
                         return obj.import;
+                    if (obj?.module)
+                        return obj.module;
                     if (obj?.default)
                         return obj.default;
                     return obj?.node;
                 }
+                /*
+                for support of this:
+                "exports": {
+                ".": {
+                    "types": "./dist/index.d.ts",
+                    "import": {
+                        "browser": {
+                            "development": "./dist/composed-offset-position.browser.mjs",
+                            "default": "./dist/composed-offset-position.browser.min.mjs"
+                        },
+                */
+                let getImportFlat = (obj: any) => {
+                    let i = getImport(obj);
+                    if (!(typeof i == 'string'))
+                        i = getImport(i);
+                    if (!(typeof i == 'string'))
+                        i = getImport(i);
+                    if (!(typeof i == 'string'))
+                        i = null;
+                    return i;
+                }
                 //Names to use: browser, import, default, node
-                let imp = getImport(packageJsonObj.exports);
+                let imp = getImportFlat(packageJsonObj.exports);
                 if (imp) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
-                } else if (imp = getImport(packageJsonObj?.['.'])) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(imp, '/');
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeTrailing(imp, '/'), '.');
+                } else if (imp = getImportFlat(packageJsonObj.exports?.['.'])) {
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeTrailing(imp, '/'), '.');
                 }
             }
 
