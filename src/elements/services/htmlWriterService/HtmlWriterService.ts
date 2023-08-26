@@ -75,7 +75,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
         const children = designItem.children();
         contentSingleTextNode = designItem.childCount === 1 && designItem.firstChild.nodeType === NodeType.TextNode;
         if (contentSingleTextNode) {
-          const notrim = designItem.name == 'script' || designItem.name == 'style';
+          const notrim = designItem.name == 'script' || designItem.name == 'style' || designItem.name == 'pre';
           this.writeTextNode(indentedTextWriter, designItem, false, !notrim);
         } else {
           if (designItem.element instanceof HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof SVGElement)) {
