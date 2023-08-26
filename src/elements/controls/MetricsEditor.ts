@@ -10,6 +10,7 @@ export class MetricsEditor extends BaseCustomWebComponentConstructorAppend {
   display: flex;
   margin: 10px;
   line-height: 12px;
+  min-width: 120px;
 }
 
 * { 
