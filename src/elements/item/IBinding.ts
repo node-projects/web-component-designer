@@ -15,7 +15,6 @@ export interface IBinding {
   mode?: BindingMode;
 
   invert?: boolean;
-  //converter?: string;
   changedEvents?: string[];
   nullSafe?: boolean;
 }

@@ -64,6 +64,8 @@ export type { IDesignItemService } from "./elements/services/designItemService/I
 export * from "./elements/services/dragDropService/ExternalDragDropService.js";
 export type { IExternalDragDropService } from "./elements/services/dragDropService/IExternalDragDropService.js";
 
+export type { IPropertyGridDragDropService } from "./elements/services/dragDropService/IPropertyGridDragDropService.js";
+
 export * from "./elements/services/dragDropService/DragDropService.js";
 export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";
 

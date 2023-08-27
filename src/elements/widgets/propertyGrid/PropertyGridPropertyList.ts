@@ -9,7 +9,7 @@ import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { PropertyType } from '../../services/propertiesService/PropertyType.js';
 import { IPropertyGroup } from '../../services/propertiesService/IPropertyGroup.js';
-import { dragDropFormatNameBindingObject } from '../../../Constants.js';
+import { dragDropFormatNameBindingObject, dragDropFormatNamePropertyGrid } from '../../../Constants.js';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -101,7 +101,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       font-size: 10px;
       text-decoration: underline;
     }
-    .createBinding {
+    .dragOverProperty {
       outline: 2px dashed orange;
       outline-offset: -2px;
     }
@@ -236,7 +236,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   private _onDragLeave(event: DragEvent, property: IProperty, label: HTMLLabelElement) {
     event.preventDefault();
-    label.classList.remove('createBinding');
+    label.classList.remove('dragOverProperty');
   }
 
   private _onDragOver(event: DragEvent, property: IProperty, label: HTMLLabelElement) {
@@ -247,10 +247,24 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       if (ddService) {
         const effect = ddService.dragOverOnProperty(event, property, this._designItems);
         if ((effect ?? 'none') != 'none') {
-          label.classList.add('createBinding');
+          label.classList.add('dragOverProperty');
           event.dataTransfer.dropEffect = effect;
         } else {
-          label.classList.remove('createBinding');
+          label.classList.remove('dragOverProperty');
+        }
+      }
+    }
+
+    const hasPropertyGrid = event.dataTransfer.types.indexOf(dragDropFormatNamePropertyGrid) >= 0;
+    if (hasPropertyGrid) {
+      const ddService = this._serviceContainer.propertyGridDragDropService;
+      if (ddService) {
+        const effect = ddService.dragOverOnProperty(event, property, this._designItems);
+        if ((effect ?? 'none') != 'none') {
+          label.classList.add('dragOverProperty');
+          event.dataTransfer.dropEffect = effect;
+        } else {
+          label.classList.remove('dragOverProperty');
         }
       }
     }
@@ -258,13 +272,22 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   private _onDrop(event: DragEvent, property: IProperty, label: HTMLLabelElement) {
     event.preventDefault();
-    label.classList.remove('createBinding');
+    label.classList.remove('dragOverProperty');
     const transferDataBindingObject = event.dataTransfer.getData(dragDropFormatNameBindingObject)
     if (transferDataBindingObject) {
       const bo = JSON.parse(transferDataBindingObject);
       const ddService = this._serviceContainer.bindableObjectDragDropService;
       if (ddService) {
         ddService.dropOnProperty(event, property, bo, this._designItems);
+      }
+    }
+
+    const transferDataPropertyGrid = event.dataTransfer.getData(dragDropFormatNamePropertyGrid)
+    if (transferDataPropertyGrid) {
+      const dropObj = JSON.parse(transferDataPropertyGrid);
+      const ddService = this._serviceContainer.propertyGridDragDropService;
+      if (ddService) {
+        ddService.dropOnProperty(event, property, dropObj, this._designItems);
       }
     }
   }
