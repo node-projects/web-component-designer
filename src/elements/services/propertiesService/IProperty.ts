@@ -9,7 +9,7 @@ export interface IProperty {
   attributeName?: string; // normaly dash seperated name of property
   description?: string;
   type?: 'addNew' | 'json' | 'color' | 'date' | 'number' | 'list' | 'enum' | 'boolean' | 'img-lis' | 'thickness' | 'css-length' | 'string' | string; // -> string, number, list, color, thickness, css-length
-  default?: any;
+  default?: any; //what was this for? remove???
   min?: number;
   max?: number;
   step?: number;
