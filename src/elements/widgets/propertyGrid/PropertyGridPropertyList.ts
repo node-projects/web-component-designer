@@ -274,16 +274,29 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public static openContextMenu(event: MouseEvent, designItems: IDesignItem[], property: IProperty) {
-    const ctxMenu: IContextMenuItem[] = [
+    const ctxMenuItems: IContextMenuItem[] = [
       {
         title: 'clear', action: (e) => {
           property.service.clearValue(designItems, property, 'value');
           designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
         }
       },
+      {
+        title: 'edit as text', action: (e, _1, _2, menu) => {
+          menu.close();
+          setTimeout(() => {
+            const oldValue = property.service.getValue(designItems, property);
+            let value = prompt(`edit value of '${property.name}' as string:`, oldValue);
+            if (value && value != oldValue) {
+              property.service.setValue(designItems, property, value);
+            }
+            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+          }, 10)
+        }
+      },
     ];
     if (designItems[0].serviceContainer.config.openBindingsEditor) {
-      ctxMenu.push(...[
+      ctxMenuItems.push(...[
         { title: '-' },
         {
           title: 'edit binding', action: () => {
@@ -300,7 +313,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         }
       ]);
     };
-    ContextMenu.show(ctxMenu, event);
+    ContextMenu.show(ctxMenuItems, event);
   }
 
   public designItemsChanged(designItems: IDesignItem[]) {
