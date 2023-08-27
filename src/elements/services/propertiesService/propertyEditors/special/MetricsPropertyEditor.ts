@@ -18,6 +18,6 @@ export class MetricsPropertyEditor extends BasePropertyEditor<MetricsEditor> {
   }
 
   refreshValue(valueType: ValueType, value: any) {
-    //this.element.valueLeft = value;
+    this.element.refresh(this.designItems?.[0]?.element)
   }
 }
