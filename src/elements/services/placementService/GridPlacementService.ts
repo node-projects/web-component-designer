@@ -2,7 +2,7 @@ import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
-import { CalculateGridInformation, GetElementGridInformation } from '../../helper/GridHelper.js';
+import { calculateGridInformation, getElementGridInformation } from '../../helper/GridHelper.js';
 import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
@@ -69,16 +69,17 @@ export class GridPlacementService implements IPlacementService {
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    const gridInformation = CalculateGridInformation(container);
+    const gridInformation = calculateGridInformation(container);
     const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
-    
+    //pos.x -= offsetInControl.x;
+    //pos.y -= offsetInControl.y;
     let row = 0;
     let column = 0;
     for (let cellRow of gridInformation.cells) {
       column = 0
       for (let cell of cellRow) {
         if (pointInRect(pos, cell)) {
-          let info = GetElementGridInformation(<HTMLElement>items[0].element);
+          let info = getElementGridInformation(<HTMLElement>items[0].element);
           if (cell.name) {
             (<HTMLElement>items[0].element).style.gridColumn = '';
             (<HTMLElement>items[0].element).style.gridRow = '';
@@ -93,13 +94,14 @@ export class GridPlacementService implements IPlacementService {
       }
       row++;
     }
-
     (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
   }
 
   finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    const gridInformation = CalculateGridInformation(container);
+    const gridInformation = calculateGridInformation(container);
     const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
+    //pos.x -= offsetInControl.x;
+    //pos.y -= offsetInControl.y;
 
     let row = 0;
     let column = 0;
@@ -108,7 +110,7 @@ export class GridPlacementService implements IPlacementService {
       column = 0
       for (let cell of cellRow) {
         if (pointInRect(pos, cell)) {
-          let info = GetElementGridInformation(<HTMLElement>items[0].element);
+          let info = getElementGridInformation(<HTMLElement>items[0].element);
           //Grid Area is shorthand for grid row/column, to make undo work correctly we need to set befor and after clear
           if (cell.name) {
             items[0].setStyle('grid-area', cell.name);

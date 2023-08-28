@@ -54,6 +54,10 @@ div.ct {
   vertical-align: middle;
 }
 
+div.ct.box {
+  border: dotted 2px black;
+}
+
 div.ct > div.ct {
   left: 0;
   top: 0;
@@ -88,11 +92,11 @@ span {
 }`;
 
   public static override readonly template = html`
-  <div class="ct"><span title="position">position</span>
-  <div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct"><span title="margin">margin</span>
-  <div data-style="margin" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct"><span title="border">border</span>
-  <div data-style="border" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct"><span title="padding">padding</span>
-  <div data-style="padding" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div class="ct" style="font-size:6px"><div data-style="element" @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div>
+  <div id="position" class="ct"><span title="position">position</span>
+  <div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div id="margin" class="ct"><span title="margin">margin</span>
+  <div data-style="margin" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div id="border" class="ct"><span title="border">border</span>
+  <div data-style="border" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div id="padding" class="ct"><span title="padding">padding</span>
+  <div data-style="padding" @keydown="onKeyDown" @dblclick="onDoubleClick" class="top">-</div><br><div @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div><div id="element" class="ct" style="font-size:6px"><div data-style="element" @keydown="onKeyDown" @dblclick="onDoubleClick" class="left">-</div>
   &nbsp;x&nbsp;
   <div data-style="element" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div>
   </div><div data-style="padding" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="padding" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div><div data-style="border" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="border" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div><div data-style="margin" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="margin" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div><div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="right">-</div><br><div data-style="position" @keydown="onKeyDown" @dblclick="onDoubleClick" class="bottom">-</div></div>
@@ -100,8 +104,19 @@ span {
 
   public property: string;
   public unsetValue: string;
+  private _borderDiv: HTMLDivElement;
+  private _elementDiv: HTMLDivElement;
+
+  constructor() {
+    super();
+    this._restoreCachedInititalValues();
+
+    this._borderDiv = this._getDomElement<HTMLDivElement>('border');
+    this._elementDiv = this._getDomElement<HTMLDivElement>('element');
+  }
 
   ready() {
+
     this._parseAttributesToProperties();
     this._assignEvents();
   }
@@ -130,6 +145,19 @@ span {
         }
       });
       this.dispatchEvent(valueChangedEvent);
+    }
+  }
+
+  refresh(element: Element) {
+    this._elementDiv.classList.remove('box');
+    this._borderDiv.classList.remove('box');
+    if (element) {
+      let cp = getComputedStyle(element);
+      if (cp.boxSizing == 'content-box') {
+        this._elementDiv.classList.add('box');
+      } else {
+        this._borderDiv.classList.add('box');
+      }
     }
   }
 }

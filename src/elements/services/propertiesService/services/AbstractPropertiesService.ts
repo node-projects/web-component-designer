@@ -66,7 +66,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         }
         else {
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
-            d.setAttribute(attributeName, value);
+            d.setAttribute(attributeName, value.toString());
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
             d.element[property.name] = value;
         }

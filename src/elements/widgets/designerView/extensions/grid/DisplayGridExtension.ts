@@ -1,4 +1,4 @@
-import { CalculateGridInformation } from "../../../../helper/GridHelper.js";
+import { calculateGridInformation } from "../../../../helper/GridHelper.js";
 import { getElementCombinedTransform } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
@@ -13,7 +13,7 @@ export class DisplayGridExtension extends AbstractExtension {
   private _gaps: SVGRectElement[];
   private _group: SVGGElement;
 
-  private gridInformation: ReturnType<typeof CalculateGridInformation>
+  private gridInformation: ReturnType<typeof calculateGridInformation>
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -25,7 +25,7 @@ export class DisplayGridExtension extends AbstractExtension {
   }
 
   override refresh(event?: Event) {
-    this.gridInformation = CalculateGridInformation(this.extendedItem);
+    this.gridInformation = calculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
 
     if (!this._group) {
@@ -71,7 +71,7 @@ export class DisplayGridExtension extends AbstractExtension {
 
   _initSVGArrays() {
     this._removeAllOverlays();
-    this.gridInformation = CalculateGridInformation(this.extendedItem);
+    this.gridInformation = calculateGridInformation(this.extendedItem);
     this._cells = new Array(this.gridInformation.cells.length);
     this.gridInformation.cells.forEach((row, i) => this._cells[i] = new Array(row.length));
     this._texts = new Array(this.gridInformation.cells.length);

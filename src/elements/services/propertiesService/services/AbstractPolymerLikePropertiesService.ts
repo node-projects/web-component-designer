@@ -43,6 +43,9 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
       } else if (PropertiesHelper.isTypescriptEnum(type)) {
         let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(type), service: this, propertyType: PropertyType.propertyAndAttribute };
         properties.push(property);
+      } else {
+        let property: IProperty = { name: name, type: "string", service: this, propertyType: PropertyType.propertyAndAttribute };
+        properties.push(property);
       }
     }
     return properties;

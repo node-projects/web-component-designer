@@ -17,7 +17,7 @@ export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
 export * from "./elements/helper/SwitchContainerHelper.js";
 export * from "./elements/helper/NpmPackageLoader.js";
-export type { IContextMenuItem } from "./elements/helper/contextMenu/IContextMenuItem.js";
+export type { IContextMenuItem, IContextMenu } from "./elements/helper/contextMenu/IContextMenuItem.js";
 
 export * from "./elements/item/DesignItem.js";
 export type { IDesignItem } from "./elements/item/IDesignItem.js";
@@ -63,6 +63,8 @@ export type { IDesignItemService } from "./elements/services/designItemService/I
 
 export * from "./elements/services/dragDropService/ExternalDragDropService.js";
 export type { IExternalDragDropService } from "./elements/services/dragDropService/IExternalDragDropService.js";
+
+export type { IPropertyGridDragDropService } from "./elements/services/dragDropService/IPropertyGridDragDropService.js";
 
 export * from "./elements/services/dragDropService/DragDropService.js";
 export type { IDragDropService } from "./elements/services/dragDropService/IDragDropService.js";

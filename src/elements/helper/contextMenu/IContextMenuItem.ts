@@ -1,3 +1,7 @@
+export interface IContextMenu {
+	close: () => void;
+};
+
 export interface IContextMenuItem {
 	readonly id?: string,
 	readonly title?: string,
@@ -6,5 +10,5 @@ export interface IContextMenuItem {
 	readonly disabled?: boolean,
 	readonly shortCut?: string;
 
-	action?: (event: MouseEvent, item: IContextMenuItem, context?: any) => void
+	action?: (event: MouseEvent, item: IContextMenuItem, context?: any, menu?: IContextMenu) => void
 };

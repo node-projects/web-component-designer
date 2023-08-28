@@ -31,6 +31,11 @@ export class CommonPropertiesService extends AbstractPropertiesService {
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     }, {
+      name: "part",
+      type: "string",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
+    }, {
       name: "tabindex",
       type: "number",
       service: this,

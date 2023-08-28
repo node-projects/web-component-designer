@@ -1,5 +1,5 @@
 import { css } from "@node-projects/base-custom-webcomponent";
-import { IContextMenuItem } from './IContextMenuItem.js';
+import { IContextMenu, IContextMenuItem } from './IContextMenuItem.js';
 
 export interface IContextMenuOptions {
 	defaultIcon?: string,
@@ -9,7 +9,7 @@ export interface IContextMenuOptions {
 	mode?: 'normal' | 'undo'
 }
 
-export class ContextMenu {
+export class ContextMenu implements IContextMenu {
 
 	private static _contextMenuCss = css`
 	  .context_menu {
@@ -213,12 +213,12 @@ export class ContextMenu {
 				} else {
 					if (item.action)
 						li.addEventListener('click', (e) => {
-							item.action(e, item, this.context);
+							item.action(e, item, this.context, this);
 							this.close();
 						});
 					if (this.options?.mode == 'undo') {
 						li.addEventListener('mouseup', (e) => {
-							item.action(e, item, this.context);
+							item.action(e, item, this.context, this);
 							this.close();
 						});
 					}
