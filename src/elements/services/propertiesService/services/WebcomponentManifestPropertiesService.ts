@@ -86,4 +86,8 @@ export class WebcomponentManifestPropertiesService extends AbstractPropertiesSer
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
     return this._propertiesList[designItem.name].find(x => x.name == property.name).propertyType == PropertyType.attribute ? BindingTarget.attribute : BindingTarget.property
   }
+
+  override getUnsetValue(designItems: IDesignItem[], property: IProperty) {
+    return designItems[0].element[property.propertyName ?? property.name];
+  }
 }
