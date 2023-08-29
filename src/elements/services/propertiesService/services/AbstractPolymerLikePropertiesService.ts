@@ -50,4 +50,8 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
     }
     return properties;
   }
+
+  override getUnsetValue(designItems: IDesignItem[], property: IProperty) {
+    return designItems[0].element[property.propertyName ?? property.name];
+  }
 }
