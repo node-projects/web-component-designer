@@ -87,6 +87,9 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     .unset-value {
       color: lightslategray
     }
+    .unset-value > * {
+      color: lightslategray
+    }
     .unset-value:focus {
       color: white
     }
