@@ -58,6 +58,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       display: flex;
       bottom: 0;
       position: absolute;
+      font-size: 12px;
+      width: 100%;
     }
     input {
       width: 40px;
