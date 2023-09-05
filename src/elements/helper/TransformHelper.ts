@@ -41,10 +41,6 @@ export function combineTransforms(element: HTMLElement, actualTransforms: string
   element.style.transform = newTransformationMatrix.toString();
 }
 
-export function getDomMatrix(element: HTMLElement) {
-  return new DOMMatrix(window.getComputedStyle(element).transform);
-}
-
 export function transformPointByInverseMatrix(point: DOMPoint, matrix: DOMMatrix) {
   const inverse = matrix.inverse();
   //fix chrome bug: https://bugs.chromium.org/p/chromium/issues/detail?id=1395645
@@ -305,5 +301,4 @@ export function normalizeToAbsolutePosition(element: HTMLElement, normalizePrope
       return top;
   }
   return null;
-
 }

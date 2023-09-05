@@ -2,7 +2,7 @@ import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
 import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
-import { transformPointByInverseMatrix, getDomMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition } from "../../../helper/TransformHelper.js";
+import { transformPointByInverseMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition, getElementCombinedTransform } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { IPlacementView } from '../IPlacementView.js';
@@ -187,7 +187,7 @@ export class ResizeExtension extends AbstractExtension {
           const diff = containerService.placePoint(event, <IPlacementView><any>this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
           let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
           let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
-          let matrix = getDomMatrix((<HTMLElement>this.extendedItem.element));
+          let matrix = getElementCombinedTransform((<HTMLElement>this.extendedItem.element));
           let transformedTrack = transformPointByInverseMatrix(new DOMPoint(trackX, trackY, 0, 0), matrix);
 
           let deltaX = transformedTrack.x;
