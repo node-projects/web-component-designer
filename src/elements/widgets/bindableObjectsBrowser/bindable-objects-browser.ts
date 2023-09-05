@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, TypedEvent, css } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameBindingObject } from '../../../Constants.js';
 import { IBindableObject } from '../../services/bindableObjectsService/IBindableObject.js';
 import { IBindableObjectsService } from '../../services/bindableObjectsService/IBindableObjectsService.js';
@@ -7,6 +7,10 @@ import { ServiceContainer } from '../../services/ServiceContainer.js';
 export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
   private _treeDiv: HTMLDivElement;
   private _tree: Fancytree.Fancytree;
+
+  public selectedObject: IBindableObject<any>;
+
+  public objectDoubleclicked = new TypedEvent<void>;
 
   static override readonly style = css`
       span.drag-source {
@@ -40,24 +44,45 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
     //@ts-ignore
     if (window.importShim)
       //@ts-ignore
-      importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+      importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
     else
       //@ts-ignore
-      import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x=> this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+      import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._treeDiv = document.createElement('div');
     this._treeDiv.style.height = '100%'
     this._treeDiv.style.overflow = 'auto';
     this._treeDiv.setAttribute('id', 'tree');
     this.shadowRoot.appendChild(this._treeDiv);
-  
+
     $(this._treeDiv).fancytree(<Fancytree.FancytreeOptions>{
       debugLevel: 0,
       icon: false,
-      extensions: ['dnd5'],
+      extensions: ['dnd5', 'filter'],
       quicksearch: true,
       source: [],
       lazyLoad: this.lazyLoad,
+      dblclick: (e) => {
+        this.objectDoubleclicked.emit();
+        return true;
+      },
+      activate: (event, data) => {
+        this.deselectNodes()
+        let node = data.node;
+        this.selectedObject = node.data.bindable;
+      },
+      filter: {
+        autoApply: true,   // Re-apply last filter if lazy data is loaded
+        autoExpand: false, // Expand all branches that contain matches while filtered
+        counter: true,     // Show a badge with number of matching child nodes near parent icons
+        fuzzy: false,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
+        hideExpandedCounter: true,  // Hide counter badge if parent is expanded
+        hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
+        highlight: true,   // Highlight matches by wrapping inside <mark> tags
+        leavesOnly: false, // Match end nodes only
+        nodata: true,      // Display a 'no data' status node if result is empty
+        mode: "dimm"       // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
+      },
       dnd5: {
         dropMarkerParent: this.shadowRoot,
         preventRecursion: true,
@@ -97,6 +122,14 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
       });
       rootNode.addNode(newNode);
     }
+  }
+
+  private deselectNodes() {
+    let nodes = this._tree.getSelectedNodes()
+    nodes.forEach(node => {
+      node.setSelected(false)
+      node.setActive(false)
+    })
   }
 
   private lazyLoad(event: any, data: any) {
