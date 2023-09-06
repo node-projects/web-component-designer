@@ -45,9 +45,11 @@ import { IDragDropService } from './dragDropService/IDragDropService.js';
 import { IDesignItemService } from './designItemService/IDesignItemService.js';
 import { IEventsService } from './eventsService/IEventsService.js';
 import { IPropertyGridDragDropService } from './dragDropService/IPropertyGridDragDropService.js';
+import { IConfigUiService } from './configUiService/IConfigUiService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
+  "attachedPropertyService": IPropertiesService;
   "containerService": IPlacementService;
   "snaplinesProviderService": ISnaplinesProviderService;
   "elementsService": IElementsService;
@@ -70,6 +72,8 @@ interface ServiceNameMap {
   "designItemService": IDesignItemService;
   "eventsService": IEventsService;
   "propertyGridDragDropService": IPropertyGridDragDropService;
+  "configUiService": IConfigUiService;
+  
   
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
@@ -145,6 +149,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getServices('propertyService');
   }
 
+  get attachedPropertyServices(): IPropertiesService[] {
+    return this.getServices('attachedPropertyService');
+  }
+
   get propertyGroupService(): IPropertyTabsService {
     return this.getLastService('propertyGroupsService');
   }
@@ -207,5 +215,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get designItemService(): IDesignItemService {
     return this.getLastService('designItemService');
+  }
+
+  get configUiServices(): IConfigUiService[] {
+    return this.getServices('configUiService');
   }
 }

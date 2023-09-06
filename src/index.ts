@@ -58,6 +58,8 @@ export type { IDemoProviderService } from "./elements/services/demoProviderServi
 export * from "./elements/services/designItemDocumentPositionService/DesignItemDocumentPositionService.js";
 export type { IDesignItemDocumentPositionService } from "./elements/services/designItemDocumentPositionService/IDesignItemDocumentPositionService.js";
 
+export type { IConfigUiService } from "./elements/services/configUiService/IConfigUiService.js";
+
 export * from "./elements/services/designItemService/DesignItemService.js";
 export type { IDesignItemService } from "./elements/services/designItemService/IDesignItemService.js";
 
@@ -84,6 +86,7 @@ export * from "./elements/services/eventsService/EventsService.js";
 
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";
+export type { IStringPosition } from "./elements/services/htmlWriterService/IStringPosition.js";
 export * from "./elements/services/htmlWriterService/AbstractHtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/FormatingHtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
@@ -129,6 +132,7 @@ export * from "./elements/services/propertiesService/propertyEditors/special/Met
 export * from "./elements/services/propertiesService/propertyEditors/special/GridAssignedRowColumnPropertyEditor.js";
 
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
+export * from "./elements/services/propertiesService/services/AttachedPropertiesService.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
 export * from "./elements/services/propertiesService/services/ContentAndIdPropertiesService.js";

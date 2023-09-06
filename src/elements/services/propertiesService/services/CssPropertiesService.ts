@@ -31,25 +31,31 @@ export class CssPropertiesService extends CommonPropertiesService {
 
   //metrics
 
-  public layout = [
-    "display",
-    "color",
-    "background-color",
-    "box-sizing",
-    "border",
-    "box-shadow",
-    "opacity",
-    "position",
-    "font-family",
-    "font-size",
-    "font-weight",
-    "inset",
-    "margin",
-    "border",
-    "padding",
-    "overflow",
-    "metrics"
-  ]
+  public layout = {
+    "common": [
+      "display",
+      "color",
+      "background-color",
+      "box-sizing",
+      "border",
+      "box-shadow",
+      "opacity",
+      "position",
+    ],
+    "font": [
+      "font-family",
+      "font-size",
+      "font-weight",
+    ],
+    "layout": [
+      "inset",
+      "margin",
+      "border",
+      "padding",
+      "overflow",
+      "metrics"
+    ]
+  }
 
   public grid = [
     "display",
@@ -112,9 +118,18 @@ export class CssPropertiesService extends CommonPropertiesService {
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
-    const propNames: string[] = this[this.name];
-    const propertiesList = propNames.map(x => this._getPropertyDef(x));
-    return propertiesList;
+    const propNames: string[] | Record<string, string[]> = this[this.name];
+    if (Array.isArray(propNames)) {
+      const propertiesList = propNames.map(x => this._getPropertyDef(x));
+      return propertiesList;
+    } else {
+      let grps: IPropertyGroup[] = [];
+      for (let g in propNames) {
+        let grp: IPropertyGroup = { name: g, properties: propNames[g].map(x => this._getPropertyDef(x)) };
+        grps.push(grp);
+      }
+      return grps;
+    }
   }
 
   _getPropertyDef(name: string): IProperty {

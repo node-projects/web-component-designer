@@ -92,8 +92,8 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
           this._propertyGridPropertyListsDict[p.name] = lst;
         }
         lst.setPropertiesService(p.propertiesService);
-        lst.createElements(items[0]);
-        visibleDict.add(p.name);
+        if (lst.createElements(items[0]))
+          visibleDict.add(p.name);
       }
 
       for (let p of this._propertyGridPropertyLists) {

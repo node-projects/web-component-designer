@@ -21,7 +21,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     }
     div.root {
       display: grid;
-      grid-template-columns: 11px 11px auto 1fr;
+      grid-template-columns: 11px 11px auto 1fr auto;
       padding: 3px 6px;
       font-family: monospace; 
       align-items: center;
@@ -52,14 +52,15 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   static override readonly template = html`
   <div class="root">
     <span style="grid-column: span 3;" class="desc">Type:</span><span id="type"></span>
-    <div title="id" id="idRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
+    <button id="config" style="display: none; grid-column: 5; grid-row: span 3; height: calc(100% - 10px); margin-left: 10px;">config</button>
+    <div title="id" id="idRect" style="grid-column: 1; width: 7px; height: 7px; border: 1px solid white;"></div>
     <span style="grid-column: span 2;" class="desc">Id:</span><input type="text" id="id">
-    <div title="innerHTML" id="innerRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
+    <div title="innerHTML" id="innerRect" style="grid-column: 1; width: 7px; height: 7px; border: 1px solid white;"></div>
     <div title="textContent" id="contentRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
     <span class="desc">Content:</span><input type="text" id="content">
   </div>
-  <node-projects-property-grid id="pg"></node-projects-property-grid>
-  `
+  <node-projects-property-grid id="pg"></node-projects-property-grid>`
+
   private _type: HTMLSpanElement;
   private _id: HTMLInputElement;
   private _content: HTMLInputElement;
@@ -70,7 +71,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   private _contentRect: HTMLDivElement;
   private _innerRect: HTMLDivElement;
   private _propertiesService: ContentAndIdPropertiesService;
-
+  private _configButton: HTMLButtonElement;
 
   constructor() {
     super();
@@ -83,6 +84,12 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._idRect = this._getDomElement<HTMLDivElement>('idRect');
     this._contentRect = this._getDomElement<HTMLDivElement>('contentRect');
     this._innerRect = this._getDomElement<HTMLDivElement>('innerRect');
+    this._configButton = this._getDomElement<HTMLButtonElement>('config');
+    this._configButton.onclick = async () => {
+      const srv = await this.serviceContainer?.getLastServiceWhereAsync('configUiService', async x => await x.hasConfigUi(this._instanceServiceContainer.selectionService.primarySelection));
+      const ui = await srv.getConfigUi(this._instanceServiceContainer.selectionService.primarySelection);
+      this.serviceContainer.globalContext.showConfigClicked.emit({ designItem: this._instanceServiceContainer.selectionService.primarySelection, configUi: ui });
+    }
 
     this._propertiesService = new ContentAndIdPropertiesService();
     this._idRect.oncontextmenu = (event) => {
@@ -137,6 +144,14 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(async e => {
       this._pg.instanceServiceContainer = value;
       await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
+
+      const srv = await this.serviceContainer?.getLastServiceWhereAsync('configUiService', x => x.hasConfigUi(this._instanceServiceContainer.selectionService.primarySelection));
+      if (srv) {
+        this._configButton.style.display = 'block';
+      } else {
+        this._configButton.style.display = 'none';
+      }
+
       if (this._instanceServiceContainer.selectionService.primarySelection?.nodeType == NodeType.Element)
         this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
       else

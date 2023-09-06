@@ -9,6 +9,10 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _filter: HTMLInputElement;
 
   static override readonly style = css`
+      :host {
+        display: block;
+      }
+
       * {
           touch-action: none;
       }
@@ -53,7 +57,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
 
   static override readonly template = html`
   <div style="height: 100%;">
-    <input id="input" style="width: 100%; height:21px;" placeholder="Filter..." autocomplete="off">
+    <input id="input" style="width: 100%; height: 25px; box-sizing: border-box;" placeholder="Filter..." autocomplete="off">
     <div style="height: calc(100% - 26px); overflow: auto;">
       <div id="treetable" style="min-width: 100%;"></div>
     </div>
