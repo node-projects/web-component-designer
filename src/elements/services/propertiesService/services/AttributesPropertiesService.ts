@@ -6,6 +6,7 @@ import { IBinding } from "../../../item/IBinding.js";
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export class AttributesPropertiesService implements IPropertiesService {
 
@@ -23,7 +24,7 @@ export class AttributesPropertiesService implements IPropertiesService {
     return { name: name, type: 'string', service: this, propertyType: PropertyType.attribute };
   }
 
-  getProperties(designItem: IDesignItem): IProperty[] {
+  getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     if (designItem) {
       let p: IProperty[] = [];
       for (let a of designItem.attributes()) {

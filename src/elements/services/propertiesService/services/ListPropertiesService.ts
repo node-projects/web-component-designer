@@ -4,6 +4,7 @@ import { IJsonPropertyDefinitions } from './IJsonPropertyDefinitions.js';
 import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 import { PropertyType } from '../PropertyType.js';
 import { RefreshMode } from '../IPropertiesService.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export class ListPropertiesService extends AbstractPropertiesService {
 
@@ -52,7 +53,7 @@ export class ListPropertiesService extends AbstractPropertiesService {
   protected override _notifyChangedProperty(designItem: IDesignItem, property: IProperty, value: any) {
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] {
+  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     return this._propertys.get(designItem.element.localName);
   }
 }
