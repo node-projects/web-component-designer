@@ -5,6 +5,7 @@ import { ValueType } from '../ValueType.js';
 import { IBinding } from "../../../item/IBinding.js";
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType.js';
+import { PropertiesHelper } from './PropertiesHelper.js';
 
 export class AttributesPropertiesService implements IPropertiesService {
 
@@ -61,6 +62,7 @@ export class AttributesPropertiesService implements IPropertiesService {
     if (designItems != null && designItems.length !== 0) {
       if (designItems.length == 1 && typeof designItems[0].getAttribute(property.name) == 'object')
         return ValueType.bound;
+      let propName = PropertiesHelper.dashToCamelCase(property.name);
       let attributeName = property.name;
       designItems.forEach((x) => {
         let has = x.hasAttribute(attributeName);
@@ -72,7 +74,7 @@ export class AttributesPropertiesService implements IPropertiesService {
       const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
         return s.getBindings(designItems[0]);
       });
-      if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+      if (bindings && bindings.find(x => x.target == BindingTarget.attribute && x.targetName == propName))
         return ValueType.bound;
     }
     else
