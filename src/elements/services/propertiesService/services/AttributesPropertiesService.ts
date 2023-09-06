@@ -19,14 +19,14 @@ export class AttributesPropertiesService implements IPropertiesService {
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
-    return { name: name, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute };
+    return { name: name, type: 'string', service: this, propertyType: PropertyType.attribute };
   }
 
   getProperties(designItem: IDesignItem): IProperty[] {
     if (designItem) {
       let p: IProperty[] = [];
       for (let a of designItem.attributes()) {
-        p.push({ name: a[0], renamable: true, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
+        p.push({ name: a[0], renamable: true, type: 'string', service: this, propertyType: PropertyType.attribute })
       }
       p.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return p;
@@ -67,6 +67,13 @@ export class AttributesPropertiesService implements IPropertiesService {
         all = all && has;
         some = some || has;
       });
+
+      //todo: optimize perf, do not call bindings service for each property. 
+      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.getBindings(designItems[0]);
+      });
+      if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+        return ValueType.bound;
     }
     else
       return ValueType.none
