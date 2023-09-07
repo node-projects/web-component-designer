@@ -5,6 +5,7 @@ import { AttachedPropertiesService } from './services/AttachedPropertiesService.
 import { AttributesPropertiesService } from './services/AttributesPropertiesService.js';
 import { CommonPropertiesService } from './services/CommonPropertiesService.js';
 import { CssCurrentPropertiesService } from './services/CssCurrentPropertiesService.js';
+import { CssCustomPropertiesService } from './services/CssCustomPropertiesService.js';
 import { CssPropertiesService } from './services/CssPropertiesService.js';
 
 export class PropertyTabsService implements IPropertyTabsService {
@@ -16,6 +17,7 @@ export class PropertyTabsService implements IPropertyTabsService {
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'common', propertiesService: new CommonPropertiesService() },
         { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
+        { name: 'css vars', propertiesService: new CssCustomPropertiesService() },
         { name: 'layout', propertiesService: new CssPropertiesService("layout") },
         { name: 'flex', propertiesService: new CssPropertiesService("flex") },
         { name: 'grid', propertiesService: new CssPropertiesService("grid") },
@@ -26,6 +28,7 @@ export class PropertyTabsService implements IPropertyTabsService {
         { name: 'attached', propertiesService: this._attachedPropertiesService },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
+        { name: 'css vars', propertiesService: new CssCustomPropertiesService() },
         { name: 'layout', propertiesService: new CssPropertiesService("layout") },
         { name: 'svg', propertiesService: new CssPropertiesService("svg") },
     ];

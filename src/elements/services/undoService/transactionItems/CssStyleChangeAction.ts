@@ -21,19 +21,35 @@ export class CssStyleChangeAction implements ITransactionItem {
   undo() {
     if (this.oldValue === '' || this.oldValue == null) {
       this.designItem._withoutUndoRemoveStyle(<string>this.name);
-      (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = ''
+      if ((<string>this.name).startsWith('--')) {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style.removeProperty(<string>this.name);
+      } else {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = '';
+      };
     } else {
       this.designItem._withoutUndoSetStyle(<string>this.name, this.oldValue);
-      (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.oldValue;
+      if ((<string>this.name).startsWith('--')) {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style.setProperty(<string>this.name, this.oldValue);
+      } else {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.oldValue;
+      }
     }
   }
   do() {
     if (this.newValue === '' || this.newValue == null) {
       this.designItem._withoutUndoRemoveStyle(<string>this.name);
-      (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = ''
+      if ((<string>this.name).startsWith('--')) {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style.removeProperty(<string>this.name);
+      } else {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = '';
+      };
     } else {
       this.designItem._withoutUndoSetStyle(<string>this.name, this.newValue);
-      (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.newValue;
+      if ((<string>this.name).startsWith('--')) {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style.setProperty(<string>this.name, this.newValue);
+      } else {
+        (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.newValue;
+      }
     }
   }
 
