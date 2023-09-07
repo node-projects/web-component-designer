@@ -43,7 +43,8 @@ export class WebcomponentManifestPropertiesService extends AbstractPropertiesSer
                   if (declaration.attributes)
                     pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
                   const p = this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text);
-                  properties.push({ name: d.name, service: this, propertyType: pType, type: p[0], values: p[1], description: d.description });
+                  if (d.name)
+                    properties.push({ name: d.name, service: this, propertyType: pType, type: p[0], values: p[1], description: d.description });
                 }
               }
               this._propertiesList[e.name] = properties;
