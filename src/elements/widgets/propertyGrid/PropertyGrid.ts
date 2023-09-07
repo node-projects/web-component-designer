@@ -44,16 +44,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
         e.preventDefault()
     });
 
-    this._itemsObserver = new MutationObserver((m) => {
-      for (const a of this._propertyGridPropertyLists) {
-        if (a.propertiesService?.getRefreshMode(this._selectedItems[0]) == RefreshMode.fullOnValueChange) {
-          a.createElements(this._selectedItems[0]);
-          a.designItemsChanged(this._selectedItems);
-        }
-
-        a.refreshForDesignItems(this._selectedItems);
-      }
-    });
+    this._itemsObserver = new MutationObserver((m) => this._mutationOccured());
   }
 
   public set serviceContainer(value: ServiceContainer) {
@@ -129,11 +120,24 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     }
   }
 
+  _mutationOccured() {
+    for (const a of this._propertyGridPropertyLists) {
+      if (a.propertiesService?.getRefreshMode(this._selectedItems[0]) == RefreshMode.fullOnValueChange) {
+        a.createElements(this._selectedItems[0]);
+        a.designItemsChanged(this._selectedItems);
+      }
+      a.refreshForDesignItems(this._selectedItems);
+    }
+  }
+
   private _observePrimarySelectionForChanges() {
     this._nodeReplacedCb?.dispose();
     this._itemsObserver.disconnect();
     this._itemsObserver.observe(this._selectedItems[0].element, { attributes: true, childList: false, characterData: false });
-    this._nodeReplacedCb = this._selectedItems[0].nodeReplaced.on(()=> this._observePrimarySelectionForChanges());
+    this._nodeReplacedCb = this._selectedItems[0].nodeReplaced.on(() => {
+      this._observePrimarySelectionForChanges();
+      this._mutationOccured();
+    });
   }
 }
 
