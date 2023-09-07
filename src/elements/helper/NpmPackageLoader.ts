@@ -7,6 +7,20 @@ import { ServiceContainer } from "../services/ServiceContainer.js";
 import { PaletteTreeView } from "../widgets/paletteView/paletteTreeView.js";
 import { removeLeading, removeTrailing } from "./Helper.js";
 
+//TODO: remove this code when import asserts are supported
+let packageHacks: any;
+//@ts-ignore
+if (window.importShim) {
+    const packageHacksUrl = import.meta.resolve('./NpmPackageHacks.json')
+    //@ts-ignore
+    packageHacks = await importShim(packageHacksUrl, { assert: { type: 'json' } });
+} else
+    //@ts-ignore
+    packageHacks = await import("./NpmPackageHacks.json", { assert: { type: 'json' } });
+
+if (packageHacks.default)
+    packageHacks = packageHacks.default;
+
 export class NpmPackageLoader {
 
     private static registryPatchedTohandleErrors: boolean;
@@ -52,7 +66,7 @@ export class NpmPackageLoader {
     }
 
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
-    async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: PaletteTreeView, loadAllImports?: boolean, reportState?: (state: string) => void) {
+    async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: PaletteTreeView, loadAllImports?: boolean, reportState?: (state: string) => void): Promise<{ html: string }> {
         const baseUrl = window.location.protocol + this._packageSource + pkg + '/';
 
         const packageJsonUrl = baseUrl + 'package.json';
@@ -140,25 +154,33 @@ export class NpmPackageLoader {
                 //todo: should be retriggered by service container, or changeing list in container
                 paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
             }
-        }
-        else {
+
+            /* Package Hacks */
+            if (packageHacks[pkg]?.import) {
+                import(packageHacks[pkg]?.import);
+            }
+            if (packageHacks[pkg]?.script) {
+                const scriptUrl = URL.createObjectURL(new Blob([packageHacks[pkg]?.script], { type: 'application/javascript' }));
+                import(scriptUrl);
+            }
+        } else {
             console.warn('npm package: ' + pkg + ' - no custom-elements.json found, only loading javascript module');
 
-            let customElementsRegistry = window.customElements;
+            let originalCustomElementsRegistry = window.customElements;
             const registry: any = {};
             const newElements: string[] = [];
             registry.define = function (name, constructor, options) {
                 newElements.push(name);
-                customElementsRegistry.define(name, constructor, options);
+                originalCustomElementsRegistry.define(name, constructor, options);
             }
             registry.get = function (name) {
-                return customElementsRegistry.get(name);
+                return originalCustomElementsRegistry.get(name);
             }
             registry.upgrade = function (node) {
-                return customElementsRegistry.upgrade(node);
+                return originalCustomElementsRegistry.upgrade(node);
             }
             registry.whenDefined = function (name) {
-                return customElementsRegistry.whenDefined(name);
+                return originalCustomElementsRegistry.whenDefined(name);
             }
 
             Object.defineProperty(window, "customElements", {
@@ -180,6 +202,15 @@ export class NpmPackageLoader {
                 console.warn('npm package: ' + pkg + ' - no entry point in package found.');
             }
 
+            /* Package Hacks */
+            if (packageHacks[pkg]?.import) {
+                await import(packageHacks[pkg]?.import);
+            }
+            if (packageHacks[pkg]?.script) {
+                const scriptUrl = URL.createObjectURL(new Blob([packageHacks[pkg]?.script], { type: 'application/javascript' }));
+                await import(scriptUrl);
+            }
+
             if (newElements.length > 0 && serviceContainer && paletteTree) {
                 const elementsCfg: IElementsJson = {
                     elements: newElements
@@ -191,13 +222,19 @@ export class NpmPackageLoader {
 
             Object.defineProperty(window, "customElements", {
                 get() {
-                    return customElementsRegistry
+                    return originalCustomElementsRegistry;
                 }
             });
-
         }
         if (reportState)
             reportState(pkg + ": done");
+
+        let retVal: any = {};
+
+        if (packageHacks[pkg]?.html) {
+            retVal.html = (<string>packageHacks[pkg]?.html).replaceAll("${baseUrl}", baseUrl);
+        }
+        return retVal;
     }
 
     async loadDependency(dependency: string, version?: string, reportState?: (state: string) => void) {
@@ -327,9 +364,9 @@ export class NpmPackageLoader {
                 //Names to use: browser, import, default, node
                 let imp = getImportFlat(packageJsonObj.exports);
                 if (imp) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeTrailing(imp, '/'), '.');
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeLeading(imp, '.'), '/');
                 } else if (imp = getImportFlat(packageJsonObj.exports?.['.'])) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeTrailing(imp, '/'), '.');
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeLeading(imp, '.'), '/');
                 }
             }
 
@@ -340,7 +377,7 @@ export class NpmPackageLoader {
                 mainImport = packageJsonObj.unpkg;
             if (!importMap.imports[packageJsonObj.name]) {
                 if (mainImport)
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(mainImport, '/');
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeLeading(mainImport, '.'), '/');
                 else
                     console.warn('package: ' + baseUrl + 'no main import found');
             }

@@ -1,0 +1,11 @@
+{
+    "@shoelace-style/shoelace": {
+        "html": "<link rel=\"stylesheet\" media=\"(prefers-color-scheme:light)\" href=\"${baseUrl}dist/themes/light.css\">\n<link rel=\"stylesheet\" media=\"(prefers-color-scheme:dark)\" href=\"${baseUrl}dist/themes/dark.css\" onload=\"document.documentElement.classList.add('sl-theme-dark');\">"
+    },
+    "@microsoft/fast-components": {
+        "script": "let res = await import('@microsoft/fast-components');\nres.provideFASTDesignSystem().register(res.allComponents);"
+    },
+    "@material/web": {
+        "import": "@material/web/all.js"
+    }
+}
