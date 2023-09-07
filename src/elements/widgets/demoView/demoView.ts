@@ -18,15 +18,39 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     background: white;
     height: 100%;
     width: 100%;
+    position: relative;
   }
   #placeholder {
+    position: absolute;
+    left: 24px;
     height: 100%;
-    width: 100%;
+    width: calc(100% - 24px);
   }
   #loading {
     position: absolute;
     top: 60px;
     left: 20px;
+  }
+  #left {
+    position:absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 24px;
+    border-right: solid white 1px;
+    box-sizing: border-box;
+    background: black;
+  }
+  span {
+    color: white;
+    rotate: 270deg;
+    display: block;
+    position: absolute;
+    top: 35px;
+    left: -38px;
+    font-weight: 600;
+    font-family: monospace;
+    font-size: 24px;
   }`;
 
   constructor() {
@@ -38,7 +62,13 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     this._loading = document.createElement('div');
     this._loading.id = 'loading';
     this._loading.textContent = '🛀 Hold on, loading...';
-    this.shadowRoot.appendChild(this._loading)
+    this.shadowRoot.appendChild(this._loading);
+    const div = document.createElement("div");
+    div.id = "left"
+    const span = document.createElement("span");
+    span.innerText = "PREVIEW";
+    div.appendChild(span);
+    this.shadowRoot.appendChild(div);
   }
 
   dispose(): void {
