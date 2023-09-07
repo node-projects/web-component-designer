@@ -2,6 +2,7 @@ import { IProperty } from '../IProperty.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { PropertyType } from '../PropertyType.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export class SVGElementsPropertiesService extends CommonPropertiesService {
 
@@ -252,10 +253,10 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
   }
 
   override getProperty(designItem: IDesignItem, name: string): IProperty {
-    return this.getProperties(designItem).find(x => x.name == name);
+    return (<IProperty[]>this.getProperties(designItem)).find(x => x.name == name);
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] {
+  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     if (!this.isHandledElement(designItem))
       return null;
     switch (designItem.element.localName) {

@@ -339,7 +339,10 @@ export class NpmPackageLoader {
             if (packageJsonObj.unpkg && !mainImport)
                 mainImport = packageJsonObj.unpkg;
             if (!importMap.imports[packageJsonObj.name]) {
-                importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(mainImport, '/');
+                if (mainImport)
+                    importMap.imports[packageJsonObj.name] = baseUrl + removeTrailing(mainImport, '/');
+                else
+                    console.warn('package: ' + baseUrl + 'no main import found');
             }
 
             importMap.imports[packageJsonObj.name + '/'] = baseUrl;

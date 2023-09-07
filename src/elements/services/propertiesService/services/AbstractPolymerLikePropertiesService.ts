@@ -4,6 +4,7 @@ import { PropertiesHelper } from './PropertiesHelper.js';
 import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 import { PropertyType } from '../PropertyType.js';
 import { RefreshMode } from '../IPropertiesService.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export abstract class AbstractPolymerLikePropertiesService extends AbstractPropertiesService {
 
@@ -11,7 +12,7 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
     return RefreshMode.full;
   }
   
-  public override getProperties(designItem: IDesignItem): IProperty[] {
+  public override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     if (!this.isHandledElement(designItem))
       return null;
     return this.parseProperties((<any>designItem.element.constructor).properties);

@@ -2,6 +2,7 @@ import { BindingTarget } from "../../../item/BindingTarget.js";
 import { IDesignItem } from "../../../item/IDesignItem.js";
 import { IPropertiesService, RefreshMode } from "../IPropertiesService.js";
 import { IProperty } from "../IProperty.js";
+import { IPropertyGroup } from "../IPropertyGroup.js";
 import { PropertyType } from "../PropertyType.js";
 import { AbstractPropertiesService } from "./AbstractPropertiesService.js";
 
@@ -75,7 +76,7 @@ export class WebcomponentManifestPropertiesService extends AbstractPropertiesSer
     return this._propertiesList[designItem.name] != null;
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] {
+  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     return this._propertiesList[designItem.name];
   }
 

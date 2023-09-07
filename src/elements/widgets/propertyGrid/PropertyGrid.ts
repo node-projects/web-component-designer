@@ -14,6 +14,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _propertyGridPropertyLists: PropertyGridPropertyList[];
   private _propertyGridPropertyListsDict: Record<string, PropertyGridPropertyList>;
   private _itemsObserver: MutationObserver;
+  private _nodeReplacedCb: Disposable;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _selectionChangedHandler: Disposable;
 
@@ -118,17 +119,21 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
             if (visibleDict.has(a.title))
               a.refreshForDesignItems(items);
           }
-          this._observeItems();
+          this._observePrimarySelectionForChanges();
         }
       } else {
         this._itemsObserver.disconnect();
+        this._nodeReplacedCb?.dispose();
+        this._nodeReplacedCb = null;
       }
     }
   }
 
-  private _observeItems() {
+  private _observePrimarySelectionForChanges() {
+    this._nodeReplacedCb?.dispose();
     this._itemsObserver.disconnect();
     this._itemsObserver.observe(this._selectedItems[0].element, { attributes: true, childList: false, characterData: false });
+    this._nodeReplacedCb = this._selectedItems[0].nodeReplaced.on(()=> this._observePrimarySelectionForChanges());
   }
 }
 

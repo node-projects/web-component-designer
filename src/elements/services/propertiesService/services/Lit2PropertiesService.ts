@@ -3,6 +3,7 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { AbstractPolymerLikePropertiesService } from './AbstractPolymerLikePropertiesService.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 import { PropertyType } from '../PropertyType.js';
+import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export class Lit2PropertiesService extends AbstractPolymerLikePropertiesService {
 
@@ -15,7 +16,7 @@ export class Lit2PropertiesService extends AbstractPolymerLikePropertiesService 
     return false;
   }
 
-  public override getProperties(designItem: IDesignItem): IProperty[] {
+  public override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
     if (!this.isHandledElement(designItem))
       return null;
     let properties: IProperty[] = [];
