@@ -17,7 +17,7 @@ import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/I
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 import { enableStylesheetService } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { AbstractStylesheetService } from '../services/stylesheetService/AbstractStylesheetService.js';
-import { cssFromString } from '@node-projects/base-custom-webcomponent';
+import { TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
@@ -35,6 +35,7 @@ export class DesignItem implements IDesignItem {
   instanceServiceContainer: InstanceServiceContainer;
   appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]> = new Map();
   shouldAppliedDesignerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
+  nodeReplaced = new TypedEvent<void>;
 
   async clone() {
     try {
