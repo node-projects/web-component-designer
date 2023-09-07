@@ -64,6 +64,7 @@ export class DesignItem implements IDesignItem {
     DesignItem._designItemMap.delete(this.node);
     DesignItem._designItemMap.set(newNode, this);
     this.node = newNode;
+    this.nodeReplaced.emit();
   }
 
   public get nodeType(): NodeType {
