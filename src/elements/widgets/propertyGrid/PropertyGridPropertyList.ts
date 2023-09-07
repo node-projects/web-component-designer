@@ -130,7 +130,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
   }
 
-  public createElements(designItem: IDesignItem) {
+  public createElements(designItem: IDesignItem): boolean {
     if (this._propertiesService && (this._propertiesService.getRefreshMode(designItem) != RefreshMode.none) || this._propertyMap.size == 0) {
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
@@ -141,9 +141,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             this.createPropertyGroups(<IPropertyGroup[]>properties);
           else
             this.createPropertyEditors(<IProperty[]>properties);
+          return true;
         }
       }
+      return false;
     }
+    return true;
   }
 
   private createPropertyGroups(groups: IPropertyGroup[]) {
@@ -153,7 +156,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       header.className = 'group-header';
       this._div.appendChild(header);
       let desc = document.createElement('span');
-      desc.innerHTML = g.description;
+      desc.innerHTML = g.description ?? '';
       desc.className = 'group-desc';
       this._div.appendChild(desc);
       this.createPropertyEditors(g.properties);

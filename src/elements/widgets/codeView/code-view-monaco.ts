@@ -222,9 +222,11 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       let model = this._monacoEditor.getModel();
       let point1 = model.getPositionAt(position.start);
       let point2 = model.getPositionAt(position.start + position.length);
-      this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
-      //@ts-ignore
-      this._monacoEditor.revealRangeInCenterIfOutsideViewport(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
+      setTimeout(() => {
+        this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
+        //@ts-ignore
+        this._monacoEditor.revealRangeInCenterIfOutsideViewport(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
+      }, 50);
     }
   }
 }

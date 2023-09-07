@@ -1,14 +1,18 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IPropertiesService } from './IPropertiesService.js';
 import { IPropertyTabsService } from './IPropertyTabsService.js';
+import { AttachedPropertiesService } from './services/AttachedPropertiesService.js';
 import { AttributesPropertiesService } from './services/AttributesPropertiesService.js';
 import { CommonPropertiesService } from './services/CommonPropertiesService.js';
 import { CssCurrentPropertiesService } from './services/CssCurrentPropertiesService.js';
 import { CssPropertiesService } from './services/CssPropertiesService.js';
 
 export class PropertyTabsService implements IPropertyTabsService {
+    protected _attachedPropertiesService = new AttachedPropertiesService();
+
     protected _pgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
+        { name: 'attached', propertiesService: this._attachedPropertiesService },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'common', propertiesService: new CommonPropertiesService() },
         { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
@@ -19,6 +23,7 @@ export class PropertyTabsService implements IPropertyTabsService {
 
     protected _svgPgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
+        { name: 'attached', propertiesService: this._attachedPropertiesService },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
         { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
         { name: 'layout', propertiesService: new CssPropertiesService("layout") },
@@ -49,7 +54,5 @@ export class PropertyTabsService implements IPropertyTabsService {
         else if (parentStyle.display.includes('flex'))
             lst = [...lst, this._flexChild[0]];
         return lst;
-
-
     }
 }

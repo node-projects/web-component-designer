@@ -5,6 +5,7 @@ import { ValueType } from '../ValueType.js';
 import { IBinding } from "../../../item/IBinding.js";
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType.js';
+import { PropertiesHelper } from './PropertiesHelper.js';
 
 export class AttributesPropertiesService implements IPropertiesService {
 
@@ -19,14 +20,14 @@ export class AttributesPropertiesService implements IPropertiesService {
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {
-    return { name: name, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute };
+    return { name: name, type: 'string', service: this, propertyType: PropertyType.attribute };
   }
 
   getProperties(designItem: IDesignItem): IProperty[] {
     if (designItem) {
       let p: IProperty[] = [];
       for (let a of designItem.attributes()) {
-        p.push({ name: a[0], renamable: true, type: 'string', service: this, propertyType: PropertyType.propertyAndAttribute })
+        p.push({ name: a[0], renamable: true, type: 'string', service: this, propertyType: PropertyType.attribute })
       }
       p.push({ name: '', type: 'addNew', service: this, propertyType: PropertyType.complex });
       return p;
@@ -61,12 +62,20 @@ export class AttributesPropertiesService implements IPropertiesService {
     if (designItems != null && designItems.length !== 0) {
       if (designItems.length == 1 && typeof designItems[0].getAttribute(property.name) == 'object')
         return ValueType.bound;
+      let propName = PropertiesHelper.dashToCamelCase(property.name);
       let attributeName = property.name;
       designItems.forEach((x) => {
         let has = x.hasAttribute(attributeName);
         all = all && has;
         some = some || has;
       });
+
+      //todo: optimize perf, do not call bindings service for each property. 
+      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
+        return s.getBindings(designItems[0]);
+      });
+      if (bindings && bindings.find(x => x.target == BindingTarget.attribute && x.targetName == propName))
+        return ValueType.bound;
     }
     else
       return ValueType.none

@@ -11,6 +11,8 @@ export enum CommandType {
 
   'rotateCounterClockwise' = 'rotateCounterClockwise',
   'rotateClockwise' = 'rotateClockwise',
+  'mirrorHorizontal' = 'mirrorHorizontal',
+  'mirrorVertical' = 'mirrorVertical',
 
   'selectAll' = 'selectAll',
 

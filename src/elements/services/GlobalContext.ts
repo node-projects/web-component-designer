@@ -3,6 +3,7 @@
 import { PropertyChangedArgs, TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { ITool } from '../widgets/designerView/tools/ITool.js';
 import { ServiceContainer } from './ServiceContainer.js';
+import { IDesignItem } from "../item/IDesignItem.js";
 
 export class GlobalContext {
 
@@ -77,4 +78,6 @@ export class GlobalContext {
     return this._fillBrush;
   }
   readonly onFillBrushChanged = new TypedEvent<PropertyChangedArgs<string>>();
+
+  readonly showConfigClicked = new TypedEvent<{configUi:Element, designItem: IDesignItem}>();
 }
