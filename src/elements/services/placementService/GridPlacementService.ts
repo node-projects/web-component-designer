@@ -19,6 +19,8 @@ export class GridPlacementService implements IPlacementService {
 
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
     for (let i of items) {
+      container.insertChild(i);
+      
       i.removeStyle("position");
       i.removeStyle("left");
       i.removeStyle("top");
