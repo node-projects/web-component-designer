@@ -4,7 +4,6 @@ import { IDragDropService } from "./IDragDropService.js";
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IPlacementService } from "../placementService/IPlacementService.js";
 import { IElementDefinition } from "../elementsService/IElementDefinition.js";
-import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
 import { ExtensionType } from "../../widgets/designerView/extensions/ExtensionType.js";
 import { dragDropFormatNameElementDefinition } from "../../../Constants.js";
 
