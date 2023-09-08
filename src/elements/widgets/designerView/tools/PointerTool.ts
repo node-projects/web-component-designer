@@ -247,15 +247,18 @@ export class PointerTool implements ITool {
           if (!this._actionStartedDesignItem)
             return;
 
+          if (!this._changeGroup)
+            this._changeGroup = designerCanvas.rootDesignItem.openGroup("Move Elements");
+
           if (event.ctrlKey && !this._copiedItemsInserted) {
+            this._changeGroup.title = "Copy Elements";
             this._copiedItemsInserted = true;
-            if (!this._changeGroup)
-              this._changeGroup = designerCanvas.rootDesignItem.openGroup("Copy Elements");
             for (let i = 0; i < this._clonedItems.length; i++) {
               this._actionStartedDesignItems[i].insertAdjacentElement(this._clonedItems[i], 'beforebegin');
             }
             designerCanvas.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'added', designItems: this._clonedItems });
           } else if (!event.ctrlKey && this._copiedItemsInserted) {
+            this._changeGroup.title = "Move Elements";
             for (let d of this._clonedItems) {
               d.remove();
             }
@@ -316,8 +319,6 @@ export class PointerTool implements ITool {
                 const newOffset = newContainerService.getElementOffset(newContainerElementDesignItem, this._actionStartedDesignItem);
                 this._moveItemsOffset = { x: newOffset.x - oldOffset.x + this._moveItemsOffset.x, y: newOffset.y - oldOffset.y + this._moveItemsOffset.y };
                 currentContainerService.leaveContainer(this._actionStartedDesignItem.parent, this._actionStartedDesignItems);
-                for (let di of this._actionStartedDesignItems)
-                  newContainerElementDesignItem._insertChildInternal(di); //todo -> maybe in enter container???
 
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
                 newContainerService.enterContainer(newContainerElementDesignItem, this._actionStartedDesignItems);

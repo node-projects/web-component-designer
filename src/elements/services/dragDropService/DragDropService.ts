@@ -4,7 +4,6 @@ import { IDragDropService } from "./IDragDropService.js";
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { IPlacementService } from "../placementService/IPlacementService.js";
 import { IElementDefinition } from "../elementsService/IElementDefinition.js";
-import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
 import { ExtensionType } from "../../widgets/designerView/extensions/ExtensionType.js";
 import { dragDropFormatNameElementDefinition } from "../../../Constants.js";
 
@@ -48,7 +47,6 @@ export class DragDropService implements IDragDropService {
     if (!newContainer)
       newContainer = designerCanvas.rootDesignItem;
 
-    //TODO : we need to use container service for adding to element, so also grid and flexbox work correct
     const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
     const elementDefinition = <IElementDefinition>JSON.parse(transferData);
     const di = await designerCanvas.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer));
@@ -62,7 +60,6 @@ export class DragDropService implements IDragDropService {
     const pos = { x: evCoord.x - containerPos.x, y: evCoord.y - containerPos.y };
     containerService.place(event, designerCanvas, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
     containerService.finishPlace(event, designerCanvas, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
-    designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(newContainer, newContainer.childCount, di));
     requestAnimationFrame(() => {
       designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di]);
       grp.commit();

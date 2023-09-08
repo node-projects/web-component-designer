@@ -139,6 +139,8 @@ export class DefaultPlacementService implements IPlacementService {
   enterContainer(container: IDesignItem, items: IDesignItem[]) {
     let filterdItems = filterChildPlaceItems(items);
     for (let i of filterdItems) {
+      container.insertChild(i);
+
       if (i.lastContainerSize) {
         if (!i.hasStyle('width'))
           i.setStyle('width', i.lastContainerSize.width + 'px');
