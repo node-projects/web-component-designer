@@ -26,7 +26,7 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
   }
 
   override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
-    if (!designItem.element.computedStyleMap)
+    if (!designItem?.element?.computedStyleMap)
       return null;
 
     let rootMap = Array.from(designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
