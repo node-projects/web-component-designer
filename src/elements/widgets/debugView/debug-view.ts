@@ -222,7 +222,7 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
         if (this._ready) {
             requestAnimationFrame(() => {
                 let element = designItem?.element;
-                if (element) {
+                if (element && element.nodeType != 8) {
                     if (element.nodeType == 3)
                         element = element.parentNode as Element;
                     this.computedStyle = getComputedStyle(element);

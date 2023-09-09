@@ -1,4 +1,5 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
+import { NodeType } from '../../item/NodeType.js';
 import { IPropertiesService } from './IPropertiesService.js';
 import { IPropertyTabsService } from './IPropertyTabsService.js';
 import { AttachedPropertiesService } from './services/AttachedPropertiesService.js';
@@ -43,6 +44,8 @@ export class PropertyTabsService implements IPropertyTabsService {
 
     getPropertygroups(designItems: IDesignItem[]): { name: string; propertiesService: IPropertiesService; }[] {
         if (designItems == null || designItems.length == 0)
+            return [];
+        if (designItems[0].nodeType == NodeType.TextNode || designItems[0].nodeType == NodeType.Comment)
             return [];
         this._pgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
         this._svgPgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));

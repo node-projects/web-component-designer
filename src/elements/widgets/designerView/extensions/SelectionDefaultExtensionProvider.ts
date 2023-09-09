@@ -5,10 +5,11 @@ import { IDesignerExtension } from './IDesignerExtension.js';
 import { SelectionDefaultExtension } from './SelectionDefaultExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
+import { NodeType } from '../../../item/NodeType.js';
 
 export class SelectionDefaultExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    return true;
+    return designItem.nodeType != NodeType.Comment;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {

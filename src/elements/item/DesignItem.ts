@@ -19,6 +19,7 @@ import { enableStylesheetService } from '../widgets/designerView/extensions/butt
 import { AbstractStylesheetService } from '../services/stylesheetService/AbstractStylesheetService.js';
 import { TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
+import { TextContentChangeAction } from '../services/undoService/transactionItems/TextContentChangeAction.js';
 
 const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
 const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
@@ -231,7 +232,7 @@ export class DesignItem implements IDesignItem {
 
   //abstract text content to own property. so only change via designer api will use it.
   public get hasContent() {
-    return this.nodeType == NodeType.TextNode || (this._childArray.length === 0 && this.content !== null);
+    return this.nodeType == NodeType.TextNode || (this.nodeType == NodeType.Comment && this.element.textContent != "") || (this._childArray.length === 0 && this.content !== null);
   }
   public get content(): string {
     if (!this.hasChildren)
@@ -249,6 +250,9 @@ export class DesignItem implements IDesignItem {
       const parent = this.parent;
       this.remove()
       parent.insertChild(di, idx);
+    } else if (this.nodeType == NodeType.Comment) {
+      const action = new TextContentChangeAction(this, value, this.content);
+      this.instanceServiceContainer.undoService.execute(action);
     } else
       this.insertChild(di);
     grp.commit();
