@@ -4,6 +4,8 @@ import { DesignItem } from "../../item/DesignItem.js";
 
 
 function generateSelector(element) {
+    if (!element)
+        return '';
     let selector, tag = element.nodeName.toLowerCase();
     if (element.id) {
         selector = '#' + element.getAttribute('id');
