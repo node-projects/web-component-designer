@@ -5,6 +5,10 @@
     "@microsoft/fast-components": {
         "script": "let res = await import('@microsoft/fast-components');\nres.provideFASTDesignSystem().register(res.allComponents);"
     },
+    "@zooplus/zoo-web-components": {
+        "script": "let res = await import('@zooplus/zoo-web-components');\nres.registerComponents(res);",
+        "style":":root {\n--primary-mid: #3C9700;\n--primary-light: #66B100;\n--primary-dark: #286400;\n--primary-ultralight: #EBF4E5;\n--secondary-mid: #FF6200;\n--secondary-light: #F80;\n--secondary-dark: #CC4E00;\n--info-ultralight: #ECF5FA;\n--info-mid: #459FD0;\n--warning-ultralight: #FDE8E9;\n--warning-mid: #ED1C24;\n}"
+    },
     "@material/web": {
         "import": "@material/web/all.js"
     }

@@ -4,6 +4,8 @@ import { DesignItem } from "../../item/DesignItem.js";
 
 
 function generateSelector(element) {
+    if (!element)
+        return '';
     let selector, tag = element.nodeName.toLowerCase();
     if (element.id) {
         selector = '#' + element.getAttribute('id');
@@ -222,7 +224,7 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
         if (this._ready) {
             requestAnimationFrame(() => {
                 let element = designItem?.element;
-                if (element) {
+                if (element && element.nodeType != 8) {
                     if (element.nodeType == 3)
                         element = element.parentNode as Element;
                     this.computedStyle = getComputedStyle(element);
