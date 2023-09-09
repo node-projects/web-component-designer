@@ -4,4 +4,5 @@ import { IEvent } from "./IEvent.js";
 export interface IEventsService {
     isHandledElement(designItem: IDesignItem): boolean;
     getPossibleEvents(designItem: IDesignItem): IEvent[];
+    getEvent(name: string): IEvent;
 }
