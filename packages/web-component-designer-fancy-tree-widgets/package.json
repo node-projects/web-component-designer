@@ -1,6 +1,6 @@
 {
-  "description": "A UI designer for Polymer apps",
-  "name": "@node-projects/web-component-designer",
+  "description": "web-component-designer addon: Widgets using JQuery FancTree",
+  "name": "@node-projects/web-component-designer-fancy-tree-widgets",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,10 +12,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.17.2"
-  },
-  "devDependencies": {
-    "mdn-data": "^2.1.0"
+    "@node-projects/base-custom-webcomponent": "^0.17.2",
+    "@node-projects/web-component-designer": "^0.1.0",
+    "jquery": "^3.7.1",
+    "jquery.fancytree": "^2.38.3"
   },
   "repository": {
     "type": "git",

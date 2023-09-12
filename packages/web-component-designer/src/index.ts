@@ -10,7 +10,7 @@ export * from "./elements/helper/IndentedTextWriter.js";
 export * from "./elements/helper/PathDataPolyfill.js";
 export * from "./elements/helper/Screenshot.js";
 export * from "./elements/helper/ClipboardHelper.js";
-export * from "./elements/loader/OldCustomElementsManifestLoader.js"
+
 export type { ITextWriter } from "./elements/helper/ITextWriter.js";
 export * from "./elements/helper/w3color.js";
 export * from "./elements/helper/contextMenu/ContextMenu.js";
@@ -24,6 +24,7 @@ export type { IDesignItem } from "./elements/item/IDesignItem.js";
 export type { IBinding } from "./elements/item/IBinding.js";
 export * from "./elements/item/BindingMode.js";
 export * from "./elements/item/BindingTarget.js";
+export * from "./elements/item/NodeType.js";
 
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
@@ -92,11 +93,7 @@ export * from "./elements/services/htmlWriterService/FormatingHtmlWriterService.
 export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/LitTsElementWriterService.js";
 
-export * from "./elements/services/htmlParserService/BaseCustomWebcomponentParserService.js";
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
-export * from "./elements/services/htmlParserService/NodeHtmlParserService.js";
-export * from "./elements/services/htmlParserService/LitElementParserService.js";
-export * from "./elements/services/htmlParserService/VueParserService.js";
 export type { IHtmlParserService } from "./elements/services/htmlParserService/IHtmlParserService.js";
 
 export type { IIntializationService } from "./elements/services/initializationService/IIntializationService.js";
@@ -156,10 +153,8 @@ export type { ISelectionChangedEvent } from "./elements/services/selectionServic
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";
 export * from "./elements/services/selectionService/SelectionService.js";
 
-export type { IStyleRule, IStyleDeclaration, IStylesheet, IStylesheetService } from "./elements/services/stylesheetService/IStylesheetService.js";
-export * from "./elements/services/stylesheetService/CssTreeStylesheetService.js";
-export * from "./elements/services/stylesheetService/CssToolsStylesheetService.js";
-export * from "./elements/services/stylesheetService/SpecificityCalculator.js";
+export type { IStyleRule, IStyleDeclaration, IStylesheet, IStylesheetService, IDocumentStylesheet } from "./elements/services/stylesheetService/IStylesheetService.js";
+export * from "./elements/services/stylesheetService/AbstractStylesheetService.js";
 
 export * from "./elements/services/undoService/ChangeGroup.js";
 export type { ITransactionItem } from "./elements/services/undoService/ITransactionItem.js";
@@ -180,7 +175,6 @@ export type { IService } from "./elements/services/IService.js";
 export type { IServiceContainer } from "./elements/services/IServiceContainer.js";
 export * from "./elements/services/ServiceContainer.js";
 
-export * from "./elements/widgets/bindableObjectsBrowser/bindable-objects-browser.js";
 export type { IBindableObjectsBrowser } from "./elements/widgets/bindableObjectsBrowser/IBindableObjectsBrowser.js";
 
 export * from "./elements/widgets/propertyGrid/PropertyGrid.js";
@@ -277,8 +271,6 @@ export type { IDesignViewConfigButtonsProvider } from './elements/widgets/design
 
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtension.js";
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/EditText/EditTextWithStyloExtension.js";
-export * from "./elements/widgets/designerView/extensions/EditText/EditTextWithStyloExtensionProvider.js";
 
 export type { IContextMenuExtension, ContextmenuInitiator } from "./elements/widgets/designerView/extensions/contextMenu/IContextMenuExtension.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js";
@@ -299,21 +291,18 @@ export * from "./elements/widgets/designerView/extensions/pointerExtensions/Abst
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtension.js";
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js";
 
+export type { IMiniatureView } from "./elements/widgets/miniatureView/IMiniatureView.js";
+
 export * from "./elements/widgets/debugView/debug-view.js";
 
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";
 export * from "./elements/widgets/paletteView/paletteView.js";
-export * from "./elements/widgets/paletteView/paletteTreeView.js";
 
 export type { ITreeView } from "./elements/widgets/treeView/ITreeView.js";
 export * from "./elements/widgets/treeView/treeView.js";
-export * from "./elements/widgets/treeView/treeViewExtended.js";
 
 export type { ICodeView } from "./elements/widgets/codeView/ICodeView.js";
-export * from "./elements/widgets/codeView/code-view-monaco.js";
-export * from "./elements/widgets/codeView/code-view-ace.js";
-export * from "./elements/widgets/codeView/code-view-code-mirror.js";
 export * from "./elements/widgets/codeView/code-view-simple.js";
 
 export * from "./elements/documentContainer.js";

@@ -4,7 +4,6 @@ import { PreDefinedElementsService } from "../services/elementsService/PreDefine
 import { WebcomponentManifestElementsService } from "../services/elementsService/WebcomponentManifestElementsService.js";
 import { WebcomponentManifestPropertiesService } from "../services/propertiesService/services/WebcomponentManifestPropertiesService.js";
 import { ServiceContainer } from "../services/ServiceContainer.js";
-import { PaletteTreeView } from "../widgets/paletteView/paletteTreeView.js";
 import { removeLeading, removeTrailing } from "./Helper.js";
 
 //TODO: remove this code when import asserts are supported
@@ -66,7 +65,7 @@ export class NpmPackageLoader {
     }
 
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
-    async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: PaletteTreeView, loadAllImports?: boolean, reportState?: (state: string) => void): Promise<{ html: string, style: string }> {
+    async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: any, loadAllImports?: boolean, reportState?: (state: string) => void): Promise<{ html: string, style: string }> {
         const baseUrl = window.location.protocol + this._packageSource + pkg + '/';
 
         const packageJsonUrl = baseUrl + 'package.json';

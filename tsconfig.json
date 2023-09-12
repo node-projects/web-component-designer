@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    /*"baseUrl":"packages",
+    "paths": {
+      "@node-projects/web-component-designer": [ "web-component-designer/src" ]
+    },*/
+    "noEmit": true
+  },
+  "include": [
+    "packages/**/src/*.js",
+    "packages/**/src/*.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

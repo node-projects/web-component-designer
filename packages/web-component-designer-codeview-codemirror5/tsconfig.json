@@ -9,5 +9,10 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.js"
+  ],
+  "references": [
+    {
+      "path": "../web-component-designer/tsconfig.json"
+    },
   ]
 }

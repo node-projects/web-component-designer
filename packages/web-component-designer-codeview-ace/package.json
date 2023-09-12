@@ -1,9 +1,9 @@
 {
-  "description": "A UI designer for Polymer apps",
-  "name": "@node-projects/web-component-designer",
+  "description": "web-component-designer addon: Code Editor using ACE",
+  "name": "@node-projects/web-component-designer-codeview-ace",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/widgets/codeView/code-view-ace.js",
   "author": "jochen.kuehner@gmx.de",
   "license": "MIT",
   "scripts": {
@@ -12,10 +12,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.17.2"
-  },
-  "devDependencies": {
-    "mdn-data": "^2.1.0"
+    "ace-builds": "^1.24.1",
+    "@node-projects/base-custom-webcomponent": "^0.17.2",
+    "@node-projects/web-component-designer": "^0.1.0"    
   },
   "repository": {
     "type": "git",

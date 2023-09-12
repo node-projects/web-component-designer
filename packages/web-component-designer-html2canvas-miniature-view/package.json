@@ -1,0 +1,23 @@
+{
+  "description": "web-component-designer addon: Miniature view provided by html2canvas",
+  "name": "@node-projects/web-component-designer-html2canvas-miniature-view",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/widgets/miniatureView/html-2-canvas-miniature-view.js",
+  "author": "jochen.kuehner@gmx.de",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@node-projects/base-custom-webcomponent": "^0.17.2",
+    "@node-projects/web-component-designer": "^0.1.0",
+    "html2canvas": "*"   
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-projects/web-component-designer.git"
+  }
+}
