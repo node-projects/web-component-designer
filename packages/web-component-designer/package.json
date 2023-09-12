@@ -1,21 +1,21 @@
 {
-  "name": "@node-projects/monorepo",
-  "private": true,
+  "description": "A UI designer for Polymer apps",
+  "name": "@node-projects/web-component-designer",
+  "version": "0.0.292",
   "type": "module",
-  "author": "",
+  "main": "./dist/index.js",
+  "author": "jochen.kuehner@gmx.de",
   "license": "MIT",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "tsc": "tsc",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },
+  "dependencies": {
+    "@node-projects/base-custom-webcomponent": "^0.17.2"
+  },
   "devDependencies": {
     "@adobe/css-tools": "4.3.1",
-    "@node-projects/base-custom-webcomponent": "^0.17.2",
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^6.1.5",
     "@papyrs/stylo": "^0.0.45",
@@ -28,7 +28,7 @@
     "codemirror": "^5.0.0",
     "css-tree": "^2.3.1",
     "esprima-next": "^5.8.4",
-    "html2canvas": "*",
+    "jest": "^29.6.4",
     "jquery": "^3.7.1",
     "jquery.fancytree": "^2.38.3",
     "mdn-data": "^2.1.0",
