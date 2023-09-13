@@ -1,9 +1,9 @@
 {
-  "description": "web-component-designer addon: Widgets using JQuery FancTree",
-  "name": "@node-projects/web-component-designer-fancy-tree-widgets",
+  "description": "web-component-designer addon: Miniature view provided by html2canvas",
+  "name": "@node-projects/web-component-designer-miniatureview-html2canvas",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/widgets/miniatureView/html-2-canvas-miniature-view.js",
   "author": "jochen.kuehner@gmx.de",
   "license": "MIT",
   "scripts": {
@@ -14,8 +14,7 @@
   "dependencies": {
     "@node-projects/base-custom-webcomponent": "^0.17.2",
     "@node-projects/web-component-designer": "^0.1.0",
-    "jquery": "^3.7.1",
-    "jquery.fancytree": "^2.38.3"
+    "html2canvas": "*"   
   },
   "repository": {
     "type": "git",

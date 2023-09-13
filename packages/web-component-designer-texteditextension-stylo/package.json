@@ -1,9 +1,9 @@
 {
-  "description": "web-component-designer addon: Miniature view provided by html2canvas",
-  "name": "@node-projects/web-component-designer-html2canvas-miniature-view",
+  "description": "web-component-designer addon: Edit Text via stylo editor",
+  "name": "@node-projects/web-component-designer-texteditextension-stylo",
   "version": "0.1.0",
   "type": "module",
-  "main": "./dist/widgets/miniatureView/html-2-canvas-miniature-view.js",
+  "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
   "license": "MIT",
   "scripts": {
@@ -12,9 +12,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@papyrs/stylo": "^0.0.45",
     "@node-projects/base-custom-webcomponent": "^0.17.2",
-    "@node-projects/web-component-designer": "^0.1.0",
-    "html2canvas": "*"   
+    "@node-projects/web-component-designer": "^0.1.0"
   },
   "repository": {
     "type": "git",
