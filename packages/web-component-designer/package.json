@@ -12,7 +12,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.17.2"
+    "@node-projects/base-custom-webcomponent": "^0.18.1"
   },
   "devDependencies": {
     "mdn-data": "^2.1.0"

@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "ace-builds": "^1.24.2",
-    "@node-projects/base-custom-webcomponent": "^0.17.2",
+    "@node-projects/base-custom-webcomponent": "^0.18.1",
     "@node-projects/web-component-designer": "^0.1.1"    
   },
   "repository": {
