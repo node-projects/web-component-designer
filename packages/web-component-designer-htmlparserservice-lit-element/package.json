@@ -12,7 +12,6 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/node-html-parser-esm": "^6.1.5",
     "esprima-next": "^5.8.4",
     "@node-projects/web-component-designer": "^0.1.0"
   },

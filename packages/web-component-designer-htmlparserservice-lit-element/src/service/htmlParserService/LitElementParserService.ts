@@ -1,11 +1,14 @@
 import { CssAttributeParser, DesignItem, IDesignItem, IHtmlParserService, InstanceServiceContainer, ServiceContainer, newElementFromString } from "@node-projects/web-component-designer";
 import { BlockStatement, ClassDeclaration, FunctionExpression, Identifier, MethodDefinition, ReturnStatement, TaggedTemplateExpression } from "esprima-next/dist/esm/esprima";
-import * as parser from "@node-projects/node-html-parser-esm";
 import * as esprima from "esprima-next";
 
 export class LitElementParserService implements IHtmlParserService {
   //TODO: switch to typescript
-  constructor() { }
+  private htmlParser: IHtmlParserService;
+
+  constructor(htmlParser: IHtmlParserService) {
+    this.htmlParser = htmlParser;
+  }
 
   async parse(module: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
     const parsedModule = esprima.parseModule(module);
@@ -17,18 +20,7 @@ export class LitElementParserService implements IHtmlParserService {
 
     const html = templateLiteral.quasis.map(x => x.value.raw).join();
 
-    const parsed = parser.parse(html, { comment: true });
-
-    let designItems: IDesignItem[] = [];
-    for (let p of parsed.childNodes) {
-      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null);
-
-      if (di != null)
-        designItems.push(di)
-      else
-        console.warn("NodeHtmlParserService - could not parse element", p)
-    }
-    return designItems;
+    return this.htmlParser.parse(html, serviceContainer, instanceServiceContainer, parseSnippet);
   }
 
   private _parseDiv = document.createElement("div");
