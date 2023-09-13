@@ -5,15 +5,7 @@ import { WebcomponentManifestElementsService } from "../services/elementsService
 import { WebcomponentManifestPropertiesService } from "../services/propertiesService/services/WebcomponentManifestPropertiesService.js";
 import { ServiceContainer } from "../services/ServiceContainer.js";
 import { removeLeading, removeTrailing } from "./Helper.js";
-
-//TODO: remove this code when import asserts are supported
-let packageHacks: any;
-
-//@ts-ignore
-packageHacks = await import("./NpmPackageHacks.json", { assert: { type: 'json' } });
-
-if (packageHacks.default)
-    packageHacks = packageHacks.default;
+import packageHacks from "./NpmPackageHacks.json"  assert { type: 'json' };
 
 export class NpmPackageLoader {
 

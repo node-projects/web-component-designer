@@ -7,15 +7,7 @@ import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStyleshe
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
-
-//TODO: remove this code when import asserts are supported
-let cssProperties: any;
-
-//@ts-ignore
-cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
-
-if (cssProperties.default)
-  cssProperties = cssProperties.default;
+import cssProperties from "./CssProperties.json"  assert { type: 'json' } ;
 
 const localName = '&lt;local&gt;';
 

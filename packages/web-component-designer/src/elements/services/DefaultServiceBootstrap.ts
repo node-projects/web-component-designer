@@ -89,7 +89,7 @@ import { SimpleDemoProviderService } from './demoProviderService/SimpleDemoProvi
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
 
-  let defaultPlacementService=new DefaultPlacementService();
+  let defaultPlacementService = new DefaultPlacementService();
   serviceContainer.register("containerService", defaultPlacementService);
   serviceContainer.register("containerService", new GridPlacementService(defaultPlacementService));
   serviceContainer.register("containerService", new FlexBoxPlacementService(defaultPlacementService));
