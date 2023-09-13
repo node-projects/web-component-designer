@@ -1,0 +1,22 @@
+{
+  "description": "web-component-designer addon: Parser Service for Templates inside of BaseCustomWebcomponent",
+  "name": "@node-projects/web-component-designer-htmlparserservice-base-custom-webcomponent",
+  "version": "0.1.1",
+  "type": "module",
+  "main": "./dist/service/htmlParserService/BaseCustomWebcomponentParserService.js",
+  "author": "jochen.kuehner@gmx.de",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@node-projects/web-component-designer": "^0.1.0",
+    "typescript": "^5.2.2"   
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-projects/web-component-designer.git"
+  }
+}

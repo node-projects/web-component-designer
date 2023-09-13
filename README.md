@@ -1,6 +1,6 @@
 # web-component-designer
 
-```It#s now considered beta. It works, we use it in production, but there are many more features to come```
+```It's now considered beta. It works, we use it in production, but there are many more features to come```
 
 A HTML web component for designing web components and HTML pages based on PolymerLabs wizzywid which can easily be integrated in your own software.
 Meanwhile polymer is not used anymore.
@@ -14,6 +14,26 @@ There is also a Preview VS-Code Addon using the Designer: https://github.com/nod
 https://www.npmjs.com/package/@node-projects/web-component-designer
 
      npm i @node-projects/web-component-designer
+
+## Additional NPM Packages
+
+All Modules wich need an external dependency are now extracted to extra NPM packges.
+So the designer now should work with bundlers.
+
+| Name                                                                   | Description |
+| ---------------------------------------------------------------------- | ----------- |
+| web-component-designer-codeview-ace                                    |             |
+| web-component-designer-codeview-codemirror                             |             |
+| web-component-designer-codeview-codemirror5                            |             |
+| web-component-designer-codeview-monaco                                 |             |
+| web-component-designer-htmlparserservice-base-custom-webcomponent      |             |
+| web-component-designer-htmlparserservice-lit-element                   |             |
+| web-component-designer-htmlparserservice-nodehtmlparser                |             |
+| web-component-designer-miniatureview-html2canvas                       |             |
+| web-component-designer-stylesheetservice-css-tools                     |             |
+| web-component-designer-stylesheetservice-css-tree                      |             |
+| web-component-designer-texteditextension-stylo                         |             |
+| web-component-designer-widgets-fancytree                               |             |
 
 ## Browser support
 

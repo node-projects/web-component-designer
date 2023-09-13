@@ -1,0 +1,23 @@
+{
+  "description": "web-component-designer addon: Edit Text via stylo editor",
+  "name": "@node-projects/web-component-designer-texteditextension-stylo",
+  "version": "0.1.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "author": "jochen.kuehner@gmx.de",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@papyrs/stylo": "^0.0.45",
+    "@node-projects/base-custom-webcomponent": "^0.17.2",
+    "@node-projects/web-component-designer": "^0.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-projects/web-component-designer.git"
+  }
+}

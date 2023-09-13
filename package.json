@@ -1,22 +1,24 @@
 {
-  "description": "A UI designer for Polymer apps",
-  "name": "@node-projects/web-component-designer",
-  "version": "0.0.292",
+  "name": "@node-projects/monorepo",
+  "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "author": "",
-  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "tsc": "tsc",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "build": "tsc",
+    "build": "npm run build --workspaces",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": "^0.17.2"
+    "@node-projects/web-component-designer": "file:packages/web-component-designer",
+    "@node-projects/web-component-designer-code-base-custom-webcomponent-parser-service": "file:packages/web-component-designer-code-base-custom-webcomponent-parser-service",
+    "@node-projects/web-component-designer-code-css-tools-stylesheetservice": "file:packages/web-component-designer-code-css-tools-stylesheetservice",
+    "@node-projects/web-component-designer-code-html2canvas-miniature-view": "file:packages/web-component-designer-code-html2canvas-miniature-view",
+    "@node-projects/web-component-designer-code-view-ace": "file:packages/web-component-designer-code-view-ace"
   },
   "devDependencies": {
     "@adobe/css-tools": "4.3.1",
+    "@node-projects/base-custom-webcomponent": "^0.17.2",
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^6.1.5",
     "@papyrs/stylo": "^0.0.45",
@@ -24,23 +26,19 @@
     "@types/css-tree": "^2.3.2",
     "@types/jquery": "^3.5.18",
     "@types/jquery.fancytree": "0.0.7",
-    "@types/node": "^20.5.9",
-    "ace-builds": "^1.24.1",
-    "codemirror": "^5.0.0",
+    "@types/node": "^20.6.0",
+    "ace-builds": "^1.24.2",
+    "codemirror5": "npm:codemirror@^5.0.0",
+    "codemirror": "^6.0.1",
     "css-tree": "^2.3.1",
     "esprima-next": "^5.8.4",
     "html2canvas": "*",
-    "jest": "^29.6.4",
     "jquery": "^3.7.1",
     "jquery.fancytree": "^2.38.3",
     "mdn-data": "^2.1.0",
-    "monaco-editor": "^0.41.0",
+    "monaco-editor": "^0.43.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
     "typescript-lit-html-plugin": "^0.9.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/node-projects/web-component-designer.git"
   }
 }

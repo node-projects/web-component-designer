@@ -1,0 +1,24 @@
+{
+  "description": "A UI designer for Polymer apps",
+  "name": "@node-projects/web-component-designer",
+  "version": "0.1.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "author": "jochen.kuehner@gmx.de",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@node-projects/base-custom-webcomponent": "^0.17.2"
+  },
+  "devDependencies": {
+    "mdn-data": "^2.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-projects/web-component-designer.git"
+  }
+}
