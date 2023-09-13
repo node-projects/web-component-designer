@@ -190,7 +190,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
   }
 
   public get selectedIndex() {
-    return this._selectedIndex;
+    return this._firstConnect ? -1 : this._selectedIndex;
   }
   public set selectedIndex(value: number) {
     let old = this._selectedIndex;
