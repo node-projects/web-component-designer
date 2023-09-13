@@ -8,14 +8,9 @@ import { removeLeading, removeTrailing } from "./Helper.js";
 
 //TODO: remove this code when import asserts are supported
 let packageHacks: any;
+
 //@ts-ignore
-if (window.importShim) {
-    const packageHacksUrl = import.meta.resolve('./NpmPackageHacks.json')
-    //@ts-ignore
-    packageHacks = await importShim(packageHacksUrl, { assert: { type: 'json' } });
-} else
-    //@ts-ignore
-    packageHacks = await import("./NpmPackageHacks.json", { assert: { type: 'json' } });
+packageHacks = await import("./NpmPackageHacks.json", { assert: { type: 'json' } });
 
 if (packageHacks.default)
     packageHacks = packageHacks.default;

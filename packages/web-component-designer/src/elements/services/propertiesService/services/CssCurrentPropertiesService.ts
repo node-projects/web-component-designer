@@ -10,14 +10,9 @@ import { NodeType } from '../../../item/NodeType.js';
 
 //TODO: remove this code when import asserts are supported
 let cssProperties: any;
+
 //@ts-ignore
-if (window.importShim) {
-  const cssPropertiesUrl = import.meta.resolve('./CssProperties.json')
-  //@ts-ignore
-  cssProperties = await importShim(cssPropertiesUrl, { assert: { type: 'json' } });
-} else
-  //@ts-ignore
-  cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
+cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
 
 if (cssProperties.default)
   cssProperties = cssProperties.default;
