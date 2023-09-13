@@ -1,10 +1,12 @@
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { CommandType, IActivateable, ICodeView, IStringPosition, IUiCommand, IUiCommandHandler } from '@node-projects/web-component-designer';
-import * as monaco from 'monaco-editor'
+import type * as monacoType from 'monaco-editor'
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
-
   private static _initalized: boolean;
+
+  //@ts-ignore
+  static monacoLib: { editor: typeof monacoType.editor, Range: typeof monacoType.Range };
 
   dispose(): void {
     this._monacoEditor?.dispose();
@@ -22,8 +24,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
   public set theme(value: string) {
     this._theme = value;
-    
-    monaco.editor.setTheme(value);
+    CodeViewMonaco.monacoLib.editor.setTheme(value);
   }
 
   static readonly properties = {
@@ -31,8 +32,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     language: String,
     theme: String
   }
-  
-  private _monacoEditor: monaco.editor.IStandaloneCodeEditor;
+
+  private _monacoEditor: monacoType.editor.IStandaloneCodeEditor;
   private _editor: HTMLDivElement;
 
   static override readonly style = css`
@@ -81,34 +82,43 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     return false;
   }
 
-  static initMonacoEditor() {
+  static loadMonacoEditorViaRequire(path = 'node_modules/monaco-editor/min/vs') {
     return new Promise<void>(async resolve => {
-      if (!CodeViewMonaco._initalized) {
-        CodeViewMonaco._initalized = true;
-
+      //@ts-ignore
+      require.config({ paths: { 'vs': path } });
+      //@ts-ignore
+      require(['vs/editor/editor.main'], () => {
         //@ts-ignore
-        require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' } });
-
-        //@ts-ignore
-        require(['vs/editor/editor.main'], () => {
-          monaco.editor.defineTheme('webComponentDesignerTheme', {
-            base: 'vs',
-            inherit: true,
-            //@ts-ignore
-            rules: [{ background: 'EDF9FA' }],
-            colors: {
-              'editor.selectionBackground': '#add6ff',
-              'editor.inactiveSelectionBackground': '#add6ff'
-            }
-          });
-          monaco.editor.setTheme('webComponentDesignerTheme');
-
-          resolve();
-        });
-      } else {
+        CodeViewMonaco.monacoLib = window.monaco;
         resolve();
-      }
-    })
+      });
+    });
+  }
+
+  static async loadMonacoEditorViaImport() {
+    let monaco = await import('monaco-editor');
+    CodeViewMonaco.monacoLib = monaco;
+  }
+
+  static setMonacoLibrary(monaco: any) {
+    CodeViewMonaco.monacoLib = monaco;
+  }
+
+  static initMonacoEditor(monaco: any) {
+    if (!CodeViewMonaco._initalized) {
+      CodeViewMonaco._initalized = true;
+      monaco.editor.defineTheme('webComponentDesignerTheme', {
+        base: 'vs',
+        inherit: true,
+        //@ts-ignore
+        rules: [{ background: 'EDF9FA' }],
+        colors: {
+          'editor.selectionBackground': '#add6ff',
+          'editor.inactiveSelectionBackground': '#add6ff'
+        }
+      });
+    }
+    monaco.editor.setTheme('webComponentDesignerTheme');
   }
 
   constructor() {
@@ -126,12 +136,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
     this._editor = this._getDomElement<HTMLDivElement>('container');
 
-    await CodeViewMonaco.initMonacoEditor();
+    //@ts-ignore
+    CodeViewMonaco.monacoLib ??= window.monaco;
 
     const resizeObserver = new ResizeObserver(() => {
       if (this._editor.offsetWidth > 0) {
-        //@ts-ignore
-        this._monacoEditor = monaco.editor.create(this._editor, {
+        this._monacoEditor = CodeViewMonaco.monacoLib.editor.create(this._editor, {
           automaticLayout: true,
           wordWrapColumn: 1000,
           //wordWrap: 'wordWrapColumn',
@@ -151,7 +161,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           }
         });
 
-        monaco.editor.setTheme(this.theme);
+        CodeViewMonaco.initMonacoEditor(CodeViewMonaco.monacoLib);
 
         let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
           this.onTextChanged.emit(this._monacoEditor.getValue())
@@ -191,8 +201,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     if (this._monacoEditor) {
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
-      monaco.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
-      monaco.editor.setTheme(this.theme);
+      CodeViewMonaco.monacoLib.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
+      CodeViewMonaco.monacoLib.editor.setTheme(this.theme);
     }
   }
 
@@ -207,7 +217,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       let point2 = model.getPositionAt(position.start + position.length);
       setTimeout(() => {
         this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
-        this._monacoEditor.revealRangeInCenterIfOutsideViewport(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
+        this._monacoEditor.revealRangeInCenterIfOutsideViewport(new CodeViewMonaco.monacoLib.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
       }, 50);
     }
   }

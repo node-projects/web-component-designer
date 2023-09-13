@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@adobe/css-tools": "4.3.1",
-    "@node-projects/web-component-designer": "^0.1.0"    
+    "@node-projects/web-component-designer": "^0.1.1"    
   },
   "repository": {
     "type": "git",
