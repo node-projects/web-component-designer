@@ -6,7 +6,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   private static _initalized: boolean;
 
   //@ts-ignore
-  static monacoLib: { editor: typeof monacoType.editor, Range: typeof monacoType.Range } = monaco;
+  static monacoLib: { editor: typeof monacoType.editor, Range: typeof monacoType.Range };
 
   dispose(): void {
     this._monacoEditor?.dispose();
@@ -89,7 +89,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       //@ts-ignore
       require(['vs/editor/editor.main'], () => {
         //@ts-ignore
-        CodeViewMonaco.monacoLib = monaco;
+        CodeViewMonaco.monacoLib = window.monaco;
         resolve();
       });
     });
@@ -135,6 +135,9 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     this.shadowRoot.adoptedStyleSheets = [style.default, (<any>this.constructor).style];
 
     this._editor = this._getDomElement<HTMLDivElement>('container');
+
+    //@ts-ignore
+    CodeViewMonaco.monacoLib ??= window.monaco;
 
     const resizeObserver = new ResizeObserver(() => {
       if (this._editor.offsetWidth > 0) {
