@@ -108,11 +108,14 @@ export * from "./elements/services/modelCommandService/DefaultModelCommandServic
 
 export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
+
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
 export type { IPropertyEditor } from "./elements/services/propertiesService/IPropertyEditor.js";
 export type { IPropertyGroup } from "./elements/services/propertiesService/IPropertyGroup.js";
-export type { IPropertyTabsService as IPropertyGroupsService } from './elements/services/propertiesService/IPropertyTabsService.js';
+export type { IPropertyGroupsService } from './elements/services/propertiesService/IPropertyGroupsService.js';
+export * from "./elements/services/propertiesService/PropertyGroupsService.js";
+
 export * from "./elements/services/propertiesService/propertyEditors/BasePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/BooleanPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ColorPropertyEditor.js";
@@ -147,7 +150,6 @@ export * from "./elements/services/propertiesService/services/CssCustomPropertie
 export * from "./elements/services/propertiesService/services/UnkownElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
-export * from "./elements/services/propertiesService/PropertyTabsService.js";
 
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";
