@@ -14,7 +14,7 @@
   "dependencies": {
     "@papyrs/stylo": "^0.0.45",
     "@node-projects/base-custom-webcomponent": "^0.17.2",
-    "@node-projects/web-component-designer": "^0.1.0"
+    "@node-projects/web-component-designer": "^0.1.1"
   },
   "repository": {
     "type": "git",

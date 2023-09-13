@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@node-projects/base-custom-webcomponent": "^0.17.2",
-    "@node-projects/web-component-designer": "^0.1.0",
+    "@node-projects/web-component-designer": "^0.1.1",
     "jquery": "^3.7.1",
     "jquery.fancytree": "^2.38.3"
   },
