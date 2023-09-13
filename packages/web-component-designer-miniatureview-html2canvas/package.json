@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Miniature view provided by html2canvas",
   "name": "@node-projects/web-component-designer-miniatureview-html2canvas",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/widgets/miniatureView/html-2-canvas-miniature-view.js",
   "author": "jochen.kuehner@gmx.de",

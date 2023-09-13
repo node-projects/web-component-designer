@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Edit Text via stylo editor",
   "name": "@node-projects/web-component-designer-texteditextension-stylo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",

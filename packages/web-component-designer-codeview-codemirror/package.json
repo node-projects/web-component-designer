@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Code Editor using Codemirror 6 and newer",
   "name": "@node-projects/web-component-designer-codeview-codemirror",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/widgets/codeView/code-view-codemirror.js",
   "author": "jochen.kuehner@gmx.de",
