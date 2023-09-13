@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Widgets using JQuery FancTree",
   "name": "@node-projects/web-component-designer-widgets-fancytree",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",

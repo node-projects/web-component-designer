@@ -1,5 +1,7 @@
 import { BaseCustomWebComponentLazyAppend, TypedEvent, css } from '@node-projects/base-custom-webcomponent';
 import { IBindableObject, IBindableObjectsService, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
+import 'jquery';
+import 'jquery.fancytree';
 
 export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
   private _treeDiv: HTMLDivElement;
@@ -39,12 +41,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
     this._restoreCachedInititalValues();
 
     //@ts-ignore
-    if (window.importShim)
-      //@ts-ignore
-      importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
-    else
-      //@ts-ignore
-      import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._treeDiv = document.createElement('div');
     this._treeDiv.style.height = '100%'

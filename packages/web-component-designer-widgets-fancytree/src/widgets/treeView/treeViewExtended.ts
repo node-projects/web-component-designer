@@ -1,5 +1,8 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, Disposable } from '@node-projects/base-custom-webcomponent';
 import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter } from '@node-projects/web-component-designer';
+import 'jquery';
+import 'jquery.fancytree';
+import 'jquery.fancytree/dist/modules/jquery.fancytree.table.js';
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
@@ -100,12 +103,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._restoreCachedInititalValues();
 
     //@ts-ignore
-    if (window.importShim)
-      //@ts-ignore
-      importShim("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
-    else
-      //@ts-ignore
-      import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
