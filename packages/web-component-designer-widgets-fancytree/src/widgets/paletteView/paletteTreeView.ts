@@ -1,6 +1,6 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { IElementsService, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
-import 'jquery';
+import '../jquery.js';
 import 'jquery.fancytree';
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {

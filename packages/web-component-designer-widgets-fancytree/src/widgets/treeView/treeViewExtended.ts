@@ -1,6 +1,6 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, Disposable } from '@node-projects/base-custom-webcomponent';
 import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter } from '@node-projects/web-component-designer';
-import 'jquery';
+import '../jquery.js';
 import 'jquery.fancytree';
 import 'jquery.fancytree/dist/modules/jquery.fancytree.table.js';
 

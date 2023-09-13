@@ -1,6 +1,6 @@
 import { BaseCustomWebComponentLazyAppend, TypedEvent, css } from '@node-projects/base-custom-webcomponent';
 import { IBindableObject, IBindableObjectsService, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
-import 'jquery';
+import '../jquery.js';
 import 'jquery.fancytree';
 
 export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
