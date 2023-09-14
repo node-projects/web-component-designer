@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Code Editor using Codemirror 5",
   "name": "@node-projects/web-component-designer-codeview-codemirror5",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "main": "./dist/widgets/codeView/code-view-codemirror5.js",
   "author": "jochen.kuehner@gmx.de",
@@ -14,7 +14,7 @@
   "dependencies": {
     "codemirror5": "npm:codemirror@^5.0.0",
     "@node-projects/base-custom-webcomponent": "^0.18.1",
-    "@node-projects/web-component-designer": "^0.1.1"    
+    "@node-projects/web-component-designer": "^0.1.8"    
   },
   "repository": {
     "type": "git",
