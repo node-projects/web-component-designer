@@ -32,6 +32,7 @@
     "monaco-editor": "^0.43.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
-    "typescript-lit-html-plugin": "^0.9.0"
+    "typescript-lit-html-plugin": "^0.9.0",
+    "wunderbaum": "^0.4.0"
   }
 }

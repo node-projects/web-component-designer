@@ -12,6 +12,12 @@ This package contains widgets using jquery/fancytree. This are more powerfull th
 
 ## Usage
 
+you need to load JQuery and FancyTree before or you could load it via
+
+    import '@node-projects/web-component-designer-widgets-fancytree/dist/loadJqueryAndFancytree.js';
+
+then import the widgets:
+
     import '@node-projects/web-component-designer-widgets-fancytree';
 
 now you could use following widgets:
