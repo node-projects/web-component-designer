@@ -81,8 +81,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   static override readonly template = html`
       <div style="height: 100%;">
         <input id="input" style="width: 100%; box-sizing: border-box; height:27px;" placeholder="Filter... (regex)" autocomplete="off">
-        <div style="height: calc(100% - 23px); overflow: auto;">
-        <div id="treetable" style="min-width: 100%;"></div>
+        <div style="height: calc(100% - 23px);">
+        <div id="treetable" class="wb-alternate" style="min-width: 100%;"></div>
         </div>
       </div>`;
 

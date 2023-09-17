@@ -22,7 +22,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       <div style="height: 100%;">
         <input id="input" style="width: 100%; height: 25px; box-sizing: border-box;" placeholder="Filter..." autocomplete="off">
         <div style="height: calc(100% - 26px);">
-          <div id="treetable" style="min-width: 100%;"></div>
+          <div id="treetable" class="wb-alternate" style="min-width: 100%;"></div>
         </div>
       </div>`;
 
