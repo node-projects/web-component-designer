@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, TypedEvent, css } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentConstructorAppend, TypedEvent, css, html } from '@node-projects/base-custom-webcomponent';
 import { IBindableObject, IBindableObjectsService, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
 import { WbNodeData } from 'types';
 import { Wunderbaum } from 'wunderbaum'
@@ -7,7 +7,7 @@ import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css
 
 type serviceNode = { service: IBindableObjectsService, bindable: IBindableObject<any> }
 
-export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
+export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorAppend {
   private _treeDiv: HTMLDivElement;
   private _tree: Wunderbaum;
 
@@ -15,44 +15,23 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
 
   public objectDoubleclicked = new TypedEvent<void>;
 
-  /*static override readonly style = css`
-      span.drag-source {
-        border: 1px solid grey;
-        border-radius: 3px;
-        padding: 2px;
-        background-color: silver;
-      }
+  static override readonly style = css``;
 
-      span.fancytree-node.fancytree-drag-source {
-        outline: 1px dotted grey;
-      }
-      span.fancytree-node.fancytree-drop-accept {
-        outline: 1px dotted green;
-      }
-      span.fancytree-node.fancytree-drop-reject {
-        outline: 1px dotted red;
-      }
-      #tree ul {
-        border: none;
-      }
-      #tree ul:focus {
-        outline: none;
-      }
-    `;*/
+  static override template = html`
+      <div id="tree" style="height: 100%; overflow: auto;" class="wb-skeleton wb-initializing wb-no-select wb-alternate">
+      </div>`
 
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    this.shadowRoot.adoptedStyleSheets = [wunderbaumStyle];
+    this.shadowRoot.adoptedStyleSheets = [BindableObjectsBrowser.style, wunderbaumStyle];
 
-    this._treeDiv = document.createElement('div');
-    this._treeDiv.style.height = '100%'
-    this._treeDiv.style.overflow = 'auto';
-    this._treeDiv.setAttribute('id', 'tree');
+    this._treeDiv = this._getDomElement<HTMLDivElement>('tree');
     this.shadowRoot.appendChild(this._treeDiv);
 
-    new Wunderbaum({
+    this._tree = new Wunderbaum({
       element: this._treeDiv,
+      debugLevel: 5,
       lazyLoad: (event) => {
         return new Promise(async resolve => {
           const service: IBindableObjectsService = (<serviceNode>event.node.data).service;
@@ -63,8 +42,8 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
           else
             children = await service.getBindableObjects(bindable);
           resolve(children.map(x => ({
-            service,
             title: x.name,
+            service,
             bindable: x,
             lazy: x.children !== false
           })));
@@ -75,24 +54,21 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
         return true;
       },
       activate: (event) => {
-        this.deselectNodes()
         this.selectedObject = event.node.data.bindable;
       },
       dnd: {
         dropMarkerParent: this.shadowRoot,
         preventRecursion: true,
         preventVoidMoves: false,
-        dropMarkerOffsetX: -24,
-        dropMarkerInsertOffsetX: -16,
         //@ts-ignore
-        dragStart: (event) => {
-          event.effectAllowed = "all";
-          event.dataTransfer.setData(dragDropFormatNameBindingObject, JSON.stringify(event.node.data.bindable));
-          event.dropEffect = "copy";
+        dragStart: (e) => {
+          e.event.dataTransfer.effectAllowed = "all";
+          e.event.dataTransfer.setData(dragDropFormatNameBindingObject, JSON.stringify(e.node.data.bindable));
+          e.event.dataTransfer.dropEffect = "copy";
           return true
         },
         //@ts-ignore
-        dragEnter: (event) => {
+        dragEnter: (e) => {
           return "over";
         }
       }
@@ -105,21 +81,12 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentLazyAppend {
 
     const services = serviceContainer.bindableObjectsServices;
     for (const s of services) {
-      const newNode = rootNode.addChildren(<WbNodeData>{
+      this._tree.root.addChildren(<WbNodeData>{
         title: s.name,
         lazy: true,
         service: s
       });
-      rootNode.addNode(newNode);
     }
-  }
-
-  private deselectNodes() {
-    let nodes = this._tree.getSelectedNodes()
-    nodes.forEach(node => {
-      node.setSelected(false)
-      node.setActive(false)
-    })
   }
 }
 

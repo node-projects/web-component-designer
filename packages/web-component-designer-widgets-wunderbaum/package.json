@@ -14,7 +14,7 @@
   "dependencies": {    
     "@node-projects/base-custom-webcomponent": "^0.18.1",
     "@node-projects/web-component-designer": "^0.1.1",
-    "wunderbaum": "^0.4.0"
+    "wunderbaum": "^0.5.1"
   },
   "repository": {
     "type": "git",
