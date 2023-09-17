@@ -255,16 +255,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         nodata: true,      // Display a 'no data' status node if result is empty
         mode: "hide"       // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
       },
-      childcounter: {
-        deep: true,
-        hideZeros: true,
-        hideExpanded: true
-      },
-      loadChildren: (event, data) => {
-        // update node and parent counters after lazy loading
-        //@ts-ignore
-        data.node.updateCounters();
-      },
       render: (e) => {
         const node = e.node;
         let item = node.data.ref;
