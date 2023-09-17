@@ -7,8 +7,12 @@
     "noEmit": false
   },
   "include": [
-    "./src/**/*.ts",
-    "./src/**/*.js",
-    "./src/**/*.json"
+    "src/**/*.ts",
+    "src/**/*.js"
+  ],
+  "references": [
+    {
+      "path": "../web-component-designer/tsconfig.json"
+    },
   ]
 }

@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, cssFromString, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { CommandType, IActivateable, ICodeView, IStringPosition, IUiCommand, IUiCommandHandler } from '@node-projects/web-component-designer';
 import type * as monacoType from 'monaco-editor'
 
@@ -132,7 +132,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     //@ts-ignore
     let style = await import("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } });
 
-    this.shadowRoot.adoptedStyleSheets = [style.default, (<any>this.constructor).style];
+    this.shadowRoot.adoptedStyleSheets = [cssFromString(style), (<any>this.constructor).style];
 
     this._editor = this._getDomElement<HTMLDivElement>('container');
 

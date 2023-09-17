@@ -9,16 +9,9 @@
     "build": "npm run build --workspaces",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {
-    "@node-projects/web-component-designer": "file:packages/web-component-designer",
-    "@node-projects/web-component-designer-code-base-custom-webcomponent-parser-service": "file:packages/web-component-designer-code-base-custom-webcomponent-parser-service",
-    "@node-projects/web-component-designer-code-css-tools-stylesheetservice": "file:packages/web-component-designer-code-css-tools-stylesheetservice",
-    "@node-projects/web-component-designer-code-html2canvas-miniature-view": "file:packages/web-component-designer-code-html2canvas-miniature-view",
-    "@node-projects/web-component-designer-code-view-ace": "file:packages/web-component-designer-code-view-ace"
-  },
   "devDependencies": {
     "@adobe/css-tools": "4.3.1",
-    "@node-projects/base-custom-webcomponent": "^0.17.2",
+    "@node-projects/base-custom-webcomponent": "^0.18.1",
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^6.1.5",
     "@papyrs/stylo": "^0.0.45",
@@ -39,6 +32,7 @@
     "monaco-editor": "^0.43.0",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
-    "typescript-lit-html-plugin": "^0.9.0"
+    "typescript-lit-html-plugin": "^0.9.0",
+    "wunderbaum": "^0.5.1"
   }
 }

@@ -33,7 +33,7 @@ import { IProperty } from "./propertiesService/IProperty.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 import { IBinding } from '../item/IBinding.js';
 import { BindingTarget } from '../item/BindingTarget.js';
-import { IPropertyTabsService } from './propertiesService/IPropertyTabsService.js';
+import { IPropertyGroupsService } from './propertiesService/IPropertyGroupsService.js';
 import { CodeViewSimple } from '../widgets/codeView/code-view-simple.js';
 import { IUndoService } from './undoService/IUndoService.js';
 import { ISelectionService } from './selectionService/ISelectionService.js';
@@ -67,7 +67,7 @@ interface ServiceNameMap {
   "modelCommandService": IModelCommandService
   "demoProviderService": IDemoProviderService;
   "elementInteractionService": IElementInteractionService;
-  "propertyGroupsService": IPropertyTabsService;
+  "propertyGroupsService": IPropertyGroupsService;
   "dragDropService": IDragDropService;
   "designItemService": IDesignItemService;
   "eventsService": IEventsService;
@@ -153,7 +153,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     return this.getServices('attachedPropertyService');
   }
 
-  get propertyGroupService(): IPropertyTabsService {
+  get propertyGroupService(): IPropertyGroupsService {
     return this.getLastService('propertyGroupsService');
   }
 

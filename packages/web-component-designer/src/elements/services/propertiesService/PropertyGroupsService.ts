@@ -1,7 +1,7 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { NodeType } from '../../item/NodeType.js';
 import { IPropertiesService } from './IPropertiesService.js';
-import { IPropertyTabsService } from './IPropertyTabsService.js';
+import { IPropertyGroupsService } from './IPropertyGroupsService.js';
 import { AttachedPropertiesService } from './services/AttachedPropertiesService.js';
 import { AttributesPropertiesService } from './services/AttributesPropertiesService.js';
 import { CommonPropertiesService } from './services/CommonPropertiesService.js';
@@ -9,7 +9,7 @@ import { CssCurrentPropertiesService } from './services/CssCurrentPropertiesServ
 import { CssCustomPropertiesService } from './services/CssCustomPropertiesService.js';
 import { CssPropertiesService } from './services/CssPropertiesService.js';
 
-export class PropertyTabsService implements IPropertyTabsService {
+export class PropertyGroupsService implements IPropertyGroupsService {
     protected _attachedPropertiesService = new AttachedPropertiesService();
 
     protected _pgList: { name: string; propertiesService: IPropertiesService; }[] = [

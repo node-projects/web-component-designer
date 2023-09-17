@@ -8,20 +8,7 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 import { GridAssignedRowColumnPropertyEditor } from '../propertyEditors/special/GridAssignedRowColumnPropertyEditor.js';
 import { MetricsPropertyEditor } from '../propertyEditors/special/MetricsPropertyEditor.js';
-
-//TODO: remove this code when import asserts are supported
-let cssProperties: any;
-//@ts-ignore
-if (window.importShim) {
-  const cssPropertiesUrl = import.meta.resolve('./CssProperties.json')
-  //@ts-ignore
-  cssProperties = await importShim(cssPropertiesUrl, { assert: { type: 'json' } });
-} else
-  //@ts-ignore
-  cssProperties = await import("./CssProperties.json", { assert: { type: 'json' } });
-
-if (cssProperties.default)
-  cssProperties = cssProperties.default;
+import cssProperties from "./CssProperties.json"  assert { type: 'json' };
 
 export class CssPropertiesService extends CommonPropertiesService {
 

@@ -3,7 +3,7 @@ import { IDisposable } from '../../../interfaces/IDisposable.js';
 import { IStringPosition } from '../../services/htmlWriterService/IStringPosition.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 
-export interface ICodeView extends IUiCommandHandler, IDisposable {
+export interface ICodeView extends IUiCommandHandler, IDisposable, HTMLElement {
   update(code: string);
   getText();
   setSelection(position: IStringPosition);

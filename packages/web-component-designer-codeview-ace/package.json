@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Code Editor using ACE",
   "name": "@node-projects/web-component-designer-codeview-ace",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "./dist/widgets/codeView/code-view-ace.js",
   "author": "jochen.kuehner@gmx.de",
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "ace-builds": "^1.24.2",
-    "@node-projects/base-custom-webcomponent": "^0.17.2",
-    "@node-projects/web-component-designer": "^0.1.1"    
+    "@node-projects/base-custom-webcomponent": "^0.18.1",
+    "@node-projects/web-component-designer": "^0.1.8"    
   },
   "repository": {
     "type": "git",

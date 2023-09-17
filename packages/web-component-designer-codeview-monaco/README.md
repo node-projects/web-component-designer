@@ -26,3 +26,11 @@ or via
 or
 
      await CodeViewCodeMonaco.loadMonacoEditorViaImport();
+
+or
+
+     <script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+     <script>
+          require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs', 'vs/css': { disabled: true } } });
+          require(['vs/editor/editor.main'], () => { });    
+     </script>

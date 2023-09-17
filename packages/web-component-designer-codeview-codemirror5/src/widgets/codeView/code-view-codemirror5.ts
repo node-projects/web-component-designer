@@ -1,4 +1,4 @@
-import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, cssFromString, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { ICodeView, IDisposable, IUiCommand, CommandType, IStringPosition } from '@node-projects/web-component-designer';
 import CodeMirror from 'codemirror5';
 
@@ -30,9 +30,9 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
     this._restoreCachedInititalValues();
 
     //@ts-ignore
-    import("codemirror5/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
+    import("codemirror5/lib/codemirror.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [cssFromString(x), ...this.shadowRoot.adoptedStyleSheets]);
     //@ts-ignore
-    import("codemirror5/addon/fold/foldgutter.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [x.default, ...this.shadowRoot.adoptedStyleSheets]);
+    import("codemirror5/addon/fold/foldgutter.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [cssFromString(x), ...this.shadowRoot.adoptedStyleSheets]);
 
     this.style.display = 'block';
     this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');
