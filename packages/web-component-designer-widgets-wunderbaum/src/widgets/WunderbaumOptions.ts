@@ -11,5 +11,12 @@ const config: WunderbaumOptions = {
     checkbox: false,
     source: [],
     header: false,
+    iconBadge: (e) => {
+      const node = e.node;
+      if (node.expanded || !node.children || !node.children.length) {
+        return null;
+      }
+      return { badge: node.children.length };
+    },
 }
 export default config;
