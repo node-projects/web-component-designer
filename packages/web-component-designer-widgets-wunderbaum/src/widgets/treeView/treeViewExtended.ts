@@ -1,9 +1,10 @@
-import { css, html, BaseCustomWebComponentConstructorAppend, Disposable } from '@node-projects/base-custom-webcomponent';
+import { css, html, BaseCustomWebComponentConstructorAppend, Disposable, DomHelper } from '@node-projects/base-custom-webcomponent';
 import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter } from '@node-projects/web-component-designer';
 import { WunderbaumNode } from 'wb_node';
-import { Wunderbaum } from 'wunderbaum'
+import { Wunderbaum } from 'wunderbaum';
+import defaultOptions from '../WunderbaumOptions.js'
 //@ts-ignore
-import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css'}
+import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
@@ -79,7 +80,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   static override readonly template = html`
       <div style="height: 100%;">
-        <input id="input" style="width: 100%; box-sizing: border-box; height:27px;" placeholder="Filter..." autocomplete="off">
+        <input id="input" style="width: 100%; box-sizing: border-box; height:27px;" placeholder="Filter... (regex)" autocomplete="off">
         <div style="height: calc(100% - 23px); overflow: auto;">
         <div id="treetable" style="min-width: 100%;"></div>
         </div>
@@ -101,8 +102,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   _filterNodes() {
     let match = this._filter.value;
     if (match) {
+      const regEx = new RegExp(match, "i");
       this._tree.filterNodes((node) => {
-        return new RegExp(match, "i").test(node.title);
+        const di: IDesignItem = node.data.ref
+        return regEx.test(di.name) || regEx.test(di.id) || regEx.test(di.content);
       }, {});
     }
     else {
@@ -160,18 +163,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   async ready() {
     this._tree = new Wunderbaum({
+      ...defaultOptions,
       element: this._treeDiv,
-      iconMap: {
-        folder: new URL("../../../assets/images/folder.svg", import.meta.url).toString(),
-        folderOpen: new URL("../../../assets/images/folder.svg", import.meta.url).toString(),
-      },
-      quicksearch: true,
-      source: [],
-      table: {
-        indentation: 10,       // indent 20px per node level
-        nodeColumnIdx: 0,      // render the node title into the 2nd column
-        checkboxColumnIdx: 0,  // render the checkboxes into the 1st column
-      },
       click: (e) => {
         if (e.event) { // only for clicked items, not when elements selected via code.
           let node = e.node;
@@ -195,27 +188,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         const disableExpand = (<MouseEvent>e.event).ctrlKey || (<MouseEvent>e.event).shiftKey;
         return !disableExpand;
       },
-      header: false,
       columns: [
         { id: "*", title: "element", width: "*" },
-        { id: "main", title: "element", width: "*" },
         { id: "buttons", title: "buttons", width: "50px" }
       ],
-
-      /*createNode: (event, data) => {
-        let node = data.node;
-
-        if (node.tr.children[0]) {
-          let designItem: IDesignItem = node.data.ref;
-          node.tr.oncontextmenu = (e) => this.showDesignItemContextMenu(designItem, e);
-          if (designItem && designItem.nodeType === NodeType.Element && designItem !== designItem.instanceServiceContainer.contentService.rootDesignItem) {
-            node.tr.onmouseenter = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(designItem.element, e);
-            node.tr.onmouseleave = (e) => designItem.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
-
-            
-          }
-        }
-      },*/
       dnd: {
         dropMarkerParent: this.shadowRoot,
         preventRecursion: true, // Prevent dropping nodes on own descendants
@@ -267,10 +243,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           grp.commit();
         },
       },
-
-      multi: {
-        mode: ""
-      },
       filter: {
         autoApply: true,   // Re-apply last filter if lazy data is loaded
         autoExpand: true, // Expand all branches that contain matches while filtered
@@ -295,17 +267,17 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       },
       render: (e) => {
         const node = e.node;
+        let item = node.data.ref;
+        e.nodeElem.querySelector("span.wb-title").innerHTML = e.node.title;
+        e.nodeElem.oncontextmenu = (e) => this.showDesignItemContextMenu(item, e);
+        e.nodeElem.onmouseenter = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(item.element, e);
+        e.nodeElem.onmouseleave = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
+
         for (const col of Object.values(e.renderColInfosById)) {
           switch (col.id) {
-            case 'main': {
-              let item = node.data.ref;
-              col.elem.innerHTML = item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content);
-              
-              col.elem.parentElement.onmouseenter = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(item.element, e);
-              col.elem.parentElement.onmouseleave = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
-              break;
-            }
             case 'buttons': {
+              DomHelper.removeAllChildnodes(col.elem);
+
               let designItem = node.data.ref;
               let d = document.createElement("div");
               d.className = "cmd"
@@ -331,10 +303,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
               col.elem.appendChild(d)
               break;
             }
-            default:
-              // Assumption: we named column.id === node.data.NAME
-              col.elem.textContent = node.data[col.id];
-              break;
           }
         }
       },
@@ -378,7 +346,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     }
 
     const newNode = currentNode.addChildren({
-      title: '',// item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
+      title: item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
       //@ts-ignore
       ref: item
     });

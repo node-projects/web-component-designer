@@ -1,8 +1,9 @@
 import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { IElementsService, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
-import { Wunderbaum } from 'wunderbaum'
+import { Wunderbaum } from 'wunderbaum';
+import defaultOptions from '../WunderbaumOptions.js';
 //@ts-ignore
-import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css'}
+import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _treeDiv: HTMLTableElement;
@@ -15,21 +16,20 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         }
         * {
             touch-action: none;
-        }
-      `;
+        }`;
 
   static override readonly template = html`
-  <div style="height: 100%;">
-    <input id="input" style="width: 100%; height: 25px; box-sizing: border-box;" placeholder="Filter..." autocomplete="off">
-    <div style="height: calc(100% - 26px);">
-      <div id="treetable" style="min-width: 100%;"></div>
-    </div>
-  </div>`;
+      <div style="height: 100%;">
+        <input id="input" style="width: 100%; height: 25px; box-sizing: border-box;" placeholder="Filter..." autocomplete="off">
+        <div style="height: calc(100% - 26px);">
+          <div id="treetable" style="min-width: 100%;"></div>
+        </div>
+      </div>`;
 
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    this.shadowRoot.adoptedStyleSheets = [PaletteTreeView.style, wunderbaumStyle];
+    this.shadowRoot.adoptedStyleSheets = [wunderbaumStyle, PaletteTreeView.style];
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -42,9 +42,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable')
 
     this._tree = new Wunderbaum({
+      ...defaultOptions,
       element: this._treeDiv,
-      quicksearch: true,
-      source: [],
       filter: {
         autoExpand: true,
         mode: 'hide',

@@ -1,9 +1,10 @@
 import { BaseCustomWebComponentConstructorAppend, TypedEvent, css, html } from '@node-projects/base-custom-webcomponent';
 import { IBindableObject, IBindableObjectsService, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
 import { WbNodeData } from 'types';
-import { Wunderbaum } from 'wunderbaum'
+import { Wunderbaum } from 'wunderbaum';
+import defaultOptions from '../WunderbaumOptions.js';
 //@ts-ignore
-import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css'}
+import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
 type serviceNode = { service: IBindableObjectsService, bindable: IBindableObject<any> }
 
@@ -24,14 +25,14 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    this.shadowRoot.adoptedStyleSheets = [BindableObjectsBrowser.style, wunderbaumStyle];
+    this.shadowRoot.adoptedStyleSheets = [wunderbaumStyle, BindableObjectsBrowser.style];
 
     this._treeDiv = this._getDomElement<HTMLDivElement>('tree');
     this.shadowRoot.appendChild(this._treeDiv);
 
     this._tree = new Wunderbaum({
+      ...defaultOptions,
       element: this._treeDiv,
-      debugLevel: 5,
       lazyLoad: (event) => {
         return new Promise(async resolve => {
           const service: IBindableObjectsService = (<serviceNode>event.node.data).service;
