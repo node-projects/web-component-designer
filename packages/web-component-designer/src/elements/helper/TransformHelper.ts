@@ -21,7 +21,7 @@ export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
     m = m.multiply(new DOMMatrix('rotate(' + s.rotate + ')'));
   }
   if (s.scale != 'none') {
-    m = m.multiply(new DOMMatrix('scale(' + s.rotate + ')'));
+    m = m.multiply(new DOMMatrix('scale(' + s.scale + ')'));
   }
   if (s.transform != 'none') {
     m = m.multiply(new DOMMatrix(s.transform));
