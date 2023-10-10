@@ -1,8 +1,8 @@
-import { BaseCustomWebComponentConstructorAppend, TypedEvent, css, html } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentConstructorAppend, TypedEvent, css, cssFromString, html } from '@node-projects/base-custom-webcomponent';
 import { IBindableObject, IBindableObjectsService, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
 import { WbNodeData } from 'types';
 import { Wunderbaum } from 'wunderbaum';
-import defaultOptions from '../WunderbaumOptions.js';
+import defaultOptions, { defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
@@ -25,7 +25,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    this.shadowRoot.adoptedStyleSheets = [wunderbaumStyle, BindableObjectsBrowser.style];
+    this.shadowRoot.adoptedStyleSheets = [cssFromString(wunderbaumStyle), defaultStyle, BindableObjectsBrowser.style];
 
     this._treeDiv = this._getDomElement<HTMLDivElement>('tree');
     this.shadowRoot.appendChild(this._treeDiv);
@@ -33,6 +33,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
     this._tree = new Wunderbaum({
       ...defaultOptions,
       element: this._treeDiv,
+      iconBadge: null,
       lazyLoad: (event) => {
         return new Promise(async resolve => {
           const service: IBindableObjectsService = (<serviceNode>event.node.data).service;
@@ -57,20 +58,19 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
       activate: (event) => {
         this.selectedObject = event.node.data.bindable;
       },
+      //@ts-ignore
       dnd: {
-        dropMarkerParent: this.shadowRoot,
         preventRecursion: true,
         preventVoidMoves: false,
-        //@ts-ignore
+        serializeClipboardData: false,
         dragStart: (e) => {
           e.event.dataTransfer.effectAllowed = "all";
           e.event.dataTransfer.setData(dragDropFormatNameBindingObject, JSON.stringify(e.node.data.bindable));
           e.event.dataTransfer.dropEffect = "copy";
           return true
         },
-        //@ts-ignore
         dragEnter: (e) => {
-          return "over";
+          return true;
         }
       }
     });

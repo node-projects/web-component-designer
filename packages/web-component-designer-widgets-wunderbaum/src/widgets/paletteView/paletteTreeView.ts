@@ -1,7 +1,7 @@
-import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
+import { css, html, BaseCustomWebComponentConstructorAppend, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { IElementsService, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
 import { Wunderbaum } from 'wunderbaum';
-import defaultOptions from '../WunderbaumOptions.js';
+import defaultOptions, { defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
@@ -14,6 +14,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         :host {
           display: block;
         }
+
         * {
             touch-action: none;
         }`;
@@ -29,7 +30,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    this.shadowRoot.adoptedStyleSheets = [wunderbaumStyle, PaletteTreeView.style];
+    this.shadowRoot.adoptedStyleSheets = [cssFromString(wunderbaumStyle), defaultStyle, PaletteTreeView.style];
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -49,20 +50,17 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         mode: 'hide',
         highlight: true
       },
+      //@ts-ignore
       dnd: {
-        dropMarkerParent: this.shadowRoot,
         preventRecursion: true, // Prevent dropping nodes on own descendants
         preventVoidMoves: false,
-        dropMarkerOffsetX: -24,
-        dropMarkerInsertOffsetX: -16,
-        //@ts-ignore
+        serializeClipboardData: false,
         dragStart: (e) => {
           e.event.dataTransfer.effectAllowed = "all";
           e.event.dataTransfer.setData(dragDropFormatNameElementDefinition, JSON.stringify(e.node.data.ref));
           e.event.dataTransfer.dropEffect = "copy";
           return true;
         },
-        //@ts-ignore
         dragEnter: (e) => {
           return false;
         }
