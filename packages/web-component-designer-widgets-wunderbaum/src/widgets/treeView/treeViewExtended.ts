@@ -1,8 +1,8 @@
-import { css, html, BaseCustomWebComponentConstructorAppend, Disposable, DomHelper } from '@node-projects/base-custom-webcomponent';
+import { css, html, BaseCustomWebComponentConstructorAppend, Disposable, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter } from '@node-projects/web-component-designer';
 import { WunderbaumNode } from 'wb_node';
 import { Wunderbaum } from 'wunderbaum';
-import defaultOptions from '../WunderbaumOptions.js'
+import defaultOptions, { defaultStyle } from '../WunderbaumOptions.js'
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
@@ -20,46 +20,13 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           touch-action: none;
           cursor: default;
       }
-      
-      span.drag-source {
-        border: 1px solid grey;
-        border-radius: 3px;
-        padding: 2px;
-        background-color: silver;
-      }
-
-      span.fancytree-node.fancytree-drag-source {
-        outline: 1px dotted grey;
-      }
-      span.fancytree-node.fancytree-drop-accept {
-        outline: 1px dotted green;
-      }
-      span.fancytree-node.fancytree-drop-reject {
-        outline: 1px dotted red;
-      }
-      #tree ul {
-        border: none;
-      }
-      #tree ul:focus {
-        outline: none;
-      }
-      span.fancytree-title {
-        align-items: center;
-        flex-direction: row;
-        display: inline-flex;
-      }
-      td {
-        white-space: nowrap;
-        display: flex;
-      }
-      td > img {
-        vertical-align: middle;
-      }
-
+    
       .cmd {
         display: flex;
-        position: sticky;
+        position: absolute;
         right: 0;
+        top: 0;
+        height: 100%;
         padding-right: 2px;
         align-items: center;
         gap: 2px;
@@ -68,28 +35,34 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         justify-content: flex-end;
         background: white;
       }
-
       .cmd > img {
         width: 10px;
       }
-
-      table.fancytree-ext-table tbody tr.fancytree-selected {
-        background-color: #bebebe;
+      
+      div.wunderbaum div.wb-row {
+        display: block;
       }
-    `;
+      span.wb-node.wb-col {
+        width: unset !important;
+        display: inline-block;
+      }
+      div.wunderbaum span.wb-node span.wb-title {
+        text-overflow: unset;
+        width: unset !important;
+      }`;
 
   static override readonly template = html`
       <div style="height: 100%;">
         <input id="input" style="width: 100%; box-sizing: border-box; height:27px;" placeholder="Filter... (regex)" autocomplete="off">
-        <div style="height: calc(100% - 23px); overflow: auto;">
-        <div id="treetable" style="min-width: 100%;"></div>
+        <div style="height: calc(100% - 23px);">
+        <div id="treetable" class="wb-alternate" style="min-width: 100%;"></div>
         </div>
       </div>`;
 
   constructor() {
     super();
     this._restoreCachedInititalValues();
-    this.shadowRoot.adoptedStyleSheets = [wunderbaumStyle, TreeViewExtended.style];
+    this.shadowRoot.adoptedStyleSheets = [cssFromString(wunderbaumStyle), defaultStyle, TreeViewExtended.style];
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {
@@ -188,60 +161,57 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         const disableExpand = (<MouseEvent>e.event).ctrlKey || (<MouseEvent>e.event).shiftKey;
         return !disableExpand;
       },
-      columns: [
+      /*columns: [
         { id: "*", title: "element", width: "*" },
         { id: "buttons", title: "buttons", width: "50px" }
-      ],
+      ],*/
+      //@ts-ignore
       dnd: {
-        dropMarkerParent: this.shadowRoot,
-        preventRecursion: true, // Prevent dropping nodes on own descendants
+        preventRecursion: true,
         preventVoidMoves: false,
-        dropMarkerOffsetX: -24,
-        dropMarkerInsertOffsetX: -16,
-        //@ts-ignore
+        serializeClipboardData: false,
         dragStart: (e) => {
-          e.event.effectAllowed = "all";
-          e.event.dropEffect = "move";
+          e.event.dataTransfer.effectAllowed = "all";
+          e.event.dataTransfer.dropEffect = "move";
           return true;
         },
-        //@ts-ignore
         dragEnter: (e) => {
-          e.event.dropEffect = e.event.ctrlKey ? 'copy' : 'move';
+          e.event.dataTransfer.dropEffect = e.event.ctrlKey ? 'copy' : 'move';
           return true;
         },
-        //@ts-ignore
         dragOver: (e) => {
-          e.event.dropEffect = e.event.ctrlKey ? 'copy' : 'move';
-          return true;
+          e.event.dataTransfer.dropEffect = e.event.ctrlKey ? 'copy' : 'move';
+          //return true;
         },
-        //@ts-ignore
-        dragDrop: async (e) => {
-          let sourceDesignitems: IDesignItem[] = e.event.otherNodeList.map(x => x.data.ref);
-          if (e.event.dropEffectSuggested == 'copy') {
+        drop: async (e) => {
+          let sourceDesignitems: IDesignItem[] = [e.sourceNode].map(x => x.data.ref);
+          if (e.event.dataTransfer.dropEffect == 'copy') {
             let newSourceDesignitems: IDesignItem[] = [];
             for (let d of sourceDesignitems)
               newSourceDesignitems.push(await d.clone());
             sourceDesignitems = newSourceDesignitems;
           }
-          const targetDesignitem: IDesignItem = e.data.ref;
+          const targetDesignitem: IDesignItem = e.node.data.ref;
+
           let grp = targetDesignitem.openGroup("drag/drop in treeview");
 
-          if (e.event.hitMode == 'over') {
+          if (e.region == 'over') {
             switchContainer(sourceDesignitems, targetDesignitem);
-          } else if (e.event.hitMode == 'after' || e.event.hitMode == 'before') {
+          } else if (e.region == 'after' || e.region == 'before') {
             for (let d of sourceDesignitems) {
               if (d.parent != targetDesignitem.parent) {
                 switchContainer([d], targetDesignitem.parent);
               }
-              if (e.event.hitMode == 'before')
+              if (e.region == 'before')
                 targetDesignitem.insertAdjacentElement(d, 'beforebegin');
+
               else
                 targetDesignitem.insertAdjacentElement(d, 'afterend');
             }
           }
 
           grp.commit();
-        },
+        }
       },
       filter: {
         autoApply: true,   // Re-apply last filter if lazy data is loaded
@@ -252,49 +222,44 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
         highlight: true,   // Highlight matches by wrapping inside <mark> tags
         leavesOnly: false, // Match end nodes only
-        nodata: true,      // Display a 'no data' status node if result is empty
         mode: "hide"       // Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
       },
       render: (e) => {
-        const node = e.node;
-        let item = node.data.ref;
-        e.nodeElem.querySelector("span.wb-title").innerHTML = e.node.title;
-        e.nodeElem.oncontextmenu = (e) => this.showDesignItemContextMenu(item, e);
-        e.nodeElem.onmouseenter = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(item.element, e);
-        e.nodeElem.onmouseleave = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
+        if (e.isNew) {
+          const node = e.node;
+          const rowElem = e.nodeElem.parentElement;
+          let item: IDesignItem = node.data.ref;
 
-        for (const col of Object.values(e.renderColInfosById)) {
-          switch (col.id) {
-            case 'buttons': {
-              DomHelper.removeAllChildnodes(col.elem);
+          e.nodeElem.oncontextmenu = (e) => this.showDesignItemContextMenu(item, e);
+          e.nodeElem.onmouseenter = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(item.element, e);
+          e.nodeElem.onmouseleave = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
 
-              let designItem = node.data.ref;
-              let d = document.createElement("div");
-              d.className = "cmd"
+          if (item && item.nodeType === NodeType.Element && item !== item.instanceServiceContainer.contentService.rootDesignItem) {
+            let d = document.createElement("div");
+            d.className = "cmd"
 
-              let imgL = document.createElement('img');
-              this._showLockAtDesignTimeState(imgL, designItem);
-              imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, designItem);
-              imgL.title = 'lock';
-              d.appendChild(imgL);
+            let imgL = document.createElement('img');
+            this._showLockAtDesignTimeState(imgL, item);
+            imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, item);
+            imgL.title = 'lock';
+            d.appendChild(imgL);
 
-              let img = document.createElement('img');
-              this._showHideAtDesignTimeState(img, designItem);
-              img.onclick = () => this._switchHideAtDesignTimeState(img, designItem);
-              img.title = 'hide in designer';
-              d.appendChild(img);
+            let img = document.createElement('img');
+            this._showHideAtDesignTimeState(img, item);
+            img.onclick = () => this._switchHideAtDesignTimeState(img, item);
+            img.title = 'hide in designer';
+            d.appendChild(img);
 
-              let imgH = document.createElement('img');
-              this._showHideAtRunTimeState(imgH, designItem);
-              imgH.onclick = () => this._switchHideAtRunTimeState(imgH, designItem);
-              imgH.title = 'hide at runtime';
-              d.appendChild(imgH);
+            let imgH = document.createElement('img');
+            this._showHideAtRunTimeState(imgH, item);
+            imgH.onclick = () => this._switchHideAtRunTimeState(imgH, item);
+            imgH.title = 'hide at runtime';
+            d.appendChild(imgH);
 
-              col.elem.appendChild(d)
-              break;
-            }
+            rowElem.appendChild(d);
           }
         }
+        e.nodeElem.querySelector("span.wb-title").innerHTML = e.node.title;
       },
     });
   }
@@ -337,7 +302,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
     const newNode = currentNode.addChildren({
       title: item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
-      //@ts-ignore
       ref: item
     });
 
@@ -349,14 +313,17 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
-    this._tree.visit((node) => {
-      if (activeElements && activeElements.indexOf(node.data.ref) >= 0) {
-        node.setSelected(true);
-        node.setActive(true);
-        node.makeVisible({ scrollIntoView: true });
-      } else {
-        node.setSelected(false);
-        node.setActive(false);
+    return;
+    this._tree.runWithDeferredUpdate(() => {
+      let lastActiveNode = null;
+      this._tree.visit((node) => {
+        const flag = activeElements && activeElements.includes(node.data.ref);
+        node.setSelected(flag);
+        node.setActive(flag);
+        if (flag) { lastActiveNode = node; }
+      });
+      if (lastActiveNode) {
+        lastActiveNode.makeVisible({ scrollIntoView: true });
       }
     });
   }

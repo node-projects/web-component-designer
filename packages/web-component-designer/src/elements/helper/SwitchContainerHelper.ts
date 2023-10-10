@@ -5,6 +5,13 @@ export function switchContainer(items: IDesignItem[], newContainer: IDesignItem,
     //- switch to other containers? like grid, flexbox, ...
     //- position non absolute, or absolute from bottom or right
 
+    for (let i of items) {
+        if (i == newContainer || i.element.contains(newContainer.element)) {
+            console.warn('could not move items into of itself or a child');
+            return;
+        }
+    }
+    
     const firstItem = items[0];
     const grp = firstItem.openGroup('switchContainerHelper');
 
