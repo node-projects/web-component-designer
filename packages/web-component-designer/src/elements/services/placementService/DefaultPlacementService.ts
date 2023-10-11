@@ -29,7 +29,7 @@ export class DefaultPlacementService implements IPlacementService {
   canEnter(container: IDesignItem, items: IDesignItem[]) {
     if (!this.isEnterableContainer(container))
       return false;
-    if (!items.every(x => !x.element.contains(container.element)))
+    if (!items.every(x => !x.element.contains(container.element) && x !== container))
       return false;
     return true;
   }
