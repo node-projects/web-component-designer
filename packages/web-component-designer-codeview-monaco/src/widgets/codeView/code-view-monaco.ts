@@ -24,6 +24,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
   public set theme(value: string) {
     this._theme = value;
+    //@ts-ignore
+    CodeViewMonaco.monacoLib ??= window.monaco;
     CodeViewMonaco.monacoLib.editor.setTheme(value);
   }
 
