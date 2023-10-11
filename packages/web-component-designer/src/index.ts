@@ -17,6 +17,7 @@ export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
 export * from "./elements/helper/SwitchContainerHelper.js";
 export * from "./elements/helper/NpmPackageLoader.js";
+export * from "./elements/helper/LayoutHelper.js";
 export type { IContextMenuItem, IContextMenu } from "./elements/helper/contextMenu/IContextMenuItem.js";
 
 export * from "./elements/item/DesignItem.js";
