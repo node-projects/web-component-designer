@@ -120,9 +120,12 @@ export function addVectors(vectorA: [number, number], vectorB: [number, number])
 }
 
 export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransformation(element: HTMLElement, designerCanvas: IDesignerCanvas): DOMPoint {
+  const toSplit = getComputedStyle(<HTMLElement>element).transformOrigin.split(' ');
+  const tfX = parseFloat(toSplit[0]);
+  const tfY = parseFloat(toSplit[1]);
   const top0: DOMPointReadOnly = new DOMPointReadOnly(
-    -parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]),
-    -parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1]),
+    -tfX,
+    -tfY,
     0,
     0
   )
@@ -135,12 +138,27 @@ export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransfo
   return designerCanvasNormalizedTransformedOrigin;
 }
 
-export function getResultingTransformationBetweenElementAndAllAncestors(element: HTMLElement, ancestor: HTMLElement, excludeAncestor?: boolean) {
+const elemntMatrixCacheKey = Symbol('windowOffsetsCacheKey');
+export function getResultingTransformationBetweenElementAndAllAncestors(element: HTMLElement, ancestor: HTMLElement, excludeAncestor?: boolean, cache: Record<string | symbol, any> = {}) {
+
+  let ch: Map<any, [DOMMatrix]> = cache[elemntMatrixCacheKey] ??= new Map<any, [DOMMatrix]>();
+  let lst: [DOMMatrix][] = [];
+
   let actualElement: HTMLElement = element;
   let actualElementMatrix: DOMMatrix;
   let newElementMatrix: DOMMatrix;
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
   while (actualElement != ancestor) {
+    let cachedObj = ch.get(actualElement);
+    if (cachedObj) {
+      if (originalElementAndAllParentsMultipliedMatrix)
+        originalElementAndAllParentsMultipliedMatrix = cachedObj[0].multiply(originalElementAndAllParentsMultipliedMatrix);
+      else
+        originalElementAndAllParentsMultipliedMatrix = cachedObj[0];
+      lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
+      break;
+    }
+
     const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
     actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
     newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
@@ -150,6 +168,11 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
     } else if (newElement != ancestor || !excludeAncestor) {
       originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(newElementMatrix);
     }
+
+    lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
+    const cacheEntry: [DOMMatrix] = [originalElementAndAllParentsMultipliedMatrix];
+    lst.push(cacheEntry);
+    ch.set(actualElement, cacheEntry);
 
     actualElement = newElement;
   }
@@ -165,13 +188,18 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   while (actualElement != canvas) {
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
     const elementWindowOffset = getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement, designerCanvas.zoomFactor, cache);
+
+    const toSplit = getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ');
+    const tfX = parseFloat(toSplit[0]);
+    const tfY = parseFloat(toSplit[1]);
     const parentElementTransformOrigin: DOMPoint = new DOMPoint(
-      elementWindowOffset.offsetLeft - designerCanvas.outerRect.x + parseFloat(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[0]),
-      elementWindowOffset.offsetTop - designerCanvas.outerRect.y + parseFloat(getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ')[1]),
+      elementWindowOffset.offsetLeft - designerCanvas.outerRect.x + tfX,
+      elementWindowOffset.offsetTop - designerCanvas.outerRect.y + tfY,
     )
     if (actualElement == element) {
-      parentElementTransformOrigin.x -= extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).x;
-      parentElementTransformOrigin.y -= extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform)).y;
+      const mtx = extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform));
+      parentElementTransformOrigin.x -= mtx.x;
+      parentElementTransformOrigin.y -= mtx.y;
     }
 
     const parentElementTransformOriginToPointVector: DOMPointReadOnly = new DOMPointReadOnly(
@@ -248,8 +276,9 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
     }
   )
 
-  const tfX = parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[0]);
-  const tfY = parseFloat(getComputedStyle(<HTMLElement>element).transformOrigin.split(' ')[1]);
+  const toSplit = getComputedStyle(<HTMLElement>element).transformOrigin.split(' ');
+  const tfX = parseFloat(toSplit[0]);
+  const tfY = parseFloat(toSplit[1]);
 
   const transformOriginWithoutTransformRelatedToCanvas: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
     {
@@ -267,7 +296,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top2 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[bottomleft].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[bottomleft].y));
   let top3 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[bottomright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[bottomright].y));
 
-  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(element, <HTMLElement>designerCanvas.canvas, true);
+  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(element, <HTMLElement>designerCanvas.canvas, true, cache);
 
   let top0Transformed = top0.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
   let top1Transformed = top1.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
