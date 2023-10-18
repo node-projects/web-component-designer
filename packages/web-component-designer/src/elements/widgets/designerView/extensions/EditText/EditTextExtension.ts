@@ -34,7 +34,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   }
 
   override extend() {
-    //todo -> check what to do with extensions, do not loose edit on mouse click,...
+    //TODO: -> check what to do with extensions, do not loose edit on mouse click,...
     //maybe use a html edit framework
     this.extendedItem.instanceServiceContainer.selectionService.clearSelectedElements();
     //this.extensionManager.removeExtension(this.extendedItem, ExtensionType.PrimarySelection);
@@ -86,7 +86,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   }
 
   _contentEdited() {
-    //todo -> save???
+    //TODO: -> save???
     //this.extendedItem.content = this.extendedItem.element.innerHTML;
     //console.log(this.extendedItem.element.innerHTML)
   }
@@ -94,7 +94,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   _blur() {
     if (!this._blurTimeout) {
       this._blurTimeout = setTimeout(() => {
-        //todo, don't remove doubleclick extension (another type could be used), remove extension itself
+        //TODO: don't remove doubleclick extension (another type could be used), remove extension itself
         //maybe also configureable when when to remove the extension
         this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Doubleclick);
       }, 150);

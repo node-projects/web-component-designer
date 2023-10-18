@@ -137,7 +137,7 @@ export class NpmPackageLoader {
             }
 
             if (serviceContainer && paletteTree) {
-                //todo: should be retriggered by service container, or changeing list in container
+                //TODO: should be retriggered by service container, or changeing list in container
                 paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
             }
 
@@ -261,7 +261,7 @@ export class NpmPackageLoader {
         const importMap = { imports: {}, scopes: {} };
 
         if (!map.hasOwnProperty(packageJsonObj.name)) {
-            //todo - use exports of package.json for importMap
+            //TODO: use exports of package.json for importMap
             if (packageJsonObj.exports) {
 
                 /* "exports": {

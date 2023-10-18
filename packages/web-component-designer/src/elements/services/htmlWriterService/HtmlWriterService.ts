@@ -42,7 +42,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
     }
   }
 
-  //todo special case for style/script nodes, keep whitespace
+  //TODO: special case for style/script nodes, keep whitespace
   private internalWrite(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, updatePositions: boolean) {
     let start = indentedTextWriter.position;
     let end = indentedTextWriter.position;

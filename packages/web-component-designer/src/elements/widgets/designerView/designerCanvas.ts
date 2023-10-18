@@ -1058,7 +1058,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: normEvt.x - normEl.x, y: normEvt.y - normEl.y };
   }
 
-  //todo: remove
+  //TODO: remove
   public elementFromPoint(x: number, y: number): Element {
     let elements = this.shadowRoot.elementsFromPoint(x, y);
     let element = elements[0];

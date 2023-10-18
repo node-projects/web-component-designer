@@ -346,7 +346,7 @@ export class ExtensionManager implements IExtensionManager {
     this.refreshAllExtensions([...this.designItemsWithExtentions])
   }
 
-  //todo does not work with permanant, when not applied... maybe we need to do in another way
+  //TODO: does not work with permanant, when not applied... maybe we need to do in another way
   //maybe store the "shouldAppliedExtensions??"
   reapplyAllAppliedExtentions() {
     this.designerCanvas.overlayLayer.startBatch();

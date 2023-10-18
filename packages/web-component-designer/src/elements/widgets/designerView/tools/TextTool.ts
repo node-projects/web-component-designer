@@ -42,7 +42,7 @@ export class TextTool implements ITool {
           di.setStyle('left', currentPoint.x + 'px');
           di.setStyle('top', currentPoint.y + 'px');
           designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
-          //todo: Maybe we could also remove the eatEvents property
+          //TODO: Maybe we could also remove the eatEvents property
 
           //TODO - don't apply doubleclick extension (maybe it is not the doubleclick one) - apply edit text extesion directly
           //should we configure the editTextExtension anywhere??

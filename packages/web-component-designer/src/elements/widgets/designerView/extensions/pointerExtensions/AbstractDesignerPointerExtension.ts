@@ -5,10 +5,7 @@ import { IExtensionManager } from "../IExtensionManger.js";
 import { IDesignerPointerExtension } from "./IDesignerPointerExtension.js";
 import { AbstractExtensionBase } from '../AbstractExtensionBase.js';
 
-//todo:
-//move draw functions to overlay layer
-//implement designerpointerextension
-//create ruler
+//TODO: move draw functions to overlay layer, implement designerpointerextension, create ruler
 export abstract class AbstractDesignerPointerExtension extends AbstractExtensionBase implements IDesignerPointerExtension {
   protected extendedItem: IDesignItem;
 

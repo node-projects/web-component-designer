@@ -81,7 +81,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
           all = all && has;
           some = some || has;
         });
-        //todo: optimize perf, do not call bindings service for each property. 
+        //TODO: optimize perf, do not call bindings service for each property. 
         const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
           return s.getBindings(designItems[0]);
         });

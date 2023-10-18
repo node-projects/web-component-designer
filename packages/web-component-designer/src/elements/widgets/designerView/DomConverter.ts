@@ -41,7 +41,7 @@ export class DomConverter {
 
   public static ConvertToString(designItems: IDesignItem[], beautifyOutput?: boolean, updatePositions:boolean = false) {
     let itw = beautifyOutput !== false ? new IndentedTextWriter() : new SimpleTextWriter();
-    //todo: check how we could support this beautify here, cause it's now a setting of the writer...
+    //TODO: check how we could support this beautify here, cause it's now a setting of the writer...
     //let options: HtmlWriterOptions = { beautifyOutput: beautifyOutput !== false, writeDesignerProperties: true, compressCssToShorthandProperties: true, parseJsonInAttributes: true, jsonWriteMode: 'beauty' };
     designItems[0].serviceContainer.htmlWriterService.write(itw, designItems, true, updatePositions);
     return itw.getString();

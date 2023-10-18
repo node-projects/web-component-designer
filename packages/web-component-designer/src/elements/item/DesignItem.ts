@@ -522,7 +522,7 @@ export class DesignItem implements IDesignItem {
     }
     (<DesignItem>designItem)._parent = this;
 
-    //todo: is this still needed???
+    //TODO: is this still needed???
     if (this.instanceServiceContainer.selectionService.primarySelection == designItem) {
       designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
       if (designItem.getPlacementService().isEnterableContainer(this))

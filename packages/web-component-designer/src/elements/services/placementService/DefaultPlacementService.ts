@@ -100,7 +100,7 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    //TODO:, this should revert all undo actions while active
+    //TODO: this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
     if (event.shiftKey) {

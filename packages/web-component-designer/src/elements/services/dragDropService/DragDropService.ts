@@ -84,7 +84,7 @@ export class DragDropService implements IDragDropService {
         const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
         newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
         if (newContainerService) {
-          //TODO: Maybe the check for SVG Elemnt should be in "canEnterByDrop"?
+          //TODO: Maybe the check for SVG Element should be in "canEnterByDrop"?
           if (newContainerService.isEnterableContainer(newContainerElementDesignItem) && !(newContainerElementDesignItem.element instanceof SVGElement)) {
             break;
           } else {

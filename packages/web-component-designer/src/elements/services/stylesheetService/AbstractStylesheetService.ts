@@ -72,7 +72,7 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
 
     protected abstract internalParse(style: string): Promise<any>;
 
-    //todo: rename to externalStylesheets
+    //TODO: rename to externalStylesheets
     getStylesheets(): IStylesheet[] {
         let stylesheets: IStylesheet[] = [];
         for (let item of this._stylesheets) {
