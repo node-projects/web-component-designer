@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Stylesheet Parser Service using css-tree",
   "name": "@node-projects/web-component-designer-stylesheetservice-css-tree",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "css-tree": "^2.3.1",
-    "@node-projects/web-component-designer": "^0.1.1"    
+    "@node-projects/web-component-designer": "=>0.1.1"    
   },
   "repository": {
     "type": "git",
