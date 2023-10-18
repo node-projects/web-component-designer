@@ -12,7 +12,9 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
   private static _stylesCache = new Map<IDesignItem, Set<string>>;
-  private _cacheClearTimer: NodeJS.Timeout;
+  private _cssCacheClearTimer: NodeJS.Timeout;
+  private static _bindingsCache = new Map<IDesignItem, IBinding[]>;
+  private _bindingsCacheClearTimer: NodeJS.Timeout;
 
   abstract getRefreshMode(designItem: IDesignItem): RefreshMode;
 
@@ -122,10 +124,13 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           break;
       };
 
-      //TODO: optimize perf, do not call bindings service for each property. 
-      const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
-        return s.getBindings(designItems[0]);
-      });
+      let bindings = AbstractPropertiesService._bindingsCache.get(designItems[0]);
+      if (!bindings) {
+        bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => s.getBindings(designItems[0]));
+        AbstractPropertiesService._bindingsCache.set(designItems[0], bindings);
+        clearTimeout(this._bindingsCacheClearTimer);
+        this._bindingsCacheClearTimer = setTimeout(() => AbstractPropertiesService._bindingsCache.clear(), 30);
+      }
       if (property.propertyType == PropertyType.cssValue) {
         if (bindings && bindings.find(x => x.target == BindingTarget.css && x.targetName == property.name))
           return ValueType.bound;
@@ -139,8 +144,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         if (!styles) {
           styles = new Set(designItems[0].getAllStyles().filter(x => x.selector != null).flatMap(x => x.declarations).map(x => x.name));
           AbstractPropertiesService._stylesCache.set(designItems[0], styles);
-          clearTimeout(this._cacheClearTimer);
-          this._cacheClearTimer = setTimeout(() => AbstractPropertiesService._stylesCache.clear(), 30);
+          clearTimeout(this._cssCacheClearTimer);
+          this._cssCacheClearTimer = setTimeout(() => AbstractPropertiesService._stylesCache.clear(), 30);
         }
 
         let cssValue = styles.has(property.name);
