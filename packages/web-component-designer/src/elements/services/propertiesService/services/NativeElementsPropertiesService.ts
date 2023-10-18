@@ -194,6 +194,13 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
       case 'br':
       case 'img':
       case 'iframe':
+      case 'h1':
+      case 'h2':
+      case 'h3':
+      case 'h4':
+      case 'h5':
+      case 'h6':
+      case 'p':
         return true;
     }
     return false;
@@ -223,6 +230,14 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
         return this.imgProperties;
       case 'iframe':
         return this.iframeProperties;
+      case 'h1':
+      case 'h2':
+      case 'h3':
+      case 'h4':
+      case 'h5':
+      case 'h6':
+      case 'p':
+        return [];
     }
 
     return null;
