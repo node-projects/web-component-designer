@@ -46,7 +46,7 @@ export class DrawEllipsisTool implements ITool {
         this._path.setAttribute("cy", currentPoint.y.toString());
         this._path.setAttribute("rx", "0");
         this._path.setAttribute("ry", "0");
-        designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foregorund);
+        designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foreground);
         break;
 
 

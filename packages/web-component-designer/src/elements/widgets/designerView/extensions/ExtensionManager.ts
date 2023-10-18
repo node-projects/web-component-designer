@@ -108,6 +108,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType, event?: Event, recursive: boolean = false) {
+    this.designerCanvas.overlayLayer.startBatch();
     if (designItems) {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       if (extProv) {
@@ -145,6 +146,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       }
     }
+    this.designerCanvas.overlayLayer.endBatch();
   }
 
   removeExtension(designItem: IDesignItem, extensionType?: ExtensionType) {
@@ -262,6 +264,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, event?: Event, ignoredExtension?: IDesignerExtension, timeout?: number) {
+    this.designerCanvas.overlayLayer.startBatch();
     const start = performance.now();
     if (designItems) {
       if (extensionType) {
@@ -310,9 +313,11 @@ export class ExtensionManager implements IExtensionManager {
         }
       }
     }
+    this.designerCanvas.overlayLayer.endBatch();
   }
 
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension) {
+    this.designerCanvas.overlayLayer.startBatch();
     if (designItems) {
       this.refreshExtensions(designItems, ExtensionType.Permanent, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Selection, null, ignoredExtension);
@@ -328,6 +333,7 @@ export class ExtensionManager implements IExtensionManager {
       this.refreshExtensions(designItems, ExtensionType.PrimarySelectionAndCanBeEntered, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainerAndCanBeEntered, null, ignoredExtension);
     }
+    this.designerCanvas.overlayLayer.endBatch();
   }
 
   refreshAllAppliedExtentions() {
@@ -337,6 +343,7 @@ export class ExtensionManager implements IExtensionManager {
   //todo does not work with permanant, when not applied... maybe we need to do in another way
   //maybe store the "shouldAppliedExtensions??"
   reapplyAllAppliedExtentions() {
+    this.designerCanvas.overlayLayer.startBatch();
     for (let d of ExtensionManager.getAllChildElements(this.designerCanvas.rootDesignItem)) {
       const keys = [...d.shouldAppliedDesignerExtensions.keys()];
       for (let e of keys) {
@@ -344,6 +351,7 @@ export class ExtensionManager implements IExtensionManager {
         this.applyExtension(d, e);
       }
     }
+    this.designerCanvas.overlayLayer.endBatch();
   }
 
   private static *getAllChildElements(designItem: IDesignItem) {

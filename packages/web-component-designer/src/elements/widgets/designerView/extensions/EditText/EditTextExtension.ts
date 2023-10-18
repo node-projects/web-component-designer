@@ -58,7 +58,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     foreignObject.setAttribute('width', '96');
     foreignObject.setAttribute('height', '24');
     foreignObject.appendChild(elements)
-    this._addOverlay(foreignObject, OverlayLayer.Foregorund);
+    this._addOverlay(foreignObject, OverlayLayer.Foreground);
 
     this.designerCanvas.clickOverlay.style.pointerEvents = 'none';
     this.extendedItem.element.addEventListener('blur', this._blurBound);

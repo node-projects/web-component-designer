@@ -45,7 +45,7 @@ export class DrawLineTool implements ITool {
         this._path.setAttribute("y1", currentPoint.y.toString());
         this._path.setAttribute("x2", currentPoint.x.toString());
         this._path.setAttribute("y2", currentPoint.y.toString());
-        designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foregorund);
+        designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foreground);
         break;
 
 
