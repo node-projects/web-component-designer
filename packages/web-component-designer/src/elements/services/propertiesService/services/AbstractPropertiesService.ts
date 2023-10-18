@@ -11,8 +11,8 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
-  _stylesCache = new Map<IDesignItem, Set<string>>;
-  _cacheClearTimer: NodeJS.Timeout;
+  private static _stylesCache = new Map<IDesignItem, Set<string>>;
+  private _cacheClearTimer: NodeJS.Timeout;
 
   abstract getRefreshMode(designItem: IDesignItem): RefreshMode;
 
@@ -135,12 +135,12 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       }
 
       if (!all && property.propertyType == PropertyType.cssValue) {
-        let styles = this._stylesCache.get(designItems[0]);
+        let styles = AbstractPropertiesService._stylesCache.get(designItems[0]);
         if (!styles) {
           styles = new Set(designItems[0].getAllStyles().filter(x => x.selector != null).flatMap(x => x.declarations).map(x => x.name));
-          this._stylesCache.set(designItems[0], styles);
+          AbstractPropertiesService._stylesCache.set(designItems[0], styles);
           clearTimeout(this._cacheClearTimer);
-          this._cacheClearTimer = setTimeout(() => this._stylesCache.clear(), 30);
+          this._cacheClearTimer = setTimeout(() => AbstractPropertiesService._stylesCache.clear(), 30);
         }
 
         let cssValue = styles.has(property.name);
