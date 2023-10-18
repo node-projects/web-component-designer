@@ -280,7 +280,10 @@ export class ExtensionManager implements IExtensionManager {
                 if (timeout) {
                   const end = performance.now();
                   if (end - start > timeout)
+                  {
+                    console.warn("refreshExtensions() took too long, stopped refreshing");
                     break outer1;
+                  }
                 }
               }
               catch (err) {
@@ -301,7 +304,10 @@ export class ExtensionManager implements IExtensionManager {
                   if (timeout) {
                     const end = performance.now();
                     if (end - start > timeout)
+                    {
+                      console.warn("refreshExtensions() took too long, stopped refreshing");
                       break outer2;
+                    }
                   }
                 }
               }
