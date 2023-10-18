@@ -12,7 +12,7 @@ export abstract class AbstractExtension extends AbstractExtensionBase implements
     this.extendedItem = extendedItem;
   }
 
-  abstract extend();
-  abstract refresh();
+  abstract extend(cache: Record<string|symbol, any>, event?: Event);
+  abstract refresh(cache: Record<string|symbol, any>, event?: Event);
   abstract dispose();
 }

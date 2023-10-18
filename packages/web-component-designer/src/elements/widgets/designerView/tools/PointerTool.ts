@@ -336,7 +336,7 @@ export class PointerTool implements ITool {
                 }
                 currentContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
               }
-              designerCanvas.extensionManager.refreshExtensions(this._actionStartedDesignItems, null, event);
+              designerCanvas.extensionManager.refreshExtensions(this._actionStartedDesignItems, null, event, null, 20);
             }
           }
           break;
@@ -379,7 +379,7 @@ export class PointerTool implements ITool {
             this._moveItemsOffset = { x: 0, y: 0 };
           }
 
-          designerCanvas.extensionManager.refreshExtensions(designerCanvas.instanceServiceContainer.selectionService.selectedElements, null, event);
+          designerCanvas.extensionManager.refreshExtensions(designerCanvas.instanceServiceContainer.selectionService.selectedElements, null, event, null, 20);
 
           if (this._changeGroup) {
             this._changeGroup.abort();

@@ -68,31 +68,65 @@ export function getParentElementIncludingSlots(element: Element): Element {
   return element.parentElement;
 }
 
-export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element, zoom: number) {
+const windowOffsetsCacheKey = Symbol('windowOffsetsCacheKey');
+export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element, zoom: number, cache: Record<string | symbol, any> = {}) {
   let offsetLeft = 0;
   let offsetTop = 0;
 
+  let ch: Map<any, { offsetLeft: number, offsetTop: number }> = cache[windowOffsetsCacheKey] = cache[windowOffsetsCacheKey] ?? new Map<any, { offsetLeft: number, offsetTop: number }>();
+  let lst: { offsetLeft: number, offsetTop: number }[] = [];
+
   while (element) {
+    let cachedObj = ch.get(element);
+    if (cachedObj) {
+      offsetLeft += cachedObj.offsetLeft;
+      offsetTop += cachedObj.offsetTop;
+
+      lst.forEach(x => { x.offsetLeft += cachedObj.offsetLeft; x.offsetTop += cachedObj.offsetTop; });
+      break;
+    }
     if (element instanceof SVGSVGElement) {
-      //todo - fix without transformation
+      //TODO: !huge Perf impact! - fix without transformation
       let t = element.style.transform;
       element.style.transform = '';
       const bcEl = element.getBoundingClientRect();
       const bcPar = element.parentElement.getBoundingClientRect();
       element.style.transform = t;
-      offsetLeft += (bcEl.left - bcPar.left) / zoom;
-      offsetTop += (bcEl.top - bcPar.top) / zoom;
+      const currLeft = (bcEl.left - bcPar.left) / zoom;
+      const currTop = (bcEl.top - bcPar.top) / zoom;
+      offsetLeft += currLeft;
+      offsetTop += currTop;
+
+      lst.forEach(x => { x.offsetLeft += currLeft; x.offsetTop += currTop });
+      const cacheEntry = { offsetLeft: currLeft, offsetTop: currTop };
+      lst.push(cacheEntry);
+      ch.set(element, cacheEntry);
+
       element = element.parentElement;
     } else if (element instanceof SVGGraphicsElement) {
       let bbox = element.getBBox();
       offsetLeft += bbox.x;
       offsetTop += bbox.y;
+
+      lst.forEach(x => { x.offsetLeft += bbox.x; x.offsetTop += bbox.y });
+      const cacheEntry = { offsetLeft: bbox.x, offsetTop: bbox.y };
+      lst.push(cacheEntry);
+      ch.set(element, cacheEntry);
+
       element = element.ownerSVGElement;
     } else if (element instanceof HTMLBodyElement) {
       element = element.parentElement;
     } else if (element instanceof HTMLHtmlElement) {
       element = element.parentElement;
     } else {
+      const currLeft = element.offsetLeft;
+      const currTop = element.offsetTop;
+
+      lst.forEach(x => { x.offsetLeft += currLeft; x.offsetTop += currTop });
+      const cacheEntry = { offsetLeft: currLeft, offsetTop: currTop };
+      lst.push(cacheEntry);
+      ch.set(element, cacheEntry);
+
       offsetLeft += element.offsetLeft;
       offsetTop += element.offsetTop;
       element = element.offsetParent;

@@ -70,6 +70,7 @@ export class ExtensionManager implements IExtensionManager {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       let extensions: IDesignerExtension[] = [];
       if (extProv) {
+        const cache = {};
         for (let e of extProv) {
           let shouldAppE = designItem.shouldAppliedDesignerExtensions.get(extensionType);
           if (!shouldAppE)
@@ -83,7 +84,7 @@ export class ExtensionManager implements IExtensionManager {
               appE = [];
             const ext = e.getExtension(this, this.designerCanvas, designItem);
             try {
-              ext.extend(event);
+              ext.extend(cache, event);
               extensions.push(ext);
             }
             catch (err) {
@@ -110,6 +111,7 @@ export class ExtensionManager implements IExtensionManager {
     if (designItems) {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       if (extProv) {
+        const cache = {};
         for (let e of extProv) {
           for (let i of designItems) {
             let shouldAppE = i.shouldAppliedDesignerExtensions.get(extensionType);
@@ -124,7 +126,7 @@ export class ExtensionManager implements IExtensionManager {
                 appE = [];
               const ext = e.getExtension(this, this.designerCanvas, i);
               try {
-                ext.extend(event);
+                ext.extend(cache, event);
               }
               catch (err) {
                 console.error(err);
@@ -233,9 +235,10 @@ export class ExtensionManager implements IExtensionManager {
       if (extensionType) {
         let exts = designItem.appliedDesignerExtensions.get(extensionType);
         if (exts) {
+          const cache = {};
           for (let e of exts) {
             try {
-              e.refresh(event);
+              e.refresh(cache, event);
             }
             catch (err) {
               console.error(err);
@@ -243,10 +246,11 @@ export class ExtensionManager implements IExtensionManager {
           }
         }
       } else {
+        const cache = {};
         for (let appE of designItem.appliedDesignerExtensions) {
           for (let e of appE[1]) {
             try {
-              e.refresh(event);
+              e.refresh(cache, event);
             }
             catch (err) {
               console.error(err);
@@ -257,16 +261,24 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
-  refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, event?: Event, ignoredExtension?: IDesignerExtension) {
+  refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, event?: Event, ignoredExtension?: IDesignerExtension, timeout?: number) {
+    const start = performance.now();
     if (designItems) {
       if (extensionType) {
+        const cache = {};
+        outer1:
         for (let i of designItems) {
           let exts = i.appliedDesignerExtensions.get(extensionType);
           if (exts) {
             for (let e of exts) {
               try {
                 if (e != ignoredExtension)
-                  e.refresh(event);
+                  e.refresh(cache, event);
+                if (timeout) {
+                  const end = performance.now();
+                  if (end - start > timeout)
+                    break outer1;
+                }
               }
               catch (err) {
                 console.error(err);
@@ -275,12 +287,20 @@ export class ExtensionManager implements IExtensionManager {
           }
         }
       } else {
+        const cache = {};
+        outer2:
         for (let i of designItems) {
           for (let appE of i.appliedDesignerExtensions) {
             for (let e of appE[1]) {
               try {
-                if (e != ignoredExtension)
-                  e.refresh(event);
+                if (e != ignoredExtension) {
+                  e.refresh(cache, event);
+                  if (timeout) {
+                    const end = performance.now();
+                    if (end - start > timeout)
+                      break outer2;
+                  }
+                }
               }
               catch (err) {
                 console.error(err);
