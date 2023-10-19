@@ -32,6 +32,7 @@ export class DesignItem implements IDesignItem {
   parsedNode: any;
 
   node: Node;
+  view: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
   appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]> = new Map();
@@ -154,11 +155,11 @@ export class DesignItem implements IDesignItem {
   private static _designItemMap = new WeakMap<Node, IDesignItem>();
 
   public get element(): Element {
-    return <Element>this.node;
+    return <Element>this.view;
   }
-
+ 
   public get name() {
-    return this.element.localName;
+    return (<Element>this.node).localName;
   }
 
   public get id(): string {
@@ -356,6 +357,7 @@ export class DesignItem implements IDesignItem {
 
   public constructor(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
     this.node = node;
+    this.view = node;
     this.parsedNode = parsedNode;
     this.serviceContainer = serviceContainer;
     this.instanceServiceContainer = instanceServiceContainer;
@@ -363,6 +365,11 @@ export class DesignItem implements IDesignItem {
     this._attributes = new Map();
     this._styles = new Map();
 
+    DesignItem._designItemMap.set(node, this);
+  }
+
+  public setView(node: Element) {
+    this.view = node;
     DesignItem._designItemMap.set(node, this);
   }
 
@@ -496,7 +503,7 @@ export class DesignItem implements IDesignItem {
 
   // Internal implementations wich don't use undo/redo
 
-  public _insertChildInternal(designItem: IDesignItem, index?: number) {
+  public _insertChildInternal(designItem: DesignItem, index?: number) {
     if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
       designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
       designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
@@ -507,15 +514,15 @@ export class DesignItem implements IDesignItem {
 
     if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
       this._childArray.push(designItem);
-      this.element.appendChild(designItem.node);
+      this.view.appendChild(designItem.view);
     } else {
       let el = this._childArray[index];
-      this.node.insertBefore(designItem.node, el.element)
+      this.view.insertBefore(designItem.view, el.element)
       this._childArray.splice(index, 0, designItem);
     }
     (<DesignItem>designItem)._parent = this;
 
-    //todo: is this still needed???
+    //TODO: is this still needed???
     if (this.instanceServiceContainer.selectionService.primarySelection == designItem) {
       designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
       if (designItem.getPlacementService().isEnterableContainer(this))
@@ -547,7 +554,7 @@ export class DesignItem implements IDesignItem {
       //Patch this sheetdata
 
       const realContent = this._childArray.reduce((a, b) => a + b.content, '');
-      this.node.textContent = AbstractStylesheetService.buildPatchedStyleSheet([cssFromString(realContent)]);
+      this.view.textContent = AbstractStylesheetService.buildPatchedStyleSheet([cssFromString(realContent)]);
       this.instanceServiceContainer.designerCanvas.lazyTriggerReparseDocumentStylesheets();
     } else if (this.name == 'link') {
 

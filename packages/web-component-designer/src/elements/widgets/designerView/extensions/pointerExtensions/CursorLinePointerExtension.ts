@@ -14,11 +14,11 @@ export class CursorLinePointerExtension extends AbstractDesignerPointerExtension
 
   refresh(event: PointerEvent) {
     let mp = this.designerCanvas.getNormalizedEventCoordinates(event);
-    this._circle = this._drawCircle(mp.x, mp.y, 1, 'svg-cursor-line', this._circle, OverlayLayer.Foregorund);
-    this._line1 = this._drawLine(mp.x, mp.y - this._lineOffset, mp.x, mp.y - this._lineOffset - this._lineLength, 'svg-cursor-line', this._line1, OverlayLayer.Foregorund);
-    this._line2 = this._drawLine(mp.x, mp.y + this._lineOffset, mp.x, mp.y + this._lineOffset + this._lineLength, 'svg-cursor-line', this._line2, OverlayLayer.Foregorund);
-    this._line3 = this._drawLine(mp.x - this._lineOffset, mp.y, mp.x - this._lineOffset - this._lineLength, mp.y, 'svg-cursor-line', this._line3, OverlayLayer.Foregorund);
-    this._line4 = this._drawLine(mp.x + this._lineOffset, mp.y, mp.x + this._lineOffset + this._lineLength, mp.y, 'svg-cursor-line', this._line4, OverlayLayer.Foregorund);
+    this._circle = this._drawCircle(mp.x, mp.y, 1, 'svg-cursor-line', this._circle, OverlayLayer.Foreground);
+    this._line1 = this._drawLine(mp.x, mp.y - this._lineOffset, mp.x, mp.y - this._lineOffset - this._lineLength, 'svg-cursor-line', this._line1, OverlayLayer.Foreground);
+    this._line2 = this._drawLine(mp.x, mp.y + this._lineOffset, mp.x, mp.y + this._lineOffset + this._lineLength, 'svg-cursor-line', this._line2, OverlayLayer.Foreground);
+    this._line3 = this._drawLine(mp.x - this._lineOffset, mp.y, mp.x - this._lineOffset - this._lineLength, mp.y, 'svg-cursor-line', this._line3, OverlayLayer.Foreground);
+    this._line4 = this._drawLine(mp.x + this._lineOffset, mp.y, mp.x + this._lineOffset + this._lineLength, mp.y, 'svg-cursor-line', this._line4, OverlayLayer.Foreground);
   }
 
   dispose() {

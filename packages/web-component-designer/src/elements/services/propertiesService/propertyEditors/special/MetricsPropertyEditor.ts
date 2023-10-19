@@ -5,7 +5,7 @@ import { MetricsEditor } from '../../../../controls/MetricsEditor.js';
 
 export class MetricsPropertyEditor extends BasePropertyEditor<MetricsEditor> {
 
-  //Todo: metrics editor does not work at all yet
+  //TODO: metrics editor does not work at all yet
 
   constructor(property: IProperty) {
     super(property);

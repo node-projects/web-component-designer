@@ -58,7 +58,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
     // No selector means local style, styleDeclaration is null means new property
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
       // styleDeclaration stored Propertygrid is not refreshed after entering a new value, so we need to reload
-      // TODO: we do not respect if a same style is found in a media query or another @rule, maybe we need a refresh in the stylesheet parser
+      //TODO: we do not respect if a same style is found in a media query or another @rule, maybe we need a refresh in the stylesheet parser
       const decls = designItems[0].instanceServiceContainer.stylesheetService?.getDeclarations(designItems[0], property.styleDeclaration.name);
       const currentDecl = decls.find(x => x.parent.selector == property.styleDeclaration.parent.selector && x.parent.stylesheetName == property.styleDeclaration.parent.stylesheetName);
 

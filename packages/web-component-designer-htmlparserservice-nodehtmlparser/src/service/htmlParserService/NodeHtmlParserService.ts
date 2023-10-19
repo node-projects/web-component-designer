@@ -3,7 +3,12 @@ import * as parser from "@node-projects/node-html-parser-esm";
 // Alternative Parser, cause when you use the Browser, it instanciates the CusomElements, 
 // and some Elements remove attributes from their DOM, so you loose Data
 export class NodeHtmlParserService implements IHtmlParserService {
-  constructor() { }
+
+  _designItemCreatedCallback?: (IDesignItem) => void;
+
+  constructor(designItemCreatedCallback?: (IDesignItem) => void) {
+    this._designItemCreatedCallback = designItemCreatedCallback;
+  }
 
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
     const parsed = parser.parse(html, { comment: true });
@@ -37,6 +42,8 @@ export class NodeHtmlParserService implements IHtmlParserService {
         manualCreatedElement = true;
       }
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
+      if (this._designItemCreatedCallback)
+        this._designItemCreatedCallback(designItem);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
 

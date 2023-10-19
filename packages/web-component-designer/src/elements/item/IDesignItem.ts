@@ -14,6 +14,8 @@ export interface IDesignItem {
 
   lastContainerSize: ISize;
 
+  setView(node: Element);
+  
   replaceNode(newNode: Node);
   nodeReplaced: TypedEvent<void>;
   clone(): Promise<IDesignItem>

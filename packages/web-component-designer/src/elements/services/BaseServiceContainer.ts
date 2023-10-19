@@ -24,6 +24,13 @@ export class BaseServiceContainer<NameMap> {
     this.servicesChanged.emit({ serviceName: <keyof NameMap>name });
   }
 
+  registerLast<K extends keyof NameMap>(name: K, service: NameMap[K]) {
+    if (!this._services.has(<string>name))
+      this._services.set(<string>name, []);
+    this._services.get(<string>name).unshift(service);
+    this.servicesChanged.emit({ serviceName: <keyof NameMap>name });
+  }
+
   registerMultiple<K extends keyof NameMap>(names: K[], service: NameMap[K]) {
     for (const name of names) {
       if (!this._services.has(<string>name))

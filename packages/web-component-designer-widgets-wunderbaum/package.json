@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Widgets using wunderbaum",
   "name": "@node-projects/web-component-designer-widgets-wunderbaum",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
@@ -12,9 +12,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {    
-    "@node-projects/base-custom-webcomponent": "^0.19.0",
-    "@node-projects/web-component-designer": "^0.1.1",
-    "wunderbaum": "^0.5.2"
+    "@node-projects/base-custom-webcomponent": ">=0.19.0",
+    "@node-projects/web-component-designer": ">=0.1.1",
+    "wunderbaum": ">=0.5.2"
   },
   "repository": {
     "type": "git",

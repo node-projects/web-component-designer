@@ -73,17 +73,55 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     this.shadowRoot.adoptedStyleSheets = styles;
   }
 
+  backgroundFragment: DocumentFragment;
+  foregroundFragment: DocumentFragment;
+  normalFragment: DocumentFragment;
+  batchCount = 0;
+
+  public startBatch() {
+    if (this.batchCount == 0) {
+      this.backgroundFragment = document.createDocumentFragment();
+      this.foregroundFragment = document.createDocumentFragment();
+      this.normalFragment = document.createDocumentFragment();
+    }
+    this.batchCount++;
+  }
+
+  public endBatch() {
+    this.batchCount--;
+    if (this.batchCount == 0) {
+      if (this.backgroundFragment.hasChildNodes)
+        this._gBackground.appendChild(this.backgroundFragment);
+      if (this.foregroundFragment.hasChildNodes)
+        this._gForeground.appendChild(this.foregroundFragment);
+      if (this.normalFragment.hasChildNodes)
+        this._gNormal.appendChild(this.normalFragment);
+      this.backgroundFragment = null;
+      this.foregroundFragment = null;
+      this.normalFragment = null;
+    }
+  }
+
   public addOverlay(overlaySource: string, element: SVGGraphicsElement, overlayLayer: OverlayLayer = OverlayLayer.Normal) {
     element.setAttribute("overlay-source", overlaySource);
     switch (overlayLayer) {
       case OverlayLayer.Background:
-        this._gBackground.appendChild(element);
+        if (this.backgroundFragment)
+          this.backgroundFragment.appendChild(element);
+        else
+          this._gBackground.appendChild(element);
         break;
-      case OverlayLayer.Foregorund:
-        this._gForeground.appendChild(element);
+      case OverlayLayer.Foreground:
+        if (this.foregroundFragment)
+          this.foregroundFragment.appendChild(element);
+        else
+          this._gForeground.appendChild(element);
         break;
       default:
-        this._gNormal.appendChild(element);
+        if (this.normalFragment)
+          this.normalFragment.appendChild(element);
+        else
+          this._gNormal.appendChild(element);
         break;
     }
   }

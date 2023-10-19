@@ -5,7 +5,7 @@ import { BindingTarget } from "../../item/BindingTarget.js";
 import { BindingMode } from "../../item/BindingMode.js";
 
 
-/* Service wich read binings from special HTMl elements -> like tag-binding */
+/* Service wich read bindings from special HTML elements -> like tag-binding */
 //TODO: refactor so we could use it
 export class SpecialTagsBindingService implements IBindingService {
 

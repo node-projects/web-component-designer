@@ -5,7 +5,7 @@ import { getElementGridInformation } from '../../../../helper/GridHelper.js';
 
 export class GridAssignedRowColumnPropertyEditor extends BasePropertyEditor<HTMLDivElement> {
 
-  //Todo: multiple cell selection, grid area support, span support
+  //TODO: multiple cell selection, grid area support, span support
 
   _root: HTMLDivElement;
 

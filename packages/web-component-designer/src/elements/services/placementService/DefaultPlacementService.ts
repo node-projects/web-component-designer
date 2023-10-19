@@ -29,7 +29,7 @@ export class DefaultPlacementService implements IPlacementService {
   canEnter(container: IDesignItem, items: IDesignItem[]) {
     if (!this.isEnterableContainer(container))
       return false;
-    if (!items.every(x => !x.element.contains(container.element)))
+    if (!items.every(x => !x.element.contains(container.element) && x !== container))
       return false;
     return true;
   }
@@ -100,7 +100,7 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    //TODO:, this should revert all undo actions while active
+    //TODO: this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
     if (event.shiftKey) {

@@ -23,8 +23,7 @@ export function getElementGridInformation(element: HTMLElement) {
 
 export function calculateGridInformation(designItem: IDesignItem) {
 
-  //todo:
-  //same name should combine columns/rows
+  //TODO: same name should combine columns/rows
 
   let itemRect = designItem.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(designItem.element);
   let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>designItem.element, null, designItem.instanceServiceContainer.designerCanvas);

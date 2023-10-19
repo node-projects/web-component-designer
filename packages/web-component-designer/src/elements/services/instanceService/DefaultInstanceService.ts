@@ -55,8 +55,7 @@ export class DefaultInstanceService implements IInstanceService {
     const elementString = '<' + definition.tag + attr + '></' + definition.tag + '>';
 
     const element = <HTMLElement>newElementFromString(elementString);
-    if (!definition.doNotSetInNodeProjectsDesignerViewOnInstance)
-      (<IDesignerInstance><any>element)._inNodeProjectsDesignerView = true;
+    (<IDesignerInstance><any>element)._inNodeProjectsDesignerView = true;
     if (definition.defaultWidth)
       element.style.width = definition.defaultWidth;
     if (definition.defaultHeight)

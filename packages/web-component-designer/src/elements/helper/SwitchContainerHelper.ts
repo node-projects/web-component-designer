@@ -1,9 +1,8 @@
 import { IDesignItem } from '../item/IDesignItem.js';
 
 export function switchContainer(items: IDesignItem[], newContainer: IDesignItem, resizeNewContainer: boolean = false, newContainerOffset: number = 0) {
-    //todo...
-    //- switch to other containers? like grid, flexbox, ...
-    //- position non absolute, or absolute from bottom or right
+    //TODO: switch to other containers like grid, flexbox, ...
+    //TODO: position non absolute, or absolute from bottom or right
 
     for (let i of items) {
         if (i == newContainer || i.element.contains(newContainer.element)) {
