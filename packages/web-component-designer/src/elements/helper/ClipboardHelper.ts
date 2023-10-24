@@ -20,6 +20,10 @@ export async function copyToClipboard(items: [format: string, data: string][]) {
         }
         console.info('Copy to clipboard successful');
     } else {
+        let activeElement: HTMLElement = <HTMLElement>document.activeElement;
+        while (activeElement?.shadowRoot?.activeElement)
+            activeElement = <HTMLElement>activeElement.shadowRoot.activeElement;
+
         internalClipboard = items[0][1];
 
         const textArea = document.createElement('textarea');
@@ -46,6 +50,8 @@ export async function copyToClipboard(items: [format: string, data: string][]) {
             }
         }
         document.body.removeChild(textArea);
+
+        activeElement.focus()
     }
 }
 
