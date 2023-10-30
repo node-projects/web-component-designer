@@ -199,11 +199,14 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
       return s.getBindings(designItems[0]);
     });
-    if (property.propertyType == PropertyType.cssValue) {
-      return bindings.find(x => (x.target == BindingTarget.css) && x.targetName == property.name);
-    } else {
-      return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
+    if (bindings != null) {
+      if (property.propertyType == PropertyType.cssValue) {
+        return bindings.find(x => (x.target == BindingTarget.css) && x.targetName == property.name);
+      } else {
+        return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
+      }
     }
+    return null;
   }
 
   getUnsetValue(designItems: IDesignItem[], property: IProperty) {
