@@ -21,6 +21,18 @@ export function filterChildPlaceItems(items: IDesignItem[]) {
   return filterdPlaceItems;
 }
 
+export function getDesignItemCurrentPos(designItem: IDesignItem, mode: 'position' | 'transform' | 'margin' | 'padding'): IPoint {
+  if (mode === 'position') {
+    const computedStyleMovedElement = getComputedStyle(designItem.element);
+    let oldLeft = parseFloat(computedStyleMovedElement.left);
+    oldLeft = Number.isNaN(oldLeft) ? null : oldLeft;
+    let oldTop = parseFloat(computedStyleMovedElement.top);
+    oldTop = Number.isNaN(oldTop) ? null : oldTop;
+    return { x: oldLeft, y: oldTop }
+  }
+  return { x: 0, y: 0 }
+}
+
 export function placeDesignItem(container: IDesignItem, designItem: IDesignItem, offset: IPoint, mode: 'position' | 'transform' | 'margin' | 'padding') {
   const movedElement = designItem.element;
   const computedStyleMovedElement = getComputedStyle(movedElement);
@@ -39,10 +51,8 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
     let oldBottom = null;
 
     let containerLeft = 0;
-    //@ts-ignore
     let containerRight = 0;
     let containerTop = 0;
-    //@ts-ignore
     let containerBottom = 0;
 
     let hasPositionedLayout = false;
@@ -71,7 +81,7 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
       designItem.setStyle('position', 'absolute');
     if (oldLeft || oldRight == null)
       designItem.setStyle('left', (offset.x + (oldLeft ?? 0) + containerLeft) + "px");
-    if(oldTop || oldBottom == null)
+    if (oldTop || oldBottom == null)
       designItem.setStyle('top', (offset.y + (oldTop ?? 0) + containerTop) + "px");
     if (oldRight)
       designItem.setStyle('right', ((oldRight ?? 0) - offset.x + containerRight) + "px");

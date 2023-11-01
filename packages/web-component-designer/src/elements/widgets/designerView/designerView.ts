@@ -238,9 +238,19 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     let alignSnap = this._getDomElement<HTMLDivElement>('alignSnap');
     alignSnap.onclick = () => { this._designerCanvas.alignOnSnap = !this._designerCanvas.alignOnSnap; alignSnap.style.backgroundColor = this._designerCanvas.alignOnSnap ? 'deepskyblue' : ''; }
     alignSnap.style.backgroundColor = this._designerCanvas.alignOnSnap ? 'deepskyblue' : '';
+    alignSnap.oncontextmenu = e => { e.preventDefault(); }
     let alignGrid = this._getDomElement<HTMLDivElement>('alignGrid');
     alignGrid.onclick = () => { this._designerCanvas.alignOnGrid = !this._designerCanvas.alignOnGrid; alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : ''; }
     alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : '';
+    alignGrid.oncontextmenu = e => {
+      e.preventDefault();
+      let res = prompt("raster size", this.designerCanvas.gridSize.toString());
+      if (res) {
+        let r = parseInt(res);
+        if (r > 0)
+          this.designerCanvas.gridSize = r;
+      }
+    }
 
     this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
 
@@ -348,7 +358,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     //this.instanceServiceContainer.selectionService.setSelectedElements(null);
     if (this._designerCanvas.rootDesignItem.childCount > 0) {
       return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), true, true);
-     
+
     }
     return '';
   }

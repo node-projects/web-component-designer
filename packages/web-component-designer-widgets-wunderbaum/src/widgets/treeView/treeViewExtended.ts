@@ -313,18 +313,11 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
-    return;
     this._tree.runWithDeferredUpdate(() => {
-      let lastActiveNode = null;
       this._tree.visit((node) => {
         const flag = activeElements && activeElements.includes(node.data.ref);
         node.setSelected(flag);
-        node.setActive(flag);
-        if (flag) { lastActiveNode = node; }
       });
-      if (lastActiveNode) {
-        lastActiveNode.makeVisible({ scrollIntoView: true });
-      }
     });
   }
 }

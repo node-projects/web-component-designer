@@ -4,7 +4,7 @@ import type { IDesignItem } from '../../item/IDesignItem.js';
 import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransformationBetweenElementAndAllAncestors } from '../../helper/TransformHelper.js';
-import { filterChildPlaceItems, placeDesignItem } from '../../helper/LayoutHelper.js';
+import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
@@ -48,8 +48,11 @@ export class DefaultPlacementService implements IPlacementService {
 
     if (!event.ctrlKey) {
       if (placementView.alignOnGrid) {
-        trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize;
-        trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize;
+        let p = getDesignItemCurrentPos(item, 'position');
+        p.x = p.x % placementView.gridSize;
+        p.y = p.y % placementView.gridSize;
+        trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize - p.x;
+        trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize - p.y;
       }
       else if (placementView.alignOnSnap) {
         let rect = item.element.getBoundingClientRect();
