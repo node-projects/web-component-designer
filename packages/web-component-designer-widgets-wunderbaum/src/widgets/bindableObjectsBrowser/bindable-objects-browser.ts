@@ -2,7 +2,7 @@ import { BaseCustomWebComponentConstructorAppend, TypedEvent, css, cssFromString
 import { IBindableObject, IBindableObjectsService, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
 import { WbNodeData } from 'types';
 import { Wunderbaum } from 'wunderbaum';
-import defaultOptions, { defaultStyle } from '../WunderbaumOptions.js';
+import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
@@ -58,8 +58,8 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
       activate: (event) => {
         this.selectedObject = event.node.data.bindable;
       },
-      //@ts-ignore
       dnd: {
+        guessDropEffect: true,
         preventRecursion: true,
         preventVoidMoves: false,
         serializeClipboardData: false,

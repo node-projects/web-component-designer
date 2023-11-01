@@ -1,7 +1,7 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { IElementsService, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
 import { Wunderbaum } from 'wunderbaum';
-import defaultOptions, { defaultStyle } from '../WunderbaumOptions.js';
+import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
@@ -50,8 +50,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         mode: 'hide',
         highlight: true
       },
-      //@ts-ignore
       dnd: {
+        guessDropEffect: true,
         preventRecursion: true, // Prevent dropping nodes on own descendants
         preventVoidMoves: false,
         serializeClipboardData: false,

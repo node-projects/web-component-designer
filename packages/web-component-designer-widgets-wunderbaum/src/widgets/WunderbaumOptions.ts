@@ -17,7 +17,7 @@ div.wunderbaum span.wb-node i.wb-expander {
   background-position-y: 5px;
 }`;
 
-const config: WunderbaumOptions = {
+export const defaultOptions: WunderbaumOptions = {
   element: null,
   debugLevel: 0,
   scrollIntoViewOnExpandClick: false,
@@ -41,4 +41,3 @@ const config: WunderbaumOptions = {
     return { badge: node.children.length };
   }  
 }
-export default config;

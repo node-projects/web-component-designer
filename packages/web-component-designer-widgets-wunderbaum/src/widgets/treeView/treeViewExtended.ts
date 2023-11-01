@@ -2,7 +2,7 @@ import { css, html, BaseCustomWebComponentConstructorAppend, Disposable, cssFrom
 import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter } from '@node-projects/web-component-designer';
 import { WunderbaumNode } from 'wb_node';
 import { Wunderbaum } from 'wunderbaum';
-import defaultOptions, { defaultStyle } from '../WunderbaumOptions.js'
+import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js'
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 
@@ -165,8 +165,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         { id: "*", title: "element", width: "*" },
         { id: "buttons", title: "buttons", width: "50px" }
       ],*/
-      //@ts-ignore
       dnd: {
+        guessDropEffect: true,
         preventRecursion: true,
         preventVoidMoves: false,
         serializeClipboardData: false,
