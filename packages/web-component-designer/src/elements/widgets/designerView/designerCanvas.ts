@@ -48,7 +48,29 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _activeTool: ITool;
 
   // IPlacementView
-  public gridSize = 10;
+  private _gridSize = 10;
+  public get gridSize() {
+    return this._gridSize;
+  }
+  public set gridSize(value: number) {
+    this._gridSize = value;
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = value * 2;
+    canvas.height = value * 2;
+    const patternSize = value;
+    for (let x = 0; x < canvas.width; x += patternSize) {
+      for (let y = 0; y < canvas.height; y += patternSize) {
+        context.fillStyle = (x + y) % (patternSize * 2) === 0 ? "#e5e5e5" : "white";
+        context.fillRect(x, y, patternSize, patternSize);
+      }
+    }
+    const dataURL = canvas.toDataURL();
+    this._backgroundImage = 'url(' + dataURL + ')';
+    if (this._canvas.style.backgroundImage != 'none')
+      this._canvas.style.backgroundImage = this._backgroundImage;
+  }
+
   public pasteOffset = 10;
   public alignOnGrid = false;
   public alignOnSnap = true;
@@ -618,7 +640,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       const instance = stylesheetService(this);
       this.instanceServiceContainer.register("stylesheetService", instance);
       this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
-        if (ss.changeSource != 'undo' ) {
+        if (ss.changeSource != 'undo') {
           const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
           this.instanceServiceContainer.undoService.execute(ssca);
         }
