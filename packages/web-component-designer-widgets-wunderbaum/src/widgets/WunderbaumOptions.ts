@@ -1,5 +1,4 @@
 import { css } from "@node-projects/base-custom-webcomponent";
-import { WunderbaumOptions } from "wb_options"
 
 export const defaultStyle = css`
 i.wb-icon > span.wb-badge {
@@ -17,7 +16,7 @@ div.wunderbaum span.wb-node i.wb-expander {
   background-position-y: 5px;
 }`;
 
-export const defaultOptions: WunderbaumOptions = {
+export const defaultOptions = {
   element: null,
   debugLevel: 0,
   scrollIntoViewOnExpandClick: false,

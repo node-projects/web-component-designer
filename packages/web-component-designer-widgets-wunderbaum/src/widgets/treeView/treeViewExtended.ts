@@ -161,10 +161,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         const disableExpand = (<MouseEvent>e.event).ctrlKey || (<MouseEvent>e.event).shiftKey;
         return !disableExpand;
       },
-      /*columns: [
-        { id: "*", title: "element", width: "*" },
-        { id: "buttons", title: "buttons", width: "50px" }
-      ],*/
       dnd: {
         guessDropEffect: true,
         preventRecursion: true,
