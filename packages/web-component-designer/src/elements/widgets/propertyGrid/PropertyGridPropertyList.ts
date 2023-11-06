@@ -172,6 +172,14 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
       }
       if (editor) {
+        if (editor.element instanceof HTMLInputElement) {
+          const ip = editor.element;
+          ip.ondrop = e => {
+            e.preventDefault();
+            const data = e.dataTransfer.getData("text/plain");
+            ip.value = data;
+          }
+        }
         let rectContainer = document.createElement("div")
         rectContainer.style.width = '20px';
         rectContainer.style.height = '20px';
