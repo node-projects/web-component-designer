@@ -65,6 +65,8 @@ export class DesignItem implements IDesignItem {
   public replaceNode(newNode: Node) {
     DesignItem._designItemMap.delete(this.node);
     DesignItem._designItemMap.set(newNode, this);
+    if (this.view == this.node)
+      this.view = newNode;
     this.node = newNode;
     this.nodeReplaced.emit();
   }
@@ -157,7 +159,7 @@ export class DesignItem implements IDesignItem {
   public get element(): Element {
     return <Element>this.view;
   }
- 
+
   public get name() {
     return (<Element>this.node).localName;
   }
