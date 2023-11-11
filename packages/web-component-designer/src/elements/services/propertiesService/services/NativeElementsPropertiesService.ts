@@ -45,6 +45,17 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
       type: "boolean",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
+    }, {
+      name: "valueAsDate",
+      type: "string",
+      service: this,
+      propertyType: PropertyType.property
+    },
+    {
+      name: "valueAsNumber",
+      type: "string",
+      service: this,
+      propertyType: PropertyType.property
     }
   ];
 
