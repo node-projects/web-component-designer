@@ -23,8 +23,50 @@
             "unsafe"
         ]
     },
-    "alignItems": {},
-    "alignSelf": {},
+    "alignItems": {
+        "type": "list",
+        "values": [
+            "start",
+            "end",
+            "flex-start",
+            "flex-end",
+            "self-start",
+            "self-end",
+            "center",
+            "normal",
+            "baseline",
+            "first baseline",
+            "last baseline",
+            "space-between",
+            "space-around",
+            "space-evenly",
+            "stretch",
+            "safe",
+            "unsafe"
+        ]
+    },
+    "alignSelf": {
+        "type": "list",
+        "values": [
+            "start",
+            "end",
+            "flex-start",
+            "flex-end",
+            "self-start",
+            "self-end",
+            "center",
+            "normal",
+            "baseline",
+            "first baseline",
+            "last baseline",
+            "space-between",
+            "space-around",
+            "space-evenly",
+            "stretch",
+            "safe",
+            "unsafe"
+        ]
+    },    
     "alignmentBaseline": {},
     "all": {},
     "animation": {},
@@ -338,9 +380,70 @@
     "insetInlineEnd": {},
     "insetInlineStart": {},
     "isolation": {},
-    "justifyContent": {},
-    "justifyItems": {},
-    "justifySelf": {},
+    "justifyContent": {
+        "type": "list",
+        "values": [
+            "start",
+            "end",
+            "flex-start",
+            "flex-end",
+            "self-start",
+            "self-end",
+            "center",
+            "normal",
+            "baseline",
+            "first baseline",
+            "last baseline",
+            "space-between",
+            "space-around",
+            "space-evenly",
+            "stretch",
+            "safe",
+            "unsafe"
+        ]
+    },    
+    "justifyItems": {
+        "type": "list",
+        "values": [
+            "start",
+            "end",
+            "flex-start",
+            "flex-end",
+            "center",
+            "normal",
+            "baseline",
+            "first baseline",
+            "last baseline",
+            "space-between",
+            "space-around",
+            "space-evenly",
+            "stretch",
+            "safe",
+            "unsafe"
+        ]
+    },    
+    "justifySelf": {
+        "type": "list",
+        "values": [
+            "start",
+            "end",
+            "flex-start",
+            "flex-end",
+            "self-start",
+            "self-end",            
+            "center",
+            "normal",
+            "baseline",
+            "first baseline",
+            "last baseline",
+            "space-between",
+            "space-around",
+            "space-evenly",
+            "stretch",
+            "safe",
+            "unsafe"
+        ]
+    },    
     "left": {},
     "letterSpacing": {},
     "lightingColor": {
