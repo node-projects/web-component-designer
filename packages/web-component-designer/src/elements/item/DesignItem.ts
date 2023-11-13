@@ -416,7 +416,7 @@ export class DesignItem implements IDesignItem {
     const action = new CssStyleChangeAction(this, nm, '', this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
-  public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean) {
+  public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean, forceSet?: boolean) {
     let nm = PropertiesHelper.camelToDashCase(name);
 
     // Pre-sorted by specificity
@@ -424,7 +424,7 @@ export class DesignItem implements IDesignItem {
 
     if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
       // Set style locally
-      if (this.getStyle(nm) != value) {
+      if (this.getStyle(nm) != value || forceSet) {
         this.setStyle(nm, value);
       } else if (value == null) {
         this.removeStyle(nm);

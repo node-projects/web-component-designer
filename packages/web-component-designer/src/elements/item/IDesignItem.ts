@@ -75,7 +75,7 @@ export interface IDesignItem {
   hasStyle(name: string): boolean
   setStyle(name: string, value?: string | null, important?: boolean);
   removeStyle(name: string);
-  updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean);
+  updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean, forceSet?: boolean);
   getStyleFromSheetOrLocal(name: string, fallback?: string);
   getStyleFromSheetOrLocalOrComputed(name: string, fallback?: string)
   getAllStyles(): IStyleRule[];
