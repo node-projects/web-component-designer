@@ -9,8 +9,10 @@ export interface IBinding {
 
   type?: string //here a name wich the bindings Service recognizes....
 
-  expression?: string;  //the Binding internal Code
+  expression?: string;  //the bindings expression
+  expressionTwoWay?: string;  //a expression wich is used for write back
   bindableObjectNames?: string[]; 
+  converters?: any
 
   mode?: BindingMode;
 
