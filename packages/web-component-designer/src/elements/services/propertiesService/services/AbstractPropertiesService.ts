@@ -54,13 +54,13 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
             d.setAttribute(attributeName, json);
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
             d.element[property.name] = value;
-        } else if (property.type == 'boolean' && !value) {
+        } else if (property.type == 'boolean' && (value === false || value == null)) {
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
             d.removeAttribute(attributeName);
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
             d.element[property.name] = false;
         }
-        else if (property.type == 'boolean' && value) {
+        else if (property.type == 'boolean' && value === true) {
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
             d.setAttribute(attributeName, "");
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
