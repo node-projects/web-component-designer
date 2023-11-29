@@ -176,8 +176,15 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         if (!attributeName)
           attributeName = PropertiesHelper.camelToDashCase(property.name);
 
-        if (property.type == 'boolean')
-          return designItems[0].hasAttribute(attributeName);
+        if (property.type == 'boolean') {
+          if (designItems[0].hasAttribute(attributeName)) {
+            const val = designItems[0].getAttribute(attributeName);
+            if (val == "")
+              return true;
+            return val;
+          }
+          return false;
+        }
         let lastValue = designItems[0].getAttribute(attributeName);
         /*
         for (const x of designItems) {
