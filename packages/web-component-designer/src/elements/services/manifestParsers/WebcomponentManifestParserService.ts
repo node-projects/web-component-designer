@@ -71,7 +71,7 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
               let pType = PropertyType.property;
               if (declaration.attributes)
                 pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
-              const p = this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text);
+              const p = this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text, d.type?.editor);
               properties.push({ name: d.name, service: this, propertyType: pType, type: p[0], values: p[1], description: d.description });
             }
           }
@@ -86,7 +86,11 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
     }
   }
 
-  private manifestClassPropertyTypeToEditorPropertyType(type: string): [type: string, values?: string[]] {
+  private manifestClassPropertyTypeToEditorPropertyType(type: string, editor: string): [type: string, values?: string[]] {
+    if (editor) {
+      if (editor.toLowerCase() === 'color')
+        return ['color'];
+    }
     if (type) {
       if (type.toLowerCase() === 'boolean')
         return ['boolean'];
