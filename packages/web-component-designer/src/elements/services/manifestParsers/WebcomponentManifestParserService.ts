@@ -7,6 +7,7 @@ import { PropertyType } from '../propertiesService/PropertyType.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { AbstractPropertiesService } from '../propertiesService/services/AbstractPropertiesService.js';
 import { removeLeading, removeTrailing } from '../../helper/Helper.js';
+import { WebcomponentManifestPropertiesService } from '../propertiesService/services/WebcomponentManifestPropertiesService.js';
 
 export class WebcomponentManifestParserService extends AbstractPropertiesService implements IElementsService, IPropertiesService {
 
@@ -71,7 +72,7 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
               let pType = PropertyType.property;
               if (declaration.attributes)
                 pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
-              const p = this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text, d.type?.editor);
+              const p = WebcomponentManifestPropertiesService.manifestClassPropertyTypeToEditorPropertyType(d.type?.text, d.type?.editor);
               properties.push({ name: d.name, service: this, propertyType: pType, type: p[0], values: p[1], description: d.description });
             }
           }
@@ -84,26 +85,6 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
         this._rejectStored = null;
       }
     }
-  }
-
-  private manifestClassPropertyTypeToEditorPropertyType(type: string, editor: string): [type: string, values?: string[]] {
-    if (editor) {
-      if (editor.toLowerCase() === 'color')
-        return ['color'];
-    }
-    if (type) {
-      if (type.toLowerCase() === 'boolean')
-        return ['boolean'];
-      if (type.toLowerCase() === 'number')
-        return ['number'];
-      if (type.toLowerCase() === 'string')
-        return ['string'];
-      if (type.startsWith("'") && type.includes("|")) {
-        const values = type.split("|").map(x => x.trim()).map(x => x.substring(1, x.length - 1));
-        return ['list', values]
-      }
-    }
-    return [type];
   }
 
   async getElements(): Promise<IElementDefinition[]> {
