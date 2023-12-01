@@ -21,26 +21,27 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
         if (a[0].startsWith('css:')) {
           bnd.targetName = name.substring(4);
           bnd.target = BindingTarget.css;
-          bnd.expression = value.substring(2, value.length - 4);
+          bnd.expression = value.substring(2, value.length - 2);
         } else if (a[0].startsWith('class:')) {
           bnd.targetName = name.substring(4);
           bnd.target = BindingTarget.class;
-          bnd.expression = value.substring(2, value.length - 4);
+          bnd.expression = value.substring(2, value.length - 2);
         } else if (a[0].startsWith('$')) {
           bnd.targetName = name.substring(1);
           bnd.target = BindingTarget.attribute;
-          bnd.expression = value.substring(2, value.length - 4);
+          bnd.expression = value.substring(2, value.length - 2);
         } else if (a[0].startsWith('@')) {
           bnd.targetName = name.substring(1);
           bnd.target = BindingTarget.event;
-          bnd.expression = value.substring(2, value.length - 4);
+          bnd.expression = value.substring(2, value.length - 2);
         } else {
           bnd.targetName = PropertiesHelper.dashToCamelCase(name);
           bnd.target = BindingTarget.property;
-          bnd.expression = value.substring(2, value.length - 4);
+          bnd.expression = value.substring(2, value.length - 2);
         }
         bnd.type = BaseCustomWebcomponentBindingsService.type;
         bnd.targetName = bnd.targetName;
+        bnd.bindableObjectNames = [value.substring(2, value.length - 2)];
         bindings.push(bnd);
       }
     }

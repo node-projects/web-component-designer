@@ -46,6 +46,7 @@ import { IDesignItemService } from './designItemService/IDesignItemService.js';
 import { IEventsService } from './eventsService/IEventsService.js';
 import { IPropertyGridDragDropService } from './dragDropService/IPropertyGridDragDropService.js';
 import { IConfigUiService } from './configUiService/IConfigUiService.js';
+import { IRefactorService } from './refactorService/IRefactorService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -73,8 +74,9 @@ interface ServiceNameMap {
   "eventsService": IEventsService;
   "propertyGridDragDropService": IPropertyGridDragDropService;
   "configUiService": IConfigUiService;
-  
-  
+  "refactorService": IRefactorService;
+
+
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
   "selectionService": (designerCanvas: IDesignerCanvas) => ISelectionService;
@@ -219,5 +221,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   get configUiServices(): IConfigUiService[] {
     return this.getServices('configUiService');
+  }
+
+  get refactorServices(): IRefactorService[] {
+    return this.getServices('refactorService');
   }
 }
