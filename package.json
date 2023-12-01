@@ -10,7 +10,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@adobe/css-tools": "4.3.1",
+    "@adobe/css-tools": "4.3.2",
     "@node-projects/base-custom-webcomponent": ">=0.19.0",
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^6.1.5",
