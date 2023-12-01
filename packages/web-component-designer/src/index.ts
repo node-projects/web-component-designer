@@ -152,6 +152,10 @@ export * from "./elements/services/propertiesService/services/UnkownElementsProp
 export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
 
+export * from "./elements/services/refactorService/BindingsRefactorService.js";
+export type { IRefactorService } from "./elements/services/refactorService/IRefactorService.js";
+export type { IRefactoring } from "./elements/services/refactorService/IRefactoring.js";
+
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";
 export * from "./elements/services/selectionService/SelectionService.js";
@@ -297,6 +301,8 @@ export * from "./elements/widgets/designerView/extensions/pointerExtensions/Curs
 export type { IMiniatureView } from "./elements/widgets/miniatureView/IMiniatureView.js";
 
 export * from "./elements/widgets/debugView/debug-view.js";
+
+export * from "./elements/widgets/refactorView/refactor-view.js";
 
 export * from "./elements/widgets/demoView/demoView.js";
 export * from "./elements/widgets/paletteView/paletteElements.js";

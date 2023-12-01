@@ -26,7 +26,8 @@ export class AttributeChangeAction implements ITransactionItem {
         this.designItem.element.removeAttribute(this.name);
       }
       catch (e) {
-        console.warn(e)
+        if (e?.code !== 5)
+          console.warn(e)
       }
     }
     else {
@@ -37,7 +38,8 @@ export class AttributeChangeAction implements ITransactionItem {
             this.designItem.element.setAttribute(this.name, this.oldValue);
         }
         catch (e) {
-          console.warn(e)
+          if (e?.code !== 5)
+            console.warn(e)
         }
       }
     }
@@ -50,7 +52,8 @@ export class AttributeChangeAction implements ITransactionItem {
         this.designItem.element.removeAttribute(this.name);
       }
       catch (e) {
-        console.warn(e)
+        if (e?.code !== 5)
+          console.warn(e)
       }
     }
     else {
@@ -61,7 +64,8 @@ export class AttributeChangeAction implements ITransactionItem {
             this.designItem.element.setAttribute(this.name, this.newValue);
         }
         catch (e) {
-          console.warn(e)
+          if (e?.code !== 5)
+            console.warn(e)
         }
       }
     }

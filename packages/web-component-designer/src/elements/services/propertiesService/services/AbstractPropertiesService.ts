@@ -54,13 +54,13 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
             d.setAttribute(attributeName, json);
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
             d.element[property.name] = value;
-        } else if (property.type == 'boolean' && !value) {
+        } else if (property.type == 'boolean' && (value === false || value == null)) {
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
             d.removeAttribute(attributeName);
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
             d.element[property.name] = false;
         }
-        else if (property.type == 'boolean' && value) {
+        else if (property.type == 'boolean' && value === true) {
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
             d.setAttribute(attributeName, "");
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
@@ -176,8 +176,15 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         if (!attributeName)
           attributeName = PropertiesHelper.camelToDashCase(property.name);
 
-        if (property.type == 'boolean')
-          return designItems[0].hasAttribute(attributeName);
+        if (property.type == 'boolean') {
+          if (designItems[0].hasAttribute(attributeName)) {
+            const val = designItems[0].getAttribute(attributeName);
+            if (val == "")
+              return true;
+            return val;
+          }
+          return false;
+        }
         let lastValue = designItems[0].getAttribute(attributeName);
         /*
         for (const x of designItems) {

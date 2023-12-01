@@ -42,7 +42,7 @@ export class WebcomponentManifestPropertiesService extends AbstractPropertiesSer
                   let pType = PropertyType.property;
                   if (declaration.attributes)
                     pType = declaration.attributes.find(x => x.fieldName == d.name) != null ? PropertyType.propertyAndAttribute : PropertyType.property;
-                  const p = this.manifestClassPropertyTypeToEditorPropertyType(d.type?.text);
+                    const p = WebcomponentManifestPropertiesService.manifestClassPropertyTypeToEditorPropertyType(d.type?.text, d.type?.editor);
                   if (d.name)
                     properties.push({ name: d.name, service: this, propertyType: pType, type: p[0], values: p[1], description: d.description });
                 }
@@ -57,7 +57,11 @@ export class WebcomponentManifestPropertiesService extends AbstractPropertiesSer
     }
   }
 
-  private manifestClassPropertyTypeToEditorPropertyType(type: string): [type: string, values?: string[]] {
+  public static manifestClassPropertyTypeToEditorPropertyType(type: string, editor: string): [type: string, values?: string[]] {
+    if (editor) {
+      if (editor.toLowerCase() === 'color')
+        return ['color'];
+    }
     if (type) {
       if (type.toLowerCase() === 'boolean')
         return ['boolean'];

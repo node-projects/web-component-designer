@@ -87,7 +87,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
         targetPixelSizes[index + 1] += diff;
         const newSizes = this._convertCssUnits(targetPixelSizes, units, <HTMLElement>this.extendedItem.element, sizeType);
 
-        this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, newSizes.join(' '));
+        this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, newSizes.join(' '), null, true);
 
         this._initalPos = null;
         this._initialSizes = null;
