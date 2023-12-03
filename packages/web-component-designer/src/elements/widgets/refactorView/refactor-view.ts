@@ -8,13 +8,13 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
   static override readonly template = html`
     <div id="root">
       <template repeat:item="[[this.refactorings]]">
-        <details>
-          <summary style="display: flex;">
-              name:<input value="[[item[0]]]" @keydown="[[this._refactor(item, event)]]" style="flex-grow: 1; min-width: 0">
+        <details open>
+          <summary>
+              name:<input value="[[item[1][0].name]]" @keydown="[[this._refactor(item, event)]]" style="flex-grow: 1; min-width: 0">
           </summary>
           <ul>
             <template repeat:reft="[[item[1]]]">
-              <li>[[reft.type]] - [[reft.display]]</li>
+              <li>[[reft.type]]/[[reft.display]]</li>
             </template>
           </ul>
         </details>
@@ -30,10 +30,17 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
         position: absolute;
         overflow: hidden;
     }
+
+    summary {
+      cursor: pointer;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+    }
     
     ul {
       margin: 4px;
-      padding-left: 30px;
+      padding-left: 20px;
       font-size: 10px;
     }
     
@@ -102,11 +109,12 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
       }
 
       //Group refactorings by name
+      //TODO: group also by itemType, cause different item types (for example screen and signal name) could have the same string
       for (const r of refactorings) {
-        let thisList = this.refactorings.get(r.name);
+        let thisList = this.refactorings.get(r.itemType + '|' + r.name);
         if (thisList === undefined) {
           thisList = [];
-          this.refactorings.set(r.name, thisList);
+          this.refactorings.set(r.itemType + '|' + r.name, thisList);
         }
         thisList.push(r);
       }

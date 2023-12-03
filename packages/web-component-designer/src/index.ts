@@ -153,6 +153,7 @@ export * from "./elements/services/propertiesService/PropertyType.js";
 export * from "./elements/services/propertiesService/ValueType.js";
 
 export * from "./elements/services/refactorService/BindingsRefactorService.js";
+export * from "./elements/services/refactorService/TextRefactorService.js";
 export type { IRefactorService } from "./elements/services/refactorService/IRefactorService.js";
 export type { IRefactoring } from "./elements/services/refactorService/IRefactoring.js";
 

@@ -10,7 +10,7 @@ export class BindingsRefactorService {
             if (bindings) {
                 for (let b of bindings) {
                     for (let s of b.bindableObjectNames) {
-                        refactorings.push({ service: this, name: s, designItem: d, type: 'binding', sourceObject: b, display: b.target + '(' + b.targetName + ')' });
+                        refactorings.push({ service: this, name: s, itemType: 'bindableObject', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName });
                     }
                 }
             }
