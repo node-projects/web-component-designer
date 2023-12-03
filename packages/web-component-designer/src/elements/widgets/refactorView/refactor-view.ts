@@ -8,13 +8,13 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
   static override readonly template = html`
     <div id="root">
       <template repeat:item="[[this.refactorings]]">
-        <details>
-          <summary style="display: flex;">
+        <details open>
+          <summary>
               name:<input value="[[item[0]]]" @keydown="[[this._refactor(item, event)]]" style="flex-grow: 1; min-width: 0">
           </summary>
           <ul>
             <template repeat:reft="[[item[1]]]">
-              <li>[[reft.type]] - [[reft.display]]</li>
+              <li>[[reft.type]]/[[reft.display]]</li>
             </template>
           </ul>
         </details>
@@ -30,10 +30,17 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
         position: absolute;
         overflow: hidden;
     }
+
+    summary {
+      cursor: pointer;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+    }
     
     ul {
       margin: 4px;
-      padding-left: 30px;
+      padding-left: 20px;
       font-size: 10px;
     }
     
