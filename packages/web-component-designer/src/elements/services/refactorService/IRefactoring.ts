@@ -7,7 +7,7 @@ export interface IRefactoring {
     name: string; //wert der 
     itemType: string; //for example: text, bindableObject, screen, ....
     designItem: IDesignItem;
-    type: 'binding' | 'script';
+    type: 'binding' | 'script' | 'content' | 'attribute';
     display?: string;
     sourceObject: any;
     target?: BindingTarget;
