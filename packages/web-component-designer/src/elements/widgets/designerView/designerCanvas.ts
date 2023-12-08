@@ -545,7 +545,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   /* --- end IUiCommandHandler --- */
 
   handleSelectAll() {
-    const selection = Array.from(this.rootDesignItem.children());
+    const selection = Array.from(this.rootDesignItem.children(true));
     const primary = this.instanceServiceContainer.selectionService.primarySelection;
     if (primary) {
       const idx = selection.indexOf(primary);

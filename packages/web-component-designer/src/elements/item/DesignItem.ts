@@ -176,13 +176,28 @@ export class DesignItem implements IDesignItem {
     return this.instanceServiceContainer.contentService.rootDesignItem === this;
   }
 
+  *childrenRect(selectors: string) {
+    if (this.hasChildren) {
+      for (let d of this.children()) {
+        if (d.nodeType == NodeType.Element && d.element.matches(selectors))
+          yield d;
+        yield* d.allMatching(selectors);
+      }
+    }
+  }
+
   _childArray: IDesignItem[] = [];
   public get hasChildren() {
     return this._childArray.length > 0;
   }
-  public *children(): IterableIterator<IDesignItem> {
+  public *children(recursive: boolean = false): IterableIterator<IDesignItem> {
     for (const e of this._childArray) {
       yield e;
+      if (recursive) {
+        for (const c of e.children()) {
+          yield c;
+        }
+      }
     }
   }
   public get childCount(): number {
