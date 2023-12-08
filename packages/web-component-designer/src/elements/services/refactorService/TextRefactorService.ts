@@ -1,7 +1,8 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
+import { IRefactorService } from "./IRefactorService.js";
 import { IRefactoring } from "./IRefactoring.js";
 
-export class TextRefactorService {
+export class TextRefactorService implements IRefactorService {
     getRefactorings(designItems: IDesignItem[]): IRefactoring[] {
         let refactorings: IRefactoring[] = [];
         for (let d of designItems) {
