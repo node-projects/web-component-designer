@@ -1,6 +1,7 @@
 import { IPoint } from '../../interfaces/IPoint.js';
 import { IRect } from '../../interfaces/IRect.js';
 import { IDesignItem } from '../item/IDesignItem.js';
+import { NodeType } from '../item/NodeType.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 export function inDesigner(element: Element): boolean {
@@ -159,6 +160,8 @@ export function calculateOuterRect(designItems: IDesignItem[], designerCanvas: I
   let elementRect: IRect;
 
   for (let s of designItems) {
+    if (s.nodeType == NodeType.TextNode || s.nodeType == NodeType.Comment)
+      continue;
     elementRect = {
       x: designerCanvas.getNormalizedElementCoordinates(s.element).x,
       y: designerCanvas.getNormalizedElementCoordinates(s.element).y,
