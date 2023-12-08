@@ -194,7 +194,7 @@ export class DesignItem implements IDesignItem {
     for (const e of this._childArray) {
       yield e;
       if (recursive) {
-        for (const c of e.children()) {
+        for (const c of e.children(recursive)) {
           yield c;
         }
       }
