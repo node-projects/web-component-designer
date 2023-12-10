@@ -661,7 +661,26 @@
     "system": {},
     "tabSize": {},
     "tableLayout": {},
-    "textAlign": {},
+    "textAlign": {
+        "type": "list",
+        "values": [
+            "start",
+            "end",
+            "left",
+            "right",
+            "center",
+            "justify",
+            "justify-all",
+            "match-parent",
+            "\".\"",
+            "\".\" center",
+            "inherit",
+            "initial",
+            "revert",
+            "revert-layer",
+            "unset"
+        ]
+    },
     "textAlignLast": {},
     "textAnchor": {},
     "textCombineUpright": {},

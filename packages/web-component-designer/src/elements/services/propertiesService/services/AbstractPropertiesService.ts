@@ -37,6 +37,11 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("property changed: " + property.name + " to " + value);
     for (let d of designItems) {
+      if (!this.isHandledElement(d))
+        continue;
+      if (!this.getProperty(d, property.name))
+        continue;
+
       if (property.propertyType == PropertyType.cssValue) {
         d.updateStyleInSheetOrLocal(property.name, value);
         //unkown css property names do not trigger the mutation observer of property grid, 

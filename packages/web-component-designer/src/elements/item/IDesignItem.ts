@@ -30,7 +30,7 @@ export interface IDesignItem {
   readonly hasStyles: boolean;
 
   readonly hasChildren: boolean;
-  children(): IterableIterator<IDesignItem>
+  children(recursive?: boolean): IterableIterator<IDesignItem>
   allMatching(selectors: string): IterableIterator<IDesignItem>
   readonly childCount: number;
   readonly firstChild: IDesignItem;

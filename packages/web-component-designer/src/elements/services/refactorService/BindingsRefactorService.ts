@@ -1,8 +1,9 @@
 import { IBinding } from "../../item/IBinding.js";
 import { IDesignItem } from "../../item/IDesignItem.js";
+import { IRefactorService } from "./IRefactorService.js";
 import { IRefactoring } from "./IRefactoring.js";
 
-export class BindingsRefactorService {
+export class BindingsRefactorService implements IRefactorService {
     getRefactorings(designItems: IDesignItem[]): IRefactoring[] {
         let refactorings: IRefactoring[] = [];
         for (let d of designItems) {

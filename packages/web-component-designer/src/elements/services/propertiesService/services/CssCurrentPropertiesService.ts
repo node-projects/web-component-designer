@@ -8,6 +8,7 @@ import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
 import cssProperties from "./CssProperties.json"  assert { type: 'json' } ;
+import { BindingTarget } from '../../../item/BindingTarget.js';
 
 const localName = '&lt;local&gt;';
 
@@ -109,5 +110,9 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
       return ValueType.all;
     }
     return super.isSet(designItems, property);
+  }
+
+  override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.css;
   }
 }

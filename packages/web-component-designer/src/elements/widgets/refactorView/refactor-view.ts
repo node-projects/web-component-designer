@@ -2,11 +2,20 @@ import { BaseCustomWebComponentConstructorAppend, css, html, Disposable } from '
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IRefactoring } from '../../services/refactorService/IRefactoring.js';
+import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
 
 export class RefactorView extends BaseCustomWebComponentConstructorAppend {
 
   static override readonly template = html`
     <div id="root">
+      <div class="search">
+        <span>search</span>
+        <input style="flex-grow: 1; min-width: 0" value="{{this.searchText}}">
+        <span>replace</span>
+        <input style="flex-grow: 1; min-width: 0"value="{{this.replaceText}}">
+        <button @click="[[this.replace()]]" style="grid-column: 2;">replace</button>
+      </div>
+      <hr>
       <template repeat:item="[[this.refactorings]]">
         <details open>
           <summary>
@@ -29,6 +38,16 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
         width: 100%;
         position: absolute;
         overflow: hidden;
+    }
+
+    .search {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      align-items: center;
+    }
+
+    span {
+      font-size: 10px;
     }
 
     summary {
@@ -62,6 +81,10 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
   private _selectionChangedHandler: Disposable;
   private _selectedItems: IDesignItem[];
 
+  public searchText: string = "(.*)";
+  public replaceText: string = "$1";
+
+
   public refactorings = new Map<string, IRefactoring[]>();;
 
   ready() {
@@ -88,13 +111,38 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
     }
   }
 
+  public replace() {
+    let grp: ChangeGroup = null;
+    for (let r of this.refactorings) {
+      let n = r[1][0].name;
+      const regex = new RegExp(this.searchText);
+      const found = n.match(regex);
+      if (found) {
+        if (!grp)
+          grp = r[1][0].designItem.openGroup('refactor with regex ' + this.searchText + " -> " + this.replaceText);
+        const newText = n.replace(regex, this.replaceText);
+        if (newText != n) {
+          this.applyRefactoring(r, newText)
+        }
+      }
+    }
+    if (!grp)
+      grp.commit();
+  }
+
   public _refactor(refactoring: [string, IRefactoring[]], event: KeyboardEvent) {
     const ip = event.target as HTMLInputElement;
     if (event.key == 'Enter') {
-      for (let r of refactoring[1]) {
-        r.service.refactor(r, r.name, ip.value);
-      }
+      this.applyRefactoring(refactoring, ip.value);
     }
+  }
+
+  public applyRefactoring(refactoring: [string, IRefactoring[]], newValue: string) {
+    const grp = refactoring[1][0].designItem.openGroup('refactor ' + refactoring[1][0].name + ' to ' + newValue);
+    for (let r of refactoring[1]) {
+      r.service.refactor(r, r.name, newValue);
+    }
+    grp.commit();
   }
 
   updateRefactorlist(designItems: IDesignItem[]) {
