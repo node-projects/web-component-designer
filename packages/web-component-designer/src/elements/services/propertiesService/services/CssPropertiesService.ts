@@ -86,7 +86,8 @@ export class CssPropertiesService extends CommonPropertiesService {
     "fill-opacity",
     "stroke",
     "stroke-width",
-    "stroke-dash-array",
+    "stroke-dasharray",
+    "stroke-dashoffset",
     "stroke-opacity"
   ];
 

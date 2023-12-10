@@ -5,6 +5,7 @@ import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
+import { BindingTarget } from '../../../item/BindingTarget.js';
 
 export class CssCustomPropertiesService extends CommonPropertiesService {
 
@@ -55,5 +56,9 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
 
   override isSet(designItems: IDesignItem[], property: IProperty): ValueType {
     return designItems[0].hasStyle(property.name) ? ValueType.all : ValueType.none;
+  }
+
+  override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    return BindingTarget.css;
   }
 }
