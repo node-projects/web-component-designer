@@ -129,7 +129,11 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
                 && rule.cssRules) {
                 t += rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
             }
-            if (rule instanceof CSSStyleRule) {
+            else if (rule instanceof CSSKeyframesRule
+                && rule.cssRules) {
+                t += rule.cssText;
+            }
+            else if (rule instanceof CSSStyleRule) {
                 let parts = rule.selectorText.split(',');
                 let sel = "";
                 for (let p of parts) {
