@@ -74,7 +74,10 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
         styles = CssCombiner.combine(new Map(styles));
       for (const s of styles) {
         if (s[0]) {
-          indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+          if (s[0].startsWith('--'))
+            indentedTextWriter.write(s[0] + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+          else
+            indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
         }
       }
       indentedTextWriter.write('"');
