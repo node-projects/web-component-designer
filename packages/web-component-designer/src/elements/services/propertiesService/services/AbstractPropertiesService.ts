@@ -137,7 +137,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         this._bindingsCacheClearTimer = setTimeout(() => AbstractPropertiesService._bindingsCache.clear(), 30);
       }
       if (property.propertyType == PropertyType.cssValue) {
-        if (bindings && bindings.find(x => x.target == BindingTarget.css && x.targetName == property.name))
+        if (bindings && bindings.find(x => (x.target == BindingTarget.css || x.target == BindingTarget.cssvar) && x.targetName == property.name))
           return ValueType.bound;
       } else {
         if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
@@ -213,7 +213,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     });
     if (bindings != null) {
       if (property.propertyType == PropertyType.cssValue) {
-        return bindings.find(x => (x.target == BindingTarget.css) && x.targetName == property.name);
+        return bindings.find(x => (x.target == BindingTarget.css || x.target == BindingTarget.cssvar) && x.targetName == property.name);
       } else {
         return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
       }
