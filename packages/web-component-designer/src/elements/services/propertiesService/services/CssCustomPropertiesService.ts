@@ -51,14 +51,19 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
   }
 
   override getUnsetValue(designItems: IDesignItem[], property: IProperty) {
-    return super.getUnsetValue(designItems, property);
+    if (designItems?.[0].element?.computedStyleMap) {
+      return designItems[0].element.computedStyleMap().get(property.name)?.[0];
+    }
+    return null;
   }
 
   override isSet(designItems: IDesignItem[], property: IProperty): ValueType {
+    if (super.isSet(designItems, property) == ValueType.bound)
+      return ValueType.bound;
     return designItems[0].hasStyle(property.name) ? ValueType.all : ValueType.none;
   }
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
-    return BindingTarget.css;
+    return BindingTarget.cssvar;
   }
 }

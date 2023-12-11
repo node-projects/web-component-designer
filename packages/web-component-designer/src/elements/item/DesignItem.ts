@@ -133,11 +133,15 @@ export class DesignItem implements IDesignItem {
     return this._styles.size > 0;
   }
   public hasStyle(name: string) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
     return this._styles.has(nm);
   }
   public getStyle(name: string) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
     return this._styles.get(nm);
   }
   public *styles() {
@@ -146,11 +150,15 @@ export class DesignItem implements IDesignItem {
     }
   }
   _withoutUndoSetStyle(name: string, value: string) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
     this._styles.set(nm, value);
   }
   _withoutUndoRemoveStyle(name: string) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
     this._styles.delete(nm);
   }
 
@@ -420,19 +428,25 @@ export class DesignItem implements IDesignItem {
   }
 
   public setStyle(name: string, value?: string | null, important?: boolean) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
     if (this.isRootItem)
       throw 'not allowed to set style on root item';
     const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
   public removeStyle(name: string) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
     const action = new CssStyleChangeAction(this, nm, '', this._styles.get(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
   public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean, forceSet?: boolean) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
 
     // Pre-sorted by specificity
     let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
@@ -450,7 +464,9 @@ export class DesignItem implements IDesignItem {
   }
 
   public getStyleFromSheetOrLocal(name: string, fallback: string = null) {
-    let nm = PropertiesHelper.camelToDashCase(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
 
     if (this.hasStyle(name))
       // Get style locally
@@ -465,17 +481,25 @@ export class DesignItem implements IDesignItem {
   }
 
   getStyleFromSheetOrLocalOrComputed(name: string, fallback: string = null) {
-    let value = this.getStyleFromSheetOrLocal(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
+
+    let value = this.getStyleFromSheetOrLocal(nm);
     if (!value) {
-      value = getComputedStyle(this.element).getPropertyValue(name)
+      value = getComputedStyle(this.element).getPropertyValue(nm)
     }
     return value ?? fallback;
   }
 
   getComputedStyle(name: string, fallback: string = null) {
-    let value = this.getStyleFromSheetOrLocal(name);
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
+
+    let value = this.getStyleFromSheetOrLocal(nm);
     if (!value) {
-      value = getComputedStyle(this.element).getPropertyValue(name)
+      value = getComputedStyle(this.element).getPropertyValue(nm)
     }
     return value ?? fallback;
   }
