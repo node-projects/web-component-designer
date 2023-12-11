@@ -58,6 +58,8 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
   }
 
   override isSet(designItems: IDesignItem[], property: IProperty): ValueType {
+    if (super.isSet(designItems, property) == ValueType.bound)
+      return ValueType.bound;
     return designItems[0].hasStyle(property.name) ? ValueType.all : ValueType.none;
   }
 
