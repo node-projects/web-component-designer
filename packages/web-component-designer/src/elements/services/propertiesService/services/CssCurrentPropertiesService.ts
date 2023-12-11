@@ -7,7 +7,7 @@ import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStyleshe
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
-import cssProperties from "./CssProperties.json"  assert { type: 'json' } ;
+import cssProperties from "./CssProperties.json"  assert { type: 'json' };
 import { BindingTarget } from '../../../item/BindingTarget.js';
 
 const localName = '&lt;local&gt;';
@@ -113,6 +113,8 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
   }
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    if (property.name.startsWith('--'))
+      return BindingTarget.cssvar;
     return BindingTarget.css;
   }
 }
