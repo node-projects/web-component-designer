@@ -10,13 +10,17 @@ import { DesignerCanvas } from '../../../widgets/designerView/designerCanvas.js'
 
 export class CssCustomPropertiesService extends CommonPropertiesService {
 
-  public override getRefreshMode(designItem: IDesignItem) {
-    return RefreshMode.fullOnValueChange;
-  }
 
-  constructor() {
+  removeInheritedCustomProperties: boolean
+
+  constructor(removeInheritedCustomProperties = true) {
     super();
     this.name = 'customProperties';
+    this.removeInheritedCustomProperties = removeInheritedCustomProperties;
+  }
+
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.fullOnValueChange;
   }
 
   override isHandledElement(designItem: IDesignItem): boolean {
@@ -35,7 +39,10 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
 
     let props = Array.from(designItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"))
 
-    let arr: IProperty[] = props.filter(x => !rootMap.includes(x)).map(x => ({
+    if (this.removeInheritedCustomProperties)
+      props = props.filter(x => !rootMap.includes(x));
+
+    let arr: IProperty[] = props.map(x => ({
       name: x,
       service: this,
       propertyType: PropertyType.cssValue
