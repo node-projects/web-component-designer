@@ -47,6 +47,9 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
   }
 
   override getValue(designItems: IDesignItem[], property: IProperty) {
+    let val = designItems[0].getStyle(property.name);
+    if (val)
+      return val;
     return getComputedStyle(designItems[0].element).getPropertyValue(property.name);
   }
 

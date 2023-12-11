@@ -28,6 +28,7 @@ export class PropertyGroupsService implements IPropertyGroupsService {
         { name: 'properties', propertiesService: null },
         { name: 'attached', propertiesService: this._attachedPropertiesService },
         { name: 'attributes', propertiesService: new AttributesPropertiesService() },
+        { name: 'common', propertiesService: new CommonPropertiesService() },
         { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
         { name: 'css vars', propertiesService: new CssCustomPropertiesService() },
         { name: 'layout', propertiesService: new CssPropertiesService("layout") },
