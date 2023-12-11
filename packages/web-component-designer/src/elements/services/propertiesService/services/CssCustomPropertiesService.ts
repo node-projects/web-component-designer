@@ -6,6 +6,7 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { BindingTarget } from '../../../item/BindingTarget.js';
+import { DesignerCanvas } from '../../../widgets/designerView/designerCanvas.js';
 
 export class CssCustomPropertiesService extends CommonPropertiesService {
 
@@ -30,7 +31,7 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
     if (!designItem?.element?.computedStyleMap)
       return null;
 
-    let rootMap = Array.from(designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
+    let rootMap = Array.from((<DesignerCanvas>designItem.instanceServiceContainer.designerCanvas).computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
 
     let props = Array.from(designItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"))
 
