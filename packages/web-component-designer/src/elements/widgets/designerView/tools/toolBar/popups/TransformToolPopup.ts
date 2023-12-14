@@ -5,6 +5,7 @@ import { IRect } from '../../../../../../interfaces/IRect.js';
 import { IPoint } from '../../../../../../interfaces/IPoint.js';
 import { DesignerView } from '../../../designerView.js';
 import { calculateOuterRect } from '../../../../../helper/ElementHelper.js';
+import { IDesignItem } from '../../../../../item/IDesignItem.js';
 
 export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend {
   private _designerView: DesignerView;
@@ -18,6 +19,8 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
   private _inputX: HTMLInputElement;
   private _inputY: HTMLInputElement;
   private _inputR: HTMLInputElement;
+  private _inputSpacingX: HTMLInputElement;
+  private _inputSpacingY: HTMLInputElement;
 
   private _originTopLeft: HTMLInputElement;
   private _originTopMid: HTMLInputElement;
@@ -106,6 +109,15 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
         margin-top: 20px;
         margin-left: 20px;
       }
+      #spacing-div{
+        display: inline-grid;
+        grid-template-rows: 20px 20px;
+        grid-template-columns: 95px 95px;
+        gap: 5px;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+      }
       `
 
   static override template = html`
@@ -125,6 +137,13 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
             <div id="button-div">
               <button id="transform-button-absolute">absolute</button>
               <button id="transform-button-relative">relative</button>
+            </div>
+
+            <div id="spacing-div">
+                <span>X spacing</span>
+                <span>Y spacing</span>
+                <input type="number" id="spacing-input-x">
+                <input type="number" id="spacing-input-y">
             </div>
 
             <div style="justify-content: center; display: grid; height: 100px">
@@ -158,6 +177,8 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
     this._inputX = this._getDomElement<HTMLInputElement>("transform-input-x");
     this._inputY = this._getDomElement<HTMLInputElement>("transform-input-y");
     this._inputR = this._getDomElement<HTMLInputElement>("transform-input-r");
+    this._inputSpacingX = this._getDomElement<HTMLInputElement>("spacing-input-x");
+    this._inputSpacingY = this._getDomElement<HTMLInputElement>("spacing-input-y");
 
     this._originTopLeft = this._getDomElement<HTMLInputElement>("origin-top-left");
     this._originTopMid = this._getDomElement<HTMLInputElement>("origin-top-mid");
@@ -246,6 +267,9 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
         else
           item.removeStyle("transform");
       }
+
+      this._applySpacing(selection);
+
       grp.commit();
     }
   }
@@ -321,6 +345,32 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
     }
 
     return newPoint;
+  }
+
+  private _applySpacing(selection: IDesignItem[]) {
+    let xSpacing = this._inputSpacingX.valueAsNumber;
+    let ySpacing = this._inputSpacingY.valueAsNumber;
+
+    if (!isNaN(xSpacing)) {
+      let sortedSelectionX = selection.sort((a, b) => {
+        return parseFloat(a.getStyle("left")) - parseFloat(b.getStyle("left"));
+      });
+      let xStartPos = parseFloat(sortedSelectionX[0].getStyle("left"));
+      for (let i = 0; i < sortedSelectionX.length; i++) {
+        sortedSelectionX[i].setStyle("left", (i * xSpacing + xStartPos) + "px");
+      }
+    }
+
+    if (!isNaN(ySpacing)) {
+      let sortedSelectionY = selection.sort((a, b) => {
+        return parseFloat(a.getStyle("top")) - parseFloat(b.getStyle("top"));
+      });
+      let yStartPos = parseFloat(sortedSelectionY[0].getStyle("top"));
+      for (let i = 0; i < sortedSelectionY.length; i++) {
+        sortedSelectionY[i].setStyle("top", (i * ySpacing + yStartPos) + "px");
+      }
+    }
+
   }
 }
 
