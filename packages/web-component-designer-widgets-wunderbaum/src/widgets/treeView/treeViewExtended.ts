@@ -309,10 +309,15 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
+    let scrolled = false;
     this._tree.runWithDeferredUpdate(() => {
       this._tree.visit((node) => {
         const flag = activeElements && activeElements.includes(node.data.ref);
         node.setSelected(flag);
+        if (flag && !scrolled) {
+          scrolled = true;
+          node.scrollIntoView();
+        }
       });
     });
   }
