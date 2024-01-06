@@ -181,6 +181,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         rect.style.width = '7px';
         rect.style.height = '7px';
         rect.style.border = '1px white solid';
+        rect.style.cursor = 'pointer';
         if (p.propertyType != PropertyType.complex)
           rectContainer.appendChild(rect);
         this._div.appendChild(rectContainer);
@@ -188,7 +189,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
           event.preventDefault();
           this.openContextMenu(event, p);
         }
-
+        rect.onclick = (event) => {
+          event.preventDefault();
+          this.openContextMenu(event, p);
+        }
         if (p.type == 'addNew') {
           let input = <HTMLInputElement>editor.element;
           input.disabled = true;
