@@ -57,9 +57,6 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       text-overflow: ellipsis;
       margin-right: 2px;
     }
-    label[for] {
-      cursor: pointer;
-    }
     input, select {
       height: 24px;
       border: 1px solid var(--input-border-color, #596c7a);
