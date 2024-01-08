@@ -258,10 +258,10 @@ export class DesignItem implements IDesignItem {
 
   //abstract text content to own property. so only change via designer api will use it.
   public get hasContent() {
-    return this.nodeType == NodeType.TextNode || (this.nodeType == NodeType.Comment && this.element.textContent != "") || (this._childArray.length === 0 && this.content !== null);
+    return ((this.nodeType == NodeType.TextNode || this.nodeType == NodeType.Comment) && this.element.textContent != "") || (this._childArray.length === 0);
   }
   public get content(): string {
-    if (!this.hasChildren)
+    if (this.nodeType == NodeType.TextNode || this.nodeType == NodeType.Comment)
       return this.node.textContent;
     else
       return this._childArray.map(x => x.content).join();
