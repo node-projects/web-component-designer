@@ -21,11 +21,11 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend(event?: Event) {
+  override extend(cache: Record<string|symbol, any>, event?: Event) {
     this.refresh(event);
   }
 
-  override refresh(event?: Event) {
+  override refresh(cache: Record<string|symbol, any>, event?: Event) {
     this.gridInformation = calculateGridInformation(this.extendedItem);
     this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
     this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
