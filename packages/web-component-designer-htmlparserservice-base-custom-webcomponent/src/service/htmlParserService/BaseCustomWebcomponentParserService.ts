@@ -1,5 +1,7 @@
 import { IHtmlParserService, ServiceContainer, InstanceServiceContainer, IDesignItem } from '@node-projects/web-component-designer';
-import ts, { SourceFile } from 'typescript'
+//import ts, { SourceFile } from 'typescript'
+import type ts from 'typescript'
+import type { SourceFile } from 'typescript'
 
 function* findAllNodesOfKind(node: ts.Node, kind: ts.SyntaxKind) {
   if (node.kind == kind)
@@ -19,7 +21,8 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
     const sourceFile = this.parseTypescriptFile(code);
 
     let htmlCode = "";
-    let cssStyle = "";    
+    let cssStyle = "";
+    //@ts-ignore
     const nodes = findAllNodesOfKind(sourceFile, ts.SyntaxKind.TaggedTemplateExpression);
     for (let nd of nodes) {
       if (nd.tag.escapedText == 'html' && nd.parent.name.escapedText == "template")
@@ -41,26 +44,36 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
     const transformTemplateLiterals = <T extends ts.Node>(context: ts.TransformationContext) =>
       (rootNode: T) => {
         function visit(node: ts.Node): ts.Node {
-          
+
+          //@ts-ignore
           if (ts.isTemplateLiteral(node) &&
+            //@ts-ignore
             ts.isTaggedTemplateExpression(node.parent) &&
             (<any>node.parent.tag).escapedText == 'html' &&
             (<any>node.parent.parent).name.escapedText == "template") {
+            //@ts-ignore
             return <ts.Node>ts.factory.createNoSubstitutionTemplateLiteral(html.replaceAll('\n', '\r\n'), html.replaceAll('\n', '\r\n'));
           } else if (css &&
+            //@ts-ignore
             ts.isTemplateLiteral(node) &&
+            //@ts-ignore
             ts.isTaggedTemplateExpression(node.parent) &&
             (<any>node.parent.tag).escapedText == 'css' &&
             (<any>node.parent.parent).name.escapedText == "style") {
+            //@ts-ignore
             return <ts.Node>ts.factory.createNoSubstitutionTemplateLiteral(css.replaceAll('\n', '\r\n'), css.replaceAll('\n', '\r\n'));
-          }          
+          }
+          //@ts-ignore  
           return ts.visitEachChild(node, visit, context);
         }
+        //@ts-ignore
         return ts.visitNode(rootNode, visit);
       };
+    //@ts-ignore
     let transformed = ts.transform(sourceFile, [transformTemplateLiterals]).transformed[0];
-
+    //@ts-ignore
     const printer = ts.createPrinter({ newLine: newLineCrLf ? ts.NewLineKind.CarriageReturnLineFeed : ts.NewLineKind.LineFeed });
+    //@ts-ignore
     const result = printer.printNode(ts.EmitHint.Unspecified, transformed, <SourceFile>transformed);
 
     return result;
@@ -74,6 +87,7 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
       getDefaultLibFileName: () => 'lib.d.ts',
       getNewLine: () => '\n',
       getSourceFile: filename => {
+        //@ts-ignore
         return ts.createSourceFile(filename, code, ts.ScriptTarget.Latest, true);
       },
       readFile: () => null,
@@ -82,8 +96,10 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
     };
 
     const filename = 'aa.ts';
+    //@ts-ignore
     const program = ts.createProgram([filename], {
       noResolve: true,
+      //@ts-ignore
       target: ts.ScriptTarget.Latest,
     }, compilerHost);
 
