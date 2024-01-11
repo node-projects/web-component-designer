@@ -77,7 +77,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
       (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
 
       for (let c of item.childNodes) {
-        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null, snippet);
+        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null, snippet, positionOffset);
         designItem._insertChildInternal(di);
       }
     } else if (item.nodeType == 3) {
