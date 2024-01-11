@@ -45,7 +45,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
       if (this._designItemCreatedCallback)
         this._designItemCreatedCallback(designItem);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
-        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
+        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
 
       let style = '';
 
