@@ -4,5 +4,5 @@ import type { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 
 export interface IHtmlParserService extends IService {
-  parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]>
+  parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean, positionOffset?: Number): Promise<IDesignItem[]>
 }

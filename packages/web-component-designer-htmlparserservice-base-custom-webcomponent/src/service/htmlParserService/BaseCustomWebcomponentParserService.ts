@@ -22,19 +22,25 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
 
     let htmlCode = "";
     let cssStyle = "";
+    let positionOffset = 0;
+    //let cssOffset = 0;
     //@ts-ignore
     const nodes = findAllNodesOfKind(sourceFile, ts.SyntaxKind.TaggedTemplateExpression);
     for (let nd of nodes) {
-      if (nd.tag.escapedText == 'html' && nd.parent.name.escapedText == "template")
+      if (nd.tag.escapedText == 'html' && nd.parent.name.escapedText == "template") {
+        positionOffset = nd.pos;
         htmlCode = nd.template.rawText;
-      if (nd.tag.escapedText == 'css' && nd.parent.name.escapedText == "style")
+      }
+      if (nd.tag.escapedText == 'css' && nd.parent.name.escapedText == "style") {
+        //cssOffset = nd.pos;
         cssStyle = nd.template.rawText;
+      }
     }
 
     if (cssStyle)
       instanceServiceContainer.stylesheetService.setStylesheets([{ name: 'css', content: cssStyle }]);
 
-    return this.htmlParser.parse(htmlCode, serviceContainer, instanceServiceContainer, parseSnippet);
+    return this.htmlParser.parse(htmlCode, serviceContainer, instanceServiceContainer, parseSnippet, positionOffset);
   }
 
   public writeBack(code: string, html: string, css: string, newLineCrLf: boolean): string {

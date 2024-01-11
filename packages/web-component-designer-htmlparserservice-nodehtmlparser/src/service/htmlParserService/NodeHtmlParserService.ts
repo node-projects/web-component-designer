@@ -10,12 +10,12 @@ export class NodeHtmlParserService implements IHtmlParserService {
     this._designItemCreatedCallback = designItemCreatedCallback;
   }
 
-  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
+  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean, positionOffset = 0): Promise<IDesignItem[]> {
     const parsed = parser.parse(html, { comment: true });
 
     let designItems: IDesignItem[] = [];
     for (let p of parsed.childNodes) {
-      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null, parseSnippet);
+      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null, parseSnippet, positionOffset);
 
       if (di != null)
         designItems.push(di)
@@ -27,7 +27,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
   private _parseDiv = document.createElement("div");
 
-  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string, snippet: boolean): IDesignItem {
+  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string, snippet: boolean, positionOffset = 0): IDesignItem {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
       let element: Element;
