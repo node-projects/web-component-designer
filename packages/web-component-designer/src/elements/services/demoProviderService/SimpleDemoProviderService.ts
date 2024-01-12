@@ -28,7 +28,13 @@ export class SimpleDemoProviderService implements IDemoProviderService {
         .map(x => cssFromString(x.content)));
     }
     shadowRoot.adoptedStyleSheets = styles;
-    shadowRoot.innerHTML = code;
+    shadowRoot.innerHTML = '';
+    //@ts-ignore
+    const myDocument = new DOMParser().parseFromString(code, 'text/html', { includeShadowRoots: true });
+    const fragment = document.createDocumentFragment();
+    for (let e of myDocument.childNodes)
+      fragment.appendChild(e)
+    shadowRoot.appendChild(fragment)
     contentDiv.style.display = '';
   }
 }

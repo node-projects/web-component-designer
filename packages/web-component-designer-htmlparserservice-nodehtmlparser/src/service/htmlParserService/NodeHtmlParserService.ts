@@ -10,12 +10,12 @@ export class NodeHtmlParserService implements IHtmlParserService {
     this._designItemCreatedCallback = designItemCreatedCallback;
   }
 
-  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
+  async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean, positionOffset = 0): Promise<IDesignItem[]> {
     const parsed = parser.parse(html, { comment: true });
 
     let designItems: IDesignItem[] = [];
     for (let p of parsed.childNodes) {
-      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null, parseSnippet);
+      let di = this._createDesignItemsRecursive(p, serviceContainer, instanceServiceContainer, null, parseSnippet, positionOffset);
 
       if (di != null)
         designItems.push(di)
@@ -27,7 +27,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
 
   private _parseDiv = document.createElement("div");
 
-  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string, snippet: boolean): IDesignItem {
+  _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string, snippet: boolean, positionOffset = 0): IDesignItem {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
       let element: Element;
@@ -45,7 +45,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
       if (this._designItemCreatedCallback)
         this._designItemCreatedCallback(designItem);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
-        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
+        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
 
       let style = '';
 
@@ -77,20 +77,29 @@ export class NodeHtmlParserService implements IHtmlParserService {
       (<HTMLElement>element).draggable = false; //even if it should be true, for better designer exp.
 
       for (let c of item.childNodes) {
-        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null, snippet);
+        let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null, snippet, positionOffset);
         designItem._insertChildInternal(di);
+
+        if (di.node instanceof HTMLTemplateElement && di.getAttribute('shadowrootmode') == 'open') {
+          try {
+            const shadow = (<HTMLElement>designItem.node).attachShadow({ mode: 'open' });
+            shadow.appendChild(di.node.content.cloneNode(true));
+          } catch (err) {
+            console.error("error attaching shadowdom", err)
+          }
+        }
       }
     } else if (item.nodeType == 3) {
       this._parseDiv.innerHTML = item.rawText;
       let element = this._parseDiv.childNodes[0];
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
-        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
+        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
     } else if (item.nodeType == 8) {
       let element = document.createComment(item.rawText);
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
-        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0], length: item.range[1] - item.range[0] });
+        instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
     }
     return designItem;
   }

@@ -14,16 +14,16 @@ export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
   let s = getComputedStyle(element);
 
   let m = new DOMMatrix();
-  if (s.translate != 'none') {
+  if (s.translate != 'none' && s.translate) {
     m = m.multiply(new DOMMatrix('translate(' + s.translate + ')'));
   }
-  if (s.rotate != 'none') {
+  if (s.rotate != 'none' && s.rotate) {
     m = m.multiply(new DOMMatrix('rotate(' + s.rotate + ')'));
   }
-  if (s.scale != 'none') {
+  if (s.scale != 'none' && s.scale) {
     m = m.multiply(new DOMMatrix('scale(' + s.scale + ')'));
   }
-  if (s.transform != 'none') {
+  if (s.transform != 'none' && s.transform) {
     m = m.multiply(new DOMMatrix(s.transform));
   }
   return m;
@@ -148,7 +148,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   let actualElementMatrix: DOMMatrix;
   let newElementMatrix: DOMMatrix;
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
-  while (actualElement != ancestor) {
+  while (actualElement != ancestor && actualElement != null) {
     let cachedObj = ch.get(actualElement);
     if (cachedObj) {
       if (originalElementAndAllParentsMultipliedMatrix)
@@ -160,19 +160,21 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
     }
 
     const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
-    newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
-    newElementMatrix.m41 = newElementMatrix.m42 = 0;
-    if (actualElement == element) {
-      originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(newElementMatrix);
-    } else if (newElement != ancestor || !excludeAncestor) {
-      originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(newElementMatrix);
-    }
+    if (newElement) {
+      actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
+      newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
+      newElementMatrix.m41 = newElementMatrix.m42 = 0;
+      if (actualElement == element) {
+        originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(newElementMatrix);
+      } else if (newElement != ancestor || !excludeAncestor) {
+        originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(newElementMatrix);
+      }
 
-    lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
-    const cacheEntry: [DOMMatrix] = [originalElementAndAllParentsMultipliedMatrix];
-    lst.push(cacheEntry);
-    ch.set(actualElement, cacheEntry);
+      lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
+      const cacheEntry: [DOMMatrix] = [originalElementAndAllParentsMultipliedMatrix];
+      lst.push(cacheEntry);
+      ch.set(actualElement, cacheEntry);
+    }
 
     actualElement = newElement;
   }
@@ -187,6 +189,8 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   let byParentTransformedPointRelatedToCanvas: IPoint = { x: 0, y: 0 };
   while (actualElement != canvas) {
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
+    if (!parentElement)
+      break;
     const elementWindowOffset = getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement, designerCanvas.zoomFactor, cache);
 
     const toSplit = getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ');
