@@ -1156,7 +1156,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this._lastHoverDesignItem != currentDesignItem) {
       if (this._lastHoverDesignItem)
         this.extensionManager.removeExtension(this._lastHoverDesignItem, ExtensionType.MouseOver);
-      if (currentDesignItem && currentDesignItem != this.rootDesignItem && DomHelper.getHost(element.parentNode) !== this.overlayLayer)
+      if (currentDesignItem && currentDesignItem != this.rootDesignItem && (!element.parentNode || DomHelper.getHost(element.parentNode) !== this.overlayLayer))
         this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver, event);
       this._lastHoverDesignItem = currentDesignItem;
     }

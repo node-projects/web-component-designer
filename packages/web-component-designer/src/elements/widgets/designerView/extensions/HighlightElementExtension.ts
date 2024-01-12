@@ -20,8 +20,10 @@ export class HighlightElementExtension extends AbstractExtension {
 
   override refresh() {
     let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: offset, y: offset }, this.designerCanvas);
-    this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect);
-    this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+    if (!isNaN(transformedCornerPoints[0].x)) {
+      this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect);
+      this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+    }
   }
 
   override dispose() {

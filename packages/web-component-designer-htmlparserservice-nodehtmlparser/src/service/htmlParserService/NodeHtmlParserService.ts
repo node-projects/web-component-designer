@@ -79,6 +79,15 @@ export class NodeHtmlParserService implements IHtmlParserService {
       for (let c of item.childNodes) {
         let di = this._createDesignItemsRecursive(c, serviceContainer, instanceServiceContainer, element instanceof SVGElement ? 'http://www.w3.org/2000/svg' : null, snippet, positionOffset);
         designItem._insertChildInternal(di);
+
+        if (di.node instanceof HTMLTemplateElement && di.getAttribute('shadowrootmode') == 'open') {
+          try {
+            const shadow = (<HTMLElement>designItem.node).attachShadow({ mode: 'open' });
+            shadow.appendChild(di.node.content.cloneNode(true));
+          } catch (err) {
+            console.error("error attaching shadowdom", err)
+          }
+        }
       }
     } else if (item.nodeType == 3) {
       this._parseDiv.innerHTML = item.rawText;
