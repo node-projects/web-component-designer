@@ -14,7 +14,8 @@ export function inDesigner(element: Element): boolean {
 export function newElementFromString(text): Element {
   const range = document.createRange();
   range.selectNode(document.body);
-  const fragment = range.createContextualFragment(text);
+  //@ts-ignore
+  const fragment = range.createContextualFragment(text, { allowDeclarativeShadowDOM: true });
   return fragment.firstChild as Element;
 }
 
