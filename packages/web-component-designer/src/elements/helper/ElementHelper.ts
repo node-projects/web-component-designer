@@ -15,7 +15,7 @@ export function newElementFromString(text): Element {
   const range = document.createRange();
   range.selectNode(document.body);
   //@ts-ignore
-  const fragment = range.createContextualFragment(text, { allowDeclarativeShadowDOM: true });
+  const fragment = range.createContextualFragment(text, { includeShadowRoots: true });
   return fragment.firstChild as Element;
 }
 
