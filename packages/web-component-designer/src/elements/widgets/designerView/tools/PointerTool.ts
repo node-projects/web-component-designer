@@ -85,7 +85,7 @@ export class PointerTool implements ITool {
     }
 
     if (((event.ctrlKey || event.metaKey) && event.shiftKey) || event.buttons == 4) {
-      const panTool = designerCanvas.serviceContainer.designerTools.get(NamedTools.Pan);
+      const panTool = <ITool>designerCanvas.serviceContainer.designerTools.get(NamedTools.Pan);
       if (panTool) {
         panTool.pointerEventHandler(designerCanvas, event, currentElement);
         return;
@@ -176,7 +176,7 @@ export class PointerTool implements ITool {
   }
 
   private _pointerActionTypeDrawSelection(designerView: IDesignerCanvas, event: PointerEvent, currentElement: HTMLElement) {
-    const drawSelectionTool = designerView.serviceContainer.designerTools.get(NamedTools.DrawSelection);
+    const drawSelectionTool = <ITool>designerView.serviceContainer.designerTools.get(NamedTools.DrawSelection);
     if (drawSelectionTool) {
       this._resetTool();
       drawSelectionTool.pointerEventHandler(designerView, event, currentElement);

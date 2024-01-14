@@ -85,6 +85,7 @@ import { MultipleSelectionRectExtensionProvider } from '../widgets/designerView/
 import { DragDropService } from './dragDropService/DragDropService.js';
 import { EventsService } from './eventsService/EventsService.js';
 import { SimpleDemoProviderService } from './demoProviderService/SimpleDemoProviderService.js';
+import { DrawElementTool } from '../widgets/designerView/tools/DrawElementTool.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -188,6 +189,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerTools.set(NamedTools.MagicWandSelector, new MagicWandSelectorTool());
   serviceContainer.designerTools.set(NamedTools.PickColor, new PickColorTool());
   serviceContainer.designerTools.set(NamedTools.Text, new TextTool());
+  serviceContainer.designerTools.set(NamedTools.DrawElementTool, DrawElementTool);
 
   serviceContainer.designerPointerExtensions.push(
     //new CursorLinePointerExtensionProvider()

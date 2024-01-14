@@ -2,7 +2,7 @@ import { IElementDefinition } from '../../services/elementsService/IElementDefin
 import { dragDropFormatNameElementDefinition } from '../../../Constants.js';
 import { BaseCustomWebComponentLazyAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
-import { DrawElementTool } from '../designerView/tools/DrawElementTool.js';
+import { NamedTools } from '../designerView/tools/NamedTools.js';
 
 export class PaletteElements extends BaseCustomWebComponentLazyAppend {
 
@@ -138,7 +138,10 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
         e.preventDefault();
       }
       button.onclick = (x) => {
-        serviceContainer.globalContext.tool = new DrawElementTool(elementDefintion);
+        let tool = serviceContainer.designerTools.get(elementDefintion.tool ?? NamedTools.DrawElementTool);
+        if (typeof tool == 'function')
+          tool = new tool(elementDefintion)
+        serviceContainer.globalContext.tool = tool;
       }
       tdEl.appendChild(button);
       tr.appendChild(tdEl);

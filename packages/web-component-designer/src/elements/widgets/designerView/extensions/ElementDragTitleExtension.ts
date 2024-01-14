@@ -2,6 +2,7 @@ import { getTextWidth } from '../../../helper/TextHelper.js';
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
+import { ITool } from '../tools/ITool.js';
 import { NamedTools } from "../tools/NamedTools.js";
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
@@ -68,7 +69,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
     event.preventDefault();
     event.stopPropagation();
 
-    this.designerCanvas.serviceContainer.designerTools.get(NamedTools.Pointer).pointerEventHandler(this.designerCanvas, event, this.extendedItem.element);
+    (<ITool>this.designerCanvas.serviceContainer.designerTools.get(NamedTools.Pointer)).pointerEventHandler(this.designerCanvas, event, this.extendedItem.element);
   }
 
   override dispose() {
