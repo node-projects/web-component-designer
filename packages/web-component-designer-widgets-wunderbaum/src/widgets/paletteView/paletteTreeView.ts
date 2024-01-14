@@ -1,5 +1,5 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, cssFromString } from '@node-projects/base-custom-webcomponent';
-import { IElementsService, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
+import { IElementDefinition, IElementsService, NamedTools, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
@@ -27,6 +27,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         </div>
       </div>`;
 
+  private serviceContainer: ServiceContainer;
+
   constructor() {
     super();
     this._restoreCachedInititalValues();
@@ -50,6 +52,18 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         mode: 'hide',
         highlight: true
       },
+      click: (e) => {
+        if (e.event) { // only for clicked items, not when elements selected via code.
+          let node = e.node;
+          let elDef: IElementDefinition = node.data.ref;
+          if (elDef) {
+            let tool = this.serviceContainer.designerTools.get(elDef.tool ?? NamedTools.DrawElementTool);
+            if (typeof tool == 'function')
+              tool = new tool(elDef)
+            this.serviceContainer.globalContext.tool = tool;
+          }
+        }
+      },
       dnd: {
         guessDropEffect: true,
         preventRecursion: true, // Prevent dropping nodes on own descendants
@@ -69,6 +83,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   }
 
   public async loadControls(serviceContainer: ServiceContainer, elementsServices: IElementsService[]) {
+    this.serviceContainer = serviceContainer;
+
     let rootNode = this._tree.root;
     rootNode.removeChildren();
 
