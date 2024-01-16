@@ -69,6 +69,8 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       const tdEl = document.createElement("td");
 
       const button = document.createElement("button");
+      if (elementDefintion.displayHtml)
+        button.innerHTML = elementDefintion.displayHtml;
       button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
       button.draggable = true;
       button.ondragstart = (e) => {
