@@ -2,6 +2,8 @@ import { IBinding } from '../../item/IBinding.js';
 
 export interface IElementDefinition {
   tag: string;
+  iconPath?: string;
+	displayHtml?: string;
   name?: string;
   description?: string;
   import?: string;
