@@ -28,7 +28,7 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
     this.shadowRoot.appendChild(this._designerTabControl);
   }
 
-  public async loadControls(serviceContainer: ServiceContainer, elementsServices: IElementsService[]) {
+  public async loadControls(serviceContainer: ServiceContainer, elementsServices: IElementsService[], projectPath?: string) {
     for (const s of elementsServices) {
       try {
         let elements = await s.getElements();
