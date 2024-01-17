@@ -59,7 +59,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
     this._table = this._getDomElement<HTMLTableElement>('table');
   }
 
-  loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[]) {
+  loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[], projectPath: string) {
     for (const elementDefintion of elementDefintions) {
       let option = document.createElement("option");
       option.value = elementDefintion.tag;
@@ -69,6 +69,16 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       const tdEl = document.createElement("td");
 
       const button = document.createElement("button");
+
+      if( elementDefintion.iconPath && !elementDefintion.displayHtml && projectPath )
+      {
+        let icon_path= projectPath + elementDefintion.iconPath;
+        elementDefintion.displayHtml = 
+          '<table><tr>' +
+          '<td align="left" valign="middle" style="width:20px;"><img style="width:16px;height:16px" src="'+ icon_path+ '"></td>' +
+          '<td align="left" >' + elementDefintion.tag + '</td>' + 
+		      '</tr></table>\n';				
+      } 
       if (elementDefintion.displayHtml)
         button.innerHTML = elementDefintion.displayHtml;
       button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
