@@ -61,6 +61,12 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
 
   private textareaProperties: IProperty[] = [
     {
+      name: "value",
+      type: "string",
+      service: this,
+      propertyType: PropertyType.property
+    },
+    {
       name: "placeholder",
       type: "string",
       service: this,

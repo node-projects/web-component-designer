@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentLazyAppend, css, cssFromString, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { CommandType, IActivateable, ICodeView, IStringPosition, IUiCommand, IUiCommandHandler } from '@node-projects/web-component-designer';
+import { CommandType, IActivateable, ICodeView, InstanceServiceContainer, IStringPosition, IUiCommand, IUiCommandHandler } from '@node-projects/web-component-designer';
 import type * as monacoType from 'monaco-editor'
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
@@ -37,6 +37,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   private _monacoEditor: monacoType.editor.IStandaloneCodeEditor;
   private _editor: HTMLDivElement;
+  private _instanceServiceContainer: InstanceServiceContainer;
+  private _disableSelection: boolean;
 
   static override readonly style = css`
     :host {
@@ -174,6 +176,14 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
             this.onTextChanged.emit(this._monacoEditor.getValue())
           });
         });
+        this._monacoEditor.onDidChangeCursorPosition(e => {
+          const offset = this._monacoEditor.getModel().getOffsetAt(e.position);
+          if (this._instanceServiceContainer) {
+            this._disableSelection = true;
+            this._instanceServiceContainer.selectionService.setSelectionByTextRange(offset, offset);
+            this._disableSelection = false;
+          }
+        });
 
         this._monacoEditor.focus();
 
@@ -198,8 +208,9 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor.layout();
   }
 
-  update(code) {
+  update(code: string, instanceServiceContainer?: InstanceServiceContainer) {
     this.code = code;
+    this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
@@ -213,7 +224,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   setSelection(position: IStringPosition) {
-    if (this._monacoEditor) {
+    if (this._monacoEditor && !this._disableSelection) {
       let model = this._monacoEditor.getModel();
       let point1 = model.getPositionAt(position.start);
       let point2 = model.getPositionAt(position.start + position.length);
