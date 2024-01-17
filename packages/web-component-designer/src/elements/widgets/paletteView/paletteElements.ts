@@ -59,7 +59,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
     this._table = this._getDomElement<HTMLTableElement>('table');
   }
 
-  loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[], projectPath: string) {
+  loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[], projectPath?: string) {
     for (const elementDefintion of elementDefintions) {
       let option = document.createElement("option");
       option.value = elementDefintion.tag;
