@@ -434,7 +434,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       }
         break;
       case CommandType.setTool: {
-        this.serviceContainer.globalContext.tool = this.serviceContainer.designerTools.get(command.parameter);
+        this.serviceContainer.globalContext.tool = <ITool>this.serviceContainer.designerTools.get(command.parameter);
       }
         break;
       case CommandType.setStrokeColor: {
@@ -884,7 +884,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
 
   private async _onDrop(event: DragEvent) {
-    this.serviceContainer.globalContext.tool = this.serviceContainer.designerTools.get(NamedTools.Pointer);
+    this.serviceContainer.globalContext.tool = <ITool>this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._lastDdElement = null;
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
@@ -1214,7 +1214,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       currentElement = this.instanceServiceContainer.selectionService.primarySelection?.element ?? this._canvas;
     }
 
-    let tool = this.serviceContainer.globalContext.tool ?? this.serviceContainer.designerTools.get(NamedTools.Pointer);
+    let tool = this.serviceContainer.globalContext.tool ?? <ITool>this.serviceContainer.designerTools.get(NamedTools.Pointer);
 
     tool.pointerEventHandler(this, event, <Element>currentElement);
     this._canvas.style.cursor = tool.cursor;
