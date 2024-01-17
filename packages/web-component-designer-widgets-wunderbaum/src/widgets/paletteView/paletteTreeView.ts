@@ -4,6 +4,7 @@ import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
+import { WbNodeData } from 'types';
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _treeDiv: HTMLTableElement;
@@ -96,11 +97,14 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       try {
         let elements = await s.getElements();
         for (let e of elements) {
-          newNode.addChildren({
+          let node: WbNodeData = {
             title: e.name ?? e.tag,
             //@ts-ignore
             ref: e
-          });
+          };
+          if (e.icon)
+            node.icon = e.icon;
+          newNode.addChildren(node);
         }
       } catch (err) {
         console.warn('Error loading elements', err);

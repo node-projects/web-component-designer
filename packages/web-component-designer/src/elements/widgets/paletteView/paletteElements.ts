@@ -59,17 +59,29 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
     this._table = this._getDomElement<HTMLTableElement>('table');
   }
 
-  loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[]) {
+  loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[], relativeImagePath?: string) {
     for (const elementDefintion of elementDefintions) {
-      let option = document.createElement("option");
-      option.value = elementDefintion.tag;
-
       const tr = document.createElement("tr");
 
       const tdEl = document.createElement("td");
 
       const button = document.createElement("button");
-      button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
+      button.setAttribute("part", "button");
+      if (elementDefintion.icon && !elementDefintion.displayHtml) {
+        let icon = elementDefintion.icon;
+        if (!elementDefintion.icon.startsWith('data:')) {
+          icon = relativeImagePath + elementDefintion.icon;
+        }
+        button.innerHTML =
+          '<table><tr>' +
+          '<td align="left" valign="middle" style="width:20px;"><img style="width:16px;height:16px" src="' + icon + '"></td>' +
+          '<td align="left" >' + elementDefintion.tag + '</td>' +
+          '</tr></table>\n';
+      }
+      else if (elementDefintion.displayHtml)
+        button.innerHTML = elementDefintion.displayHtml;
+      else
+        button.innerText = elementDefintion.name ? elementDefintion.name : elementDefintion.tag;
       button.draggable = true;
       button.ondragstart = (e) => {
         e.dataTransfer.setData(dragDropFormatNameElementDefinition, JSON.stringify(elementDefintion));
