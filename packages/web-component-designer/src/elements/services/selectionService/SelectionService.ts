@@ -46,7 +46,10 @@ export class SelectionService implements ISelectionService {
 
   setSelectionByTextRange(positionStart: number, positionEnd: number) {
     const item = findDesignItem(this._designerCanvas.rootDesignItem, positionStart);
-    this.setSelectedElements([item]);
+    if (item) {
+      if (this.selectedElements.length != 1 || this.primarySelection != item)
+        this.setSelectedElements([item]);
+    }
   }
 
   _withoutUndoSetSelectedElements(designItems: IDesignItem[]) {
