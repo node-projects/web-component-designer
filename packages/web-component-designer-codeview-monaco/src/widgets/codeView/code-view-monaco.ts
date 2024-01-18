@@ -168,26 +168,46 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
         CodeViewMonaco.initMonacoEditor(CodeViewMonaco.monacoLib);
 
+        let selectionTimeout;
+        let disableCursorChange;
         let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-          this.onTextChanged.emit(this._monacoEditor.getValue())
+          console.log('text change')
+          if (selectionTimeout) {
+            clearTimeout(selectionTimeout);
+            selectionTimeout = null;
+          }
+          disableCursorChange = true;
+          setTimeout(() => {
+            disableCursorChange = false;
+          }, 50);
+          this.onTextChanged.emit(this._monacoEditor.getValue());
         });
         this._monacoEditor.onDidChangeModel(e => {
           changeContentListener.dispose();
           changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-            this.onTextChanged.emit(this._monacoEditor.getValue())
+            console.log('text change')
+            if (selectionTimeout) {
+              clearTimeout(selectionTimeout);
+              selectionTimeout = null;
+            }
+            disableCursorChange = true;
+            setTimeout(() => {
+              disableCursorChange = false;
+            }, 50);
+            this.onTextChanged.emit(this._monacoEditor.getValue());
           });
         });
         this._monacoEditor.onDidChangeCursorPosition(e => {
           const offset = this._monacoEditor.getModel().getOffsetAt(e.position);
-          let debounce = false;
-          if (this._instanceServiceContainer && !debounce && !this._disableSelectionAfterUpd) {
-            debounce = true;
+          if (this._instanceServiceContainer && !this._disableSelectionAfterUpd && !disableCursorChange) {
             this._disableSelection = true;
-            setTimeout(() => {
-              debounce = false;
+            if (selectionTimeout)
+              clearTimeout(selectionTimeout);
+            selectionTimeout = setTimeout(() => {
+              selectionTimeout = null;
+              this._instanceServiceContainer.selectionService.setSelectionByTextRange(offset, offset);
+              this._disableSelection = false;
             }, 50);
-            this._instanceServiceContainer.selectionService.setSelectionByTextRange(offset, offset);
-            this._disableSelection = false;
           }
         });
 
@@ -215,6 +235,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   update(code: string, instanceServiceContainer?: InstanceServiceContainer) {
+    console.log('update text');
     this.code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
@@ -232,6 +253,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   setSelection(position: IStringPosition) {
+    console.log('set selection');
     if (this._monacoEditor && !this._disableSelection) {
       let model = this._monacoEditor.getModel();
       let point1 = model.getPositionAt(position.start);
