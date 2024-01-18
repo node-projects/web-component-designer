@@ -179,7 +179,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor.onDidChangeCursorPosition(e => {
           const offset = this._monacoEditor.getModel().getOffsetAt(e.position);
           let debounce = false;
-          if (this._instanceServiceContainer && debounce) {
+          if (this._instanceServiceContainer && !debounce) {
             debounce = true;
             this._disableSelection = true;
             setTimeout(() => {
