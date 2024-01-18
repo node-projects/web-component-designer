@@ -39,6 +39,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   private _editor: HTMLDivElement;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _disableSelection: boolean;
+  private _disableSelectionAfterUpd: boolean;
 
   static override readonly style = css`
     :host {
@@ -179,7 +180,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor.onDidChangeCursorPosition(e => {
           const offset = this._monacoEditor.getModel().getOffsetAt(e.position);
           let debounce = false;
-          if (this._instanceServiceContainer && !debounce && !this._disableSelection) {
+          if (this._instanceServiceContainer && !debounce && !this._disableSelectionAfterUpd) {
             debounce = true;
             this._disableSelection = true;
             setTimeout(() => {
@@ -217,12 +218,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     this.code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
-      this._disableSelection = true;
+      this._disableSelectionAfterUpd = true;
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
       CodeViewMonaco.monacoLib.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
       CodeViewMonaco.monacoLib.editor.setTheme(this.theme);
-      this._disableSelection = false;
+      this._disableSelectionAfterUpd = false;
     }
   }
 
