@@ -179,7 +179,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor.onDidChangeCursorPosition(e => {
           const offset = this._monacoEditor.getModel().getOffsetAt(e.position);
           let debounce = false;
-          if (this._instanceServiceContainer && !debounce) {
+          if (this._instanceServiceContainer && !debounce && !this._disableSelection) {
             debounce = true;
             this._disableSelection = true;
             setTimeout(() => {
@@ -217,10 +217,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     this.code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
+      this._disableSelection = true;
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
       CodeViewMonaco.monacoLib.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
       CodeViewMonaco.monacoLib.editor.setTheme(this.theme);
+      this._disableSelection = false;
     }
   }
 
