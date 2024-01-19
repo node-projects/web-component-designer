@@ -373,6 +373,12 @@ export class NpmPackageLoader {
 
             importMap.imports[packageJsonObj.name + '/'] = baseUrl;
 
+            if (packageHacks[packageJsonObj.name]?.map) {
+                for (let h in packageHacks[packageJsonObj.name]?.map) [
+                    importMap.imports[h] = baseUrl + packageHacks[packageJsonObj.name].map[h]
+                ]
+            }
+
             //@ts-ignore
             importShim.addImportMap(importMap);
         }
