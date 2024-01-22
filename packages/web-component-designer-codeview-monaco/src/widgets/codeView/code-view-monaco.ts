@@ -39,6 +39,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   private _editor: HTMLDivElement;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _disableSelection: boolean;
+  private _disableSelectionAfterUpd: boolean;
 
   static override readonly style = css`
     :host {
@@ -167,21 +168,44 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
         CodeViewMonaco.initMonacoEditor(CodeViewMonaco.monacoLib);
 
+        let selectionTimeout;
+        let disableCursorChange;
         let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-          this.onTextChanged.emit(this._monacoEditor.getValue())
+          if (selectionTimeout) {
+            clearTimeout(selectionTimeout);
+            selectionTimeout = null;
+          }
+          disableCursorChange = true;
+          setTimeout(() => {
+            disableCursorChange = false;
+          }, 50);
+          this.onTextChanged.emit(this._monacoEditor.getValue());
         });
         this._monacoEditor.onDidChangeModel(e => {
           changeContentListener.dispose();
           changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-            this.onTextChanged.emit(this._monacoEditor.getValue())
+            if (selectionTimeout) {
+              clearTimeout(selectionTimeout);
+              selectionTimeout = null;
+            }
+            disableCursorChange = true;
+            setTimeout(() => {
+              disableCursorChange = false;
+            }, 50);
+            this.onTextChanged.emit(this._monacoEditor.getValue());
           });
         });
         this._monacoEditor.onDidChangeCursorPosition(e => {
           const offset = this._monacoEditor.getModel().getOffsetAt(e.position);
-          if (this._instanceServiceContainer) {
+          if (this._instanceServiceContainer && !this._disableSelectionAfterUpd && !disableCursorChange) {
             this._disableSelection = true;
-            this._instanceServiceContainer.selectionService.setSelectionByTextRange(offset, offset);
-            this._disableSelection = false;
+            if (selectionTimeout)
+              clearTimeout(selectionTimeout);
+            selectionTimeout = setTimeout(() => {
+              selectionTimeout = null;
+              this._instanceServiceContainer.selectionService.setSelectionByTextRange(offset, offset);
+              this._disableSelection = false;
+            }, 50);
           }
         });
 
@@ -212,10 +236,12 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     this.code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
+      this._disableSelectionAfterUpd = true;
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
       CodeViewMonaco.monacoLib.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
       CodeViewMonaco.monacoLib.editor.setTheme(this.theme);
+      this._disableSelectionAfterUpd = false;
     }
   }
 
