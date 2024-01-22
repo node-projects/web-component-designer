@@ -171,7 +171,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         let selectionTimeout;
         let disableCursorChange;
         let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-          console.log('text change')
           if (selectionTimeout) {
             clearTimeout(selectionTimeout);
             selectionTimeout = null;
@@ -185,7 +184,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor.onDidChangeModel(e => {
           changeContentListener.dispose();
           changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
-            console.log('text change')
             if (selectionTimeout) {
               clearTimeout(selectionTimeout);
               selectionTimeout = null;
@@ -235,7 +233,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   update(code: string, instanceServiceContainer?: InstanceServiceContainer) {
-    console.log('update text');
     this.code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
@@ -253,7 +250,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   setSelection(position: IStringPosition) {
-    console.log('set selection');
     if (this._monacoEditor && !this._disableSelection) {
       let model = this._monacoEditor.getModel();
       let point1 = model.getPositionAt(position.start);
