@@ -8,6 +8,7 @@ export interface IUndoService extends IService {
   canUndo(): boolean;
   canRedo(): boolean;
   clear();
+  clearTransactionstackIfNotEmpty();
   undo();
   redo();
   getUndoEntries(count?: number): Generator<string, void, unknown>

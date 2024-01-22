@@ -71,6 +71,13 @@ export class UndoService implements IUndoService {
     this._transactionStack = [];
   }
 
+  clearTransactionstackIfNotEmpty() {
+    if (this._transactionStack.length) {
+      console.warn("transactionStack was not empty, but should be", this._transactionStack);
+      this._transactionStack = [];
+    }
+  }
+
   undo() {
     if (!this.canUndo())
       return;

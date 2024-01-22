@@ -745,6 +745,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public setDesignItems(designItems: IDesignItem[]) {
+    this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
     const setItemsAction = new SetDesignItemsAction(designItems, [...this.rootDesignItem.children()]);
     this.instanceServiceContainer.undoService.execute(setItemsAction);
   }
