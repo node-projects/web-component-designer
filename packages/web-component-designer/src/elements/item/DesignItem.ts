@@ -408,7 +408,7 @@ export class DesignItem implements IDesignItem {
 
     DesignItem._designItemMap.set(node, this);
   }
-
+  
   public setView(node: Element) {
     this.view = node;
     DesignItem._designItemMap.set(node, this);
@@ -422,9 +422,27 @@ export class DesignItem implements IDesignItem {
     return DesignItem.GetOrCreateDesignItem(node, node, this.serviceContainer, this.instanceServiceContainer);
   }
 
+  static getCustomDiv(el : Element ) : Element 
+	{	
+		let customDiv: Element = null;
+		let par = el.parentElement;
+			 
+		while (par != null) {
+			let name= par.nodeName;
+			if( name.startsWith("CUSTOM"))
+				customDiv= par;
+			par = par.parentElement;
+		}
+		
+		return customDiv;
+	}
+  
   static GetOrCreateDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     if (!node)
       return null;
+    let customDiv= DesignItem.getCustomDiv(<Element>node);
+  	if( customDiv)
+  		node= customDiv;
     let designItem: IDesignItem = DesignItem._designItemMap.get(node);
     if (!designItem) {
       let dis = serviceContainer.designItemService;
