@@ -1205,7 +1205,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.clickOverlay.style.cursor = this._canvas.style.cursor;
 
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, currentElement, this.serviceContainer, this.instanceServiceContainer);
-    this.showHoverExtension(currentDesignItem.element, event);
+    if(currentDesignItem)
+      this.showHoverExtension(currentDesignItem.element, event);
 
     //TODO: needed ??
     if (currentElement && DomHelper.getHost(currentElement.parentNode) === this.overlayLayer) {
