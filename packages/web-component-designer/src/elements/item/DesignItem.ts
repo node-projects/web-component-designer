@@ -440,9 +440,14 @@ export class DesignItem implements IDesignItem {
   static GetOrCreateDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     if (!node)
       return null;
+    
+    if( node.nodeName.startsWith("STATIC"))
+		  return null;
+    
     let customDiv= DesignItem.getCustomDiv(<Element>node);
   	if( customDiv)
   		node= customDiv;
+    
     let designItem: IDesignItem = DesignItem._designItemMap.get(node);
     if (!designItem) {
       let dis = serviceContainer.designItemService;
