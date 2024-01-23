@@ -57,6 +57,8 @@ export class PointerTool implements ITool {
       }
       let newEl = designerCanvas.serviceContainer.elementAtPointService.getElementAtPoint(designerCanvas, { x: event.x, y: event.y });
       const designItem = DesignItem.GetOrCreateDesignItem(newEl, newEl, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+      if( !designItem)
+				return;
       if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
         designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
       }
@@ -124,7 +126,8 @@ export class PointerTool implements ITool {
 
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-
+    if(!currentDesignItem)
+			return;
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, currentElement);
