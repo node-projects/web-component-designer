@@ -45,15 +45,17 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
         } else if (stylesheets != null) {
             targetMap.clear();
             for (let stylesheet of stylesheets) {
+                let ast = null;
                 try {
-                    targetMap.set(stylesheet.name, {
-                        stylesheet: stylesheet,
-                        ast: await this.internalParse(stylesheet.content)
-                    });
+                    ast = await this.internalParse(stylesheet.content)
                 }
                 catch (err) {
                     console.warn("error parsing stylesheet", stylesheet, err)
                 }
+                targetMap.set(stylesheet.name, {
+                    stylesheet: stylesheet,
+                    ast: ast
+                });
             }
             if (targetMap == this._stylesheets)
                 this.stylesheetsChanged.emit();
@@ -120,7 +122,7 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
         return style;
     }
 
-    private static traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule | CSSSupportsRule): string {
+    private static traverseAndCollectRules(ruleContainer: CSSStyleSheet | CSSMediaRule | CSSContainerRule | CSSSupportsRule | CSSStyleRule, noPatch = false): string {
         let t = '';
         for (let rule of ruleContainer.cssRules) {
             if ((rule instanceof CSSContainerRule
@@ -134,18 +136,22 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
                 t += rule.cssText;
             }
             else if (rule instanceof CSSStyleRule) {
-                let parts = rule.selectorText.split(',');
                 let sel = "";
-                for (let p of parts) {
-                    if (p == ':host')
-                        sel += DesignerCanvas.cssprefixConstant
-                    else if (p.includes(DesignerCanvas.cssprefixConstant)) {
-                        sel += p;
-                        continue;
+                if (!noPatch) {
+                    let parts = rule.selectorText.split(',');
+                    for (let p of parts) {
+                        if (p == ':host')
+                            sel += DesignerCanvas.cssprefixConstant
+                        else if (p.includes(DesignerCanvas.cssprefixConstant)) {
+                            sel += p;
+                            continue;
+                        }
+                        if (sel)
+                            sel += ',';
+                        sel += DesignerCanvas.cssprefixConstant + p.trimStart();
                     }
-                    if (sel)
-                        sel += ',';
-                    sel += DesignerCanvas.cssprefixConstant + p.trimStart();
+                } else {
+                    sel = rule.selectorText;
                 }
                 t += sel;
                 let cssText = rule.style.cssText;
@@ -157,11 +163,14 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
                         cssText += e[0] + ':' + e[1].toString() + ';';
                     }
                 }
-                t += '{' + cssText + '}';
+                t += '{' + cssText;
 
-                /*if (rule.cssRules) {
-                    t += rule.cssText.split(rule.conditionText)[0] + rule.conditionText + " { " + this.traverseAndCollectRules(rule) + " }";
-                }*/
+                if (rule.cssRules?.length) {
+                    const part = this.traverseAndCollectRules(rule, true);
+                    t += part;
+                }
+
+                t += '}';
             }
         }
         return t;
