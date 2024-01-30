@@ -140,16 +140,17 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
                 if (!noPatch) {
                     let parts = rule.selectorText.split(',');
                     for (let p of parts) {
-                        if (p == ':host')
-                            sel += DesignerCanvas.cssprefixConstant;
-                        else if (p == ':root')
+                        if (sel)
+                            sel += ',';
+                        if (p.startsWith(':host')) {
+                            sel += p.replace(':host', DesignerCanvas.cssprefixConstant);
+                            continue;
+                        } else if (p == ':root')
                             sel += p;
                         else if (p.includes(DesignerCanvas.cssprefixConstant)) {
                             sel += p;
                             continue;
                         }
-                        if (sel)
-                            sel += ',';
                         sel += DesignerCanvas.cssprefixConstant + p.trimStart();
                     }
                 } else {
