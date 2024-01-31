@@ -15,7 +15,7 @@ export interface IDesignItem {
   lastContainerSize: ISize;
 
   setView(node: Element);
-  
+
   replaceNode(newNode: Node);
   nodeReplaced: TypedEvent<void>;
   clone(): Promise<IDesignItem>
@@ -91,4 +91,8 @@ export interface IDesignItem {
   lockAtDesignTime: boolean;
 
   getPlacementService(style?: CSSStyleDeclaration): IPlacementService;
+
+  getComputedStyleProperty(name: string, fallback: string): string;
+  getComputedStyle(): CSSStyleDeclaration;
+  querySelectorAll(selectors: string): NodeListOf<HTMLElement>;
 }

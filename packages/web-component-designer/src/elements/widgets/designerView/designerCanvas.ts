@@ -35,7 +35,6 @@ import { NodeType } from '../../item/NodeType.js';
 import { StylesheetChangedAction } from '../../services/undoService/transactionItems/StylesheetChangedAction.js';
 import { SetDesignItemsAction } from '../../services/undoService/transactionItems/SetDesignItemsAction.js';
 import { IDocumentStylesheet } from '../../services/stylesheetService/IStylesheetService.js';
-import { AbstractStylesheetService } from '../../services/stylesheetService/AbstractStylesheetService.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -123,6 +122,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   // Private Variables
   private _canvas: HTMLDivElement;
+  private _canvasShadowRoot: ShadowRoot;
   private _canvasContainer: HTMLDivElement;
   private _outercanvas2: HTMLDivElement;
 
@@ -146,19 +146,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       font-weight: inherit;
       font-style: inherit;
       line-height: inherit;
+      --node-projects-web-component-designer-background: inherit;
     }
     * {
       touch-action: none;
     }
     #node-projects-designer-canvas-canvas {
-      background-color: var(--canvas-background, white);
-      /* 10px grid, using http://www.patternify.com/ */
-      //background-image: url(data:image/png;base64,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);
-      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAFXmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjIwIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMjAiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIyMCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMjAiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSIKICAgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIKICAgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIgogICB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCIKICAgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCI+CiAgIDxkYzp0aXRsZT4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+QmFja2dyb3VuZGdyaWRfMTBweDwvcmRmOmxpPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnRpdGxlPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgRGVzaWduZXIgMS4xMC42IgogICAgICBzdEV2dDp3aGVuPSIyMDIyLTEyLTA4VDA5OjE1OjQ4KzAxOjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4fvgn+AAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kc8rRFEUxz8GjRhRLCiLl7BCftTExmLkV2ExnvJr8+bNvBk1b+b13kiyVbaKEhu/FvwFbJW1UkRKlrImNug5b2ZqJplzO/d87vfec7r3XPCpSd10KnrATGXs8FhImZtfUPwvBKjCTx/Nmu5YUzOjKiXt854yL952ebVKn/vXaqIxR4eyKuEh3bIzwuPCk6sZy+Md4UY9oUWFz4Q7bbmg8J2nR3L86nE8x98e22p4GHz1wkq8iCNFrCdsU1heTpuZXNHz9/FeEoilZmcktoq34BBmjBAKE4wwTJBeBmUO0iX96ZYVJfJ7svnTpCVXl9liDZtl4iTI0CnqilSPSTREj8lIsub1/29fHaO/L1c9EILKZ9d9bwf/Nvxsue7Xkev+HEP5E1ymCvnpQxj4EH2roLUdQN0GnF8VtMguXGxC06Ol2VpWKhf3GQa8nULtPDTcQPVirmf5fU4eQF2Xr7qGvX3okPN1S790cWfsRnax1QAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAC9JREFUOI1jfPr0KQNuICUlhUeWCY8cQTCqeWRoZvz//z8e6WfPntHK5lHNI0MzAMChCNMTuPcnAAAAAElFTkSuQmCC);
+      background: var(--node-projects-web-component-designer-background, border-box fixed 0px 0px repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAFXmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjIwIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMjAiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIyMCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMjAiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSIKICAgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIKICAgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIgogICB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCIKICAgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCI+CiAgIDxkYzp0aXRsZT4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+QmFja2dyb3VuZGdyaWRfMTBweDwvcmRmOmxpPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnRpdGxlPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgRGVzaWduZXIgMS4xMC42IgogICAgICBzdEV2dDp3aGVuPSIyMDIyLTEyLTA4VDA5OjE1OjQ4KzAxOjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4fvgn+AAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kc8rRFEUxz8GjRhRLCiLl7BCftTExmLkV2ExnvJr8+bNvBk1b+b13kiyVbaKEhu/FvwFbJW1UkRKlrImNug5b2ZqJplzO/d87vfec7r3XPCpSd10KnrATGXs8FhImZtfUPwvBKjCTx/Nmu5YUzOjKiXt854yL952ebVKn/vXaqIxR4eyKuEh3bIzwuPCk6sZy+Md4UY9oUWFz4Q7bbmg8J2nR3L86nE8x98e22p4GHz1wkq8iCNFrCdsU1heTpuZXNHz9/FeEoilZmcktoq34BBmjBAKE4wwTJBeBmUO0iX96ZYVJfJ7svnTpCVXl9liDZtl4iTI0CnqilSPSTREj8lIsub1/29fHaO/L1c9EILKZ9d9bwf/Nvxsue7Xkev+HEP5E1ymCvnpQxj4EH2roLUdQN0GnF8VtMguXGxC06Ol2VpWKhf3GQa8nULtPDTcQPVirmf5fU4eQF2Xr7qGvX3okPN1S790cWfsRnax1QAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAC9JREFUOI1jfPr0KQNuICUlhUeWCY8cQTCqeWRoZvz//z8e6WfPntHK5lHNI0MzAMChCNMTuPcnAAAAAElFTkSuQmCC));
       image-rendering: pixelated;
-      background-position: 0px 0px;
-      background-attachment: fixed;
-      background-origin: -box;
       box-sizing: border-box;
       width: 100%;
       height: 100%;
@@ -321,6 +316,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._restoreCachedInititalValues();
 
     this._canvas = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvas');
+    this._canvasShadowRoot = this._canvas.attachShadow({ mode: 'open' })
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
     this.clickOverlay = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-clickOverlay');
@@ -382,15 +378,31 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private applyAllStyles() {
-    let styles = [this.constructor.style]
+    let styles: CSSStyleSheet[] = []
     if (this._additionalStyle)
-      styles.push(cssFromString(AbstractStylesheetService.buildPatchedStyleSheet(this._additionalStyle)));
+      styles.push(...this._additionalStyle);
     if (this.instanceServiceContainer.stylesheetService) {
       styles.push(...this.instanceServiceContainer.stylesheetService
         .getStylesheets()
-        .map(x => cssFromString(AbstractStylesheetService.buildPatchedStyleSheet([cssFromString(x.content)]))));
+        .map(x => cssFromString(x.content)));
     }
-    this.shadowRoot.adoptedStyleSheets = styles;
+
+    let backgroundSet = false;
+    for (const s of styles) {
+      for (let r of s.cssRules) {
+        if (r instanceof CSSStyleRule) {
+          if (r.selectorText.split(',').includes(':host')) {
+            if (r.style.background) {
+              this._canvas.style.background = r.style.background;
+              backgroundSet = true;
+            }
+          }
+        }
+      }
+    }
+    if (!backgroundSet)
+      this._canvas.style.background = ''
+    this._canvasShadowRoot.adoptedStyleSheets = styles;
   }
 
 
@@ -475,12 +487,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public disableBackgroud() {
-    this._backgroundImage = this._canvas.style.backgroundImage;
     this._canvas.style.backgroundImage = 'none';
   }
 
   public enableBackground() {
-    this._canvas.style.backgroundImage = this._backgroundImage;
+    this._canvas.style.backgroundImage = 'var(--node-projects-web-component-designer-background)';
   }
 
   public zoomToFit() {
@@ -639,6 +650,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
 
     this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this._canvas, this.serviceContainer, this.instanceServiceContainer);
+    //this.rootDesignItem.setView(<any>this._canvasShadowRoot);
     const contentService = this.serviceContainer.getLastService('contentService')
     if (contentService) {
       this.instanceServiceContainer.register("contentService", contentService(this));
@@ -778,7 +790,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private async reparseDocumentStylesheets() {
     if (this.instanceServiceContainer.stylesheetService) {
-      const styleElements = this.rootDesignItem.element.querySelectorAll('style');
+      const styleElements = this.rootDesignItem.querySelectorAll('style');
       let i = 1;
       const intStyleSheets: IDocumentStylesheet[] = [...styleElements].map(x => ({ name: '&lt;style&gt; #' + (x.id ? x.id + '(' + i++ + ')' : i++), content: DesignItem.GetDesignItem(x).content, designItem: DesignItem.GetDesignItem(x) }));
       await this.instanceServiceContainer.stylesheetService.setDocumentStylesheets(intStyleSheets);
@@ -950,10 +962,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     let input = this._getDomElement<HTMLInputElement>('node-projects-designer-search-input');
     this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = "0 selected";
     if (input.value != "") {
-      let selectedElements = this.shadowRoot.querySelectorAll(input.value);
+      let selectedElements = this._canvasShadowRoot.querySelectorAll(input.value);
       let designItems = [];
       for (let i = 0; i <= selectedElements.length; i++) {
-        if (this._canvasContainer.contains(selectedElements[i]))
+        if (this._canvasShadowRoot.contains(selectedElements[i]))
           designItems.push(DesignItem.GetDesignItem(selectedElements[i]));
       }
       if (designItems.length > 0) {
@@ -1092,57 +1104,33 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   //TODO: remove
   public elementFromPoint(x: number, y: number): Element {
-    let elements = this.shadowRoot.elementsFromPoint(x, y);
+    let elements = this._canvasShadowRoot.elementsFromPoint(x, y);
     let element = elements[0];
-    if (element === this.clickOverlay)
-      element = elements[1];
-    if (element === this.clickOverlay)
-      element = this._canvas;
     return element;
   }
 
   public elementsFromPoint(x: number, y: number): Element[] {
     let retVal: Element[] = [];
-    let elements = this.shadowRoot.elementsFromPoint(x, y);
+    let elements = this._canvasShadowRoot.elementsFromPoint(x, y);
     for (let e of elements) {
-      if (e == this.clickOverlay)
+      if (e.getRootNode() !== this._canvasShadowRoot)
         continue;
-      if (e == this.overlayLayer)
-        continue;
-      if (e.getRootNode() !== this.shadowRoot)
-        continue;
-      if (e == this._outercanvas2)
-        break;
       retVal.push(e);
-      if (e === this._canvas)
-        break;
     }
     return retVal;
   }
 
   public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
-    const elements = this.shadowRoot.elementsFromPoint(point.x, point.y);
+    const elements = this._canvasShadowRoot.elementsFromPoint(point.x, point.y);
     let currentElement: HTMLElement = null;
 
     for (let i = 0; i < elements.length; i++) {
       currentElement = <HTMLElement>elements[i];
-      if (currentElement == this._outercanvas2) {
-        currentElement = null;
-        break;
-      }
-      if (currentElement == this.clickOverlay) {
-        currentElement = null;
-        continue;
-      }
-      if (currentElement == this.overlayLayer) {
-        currentElement = null;
-        continue;
-      }
       if (ignoreElementCallback && ignoreElementCallback(currentElement)) {
         currentElement = null;
         continue;
       }
-      if (currentElement.getRootNode() !== this.shadowRoot) {
+      if (currentElement.getRootNode() !== this._canvasShadowRoot) {
         currentElement = null;
         continue;
       }

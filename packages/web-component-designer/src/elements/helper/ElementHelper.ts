@@ -92,7 +92,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       let t = element.style.transform;
       element.style.transform = '';
       const bcEl = element.getBoundingClientRect();
-      const bcPar = element.parentElement.getBoundingClientRect();
+      const bcPar = element.parentElement ? element.parentElement.getBoundingClientRect() : (<ShadowRoot>element.getRootNode()).host.getBoundingClientRect();
       element.style.transform = t;
       const currLeft = (bcEl.left - bcPar.left) / zoom;
       const currTop = (bcEl.top - bcPar.top) / zoom;
@@ -104,7 +104,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       lst.push(cacheEntry);
       ch.set(element, cacheEntry);
 
-      element = element.parentElement;
+      element = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
     } else if (element instanceof SVGGraphicsElement) {
       let bbox = element.getBBox();
       offsetLeft += bbox.x;
@@ -131,7 +131,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 
       offsetLeft += element.offsetLeft;
       offsetTop += element.offsetTop;
-      element = element.offsetParent;
+      element = element.offsetParent  ? element.offsetParent : (<ShadowRoot>element.getRootNode()).host;
     }
   }
   return { offsetLeft: offsetLeft, offsetTop: offsetTop };

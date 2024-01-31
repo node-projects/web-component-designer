@@ -40,7 +40,7 @@ export class MagicWandSelectorTool implements ITool {
         (<Element>event.target).releasePointerCapture(event.pointerId);
         designerCanvas.releaseActiveTool();
 
-        const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
+        const elements = designerCanvas.rootDesignItem.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];
 
         let point: DOMPointInit = designerCanvas.overlayLayer.createPoint();

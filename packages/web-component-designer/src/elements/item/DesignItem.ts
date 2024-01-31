@@ -376,6 +376,14 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
+  querySelectorAll(selectors: string): NodeListOf<HTMLElement> {
+    if (this.isRootItem) {
+      return (<HTMLElement>this.node).shadowRoot.querySelectorAll(selectors);
+    } else {
+      return this.element.querySelectorAll(selectors);
+    }
+  }
+
   updateChildrenFromNodesChildren() {
     this._childArray = [];
     if (this.nodeType == NodeType.Element) {
@@ -508,7 +516,7 @@ export class DesignItem implements IDesignItem {
     return value ?? fallback;
   }
 
-  getComputedStyle(name: string, fallback: string = null) {
+  getComputedStyleProperty(name: string, fallback: string = null) {
     let nm = name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
@@ -518,6 +526,13 @@ export class DesignItem implements IDesignItem {
       value = getComputedStyle(this.element).getPropertyValue(nm)
     }
     return value ?? fallback;
+  }
+
+  getComputedStyle() {
+    /*if (this.isRootItem) {
+      return window.getComputedStyle((<ShadowRoot>this.node).host);
+    }*/
+    return window.getComputedStyle(this.element);
   }
 
   _stylesCache: IStyleRule[] = null;
@@ -571,13 +586,17 @@ export class DesignItem implements IDesignItem {
 
     if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
       this._childArray.push(designItem);
-      if (this.view instanceof HTMLTemplateElement) {
-        this.view.content.appendChild(designItem.view)
+      if (this.isRootItem) {
+        (<HTMLElement>this.node).shadowRoot.appendChild(designItem.view);
+      } else if (this.view instanceof HTMLTemplateElement) {
+        this.view.content.appendChild(designItem.view);
       } else
         this.view.appendChild(designItem.view);
     } else {
       let el = this._childArray[index];
-      if (this.view instanceof HTMLTemplateElement) {
+      if (this.isRootItem) {
+        (<HTMLElement>this.node).shadowRoot.insertBefore(designItem.view, el.element);
+      } else if (this.view instanceof HTMLTemplateElement) {
         this.view.content.insertBefore(designItem.view, el.element)
       } else
         this.view.insertBefore(designItem.view, el.element)
