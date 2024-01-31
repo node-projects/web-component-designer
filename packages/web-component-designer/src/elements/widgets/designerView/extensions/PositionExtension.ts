@@ -21,7 +21,7 @@ export class PositionExtension extends AbstractExtension {
 
   override refresh() {
     const itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
-    const itemParentRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element.parentElement);
+    const itemParentRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.parent.element);
 
     this._line1 = this._drawLine(itemParentRect.x, itemRect.y + itemRect.height / 2, itemRect.x, itemRect.y + itemRect.height / 2, 'svg-position', this._line1);
     this._line2 = this._drawLine(itemParentRect.x + itemParentRect.width, itemRect.y + itemRect.height / 2, itemRect.x + itemRect.width, itemRect.y + itemRect.height / 2, 'svg-position', this._line2);

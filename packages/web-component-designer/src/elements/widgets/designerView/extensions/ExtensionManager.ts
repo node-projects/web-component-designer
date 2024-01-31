@@ -18,6 +18,13 @@ export class ExtensionManager implements IExtensionManager {
 
     designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
     designerCanvas.instanceServiceContainer.contentService.onContentChanged.on(this._contentChanged.bind(this));
+
+    setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
+  }
+
+  private refreshAllExtensionsTimeout() {
+    this.refreshAllAppliedExtentions();
+    setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
   }
 
   private _contentChanged(contentChanged: IContentChanged) {
@@ -92,6 +99,7 @@ export class ExtensionManager implements IExtensionManager {
             }
             appE.push(ext);
             designItem.appliedDesignerExtensions.set(extensionType, appE);
+
             this.designItemsWithExtentions.add(designItem);
           }
         }
@@ -279,8 +287,7 @@ export class ExtensionManager implements IExtensionManager {
                   e.refresh(cache, event);
                 if (timeout) {
                   const end = performance.now();
-                  if (end - start > timeout)
-                  {
+                  if (end - start > timeout) {
                     console.warn("refreshExtensions() took too long, stopped refreshing");
                     break outer1;
                   }
@@ -303,8 +310,7 @@ export class ExtensionManager implements IExtensionManager {
                   e.refresh(cache, event);
                   if (timeout) {
                     const end = performance.now();
-                    if (end - start > timeout)
-                    {
+                    if (end - start > timeout) {
                       console.warn("refreshExtensions() took too long, stopped refreshing");
                       break outer2;
                     }

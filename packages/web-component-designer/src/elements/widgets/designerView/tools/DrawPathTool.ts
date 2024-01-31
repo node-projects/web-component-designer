@@ -129,6 +129,7 @@ export class DrawPathTool implements ITool {
           this._path.setAttribute("d", d);
           this._path.removeAttribute("stroke");
           this._path.removeAttribute("stroke-width");
+          this._path.removeAttribute("overlay-source");
           svg.appendChild(this._path);
           svg.style.left = (mvX) + 'px';
           svg.style.top = (mvY) + 'px';

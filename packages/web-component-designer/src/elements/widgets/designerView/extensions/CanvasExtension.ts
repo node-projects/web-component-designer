@@ -10,7 +10,7 @@ export class CanvasExtension extends AbstractExtension {
   }
 
   override extend() {
-    let itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
+    const itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
     const computedStyle = getComputedStyle(this.extendedItem.element);
     if (computedStyle.margin !== '0px') {
       const left = Number.parseFloat(computedStyle.marginLeft.replace('px', ''));

@@ -32,13 +32,13 @@ export class ResizeExtension extends AbstractExtension {
     this.resizeAllSelected = resizeAllSelected;
   }
 
-  override extend() {
-    this.refresh();
+  override extend(cache: Record<string|symbol, any>, event?: Event) {
+    this.refresh(cache, event);
   }
 
-  override refresh() {
+  override refresh(cache: Record<string|symbol, any>, event?: Event) {
     //#region Resizer circles
-    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
+    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
 
     this._circle1 = this._drawResizerOverlay(transformedCornerPoints[0].x, transformedCornerPoints[0].y, 'nw-resize', this._circle1);
     this._circle2 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[1].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[1].y - transformedCornerPoints[0].y) / 2), 'n-resize', this._circle2);

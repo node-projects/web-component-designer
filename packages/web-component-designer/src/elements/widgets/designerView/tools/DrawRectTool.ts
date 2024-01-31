@@ -114,6 +114,7 @@ export class DrawRectTool implements ITool {
         this._path.setAttribute("y", (this._py - mvY).toString());
         this._path.removeAttribute("stroke");
         this._path.removeAttribute("stroke-width");
+        this._path.removeAttribute("overlay-source");
         svg.appendChild(this._path);
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';

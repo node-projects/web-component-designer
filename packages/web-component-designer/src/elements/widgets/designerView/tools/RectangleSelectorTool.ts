@@ -62,7 +62,7 @@ export class RectangleSelectorTool implements ITool {
         (<Element>event.target).releasePointerCapture(event.pointerId);
         designerCanvas.releaseActiveTool();
 
-        const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
+        const elements = designerCanvas.rootDesignItem.querySelectorAll('*');
         let inSelectionElements: IDesignItem[] = [];
 
         let point = designerCanvas.overlayLayer.createPoint();

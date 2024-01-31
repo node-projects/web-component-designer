@@ -18,8 +18,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend() {
-    const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
+  override extend(cache: Record<string|symbol, any>, event?: Event) {
+    const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
     if (!isNaN(transformedCornerPoints[0].x)) {
       const boundRect = this.extendedItem.element.getBoundingClientRect();
       let w = getTextWidth(this.extendedItem.name, '10px monospace');
@@ -36,15 +36,15 @@ export class ElementDragTitleExtension extends AbstractExtension {
       this._rect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
       this._rect.addEventListener('pointermove', (e) => this._pointerEvent(e));
       this._rect.addEventListener('pointerup', (e) => this._pointerEvent(e));
-      this.refresh();
+      this.refresh(cache, event);
     }
   }
 
   _drawMoveOverlay(itemRect: DOMRect) {
   }
 
-  override refresh() {
-    const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 0, y: 16 }, this.designerCanvas);
+  override refresh(cache: Record<string|symbol, any>, event?: Event) {
+    const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 0, y: 16 }, this.designerCanvas, cache);
     const angle = Math.atan2((transformedCornerPoints[1].y - transformedCornerPoints[0].y), (transformedCornerPoints[1].x - transformedCornerPoints[0].x)) * 180 / Math.PI;
     const transformedCornerPointsTx = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 0, y: 5 }, this.designerCanvas);
 

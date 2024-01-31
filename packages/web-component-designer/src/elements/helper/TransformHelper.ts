@@ -2,6 +2,9 @@ import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
 import { getElementsWindowOffsetWithoutSelfAndParentTransformations, getParentElementIncludingSlots } from "./ElementHelper.js";
 
+//TODO:
+//transform-box
+
 let identityMatrix: number[] = [
   1, 0, 0, 0,
   0, 1, 0, 0,
@@ -183,7 +186,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
 }
 
 export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement, point: DOMPoint, designerCanvas: IDesignerCanvas, cache?: Record<string | symbol, any>) {
-  const canvas = element.closest('#node-projects-designer-canvas-canvas');
+  const canvas = designerCanvas.rootDesignItem.node;
   let actualElement: HTMLElement = element;
   let parentElementTransformOriginToPointVectorTransformed: DOMPointReadOnly;
   let byParentTransformedPointRelatedToCanvas: IPoint = { x: 0, y: 0 };
