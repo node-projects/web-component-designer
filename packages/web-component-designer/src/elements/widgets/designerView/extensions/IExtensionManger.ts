@@ -7,6 +7,7 @@ export interface IExtensionManager {
   applyExtensions(designItems: IDesignItem[], extensionType: ExtensionType, event?: Event, recursive?: boolean);
   removeExtension(designItem: IDesignItem, extensionType?: ExtensionType);
   removeExtensions(designItems: IDesignItem[], recursive: boolean, extensionType?: ExtensionType);
+  removeExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension);
   refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType, event?: Event);
   refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, event?: Event, ignoredExtension?: IDesignerExtension, timeout?: number);
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension);

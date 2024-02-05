@@ -157,6 +157,25 @@ export class ExtensionManager implements IExtensionManager {
     this.designerCanvas.overlayLayer.endBatch();
   }
 
+  removeExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension) {
+    for (let e of designItem.appliedDesignerExtensions) {
+      const idx = e[1].indexOf(extension);
+      if (idx >= 0) {
+        try {
+          extension.dispose();
+        }
+        catch (err) {
+          console.error(err);
+        }
+        e[1].splice(idx, 1);
+        if (e[1].length == 0)
+          designItem.appliedDesignerExtensions.delete(e[0]);
+        if (!designItem.appliedDesignerExtensions.size)
+          this.designItemsWithExtentions.delete(designItem);
+      }
+    }
+  }
+
   removeExtension(designItem: IDesignItem, extensionType?: ExtensionType) {
     if (designItem) {
       if (extensionType) {
@@ -243,15 +262,19 @@ export class ExtensionManager implements IExtensionManager {
   refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType, event?: Event) {
     if (designItem) {
       if (extensionType) {
-        let exts = designItem.appliedDesignerExtensions.get(extensionType);
-        if (exts) {
-          const cache = {};
-          for (let e of exts) {
-            try {
-              e.refresh(cache, event);
-            }
-            catch (err) {
-              console.error(err);
+        if (!designItem.element.isConnected) {
+          this.removeExtension(designItem, extensionType);
+        } else {
+          let exts = designItem.appliedDesignerExtensions.get(extensionType);
+          if (exts) {
+            const cache = {};
+            for (let e of exts) {
+              try {
+                e.refresh(cache, event);
+              }
+              catch (err) {
+                console.error(err);
+              }
             }
           }
         }
@@ -279,22 +302,26 @@ export class ExtensionManager implements IExtensionManager {
         const cache = {};
         outer1:
         for (let i of designItems) {
-          let exts = i.appliedDesignerExtensions.get(extensionType);
-          if (exts) {
-            for (let e of exts) {
-              try {
-                if (e != ignoredExtension)
-                  e.refresh(cache, event);
-                if (timeout) {
-                  const end = performance.now();
-                  if (end - start > timeout) {
-                    console.warn("refreshExtensions() took too long, stopped refreshing");
-                    break outer1;
+          if (!i.element.isConnected) {
+            this.removeExtension(i, extensionType);
+          } else {
+            let exts = i.appliedDesignerExtensions.get(extensionType);
+            if (exts) {
+              for (let e of exts) {
+                try {
+                  if (e != ignoredExtension)
+                    e.refresh(cache, event);
+                  if (timeout) {
+                    const end = performance.now();
+                    if (end - start > timeout) {
+                      console.warn("refreshExtensions() took too long, stopped refreshing");
+                      break outer1;
+                    }
                   }
                 }
-              }
-              catch (err) {
-                console.error(err);
+                catch (err) {
+                  console.error(err);
+                }
               }
             }
           }

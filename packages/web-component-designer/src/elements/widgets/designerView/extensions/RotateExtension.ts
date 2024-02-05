@@ -19,19 +19,24 @@ export class RotateExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend() {
-    this.refresh();
+  override extend(cache: Record<string | symbol, any>, event?: Event) {
+    this.refresh(cache, event);
   }
 
-  override refresh() {
+  override refresh(cache: Record<string | symbol, any>, event?: Event) {
     const rect = this.extendedItem.element.getBoundingClientRect();
     this._actualRotationAngle = getRotationAngleFromMatrix(null, new DOMMatrix((<HTMLElement>this.extendedItem.element).style.transform));
-    this._rotateIcon = this._drawRotateOverlay(rect, this._rotateIcon);
+    this._rotateIcon = this._drawRotateOverlay(rect, this._rotateIcon, cache);
   }
 
-  _drawRotateOverlay(itemRect: DOMRect, oldRotateIcon: any) {
-    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 10, y: 10 }, this.designerCanvas);
+  _drawRotateOverlay(itemRect: DOMRect, oldRotateIcon: any, cache: Record<string | symbol, any>) {
+    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 10, y: 10 }, this.designerCanvas, cache);
     let rotateIconPosition: DOMPoint = transformedCornerPoints[0];
+
+    if (isNaN(transformedCornerPoints[0].x) || isNaN(transformedCornerPoints[1].x)) {
+      this.remove();
+      return;
+    }
 
     if (!oldRotateIcon) {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");

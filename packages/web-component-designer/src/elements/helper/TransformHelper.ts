@@ -222,8 +222,8 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   return byParentTransformedPointRelatedToCanvas;
 }
 
-export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement, point: IPoint, designerCanvas: IDesignerCanvas): IPoint {
-  return getDesignerCanvasNormalizedTransformedCornerDOMPoints(element, { x: -point.x, y: -point.y }, designerCanvas)[0];
+export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement, point: IPoint, designerCanvas: IDesignerCanvas, cache: Record<string | symbol, any>): IPoint {
+  return getDesignerCanvasNormalizedTransformedCornerDOMPoints(element, { x: -point.x, y: -point.y }, designerCanvas, cache)[0];
 }
 
 export function getElementSize(element: HTMLElement) {
