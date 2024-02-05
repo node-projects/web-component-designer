@@ -15,7 +15,7 @@ export class SelectionDefaultExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend(cache: Record<string|symbol, any>, event?: Event) {
+  override extend(cache: Record<string | symbol, any>, event?: Event) {
     this.refresh(cache);
   }
 
@@ -28,6 +28,10 @@ export class SelectionDefaultExtension extends AbstractExtension {
     else
       transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
 
+    if (isNaN(transformedCornerPoints[0].x) || isNaN(transformedCornerPoints[1].x)) {
+      this.remove();
+      return;
+    }
     this._line1 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'svg-selection', this._line1);
     this._line2 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'svg-selection', this._line2);
     this._line3 = this._drawLine(transformedCornerPoints[1].x, transformedCornerPoints[1].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-selection', this._line3);

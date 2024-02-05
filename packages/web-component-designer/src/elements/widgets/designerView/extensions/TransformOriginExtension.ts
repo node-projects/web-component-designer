@@ -17,11 +17,14 @@ export class TransformOriginExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend() {
+  override extend(cache: Record<string | symbol, any>, event?: Event) {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
-    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas);
-
+    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas, cache);
+    if (isNaN(toDOMPoint.x) || isNaN(toDOMPoint.y)) {
+      this.remove();
+      return;
+    }
     this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
     this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     this._circle.style.cursor = 'pointer';
@@ -91,16 +94,18 @@ export class TransformOriginExtension extends AbstractExtension {
           }
           else
             this.extendedItem.updateStyleInSheetOrLocal('transform-origin', newX + 'px' + ' ' + newY + 'px');
-          this.refresh();
+          this.refresh(null, null);
           this._startPos = null;
         }
         break;
     }
   }
 
-  override refresh() {
-    this._removeAllOverlays();
-    this.extend();
+  override refresh(cache: Record<string | symbol, any>, event?: Event) {
+    if (this._circle) {
+      this._removeAllOverlays();
+      this.extend(cache, event);
+    }
   }
 
   override dispose() {
