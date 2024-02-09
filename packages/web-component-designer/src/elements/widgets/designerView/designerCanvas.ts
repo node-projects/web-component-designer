@@ -488,7 +488,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.canvasOffset = { x: 0, y: 0 };
     this.zoomFactor = 1;
 
-    for (let n of DomHelper.getAllChildNodes(this.rootDesignItem.element)) {
+    for (let n of this.rootDesignItem.querySelectorAll('*')) {
       if (n instanceof Element) {
         const rect = n.getBoundingClientRect();
         minX = minX < rect.x ? minX : rect.x;
