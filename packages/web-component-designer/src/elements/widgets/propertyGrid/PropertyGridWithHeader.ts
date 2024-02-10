@@ -43,6 +43,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       overflow: hidden;
       font-size: 12px;
       height: 20px;
+      border: none;
     }
     #pg {
       height: calc(100% - 64px);
@@ -51,7 +52,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
   static override readonly template = html`
   <div class="root">
-    <span style="grid-column: span 3;" class="desc">Type:</span><span id="type"></span>
+    <span style="grid-column: span 3;" class="desc">Type:</span><input type="text" readonly id="type">
     <button id="config" style="display: none; grid-column: 5; grid-row: span 3; height: calc(100% - 10px); margin-left: 10px;">config</button>
     <div title="id" id="idRect" style="grid-column: 1; width: 7px; height: 7px; border: 1px solid white;"></div>
     <span style="grid-column: span 2;" class="desc">Id:</span><input type="text" id="id">
@@ -61,7 +62,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   </div>
   <node-projects-property-grid id="pg"></node-projects-property-grid>`
 
-  private _type: HTMLSpanElement;
+  private _type: HTMLInputElement;
   private _id: HTMLInputElement;
   private _content: HTMLInputElement;
   private _pg: PropertyGrid;
@@ -77,7 +78,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     super();
     this._restoreCachedInititalValues();
 
-    this._type = this._getDomElement<HTMLSpanElement>('type');
+    this._type = this._getDomElement<HTMLInputElement>('type');
     this._id = this._getDomElement<HTMLInputElement>('id');
     this._content = this._getDomElement<HTMLInputElement>('content');
     this._pg = this._getDomElement<PropertyGrid>('pg');
@@ -152,10 +153,12 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         this._configButton.style.display = 'none';
       }
 
-      if (this._instanceServiceContainer.selectionService.primarySelection?.nodeType == NodeType.Element)
-        this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
-      else
-        this._type.innerText = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
+      if (this._instanceServiceContainer.selectionService.primarySelection?.nodeType == NodeType.Element) {
+        this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
+      } else {
+        this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
+      }
+      this._type.title = this._type.value;
       this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
       if (this._instanceServiceContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
         this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';

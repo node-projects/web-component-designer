@@ -17,6 +17,21 @@ export abstract class AbstractExtensionBase {
     this.overlayLayerView = designerCanvas.overlayLayer;
   }
 
+  private _backup;
+  protected _valuesHaveChanges(...values) {
+    if (this._backup == null) {
+      this._backup = values
+      return true;
+    }
+    for (let i = 0; i < values.length; i++) {
+      if (values[i] !== this._backup[i]) {
+        this._backup = values
+        return true;
+      }
+    }
+    return false;
+  }
+
   protected _removeAllOverlays() {
     for (let o of this.overlays) {
       try {
@@ -72,6 +87,14 @@ export abstract class AbstractExtensionBase {
       this.overlays.push(newText);
     }
     return newText;
+  }
+
+  protected _drawHTML(html: string | HTMLElement, x: number, y: number, w: number, h: number, className?: string, htmlObj?: SVGForeignObjectElement, overlayLayer?: OverlayLayer) {
+    const newHtml = this.overlayLayerView.drawHTML(this.constructor.name, html, x, y, w, h, className, htmlObj, overlayLayer);
+    if (!htmlObj) {
+      this.overlays.push(newHtml);
+    }
+    return newHtml;
   }
 
   protected _drawTextWithBackground(text: string, x: number, y: number, backgroundColor: string, className?: string, existingEls?: [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement], overlayLayer?: OverlayLayer) {
