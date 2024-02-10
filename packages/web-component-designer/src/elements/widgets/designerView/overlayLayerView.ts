@@ -234,6 +234,24 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return textEl;
   }
 
+  drawHTML(overlaySource: string, html: HTMLElement | string, x: number, y: number, w: number, h: number,  className?: string, htmlObj?: SVGForeignObjectElement, overlayLayer?: OverlayLayer) {
+    if (!htmlObj) {
+      htmlObj = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+      this.addOverlay(overlaySource, htmlObj, overlayLayer);
+    }
+    htmlObj.setAttribute('x', <string><any>x);
+    htmlObj.setAttribute('y', <string><any>y);
+    htmlObj.setAttribute('width', <string><any>w);
+    htmlObj.setAttribute('height', <string><any>h);
+    if (typeof html === 'string')
+      htmlObj.innerHTML = html;
+    else
+      htmlObj.appendChild(html);
+    if (className)
+      htmlObj.setAttribute('class', className);
+    return htmlObj;
+  }
+
   drawTextWithBackground(overlaySource: string, text: string, x: number, y: number, backgroundColor: string, className?: string, existingEls?: [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement], overlayLayer?: OverlayLayer): [SVGFilterElement, SVGFEFloodElement, SVGTextElement, SVGTextElement] {
     if (!existingEls) {
       let filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");

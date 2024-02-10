@@ -1,4 +1,3 @@
-import { DomHelper } from '@node-projects/base-custom-webcomponent';
 import { IRect } from '../../../interfaces/IRect.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { ISnaplinesProviderService } from './ISnaplinesProviderService.js';
@@ -21,8 +20,7 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
       const positionsV: [number, IRect][] = [];
       const positionsMiddleV: [number, IRect][] = [];
 
-      let ignoreElements = ignoredItems.map(x => x.element);
-      for (let n of DomHelper.getAllChildNodes(containerItem.element, false, ignoreElements)) {
+      for (let n of containerItem.querySelectorAll('*')) {
         if (!ignMap.has(<Element>n)) {
           const p = (<Element>n).getBoundingClientRect();
           const pLeft = (p.x - outerRect.x) / canvas.scaleFactor;
