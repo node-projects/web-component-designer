@@ -17,6 +17,5 @@ export class ElementDragTitleExtensionProvider implements IDesignerExtensionProv
 
   readonly style = css`
     .svg-text-primary { stroke: none; color: white; font-family: monospace; }
-    .svg-text-primary.span { width: 100%; position: absolute; text-overflow: ellipsis; overflow: hidden; }
   `;
 }

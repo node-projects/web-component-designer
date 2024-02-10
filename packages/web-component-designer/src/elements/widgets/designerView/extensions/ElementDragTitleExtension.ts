@@ -26,10 +26,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
       let elementWidth = Math.sqrt(Math.pow(transformedCornerPoints[1].x - transformedCornerPoints[0].x, 2) + Math.pow(transformedCornerPoints[1].y - transformedCornerPoints[0].y, 2));
       let text = this.extendedItem.name;
       this._width = Math.max(Math.min(elementWidth, w), extensionWidth);
-      if (w > this._width)
-        text = this.extendedItem.name.substring(0, 10) + '…'
       this._rect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-primary-selection-move', this._rect);
-      this._text = this._drawHTML('<span>' + text + '</span>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
+      this._text = this._drawHTML('<span style="width: 100%;position: absolute;overflow: hidden;text-overflow: ellipsis;">' + text + '</span>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
       this._rect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
       this._rect.addEventListener('pointermove', (e) => this._pointerEvent(e));
       this._rect.addEventListener('pointerup', (e) => this._pointerEvent(e));
@@ -58,6 +56,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
         this._text.setAttribute('x', '' + transformedCornerPoints[0].x);
         this._text.setAttribute('y', '' + transformedCornerPoints[0].y);
         this._text.style.fontSize = (10 / this.designerCanvas.scaleFactor) + 'px';
+        this._text.setAttribute('height', '' + h);
+        this._text.setAttribute('width', '' + w);
         this._text.style.transformBox = 'fill-box'
         this._text.style.rotate = angle + 'deg';
       }
