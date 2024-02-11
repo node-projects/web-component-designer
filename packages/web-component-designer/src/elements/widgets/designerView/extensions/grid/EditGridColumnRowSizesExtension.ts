@@ -22,26 +22,26 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
   }
 
   override extend(cache: Record<string|symbol, any>, event?: Event) {
+    this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
+    this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
+    this._group.style.transformOrigin = '0 0';
+    this._group.style.transformBox = 'fill-box';
+
     this.refresh(event);
   }
 
   override refresh(cache: Record<string|symbol, any>, event?: Event) {
     this.gridInformation = calculateGridInformation(this.extendedItem);
-    this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
-    this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
-    this._group.style.transformOrigin = '0 0';
-    this._group.style.transformBox = 'fill-box';
-    
     this.gridInformation.gaps.forEach((gap, i) => {
       if (gap.width < 3) { gap.width = 3; gap.x--; }
       if (gap.height < 3) { gap.height = 3; gap.y--; }
       let rect = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-resizer-' + gap.type, this._resizers[i], OverlayLayer.Normal);
-      this._group.appendChild(rect);
       if (!this._resizers[i]) {
         this._resizers[i] = rect;
         rect.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(event, rect, gap));
         rect.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeResize(event, rect, gap));
         rect.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeResize(event, rect, gap));
+        this._group.appendChild(rect);
       }
     });
   }
