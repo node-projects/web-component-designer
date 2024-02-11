@@ -21,7 +21,7 @@ export class DefaultPlacementService implements IPlacementService {
   isEnterableContainer(container: IDesignItem) {
     if (DomConverter.IsSelfClosingElement(container.element.localName))
       return false;
-    if (container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
+    if (!container.isRootItem && container.element.shadowRoot && container.element.shadowRoot.querySelector('slot') == null)
       return false;
     return true;
   }
