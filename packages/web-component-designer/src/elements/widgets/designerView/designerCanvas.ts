@@ -706,6 +706,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp, true);
       this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, true);
     }
+    this.extensionManager.connected();
+  }
+
+  disconnectedCallback() {
+    this.extensionManager.disconnected();
   }
 
   private _zoomFactorChanged(refreshExtensions = true) {

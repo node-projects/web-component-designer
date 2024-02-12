@@ -12,19 +12,29 @@ export class ExtensionManager implements IExtensionManager {
 
   designerCanvas: IDesignerCanvas;
   designItemsWithExtentions: Set<IDesignItem> = new Set();
+  _timeout: ReturnType<typeof setTimeout>;
 
   constructor(designerCanvas: IDesignerCanvas) {
     this.designerCanvas = designerCanvas;
 
     designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
     designerCanvas.instanceServiceContainer.contentService.onContentChanged.on(this._contentChanged.bind(this));
+  }
 
-    setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
+  connected() {
+    if (!this._timeout)
+      this._timeout = setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
+  }
+
+  disconnected() {
+    if (this._timeout)
+      clearTimeout(this._timeout);
+    this._timeout = null;
   }
 
   private refreshAllExtensionsTimeout() {
     this.refreshAllAppliedExtentions();
-    setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
+    this._timeout = setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
   }
 
   private _contentChanged(contentChanged: IContentChanged) {

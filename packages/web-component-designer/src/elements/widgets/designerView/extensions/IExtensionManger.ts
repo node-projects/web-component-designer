@@ -13,4 +13,6 @@ export interface IExtensionManager {
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension);
   refreshAllAppliedExtentions();
   reapplyAllAppliedExtentions();
+  connected();
+  disconnected();
 }
