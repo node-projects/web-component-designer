@@ -117,9 +117,9 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 
       element = element.ownerSVGElement;
     } else if (element instanceof HTMLBodyElement) {
-      element = element.parentElement;
+      element = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
     } else if (element instanceof HTMLHtmlElement) {
-      element = element.parentElement;
+      element = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
     } else {
       const currLeft = element.offsetLeft;
       const currTop = element.offsetTop;
@@ -131,7 +131,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 
       offsetLeft += element.offsetLeft;
       offsetTop += element.offsetTop;
-      element = element.offsetParent  ? element.offsetParent : (<ShadowRoot>element.getRootNode()).host;
+      element = element.offsetParent ? element.offsetParent : (<ShadowRoot>element.getRootNode()).host;
     }
   }
   return { offsetLeft: offsetLeft, offsetTop: offsetTop };
