@@ -278,12 +278,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     #node-projects-designer-search-container > #node-projects-designer-search-close::after {
       transform: translate(-50%, -50%) rotate(-45deg);
     }
-
-    #node-projects-designer-canvas-canvas {
-      margin: 0; 
-      padding: 0; 
-      border: none;
-    }
   `;
 
   static override readonly template = html`
