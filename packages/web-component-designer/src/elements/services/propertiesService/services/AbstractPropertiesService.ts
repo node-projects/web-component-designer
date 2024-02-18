@@ -84,6 +84,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   }
 
   getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+    if (property.propertyType == PropertyType.attribute)
+      return BindingTarget.attribute;
+    if (property.propertyType == PropertyType.cssValue)
+      return BindingTarget.css;
     return BindingTarget.property;
   }
 
@@ -140,8 +144,16 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         if (bindings && bindings.find(x => (x.target == BindingTarget.css || x.target == BindingTarget.cssvar) && x.targetName == property.name))
           return ValueType.bound;
       } else {
-        if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
-          return ValueType.bound;
+        if (property.propertyType == PropertyType.attribute) {
+          if (bindings && bindings.find(x => x.target == BindingTarget.attribute && x.targetName == property.name))
+            return ValueType.bound;
+        } else if (property.propertyType == PropertyType.property) {
+          if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+            return ValueType.bound;
+        } else {
+          if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name))
+            return ValueType.bound;
+        }
       }
 
       if (!all && property.propertyType == PropertyType.cssValue) {
@@ -215,7 +227,13 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       if (property.propertyType == PropertyType.cssValue) {
         return bindings.find(x => (x.target == BindingTarget.css || x.target == BindingTarget.cssvar) && x.targetName == property.name);
       } else {
-        return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
+        if (property.propertyType == PropertyType.attribute) {
+          return bindings.find(x => x.target == BindingTarget.attribute && x.targetName == property.name);
+        } else if (property.propertyType == PropertyType.property) {
+          return bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name);
+        } else {
+          return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
+        }
       }
     }
     return null;
