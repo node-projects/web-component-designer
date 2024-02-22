@@ -209,6 +209,7 @@ export * from "./elements/widgets/designerView/tools/toolBar/buttons/ZoomToolBut
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/popups/DrawToolPopup.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/SelectionToolPopup.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbar.js";
 export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbarButton.js";
