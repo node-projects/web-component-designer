@@ -7,6 +7,7 @@ import { ExtensionType } from './ExtensionType.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { IDesignerExtension } from './IDesignerExtension.js';
 import { IContentChanged } from '../../../services/contentService/IContentChanged.js';
+import { DesignerCanvas } from '../designerCanvas.js';
 
 export class ExtensionManager implements IExtensionManager {
 
@@ -386,6 +387,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshAllAppliedExtentions() {
+    (<DesignerCanvas>this.designerCanvas).fillCalculationrects();
     this.refreshAllExtensions([...this.designItemsWithExtentions])
   }
 

@@ -716,7 +716,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer.style.bottom = this._outercanvas2.offsetHeight >= this._canvasContainer.offsetHeight ? '0' : '';
     this._canvasContainer.style.right = this._outercanvas2.offsetWidth >= this._canvasContainer.offsetWidth ? '0' : '';
     this._updateTransform();
-    this._fillCalculationrects();
+    this.fillCalculationrects();
     this.onZoomFactorChanged.emit(this._zoomFactor);
     if (refreshExtensions) {
       this.extensionManager.refreshAllAppliedExtentions();
@@ -750,7 +750,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public _internalSetDesignItems(designItems: IDesignItem[]) {
-    this._fillCalculationrects();
+    this.fillCalculationrects();
     this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
     for (let i of [...this.rootDesignItem.children()])
@@ -801,7 +801,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onDragEnter(event: DragEvent) {
-    this._fillCalculationrects();
+    this.fillCalculationrects();
     event.preventDefault();
 
     const hasTransferDataBindingObject = event.dataTransfer.types.indexOf(dragDropFormatNameBindingObject) >= 0;
@@ -828,7 +828,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onDragLeave(event: DragEvent) {
-    this._fillCalculationrects();
+    this.fillCalculationrects();
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
 
@@ -849,7 +849,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       containerService.finishPlace(this, this.rootDesignItem, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
     }*/
 
-    this._fillCalculationrects();
+    this.fillCalculationrects();
 
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
       const ddService = this.serviceContainer.externalDragDropService;
@@ -889,7 +889,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
 
-    this._fillCalculationrects();
+    this.fillCalculationrects();
 
     if (event.dataTransfer.files?.length > 0) {
       const ddService = this.serviceContainer.externalDragDropService;
@@ -910,7 +910,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       else {
         const dragDropService = this.serviceContainer.dragDropService;
         if (dragDropService) {
-          this._fillCalculationrects();
+          this.fillCalculationrects();
           dragDropService.drop(this, event);
         }
       }
@@ -1150,7 +1150,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (!this.serviceContainer)
       return;
 
-    this._fillCalculationrects();
+    this.fillCalculationrects();
 
     if (this._pointerextensions) {
       for (let pe of this._pointerextensions)
@@ -1212,7 +1212,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._activeTool = null;
   }
 
-  private _fillCalculationrects() {
+  public fillCalculationrects() {
     this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
     this.outerRect = this._outercanvas2.getBoundingClientRect();
   }
