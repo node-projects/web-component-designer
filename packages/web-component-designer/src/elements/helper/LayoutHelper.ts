@@ -5,6 +5,9 @@
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 
+/**
+ * This function filters a items list, so only the outer elments are used for example in a move
+ */
 export function filterChildPlaceItems(items: IDesignItem[]) {
   const filterdPlaceItems: IDesignItem[] = [];
   next:
