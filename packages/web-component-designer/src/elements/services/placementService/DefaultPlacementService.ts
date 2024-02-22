@@ -8,7 +8,6 @@ import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from 
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
-import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -115,8 +114,6 @@ export class DefaultPlacementService implements IPlacementService {
     for (const designItem of filteredItems) {
       const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
       let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(<HTMLElement>designItem.parent.element, <HTMLElement>canvas, true);
-
-      console.log('matrix', originalElementAndAllAncestorsMultipliedMatrix);
 
       let transformMatrixParentTransformsCompensated = null;
       if (originalElementAndAllAncestorsMultipliedMatrix) {

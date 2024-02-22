@@ -841,14 +841,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _lastDdElement = null;
   private _onDragOver(event: DragEvent) {
     event.preventDefault();
-    /*if (this.alignOnSnap) {
-      this.snapLines.calculateSnaplines(this.instanceServiceContainer.selectionService.selectedElements);
-      //TODO: fix this following code...
-      const currentPoint = this.getDesignerMousepoint(event);
-      let containerService = this.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.rootDesignItem))
-      containerService.finishPlace(this, this.rootDesignItem, this._initialPoint, currentPoint, this.instanceServiceContainer.selectionService.selectedElements);
-    }*/
-
+    
     this.fillCalculationrects();
 
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
