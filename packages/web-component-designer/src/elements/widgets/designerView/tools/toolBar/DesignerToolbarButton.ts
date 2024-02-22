@@ -22,6 +22,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
     img {
       width: calc(100% - 4px);
       height: calc(100% - 4px);
+      -webkit-user-drag: none;
     }    
     `;
 
@@ -34,6 +35,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
 
   private _img: HTMLImageElement;
   private _div: HTMLImageElement;
+  private _longPress;
 
   constructor(designerCanvas: IDesignerCanvas, tools: Record<string | NamedTools, { icon: string }>) {
     super();
@@ -41,13 +43,27 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
     this.tools = tools;
     this._img = this._getDomElement<HTMLImageElement>('img');
     this._div = this._getDomElement<HTMLImageElement>('div');
-    this._div.onclick = () => {
-      if (this.popup) {
-        (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).showPopup(this);
-      } else {
+    this._div.onpointerdown = () => {
+      if (this.currentToolOnButton) {
         (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setTool(this.currentToolOnButton);
+        if (this.popup) {
+          this._longPress = setTimeout(() => {
+            this._longPress = null;
+            (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).showPopup(this);
+          }, 200)
+        }
       }
-    }
+      else if (this.popup)
+        (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).showPopup(this);
+    };
+
+    this._div.onpointerup = () => {
+      if (this._longPress) {
+        clearTimeout(this._longPress);
+        this._longPress = null;
+      }
+    };
+
 
     this.showTool(Object.getOwnPropertyNames(tools)[0])
   }
