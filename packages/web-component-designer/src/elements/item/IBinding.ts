@@ -11,7 +11,10 @@ export interface IBinding {
 
   expression?: string;  //the bindings expression
   expressionTwoWay?: string;  //a expression wich is used for write back
-  bindableObjectNames?: string[]; 
+
+  bindableObjectNames?: string[];      //TODO: deprecate and remove
+  bindableObjects?: IBindableObject[]; //if a name is not enough, use this list
+
   converters?: any
 
   mode?: BindingMode;
@@ -19,4 +22,10 @@ export interface IBinding {
   invert?: boolean;
   changedEvents?: string[];
   nullSafe?: boolean;
+}
+
+export interface IBindableObject {   //e.g.   aa:$uservalue.0.name
+  name?: string;                  //uservalue.0.name
+  alias?: string;                 //aa
+  modificator?: string;           //$
 }
