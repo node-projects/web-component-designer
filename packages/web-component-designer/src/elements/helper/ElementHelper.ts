@@ -75,7 +75,13 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
   let offsetLeft = 0;
   let offsetTop = 0;
 
-  let ch: Map<any, { offsetLeft: number, offsetTop: number }> = cache[windowOffsetsCacheKey] ??= new Map<any, { offsetLeft: number, offsetTop: number }>();
+
+  let ch: Map<any, { offsetLeft: number, offsetTop: number }>;
+  if (cache)
+    ch = cache[windowOffsetsCacheKey] ??= new Map<any, { offsetLeft: number, offsetTop: number }>();
+  else
+    ch = new Map<any, { offsetLeft: number, offsetTop: number }>();
+  
   let lst: { offsetLeft: number, offsetTop: number }[] = [];
 
   while (element) {

@@ -114,6 +114,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         e.preventDefault();
         e.stopPropagation();
       }
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
     }
     this._content.onkeydown = e => {
       if (e.key == 'Enter') {
@@ -124,6 +125,8 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         e.preventDefault();
         e.stopPropagation();
       }
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
     }
 
     let pSel: IDesignItem
@@ -131,7 +134,10 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       pSel = this._instanceServiceContainer.selectionService.primarySelection;
     }
     this._id.onblur = e => {
-      pSel.id = this._id.value;
+      if (pSel)
+        pSel.id = this._id.value;
+      pSel = null;
+      PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
     }
   }
 
@@ -159,6 +165,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
       }
       this._type.title = this._type.value;
+      this._id.blur();
       this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
       if (this._instanceServiceContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
         this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';

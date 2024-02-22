@@ -46,38 +46,40 @@ export class DrawElementTool implements ITool {
   keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
 
   sizeOverlapThreshold = false;
-  private async _onPointerDown(designerView: IDesignerCanvas, event: PointerEvent) {
+  private async _onPointerDown(designerCanvas: IDesignerCanvas, event: PointerEvent) {
+    const evPos = designerCanvas.getNormalizedEventCoordinates(event);
+
     event.preventDefault();
-    this._startPosition = { x: event.x, y: event.y };
+    this._startPosition = { x: evPos.x, y: evPos.y };
 
-    this._changeGroup = designerView.rootDesignItem.openGroup("Insert Item");
-    this._createdItem = await designerView.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(this._elementDefinition, designerView.serviceContainer, designerView.instanceServiceContainer));
-    const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
+    this._changeGroup = designerCanvas.rootDesignItem.openGroup("Insert Item");
+    this._createdItem = await designerCanvas.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(this._elementDefinition, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer));
     this._createdItem.setStyle('position', 'absolute');
-
-    this._createdItem.setStyle('left', event.offsetX + targetRect.left - designerView.containerBoundingRect.x + 'px');
-    this._createdItem.setStyle('top', event.offsetY + targetRect.top - designerView.containerBoundingRect.y + 'px');
+    this._createdItem.setStyle('left', evPos.x + 'px');
+    this._createdItem.setStyle('top', evPos.y + 'px');
     this._createdItem.setStyle('width', '0');
     this._createdItem.setStyle('height', '0');
     (<HTMLElement>this._createdItem.element).style.overflow = 'hidden';
 
-    designerView.rootDesignItem.insertChild(this._createdItem);
+    designerCanvas.rootDesignItem.insertChild(this._createdItem);
     //draw via containerService??? how to draw into a grid, a stackpanel???
-    designerView.instanceServiceContainer.selectionService.clearSelectedElements();
+    designerCanvas.instanceServiceContainer.selectionService.clearSelectedElements();
   }
 
   private async _onPointerMove(designerCanvas: IDesignerCanvas, event: PointerEvent) {
+    const evPos = designerCanvas.getNormalizedEventCoordinates(event);
+
     if (this._createdItem) {
       if (!this._rect) {
         this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._rect, OverlayLayer.Foreground);
         this._rect.setAttribute('class', 'svg-draw-new-element');
-        this._rect.setAttribute('x', <string><any>(this._startPosition.x - designerCanvas.containerBoundingRect.x));
-        this._rect.setAttribute('y', <string><any>(this._startPosition.y - designerCanvas.containerBoundingRect.y));
+        this._rect.setAttribute('x', <string><any>(this._startPosition.x));
+        this._rect.setAttribute('y', <string><any>(this._startPosition.y));
       }
 
-      const w = event.x - this._startPosition.x;
-      const h = event.y - this._startPosition.y;
+      const w = evPos.x - this._startPosition.x;
+      const h = evPos.y - this._startPosition.y;
       if (w >= 0) {
         this._rect.setAttribute('width', w);
         this._createdItem.setStyle('width', w + 'px');

@@ -20,8 +20,12 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
       const positionsV: [number, IRect][] = [];
       const positionsMiddleV: [number, IRect][] = [];
 
-      for (let n of containerItem.querySelectorAll('*')) {
-        if (!ignMap.has(<Element>n)) {
+      const tw = document.createTreeWalker(containerItem.isRootItem ? containerItem.element.shadowRoot : containerItem.element, NodeFilter.SHOW_ELEMENT);
+      let n: Element = <Element>tw.nextNode();
+      while (n != null) {
+        if (ignMap.has(<Element>n)) {
+          n = <Element>tw.nextSibling();
+        } else {
           const p = (<Element>n).getBoundingClientRect();
           const pLeft = (p.x - outerRect.x) / canvas.scaleFactor;
           const pMidH = (p.x - outerRect.x + p.width / 2) / canvas.scaleFactor;
@@ -32,20 +36,22 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
           const transformedP: IRect = { x: pLeft + outerRect.x, y: pTop + outerRect.y, width: p.width / canvas.scaleFactor, height: p.height / canvas.scaleFactor };
 
           if (provideWithDist)
-            positionsH.push([pLeft - provideWithDistDist, transformedP])
-          positionsH.push([pLeft, transformedP])
-          positionsMiddleH.push([pMidH, transformedP])
-          positionsH.push([pRight, transformedP])
+            positionsH.push([pLeft - provideWithDistDist, transformedP]);
+          positionsH.push([pLeft, transformedP]);
+          positionsMiddleH.push([pMidH, transformedP]);
+          positionsH.push([pRight, transformedP]);
           if (provideWithDist)
-            positionsH.push([pRight + provideWithDistDist, transformedP])
+            positionsH.push([pRight + provideWithDistDist, transformedP]);
 
           if (provideWithDist)
-            positionsV.push([pTop - provideWithDistDist, transformedP])
-          positionsV.push([pTop, transformedP])
-          positionsMiddleV.push([pMidV, transformedP])
-          positionsV.push([pBottom, transformedP])
+            positionsV.push([pTop - provideWithDistDist, transformedP]);
+          positionsV.push([pTop, transformedP]);
+          positionsMiddleV.push([pMidV, transformedP]);
+          positionsV.push([pBottom, transformedP]);
           if (provideWithDist)
-            positionsV.push([pBottom + provideWithDistDist, transformedP])
+            positionsV.push([pBottom + provideWithDistDist, transformedP]);
+
+          n = <Element>tw.nextNode();
         }
       }
       positionsH.push([0, { x: 0, y: 0, width: 0, height: 0 }]);

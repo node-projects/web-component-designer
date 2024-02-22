@@ -29,7 +29,7 @@ export function convertCssUnitToPixel(cssValue: string, target: HTMLElement, per
         'vmax': value => value / 100 * (window.innerHeight > window.innerWidth ? window.innerHeight : window.innerWidth),
         'lh': value => value * parseFloat(getComputedStyle(target).lineHeight),
         'rlh': value => value * parseFloat(getComputedStyle(document.documentElement).lineHeight),
-        '%': value => value / 100 * (percentTarget == 'height' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
+        '%': value => value / 100 * (percentTarget == 'height' ? getOriginalSizeBeforeTransformation(target).height : getOriginalSizeBeforeTransformation(target).width),
 
         /*TODO: container units
         //find parent with computed style where container-type is inline-size or size (regarding to query type)
@@ -102,7 +102,7 @@ export function convertCssUnit(cssValue: string | number, target: HTMLElement, p
         'vmax': value => value * 100 / (window.innerHeight > window.innerWidth ? window.innerHeight : window.innerWidth),
         'lh': value => value / parseFloat(getComputedStyle(target).lineHeight),
         'rlh': value => value / parseFloat(getComputedStyle(document.documentElement).lineHeight),
-        '%': value => value * 100 / (percentTarget == 'height' ? target.getBoundingClientRect().height : target.getBoundingClientRect().width),
+        '%': value => value * 100 / (percentTarget == 'height' ? getOriginalSizeBeforeTransformation(target).height : getOriginalSizeBeforeTransformation(target).width),
 
         // Times
         'ms': value => value,
@@ -122,4 +122,8 @@ export function convertCssUnit(cssValue: string | number, target: HTMLElement, p
     }
 
     return <any>cssValue;
+}
+
+function getOriginalSizeBeforeTransformation(element: HTMLElement): { width: number, height: number } {
+    return { width: element.offsetWidth, height: element.offsetHeight };
 }

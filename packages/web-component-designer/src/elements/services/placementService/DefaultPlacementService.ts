@@ -106,13 +106,14 @@ export class DefaultPlacementService implements IPlacementService {
     //TODO: this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
+
     if (event.shiftKey) {
       track = straightenLine({ x: 0, y: 0 }, track, true);
     }
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
-      const canvas = designItem.element.closest('#node-projects-designer-canvas-canvas');
-      let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(<HTMLElement>designItem.element.parentElement, <HTMLElement>canvas, true);
+      const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
+      let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(<HTMLElement>designItem.parent.element, <HTMLElement>canvas, true);
 
       let transformMatrixParentTransformsCompensated = null;
       if (originalElementAndAllAncestorsMultipliedMatrix) {

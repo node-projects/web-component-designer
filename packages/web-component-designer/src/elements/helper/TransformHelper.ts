@@ -141,10 +141,14 @@ export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransfo
   return designerCanvasNormalizedTransformedOrigin;
 }
 
-const elemntMatrixCacheKey = Symbol('windowOffsetsCacheKey');
+//const elementMatrixCacheKey = Symbol('windowOffsetsCacheKey');
 export function getResultingTransformationBetweenElementAndAllAncestors(element: HTMLElement, ancestor: HTMLElement, excludeAncestor?: boolean, cache: Record<string | symbol, any> = {}) {
 
-  let ch: Map<any, [DOMMatrix]> = cache[elemntMatrixCacheKey] ??= new Map<any, [DOMMatrix]>();
+  /*let ch: Map<any, [DOMMatrix]>;
+  if (cache)
+    ch = cache[elementMatrixCacheKey] ??= new Map<any, [DOMMatrix]>();
+  else
+    ch = new Map<any, [DOMMatrix]>();*/
   let lst: [DOMMatrix][] = [];
 
   let actualElement: HTMLElement = element;
@@ -152,7 +156,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   let newElementMatrix: DOMMatrix;
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
   while (actualElement != ancestor && actualElement != null) {
-    let cachedObj = ch.get(actualElement);
+    /*let cachedObj = ch.get(actualElement);
     if (cachedObj) {
       if (originalElementAndAllParentsMultipliedMatrix)
         originalElementAndAllParentsMultipliedMatrix = cachedObj[0].multiply(originalElementAndAllParentsMultipliedMatrix);
@@ -160,7 +164,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
         originalElementAndAllParentsMultipliedMatrix = cachedObj[0];
       lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
       break;
-    }
+    }*/
 
     const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
     if (newElement) {
@@ -176,7 +180,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
       lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
       const cacheEntry: [DOMMatrix] = [originalElementAndAllParentsMultipliedMatrix];
       lst.push(cacheEntry);
-      ch.set(actualElement, cacheEntry);
+      //ch.set(actualElement, cacheEntry);
     }
 
     actualElement = newElement;
@@ -315,6 +319,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y);
   transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y);
   transformedCornerPoints[3] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top3Transformed.x, designerCanvasNormalizedTransformOrigin.y + top3Transformed.y);
+
 
   return transformedCornerPoints;
 }
