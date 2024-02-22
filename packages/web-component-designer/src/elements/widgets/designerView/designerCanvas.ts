@@ -35,6 +35,7 @@ import { NodeType } from '../../item/NodeType.js';
 import { StylesheetChangedAction } from '../../services/undoService/transactionItems/StylesheetChangedAction.js';
 import { SetDesignItemsAction } from '../../services/undoService/transactionItems/SetDesignItemsAction.js';
 import { IDocumentStylesheet } from '../../services/stylesheetService/IStylesheetService.js';
+import { filterChildPlaceItems } from '../../helper/LayoutHelper.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -841,7 +842,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _lastDdElement = null;
   private _onDragOver(event: DragEvent) {
     event.preventDefault();
-    
+
     this.fillCalculationrects();
 
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
@@ -1018,10 +1019,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
               offset.x = -moveOffset;
             if (event.key == 'ArrowLeft')
               offset.x = moveOffset;
-            this.instanceServiceContainer.selectionService.selectedElements.forEach(x => {
+
+            for (let x of filterChildPlaceItems(this.instanceServiceContainer.selectionService.selectedElements)) {
               const containerStyle = getComputedStyle(x.parent.element);
               x.serviceContainer.getLastServiceWhere('containerService', y => y.serviceForContainer(x.parent, containerStyle)).moveElements([x], offset, false);
-            });
+            };
           }
           break;
       }
