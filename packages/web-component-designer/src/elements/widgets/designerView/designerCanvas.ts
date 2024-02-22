@@ -48,6 +48,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   // IPlacementView
   private _gridSize = 10;
+  private _moveGroup: import("d:/repos/github/nodeprojects/web-component-designer/packages/web-component-designer/src/index").ChangeGroup;
   public get gridSize() {
     return this._gridSize;
   }
@@ -965,6 +966,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (event.composedPath().indexOf(this.eatEvents) >= 0)
       return;
 
+    if (this._moveGroup) {
+      this._moveGroup.commit()
+      this._moveGroup = null;
+    }
+
     event.preventDefault();
   }
 
@@ -1007,6 +1013,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         case 'ArrowLeft':
         case 'ArrowRight':
           {
+            if (!this._moveGroup)
+              this._moveGroup = this.rootDesignItem.openGroup("move items");
+
             let offset = { x: 0, y: 0 };
             if (event.key == 'ArrowDown')
               offset.y = -moveOffset;
