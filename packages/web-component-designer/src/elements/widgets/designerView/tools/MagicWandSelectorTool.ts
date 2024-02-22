@@ -13,6 +13,13 @@ export class MagicWandSelectorTool implements ITool {
   private _path: SVGPathElement;
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    if (event.ctrlKey)
+      this.cursor = 'copy';
+    else if (event.altKey)
+      this.cursor = 'default';
+    else
+      this.cursor = 'default';
+
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
 
     switch (event.type) {
@@ -43,6 +50,9 @@ export class MagicWandSelectorTool implements ITool {
         const elements = designerCanvas.rootDesignItem.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];
 
+        if ((event.ctrlKey || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+          inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+
         let point: DOMPointInit = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
           let elementRect = designerCanvas.getNormalizedElementCoordinates(e);
@@ -59,10 +69,13 @@ export class MagicWandSelectorTool implements ITool {
           point.y = elementRect.y + elementRect.height;
           const p4 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
           if (p1 && p2 && p3 && p4) {
-            const desItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
-            if (designerCanvas.instanceServiceContainer.selectionService.selectedElements)
-              inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-            inSelectionElements.push(desItem);
+            const desItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+            if (!inSelectionElements.includes(desItem) && !event.altKey) {
+              inSelectionElements.push(desItem);
+            } else if (event.altKey) {
+              const idx = inSelectionElements.indexOf(desItem);
+              inSelectionElements.splice(idx, 1)
+            }
           }
         }
 
