@@ -81,7 +81,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
     ch = cache[windowOffsetsCacheKey] ??= new Map<any, { offsetLeft: number, offsetTop: number }>();
   else
     ch = new Map<any, { offsetLeft: number, offsetTop: number }>();
-  
+
   let lst: { offsetLeft: number, offsetTop: number }[] = [];
 
   while (element) {
@@ -93,6 +93,23 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       lst.forEach(x => { x.offsetLeft += cachedObj.offsetLeft; x.offsetTop += cachedObj.offsetTop; });
       break;
     }
+
+    let nextParent = element.offsetParent ? element.offsetParent : (<ShadowRoot>element.getRootNode()).host;
+
+    if (element instanceof SVGGraphicsElement) {
+      nextParent = element.ownerSVGElement;
+    } else if (element instanceof HTMLBodyElement || element instanceof HTMLHtmlElement) {
+      nextParent = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
+    }
+    let scrollLeft = 0;
+    let scrollTop = 0;
+    if (nextParent) {
+      scrollLeft = nextParent.scrollLeft ?? 0;
+      scrollTop = nextParent.scrollTop ?? 0;
+    }
+
+    let currLeft = 0;
+    let currTop = 0;
     if (element instanceof SVGSVGElement) {
       //TODO: !huge Perf impact! - fix without transformation
       let t = element.style.transform;
@@ -100,45 +117,26 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       const bcEl = element.getBoundingClientRect();
       const bcPar = element.parentElement ? element.parentElement.getBoundingClientRect() : (<ShadowRoot>element.getRootNode()).host.getBoundingClientRect();
       element.style.transform = t;
-      const currLeft = (bcEl.left - bcPar.left) / zoom;
-      const currTop = (bcEl.top - bcPar.top) / zoom;
-      offsetLeft += currLeft;
-      offsetTop += currTop;
-
-      lst.forEach(x => { x.offsetLeft += currLeft; x.offsetTop += currTop });
-      const cacheEntry = { offsetLeft: currLeft, offsetTop: currTop };
-      lst.push(cacheEntry);
-      ch.set(element, cacheEntry);
-
-      element = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
+      currLeft = (bcEl.left - bcPar.left) / zoom;
+      currTop = (bcEl.top - bcPar.top) / zoom;
     } else if (element instanceof SVGGraphicsElement) {
       let bbox = element.getBBox();
-      offsetLeft += bbox.x;
-      offsetTop += bbox.y;
-
-      lst.forEach(x => { x.offsetLeft += bbox.x; x.offsetTop += bbox.y });
-      const cacheEntry = { offsetLeft: bbox.x, offsetTop: bbox.y };
-      lst.push(cacheEntry);
-      ch.set(element, cacheEntry);
-
-      element = element.ownerSVGElement;
-    } else if (element instanceof HTMLBodyElement) {
-      element = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
-    } else if (element instanceof HTMLHtmlElement) {
-      element = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
+      currLeft = bbox.x
+      currTop = bbox.y;
     } else {
-      const currLeft = element.offsetLeft;
-      const currTop = element.offsetTop;
-
-      lst.forEach(x => { x.offsetLeft += currLeft; x.offsetTop += currTop });
-      const cacheEntry = { offsetLeft: currLeft, offsetTop: currTop };
-      lst.push(cacheEntry);
-      ch.set(element, cacheEntry);
-
-      offsetLeft += element.offsetLeft;
-      offsetTop += element.offsetTop;
-      element = element.offsetParent ? element.offsetParent : (<ShadowRoot>element.getRootNode()).host;
+      currLeft = element.offsetLeft - scrollLeft;
+      currTop = element.offsetTop - scrollTop;
     }
+
+    lst.forEach(x => { x.offsetLeft += currLeft; x.offsetTop += currTop });
+    const cacheEntry = { offsetLeft: currLeft, offsetTop: currTop };
+    lst.push(cacheEntry);
+    ch.set(element, cacheEntry);
+
+    offsetLeft += currLeft;
+    offsetTop += currTop;
+
+    element = nextParent;
   }
   return { offsetLeft: offsetLeft, offsetTop: offsetTop };
 }
