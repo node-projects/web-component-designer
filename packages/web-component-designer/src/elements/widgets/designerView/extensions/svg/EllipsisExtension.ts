@@ -32,8 +32,11 @@ export class EllipsisExtension extends AbstractExtension {
         super(extensionManager, designerView, extendedItem);
     }
 
-
     override extend() {
+        this.refresh();
+    }
+
+    override refresh() {
         this._parentRect = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
         this._ellipseElement = (<SVGEllipseElement>this.extendedItem.node);
         this._startScrollOffset = this.designerCanvas.canvasOffset;
@@ -43,12 +46,13 @@ export class EllipsisExtension extends AbstractExtension {
         this._rx = this._ellipseElement.rx.baseVal.value;
         this._ry = this._ellipseElement.ry.baseVal.value;
 
-        this._circle1 = this._drawPathCircle(this._cx, this._cy - this._ry, this._ellipseElement, 0)
-        this._circle2 = this._drawPathCircle(this._cx + this._rx, this._cy, this._ellipseElement, 1)
-        this._circle3 = this._drawPathCircle(this._cx, this._cy + this._ry, this._ellipseElement, 2)
-        this._circle4 = this._drawPathCircle(this._cx - this._rx, this._cy, this._ellipseElement, 3)
+        if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, this._cx, this._cy, this._rx, this._ry)) {
+            this._circle1 = this._drawPathCircle(this._cx, this._cy - this._ry, this._ellipseElement, 0, this._circle1)
+            this._circle2 = this._drawPathCircle(this._cx + this._rx, this._cy, this._ellipseElement, 1, this._circle2)
+            this._circle3 = this._drawPathCircle(this._cx, this._cy + this._ry, this._ellipseElement, 2, this._circle3)
+            this._circle4 = this._drawPathCircle(this._cx - this._rx, this._cy, this._ellipseElement, 3, this._circle4)
+        }
     }
-
 
     pointerEvent(event: PointerEvent, circle: SVGCircleElement, e: SVGEllipseElement, index: number) {
         event.stopPropagation();
@@ -136,12 +140,12 @@ export class EllipsisExtension extends AbstractExtension {
 
 
 
-    _drawPathCircle(x: number, y: number, e: SVGEllipseElement, index: number) {
-        let circle = this._drawCircle(
+    _drawPathCircle(x: number, y: number, e: SVGEllipseElement, index: number, circle: SVGCircleElement) {
+        circle = this._drawCircle(
             (this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x,
             (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y,
             5 / this.designerCanvas.scaleFactor,
-            'svg-path');
+            'svg-path', circle);
         circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
         circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, e, index));
         circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, e, index));
@@ -210,13 +214,6 @@ export class EllipsisExtension extends AbstractExtension {
         this.extendedItem.setAttribute('cx', (this._ellipseElement.cx.baseVal.value + diffX).toString());
         this.extendedItem.setAttribute('cy', (this._ellipseElement.cy.baseVal.value + diffY).toString());
     }
-
-
-    override refresh() {
-        this._removeAllOverlays();
-        this.extend();
-    }
-
 
     override dispose() {
         this._removeAllOverlays();
