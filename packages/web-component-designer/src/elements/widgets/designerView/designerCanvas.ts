@@ -37,6 +37,7 @@ import { SetDesignItemsAction } from '../../services/undoService/transactionItem
 import { IDocumentStylesheet } from '../../services/stylesheetService/IStylesheetService.js';
 import { filterChildPlaceItems } from '../../helper/LayoutHelper.js';
 import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
+import { TouchGestureHelper } from '../../helper/TouchGestureHelper.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -50,7 +51,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   // IPlacementView
   private _gridSize = 10;
-  private _moveGroup: ChangeGroup;
   public get gridSize() {
     return this._gridSize;
   }
@@ -91,6 +91,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _backgroundImage: string;
 
   private _enableSelectTextNodesOnClick = false;
+
+  private _moveGroup: ChangeGroup;
+  private _touchGestureHelper: TouchGestureHelper;
 
   public get zoomFactor(): number {
     return this._zoomFactor;
@@ -692,6 +695,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   connectedCallback() {
     if (!this._firstConnect) {
       this._firstConnect = true;
+      this._touchGestureHelper = TouchGestureHelper.addTouchEvents(this.clickOverlay);
       this.clickOverlay.addEventListener(EventNames.PointerDown, this._pointerEventHandler);
       this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandler);
       this.clickOverlay.addEventListener(EventNames.PointerUp, this._pointerEventHandler);
@@ -702,6 +706,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.KeyDown, this.onKeyDown, true);
       this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp, true);
       this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, true);
+      this.clickOverlay.addEventListener('zoom', (e: CustomEvent) => {
+        this.zoomFactor = this.zoomFactor + (e.detail.diff / 10);
+      });
+      this.clickOverlay.addEventListener('pan', (e: CustomEvent) => {
+        const newCanvasOffset = {
+          x: (this.canvasOffset.x) - e.detail.deltaX ,
+          y: (this.canvasOffset.y) - e.detail.deltaY 
+        }
+        this.canvasOffset = newCanvasOffset
+      });
     }
     this.extensionManager.connected();
   }
@@ -1144,6 +1158,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
     if (!this.serviceContainer)
+      return;
+
+    if (this._touchGestureHelper.multitouchEventActive)
       return;
 
     this.fillCalculationrects();
