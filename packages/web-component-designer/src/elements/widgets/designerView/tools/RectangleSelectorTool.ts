@@ -17,13 +17,20 @@ export class RectangleSelectorTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    if (event.ctrlKey)
+      this.cursor = 'copy';
+    else if (event.altKey)
+      this.cursor = 'default';
+    else
+      this.cursor = 'default';
+
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
 
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
         designerCanvas.captureActiveTool(this);
-        
+
         this._initialPoint = currentPoint;
         if (!this._rect)
           this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -62,8 +69,11 @@ export class RectangleSelectorTool implements ITool {
         (<Element>event.target).releasePointerCapture(event.pointerId);
         designerCanvas.releaseActiveTool();
 
-        const elements = designerCanvas.rootDesignItem.element.querySelectorAll('*');
+        const elements = designerCanvas.rootDesignItem.querySelectorAll('*');
         let inSelectionElements: IDesignItem[] = [];
+
+        if ((event.ctrlKey || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+          inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
         let point = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
@@ -81,12 +91,16 @@ export class RectangleSelectorTool implements ITool {
           point.y = elementRect.y + elementRect.height;
           const p4 = p3 && this._rect.isPointInFill(point);
           if (p4) {
-            const desItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer)
-            if(designerCanvas.instanceServiceContainer.selectionService.selectedElements)
-                inSelectionElements.push(... designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-            inSelectionElements.push(desItem);
+            const desItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+            if (!inSelectionElements.includes(desItem) && !event.altKey) {
+              inSelectionElements.push(desItem);
+            } else if (event.altKey) {
+              const idx = inSelectionElements.indexOf(desItem);
+              inSelectionElements.splice(idx, 1)
+            }
           }
         }
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
 
         designerCanvas.overlayLayer.removeOverlay(this._rect);
         this._rect = null;

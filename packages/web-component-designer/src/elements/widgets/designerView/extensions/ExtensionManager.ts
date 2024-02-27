@@ -7,17 +7,35 @@ import { ExtensionType } from './ExtensionType.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { IDesignerExtension } from './IDesignerExtension.js';
 import { IContentChanged } from '../../../services/contentService/IContentChanged.js';
+import { DesignerCanvas } from '../designerCanvas.js';
 
 export class ExtensionManager implements IExtensionManager {
 
   designerCanvas: IDesignerCanvas;
   designItemsWithExtentions: Set<IDesignItem> = new Set();
+  _timeout: ReturnType<typeof setTimeout>;
 
   constructor(designerCanvas: IDesignerCanvas) {
     this.designerCanvas = designerCanvas;
 
     designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
     designerCanvas.instanceServiceContainer.contentService.onContentChanged.on(this._contentChanged.bind(this));
+  }
+
+  connected() {
+    if (!this._timeout)
+      this._timeout = setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
+  }
+
+  disconnected() {
+    if (this._timeout)
+      clearTimeout(this._timeout);
+    this._timeout = null;
+  }
+
+  private refreshAllExtensionsTimeout() {
+    this.refreshAllAppliedExtentions();
+    this._timeout = setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
   }
 
   private _contentChanged(contentChanged: IContentChanged) {
@@ -92,6 +110,7 @@ export class ExtensionManager implements IExtensionManager {
             }
             appE.push(ext);
             designItem.appliedDesignerExtensions.set(extensionType, appE);
+
             this.designItemsWithExtentions.add(designItem);
           }
         }
@@ -147,6 +166,25 @@ export class ExtensionManager implements IExtensionManager {
       }
     }
     this.designerCanvas.overlayLayer.endBatch();
+  }
+
+  removeExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension) {
+    for (let e of designItem.appliedDesignerExtensions) {
+      const idx = e[1].indexOf(extension);
+      if (idx >= 0) {
+        try {
+          extension.dispose();
+        }
+        catch (err) {
+          console.error(err);
+        }
+        e[1].splice(idx, 1);
+        if (e[1].length == 0)
+          designItem.appliedDesignerExtensions.delete(e[0]);
+        if (!designItem.appliedDesignerExtensions.size)
+          this.designItemsWithExtentions.delete(designItem);
+      }
+    }
   }
 
   removeExtension(designItem: IDesignItem, extensionType?: ExtensionType) {
@@ -235,15 +273,19 @@ export class ExtensionManager implements IExtensionManager {
   refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType, event?: Event) {
     if (designItem) {
       if (extensionType) {
-        let exts = designItem.appliedDesignerExtensions.get(extensionType);
-        if (exts) {
-          const cache = {};
-          for (let e of exts) {
-            try {
-              e.refresh(cache, event);
-            }
-            catch (err) {
-              console.error(err);
+        if (!designItem.element.isConnected) {
+          this.removeExtension(designItem, extensionType);
+        } else {
+          let exts = designItem.appliedDesignerExtensions.get(extensionType);
+          if (exts) {
+            const cache = {};
+            for (let e of exts) {
+              try {
+                e.refresh(cache, event);
+              }
+              catch (err) {
+                console.error(err);
+              }
             }
           }
         }
@@ -271,23 +313,26 @@ export class ExtensionManager implements IExtensionManager {
         const cache = {};
         outer1:
         for (let i of designItems) {
-          let exts = i.appliedDesignerExtensions.get(extensionType);
-          if (exts) {
-            for (let e of exts) {
-              try {
-                if (e != ignoredExtension)
-                  e.refresh(cache, event);
-                if (timeout) {
-                  const end = performance.now();
-                  if (end - start > timeout)
-                  {
-                    console.warn("refreshExtensions() took too long, stopped refreshing");
-                    break outer1;
+          if (!i.element.isConnected) {
+            this.removeExtension(i, extensionType);
+          } else {
+            let exts = i.appliedDesignerExtensions.get(extensionType);
+            if (exts) {
+              for (let e of exts) {
+                try {
+                  if (e != ignoredExtension)
+                    e.refresh(cache, event);
+                  if (timeout) {
+                    const end = performance.now();
+                    if (end - start > timeout) {
+                      console.warn("refreshExtensions() took too long, stopped refreshing");
+                      break outer1;
+                    }
                   }
                 }
-              }
-              catch (err) {
-                console.error(err);
+                catch (err) {
+                  console.error(err);
+                }
               }
             }
           }
@@ -303,8 +348,7 @@ export class ExtensionManager implements IExtensionManager {
                   e.refresh(cache, event);
                   if (timeout) {
                     const end = performance.now();
-                    if (end - start > timeout)
-                    {
+                    if (end - start > timeout) {
                       console.warn("refreshExtensions() took too long, stopped refreshing");
                       break outer2;
                     }
@@ -343,6 +387,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshAllAppliedExtentions() {
+    (<DesignerCanvas>this.designerCanvas).fillCalculationrects();
     this.refreshAllExtensions([...this.designItemsWithExtentions])
   }
 

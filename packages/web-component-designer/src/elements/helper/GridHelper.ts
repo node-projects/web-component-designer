@@ -34,6 +34,7 @@ export function calculateGridInformation(designItem: IDesignItem) {
 
   const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
   const paddingTop = Number.parseFloat(computedStyle.paddingTop);
+ 
 
   let y = 0;
   let xGap = 0;
@@ -41,6 +42,8 @@ export function calculateGridInformation(designItem: IDesignItem) {
   let rw = 0;
   let xOffset = transformedCornerPoints[0].x;
   let yOffset = transformedCornerPoints[0].y;
+  xOffset+=parseFloat(computedStyle.borderLeftWidth);
+  yOffset+=parseFloat(computedStyle.borderTopWidth);
 
   let gridA: string[] = null;
   if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')

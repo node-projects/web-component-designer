@@ -7,6 +7,7 @@ export interface ISelectionService {
   selectedElements: IDesignItem[];
 
   setSelectedElements(designItems: IDesignItem[]): void;
+  setSelectionByTextRange(positionStart: number, positionEnd: number);
 
   clearSelectedElements(): void;
 

@@ -12,5 +12,6 @@ export enum NamedTools {
   RectangleSelector = 'RectangleSelector',
   PickColor = 'PickColor',
   Text = 'Text',
-  TextBoc = "TextBoc",
+  
+  DrawElementTool = "DrawElementTool"
 }

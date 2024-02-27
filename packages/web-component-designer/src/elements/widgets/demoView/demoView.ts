@@ -58,6 +58,7 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
 
     this._placeholder = document.createElement('div');
     this._placeholder.id = 'placeholder';
+    this._placeholder.style.transform = 'scale(1)'; //to fix position: static alignment
     this.shadowRoot.appendChild(this._placeholder)
     this._loading = document.createElement('div');
     this._loading.id = 'loading';

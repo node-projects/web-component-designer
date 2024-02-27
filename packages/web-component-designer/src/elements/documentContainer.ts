@@ -154,7 +154,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       if (this._tabControl.selectedIndex === 2) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
         this._content = this.designerView.getHTML();
-        this.codeView.update(this._content);
+        this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         if (primarySelection) {
           if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
             this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
@@ -203,7 +203,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       if (this._tabControl.selectedIndex === 0)
         this.designerView.parseHTML(this._content, this._firstLoad);
       else if (this._tabControl.selectedIndex === 1)
-        this.codeView.update(this._content);
+        this.codeView.update(this._content, this.designerView.instanceServiceContainer);
       else if (this._tabControl.selectedIndex === 2) {
 
       }
@@ -240,7 +240,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       if (i.newIndex === 0 || i.newIndex === 2)
         this.designerView.parseHTML(this._content, this._firstLoad);
       if (i.newIndex === 1 || i.newIndex === 2) {
-        this.codeView.update(this._content);
+        this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         if (this._selectionPosition) {
           this.codeView.setSelection(this._selectionPosition);
           this._selectionPosition = null;

@@ -5,6 +5,23 @@ import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { SelectionChangedAction } from '../undoService/transactionItems/SelectionChangedAction.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
+function findDesignItem(designItem: IDesignItem, position: number): IDesignItem {
+  let usedItem = null;
+  if (designItem.hasChildren) {
+    for (let d of designItem.children()) {
+      const nodePosition = designItem.instanceServiceContainer.designItemDocumentPositionService.getPosition(d);
+      if (nodePosition) {
+        if (nodePosition.start <= position)
+          usedItem = d;
+      }
+    }
+  }
+  if (usedItem) {
+    return findDesignItem(usedItem, position)
+  }
+  return designItem;
+}
+
 export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;
   selectedElements: IDesignItem[] = [];
@@ -24,6 +41,14 @@ export class SelectionService implements ISelectionService {
       } else {
         this._withoutUndoSetSelectedElements(designItems);
       }
+    }
+  }
+
+  setSelectionByTextRange(positionStart: number, positionEnd: number) {
+    const item = findDesignItem(this._designerCanvas.rootDesignItem, positionStart);
+    if (item) {
+      if (this.selectedElements.length != 1 || this.primarySelection != item)
+        this.setSelectedElements([item]);
     }
   }
 

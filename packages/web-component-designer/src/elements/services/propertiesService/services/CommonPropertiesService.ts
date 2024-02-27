@@ -24,7 +24,7 @@ export class CommonPropertiesService extends AbstractPropertiesService {
       service: this,
       attributeName: "class",
       propertyName: "className",
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     }, {
       name: "title",
       type: "string",

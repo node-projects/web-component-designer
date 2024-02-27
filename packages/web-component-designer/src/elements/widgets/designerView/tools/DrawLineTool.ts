@@ -81,6 +81,7 @@ export class DrawLineTool implements ITool {
         this._path.setAttribute("y2", (this._endPoint.y - mvY).toString());
         this._path.removeAttribute("stroke");
         this._path.removeAttribute("stroke-width");
+        this._path.removeAttribute("overlay-source");
         svg.appendChild(this._path);
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';

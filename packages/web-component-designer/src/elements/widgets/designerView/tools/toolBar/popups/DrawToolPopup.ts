@@ -29,6 +29,7 @@ export class DrawToolPopup extends BaseCustomWebComponentConstructorAppend {
           display: flex;
           flex-wrap: wrap;
           margin-bottom: 5px;
+          gap: 3px;
       }
       .inputs{
         float: left;
@@ -109,4 +110,4 @@ export class DrawToolPopup extends BaseCustomWebComponentConstructorAppend {
   }
 }
 
-customElements.define('node-projects-designer-drawtool-popup', DrawToolPopup);
+customElements.define('node-projects-designer-draw-tool-popup', DrawToolPopup);

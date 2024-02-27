@@ -15,4 +15,8 @@ export abstract class AbstractExtension extends AbstractExtensionBase implements
   abstract extend(cache: Record<string|symbol, any>, event?: Event);
   abstract refresh(cache: Record<string|symbol, any>, event?: Event);
   abstract dispose();
+
+  remove() {
+    this.extensionManager.removeExtensionInstance(this.extendedItem, this);
+  }
 }

@@ -121,7 +121,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
     zoomDesignerBackground: true
   };
 
-  public readonly designerTools: Map<string | NamedTools, ITool> = new Map();
+  public readonly designerTools: Map<string | NamedTools, ITool | (new (IElementDefinition) => ITool)> = new Map();
 
   get bindingService(): IBindingService {
     return this.getLastService('bindingService');

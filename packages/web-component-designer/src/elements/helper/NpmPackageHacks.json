@@ -11,5 +11,11 @@
     },
     "@material/web": {
         "import": "@material/web/all.js"
+    },
+    "@stencil/core": {
+        "map": {
+            "@stencil/core/internal/client": "internal/client/index.js",
+            "@stencil/core/internal/app-data": "internal/app-data/index.js"
+        }
     }
 }

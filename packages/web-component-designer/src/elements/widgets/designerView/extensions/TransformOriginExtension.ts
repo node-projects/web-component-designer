@@ -17,24 +17,40 @@ export class TransformOriginExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend() {
+
+  override refresh(cache: Record<string | symbol, any>, event?: Event) {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
-    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas);
+    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas, cache);
 
-    this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
-    this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
-    this._circle.style.cursor = 'pointer';
+    if (this._valuesHaveChanges(toDOMPoint.x, toDOMPoint.y, this.designerCanvas.zoomFactor)) {
+      this._removeAllOverlays();
+      this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
+      this._circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+      this._circle.style.cursor = 'pointer';
 
-    this._circle2 = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 1 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
-    this._circle2.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
-    this._circle2.style.pointerEvents = 'none';
-    this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
-    this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
-    this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
-    let old = this.extendedItem.getStyleFromSheetOrLocal('transform-origin');
-    if (old) {
-      this._oldValue = old;
+      this._circle2 = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 1 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
+      this._circle2.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+      this._circle2.style.pointerEvents = 'none';
+      this._circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event));
+      this._circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event));
+      this._circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event)); //TODO: -> assign to window
+    }
+  }
+
+  override extend(cache: Record<string | symbol, any>, event?: Event) {
+    const computed = getComputedStyle(this.extendedItem.element);
+    const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
+    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas, cache);
+    if (isNaN(toDOMPoint.x) || isNaN(toDOMPoint.y)) {
+      this.remove();
+      return;
+    } else {
+      let old = this.extendedItem.getStyleFromSheetOrLocal('transform-origin');
+      if (old) {
+        this._oldValue = old;
+      }
+      this.refresh(cache, event);
     }
   }
 
@@ -91,16 +107,11 @@ export class TransformOriginExtension extends AbstractExtension {
           }
           else
             this.extendedItem.updateStyleInSheetOrLocal('transform-origin', newX + 'px' + ' ' + newY + 'px');
-          this.refresh();
+          this.refresh(null, null);
           this._startPos = null;
         }
         break;
     }
-  }
-
-  override refresh() {
-    this._removeAllOverlays();
-    this.extend();
   }
 
   override dispose() {

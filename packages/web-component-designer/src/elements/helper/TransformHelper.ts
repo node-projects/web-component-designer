@@ -2,6 +2,9 @@ import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
 import { getElementsWindowOffsetWithoutSelfAndParentTransformations, getParentElementIncludingSlots } from "./ElementHelper.js";
 
+//TODO:
+//transform-box
+
 let identityMatrix: number[] = [
   1, 0, 0, 0,
   0, 1, 0, 0,
@@ -14,16 +17,16 @@ export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
   let s = getComputedStyle(element);
 
   let m = new DOMMatrix();
-  if (s.translate != 'none') {
+  if (s.translate != 'none' && s.translate) {
     m = m.multiply(new DOMMatrix('translate(' + s.translate + ')'));
   }
-  if (s.rotate != 'none') {
+  if (s.rotate != 'none' && s.rotate) {
     m = m.multiply(new DOMMatrix('rotate(' + s.rotate + ')'));
   }
-  if (s.scale != 'none') {
+  if (s.scale != 'none' && s.scale) {
     m = m.multiply(new DOMMatrix('scale(' + s.scale + ')'));
   }
-  if (s.transform != 'none') {
+  if (s.transform != 'none' && s.transform) {
     m = m.multiply(new DOMMatrix(s.transform));
   }
   return m;
@@ -138,18 +141,22 @@ export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransfo
   return designerCanvasNormalizedTransformedOrigin;
 }
 
-const elemntMatrixCacheKey = Symbol('windowOffsetsCacheKey');
+//const elementMatrixCacheKey = Symbol('windowOffsetsCacheKey');
 export function getResultingTransformationBetweenElementAndAllAncestors(element: HTMLElement, ancestor: HTMLElement, excludeAncestor?: boolean, cache: Record<string | symbol, any> = {}) {
 
-  let ch: Map<any, [DOMMatrix]> = cache[elemntMatrixCacheKey] ??= new Map<any, [DOMMatrix]>();
+  /*let ch: Map<any, [DOMMatrix]>;
+  if (cache)
+    ch = cache[elementMatrixCacheKey] ??= new Map<any, [DOMMatrix]>();
+  else
+    ch = new Map<any, [DOMMatrix]>();*/
   let lst: [DOMMatrix][] = [];
 
   let actualElement: HTMLElement = element;
   let actualElementMatrix: DOMMatrix;
   let newElementMatrix: DOMMatrix;
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
-  while (actualElement != ancestor) {
-    let cachedObj = ch.get(actualElement);
+  while (actualElement != ancestor && actualElement != null) {
+    /*let cachedObj = ch.get(actualElement);
     if (cachedObj) {
       if (originalElementAndAllParentsMultipliedMatrix)
         originalElementAndAllParentsMultipliedMatrix = cachedObj[0].multiply(originalElementAndAllParentsMultipliedMatrix);
@@ -157,22 +164,24 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
         originalElementAndAllParentsMultipliedMatrix = cachedObj[0];
       lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
       break;
-    }
+    }*/
 
     const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
-    newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
-    newElementMatrix.m41 = newElementMatrix.m42 = 0;
-    if (actualElement == element) {
-      originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(newElementMatrix);
-    } else if (newElement != ancestor || !excludeAncestor) {
-      originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(newElementMatrix);
-    }
+    if (newElement) {
+      actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
+      newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
+      newElementMatrix.m41 = newElementMatrix.m42 = 0;
+      if (actualElement == element) {
+        originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(newElementMatrix);
+      } else if (newElement != ancestor || !excludeAncestor) {
+        originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(newElementMatrix);
+      }
 
-    lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
-    const cacheEntry: [DOMMatrix] = [originalElementAndAllParentsMultipliedMatrix];
-    lst.push(cacheEntry);
-    ch.set(actualElement, cacheEntry);
+      lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
+      const cacheEntry: [DOMMatrix] = [originalElementAndAllParentsMultipliedMatrix];
+      lst.push(cacheEntry);
+      //ch.set(actualElement, cacheEntry);
+    }
 
     actualElement = newElement;
   }
@@ -181,12 +190,14 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
 }
 
 export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement, point: DOMPoint, designerCanvas: IDesignerCanvas, cache?: Record<string | symbol, any>) {
-  const canvas = element.closest('#node-projects-designer-canvas-canvas');
+  const canvas = designerCanvas.rootDesignItem.node;
   let actualElement: HTMLElement = element;
   let parentElementTransformOriginToPointVectorTransformed: DOMPointReadOnly;
   let byParentTransformedPointRelatedToCanvas: IPoint = { x: 0, y: 0 };
   while (actualElement != canvas) {
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
+    if (!parentElement)
+      break;
     const elementWindowOffset = getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement, designerCanvas.zoomFactor, cache);
 
     const toSplit = getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ');
@@ -215,8 +226,8 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   return byParentTransformedPointRelatedToCanvas;
 }
 
-export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement, point: IPoint, designerCanvas: IDesignerCanvas): IPoint {
-  return getDesignerCanvasNormalizedTransformedCornerDOMPoints(element, { x: -point.x, y: -point.y }, designerCanvas)[0];
+export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement, point: IPoint, designerCanvas: IDesignerCanvas, cache: Record<string | symbol, any>): IPoint {
+  return getDesignerCanvasNormalizedTransformedCornerDOMPoints(element, { x: -point.x, y: -point.y }, designerCanvas, cache)[0];
 }
 
 export function getElementSize(element: HTMLElement) {
@@ -308,6 +319,7 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y);
   transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y);
   transformedCornerPoints[3] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top3Transformed.x, designerCanvasNormalizedTransformOrigin.y + top3Transformed.y);
+
 
   return transformedCornerPoints;
 }

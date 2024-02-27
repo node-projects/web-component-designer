@@ -19,12 +19,12 @@ export class DisplayGridExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend(event?: Event) {
+  override extend(cache: Record<string|symbol, any>, event?: Event) {
     this._initSVGArrays();
     this.refresh(event);
   }
 
-  override refresh(event?: Event) {
+  override refresh(cache: Record<string|symbol, any>, event?: Event) {
     this.gridInformation = calculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
 

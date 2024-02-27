@@ -16,8 +16,7 @@ import { DeleteAction } from '../services/undoService/transactionItems/DeleteAct
 import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 import { enableStylesheetService } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
-import { AbstractStylesheetService } from '../services/stylesheetService/AbstractStylesheetService.js';
-import { TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
+import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
 import { TextContentChangeAction } from '../services/undoService/transactionItems/TextContentChangeAction.js';
 
@@ -177,7 +176,10 @@ export class DesignItem implements IDesignItem {
   }
   public set id(value: string) {
     this.element.id = value;
-    this.setAttribute("id", value);
+    if (this.id)
+      this.setAttribute("id", value);
+    else
+      this.removeAttribute("id")
   }
 
   public get isRootItem(): boolean {
@@ -258,10 +260,10 @@ export class DesignItem implements IDesignItem {
 
   //abstract text content to own property. so only change via designer api will use it.
   public get hasContent() {
-    return this.nodeType == NodeType.TextNode || (this.nodeType == NodeType.Comment && this.element.textContent != "") || (this._childArray.length === 0 && this.content !== null);
+    return ((this.nodeType == NodeType.TextNode || this.nodeType == NodeType.Comment) && this.element.textContent != "") || (this._childArray.length === 0);
   }
   public get content(): string {
-    if (!this.hasChildren)
+    if (this.nodeType == NodeType.TextNode || this.nodeType == NodeType.Comment)
       return this.node.textContent;
     else
       return this._childArray.map(x => x.content).join();
@@ -338,6 +340,15 @@ export class DesignItem implements IDesignItem {
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
     let designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
 
+    if (node instanceof HTMLTemplateElement && node.getAttribute('shadowrootmode') == 'open') {
+      try {
+        const shadow = (<HTMLElement>node.parentNode).attachShadow({ mode: 'open' });
+        shadow.appendChild(node.content.cloneNode(true));
+      } catch (err) {
+        console.error("error attaching shadowdom", err)
+      }
+    }
+
     if (designItem.nodeType == NodeType.Element) {
       for (let a of designItem.element.attributes) {
         if (a.name !== 'style') {
@@ -368,13 +379,29 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
+  querySelectorAll(selectors: string): NodeListOf<HTMLElement> {
+    if (this.isRootItem) {
+      return (<HTMLElement>this.node).shadowRoot.querySelectorAll(selectors);
+    } else {
+      return this.element.querySelectorAll(selectors);
+    }
+  }
+
   updateChildrenFromNodesChildren() {
     this._childArray = [];
     if (this.nodeType == NodeType.Element) {
-      for (const c of this.element.childNodes) {
-        const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
-        this._childArray.push(di);
-        (<DesignItem>di)._parent = this;
+      if (this.element instanceof HTMLTemplateElement) {
+        for (const c of this.element.content.childNodes) {
+          const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
+          this._childArray.push(di);
+          (<DesignItem>di)._parent = this;
+        }
+      } else {
+        for (const c of this.element.childNodes) {
+          const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
+          this._childArray.push(di);
+          (<DesignItem>di)._parent = this;
+        }
       }
     }
     this._refreshIfStyleSheet();
@@ -492,7 +519,7 @@ export class DesignItem implements IDesignItem {
     return value ?? fallback;
   }
 
-  getComputedStyle(name: string, fallback: string = null) {
+  getComputedStyleProperty(name: string, fallback: string = null) {
     let nm = name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
@@ -502,6 +529,13 @@ export class DesignItem implements IDesignItem {
       value = getComputedStyle(this.element).getPropertyValue(nm)
     }
     return value ?? fallback;
+  }
+
+  getComputedStyle() {
+    /*if (this.isRootItem) {
+      return window.getComputedStyle((<ShadowRoot>this.node).host);
+    }*/
+    return window.getComputedStyle(this.element);
   }
 
   _stylesCache: IStyleRule[] = null;
@@ -555,10 +589,20 @@ export class DesignItem implements IDesignItem {
 
     if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
       this._childArray.push(designItem);
-      this.view.appendChild(designItem.view);
+      if (this.isRootItem) {
+        (<HTMLElement>this.node).shadowRoot.appendChild(designItem.view);
+      } else if (this.view instanceof HTMLTemplateElement) {
+        this.view.content.appendChild(designItem.view);
+      } else
+        this.view.appendChild(designItem.view);
     } else {
       let el = this._childArray[index];
-      this.view.insertBefore(designItem.view, el.element)
+      if (this.isRootItem) {
+        (<HTMLElement>this.node).shadowRoot.insertBefore(designItem.view, el.element);
+      } else if (this.view instanceof HTMLTemplateElement) {
+        this.view.content.insertBefore(designItem.view, el.element)
+      } else
+        this.view.insertBefore(designItem.view, el.element)
       this._childArray.splice(index, 0, designItem);
     }
     (<DesignItem>designItem)._parent = this;
@@ -594,9 +638,10 @@ export class DesignItem implements IDesignItem {
       //Update Stylesheetservice with sheet info
       //Patch this sheetdata
 
-      const realContent = this._childArray.reduce((a, b) => a + b.content, '');
+      //TODO: do not patch styles in templates, this needs to be recursive, cause the style does not need to be on the root
+      /*const realContent = this._childArray.reduce((a, b) => a + b.content, '');
       this.view.textContent = AbstractStylesheetService.buildPatchedStyleSheet([cssFromString(realContent)]);
-      this.instanceServiceContainer.designerCanvas.lazyTriggerReparseDocumentStylesheets();
+      this.instanceServiceContainer.designerCanvas.lazyTriggerReparseDocumentStylesheets();*/
     } else if (this.name == 'link') {
 
     }

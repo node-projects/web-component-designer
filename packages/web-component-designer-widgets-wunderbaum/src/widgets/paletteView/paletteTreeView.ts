@@ -1,9 +1,10 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, cssFromString } from '@node-projects/base-custom-webcomponent';
-import { IElementsService, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
+import { IElementDefinition, IElementsService, NamedTools, ServiceContainer, dragDropFormatNameElementDefinition } from '@node-projects/web-component-designer';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
+import { WbNodeData } from 'types';
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   private _treeDiv: HTMLTableElement;
@@ -26,6 +27,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
           <div id="treetable" class="wb-alternate" style="min-width: 100%;"></div>
         </div>
       </div>`;
+
+  private serviceContainer: ServiceContainer;
 
   constructor() {
     super();
@@ -50,6 +53,18 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         mode: 'hide',
         highlight: true
       },
+      click: (e) => {
+        if (e.event) { // only for clicked items, not when elements selected via code.
+          let node = e.node;
+          let elDef: IElementDefinition = node.data.ref;
+          if (elDef) {
+            let tool = this.serviceContainer.designerTools.get(elDef.tool ?? NamedTools.DrawElementTool);
+            if (typeof tool == 'function')
+              tool = new tool(elDef)
+            this.serviceContainer.globalContext.tool = tool;
+          }
+        }
+      },
       dnd: {
         guessDropEffect: true,
         preventRecursion: true, // Prevent dropping nodes on own descendants
@@ -69,6 +84,8 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
   }
 
   public async loadControls(serviceContainer: ServiceContainer, elementsServices: IElementsService[]) {
+    this.serviceContainer = serviceContainer;
+
     let rootNode = this._tree.root;
     rootNode.removeChildren();
 
@@ -80,11 +97,14 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
       try {
         let elements = await s.getElements();
         for (let e of elements) {
-          newNode.addChildren({
+          let node: WbNodeData = {
             title: e.name ?? e.tag,
             //@ts-ignore
             ref: e
-          });
+          };
+          if (e.icon)
+            node.icon = e.icon;
+          newNode.addChildren(node);
         }
       } catch (err) {
         console.warn('Error loading elements', err);

@@ -107,6 +107,10 @@ export * from "./elements/services/manifestParsers/WebcomponentManifestParserSer
 export type { IModelCommandService } from "./elements/services/modelCommandService/IModelCommandService.js";
 export * from "./elements/services/modelCommandService/DefaultModelCommandService.js";
 
+export type { IMultiplayerService } from "./elements/services/multiplayerService/IMultiplayerService.js";
+export * from "./elements/services/multiplayerService/MultiplayerService.js";
+
+
 export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 
@@ -205,6 +209,7 @@ export * from "./elements/widgets/designerView/tools/toolBar/buttons/ZoomToolBut
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/popups/DrawToolPopup.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/SelectionToolPopup.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbar.js";
 export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbarButton.js";

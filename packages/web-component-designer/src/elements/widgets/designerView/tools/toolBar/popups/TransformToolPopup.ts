@@ -375,4 +375,4 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
 }
 
 
-customElements.define('node-projects-designer-transformtool-popup', TransformToolPopup);
+customElements.define('node-projects-designer-transform-tool-popup', TransformToolPopup);

@@ -99,6 +99,7 @@ export class DrawEllipsisTool implements ITool {
         this._path.setAttribute("cy", (this._cy - mvY).toString());
         this._path.removeAttribute("stroke");
         this._path.removeAttribute("stroke-width");
+        this._path.removeAttribute("overlay-source");
         svg.style.left = (mvX) + 'px';
         svg.style.top = (mvY) + 'px';
         svg.style.position = 'absolute';

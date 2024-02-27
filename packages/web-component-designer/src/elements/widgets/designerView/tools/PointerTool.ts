@@ -66,7 +66,6 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-
     if (event.ctrlKey)
       this.cursor = 'copy';
     else
@@ -85,7 +84,7 @@ export class PointerTool implements ITool {
     }
 
     if (((event.ctrlKey || event.metaKey) && event.shiftKey) || event.buttons == 4) {
-      const panTool = designerCanvas.serviceContainer.designerTools.get(NamedTools.Pan);
+      const panTool = <ITool>designerCanvas.serviceContainer.designerTools.get(NamedTools.Pan);
       if (panTool) {
         panTool.pointerEventHandler(designerCanvas, event, currentElement);
         return;
@@ -176,7 +175,7 @@ export class PointerTool implements ITool {
   }
 
   private _pointerActionTypeDrawSelection(designerView: IDesignerCanvas, event: PointerEvent, currentElement: HTMLElement) {
-    const drawSelectionTool = designerView.serviceContainer.designerTools.get(NamedTools.DrawSelection);
+    const drawSelectionTool = <ITool>designerView.serviceContainer.designerTools.get(NamedTools.DrawSelection);
     if (drawSelectionTool) {
       this._resetTool();
       drawSelectionTool.pointerEventHandler(designerView, event, currentElement);
@@ -361,8 +360,14 @@ export class PointerTool implements ITool {
             if (containerService) {
               if (!this._changeGroup)
                 this._changeGroup = designerCanvas.rootDesignItem.openGroup("Move Elements");
-              containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-              this._changeGroup.commit();
+              try {
+                containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+                this._changeGroup.commit();
+              }
+              catch (err) {
+                console.error(err);
+                this._changeGroup.abort();
+              }
               this._changeGroup = null;
               let elements = designerCanvas.elementsFromPoint(event.x, event.y);
               for (const item of this._actionStartedDesignItems) {
@@ -370,6 +375,10 @@ export class PointerTool implements ITool {
                   designerCanvas.extensionManager.applyExtension(item, ExtensionType.MouseOver, event);
                 designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
               }
+            } else {
+              if (this._changeGroup)
+                this._changeGroup.abort();
+              this._changeGroup = null;
             }
 
             designerCanvas.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
