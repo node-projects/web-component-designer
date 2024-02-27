@@ -9,6 +9,8 @@ import { IPlacementView } from '../IPlacementView.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 
+//TODO: use PlacementService, size is not always width/height could also be margin etc...
+//      also when elment aligned to bottom, will it later also be?
 export class ResizeExtension extends AbstractExtension {
 
   private resizeAllSelected: boolean;
@@ -115,74 +117,15 @@ export class ResizeExtension extends AbstractExtension {
         if (this.designerCanvas.alignOnSnap)
           this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
-        let i = 0;
-        let top: string = null;
-        let bottom: string = null;
-        let left: string = null;
-        let right: string = null;
-
-        switch (this._actionModeStarted) {
-          case 'e-resize':
-            left = getComputedStyle(this.extendedItem.element).left;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
-            (<HTMLElement>this.extendedItem.element).style.left = left;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
-            break;
-          case 'se-resize':
-            top = getComputedStyle(this.extendedItem.element).top;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
-            (<HTMLElement>this.extendedItem.element).style.top = top;
-            left = getComputedStyle(this.extendedItem.element).left;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
-            (<HTMLElement>this.extendedItem.element).style.left = left;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
-            break;
-          case 's-resize':
-            top = getComputedStyle(this.extendedItem.element).top;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
-            (<HTMLElement>this.extendedItem.element).style.top = top;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
-            break;
-          case 'sw-resize':
-            top = getComputedStyle(this.extendedItem.element).top;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('bottom');
-            (<HTMLElement>this.extendedItem.element).style.top = top;
-            right = getComputedStyle(this.extendedItem.element).right;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
-            (<HTMLElement>this.extendedItem.element).style.right = right;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
-            break;
-          case 'w-resize':
-            right = getComputedStyle(this.extendedItem.element).right;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
-            (<HTMLElement>this.extendedItem.element).style.right = right;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
-            break;
-          case 'nw-resize':
-            bottom = getComputedStyle(this.extendedItem.element).bottom;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
-            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
-            right = getComputedStyle(this.extendedItem.element).right;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('left');
-            (<HTMLElement>this.extendedItem.element).style.right = right;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
-            break;
-          case 'n-resize':
-            bottom = getComputedStyle(this.extendedItem.element).bottom;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
-            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
-            break;
-          case 'ne-resize':
-            bottom = getComputedStyle(this.extendedItem.element).bottom;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('top');
-            (<HTMLElement>this.extendedItem.element).style.bottom = bottom;
-            left = getComputedStyle(this.extendedItem.element).left;
-            (<HTMLElement>this.extendedItem.element).style.removeProperty('right');
-            (<HTMLElement>this.extendedItem.element).style.left = left;
-            (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
-            break;
+        this.prepareResize(this.extendedItem, this._actionModeStarted)
+        if (this.resizeAllSelected) {
+          for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+            if (designItem !== this.extendedItem) {
+              this.prepareResize(designItem, this._actionModeStarted);
+            }
+          }
         }
+
         break;
 
       case EventNames.PointerMove:
@@ -260,7 +203,7 @@ export class ResizeExtension extends AbstractExtension {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width - deltaX + 'px';
                     (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
                   }
                 }
@@ -274,7 +217,7 @@ export class ResizeExtension extends AbstractExtension {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width - deltaX + 'px';
                   }
                 }
               }
@@ -289,8 +232,8 @@ export class ResizeExtension extends AbstractExtension {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
+                    (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width - deltaX + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height - deltaY + 'px';
                   }
                 }
               }
@@ -303,7 +246,7 @@ export class ResizeExtension extends AbstractExtension {
                 i++;
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height - deltaY + 'px';
                   }
                 }
               }
@@ -319,7 +262,7 @@ export class ResizeExtension extends AbstractExtension {
                 for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
                   if (designItem !== this.extendedItem) {
                     (<HTMLElement>designItem.element).style.width = this._initialSizes[i].width + deltaX + 'px';
-                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height + deltaY + 'px';
+                    (<HTMLElement>designItem.element).style.height = this._initialSizes[i].height - deltaY + 'px';
                   }
                 }
               }
@@ -369,12 +312,86 @@ export class ResizeExtension extends AbstractExtension {
             if (designItem !== this.extendedItem) {
               designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
               designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
+
+              designItem.setStyle('left', normalizeToAbsolutePosition(<HTMLElement>designItem.element, 'left'));
+              designItem.setStyle('top', normalizeToAbsolutePosition(<HTMLElement>designItem.element, 'top'));
             }
           }
         }
         cg.commit();
         this._initialSizes = null;
         this._initialPoint = null;
+        break;
+    }
+  }
+
+  private prepareResize(designItem: IDesignItem, mode: string) {
+    let i = 0;
+    let top: string = null;
+    let bottom: string = null;
+    let left: string = null;
+    let right: string = null;
+
+    switch (this._actionModeStarted) {
+      case 'e-resize':
+        left = getComputedStyle(designItem.element).left;
+        (<HTMLElement>designItem.element).style.removeProperty('right');
+        (<HTMLElement>designItem.element).style.left = left;
+        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+        break;
+      case 'se-resize':
+        top = getComputedStyle(designItem.element).top;
+        (<HTMLElement>designItem.element).style.removeProperty('bottom');
+        (<HTMLElement>designItem.element).style.top = top;
+        left = getComputedStyle(designItem.element).left;
+        (<HTMLElement>designItem.element).style.removeProperty('right');
+        (<HTMLElement>designItem.element).style.left = left;
+        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+        break;
+      case 's-resize':
+        top = getComputedStyle(designItem.element).top;
+        (<HTMLElement>designItem.element).style.removeProperty('bottom');
+        (<HTMLElement>designItem.element).style.top = top;
+        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+        break;
+      case 'sw-resize':
+        top = getComputedStyle(designItem.element).top;
+        (<HTMLElement>designItem.element).style.removeProperty('bottom');
+        (<HTMLElement>designItem.element).style.top = top;
+        right = getComputedStyle(designItem.element).right;
+        (<HTMLElement>designItem.element).style.removeProperty('left');
+        (<HTMLElement>designItem.element).style.right = right;
+        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
+        break;
+      case 'w-resize':
+        right = getComputedStyle(designItem.element).right;
+        (<HTMLElement>designItem.element).style.removeProperty('left');
+        (<HTMLElement>designItem.element).style.right = right;
+        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
+        break;
+      case 'nw-resize':
+        bottom = getComputedStyle(designItem.element).bottom;
+        (<HTMLElement>designItem.element).style.removeProperty('top');
+        (<HTMLElement>designItem.element).style.bottom = bottom;
+        right = getComputedStyle(designItem.element).right;
+        (<HTMLElement>designItem.element).style.removeProperty('left');
+        (<HTMLElement>designItem.element).style.right = right;
+        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+        break;
+      case 'n-resize':
+        bottom = getComputedStyle(designItem.element).bottom;
+        (<HTMLElement>designItem.element).style.removeProperty('top');
+        (<HTMLElement>designItem.element).style.bottom = bottom;
+        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+        break;
+      case 'ne-resize':
+        bottom = getComputedStyle(designItem.element).bottom;
+        (<HTMLElement>designItem.element).style.removeProperty('top');
+        (<HTMLElement>designItem.element).style.bottom = bottom;
+        left = getComputedStyle(designItem.element).left;
+        (<HTMLElement>designItem.element).style.removeProperty('right');
+        (<HTMLElement>designItem.element).style.left = left;
+        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
         break;
     }
   }
