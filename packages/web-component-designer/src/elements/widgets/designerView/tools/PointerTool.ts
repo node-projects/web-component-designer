@@ -47,7 +47,7 @@ export class PointerTool implements ITool {
 
   private _showContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
     event.preventDefault();
-    if (!event.shiftKey) {
+    if (!event.ctrlKey && !event.shiftKey) {
       let items = designerCanvas.elementsFromPoint(event.x, event.y);
       for (let e of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         if (items.indexOf(e.element) >= 0) {
@@ -66,7 +66,7 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    if (event.ctrlKey)
+    if (event.ctrlKey || event.shiftKey)
       this.cursor = 'copy';
     else
       this.cursor = 'default';
@@ -134,7 +134,7 @@ export class PointerTool implements ITool {
         if (currentDesignItem !== designerCanvas.rootDesignItem) {
           this._actionType = PointerActionType.Drag;
         } else if (currentElement === <any>designerCanvas || currentElement === designerCanvas.rootDesignItem.element || currentElement == null) {
-          if (!event.shiftKey)
+          if (!event.ctrlKey && !event.shiftKey)
             designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null);
           this._actionType = PointerActionType.DrawSelection;
         } else {
