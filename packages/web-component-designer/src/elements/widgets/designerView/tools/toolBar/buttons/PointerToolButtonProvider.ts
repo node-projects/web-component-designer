@@ -5,6 +5,6 @@ import { assetsPath } from "../../../../../../Constants.js";
 
 export class PointerToolButtonProvider implements IDesignViewToolbarButtonProvider {
   provideButton(designerCanvas: IDesignerCanvas): HTMLElement {
-    return new DesignerToolbarButton(designerCanvas, { 'Pointer': { icon: assetsPath + 'images/layout/PointerTool.svg' } });
+    return new DesignerToolbarButton(designerCanvas, { 'Pointer': { icon: assetsPath + 'images/tools/PointerTool.svg' } });
   }
 }

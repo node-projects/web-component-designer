@@ -6,7 +6,7 @@ import { TransformToolPopup } from "../popups/TransformToolPopup.js";
 
 export class TransformToolButtonProvider implements IDesignViewToolbarButtonProvider {
   provideButton(designerCanvas: IDesignerCanvas): HTMLElement {
-    const button =  new DesignerToolbarButton(designerCanvas, { '': { icon: assetsPath + 'images/layout/TransformTool.svg' } });
+    const button =  new DesignerToolbarButton(designerCanvas, { '': { icon: assetsPath + 'images/tools/TransformTool.svg' } });
     button.popup = TransformToolPopup;
     return button;
   }
