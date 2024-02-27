@@ -36,6 +36,7 @@ import { StylesheetChangedAction } from '../../services/undoService/transactionI
 import { SetDesignItemsAction } from '../../services/undoService/transactionItems/SetDesignItemsAction.js';
 import { IDocumentStylesheet } from '../../services/stylesheetService/IStylesheetService.js';
 import { filterChildPlaceItems } from '../../helper/LayoutHelper.js';
+import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -49,7 +50,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   // IPlacementView
   private _gridSize = 10;
-  private _moveGroup: import("d:/repos/github/nodeprojects/web-component-designer/packages/web-component-designer/src/index").ChangeGroup;
+  private _moveGroup: ChangeGroup;
   public get gridSize() {
     return this._gridSize;
   }
