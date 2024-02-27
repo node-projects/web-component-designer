@@ -10,6 +10,7 @@ export * from "./elements/helper/IndentedTextWriter.js";
 export * from "./elements/helper/PathDataPolyfill.js";
 export * from "./elements/helper/Screenshot.js";
 export * from "./elements/helper/ClipboardHelper.js";
+export * from "./elements/helper/TouchGestureHelper.js";
 
 export type { ITextWriter } from "./elements/helper/ITextWriter.js";
 export * from "./elements/helper/w3color.js";
