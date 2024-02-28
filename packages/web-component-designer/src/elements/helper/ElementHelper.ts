@@ -96,11 +96,12 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 
     let nextParent = element.offsetParent ? element.offsetParent : (<ShadowRoot>element.getRootNode()).host;
 
-    if (element instanceof SVGGraphicsElement) {
-      nextParent = element.ownerSVGElement;
-    } else if (element instanceof HTMLBodyElement || element instanceof HTMLHtmlElement) {
+    if (element instanceof SVGSVGElement || element instanceof HTMLBodyElement || element instanceof HTMLHtmlElement) {
       nextParent = element.parentElement ? element.parentElement : (<ShadowRoot>element.getRootNode()).host;
+    } else if (element instanceof SVGGraphicsElement) {
+      nextParent = element.ownerSVGElement;
     }
+
     let scrollLeft = 0;
     let scrollTop = 0;
     if (nextParent) {
