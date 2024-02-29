@@ -2,16 +2,16 @@ import { html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension } from "../AbstractExtension.js";
-import { ExtensionType } from "../ExtensionType.js";
 import { IExtensionManager } from '../IExtensionManger.js';
 import { OverlayLayer } from "../OverlayLayer.js";
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../../helper/TransformHelper.js";
 
 export type handlesPointerEvent = { handlesPointerEvent(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element): boolean }
 
 export class EditTextExtension extends AbstractExtension implements handlesPointerEvent {
 
   private static template = html`
-    <div style="height: 24px; display: flex;">
+    <div style="height: 24px; display: flex; gap: 2px;">
       <button data-command="bold" style="pointer-events: all; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
       <button data-command="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
       <button data-command="underline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
@@ -19,38 +19,28 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     </div>
   `;
 
-  private _contentEditedBound: any;
-  private _blurBound: any;
-  private _blurTimeout: NodeJS.Timeout;
   private _foreignObject: SVGForeignObjectElement;
-  private _focusBound: any;
+  private _path: SVGPathElement;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
-
-    this._contentEditedBound = this._contentEdited.bind(this);
-    this._blurBound = this._blur.bind(this);
-    this._focusBound = this._focus.bind(this);
   }
 
   override extend() {
     //TODO: -> check what to do with extensions, do not loose edit on mouse click,...
     //maybe use a html edit framework
     this.extendedItem.instanceServiceContainer.selectionService.clearSelectedElements();
-    //this.extensionManager.removeExtension(this.extendedItem, ExtensionType.PrimarySelection);
-    //this.extensionManager.removeExtension(this.extendedItem, ExtensionType.PrimarySelectionAndCanBeEntered);
-    //this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Selection);
+    this.extendedItem.removeDesignerAttributesAndStylesFromChildren();
     this.extendedItem.element.setAttribute('contenteditable', '');
-    this.extendedItem.element.addEventListener('input', this._contentEditedBound);
 
     (<HTMLElement>this.extendedItem.element).focus();
-    this.designerCanvas.eatEvents = this.extendedItem.element;
 
     let itemRect = this.extendedItem.element.getBoundingClientRect();
 
     const elements = <SVGGraphicsElement>(<any>EditTextExtension.template.content.cloneNode(true));
-    elements.querySelectorAll('button').forEach(x => x.onclick = () => this._formatSelection(x.dataset['command']));
+    elements.querySelectorAll('button').forEach(x => x.onpointerdown = () => this._formatSelection(x.dataset['command']));
 
+    //Button overlay
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     this._foreignObject = foreignObject
     foreignObject.setAttribute('x', '' + (itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor);
@@ -60,22 +50,38 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     foreignObject.appendChild(elements)
     this._addOverlay(foreignObject, OverlayLayer.Foreground);
 
+    //TODO - nice way to disable click overlay
     this.designerCanvas.clickOverlay.style.pointerEvents = 'none';
-    this.extendedItem.element.addEventListener('blur', this._blurBound);
-    this.extendedItem.element.addEventListener('focus', this._focusBound);
+
+    //overlay to detect click outside
+    this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    this._path.setAttribute('class', 'svg-edit-text-clickoutside');
+    this._path.setAttribute('fill-rule', 'evenodd');
+    this._path.style.pointerEvents = 'auto';
+    this._path.onpointerdown = (e)=> {
+      this.extensionManager.removeExtensionInstance(this.extendedItem, this);
+    }
+    this._addOverlay(this._path, OverlayLayer.Background);
+    let points = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
+    let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
+    let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
+    data += "M" + points[0].x + " " + points[0].y + " L" + points[1].x + " " + points[1].y + " L" + points[3].x + " " + points[3].y + " L" + points[2].x + " " + points[2].y + " Z";
+    this._path.setAttribute("d", data);
   }
 
   override refresh() {
-    this.dispose();
+    let points = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
+    let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
+    let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
+    data += "M" + points[0].x + " " + points[0].y + " L" + points[1].x + " " + points[1].y + " L" + points[3].x + " " + points[3].y + " L" + points[2].x + " " + points[2].y + " Z";
+    this._path.setAttribute("d", data);
   }
 
   override dispose() {
     this._removeAllOverlays();
     this.extendedItem.element.removeAttribute('contenteditable');
-    this.extendedItem.element.removeEventListener('input', this._contentEditedBound);
-    this.extendedItem.element.removeEventListener('blur', this._blurBound);
-    this.designerCanvas.eatEvents = null;
     this.extendedItem.updateChildrenFromNodesChildren();
+
     this.designerCanvas.clickOverlay.style.pointerEvents = 'auto';
   }
 
@@ -85,34 +91,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     return p.indexOf(stylo) >= 0;
   }
 
-  _contentEdited() {
-    //TODO: -> save???
-    //this.extendedItem.content = this.extendedItem.element.innerHTML;
-    //console.log(this.extendedItem.element.innerHTML)
-  }
-
-  _blur() {
-    if (!this._blurTimeout) {
-      this._blurTimeout = setTimeout(() => {
-        //TODO: don't remove doubleclick extension (another type could be used), remove extension itself
-        //maybe also configureable when when to remove the extension
-        this.extensionManager.removeExtension(this.extendedItem, ExtensionType.Doubleclick);
-      }, 150);
-    }
-  }
-
-  _focus() {
-    if (this._blurTimeout) {
-      clearTimeout(this._blurTimeout);
-      this._blurTimeout = null;
-    }
-  }
-
   _formatSelection(type: string) {
-    if (this._blurTimeout)
-      clearTimeout(this._blurTimeout);
-    this._blurTimeout = null;
-    //const selection = <Selection>(<any>this.designerView.shadowRoot).getSelection()
     document.execCommand(type, false, null);
     (<HTMLElement>this.extendedItem.element).focus()
   }

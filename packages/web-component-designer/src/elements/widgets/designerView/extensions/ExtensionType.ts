@@ -1,4 +1,6 @@
 export enum ExtensionType {
+  Directly = 0, //Extensions wich are applied directly, for example from Text Edit Tool
+
   Permanent = 1,
   Selection = 2,
   PrimarySelection = 3,
@@ -23,7 +25,7 @@ export enum ExtensionType {
 
   /**
    * Extensions only when the container can be Entered.
-   * So for Example on a custome webcomponent wich uses a grid layout for it's root, but can not show children,
+   * So for Example on a custom webcomponent wich uses a grid layout for it's root, but can not show children,
    * do not display grid extension.
    */
   PrimarySelectionAndCanBeEntered = 13,

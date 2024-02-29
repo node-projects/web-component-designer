@@ -387,6 +387,17 @@ export class DesignItem implements IDesignItem {
     }
   }
 
+  removeDesignerAttributesAndStylesFromChildren() {
+    const els = this.querySelectorAll('*');
+    for (let e of els) {
+      const di = DesignItem.GetDesignItem(e);
+      if (!di.hasAttribute("draggable"))
+        e.removeAttribute("draggable");
+      if (!di.hasStyle("pointer-events"))
+        e.style.pointerEvents = '';
+    }
+  }
+
   updateChildrenFromNodesChildren() {
     this._childArray = [];
     if (this.nodeType == NodeType.Element) {

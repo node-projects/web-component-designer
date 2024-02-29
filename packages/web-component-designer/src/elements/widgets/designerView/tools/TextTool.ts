@@ -2,8 +2,7 @@ import { EventNames } from '../../../../enums/EventNames.js';
 import { DesignItem } from '../../../item/DesignItem.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
-import { handlesPointerEvent } from '../extensions/EditText/EditTextExtension.js';
-import { ExtensionType } from '../extensions/ExtensionType.js';
+import { EditTextExtension, handlesPointerEvent } from '../extensions/EditText/EditTextExtension.js';
 import { IDesignerExtension } from '../extensions/IDesignerExtension.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { ITool } from './ITool.js';
@@ -42,12 +41,8 @@ export class TextTool implements ITool {
           di.setStyle('left', currentPoint.x + 'px');
           di.setStyle('top', currentPoint.y + 'px');
           designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
-          //TODO: Maybe we could also remove the eatEvents property
-
-          //TODO - don't apply doubleclick extension (maybe it is not the doubleclick one) - apply edit text extesion directly
-          //should we configure the editTextExtension anywhere??
-          this._textEditExtensions = designerCanvas.extensionManager.applyExtension(di, ExtensionType.Doubleclick, event);
-
+          designerCanvas.extensionManager.applyExtensionInstance(di, new EditTextExtension(designerCanvas.extensionManager, designerCanvas, di));
+          designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
           setTimeout(() => { span.focus(); }, 50);
         } else {
           for (let e of this._textEditExtensions) {

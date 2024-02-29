@@ -79,7 +79,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public snapLines: Snaplines;
   public overlayLayer: OverlayLayerView;
   public rootDesignItem: IDesignItem;
-  public eatEvents: Element;
 
   private _currentPasteOffset = this.pasteOffset;
   private _zoomFactor = 1; //if scale or zoom css property is used this needs to be the value
@@ -972,9 +971,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private onKeyUp(event: KeyboardEvent) {
-    if (event.composedPath().indexOf(this.eatEvents) >= 0)
-      return;
-
     if (this._moveGroup) {
       this._moveGroup.commit()
       this._moveGroup = null;
@@ -984,9 +980,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private onKeyDown(event: KeyboardEvent) {
-    if (event.composedPath().indexOf(this.eatEvents) >= 0)
-      return;
-
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
       this.executeCommand({ type: CommandType.undo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
@@ -1170,9 +1163,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         pe.refresh(event);
     }
 
-    if (event.composedPath().indexOf(this.eatEvents) >= 0)
-      return;
-
     let currentElement: Node;
     if (forceElement)
       currentElement = forceElement;
@@ -1206,8 +1196,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     //TODO: needed ??
     if (currentElement && DomHelper.getHost(currentElement.parentNode) === this.overlayLayer) {
-      if (this.eatEvents)
-        return;
       currentElement = this.instanceServiceContainer.selectionService.primarySelection?.element ?? this._canvas;
     }
 
