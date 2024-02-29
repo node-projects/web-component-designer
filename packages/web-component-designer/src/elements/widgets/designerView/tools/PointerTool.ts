@@ -26,11 +26,12 @@ export class PointerTool implements ITool {
   private _previousEventName: EventNames;
 
   private _dragOverExtensionItem: IDesignItem;
-  private _dragExtensionItem: IDesignItem;
+  private _dragParentExtensionItem: IDesignItem;
 
   private _moveItemsOffset: IPoint = { x: 0, y: 0 };
   private _initialOffset: IPoint;
-  private _started: boolean = false;;
+  private _started: boolean = false;
+  private _holdTimeout: any;
 
   private _firstTimeInMove: boolean;
   private _secondTimeInMove: boolean;
@@ -182,7 +183,12 @@ export class PointerTool implements ITool {
     }
   }
 
-  private async _pointerActionTypeDragOrSelect(designerCanvas: IDesignerCanvas, event: PointerEvent, currentDesignItem: IDesignItem, currentPoint: IPoint) {
+  private async _pointerActionTypeDragOrSelect(designerCanvas: IDesignerCanvas, event: PointerEvent, currentDesignItem: IDesignItem, currentPoint: IPoint, raisedFromHold = false) {
+    if (this._holdTimeout) {
+      clearTimeout(this._holdTimeout);
+      this._holdTimeout = null;
+    }
+
     if (event.altKey) {
       if (event.type == EventNames.PointerDown) {
         const currentSelection = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
@@ -219,6 +225,8 @@ export class PointerTool implements ITool {
           if (event.buttons == 0) {
             return;
           }
+
+
 
           if (this._firstTimeInMove) {
             if (!currentDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(currentDesignItem)) {
@@ -277,10 +285,10 @@ export class PointerTool implements ITool {
             const currentContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent, containerStyle));
             if (currentContainerService) {
               const dragItem = this._actionStartedDesignItem.parent;
-              if (this._dragExtensionItem != dragItem) {
-                designerCanvas.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
+              if (this._dragParentExtensionItem != dragItem) {
+                designerCanvas.extensionManager.removeExtension(this._dragParentExtensionItem, ExtensionType.ContainerDrag);
                 designerCanvas.extensionManager.applyExtension(dragItem, ExtensionType.ContainerDrag, event);
-                this._dragExtensionItem = dragItem;
+                this._dragParentExtensionItem = dragItem;
               }
               else {
                 designerCanvas.extensionManager.refreshExtension(dragItem, ExtensionType.ContainerDrag);
@@ -312,7 +320,13 @@ export class PointerTool implements ITool {
                 }
               }
 
-              if (newContainerService && event.altKey) {
+              if (newContainerService) {
+                this._holdTimeout = setTimeout(() => {
+                  this._pointerActionTypeDragOrSelect(designerCanvas, event, currentDesignItem, currentPoint, true);
+                }, 1000);
+              }
+
+              if (newContainerService && (event.altKey || raisedFromHold)) {
                 //TODO: all items, fix position
                 const oldOffset = currentContainerService.getElementOffset(this._actionStartedDesignItem.parent, this._actionStartedDesignItem);
                 const newOffset = newContainerService.getElementOffset(newContainerElementDesignItem, this._actionStartedDesignItem);
@@ -322,6 +336,14 @@ export class PointerTool implements ITool {
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
                 newContainerService.enterContainer(newContainerElementDesignItem, this._actionStartedDesignItems);
                 newContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
+
+                designerCanvas.extensionManager.removeExtension(this._dragParentExtensionItem, ExtensionType.ContainerDrag);
+                designerCanvas.extensionManager.applyExtension(newContainerElementDesignItem, ExtensionType.ContainerDrag, event);
+                this._dragParentExtensionItem = newContainerElementDesignItem;
+                designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOverAndCanBeEntered);
+                this._dragOverExtensionItem = null;
+
+                designerCanvas.extensionManager.refreshAllAppliedExtentions();
               } else {
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
                 if (!this._started) {
@@ -381,8 +403,8 @@ export class PointerTool implements ITool {
               this._changeGroup = null;
             }
 
-            designerCanvas.extensionManager.removeExtension(this._dragExtensionItem, ExtensionType.ContainerDrag);
-            this._dragExtensionItem = null;
+            designerCanvas.extensionManager.removeExtension(this._dragParentExtensionItem, ExtensionType.ContainerDrag);
+            this._dragParentExtensionItem = null;
             designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerDragOverAndCanBeEntered);
             this._dragOverExtensionItem = null;
             this._moveItemsOffset = { x: 0, y: 0 };
@@ -425,6 +447,7 @@ export class PointerTool implements ITool {
 
     const designerCanvas = designItem.instanceServiceContainer.designerCanvas;
     const elementsFromPoint = designerCanvas.elementsFromPoint(event.x, event.y);
+    elementsFromPoint.push(designerCanvas.rootDesignItem.element);
     for (let e of elementsFromPoint) {
       if (e == designItem.element) {
         continue;
