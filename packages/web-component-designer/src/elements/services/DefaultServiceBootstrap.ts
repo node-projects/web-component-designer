@@ -127,7 +127,7 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
-    new TransformOriginExtensionProvider(),
+    new TransformOriginExtensionProvider(true),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
     new EllipsisExtensionProvider(),
