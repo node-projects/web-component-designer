@@ -11,30 +11,35 @@ export class FontPropertyEditor extends BasePropertyEditor<HTMLSelectElement> {
     let element = document.createElement("select");
     this.element = element;
 
+    FontPropertyEditor.addFontsToSelect(element);
+    this.element.onchange = (e) => this._valueChanged(this.element.value);
+  }
+
+  static addFontsToSelect(select: HTMLSelectElement) {
     if (FontPropertyEditor.fontList) {
-      this.parseFontList();
+      FontPropertyEditor.parseFontList(select);
       //@ts-ignore
     } else if (window.queryLocalFonts) {
       //@ts-ignore
       window.queryLocalFonts().then(x => {
         //@ts-ignore
         FontPropertyEditor.fontList = [...new Set(x.map(y => y.family))];
-        this.parseFontList();
+        FontPropertyEditor.parseFontList(select);
       })
     } else {
       FontPropertyEditor.fontList = ["Verdana", "Arial", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"];
-      this.parseFontList();
+      FontPropertyEditor.parseFontList(select);
     }
   }
 
-  parseFontList() {
+  private static parseFontList(select: HTMLSelectElement) {
     for (let v of FontPropertyEditor.fontList) {
       let option = document.createElement("option");
       option.value = <any>v;
       option.text = v;
-      this.element.appendChild(option);
+      select.appendChild(option);
     }
-    this.element.onchange = (e) => this._valueChanged(this.element.value);
+
   }
 
   refreshValue(valueType: ValueType, value: any) {

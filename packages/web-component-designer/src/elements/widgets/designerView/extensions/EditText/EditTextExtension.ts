@@ -114,23 +114,11 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     return p.indexOf(stylo) >= 0;
   }
 
-  _getSelection() {
-    let selection = document.getSelection();
-    if ((<any>selection).getComposedRanges)
-      selection = (<any>selection).getComposedRanges(this.designerCanvas.rootDesignItem.element.shadowRoot);
-    else if ((<any>this.designerCanvas.rootDesignItem.element.shadowRoot).getSelection)
-      selection = (<any>this.designerCanvas.rootDesignItem.element.shadowRoot).getSelection();
-    return selection;
-  }
-
   _formatSelection(type: string, value?: string) {
     const selection = shadowrootGetSelection(this.designerCanvas.rootDesignItem.element.shadowRoot);
-
     const spans = wrapSelectionInSpans(selection);
     for (const span of spans)
       span.style[type] = value;
-    //fallback...
-    //document.execCommand(type, false, null);
     (<HTMLElement>this.extendedItem.element).focus()
   }
 }

@@ -7,7 +7,7 @@ export function shadowrootGetSelection(shadowRoot: ShadowRoot) {
     return selection;
 }
 
-function wrapTextNodesInSpan(range, spans: HTMLSpanElement[]) {
+function wrapTextNodesInSpan(range: Range, spans: HTMLSpanElement[]) {
     function wrapNode(node) {
         const span = document.createElement('span');
         spans.push(span);
@@ -32,15 +32,29 @@ function wrapTextNodesInSpan(range, spans: HTMLSpanElement[]) {
     range.insertNode(fragment);
 }
 
+function staticRangeToRange(staticRange) {
+    const range = document.createRange();
+
+    range.setStart(staticRange.startContainer, staticRange.startOffset);
+    range.setEnd(staticRange.endContainer, staticRange.endOffset);
+
+    return range;
+}
+
 export function wrapSelectionInSpans(selection: Selection) {
     const spans: HTMLSpanElement[] = [];
-    if (!selection.rangeCount)
-        return spans;
 
-    const range = selection.getRangeAt(0);
-    wrapTextNodesInSpan(range, spans);
+    if (selection[0] instanceof StaticRange) {
+        wrapTextNodesInSpan(staticRangeToRange(selection[0]), spans);
+    } else {
+        if (!selection.rangeCount)
+            return spans;
 
-    selection.removeAllRanges();
+        const range = selection.getRangeAt(0);
+        wrapTextNodesInSpan(range, spans);
+    }
+    if (selection.removeAllRanges)
+        selection.removeAllRanges();
 
     return spans;
 }
