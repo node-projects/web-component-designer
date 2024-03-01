@@ -9,7 +9,7 @@ import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
 
-export class DefaultPlacementService implements IPlacementService {
+export class AbsolutePlacementService implements IPlacementService {
 
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
     if (containerStyle.display === 'grid' || containerStyle.display === 'inline-grid' ||

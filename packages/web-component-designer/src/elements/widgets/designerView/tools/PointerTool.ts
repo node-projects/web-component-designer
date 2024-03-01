@@ -334,7 +334,7 @@ export class PointerTool implements ITool {
                 currentContainerService.leaveContainer(this._actionStartedDesignItem.parent, this._actionStartedDesignItems);
 
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
-                newContainerService.enterContainer(newContainerElementDesignItem, this._actionStartedDesignItems);
+                newContainerService.enterContainer(newContainerElementDesignItem, this._actionStartedDesignItems, 'normal');
                 newContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
 
                 designerCanvas.extensionManager.removeExtension(this._dragParentExtensionItem, ExtensionType.ContainerDrag);
