@@ -4,6 +4,7 @@ import { ZplParserService } from './services/ZplParserService.js';
 import { ZplImageDrop } from './services/ZplImageDrop.js';
 import { ZplLayoutCopyPasteService } from './services/ZplLayoutCopyPasteService.js';
 import { ZplLayoutResizeExtensionProvider } from './extensions/ZplLayoutResizeExtensionProvider.js';
+import { ZplDemoView } from './widgets/views/zpl-demo-view.js';
 
 export function createZplDesignerServiceContainer() {
     let serviceContainer = new ServiceContainer();
@@ -79,7 +80,8 @@ export function createZplDesignerServiceContainer() {
         new TransformToolButtonProvider()
     );
 
-    import.meta
+    serviceContainer.config.demoViewWidget = ZplDemoView;
+
     serviceContainer.register('elementsService', new JsonFileElementsService('zpl', new URL("./widgets/elements.json", import.meta.url)));
 
     return serviceContainer;
