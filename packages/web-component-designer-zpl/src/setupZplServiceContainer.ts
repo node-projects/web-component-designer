@@ -1,4 +1,4 @@
-import { ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, CanvasExtensionProvider, PositionExtensionProvider, SelectionDefaultExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, ContentService, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService } from '@node-projects/web-component-designer';
+import { ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, CanvasExtensionProvider, PositionExtensionProvider, SelectionDefaultExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, ContentService, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService } from '@node-projects/web-component-designer';
 import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
 import { ZplLayoutPlacementService } from './services/ZplLayoutPlacementService.js';
 import { ZplParserService } from './services/ZplParserService.js';
@@ -21,6 +21,7 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.register("copyPasteService", new ZplLayoutCopyPasteService());
     serviceContainer.register("modelCommandService", new DefaultModelCommandService());
     serviceContainer.register("propertyGroupsService", new PropertyGroupsService());
+    serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService(true));
 
     serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
     serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
@@ -78,7 +79,7 @@ export function createZplDesignerServiceContainer() {
         new ZoomToolButtonProvider()
     );
 
-    serviceContainer.register('elementsService', new JsonFileElementsService('zpl', '/dist/widgets/elements.json'));
+    serviceContainer.register('elementsService', new JsonFileElementsService('zpl', '/node_modules/@node-projects/web-component-designer-zpl/dist/widgets/elements.json'));
 
     return serviceContainer;
 }
