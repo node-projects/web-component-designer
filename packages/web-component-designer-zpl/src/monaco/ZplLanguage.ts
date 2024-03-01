@@ -1,4 +1,4 @@
-export function addZplLanguageToMonaco(monaco) {
+export function addZplLanguageToMonaco(monaco?: any) {
     if (!monaco)
         //@ts-ignore
         monaco = window.monaco;
