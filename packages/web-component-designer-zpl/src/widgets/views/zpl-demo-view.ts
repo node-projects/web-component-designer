@@ -30,7 +30,7 @@ export class ZplDemoView extends BaseCustomWebComponentConstructorAppend impleme
     dispose(): void { }
 
     async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
-        const url = "http://labelary.com/viewer.html?zpl=" + encodeURIComponent(code);
+        const url = "https://labelary.com/viewer.html?zpl=" + encodeURIComponent(code);
         (<HTMLIFrameElement>this._getDomElement('iframe')).src = url;
     }
 }
