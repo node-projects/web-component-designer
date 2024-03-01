@@ -5,6 +5,8 @@ export * from "./widgets/zpl-graphic-diagonal-line.js";
 export * from "./widgets/zpl-image.js";
 export * from "./widgets/zpl-text.js";
 
+export * from "./monaco/ZplLanguage.js";
+
 export * from "./extensions/ZplLayoutResizeExtensionProvider.js";
 
 export * from "./services/ZplImageDrop.js";
