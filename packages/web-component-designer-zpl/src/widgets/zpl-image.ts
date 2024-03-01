@@ -1,6 +1,6 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
-import { getZplCoordinates } from "../zplHelper.js";
 import { requestAnimationFramePromise } from "@node-projects/web-component-designer";
+import { getZplCoordinates } from "../zplHelper.js";
 
 export class ZplImage extends BaseCustomWebComponentConstructorAppend {
 
