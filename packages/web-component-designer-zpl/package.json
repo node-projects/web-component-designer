@@ -1,6 +1,6 @@
 {
   "description": "web-component-designer addon: Widgets and Services for creating a ZPL Designer",
-  "name": "@node-projects/web-component-designer-zp",
+  "name": "@node-projects/web-component-designer-zpl",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
