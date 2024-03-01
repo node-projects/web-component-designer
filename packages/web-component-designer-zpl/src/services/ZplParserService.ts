@@ -220,7 +220,6 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
         tx += "^XZ";
 
         textWriter.writeLine("^XA");
-        textWriter.writeLine("^FX Comment for printersettings");
         // textWriter.writeLine("^FX For better view visit http://labelary.com/viewer.html?zpl=" + encodeURIComponent(tx));
         for (let d of designItems) {
             let start = textWriter.position;
