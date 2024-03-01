@@ -59,7 +59,8 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             p = p.replaceAll("\n", "");
             p = p.replaceAll("\r", "");
             let command = p.substring(0, 2);
-            let fields = p.substring(2).split(",");
+            let fieldString = p.substring(2);
+            let fields = fieldString.split(",");
             switch (command) {
                 case "XA":
                 case "XZ":
@@ -155,9 +156,9 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                 case "FD":
                     if (bc) {
                         if (qr)
-                            barcode.setAttribute("content", fields[0].substring(3));
+                            barcode.setAttribute("content", fieldString.substring(3));
                         else
-                            barcode.setAttribute("content", fields[0]);
+                            barcode.setAttribute("content", fieldString);
                         designItems.push(DesignItem.createDesignItemFromInstance(barcode, serviceContainer, instanceServiceContainer));
                         bc = false;
                         qr = false;
