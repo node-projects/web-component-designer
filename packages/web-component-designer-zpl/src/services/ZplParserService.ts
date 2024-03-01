@@ -5,6 +5,7 @@ import { ZplGraphicDiagonalLine } from "../widgets/zpl-graphic-diagonal-line.js"
 import { ZplGraphicCircle } from "../widgets/zpl-graphic-circle.js";
 import { ZplText } from "../widgets/zpl-text.js";
 import { ZplImage } from "../widgets/zpl-image.js";
+import { ZplComment } from "../widgets/zpl-comment.js";
 
 function getSetValue(...args) {
     for (let a of args)
@@ -64,7 +65,14 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             switch (command) {
                 case "XA":
                 case "XZ":
+                    break;
                 case "FX":
+                    let comment = new ZplComment();
+                    comment.style.position = "absolute";
+                    comment.style.left = x + "px";
+                    comment.style.top = y + "px";
+                    comment.setAttribute("content", fieldString);
+                    designItems.push(DesignItem.createDesignItemFromInstance(comment, serviceContainer, instanceServiceContainer));
                     break;
                 case "CF":
                     fontName = fields[0];
@@ -171,7 +179,7 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                         text.setAttribute("font-name", fontName);
                         text.setAttribute("font-height", fontHeight.toString());
                         text.setAttribute("font-width", fontWidth.toString());
-                        text.setAttribute("content", fields[0]);
+                        text.setAttribute("content", fieldString);
                         designItems.push(DesignItem.createDesignItemFromInstance(text, serviceContainer, instanceServiceContainer));
                     }
                     break;
