@@ -59,7 +59,8 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
             this._barcode.appendChild(svg);
             this._barcode.style.marginTop = "10px";
         } else {
-            await LazyLoader.LoadJavascript("/node_modules/jsbarcode/dist/JsBarcode.all.js");
+            const packageurl = new URL("../../../../jsbarcode/dist/JsBarcode.all.js", import.meta.url);
+            await LazyLoader.LoadJavascript(packageurl.toString());
             let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             this._barcode.appendChild(svg);
             this._barcode.style.marginTop = "";
