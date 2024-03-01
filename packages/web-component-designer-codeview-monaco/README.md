@@ -12,20 +12,20 @@ This uses the Monaco Editor for the Webcomponent Designer Codeview
 
 ## Usage
 
-    import { CodeViewCodeMonaco } from '@node-projects/web-component-designer-codeview-monaco';
-    serviceContainer.config.codeViewWidget = CodeViewCodeMonaco;
+    import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
+    serviceContainer.config.codeViewWidget = CodeViewMonaco;
 
 You need to load the monaco manualy and call
 
-     await CodeViewCodeMonaco.setMonacoLibrary(...); 
+     await CodeViewMonaco.setMonacoLibrary(...); 
      
 or via
 
-     await CodeViewCodeMonaco.loadMonacoEditorViaRequire(); 
+     await CodeViewMonaco.loadMonacoEditorViaRequire(); 
 
 or
 
-     await CodeViewCodeMonaco.loadMonacoEditorViaImport();
+     await CodeViewMonaco.loadMonacoEditorViaImport();
 
 or
 

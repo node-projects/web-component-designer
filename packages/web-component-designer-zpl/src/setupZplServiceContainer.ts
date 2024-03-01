@@ -79,7 +79,8 @@ export function createZplDesignerServiceContainer() {
         new TransformToolButtonProvider()
     );
 
-    serviceContainer.register('elementsService', new JsonFileElementsService('zpl', '/node_modules/@node-projects/web-component-designer-zpl/dist/widgets/elements.json'));
+    import.meta
+    serviceContainer.register('elementsService', new JsonFileElementsService('zpl', new URL("./widgets/elements.json", import.meta.url)));
 
     return serviceContainer;
 }
