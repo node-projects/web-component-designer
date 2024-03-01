@@ -311,6 +311,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _pointerextensions: IDesignerPointerExtension[];
 
   private _lastCopiedPrimaryItem: IDesignItem;
+  private _ignoreEvent: Event;
 
   constructor() {
     super();
@@ -391,6 +392,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasShadowRoot.adoptedStyleSheets = styles;
   }
 
+  ignoreEvent(event: Event) {
+    this._ignoreEvent = event;
+  }
 
   /* --- start IUiCommandHandler --- */
 
@@ -710,8 +714,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       });
       this.clickOverlay.addEventListener('pan', (e: CustomEvent) => {
         const newCanvasOffset = {
-          x: (this.canvasOffset.x) - e.detail.deltaX ,
-          y: (this.canvasOffset.y) - e.detail.deltaY 
+          x: (this.canvasOffset.x) - e.detail.deltaX,
+          y: (this.canvasOffset.y) - e.detail.deltaY
         }
         this.canvasOffset = newCanvasOffset
       });
@@ -1150,6 +1154,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
+    if (this._ignoreEvent === event)
+      return;
+    
     if (!this.serviceContainer)
       return;
 

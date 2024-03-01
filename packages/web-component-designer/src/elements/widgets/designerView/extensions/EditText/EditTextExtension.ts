@@ -60,7 +60,11 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
     const elements = <SVGGraphicsElement>(<any>EditTextExtension.template.content.cloneNode(true));
     FontPropertyEditor.addFontsToSelect(elements.querySelector('#fontFamily'));
-    elements.querySelectorAll('button').forEach(x => x.onpointerdown = () => this._formatSelection(x.dataset['command'], x.dataset['commandParameter']));
+    elements.querySelectorAll('button').forEach(x => x.onpointerdown = (e) => {
+      this.designerCanvas.ignoreEvent(e);
+      this._formatSelection(x.dataset['command'], x.dataset['commandParameter'])
+    });
+    elements.querySelectorAll('select').forEach(x => x.onpointerdown = (e) => this.designerCanvas.ignoreEvent(e));
     elements.querySelectorAll('select').forEach(x => x.onchange = () => this._formatSelection(x.dataset['command'], x.value));
 
     //Button overlay
