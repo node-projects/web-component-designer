@@ -5,6 +5,8 @@ import { AbstractExtension } from "../AbstractExtension.js";
 import { IExtensionManager } from '../IExtensionManger.js';
 import { OverlayLayer } from "../OverlayLayer.js";
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../../helper/TransformHelper.js";
+import { shadowrootGetSelection, wrapSelectionInSpans } from "../../../../helper/SelectionHelper.js";
+import { FontPropertyEditor } from "../../../../services/propertiesService/propertyEditors/FontPropertyEditor.js";
 
 export type handlesPointerEvent = { handlesPointerEvent(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element): boolean }
 
@@ -12,10 +14,29 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
   private static template = html`
     <div style="height: 24px; display: flex; gap: 2px;">
-      <button data-command="bold" style="pointer-events: all; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
-      <button data-command="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
-      <button data-command="underline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
-      <button data-command="strikeThrough" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
+      <button data-command="font-weight" data-command-parameter="800" style="pointer-events: all; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
+      <button data-command="font-style" data-command-parameter="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
+      <button data-command="text-decoration" data-command-parameter="underline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
+      <button data-command="text-decoration" data-command-parameter="line-through" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
+      <button data-command="text-decoration" data-command-parameter="overline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><span style="text-decoration: overline">o</span></button>
+      <select data-command="fontSize" style="pointer-events: all; height: 24px; width: 60px; padding: 0;">
+        <option>8px</option>
+        <option>9px</option>
+        <option>10px</option>
+        <option>11px</option>
+        <option>12px</option>
+        <option>14px</option>
+        <option>16px</option>
+        <option>18px</option>
+        <option>20px</option>
+        <option>24px</option>
+        <option>28px</option>
+        <option>32px</option>
+        <option>36px</option>
+      </select>
+      <select id="fontFamily" data-command="font-family" style="pointer-events: all; height: 24px; width: 90px; padding: 0;">
+        
+      </select>
     </div>
   `;
 
@@ -38,14 +59,16 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     let itemRect = this.extendedItem.element.getBoundingClientRect();
 
     const elements = <SVGGraphicsElement>(<any>EditTextExtension.template.content.cloneNode(true));
-    elements.querySelectorAll('button').forEach(x => x.onpointerdown = () => this._formatSelection(x.dataset['command']));
+    FontPropertyEditor.addFontsToSelect(elements.querySelector('#fontFamily'));
+    elements.querySelectorAll('button').forEach(x => x.onpointerdown = () => this._formatSelection(x.dataset['command'], x.dataset['commandParameter']));
+    elements.querySelectorAll('select').forEach(x => x.onchange = () => this._formatSelection(x.dataset['command'], x.value));
 
     //Button overlay
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     this._foreignObject = foreignObject
     foreignObject.setAttribute('x', '' + (itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor);
     foreignObject.setAttribute('y', '' + ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 30));
-    foreignObject.setAttribute('width', '96');
+    foreignObject.setAttribute('width', '300');
     foreignObject.setAttribute('height', '24');
     foreignObject.appendChild(elements)
     this._addOverlay(foreignObject, OverlayLayer.Foreground);
@@ -58,7 +81,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     this._path.setAttribute('class', 'svg-edit-text-clickoutside');
     this._path.setAttribute('fill-rule', 'evenodd');
     this._path.style.pointerEvents = 'auto';
-    this._path.onpointerdown = (e)=> {
+    this._path.onpointerdown = (e) => {
       this.extensionManager.removeExtensionInstance(this.extendedItem, this);
     }
     this._addOverlay(this._path, OverlayLayer.Background);
@@ -86,13 +109,28 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   }
 
   handlesPointerEvent(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element): boolean {
-    let p = event.composedPath();
+    const p = event.composedPath();
     const stylo = this._foreignObject.querySelector('stylo-editor');
     return p.indexOf(stylo) >= 0;
   }
 
-  _formatSelection(type: string) {
-    document.execCommand(type, false, null);
+  _getSelection() {
+    let selection = document.getSelection();
+    if ((<any>selection).getComposedRanges)
+      selection = (<any>selection).getComposedRanges(this.designerCanvas.rootDesignItem.element.shadowRoot);
+    else if ((<any>this.designerCanvas.rootDesignItem.element.shadowRoot).getSelection)
+      selection = (<any>this.designerCanvas.rootDesignItem.element.shadowRoot).getSelection();
+    return selection;
+  }
+
+  _formatSelection(type: string, value?: string) {
+    const selection = shadowrootGetSelection(this.designerCanvas.rootDesignItem.element.shadowRoot);
+
+    const spans = wrapSelectionInSpans(selection);
+    for (const span of spans)
+      span.style[type] = value;
+    //fallback...
+    //document.execCommand(type, false, null);
     (<HTMLElement>this.extendedItem.element).focus()
   }
 }
