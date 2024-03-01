@@ -240,6 +240,10 @@ export function getElementSize(element: HTMLElement) {
     let bbox = element.getBBox()
     width = bbox.width;
     height = bbox.height;
+  } else if (element instanceof MathMLElement) {
+    let bbox = element.getBoundingClientRect()
+    width = bbox.width;
+    height = bbox.height;
   }
   return { width, height }
 }
