@@ -1,8 +1,7 @@
 import { ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, CanvasExtensionProvider, PositionExtensionProvider, SelectionDefaultExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, ContentService, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, DefaultEditorTypesService, TransformToolButtonProvider } from '@node-projects/web-component-designer';
-import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
 import { ZplLayoutPlacementService } from './services/ZplLayoutPlacementService.js';
 import { ZplParserService } from './services/ZplParserService.js';
-import { ZplImageDrop } from './services/ZplImageDrop';
+import { ZplImageDrop } from './services/ZplImageDrop.js';
 import { ZplLayoutCopyPasteService } from './services/ZplLayoutCopyPasteService.js';
 import { ZplLayoutResizeExtensionProvider } from './extensions/ZplLayoutResizeExtensionProvider.js';
 
@@ -28,8 +27,6 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
     serviceContainer.register("contentService", (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
     serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
-
-    serviceContainer.config.codeViewWidget = CodeViewMonaco;
 
     serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     ]);
