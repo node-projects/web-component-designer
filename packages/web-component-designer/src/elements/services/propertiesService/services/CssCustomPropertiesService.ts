@@ -14,7 +14,7 @@ export class CssCustomPropertiesService extends CommonPropertiesService {
   removeInheritedCustomProperties: boolean
 
   constructor(removeInheritedCustomProperties = true) {
-    super();
+    super(false);
     this.name = 'customProperties';
     this.removeInheritedCustomProperties = removeInheritedCustomProperties;
   }

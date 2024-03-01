@@ -93,7 +93,7 @@ export class CssPropertiesService extends CommonPropertiesService {
 
 
   constructor(name: 'layout' | 'grid' | 'gridChild' | 'flex' | 'flexChild' | 'svg') {
-    super();
+    super(false);
     this.name = name;
   }
 
