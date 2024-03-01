@@ -6,6 +6,10 @@ import { AbstractBaseToolPopup } from './AbstractBaseToolPopup.js';
 export class DrawToolPopup extends AbstractBaseToolPopup {
 
   static override style = [<CSSStyleSheet>super.style, css`
+      .container {
+          width: 220px;
+          min-height: 300px;
+      }
       .inputs{
         float: left;
         margin-top: 5px;
