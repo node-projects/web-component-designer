@@ -1,0 +1,27 @@
+{
+  "description": "web-component-designer addon for visualizations",
+  "name": "@node-projects/web-component-designer-visualization-addons",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "author": "jochen.kuehner@gmx.de",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@node-projects/base-custom-webcomponent": ">=0.19.0",
+    "@node-projects/web-component-designer": ">=0.1.1",
+    "@node-projects/web-component-designer-widgets-wunderbaum": ">=0.1.12",
+    "@node-projects/web-component-designer-codeview-monaco": ">=0.1.18",
+    "@blockly/zoom-to-fit": "^5.0.11",
+    "blockly": "^10.4.2",
+    "long": "^5.2.3" 
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-projects/web-component-designer.git"
+  }
+}
