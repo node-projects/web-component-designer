@@ -103,7 +103,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
     } else if (element instanceof SVGGraphicsElement) {
       nextParent = element.ownerSVGElement;
     } else if (element instanceof MathMLElement) {
-      nextParent = element.parentElement;
+      nextParent = element.parentElement ?? nextParent;
     }
 
     let scrollLeft = 0;
