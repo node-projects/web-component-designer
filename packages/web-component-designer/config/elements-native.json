@@ -2,6 +2,7 @@
   "elements":
   [
     "div",
+    "label",
     "input",
     "textarea",
     "select",

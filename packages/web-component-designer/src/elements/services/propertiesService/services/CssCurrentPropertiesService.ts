@@ -19,7 +19,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
   }
 
   constructor() {
-    super();
+    super(false);
     this.name = 'styles';
   }
 

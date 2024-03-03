@@ -1,7 +1,5 @@
 # web-component-designer
 
-```It's now considered beta. It works, we use it in production, but there are many more features to come```
-
 A HTML web component for designing web components and HTML pages based on PolymerLabs wizzywid which can easily be integrated in your own software.
 Meanwhile polymer is not used anymore.
 

@@ -43,3 +43,7 @@ export function removeLeading(text: string, char: string) {
     return text.substring(1);
   return text;
 }
+
+export function requestAnimationFramePromise() {
+  return new Promise(resolve => requestAnimationFrame(resolve));
+}

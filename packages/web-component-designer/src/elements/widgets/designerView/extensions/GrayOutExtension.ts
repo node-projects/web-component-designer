@@ -1,4 +1,4 @@
-import { IRect } from '../../../../interfaces/IRect.js';
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -21,22 +21,16 @@ export class GrayOutExtension extends AbstractExtension {
     if (!this._path) {
       this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       this._path.setAttribute('class', 'svg-gray-out');
+      this._path.setAttribute('fill-rule', 'evenodd');
       this._addOverlay(this._path, OverlayLayer.Background);
     }
-    let normalizedRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
 
-    this.drawGrayOut(normalizedRect);
-  }
-
-  drawGrayOut(r: IRect) {
+    let points = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
     let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
-    const pathPoints = "M0 0 L0 " + outsideRect.height + "L" + r.x + " " + outsideRect.height + "L" + r.x + " 0" + " L0 0" +
-      "M" + r.x + " 0 L" + r.x + " " + r.y + "L" + outsideRect.width + " " + r.y + "L" + outsideRect.width + " 0" + "L" + r.x + " 0" +
-      "M" + r.x + " " + (r.y + r.height) + "L" + r.x + " " + outsideRect.height + "L" + outsideRect.width + " " + outsideRect.height + "L" + outsideRect.width + " " + (r.y + r.height) + "L" + r.x + " " + (r.y + r.height) +
-      "M" + (r.x + r.width) + " " + r.y + "L" + (r.x + r.width) + " " + (r.y + r.height) + "L" + outsideRect.width + " " + (r.y + r.height) + "L" + outsideRect.width + " " + (r.y) + "L" + (r.x + r.width) + " " + r.y;
-    this._path.setAttribute("d", pathPoints);
+    let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
+    data += "M" + points[0].x + " " + points[0].y + " L" + points[1].x + " " + points[1].y + " L" + points[3].x + " " + points[3].y + " L" + points[2].x + " " + points[2].y + " Z";
+    this._path.setAttribute("d", data);
   }
-
 
   override dispose() {
     this._removeAllOverlays();

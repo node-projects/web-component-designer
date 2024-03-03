@@ -1,35 +1,14 @@
-import { html, BaseCustomWebComponentConstructorAppend, css } from '@node-projects/base-custom-webcomponent';
+import { html, css } from '@node-projects/base-custom-webcomponent';
 import { assetsPath } from "../../../../../../Constants.js";
 import { DesignerToolbar } from '../DesignerToolbar.js';
+import { AbstractBaseToolPopup } from './AbstractBaseToolPopup.js';
 
-export class DrawToolPopup extends BaseCustomWebComponentConstructorAppend {
+export class DrawToolPopup extends AbstractBaseToolPopup {
 
-  static override style = css`
+  static override style = [<CSSStyleSheet>super.style, css`
       .container {
           width: 220px;
-          min-height: 200px;
-          color: white;
-          background-color: rgb(64, 64, 64);
-          border: 1px solid black;
-      }
-      header {
-          text-align: center;
-      }
-      .tool {
-          height: 32px;
-          width: 32px;
-          background-color: rgb(255, 255, 255);
-          background-size: 65%;
-          background-repeat: no-repeat;
-          background-position: center center;
-          flex-shrink: 0;
-          border-bottom: 1px solid black;
-      }
-      .tools {
-          display: flex;
-          flex-wrap: wrap;
-          margin-bottom: 5px;
-          gap: 3px;
+          min-height: 300px;
       }
       .inputs{
         float: left;
@@ -53,20 +32,18 @@ export class DrawToolPopup extends BaseCustomWebComponentConstructorAppend {
       }
       .strokethickness{
         float: both;
-      }
-      
-      `
+      }`]
 
   static override template = html`
         <div class="container">
           <header><h2 id="title" style="margin: 0;">Draw</h2></header>
           <main id="content-area">
             <div class="tools">
-              <div class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" style="background-image: url('${assetsPath}images/layout/DrawLineTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Pointer Tool" style="background-image: url('${assetsPath}images/layout/DrawPathTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="background-image: url('${assetsPath}images/layout/DrawRectTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/layout/DrawEllipTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" style="background-image: url('${assetsPath}images/layout/ColorPickerTool.svg');"></div>
+              <div class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" style="background-image: url('${assetsPath}images/tools/DrawLineTool.svg');"></div>
+              <div class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Pointer Tool" style="background-image: url('${assetsPath}images/tools/DrawPathTool.svg');"></div>
+              <div class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="background-image: url('${assetsPath}images/tools/DrawRectTool.svg');"></div>
+              <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/tools/DrawEllipTool.svg');"></div>
+              <div class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" style="background-image: url('${assetsPath}images/tools/ColorPickerTool.svg');"></div>
             </div>
             <div class="inputs">
               <div class="input">
@@ -87,11 +64,6 @@ export class DrawToolPopup extends BaseCustomWebComponentConstructorAppend {
 
   constructor() {
     super();
-
-    for (let e of [...this.shadowRoot.querySelectorAll("div.tool")]) {
-      let div = (<HTMLDivElement>e);
-      div.onclick = () => (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setTool(div.dataset['commandParameter']);
-    }
 
     if(this.shadowRoot.querySelector("input.strokecolor")) {
       let input = <HTMLInputElement>this._getDomElement("strokecolor");

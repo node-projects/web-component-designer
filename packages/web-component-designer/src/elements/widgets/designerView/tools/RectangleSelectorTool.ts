@@ -17,7 +17,7 @@ export class RectangleSelectorTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    if (event.ctrlKey)
+    if (event.ctrlKey || event.shiftKey)
       this.cursor = 'copy';
     else if (event.altKey)
       this.cursor = 'default';
@@ -72,7 +72,7 @@ export class RectangleSelectorTool implements ITool {
         const elements = designerCanvas.rootDesignItem.querySelectorAll('*');
         let inSelectionElements: IDesignItem[] = [];
 
-        if ((event.ctrlKey || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+        if ((event.ctrlKey || event.shiftKey || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
           inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
         let point = designerCanvas.overlayLayer.createPoint();

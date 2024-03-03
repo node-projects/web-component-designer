@@ -22,9 +22,9 @@ export class JsonFileElementsService implements IElementsService {
     return new Promise((resolve, reject) => { this._resolveStored.push(resolve); this._rejectStored.push(reject); });
   }
 
-  constructor(name: string, file: string) {
+  constructor(name: string, file: string|URL) {
     this._name = name;
-    LazyLoader.LoadText(file).then(data => {
+    LazyLoader.LoadText(file.toString()).then(data => {
       let parsed = JSON.parse(data) as IElementsJson;
       this._elementList = [];
       parsed.elements.forEach(element => {

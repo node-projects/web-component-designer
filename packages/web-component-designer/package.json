@@ -1,7 +1,7 @@
 {
   "description": "A UI designer for Polymer apps",
   "name": "@node-projects/web-component-designer",
-  "version": "0.1.87",
+  "version": "0.1.98",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
@@ -12,10 +12,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": ">=0.21.2"
+    "@node-projects/base-custom-webcomponent": ">=0.23.0"
   },
   "devDependencies": {
-    "mdn-data": "^2.3.0"
+    "mdn-data": "^2.4.2"
   },
   "repository": {
     "type": "git",

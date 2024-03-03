@@ -4,11 +4,13 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "noEmit": false
+    "noEmit": false,
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.js"
+    "src/**/*.js",
+    "src/**/*.json"
   ],
   "references": [
     {

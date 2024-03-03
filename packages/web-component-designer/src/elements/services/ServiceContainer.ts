@@ -118,7 +118,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
   public readonly globalContext: GlobalContext = new GlobalContext(this);
 
   public readonly options = {
-    zoomDesignerBackground: true
+    zoomDesignerBackground: true,
+    roundPixelsToDecimalPlaces: -1
   };
 
   public readonly designerTools: Map<string | NamedTools, ITool | (new (IElementDefinition) => ITool)> = new Map();

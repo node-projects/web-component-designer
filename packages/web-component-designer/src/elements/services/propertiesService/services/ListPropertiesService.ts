@@ -16,8 +16,8 @@ export class ListPropertiesService extends AbstractPropertiesService {
 
   private _propertys: Map<string, IProperty[]> = new Map();
 
-  constructor(propertyDefinitions: IJsonPropertyDefinitions) {
-    super();
+  constructor(propertyDefinitions: IJsonPropertyDefinitions, recreateElementsOnPropertyChange?: boolean) {
+    super(recreateElementsOnPropertyChange);
 
     for (let e in propertyDefinitions) {
       let parr: IProperty[] = []

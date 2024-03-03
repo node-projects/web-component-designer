@@ -17,10 +17,10 @@ export class GridPlacementService implements IPlacementService {
     this._basePlacementService = basePlacementService ?? new DefaultPlacementService();
   }
 
-  enterContainer(container: IDesignItem, items: IDesignItem[]) {
+  enterContainer(container: IDesignItem, items: IDesignItem[], mode: 'normal' | 'drop') {
     for (let i of items) {
       container.insertChild(i);
-      
+
       i.removeStyle("position");
       i.removeStyle("left");
       i.removeStyle("top");

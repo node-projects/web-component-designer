@@ -5,6 +5,6 @@ import { assetsPath } from "../../../../../../Constants.js";
 
 export class TextToolButtonProvider implements IDesignViewToolbarButtonProvider {
   provideButton(designerCanvas: IDesignerCanvas): HTMLElement {
-    return new DesignerToolbarButton(designerCanvas, { 'Text': { icon: assetsPath + 'images/layout/TextTool.svg' } });
+    return new DesignerToolbarButton(designerCanvas, { 'Text': { icon: assetsPath + 'images/tools/TextTool.svg' } });
   }
 }

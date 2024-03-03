@@ -86,6 +86,7 @@ import { DragDropService } from './dragDropService/DragDropService.js';
 import { EventsService } from './eventsService/EventsService.js';
 import { SimpleDemoProviderService } from './demoProviderService/SimpleDemoProviderService.js';
 import { DrawElementTool } from '../widgets/designerView/tools/DrawElementTool.js';
+import { RoundPixelsDesignViewConfigButton } from '../widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -127,7 +128,7 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ElementDragTitleExtensionProvider(),
-    new TransformOriginExtensionProvider(),
+    new TransformOriginExtensionProvider(true),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
     new EllipsisExtensionProvider(),
@@ -202,7 +203,9 @@ export function createDefaultServiceContainer() {
     new ButtonSeperatorProvider(10),
     new InvisibleElementExtensionDesignViewConfigButtons(),
     new ButtonSeperatorProvider(10),
-    new StylesheetServiceDesignViewConfigButtons()
+    new StylesheetServiceDesignViewConfigButtons(),
+    new ButtonSeperatorProvider(30),
+    new RoundPixelsDesignViewConfigButton()
   );
 
   serviceContainer.designViewToolbarButtons.push(

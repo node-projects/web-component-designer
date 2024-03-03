@@ -168,6 +168,21 @@ export class ExtensionManager implements IExtensionManager {
     this.designerCanvas.overlayLayer.endBatch();
   }
 
+  applyExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension) {
+    let appE = designItem.appliedDesignerExtensions.get(ExtensionType.Directly);
+    if (!appE)
+      appE = [];
+    try {
+      extension.extend(null, null);
+    }
+    catch (err) {
+      console.error(err);
+    }
+    appE.push(extension);
+    designItem.appliedDesignerExtensions.set(ExtensionType.Directly, appE);
+    this.designItemsWithExtentions.add(designItem);
+  }
+
   removeExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension) {
     for (let e of designItem.appliedDesignerExtensions) {
       const idx = e[1].indexOf(extension);
@@ -369,6 +384,7 @@ export class ExtensionManager implements IExtensionManager {
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension) {
     this.designerCanvas.overlayLayer.startBatch();
     if (designItems) {
+      this.refreshExtensions(designItems, ExtensionType.Directly, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Permanent, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.Selection, null, ignoredExtension);
       this.refreshExtensions(designItems, ExtensionType.PrimarySelection, null, ignoredExtension);

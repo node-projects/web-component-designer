@@ -27,7 +27,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
       let text = this.extendedItem.name;
       this._width = Math.max(Math.min(elementWidth, w), extensionWidth);
       this._rect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-primary-selection-move', this._rect);
-      this._text = this._drawHTML('<span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + text + '</span>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
+      this._text = this._drawHTML('<div style="position:relative"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0;">' + text + '</span></div>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
+      this._text.style.overflow = 'visible';
       this._rect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
       this._rect.addEventListener('pointermove', (e) => this._pointerEvent(e));
       this._rect.addEventListener('pointerup', (e) => this._pointerEvent(e));
@@ -58,8 +59,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
         this._text.style.fontSize = (10 / this.designerCanvas.scaleFactor) + 'px';
         this._text.setAttribute('height', '' + h);
         this._text.setAttribute('width', '' + w);
-        this._text.style.transformBox = 'fill-box'
-        this._text.style.rotate = angle + 'deg';
+        (<HTMLElement>this._text.children[0].children[0]).style.rotate = angle + 'deg';
       }
     }
   }

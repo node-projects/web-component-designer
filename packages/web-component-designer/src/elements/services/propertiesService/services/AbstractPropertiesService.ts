@@ -8,8 +8,15 @@ import { IBinding } from '../../../item/IBinding.js';
 import { PropertyType } from '../PropertyType.js';
 import { NodeType } from '../../../item/NodeType.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
+import { newElementFromString } from '../../../helper/ElementHelper.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
+
+  constructor(recreateElementsOnPropertyChange?: boolean) {
+    this._recreateElementsOnPropertyChange = recreateElementsOnPropertyChange;
+  }
+
+  protected _recreateElementsOnPropertyChange: boolean = false;
 
   private static _stylesCache = new Map<IDesignItem, Set<string>>;
   private _cssCacheClearTimer: NodeJS.Timeout;
@@ -81,6 +88,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       this._notifyChangedProperty(d, property, value);
     }
     cg.commit();
+    if (this._recreateElementsOnPropertyChange)
+      AbstractPropertiesService.recreateElements(this, designItems);
   }
 
   getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
@@ -112,6 +121,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       this._notifyChangedProperty(d, property, undefined);
     }
     cg.commit();
+    if (this._recreateElementsOnPropertyChange)
+      AbstractPropertiesService.recreateElements(this, designItems);
   }
 
   isSet(designItems: IDesignItem[], property: IProperty): ValueType {
@@ -251,5 +262,26 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     }
     else
       return property.defaultValue;
+  }
+
+  protected static recreateElements(service: IPropertiesService, designItems: IDesignItem[]) {
+    for (let d of designItems) {
+      if (!service.isHandledElement(d))
+        continue;
+
+      let txt = '<' + d.name + ' ';
+      for (let a of d.element.attributes) {
+        txt += a.name + '="' + a.value.replaceAll('"', '&quot;') + '" ';
+      }
+      txt += '></' + d.name + '>';
+      let element = newElementFromString(txt); // some custom elements only parse attributes during constructor call 
+      for (let c of [...d.element.childNodes])
+        element.appendChild(c);
+      (<HTMLElement>element).style.pointerEvents = 'auto';
+      (<HTMLElement>d.node).insertAdjacentElement('beforebegin', element);
+      if (d.node.parentNode)
+        (<HTMLElement>d.node.parentNode).removeChild(d.node);
+      d.replaceNode(element);
+    }
   }
 }

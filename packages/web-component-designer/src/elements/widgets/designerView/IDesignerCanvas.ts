@@ -40,8 +40,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   canvas: HTMLElement;
   additionalStyles: CSSStyleSheet[];
 
-  eatEvents: Element;
-
+  ignoreEvent(event: Event);
+  
   initialize(serviceContainer: ServiceContainer);
 
   getNormalizedEventCoordinates(event: MouseEvent): IPoint;

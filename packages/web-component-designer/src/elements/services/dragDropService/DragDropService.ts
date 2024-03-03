@@ -51,9 +51,8 @@ export class DragDropService implements IDragDropService {
     const elementDefinition = <IElementDefinition>JSON.parse(transferData);
     const di = await designerCanvas.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer));
     const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
-    di.setStyle('position', 'absolute');
     const containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, newContainer.getComputedStyle()))
-    containerService.enterContainer(newContainer, [di]);
+    containerService.enterContainer(newContainer, [di], 'drop');
 
     const containerPos = designerCanvas.getNormalizedElementCoordinates(newContainer.element);
     const evCoord = designerCanvas.getNormalizedEventCoordinates(event);

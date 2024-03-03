@@ -140,9 +140,11 @@ export class DefaultPlacementService implements IPlacementService {
     designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshExtensions(designItems);
   }
 
-  enterContainer(container: IDesignItem, items: IDesignItem[]) {
+  enterContainer(container: IDesignItem, items: IDesignItem[], mode: 'normal' | 'drop') {
     let filterdItems = filterChildPlaceItems(items);
     for (let i of filterdItems) {
+      if (mode == 'drop')
+        i.setStyle('position', 'absolute');
       container.insertChild(i);
 
       if (i.lastContainerSize) {

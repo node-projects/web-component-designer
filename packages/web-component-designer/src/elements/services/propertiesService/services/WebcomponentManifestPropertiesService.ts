@@ -17,8 +17,8 @@ export class WebcomponentManifestPropertiesService extends AbstractPropertiesSer
 
   private _propertiesList: Record<string, IProperty[]>;
 
-  constructor(name: string, manifest: any) {
-    super();
+  constructor(name: string, manifest: any, recreateElementsOnPropertyChange?: boolean) {
+    super(recreateElementsOnPropertyChange);
     this._name = name;
     this._parseManifest(manifest);
   }

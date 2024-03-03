@@ -10,6 +10,7 @@ export * from "./elements/helper/IndentedTextWriter.js";
 export * from "./elements/helper/PathDataPolyfill.js";
 export * from "./elements/helper/Screenshot.js";
 export * from "./elements/helper/ClipboardHelper.js";
+export * from "./elements/helper/TouchGestureHelper.js";
 
 export type { ITextWriter } from "./elements/helper/ITextWriter.js";
 export * from "./elements/helper/w3color.js";
@@ -18,6 +19,7 @@ export * from "./elements/helper/Helper.js";
 export * from "./elements/helper/SwitchContainerHelper.js";
 export * from "./elements/helper/NpmPackageLoader.js";
 export * from "./elements/helper/LayoutHelper.js";
+export * from "./elements/helper/SelectionHelper.js";
 export type { IContextMenuItem, IContextMenu } from "./elements/helper/contextMenu/IContextMenuItem.js";
 
 export * from "./elements/item/DesignItem.js";
@@ -35,6 +37,7 @@ export type { IBindableObjectDragDropService } from "./elements/services/bindabl
 export type { IBindingService } from "./elements/services/bindingsService/IBindingService.js";
 export * from "./elements/services/bindingsService/BaseCustomWebcomponentBindingsService.js";
 
+export * from "./elements/services/placementService/AbsolutePlacementService.js";
 export * from "./elements/services/placementService/DefaultPlacementService.js";
 export * from "./elements/services/placementService/FlexBoxPlacementService.js";
 export * from "./elements/services/placementService/GridPlacementService.js";
@@ -208,8 +211,12 @@ export * from "./elements/widgets/designerView/tools/toolBar/buttons/TextToolBut
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js";
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js";
 
+
+export * from "./elements/widgets/designerView/tools/toolBar/popups/AbstractBaseToolPopup.js";
 export * from "./elements/widgets/designerView/tools/toolBar/popups/DrawToolPopup.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/PointerToolPopup.js";
 export * from "./elements/widgets/designerView/tools/toolBar/popups/SelectionToolPopup.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/TransformToolPopup.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbar.js";
 export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbarButton.js";

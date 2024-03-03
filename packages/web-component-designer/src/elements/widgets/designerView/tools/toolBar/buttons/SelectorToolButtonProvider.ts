@@ -7,8 +7,8 @@ import { SelectionToolPopup } from "../popups/SelectionToolPopup.js";
 export class SelectorToolButtonProvider implements IDesignViewToolbarButtonProvider {
   provideButton(designerCanvas: IDesignerCanvas): HTMLElement {
     const button = new DesignerToolbarButton(designerCanvas, {
-      'RectangleSelector': { icon: assetsPath + 'images/layout/SelectRectTool.svg' },
-      'MagicWandSelector': { icon: assetsPath + 'images/layout/MagicWandTool.svg' }
+      'RectangleSelector': { icon: assetsPath + 'images/tools/SelectRectTool.svg' },
+      'MagicWandSelector': { icon: assetsPath + 'images/tools/MagicWandTool.svg' }
     });
     button.popup = SelectionToolPopup
     return button;

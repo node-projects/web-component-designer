@@ -28,6 +28,7 @@
     "html2canvas": "*",
     "jquery": "^3.7.1",
     "jquery.fancytree": "^2.38.3",
+    "jsbarcode": "^3.11.6",
     "mdn-data": "^2.1.0",
     "monaco-editor": "^0.30.0",
     "ts-jest": "^29.1.1",
