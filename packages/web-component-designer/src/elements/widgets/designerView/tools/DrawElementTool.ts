@@ -1,5 +1,6 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { roundValue } from '../../../helper/LayoutHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IElementDefinition } from '../../../services/elementsService/IElementDefinition.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
@@ -55,8 +56,8 @@ export class DrawElementTool implements ITool {
     this._changeGroup = designerCanvas.rootDesignItem.openGroup("Insert Item");
     this._createdItem = await designerCanvas.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(this._elementDefinition, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer));
     this._createdItem.setStyle('position', 'absolute');
-    this._createdItem.setStyle('left', evPos.x + 'px');
-    this._createdItem.setStyle('top', evPos.y + 'px');
+    this._createdItem.setStyle('left', roundValue(this._createdItem, evPos.x) + 'px');
+    this._createdItem.setStyle('top', roundValue(this._createdItem, evPos.y) + 'px');
     this._createdItem.setStyle('width', '0');
     this._createdItem.setStyle('height', '0');
     (<HTMLElement>this._createdItem.element).style.overflow = 'hidden';
@@ -74,22 +75,22 @@ export class DrawElementTool implements ITool {
         this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._rect, OverlayLayer.Foreground);
         this._rect.setAttribute('class', 'svg-draw-new-element');
-        this._rect.setAttribute('x', <string><any>(this._startPosition.x));
-        this._rect.setAttribute('y', <string><any>(this._startPosition.y));
+        this._rect.setAttribute('x', <string><any>roundValue(this._createdItem, this._startPosition.x));
+        this._rect.setAttribute('y', <string><any>roundValue(this._createdItem, this._startPosition.y));
       }
 
-      const w = evPos.x - this._startPosition.x;
-      const h = evPos.y - this._startPosition.y;
-      if (w >= 0) {
+      const w = roundValue(this._createdItem, evPos.x - this._startPosition.x);
+      const h = roundValue(this._createdItem, evPos.y - this._startPosition.y);
+      if (parseFloat('' + w) >= 0) {
         this._rect.setAttribute('width', w);
         this._createdItem.setStyle('width', w + 'px');
       }
-      if (h >= 0) {
+      if (parseFloat('' + h) >= 0) {
         this._rect.setAttribute('height', h);
         this._createdItem.setStyle('height', h + 'px');
       }
 
-      if (w > 5 || h > 5)
+      if (parseFloat('' + w) > 5 || parseFloat('' + h) > 5)
         this.sizeOverlapThreshold = true;
     }
   }

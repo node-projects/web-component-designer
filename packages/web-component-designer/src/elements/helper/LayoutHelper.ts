@@ -83,14 +83,21 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
     if (!hasPositionedLayout)
       designItem.setStyle('position', 'absolute');
     if (oldLeft || oldRight == null)
-      designItem.setStyle('left', (offset.x + (oldLeft ?? 0) + containerLeft) + "px");
+      designItem.setStyle('left', roundValue(designItem, offset.x + (oldLeft ?? 0) + containerLeft) + "px");
     if (oldTop || oldBottom == null)
-      designItem.setStyle('top', (offset.y + (oldTop ?? 0) + containerTop) + "px");
+      designItem.setStyle('top', roundValue(designItem, offset.y + (oldTop ?? 0) + containerTop) + "px");
     if (oldRight)
-      designItem.setStyle('right', ((oldRight ?? 0) - offset.x + containerRight) + "px");
+      designItem.setStyle('right', roundValue(designItem, (oldRight ?? 0) - offset.x + containerRight) + "px");
     if (oldBottom)
-      designItem.setStyle('bottom', ((oldBottom ?? 0) - offset.y + containerBottom) + "px");
+      designItem.setStyle('bottom', roundValue(designItem, (oldBottom ?? 0) - offset.y + containerBottom) + "px");
   }
+}
+
+export function roundValue(designItem: IDesignItem, value: number) {
+  if (designItem.serviceContainer.options.roundPixelsToDecimalPlaces >= 0) {
+    return value.toFixed(designItem.serviceContainer.options.roundPixelsToDecimalPlaces);
+  }
+  return value;
 }
 
 /*function placeViaPosition(container: IDesignItem, designItem: IDesignItem, offset: IPoint, mode: 'position' | 'transform' | 'margin' | 'padding') {
