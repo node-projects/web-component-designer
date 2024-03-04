@@ -8,9 +8,9 @@ import { Wunderbaum } from 'wunderbaum';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
 import { WbRenderEventType } from "types";
-import { VisualizationPropertyGrid } from "./VisualizationPropertyGrid";
-import { VisualizationHandler } from "../interfaces/VisualizationHandler";
-import { VisualizationShell } from "../interfaces/VisualizationShell";
+import { VisualizationPropertyGrid } from "./VisualizationPropertyGrid.js";
+import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
+import { VisualizationShell } from "../interfaces/VisualizationShell.js";
 import '@node-projects/splitview.webcomponent';
 
 export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend {

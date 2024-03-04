@@ -6,7 +6,7 @@ export * from './blockly/components/components.js';
 
 export * from './components/BindingsEditor.js';
 export * from './components/BindingsEditorHistoric.js';
-export * from './components/ScriptEditor.js';
+export * from './components/SimpleScriptEditor.js';
 export * from './components/VisualizationPropertyGrid.js';
 
 export * from './helpers/BindingsHelper.js';

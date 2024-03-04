@@ -1,4 +1,4 @@
-import { sleep } from "@node-projects/web-component-designer/src/elements/helper/Helper.js";
+import { sleep } from "@node-projects/web-component-designer";
 import { generateEventCodeFromBlockly } from "../blockly/BlocklyJavascriptHelper.js";
 import { parseBindingString } from "../helpers/BindingsHelper.js";
 import { IScriptMultiplexValue } from "../interfaces/IScriptMultiplexValue.js";
