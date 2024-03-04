@@ -87,6 +87,7 @@ import { EventsService } from './eventsService/EventsService.js';
 import { SimpleDemoProviderService } from './demoProviderService/SimpleDemoProviderService.js';
 import { DrawElementTool } from '../widgets/designerView/tools/DrawElementTool.js';
 import { RoundPixelsDesignViewConfigButton } from '../widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js';
+import { MathMLElementsPropertiesService } from './propertiesService/services/MathMLElementsPropertiesService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -100,6 +101,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("propertyService", new LitElementPropertiesService());
   serviceContainer.register("propertyService", new NativeElementsPropertiesService());
   serviceContainer.register("propertyService", new SVGElementsPropertiesService());
+  serviceContainer.register("propertyService", new MathMLElementsPropertiesService());
   serviceContainer.register("propertyService", new Lit2PropertiesService());
   serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
   serviceContainer.register("propertyGroupsService", new PropertyGroupsService());

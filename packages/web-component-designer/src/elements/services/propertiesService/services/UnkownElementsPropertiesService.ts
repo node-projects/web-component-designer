@@ -19,6 +19,8 @@ export class UnkownElementsPropertiesService extends AbstractPropertiesService {
     let list = Object.getOwnPropertyNames(Object.getPrototypeOf(designItem.element));
     let props: IProperty[] = [];
     for (let p of list) {
+      if (p.startsWith('on'))
+        continue;
       let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(designItem.element), p);
       if (desc.get || desc.set) {
         let v = designItem.element[p];
