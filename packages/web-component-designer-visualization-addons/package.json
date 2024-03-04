@@ -16,6 +16,8 @@
     "@node-projects/web-component-designer": ">=0.1.1",
     "@node-projects/web-component-designer-widgets-wunderbaum": ">=0.1.12",
     "@node-projects/web-component-designer-codeview-monaco": ">=0.1.18",
+    "@node-projects/propertygrid.webcomponent": ">=1.0.2",
+    "@node-projects/splitview.webcomponent": ">=1.0.1",
     "@blockly/zoom-to-fit": "^5.0.11",
     "blockly": "^10.4.2",
     "long": "^5.2.3" 
