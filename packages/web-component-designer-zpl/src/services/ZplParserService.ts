@@ -24,6 +24,27 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
 
     options: IHtmlWriterOptions = {};
 
+    createTransform(char: string, el: HTMLElement) {
+        switch (char) {
+            case 'R': {
+                el.style.transform = 'rotate(90deg) translateY(-100%)';
+                el.style.transformOrigin = '0% 0%'
+                return;
+            };
+            case 'I': {
+                el.style.transform = 'rotate(180deg)';
+                el.style.transformOrigin = '50% 50%'
+                return;
+            }
+            case 'B': {
+                el.style.transform = 'rotate(270deg)';
+                el.style.transformOrigin = '100% 100%'
+                return;
+            };
+        }
+        return;
+    }
+
     async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
         let parts = html.split("^");
         let images: Record<string, image> = {};
@@ -45,6 +66,7 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
         let fontName: string;
         let fontHeight: number;
         let fontWidth: number;
+        let rotation: string = 'N';
         let x: number;
         let y: number;
         let bc: boolean;
@@ -62,6 +84,7 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             let command = p.substring(0, 2);
             let fieldString = p.substring(2);
             let fields = fieldString.split(",");
+
             switch (command) {
                 case "XA":
                 case "XZ":
@@ -74,18 +97,35 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                     comment.setAttribute("content", fieldString);
                     designItems.push(DesignItem.createDesignItemFromInstance(comment, serviceContainer, instanceServiceContainer));
                     break;
-                case "CF":
-                    fontName = fields[0];
-                    fontHeight = parseInt(fields[1]);
-                    let defultFontWidth = 15;
+                case "AA": //Ax x=fontname
+                case "A0": {
+                    fontName = command[1];
+                    rotation = getSetValue(fields[0], 'N');
+                    let defaultFontWidth = 15;
                     switch (fontName) {
                         case "A":
-                            defultFontWidth = 15;
+                            defaultFontWidth = 15;
                             break;
                         case "0":
-                            defultFontWidth = fontHeight;
+                            defaultFontWidth = fontHeight;
                     }
-                    fontWidth = parseInt(getSetValue(fields[2], defultFontWidth));
+                    fontHeight = parseInt(getSetValue(fields[1], defaultFontWidth));
+                    fontWidth = parseInt(getSetValue(fields[2], defaultFontWidth));
+                    break;
+                }
+                case "CF": //we should switch to use A, CF is default font
+                    rotation = 'N';
+                    fontName = fields[0];
+                    fontHeight = parseInt(fields[1]);
+                    let defaultFontWidth = 15;
+                    switch (fontName) {
+                        case "A":
+                            defaultFontWidth = 15;
+                            break;
+                        case "0":
+                            defaultFontWidth = fontHeight;
+                    }
+                    fontWidth = parseInt(getSetValue(fields[2], defaultFontWidth));
                     break;
                 case "FO":
                     x = parseInt(fields[0]);
@@ -180,6 +220,9 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                         text.setAttribute("font-height", fontHeight.toString());
                         text.setAttribute("font-width", fontWidth.toString());
                         text.setAttribute("content", fieldString);
+                        if (rotation) {
+                            this.createTransform(rotation, text);
+                        }
                         designItems.push(DesignItem.createDesignItemFromInstance(text, serviceContainer, instanceServiceContainer));
                     }
                     break;
