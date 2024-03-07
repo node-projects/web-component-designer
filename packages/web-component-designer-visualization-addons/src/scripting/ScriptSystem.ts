@@ -1,4 +1,4 @@
-import { sleep } from "@node-projects/web-component-designer/src/elements/helper/Helper.js";
+import { sleep } from "@node-projects/web-component-designer";
 import { generateEventCodeFromBlockly } from "../blockly/BlocklyJavascriptHelper.js";
 import { parseBindingString } from "../helpers/BindingsHelper.js";
 import { IScriptMultiplexValue } from "../interfaces/IScriptMultiplexValue.js";
@@ -6,17 +6,13 @@ import { VisualisationElementScript } from "../interfaces/VisualisationElementSc
 import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { Script } from "./Script.js";
 import { ScriptCommands } from "./ScriptCommands.js";
-
 import Long from 'long'
-import { VisualizationUiHandler } from "../interfaces/VisualizationUiHandler.js";
-
 
 export class ScriptSystem {
 
   _visualizationHandler: VisualizationHandler;
-  _visualizationUiHandler: VisualizationUiHandler;
 
-  constructor(visualizationHandler: VisualizationHandler, visualizationUiHandler: VisualizationUiHandler) {
+  constructor(visualizationHandler: VisualizationHandler) {
     this._visualizationHandler = visualizationHandler;
   }
 
@@ -28,11 +24,6 @@ export class ScriptSystem {
 
   async runScriptCommand<T extends ScriptCommands>(command: T, context) {
     switch (command.type) {
-      case 'CloseDialog': {
-        //const dialogdId = await this.getValue(c.dialogId, outerContext);                
-        this._visualizationUiHandler.closeDialog(<HTMLElement>context.element);
-        break;
-      }
 
       case 'OpenUrl': {
         window.open(await this.getValue(command.url, context), command.target);
@@ -49,12 +40,6 @@ export class ScriptSystem {
         const target = await this.getValue(command.target, context);
         const message = await this.getValue(command.message, context);
         console[target](message);
-        break;
-      }
-
-      case 'SwitchLanguage': {
-        const language = await this.getValue(command.language, context);
-        this._visualizationUiHandler.switchLanguage(language);
         break;
       }
 

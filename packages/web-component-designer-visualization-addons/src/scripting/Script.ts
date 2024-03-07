@@ -1,4 +1,4 @@
-import { ScriptCommands } from "./ScriptCommands";
+import { ScriptCommands } from "./ScriptCommands.js";
 
 export class Script {
     name?: string;

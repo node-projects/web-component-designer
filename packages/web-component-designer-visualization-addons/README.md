@@ -9,7 +9,7 @@ https://www.npmjs.com/package/@node-projects/web-component-designer-visualizatio
 ## Description
 
 This package contains basic elements for a custom visualization, like a script system, a bindings system, ...
-It is used for example by the iobroker.webui
+It is used for example by the iobroker.webui.
 
 ## Dependencies
 

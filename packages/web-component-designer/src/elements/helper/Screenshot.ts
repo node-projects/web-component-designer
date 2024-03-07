@@ -27,7 +27,9 @@ export class Screenshot {
           cursor: "never",
           displaySurface: 'browser'
         },
-        audio: false
+        audio: false,
+        selfBrowserSurface: "include",
+        preferCurrentTab: true
       }
       Screenshot._video.style.display = "none";
       elementHostForVideo.appendChild(Screenshot._video);

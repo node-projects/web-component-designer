@@ -148,6 +148,7 @@ export * from "./elements/services/propertiesService/services/CssCurrentProperti
 export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
 export * from "./elements/services/propertiesService/services/ListPropertiesService.js";
 export * from "./elements/services/propertiesService/services/LitElementPropertiesService.js";
+export * from "./elements/services/propertiesService/services/MathMLElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/SVGElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/PolymerPropertiesService.js";

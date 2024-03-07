@@ -151,7 +151,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       font-weight: inherit;
       font-style: inherit;
       line-height: inherit;
-      --node-projects-web-component-designer-background: inherit;
     }
     * {
       touch-action: none;
@@ -413,24 +412,32 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         if (!this.instanceServiceContainer.selectionService.primarySelection) {
           this.zoomToFit();
           this.disableBackgroud();
-          const el = this.rootDesignItem.element;
-          const sel = this.instanceServiceContainer.selectionService.selectedElements;
-          this.instanceServiceContainer.selectionService.setSelectedElements(null);
-          await sleep(100);
-          const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
-          await exportData(dataURItoBlob(screenshot), "screenshot.png");
-          this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+          try {
+            const el = this.rootDesignItem.element;
+            const sel = this.instanceServiceContainer.selectionService.selectedElements;
+            this.instanceServiceContainer.selectionService.setSelectedElements(null);
+            await sleep(100);
+            const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
+            await exportData(dataURItoBlob(screenshot), "screenshot.png");
+            this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+          } catch (err) {
+            console.error(err);
+          }
           this.enableBackground();
         }
         else {
           this.disableBackgroud();
-          const el = this.instanceServiceContainer.selectionService.primarySelection.element;
-          const sel = this.instanceServiceContainer.selectionService.selectedElements;
-          this.instanceServiceContainer.selectionService.setSelectedElements(null);
-          await sleep(100);
-          const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
-          await exportData(dataURItoBlob(screenshot), "screenshot.png");
-          this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+          try {
+            const el = this.instanceServiceContainer.selectionService.primarySelection.element;
+            const sel = this.instanceServiceContainer.selectionService.selectedElements;
+            this.instanceServiceContainer.selectionService.setSelectedElements(null);
+            await sleep(100);
+            const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
+            await exportData(dataURItoBlob(screenshot), "screenshot.png");
+            this.instanceServiceContainer.selectionService.setSelectedElements(sel);
+          } catch (err) {
+            console.error(err);
+          }
           this.enableBackground();
         }
       }
@@ -477,11 +484,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public disableBackgroud() {
-    this._canvasContainer.style.backgroundImage = 'none';
+    this._canvasContainer.style.background = 'var(--node-projects-web-component-designer-screenshot-background, white)';
   }
 
   public enableBackground() {
-    this._canvasContainer.style.backgroundImage = 'var(--node-projects-web-component-designer-background)';
+    this._canvasContainer.style.background = '';
   }
 
   public zoomToFit() {
@@ -944,7 +951,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _onDblClick(event: KeyboardEvent) {
     event.preventDefault();
-    this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);
+    if (this.serviceContainer.globalContext.tool == null || this.serviceContainer.globalContext.tool === this.serviceContainer.designerTools.get(NamedTools.Pointer))
+      this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);
   }
 
   private _searchShowOverlay() {
@@ -1156,7 +1164,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
     if (this._ignoreEvent === event)
       return;
-    
+
     if (!this.serviceContainer)
       return;
 
