@@ -20,12 +20,14 @@ export class CanvasExtension extends AbstractExtension {
       const top = Number.parseFloat(computedStyle.marginTop.replace('px', ''));
       const right = Number.parseFloat(computedStyle.marginRight.replace('px', ''));
       const bottom = Number.parseFloat(computedStyle.marginBottom.replace('px', ''));
-      if (this._valuesHaveChanges(left, top, right, bottom, itemRect.x, itemRect.y, itemRect.width, itemRect.height)) {
-        this._removeAllOverlays();
-        this._drawRect(itemRect.x - left, itemRect.y - top, left + itemRect.width + right, top, 'svg-margin');
-        this._drawRect(itemRect.x - left, itemRect.y, left, itemRect.height, 'svg-margin');
-        this._drawRect(itemRect.x + itemRect.width, itemRect.y, right, itemRect.height, 'svg-margin');
-        this._drawRect(itemRect.x - left, itemRect.y + itemRect.height, left + itemRect.width + right, bottom, 'svg-margin');
+      if (!isNaN(left) && !isNaN(top) && !isNaN(right) && !isNaN(bottom)) {
+        if (this._valuesHaveChanges(left, top, right, bottom, itemRect.x, itemRect.y, itemRect.width, itemRect.height)) {
+          this._removeAllOverlays();
+          this._drawRect(itemRect.x - left, itemRect.y - top, left + itemRect.width + right, top, 'svg-margin');
+          this._drawRect(itemRect.x - left, itemRect.y, left, itemRect.height, 'svg-margin');
+          this._drawRect(itemRect.x + itemRect.width, itemRect.y, right, itemRect.height, 'svg-margin');
+          this._drawRect(itemRect.x - left, itemRect.y + itemRect.height, left + itemRect.width + right, bottom, 'svg-margin');
+        }
       }
     }
   }
