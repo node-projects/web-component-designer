@@ -15,7 +15,7 @@ export class PanTool implements ITool {
         break;
 
       case EventNames.PointerMove:
-        if (event.buttons == 1) {
+        if (event.buttons == 1 || event.buttons == 4) {
           designerCanvas.canvasOffset = { x: designerCanvas.canvasOffset.x + + event.movementX / designerCanvas.zoomFactor, y: designerCanvas.canvasOffset.y + event.movementY / designerCanvas.zoomFactor };
         }
         break;
