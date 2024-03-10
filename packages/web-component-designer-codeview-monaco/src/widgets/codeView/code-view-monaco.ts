@@ -5,7 +5,6 @@ import type * as monacoType from 'monaco-editor'
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
   private static _initalized: boolean;
 
-  //@ts-ignore
   static monacoLib: { editor: typeof monacoType.editor, Range: typeof monacoType.Range };
 
   dispose(): void {
@@ -18,6 +17,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   public code: string;
   public onTextChanged = new TypedEvent<string>();
   public language: string = 'html';
+  public singleRow: boolean = false;
+
   private _theme: string = 'webComponentDesignerTheme';
   public get theme(): string {
     return this._theme;
@@ -29,10 +30,22 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     CodeViewMonaco.monacoLib.editor.setTheme(value);
   }
 
+  #readOnly = false;
+  get readOnly() {
+    return this.#readOnly;
+  }
+  set readOnly(v) {
+    this.#readOnly = v;
+    if (this._monacoEditor)
+      this._monacoEditor.updateOptions({ readOnly: v })
+  }
+
   static readonly properties = {
     code: String,
     language: String,
-    theme: String
+    theme: String,
+    singleRow: Boolean,
+    readOnly: Boolean
   }
 
   private _monacoEditor: monacoType.editor.IStandaloneCodeEditor;
@@ -144,19 +157,21 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     //@ts-ignore
     CodeViewMonaco.monacoLib ??= window.monaco;
 
+    CodeViewMonaco.initMonacoEditor(CodeViewMonaco.monacoLib);
+
     const resizeObserver = new ResizeObserver(() => {
       if (this._editor.offsetWidth > 0) {
-        this._monacoEditor = CodeViewMonaco.monacoLib.editor.create(this._editor, {
+
+        let options: monacoType.editor.IStandaloneEditorConstructionOptions = {
           automaticLayout: true,
-          wordWrapColumn: 1000,
-          //wordWrap: 'wordWrapColumn',
-          fontLigatures: '',
-          value: this.code,
           language: this.language,
+          value: this.code,
+          fixedOverflowWidgets: true,
           minimap: {
             size: 'fill'
           },
-          fixedOverflowWidgets: true,
+          readOnly: this.#readOnly,
+
           scrollbar: {
             useShadows: false,
             verticalHasArrows: true,
@@ -164,9 +179,17 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
             vertical: 'visible',
             horizontal: 'visible'
           }
-        });
+        }
+        if (this.singleRow) {
+          options.minimap.enabled = false;
+          options.lineNumbers = 'off';
+          options.glyphMargin = false;
+          options.folding = false;
+          options.lineDecorationsWidth = 0;
+          options.lineNumbersMinChars = 0;
+        }
 
-        CodeViewMonaco.initMonacoEditor(CodeViewMonaco.monacoLib);
+        this._monacoEditor = CodeViewMonaco.monacoLib.editor.create(this._editor, options);
 
         let selectionTimeout;
         let disableCursorChange;
