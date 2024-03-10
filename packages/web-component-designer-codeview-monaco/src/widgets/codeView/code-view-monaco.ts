@@ -213,6 +213,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
             disableCursorChange = false;
           }, 50);
           this.onTextChanged.emit(this._monacoEditor.getValue());
+          this.dispatchEvent(new CustomEvent('code-changed'));
         });
         this._monacoEditor.onDidChangeModel(e => {
           changeContentListener.dispose();
@@ -226,6 +227,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
               disableCursorChange = false;
             }, 50);
             this.onTextChanged.emit(this._monacoEditor.getValue());
+            this.dispatchEvent(new CustomEvent('code-changed'));
           });
         });
         this._monacoEditor.onDidChangeCursorPosition(e => {
