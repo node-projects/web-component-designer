@@ -60,7 +60,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
         </div>
     `;
 
-    static readonly is = 'node-projects-simple-script-editor';
+    static readonly is = 'node-projects-visualization-simple-script-editor';
 
     public serviceContainer: ServiceContainer;
     public visualizationHandler: VisualizationHandler;

@@ -76,7 +76,7 @@ export class BindingsEditorHistoric extends BaseCustomWebComponentConstructorApp
             box-sizing: border-box;
         }`;
 
-    static readonly is = 'node-projects-bindings-editor-historic';
+    static readonly is = 'node-projects-visualization-bindings-editor-historic';
 
     historic: any;
 

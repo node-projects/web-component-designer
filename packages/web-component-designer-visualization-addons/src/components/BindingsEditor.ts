@@ -155,15 +155,15 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
             font-size: inherit;
         }
         
-        iobroker-webui-monaco-editor:not([readonly]) {
+        node-projects-code-view-monaco:not([readonly]) {
             border: 1px black solid;
         }
         
-        iobroker-webui-monaco-editor[readonly] {
+        node-projects-code-view-monaco[readonly] {
             border: 1px lightgray solid;
         }`;
 
-  static readonly is = 'iobroker-webui-dynamics-editor';
+  static readonly is = 'node-projects-visualization-bindings-editor';
 
   static readonly properties = {
     twoWayPossible: Boolean,
