@@ -14,7 +14,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 
-  public code: string;
   public onTextChanged = new TypedEvent<string>();
   public language: string = 'html';
   public singleRow: boolean = false;
@@ -28,6 +27,18 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     //@ts-ignore
     CodeViewMonaco.monacoLib ??= window.monaco;
     CodeViewMonaco.monacoLib.editor.setTheme(value);
+  }
+
+  #code: string = null;
+  get code() {
+    if (this._monacoEditor)
+      return this._monacoEditor.getModel().getValue();
+    return null;
+  }
+  set code(v) {
+    this.#code = v;
+    if (this._monacoEditor)
+      this._monacoEditor.getModel().setValue(v);
   }
 
   #readOnly = false;
@@ -165,7 +176,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         let options: monacoType.editor.IStandaloneEditorConstructionOptions = {
           automaticLayout: true,
           language: this.language,
-          value: this.code,
+          value: this.#code,
           fixedOverflowWidgets: true,
           minimap: {
             size: 'fill'
@@ -255,7 +266,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   update(code: string, instanceServiceContainer?: InstanceServiceContainer) {
-    this.code = code;
+    this.#code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
       this._disableSelectionAfterUpd = true;
