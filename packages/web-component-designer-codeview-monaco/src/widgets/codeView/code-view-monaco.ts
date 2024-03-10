@@ -170,15 +170,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           minimap: {
             size: 'fill'
           },
-          readOnly: this.#readOnly,
-
-          scrollbar: {
-            useShadows: false,
-            verticalHasArrows: true,
-            horizontalHasArrows: true,
-            vertical: 'visible',
-            horizontal: 'visible'
-          }
+          readOnly: this.#readOnly
         }
         if (this.singleRow) {
           options.minimap.enabled = false;
@@ -187,6 +179,13 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           options.folding = false;
           options.lineDecorationsWidth = 0;
           options.lineNumbersMinChars = 0;
+        } else {
+          options.scrollbar = {};
+          options.scrollbar.useShadows = false;
+          options.scrollbar.verticalHasArrows = true;
+          options.scrollbar.horizontalHasArrows = true;
+          options.scrollbar.vertical = 'visible';
+          options.scrollbar.horizontal = 'visible';
         }
 
         this._monacoEditor = CodeViewMonaco.monacoLib.editor.create(this._editor, options);
