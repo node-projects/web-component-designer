@@ -194,14 +194,14 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   private _shell: VisualizationShell
   private _activeRow: number = -1;
 
-  constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, servieContainer: ServiceContainer, shell: VisualizationShell) {
+  constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, serviceContainer: ServiceContainer, shell: VisualizationShell) {
     super();
     super._restoreCachedInititalValues();
 
     this._property = property;
     this._binding = binding;
     this._bindingTarget = bindingTarget;
-    this._serviceContainer = servieContainer;
+    this._serviceContainer = serviceContainer;
     this._shell = shell;
   }
 

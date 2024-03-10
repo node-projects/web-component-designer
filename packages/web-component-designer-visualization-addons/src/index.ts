@@ -16,14 +16,13 @@ export * from './interfaces/VisualisationElementScript.js';
 export * from './interfaces/VisualizationBinding.js';
 export * from './interfaces/VisualizationHandler.js';
 export * from './interfaces/VisualizationShell.js';
-export * from './interfaces/VisualizationUiHandler.js';
 
 export * from './scripting/Script.js';
 export * from './scripting/ScriptCommands.js';
 export * from './scripting/ScriptSystem.js';
 
 export * from './services/BindableObjectDragDropService.js';
-export * from './services/BindingsService.js';
+export * from './services/VisualizationBindingsService.js';
 export * from './services/PropertyGridDragDropService.js';
 export * from './services/ScriptRefactorService.js';
 export * from './services/SignalPropertyEditor.js';

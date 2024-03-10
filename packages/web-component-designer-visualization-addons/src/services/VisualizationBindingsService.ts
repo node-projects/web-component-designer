@@ -2,7 +2,7 @@ import { BindingMode, BindingTarget, IBinding, IBindingService, IDesignItem, Pro
 import { VisualizationBinding } from "../interfaces/VisualizationBinding.js";
 import { BindingsHelper } from "../helpers/BindingsHelper.js";
 
-export class BindingsService implements IBindingService {
+export class VisualizationBindingsService implements IBindingService {
   constructor(bindingsHelper: BindingsHelper) {
     this._bindingsHelper = bindingsHelper;
   }
