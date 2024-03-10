@@ -60,7 +60,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     <div title="textContent" id="contentRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
     <span class="desc">Content:</span><input type="text" id="content">
   </div>
-  <node-projects-property-grid id="pg"></node-projects-property-grid>`
+  <node-projects-web-component-designer-property-grid id="pg"></node-projects-web-component-designer-property-grid>`
 
   private _type: HTMLInputElement;
   private _id: HTMLInputElement;
@@ -182,4 +182,4 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   }
 }
 
-customElements.define('node-projects-property-grid-with-header', PropertyGridWithHeader);
+customElements.define('node-projects-web-component-designer-property-grid-with-header', PropertyGridWithHeader);

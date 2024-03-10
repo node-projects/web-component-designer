@@ -141,4 +141,4 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   }
 }
 
-customElements.define('node-projects-property-grid', PropertyGrid);
+customElements.define('node-projects-web-component-designer-property-grid', PropertyGrid);
