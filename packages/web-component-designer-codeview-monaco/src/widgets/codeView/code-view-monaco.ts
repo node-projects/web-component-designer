@@ -207,6 +207,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           if (selectionTimeout) {
             clearTimeout(selectionTimeout);
             selectionTimeout = null;
+            this._disableSelection = false;
           }
           disableCursorChange = true;
           setTimeout(() => {
@@ -221,6 +222,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
             if (selectionTimeout) {
               clearTimeout(selectionTimeout);
               selectionTimeout = null;
+              this._disableSelection = false;
             }
             disableCursorChange = true;
             setTimeout(() => {
