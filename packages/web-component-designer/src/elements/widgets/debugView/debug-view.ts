@@ -224,9 +224,9 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
         if (this._ready) {
             requestAnimationFrame(() => {
                 let element = designItem?.element;
-                if (element && element.nodeType != 8) {
-                    if (element.nodeType == 3)
-                        element = element.parentNode as Element;
+                if (element?.nodeType == 3)
+                    element = element.parentNode as Element;
+                if (element && element.nodeType != 8 && element.nodeType != 11) {
                     this.computedStyle = getComputedStyle(element);
                     this.selectedElementOffsetParent = (<HTMLElement>element).offsetParent;
                     if (this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element) {
