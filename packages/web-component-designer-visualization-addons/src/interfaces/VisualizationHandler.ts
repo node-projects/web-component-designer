@@ -2,7 +2,7 @@
 type StateValue = string | number | boolean | null;
 
 export interface State {
-  value: StateValue;
+  val: StateValue;
 }
 
 export interface Signal {

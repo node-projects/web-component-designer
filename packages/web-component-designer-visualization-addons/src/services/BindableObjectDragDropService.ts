@@ -68,23 +68,23 @@ export class BindableObjectDragDropService implements IBindableObjectDragDropSer
 
       let state = await this._visualizationHandler.getState(bindableObject.fullName);
       //TODO: only icon&image if val is a url with extension 
-      if (info.role === 'url' && typeof state?.value === 'string') {
-        if (state.value.endsWith('jpg') || state.value.endsWith('jpeg') || state.value.endsWith('png') || state.value.endsWith('gif') || state.value.endsWith('svg')) {
+      if (info.role === 'url' && typeof state?.val === 'string') {
+        if (state.val.endsWith('jpg') || state.val.endsWith('jpeg') || state.val.endsWith('png') || state.val.endsWith('gif') || state.val.endsWith('svg')) {
           const img = document.createElement('img');
           di = DesignItem.createDesignItemFromInstance(img, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
           grp = di.openGroup("Insert");
           const binding: VisualizationBinding = { signal: bindableObject.fullName, target: BindingTarget.property };
           let serializedBinding = this._bindingsHelper.serializeBinding(img, 'src', binding);
           di.setAttribute(serializedBinding[0], serializedBinding[1]);
-          (<HTMLImageElement>di.element).src = state.value;
-        } else if (state.value.endsWith('mp4')) {
+          (<HTMLImageElement>di.element).src = state.val;
+        } else if (state.val.endsWith('mp4')) {
           const video = document.createElement('video');
           di = DesignItem.createDesignItemFromInstance(video, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
           grp = di.openGroup("Insert");
           const binding: VisualizationBinding = { signal: bindableObject.fullName, target: BindingTarget.property };
           let serializedBinding = this._bindingsHelper.serializeBinding(video, 'src', binding);
           di.setAttribute(serializedBinding[0], serializedBinding[1]);
-          (<HTMLImageElement>di.element).src = state.value;
+          (<HTMLImageElement>di.element).src = state.val;
         } else {
           const video = document.createElement('iframe');
           di = DesignItem.createDesignItemFromInstance(video, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
@@ -92,7 +92,7 @@ export class BindableObjectDragDropService implements IBindableObjectDragDropSer
           const binding: VisualizationBinding = { signal: bindableObject.fullName, target: BindingTarget.property };
           let serializedBinding = this._bindingsHelper.serializeBinding(video, 'src', binding);
           di.setAttribute(serializedBinding[0], serializedBinding[1]);
-          (<HTMLImageElement>di.element).src = state.value;
+          (<HTMLImageElement>di.element).src = state.val;
         }
       }
 
