@@ -12,6 +12,7 @@ import { IDisposable } from '../interfaces/IDisposable.js';
 import { ISelectionChangedEvent } from "./services/selectionService/ISelectionChangedEvent.js";
 import { SimpleSplitView } from './controls/SimpleSplitView.js';
 import { IStylesheet } from "./services/stylesheetService/IStylesheetService.js";
+import { sleep } from "./helper/Helper.js";
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;
@@ -243,7 +244,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         if (this._selectionPosition) {
           this.codeView.setSelection(this._selectionPosition);
-          this._selectionPosition = null;
+          sleep(20).then(x => {
+            this.codeView.setSelection(this._selectionPosition);
+            this._selectionPosition = null;
+          });
         }
         if (i.changedViaClick) {
           this.codeView.focusEditor();
