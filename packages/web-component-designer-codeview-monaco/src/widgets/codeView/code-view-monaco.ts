@@ -289,7 +289,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   setSelection(position: IStringPosition) {
-    if (this._monacoEditor && !this._disableSelection) {
+    if (this._monacoEditor && !this._disableSelection && position) {
       let model = this._monacoEditor.getModel();
       let point1 = model.getPositionAt(position.start);
       let point2 = model.getPositionAt(position.start + position.length);
