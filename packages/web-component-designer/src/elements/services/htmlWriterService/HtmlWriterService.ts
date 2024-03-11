@@ -116,6 +116,9 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
   }
 
   private writeTextNode(indentedTextWriter: IndentedTextWriter, designItem: IDesignItem, indentAndNewline: boolean, trim = true) {
+    let start = indentedTextWriter.position;
+    let end = indentedTextWriter.position;
+
     let content = DomConverter.normalizeContentValue(designItem.content);
     if (trim)
       content = content.trim();
@@ -126,5 +129,9 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       if (indentAndNewline)
         this._conditionalyWriteNewline(indentedTextWriter, designItem);
     }
+    end = indentedTextWriter.position;
+
+    for (const d of designItem.children())
+      designItem.instanceServiceContainer.designItemDocumentPositionService.setPosition(d, { start: start, length: end - start });
   }
 }

@@ -137,10 +137,11 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     if (this._tabControl.selectedIndex === 2) {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (primarySelection) {
-        this._content = this.designerView.getHTML();
+        //this._content = this.designerView.getHTML();
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
           this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
-          this.codeView.setSelection(this._selectionPosition);
+          if (this._selectionPosition)
+            this.codeView.setSelection(this._selectionPosition);
           this._selectionPosition = null;
         }
       }
@@ -245,7 +246,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         if (this._selectionPosition) {
           this.codeView.setSelection(this._selectionPosition);
           sleep(20).then(x => {
-            this.codeView.setSelection(this._selectionPosition);
+            if (this._selectionPosition)
+              this.codeView.setSelection(this._selectionPosition);
             this._selectionPosition = null;
           });
         }
