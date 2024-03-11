@@ -231,14 +231,16 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           });
         });
         this._monacoEditor.onDidChangeCursorPosition(e => {
-          const offset = this._monacoEditor.getModel().getOffsetAt(e.position);
+          const sel = this._monacoEditor.getSelection();
+          const offsetStart = this._monacoEditor.getModel().getOffsetAt(sel.getStartPosition());
+          const offsetEnd = this._monacoEditor.getModel().getOffsetAt(sel.getEndPosition());
           if (this._instanceServiceContainer && !this._disableSelectionAfterUpd && !disableCursorChange) {
             this._disableSelection = true;
             if (selectionTimeout)
               clearTimeout(selectionTimeout);
             selectionTimeout = setTimeout(() => {
               selectionTimeout = null;
-              this._instanceServiceContainer.selectionService.setSelectionByTextRange(offset, offset);
+              this._instanceServiceContainer.selectionService.setSelectionByTextRange(offsetStart, offsetEnd);
               this._disableSelection = false;
             }, 50);
           }
