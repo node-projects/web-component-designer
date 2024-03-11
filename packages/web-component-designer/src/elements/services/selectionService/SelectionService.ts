@@ -11,7 +11,7 @@ function findDesignItem(designItem: IDesignItem, position: number): IDesignItem 
     for (let d of designItem.children()) {
       const nodePosition = designItem.instanceServiceContainer.designItemDocumentPositionService.getPosition(d);
       if (nodePosition) {
-        if (nodePosition.start <= position)
+        if (nodePosition.start <= position && nodePosition.start + nodePosition.length >= position)
           usedItem = d;
       }
     }
