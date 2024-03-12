@@ -18,20 +18,22 @@ https://www.npmjs.com/package/@node-projects/web-component-designer
 All Modules wich need an external dependency are now extracted to extra NPM packges.
 So the designer now should work with bundlers.
 
-| Name                                                                   | Description |
-| ---------------------------------------------------------------------- | ----------- |
-| web-component-designer-codeview-ace                                    |             |
-| web-component-designer-codeview-codemirror                             |             |
-| web-component-designer-codeview-codemirror5                            |             |
-| web-component-designer-codeview-monaco                                 |             |
-| web-component-designer-htmlparserservice-base-custom-webcomponent      |             |
-| web-component-designer-htmlparserservice-lit-element                   |             |
-| web-component-designer-htmlparserservice-nodehtmlparser                |             |
-| web-component-designer-miniatureview-html2canvas                       |             |
-| web-component-designer-stylesheetservice-css-tools                     |             |
-| web-component-designer-stylesheetservice-css-tree                      |             |
-| web-component-designer-texteditextension-stylo                         |             |
-| web-component-designer-widgets-fancytree                               |             |
+| Name                                                                   | Description                                  |
+| ---------------------------------------------------------------------- | -------------------------------------------- |
+| web-component-designer-codeview-ace                                    |                                              |
+| web-component-designer-codeview-codemirror                             |                                              |
+| web-component-designer-codeview-codemirror5                            |                                              |
+| web-component-designer-codeview-monaco                                 |                                              |
+| web-component-designer-htmlparserservice-base-custom-webcomponent      |                                              |
+| web-component-designer-htmlparserservice-lit-element                   |                                              |
+| web-component-designer-htmlparserservice-nodehtmlparser                |                                              |
+| web-component-designer-miniatureview-html2canvas                       |                                              |
+| web-component-designer-stylesheetservice-css-tools                     |                                              |
+| web-component-designer-stylesheetservice-css-tree                      |                                              |
+| web-component-designer-visualization-addons                            |                                              |
+| web-component-designer-texteditextension-stylo                         | deprecated - stylo is deprecated             |
+| web-component-designer-widgets-fancytree                               | deprecated - replaced by widgets-wunderbaum  |
+| web-component-designer-widgets-wunderbaum                              |                                              |
 
 ## Browser support
 
@@ -41,7 +43,9 @@ So the designer now should work with bundlers.
   
 ## Projects using it
 
-A ZPL Designer included in a comercial Application:
+A ZPL-Label Designer:
+(https://github.com/node-projects/web-component-designer-zpl-demo)
+
 ![image](https://github.com/node-projects/web-component-designer/assets/364896/e1f1e3cc-29a3-4749-a676-389577fab69a)
 
 A Materialflow Layout Editor in a comercial Application:
