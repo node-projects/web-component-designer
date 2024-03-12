@@ -129,7 +129,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   async refreshInSplitView() {
-    await this.designerView.parseHTML(this._content);
+    await this.updateDesignerHtml();
     this._disableChangeNotificationEditor = false;
   }
 
@@ -203,7 +203,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
     if (this._tabControl) {
       if (this._tabControl.selectedIndex === 0)
-        this.designerView.parseHTML(this._content, this._firstLoad);
+        this.updateDesignerHtml();
       else if (this._tabControl.selectedIndex === 1)
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
       else if (this._tabControl.selectedIndex === 2) {
@@ -240,7 +240,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       }
 
       if (i.newIndex === 0 || i.newIndex === 2)
-        this.designerView.parseHTML(this._content, this._firstLoad);
+        this.updateDesignerHtml();
       if (i.newIndex === 1 || i.newIndex === 2) {
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         if (this._selectionPosition) {
@@ -270,6 +270,20 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     if (this._content) {
       this.content = this._content;
       this._firstLoad = false;
+    }
+  }
+
+  private async updateDesignerHtml() {
+    if (this._firstLoad)
+      return this.designerView.parseHTML(this._content, this._firstLoad);
+    else {
+      const html = this.designerView.getHTML();
+      if (html != this._content)
+        return this.designerView.parseHTML(this._content, this._firstLoad);
+      else {
+        this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
+        this.designerView.designerCanvas.extensionManager.refreshAllAppliedExtentions();
+      }
     }
   }
 
