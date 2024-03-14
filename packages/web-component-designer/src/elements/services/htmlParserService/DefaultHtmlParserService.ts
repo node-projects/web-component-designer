@@ -7,8 +7,11 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 export class DefaultHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    return this.createDesignItems(doc.body.childNodes, serviceContainer, instanceServiceContainer);
+    //@ts-ignore
+    const doc = parser.parseFromString(html, 'text/html', { includeShadowRoots: true });
+    const headNodes = this.createDesignItems(doc.head.childNodes, serviceContainer, instanceServiceContainer);
+    const bodyNodes = this.createDesignItems(doc.body.childNodes, serviceContainer, instanceServiceContainer);
+    return [...headNodes, ...bodyNodes];
   }
 
   public createDesignItems(elements: NodeListOf<ChildNode> | Node[] | HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {

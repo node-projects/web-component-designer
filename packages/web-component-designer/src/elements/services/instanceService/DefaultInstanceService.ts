@@ -69,7 +69,11 @@ export class DefaultInstanceService implements IInstanceService {
 
     if (definition.defaultContent) {
       if (typeof definition.defaultContent === "string") {
-        element.innerHTML = definition.defaultContent
+        const parser = new DOMParser();
+        //@ts-ignore
+        const doc = parser.parseFromString(definition.defaultContent, 'text/html', { includeShadowRoots: true });
+        element.append(...doc.head.childNodes);
+        element.append(...doc.body.childNodes);
       } else {
         element.appendChild(definition.defaultContent);
       }
