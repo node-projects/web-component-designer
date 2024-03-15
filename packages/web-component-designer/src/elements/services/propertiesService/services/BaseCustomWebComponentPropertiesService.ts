@@ -10,7 +10,8 @@ export class BaseCustomWebComponentPropertiesService extends AbstractPolymerLike
   override isHandledElement(designItem: IDesignItem): boolean {
     return designItem.element instanceof BaseCustomWebComponentLazyAppend ||
       designItem.element instanceof BaseCustomWebComponentConstructorAppendLazyReady ||
-      designItem.element instanceof BaseCustomWebComponentConstructorAppend;
+      designItem.element instanceof BaseCustomWebComponentConstructorAppend ||
+      designItem.element instanceof BaseCustomWebComponentNoAttachedTemplate;
   }
 
   protected override _notifyChangedProperty(designItem: IDesignItem, property: IProperty, value: any) {
