@@ -288,11 +288,12 @@ export class DesignItem implements IDesignItem {
   public set innerHTML(value: string) {
     if (this.nodeType != NodeType.TextNode) {
       const grp = this.openGroup('set innerHTML');
+      this.clearChildren();
       const range = document.createRange();
       range.selectNode(document.body);
       const fragment = range.createContextualFragment(value);
       for (const n of fragment.childNodes) {
-        let di = DesignItem.GetOrCreateDesignItem(n, n, this.serviceContainer, this.instanceServiceContainer)
+        let di = DesignItem.createDesignItemFromInstance(n, this.serviceContainer, this.instanceServiceContainer)
         this.insertChild(di);
       }
       grp.commit();
