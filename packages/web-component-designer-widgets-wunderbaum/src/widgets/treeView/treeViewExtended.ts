@@ -284,11 +284,16 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _recomputeTree(rootItem: IDesignItem): void {
-    this._tree.root.removeChildren();
+    try {
+      this._tree.root.removeChildren();
 
-    this._getChildren(rootItem, null);
-    this._tree.expandAll();
-    this._filterNodes();
+      this._getChildren(rootItem, null);
+      this._tree.expandAll();
+      this._filterNodes();
+    }
+    catch (err) {
+      console.error(err);
+    }
   }
 
   private _getChildren(item: IDesignItem, currentNode: WunderbaumNode): any {
