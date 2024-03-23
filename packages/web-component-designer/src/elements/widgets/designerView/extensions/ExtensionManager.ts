@@ -8,6 +8,16 @@ import { IExtensionManager } from './IExtensionManger.js';
 import { IDesignerExtension } from './IDesignerExtension.js';
 import { IContentChanged } from '../../../services/contentService/IContentChanged.js';
 import { DesignerCanvas } from '../designerCanvas.js';
+import { ISelectionRefreshEvent } from '../../../services/selectionService/ISelectionRefreshEvent.js';
+import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
+
+function wmGet<T extends Map<any, any>>(designItem: IDesignItem, weakMap: WeakMap<IDesignItem, T>) {
+  let val = weakMap.get(designItem);
+  if (val) return val;
+  val = <any>new Map<any, any>();
+  weakMap.set(designItem, val);
+  return val;
+}
 
 export class ExtensionManager implements IExtensionManager {
 
@@ -15,10 +25,15 @@ export class ExtensionManager implements IExtensionManager {
   designItemsWithExtentions: Set<IDesignItem> = new Set();
   _timeout: ReturnType<typeof setTimeout>;
 
+  _appliedDesignerExtensions = new WeakMap<DesignItem, Map<ExtensionType, IDesignerExtension[]>>
+  _shouldAppliedDesignerExtensions = new WeakMap<DesignItem, Map<ExtensionType, IDesignerExtensionProvider[]>>
+  _lastApplyEventPerType = new WeakMap<DesignItem, Map<ExtensionType, Event>>
+
   constructor(designerCanvas: IDesignerCanvas) {
     this.designerCanvas = designerCanvas;
 
     designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
+    designerCanvas.instanceServiceContainer.selectionService.onSelectionRefresh.on(this._selectedElementsRefresh.bind(this));
     designerCanvas.instanceServiceContainer.contentService.onContentChanged.on(this._contentChanged.bind(this));
   }
 
@@ -32,6 +47,8 @@ export class ExtensionManager implements IExtensionManager {
       clearTimeout(this._timeout);
     this._timeout = null;
   }
+
+
 
   private refreshAllExtensionsTimeout() {
     this.refreshAllAppliedExtentions();
@@ -64,23 +81,30 @@ export class ExtensionManager implements IExtensionManager {
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
         this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
+        this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionRefreshed);
         this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
         this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.Selection);
       }
     }
 
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
-      this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection);
-      this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection);
+      this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection, selectionChangedEvent.event);
+      this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection, selectionChangedEvent.event);
       if (selectionChangedEvent.selectedElements[0].getPlacementService()?.isEnterableContainer(selectionChangedEvent.selectedElements[0]))
-        this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
+        this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered, selectionChangedEvent.event);
       const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
-      this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
+      this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer, selectionChangedEvent.event);
       if (primaryContainer.getPlacementService()?.isEnterableContainer(primaryContainer))
-        this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
+        this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered, selectionChangedEvent.event);
     }
+  }
 
-    //this.refreshExtensions(selectionChangedEvent.selectedElements);
+  private _selectedElementsRefresh(selectionChangedEvent: ISelectionRefreshEvent) {
+    this.refreshAllAppliedExtentions(selectionChangedEvent.event);
+
+    if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
+      this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionRefreshed, selectionChangedEvent.event);
+    }
   }
 
   applyExtension(designItem: IDesignItem, extensionType: ExtensionType, event?: Event, recursive: boolean = false) {
@@ -90,26 +114,29 @@ export class ExtensionManager implements IExtensionManager {
       if (extProv) {
         const cache = {};
         for (let e of extProv) {
-          let shouldAppE = designItem.shouldAppliedDesignerExtensions.get(extensionType);
+          let shouldAppE = wmGet(designItem, this._shouldAppliedDesignerExtensions).get(extensionType);
           if (!shouldAppE)
             shouldAppE = [];
           shouldAppE.push(e);
-          designItem.shouldAppliedDesignerExtensions.set(extensionType, shouldAppE);
+          wmGet(designItem, this._shouldAppliedDesignerExtensions).set(extensionType, shouldAppE);
 
           if (e.shouldExtend(this, this.designerCanvas, designItem)) {
-            let appE = designItem.appliedDesignerExtensions.get(extensionType);
+            let appE = wmGet(designItem, this._appliedDesignerExtensions).get(extensionType);
             if (!appE)
               appE = [];
             const ext = e.getExtension(this, this.designerCanvas, designItem);
             try {
               ext.extend(cache, event);
               extensions.push(ext);
+              if (event)
+                wmGet(designItem, this._lastApplyEventPerType).set(extensionType, event);
+              else wmGet(designItem, this._lastApplyEventPerType).delete(extensionType);
             }
             catch (err) {
               console.error(err);
             }
             appE.push(ext);
-            designItem.appliedDesignerExtensions.set(extensionType, appE);
+            wmGet(designItem, this._appliedDesignerExtensions).set(extensionType, appE);
 
             this.designItemsWithExtentions.add(designItem);
           }
@@ -134,25 +161,28 @@ export class ExtensionManager implements IExtensionManager {
         const cache = {};
         for (let e of extProv) {
           for (let i of designItems) {
-            let shouldAppE = i.shouldAppliedDesignerExtensions.get(extensionType);
+            let shouldAppE = wmGet(i, this._shouldAppliedDesignerExtensions).get(extensionType);
             if (!shouldAppE)
               shouldAppE = [];
             shouldAppE.push(e);
-            i.shouldAppliedDesignerExtensions.set(extensionType, shouldAppE);
+            wmGet(i, this._shouldAppliedDesignerExtensions).set(extensionType, shouldAppE);
 
             if (e.shouldExtend(this, this.designerCanvas, i)) {
-              let appE = i.appliedDesignerExtensions.get(extensionType);
+              let appE = wmGet(i, this._appliedDesignerExtensions).get(extensionType);
               if (!appE)
                 appE = [];
               const ext = e.getExtension(this, this.designerCanvas, i);
               try {
                 ext.extend(cache, event);
+                if (event)
+                  wmGet(i, this._lastApplyEventPerType).set(extensionType, event);
+                else wmGet(i, this._lastApplyEventPerType).delete(extensionType);
               }
               catch (err) {
                 console.error(err);
               }
               appE.push(ext);
-              i.appliedDesignerExtensions.set(extensionType, appE);
+              wmGet(i, this._appliedDesignerExtensions).set(extensionType, appE);
               this.designItemsWithExtentions.add(i);
             }
           }
@@ -169,7 +199,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   applyExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension) {
-    let appE = designItem.appliedDesignerExtensions.get(ExtensionType.Directly);
+    let appE = wmGet(designItem, this._appliedDesignerExtensions).get(ExtensionType.Directly);
     if (!appE)
       appE = [];
     try {
@@ -179,12 +209,12 @@ export class ExtensionManager implements IExtensionManager {
       console.error(err);
     }
     appE.push(extension);
-    designItem.appliedDesignerExtensions.set(ExtensionType.Directly, appE);
+    wmGet(designItem, this._appliedDesignerExtensions).set(ExtensionType.Directly, appE);
     this.designItemsWithExtentions.add(designItem);
   }
 
   removeExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension) {
-    for (let e of designItem.appliedDesignerExtensions) {
+    for (let e of wmGet(designItem, this._appliedDesignerExtensions)) {
       const idx = e[1].indexOf(extension);
       if (idx >= 0) {
         try {
@@ -195,8 +225,8 @@ export class ExtensionManager implements IExtensionManager {
         }
         e[1].splice(idx, 1);
         if (e[1].length == 0)
-          designItem.appliedDesignerExtensions.delete(e[0]);
-        if (!designItem.appliedDesignerExtensions.size)
+          wmGet(designItem, this._appliedDesignerExtensions).delete(e[0]);
+        if (!wmGet(designItem, this._appliedDesignerExtensions).size)
           this.designItemsWithExtentions.delete(designItem);
       }
     }
@@ -205,25 +235,26 @@ export class ExtensionManager implements IExtensionManager {
   removeExtension(designItem: IDesignItem, extensionType?: ExtensionType) {
     if (designItem) {
       if (extensionType) {
-        designItem.shouldAppliedDesignerExtensions.delete(extensionType);
+        wmGet(designItem, this._shouldAppliedDesignerExtensions).delete(extensionType);
 
-        let exts = designItem.appliedDesignerExtensions.get(extensionType);
+        let exts = wmGet(designItem, this._appliedDesignerExtensions).get(extensionType);
         if (exts) {
           for (let e of exts) {
             try {
               e.dispose();
+              wmGet(designItem, this._lastApplyEventPerType).delete(extensionType);
             }
             catch (err) {
               console.error(err);
             }
           }
-          designItem.appliedDesignerExtensions.delete(extensionType);
-          if (!designItem.appliedDesignerExtensions.size)
+          wmGet(designItem, this._appliedDesignerExtensions).delete(extensionType);
+          if (!wmGet(designItem, this._appliedDesignerExtensions).size)
             this.designItemsWithExtentions.delete(designItem);
         }
       } else {
-        designItem.shouldAppliedDesignerExtensions.clear();
-        for (let appE of designItem.appliedDesignerExtensions) {
+        wmGet(designItem, this._shouldAppliedDesignerExtensions).clear();
+        for (let appE of wmGet(designItem, this._appliedDesignerExtensions)) {
           for (let e of appE[1]) {
             try {
               e.dispose();
@@ -233,7 +264,7 @@ export class ExtensionManager implements IExtensionManager {
             }
           }
         }
-        designItem.appliedDesignerExtensions.clear();
+        wmGet(designItem, this._appliedDesignerExtensions).clear();
         this.designItemsWithExtentions.delete(designItem);
       }
     }
@@ -246,19 +277,20 @@ export class ExtensionManager implements IExtensionManager {
           if (recursive && i.hasChildren) {
             this.removeExtensions([...i.children()], true, extensionType);
           }
-          i.shouldAppliedDesignerExtensions.delete(extensionType);
-          let exts = i.appliedDesignerExtensions.get(extensionType);
+          wmGet(i, this._shouldAppliedDesignerExtensions).delete(extensionType);
+          let exts = wmGet(i, this._appliedDesignerExtensions).get(extensionType);
           if (exts) {
             for (let e of exts) {
               try {
                 e.dispose();
+                wmGet(i, this._lastApplyEventPerType).delete(extensionType);
               }
               catch (err) {
                 console.error(err);
               }
             }
-            i.appliedDesignerExtensions.delete(extensionType);
-            if (!i.appliedDesignerExtensions.size)
+            wmGet(i, this._appliedDesignerExtensions).delete(extensionType);
+            if (!wmGet(i, this._appliedDesignerExtensions).size)
               this.designItemsWithExtentions.delete(i);
           }
         }
@@ -267,8 +299,8 @@ export class ExtensionManager implements IExtensionManager {
           if (recursive && i.hasChildren) {
             this.removeExtensions([...i.children()], true, extensionType);
           }
-          i.shouldAppliedDesignerExtensions.clear();
-          for (let appE of i.appliedDesignerExtensions) {
+          wmGet(i, this._shouldAppliedDesignerExtensions).clear();
+          for (let appE of wmGet(i, this._appliedDesignerExtensions)) {
             for (let e of appE[1]) {
               try {
                 e.dispose();
@@ -278,7 +310,7 @@ export class ExtensionManager implements IExtensionManager {
               }
             }
           }
-          i.appliedDesignerExtensions.clear();
+          wmGet(i, this._appliedDesignerExtensions).clear();
           this.designItemsWithExtentions.delete(i);
         }
       }
@@ -291,12 +323,14 @@ export class ExtensionManager implements IExtensionManager {
         if (!designItem.element.isConnected) {
           this.removeExtension(designItem, extensionType);
         } else {
-          let exts = designItem.appliedDesignerExtensions.get(extensionType);
+          let exts = wmGet(designItem, this._appliedDesignerExtensions).get(extensionType);
           if (exts) {
             const cache = {};
             for (let e of exts) {
               try {
                 e.refresh(cache, event);
+                if (event)
+                  wmGet(designItem, this._lastApplyEventPerType).set(extensionType, event);
               }
               catch (err) {
                 console.error(err);
@@ -306,7 +340,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         const cache = {};
-        for (let appE of designItem.appliedDesignerExtensions) {
+        for (let appE of wmGet(designItem, this._appliedDesignerExtensions)) {
           for (let e of appE[1]) {
             try {
               e.refresh(cache, event);
@@ -331,7 +365,7 @@ export class ExtensionManager implements IExtensionManager {
           if (!i.element.isConnected) {
             this.removeExtension(i, extensionType);
           } else {
-            let exts = i.appliedDesignerExtensions.get(extensionType);
+            let exts = wmGet(i, this._appliedDesignerExtensions).get(extensionType);
             if (exts) {
               for (let e of exts) {
                 try {
@@ -356,11 +390,13 @@ export class ExtensionManager implements IExtensionManager {
         const cache = {};
         outer2:
         for (let i of designItems) {
-          for (let appE of i.appliedDesignerExtensions) {
+          for (let appE of wmGet(i, this._appliedDesignerExtensions)) {
             for (let e of appE[1]) {
               try {
                 if (e != ignoredExtension) {
                   e.refresh(cache, event);
+                  if (event)
+                    wmGet(i, this._lastApplyEventPerType).set(extensionType, event);
                   if (timeout) {
                     const end = performance.now();
                     if (end - start > timeout) {
@@ -381,47 +417,50 @@ export class ExtensionManager implements IExtensionManager {
     this.designerCanvas.overlayLayer.endBatch();
   }
 
-  refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension) {
+  refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension, event?: Event) {
     this.designerCanvas.overlayLayer.startBatch();
     if (designItems) {
-      this.refreshExtensions(designItems, ExtensionType.Directly, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.Permanent, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.Selection, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelection, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.MouseOver, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.ContainerDragOverAndCanBeEntered, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.ContainerDrag, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.Doubleclick, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.Placement, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionAndCanBeEntered, null, ignoredExtension);
-      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainerAndCanBeEntered, null, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Directly, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Permanent, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Selection, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelection, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainer, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.MouseOver, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.OnlyOneItemSelected, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.MultipleItemsSelected, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDragOverAndCanBeEntered, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.ContainerDrag, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Doubleclick, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.Placement, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionAndCanBeEntered, event, ignoredExtension);
+      this.refreshExtensions(designItems, ExtensionType.PrimarySelectionContainerAndCanBeEntered, event, ignoredExtension);
     }
     this.designerCanvas.overlayLayer.endBatch();
   }
 
-  refreshAllAppliedExtentions() {
+  refreshAllAppliedExtentions(event?: Event) {
     (<DesignerCanvas>this.designerCanvas).fillCalculationrects();
-    this.refreshAllExtensions([...this.designItemsWithExtentions])
+    this.refreshAllExtensions([...this.designItemsWithExtentions], null, event)
   }
 
   //TODO: does not work with permanant, when not applied... maybe we need to do in another way
   //maybe store the "shouldAppliedExtensions??"
-  reapplyAllAppliedExtentions() {
+  reapplyAllAppliedExtentions(filterDesignItems?: IDesignItem[]) {
     this.designerCanvas.overlayLayer.startBatch();
     for (let d of ExtensionManager.getAllChildElements(this.designerCanvas.rootDesignItem)) {
-      const keys = [...d.shouldAppliedDesignerExtensions.keys()];
-      for (let e of keys) {
-        this.removeExtension(d, e);
-        this.applyExtension(d, e);
+      if (!filterDesignItems || filterDesignItems.includes(d)) {
+        const keys = [...wmGet(d, this._shouldAppliedDesignerExtensions).keys()];
+        for (let t of keys) {
+          const evt = wmGet(d, this._lastApplyEventPerType).get(t);
+          this.removeExtension(d, t);
+          this.applyExtension(d, t, evt);
+        }
       }
     }
     this.designerCanvas.overlayLayer.endBatch();
   }
 
-  private static *getAllChildElements(designItem: IDesignItem) {
+  private static *getAllChildElements(designItem: IDesignItem): IterableIterator<IDesignItem> {
     if (designItem.nodeType == NodeType.Element)
       yield designItem;
     if (designItem.hasChildren) {

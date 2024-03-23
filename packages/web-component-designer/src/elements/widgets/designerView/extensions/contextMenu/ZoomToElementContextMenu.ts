@@ -9,7 +9,7 @@ const offset = 10;
 export class ZoomToElementContextMenu implements IContextMenuExtension {
 
   public shouldProvideContextmenu(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    return true;
+    return designItem !== null;
   }
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {

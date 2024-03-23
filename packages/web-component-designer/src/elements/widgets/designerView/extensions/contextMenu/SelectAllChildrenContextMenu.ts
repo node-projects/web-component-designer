@@ -7,7 +7,7 @@ import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExten
 export class SelectAllChildrenContextMenu implements IContextMenuExtension {
 
   public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    return designItem.hasChildren;
+    return designItem?.hasChildren;
   }
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {

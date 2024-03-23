@@ -7,7 +7,7 @@ import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExten
 export class PathContextMenu implements IContextMenuExtension {
 
   public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    if (designItem.element instanceof SVGPathElement)
+    if (designItem?.element instanceof SVGPathElement)
       return true;
     return false;
   }

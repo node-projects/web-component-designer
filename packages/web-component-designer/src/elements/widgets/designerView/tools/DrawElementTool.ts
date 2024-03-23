@@ -98,7 +98,7 @@ export class DrawElementTool implements ITool {
   private async _onPointerUp(designerView: IDesignerCanvas, event: PointerEvent) {
     if (this.sizeOverlapThreshold) {
       this._changeGroup.commit();
-      designerView.instanceServiceContainer.selectionService.setSelectedElements([this._createdItem]);
+      designerView.instanceServiceContainer.selectionService.setSelectedElements([this._createdItem], event);
     } else {
       this._changeGroup.abort();
     }

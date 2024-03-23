@@ -59,7 +59,7 @@ export class PointerTool implements ITool {
       let newEl = designerCanvas.serviceContainer.elementAtPointService.getElementAtPoint(designerCanvas, { x: event.x, y: event.y });
       const designItem = DesignItem.GetOrCreateDesignItem(newEl, newEl, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
       if (!designerCanvas.instanceServiceContainer.selectionService.isSelected(designItem)) {
-        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem]);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([designItem], event);
       }
 
       designerCanvas.showDesignItemContextMenu(designItem, event);
@@ -136,7 +136,7 @@ export class PointerTool implements ITool {
           this._actionType = PointerActionType.Drag;
         } else if (currentElement === <any>designerCanvas || currentElement === designerCanvas.rootDesignItem.element || currentElement == null) {
           if (!event.ctrlKey && !event.shiftKey)
-            designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null);
+            designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null, event);
           this._actionType = PointerActionType.DrawSelection;
         } else {
           this._actionType = PointerActionType.DragOrSelect;
@@ -159,7 +159,7 @@ export class PointerTool implements ITool {
       designerCanvas.snapLines.clearSnaplines();
       if (this._actionType == PointerActionType.DrawSelection) {
         if (currentDesignItem !== designerCanvas.rootDesignItem)
-          designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+          designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem], event);
       }
       this._resetTool();
     }
@@ -231,9 +231,9 @@ export class PointerTool implements ITool {
           if (this._firstTimeInMove) {
             if (!currentDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(currentDesignItem)) {
               if (event.ctrlKey || event.shiftKey)
-                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([...currentDesignItem.instanceServiceContainer.selectionService.selectedElements, currentDesignItem]);
+                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([...currentDesignItem.instanceServiceContainer.selectionService.selectedElements, currentDesignItem], event);
               else
-                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem], event);
               this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
               if (designerCanvas.alignOnSnap)
                 designerCanvas.snapLines.calculateSnaplines(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
@@ -367,7 +367,7 @@ export class PointerTool implements ITool {
           this._started = false;
           if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
             if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey) {
-              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem]);
+              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem], event);
             } else {
               this.checkSelectElement(event, designerCanvas, currentDesignItem);
             }
@@ -428,16 +428,16 @@ export class PointerTool implements ITool {
       if (index >= 0) {
         let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);
         newSelectedList.splice(index, 1);
-        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList, event);
       }
       else {
         let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);
         newSelectedList.push(currentDesignItem);
-        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(newSelectedList, event);
       }
     } else {
       if (designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem) < 0)
-        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem]);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem], event);
     }
   }
 

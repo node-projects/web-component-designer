@@ -8,7 +8,7 @@ import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExten
 export class ZMoveContextMenu implements IContextMenuExtension{
 
   public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    return !designItem.isRootItem && designItem.nodeType == NodeType.Element;
+    return !designItem?.isRootItem && designItem?.nodeType == NodeType.Element;
   }
 
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {

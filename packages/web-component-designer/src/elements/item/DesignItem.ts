@@ -6,14 +6,12 @@ import { ChangeGroup } from '../services/undoService/ChangeGroup.js';
 import { NodeType } from './NodeType.js';
 import { AttributeChangeAction } from '../services/undoService/transactionItems/AttributeChangeAction.js';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
-import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { CssAttributeParser } from '../helper/CssAttributeParser.js';
 import { ISize } from '../../interfaces/ISize.js';
 import { PropertiesHelper } from '../services/propertiesService/services/PropertiesHelper.js';
 import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction.js';
 import { DomConverter } from '../widgets/designerView/DomConverter.js';
 import { DeleteAction } from '../services/undoService/transactionItems/DeleteAction.js';
-import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 import { enableStylesheetService } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
@@ -34,8 +32,6 @@ export class DesignItem implements IDesignItem {
   view: Node;
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
-  appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]> = new Map();
-  shouldAppliedDesignerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]> = new Map();
   nodeReplaced = new TypedEvent<void>;
 
   async clone() {

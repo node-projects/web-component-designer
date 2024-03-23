@@ -8,7 +8,7 @@ import { css } from "@node-projects/base-custom-webcomponent";
 
 export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {
   showOnlyWhenSet: boolean;
-  
+
   constructor(showOnlyWhenSet = true) {
     this.showOnlyWhenSet = showOnlyWhenSet;
   }
@@ -19,9 +19,13 @@ export class TransformOriginExtensionProvider implements IDesignerExtensionProvi
         return true;
       if (designItem.hasStyle('transformOrigin'))
         return true;
-      if (getComputedStyle(designItem.element).display != 'inline' && designItem.element.getBoundingClientRect) {
+      const cs = getComputedStyle(designItem.element);
+      if (cs.display != 'inline' && designItem.element.getBoundingClientRect) {
         const r = designItem.element.getBoundingClientRect();
-        if (getComputedStyle(designItem.element).transformOrigin != r.width / 2 + 'px ' + r.height / 2 + 'px')
+        const pr = cs.transformOrigin.split(' ');
+        const x = parseFloat(pr[0]) - r.width / 2;
+        const y = parseFloat(pr[1]) - r.height / 2;
+        if (x > 0.5 || x < -0.5 || y > 0.5 || y < -0.5)
           return true;
       }
     }

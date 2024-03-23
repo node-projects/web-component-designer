@@ -12,9 +12,9 @@ export enum ExtensionType {
    * Extension for the Container wich the dragged element is draged over.
    */
   ContainerDragOverAndCanBeEntered = 8,
-   /**
-   * Extension for the Container on wich a new element is draged over.
-   */
+  /**
+  * Extension for the Container on wich a new element is draged over.
+  */
   ContainerExternalDragOverAndCanBeEntered = 9,
   /**
    * Extension for the Current Container wich the dragged element is contained.
@@ -30,4 +30,8 @@ export enum ExtensionType {
    */
   PrimarySelectionAndCanBeEntered = 13,
   PrimarySelectionContainerAndCanBeEntered = 14,
+  /**
+   * Extension when the Primary Selection is refreshed, means clicked a second time
+   */
+  PrimarySelectionRefreshed = 15,
 }

@@ -26,7 +26,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     .svg-position  { stroke: black; stroke-dasharray: 2; }
     .svg-path { stroke: #3899ec; fill: orange; pointer-events: all }
     .svg-path-line { stroke: #3899ec; stroke-dasharray: 2; }
-    .svg-draw-new-element { stroke: black; fill: transparent; stroke-width: 1; }`;
+    .svg-draw-new-element { stroke: black; fill: transparent; stroke-width: 1; }
+    .svg-toolbar-container { overflow: visible }
+    .svg-toolbar-container div { padding: 5px; display: flex; gap: 2px; background: white; border-radius: 4px; box-shadow: 0 2px 10px 0 rgba(19,23,32,.2); align-items: center; }
+    `;
 
   static readonly is = 'node-projects-overlay-layer-view';
 

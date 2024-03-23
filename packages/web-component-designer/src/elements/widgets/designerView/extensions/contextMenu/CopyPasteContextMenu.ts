@@ -11,10 +11,10 @@ export class CopyPasteContextMenu implements IContextMenuExtension {
 
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
-      { title: 'copy', action: () => { designerView.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C' },
-      { title: 'cut', action: () => { designerView.executeCommand({ type: CommandType.cut }); }, shortCut: 'Ctrl + X' },
+      { title: 'copy', action: () => { designerView.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C', disabled: designItem === null },
+      { title: 'cut', action: () => { designerView.executeCommand({ type: CommandType.cut }); }, shortCut: 'Ctrl + X', disabled: designItem === null },
       { title: 'paste', action: () => { designerView.executeCommand({ type: CommandType.paste }); }, shortCut: 'Ctrl + V' },
-      { title: 'delete', action: () => { designerView.executeCommand({ type: CommandType.delete }); }, shortCut: 'Del' },
+      { title: 'delete', action: () => { designerView.executeCommand({ type: CommandType.delete }); }, shortCut: 'Del', disabled: designItem === null },
     ]
   }
 }

@@ -9,7 +9,7 @@ import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExten
 export class RectContextMenu implements IContextMenuExtension {
 
   public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    if (designItem.element instanceof SVGRectElement)
+    if (designItem?.element instanceof SVGRectElement)
       return true;
     return false;
   }

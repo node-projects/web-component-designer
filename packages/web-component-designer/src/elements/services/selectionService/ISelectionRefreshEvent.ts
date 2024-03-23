@@ -1,7 +1,6 @@
 import { IDesignItem } from '../../item/IDesignItem.js';
 
-export interface ISelectionChangedEvent {
-    oldSelectedElements: IDesignItem[]
+export interface ISelectionRefreshEvent {
     selectedElements: IDesignItem[],
     event?: Event
 }

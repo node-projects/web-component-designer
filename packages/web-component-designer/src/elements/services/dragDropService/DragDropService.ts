@@ -60,7 +60,7 @@ export class DragDropService implements IDragDropService {
     containerService.place(event, designerCanvas, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
     containerService.finishPlace(event, designerCanvas, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
     requestAnimationFrame(() => {
-      designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di]);
+      designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di], event);
       grp.commit();
     });
   }

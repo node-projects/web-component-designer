@@ -13,7 +13,7 @@ export type handlesPointerEvent = { handlesPointerEvent(designerCanvas: IDesigne
 export class EditTextExtension extends AbstractExtension implements handlesPointerEvent {
 
   private static template = html`
-    <div style="height: 24px; display: flex; gap: 2px;">
+    <div style="height: 100%; display: flex; gap: 2px; width: 100%;">
       <button data-command="font-weight" data-command-parameter="800" style="pointer-events: all; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
       <button data-command="font-style" data-command-parameter="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
       <button data-command="text-decoration" data-command-parameter="underline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
@@ -42,6 +42,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
   private _foreignObject: SVGForeignObjectElement;
   private _path: SVGPathElement;
+  private _toolbar: import("/Users/jochenkuehner/Desktop/repos/github/nodeprojects/web-component-designer/packages/web-component-designer/src/elements/widgets/designerView/extensions/AbstractExtension").toolbarObject;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -58,24 +59,14 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
     let itemRect = this.extendedItem.element.getBoundingClientRect();
 
-    const elements = <SVGGraphicsElement>(<any>EditTextExtension.template.content.cloneNode(true));
-    FontPropertyEditor.addFontsToSelect(elements.querySelector('#fontFamily'));
-    elements.querySelectorAll('button').forEach(x => x.onpointerdown = (e) => {
-      this.designerCanvas.ignoreEvent(e);
+    this._toolbar = this.createToolbar(EditTextExtension.template, 300, 24);
+    this._toolbar.updatePosition({ x: (itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, y: ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 36) });
+
+    FontPropertyEditor.addFontsToSelect(this._toolbar.getById<HTMLSelectElement>('fontFamily'));
+    this._toolbar.querySelectorAll('button').forEach(x => x.onpointerdown = (e) => {
       this._formatSelection(x.dataset['command'], x.dataset['commandParameter'])
     });
-    elements.querySelectorAll('select').forEach(x => x.onpointerdown = (e) => this.designerCanvas.ignoreEvent(e));
-    elements.querySelectorAll('select').forEach(x => x.onchange = () => this._formatSelection(x.dataset['command'], x.value));
-
-    //Button overlay
-    const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    this._foreignObject = foreignObject
-    foreignObject.setAttribute('x', '' + (itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor);
-    foreignObject.setAttribute('y', '' + ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 30));
-    foreignObject.setAttribute('width', '300');
-    foreignObject.setAttribute('height', '24');
-    foreignObject.appendChild(elements)
-    this._addOverlay(foreignObject, OverlayLayer.Foreground);
+    this._toolbar.querySelectorAll('select').forEach(x => x.onchange = () => this._formatSelection(x.dataset['command'], x.value));
 
     //TODO - nice way to disable click overlay
     this.designerCanvas.clickOverlay.style.pointerEvents = 'none';

@@ -10,7 +10,7 @@ export class MultipleItemsSelectedContextMenu implements IContextMenuExtension {
   public orderIndex: number = 60;
 
   public shouldProvideContextmenu(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    if (designItem.instanceServiceContainer.selectionService.selectedElements.length > 1) {
+    if (designItem?.instanceServiceContainer.selectionService.selectedElements.length > 1) {
       return true;
     }
     return false;

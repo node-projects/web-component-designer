@@ -141,16 +141,19 @@ export class EllipsisExtension extends AbstractExtension {
 
 
     _drawPathCircle(x: number, y: number, e: SVGEllipseElement, index: number, circle: SVGCircleElement) {
-        circle = this._drawCircle(
+        let newCircle = this._drawCircle(
             (this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x,
             (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y,
             5 / this.designerCanvas.scaleFactor,
             'svg-path', circle);
-        circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
-        circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, e, index));
-        circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, e, index));
-        circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, e, index));
-        return circle;
+        newCircle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+
+        if (!circle) {
+            newCircle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, newCircle, e, index));
+            newCircle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, newCircle, e, index));
+            newCircle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, newCircle, e, index));
+        }
+        return newCircle;
     }
 
     _redrawPathCircle(x: number, y: number, oldCircle: SVGCircleElement) {

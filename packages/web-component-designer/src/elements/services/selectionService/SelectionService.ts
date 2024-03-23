@@ -4,6 +4,8 @@ import { ISelectionChangedEvent } from './ISelectionChangedEvent.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { SelectionChangedAction } from '../undoService/transactionItems/SelectionChangedAction.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
+import { arraysEqual } from '../../helper/Helper.js';
+import { ISelectionRefreshEvent } from './ISelectionRefreshEvent.js';
 
 function findDesignItem(designItem: IDesignItem, position: number): IDesignItem {
   let usedItem = null;
@@ -33,13 +35,17 @@ export class SelectionService implements ISelectionService {
     this._undoSelectionChanges = undoSelectionChanges;
   }
 
-  setSelectedElements(designItems: IDesignItem[]) {
+  setSelectedElements(designItems: IDesignItem[], event?: Event) {
     if (this.selectedElements != designItems && !(this.selectedElements.length === 0 && (designItems == null || designItems.length === 0))) {
+      if (arraysEqual(designItems, this.selectedElements)) {
+         this.onSelectionRefresh.emit({ selectedElements: this.selectedElements, event });
+        return;
+      }
       if (this._undoSelectionChanges) {
         const action = new SelectionChangedAction(this.selectedElements, designItems, this);
         this._designerCanvas.instanceServiceContainer.undoService.execute(action);
       } else {
-        this._withoutUndoSetSelectedElements(designItems);
+        this._withoutUndoSetSelectedElements(designItems, event);
       }
     }
   }
@@ -52,7 +58,7 @@ export class SelectionService implements ISelectionService {
     }
   }
 
-  _withoutUndoSetSelectedElements(designItems: IDesignItem[]) {
+  _withoutUndoSetSelectedElements(designItems: IDesignItem[], event?: Event) {
     let oldSelectedElements = this.selectedElements;
     if (!designItems) {
       this.selectedElements = [];
@@ -69,7 +75,7 @@ export class SelectionService implements ISelectionService {
       else
         this.primarySelection = null;
     }
-    this.onSelectionChanged.emit({ selectedElements: this.selectedElements, oldSelectedElements: oldSelectedElements });
+    this.onSelectionChanged.emit({ selectedElements: this.selectedElements, oldSelectedElements: oldSelectedElements, event });
   }
 
   clearSelectedElements() {
@@ -81,4 +87,5 @@ export class SelectionService implements ISelectionService {
   }
 
   readonly onSelectionChanged = new TypedEvent<ISelectionChangedEvent>();
+  readonly onSelectionRefresh = new TypedEvent<ISelectionRefreshEvent>();
 }

@@ -14,30 +14,34 @@ export class DisplayGridExtension extends AbstractExtension {
   private _group: SVGGElement;
 
   private gridInformation: ReturnType<typeof calculateGridInformation>
+  private _lastEvent: Event;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend(cache: Record<string|symbol, any>, event?: Event) {
+  override extend(cache: Record<string | symbol, any>, event?: Event) {
     this._initSVGArrays();
     this.refresh(event);
   }
 
-  override refresh(cache: Record<string|symbol, any>, event?: Event) {
+  override refresh(cache: Record<string | symbol, any>, event?: Event) {
     this.gridInformation = calculateGridInformation(this.extendedItem);
     let cells = this.gridInformation.cells;
 
-    if (!this._group) {
-    this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
-    this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
-    this._group.style.transformOrigin = '0 0';
-    this._group.style.transformBox = 'fill-box';
-    }
+    if (event)
+      this._lastEvent = event;
 
     if (cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
       if (this.gridInformation.cells.length != this._cells.length || this.gridInformation.cells[0].length != this._cells[0].length)
         this._initSVGArrays();
+
+      if (!this._group) {
+        this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
+        this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
+        this._group.style.transformOrigin = '0 0';
+        this._group.style.transformBox = 'fill-box';
+      }
 
       //draw gaps
       this.gridInformation.gaps.forEach((gap, i) => {
@@ -54,8 +58,8 @@ export class DisplayGridExtension extends AbstractExtension {
             this._texts[i][j] = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', this._texts[i][j], OverlayLayer.Background);
             this._texts[i][j].setAttribute("dominant-baseline", "hanging");
           }
-          if (event && event instanceof MouseEvent) {
-            let crd = this.designerCanvas.getNormalizedEventCoordinates(event);
+          if (this._lastEvent && this._lastEvent instanceof MouseEvent) {
+            let crd = this.designerCanvas.getNormalizedEventCoordinates(this._lastEvent);
             if (crd.x >= cell.x && crd.y >= cell.y && crd.x <= cell.x + cell.width && crd.y <= cell.y + cell.height) {
               this._cells[i][j].setAttribute("class", "svg-grid-current-cell");
             }
@@ -71,6 +75,7 @@ export class DisplayGridExtension extends AbstractExtension {
 
   _initSVGArrays() {
     this._removeAllOverlays();
+    this._group = null;
     this.gridInformation = calculateGridInformation(this.extendedItem);
     this._cells = new Array(this.gridInformation.cells.length);
     this.gridInformation.cells.forEach((row, i) => this._cells[i] = new Array(row.length));

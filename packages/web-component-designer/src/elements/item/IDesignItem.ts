@@ -2,10 +2,7 @@ import { ServiceContainer } from '../services/ServiceContainer.js';
 import { InstanceServiceContainer } from '../services/InstanceServiceContainer.js';
 import { ChangeGroup } from '../services/undoService/ChangeGroup.js';
 import { NodeType } from './NodeType.js';
-import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
-import { IDesignerExtension } from '../widgets/designerView/extensions/IDesignerExtension.js';
 import { ISize } from "../../interfaces/ISize.js";
-import { IDesignerExtensionProvider } from '../widgets/designerView/extensions/IDesignerExtensionProvider.js';
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
@@ -65,9 +62,7 @@ export interface IDesignItem {
 
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
-  appliedDesignerExtensions: Map<ExtensionType, IDesignerExtension[]>
-  shouldAppliedDesignerExtensions: Map<ExtensionType, IDesignerExtensionProvider[]>
-
+  
   getOrCreateDesignItem(node: Node);
 
   openGroup(title: string): ChangeGroup

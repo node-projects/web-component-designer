@@ -14,7 +14,6 @@ import { ElementDragTitleExtensionProvider } from '../widgets/designerView/exten
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider.js';
 import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider.js';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider.js';
-import { PathExtensionProvider } from '../widgets/designerView/extensions/svg/PathExtensionProvider.js';
 import { HighlightElementExtensionProvider } from '../widgets/designerView/extensions/HighlightElementExtensionProvider.js';
 import { NamedTools } from '../widgets/designerView/tools/NamedTools.js';
 import { PointerTool } from '../widgets/designerView/tools/PointerTool.js';
@@ -62,9 +61,6 @@ import { DrawToolButtonProvider } from '../widgets/designerView/tools/toolBar/bu
 import { TextToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js';
 import { SelectorToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/SelectorToolButtonProvider.js';
 import { GrayOutDragOverContainerExtensionProvider } from '../widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js';
-import { LineExtensionProvider } from '../widgets/designerView/extensions/svg/LineExtensionProvider.js';
-import { RectExtentionProvider } from '../widgets/designerView/extensions/svg/RectExtensionProvider.js';
-import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
 import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
 import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
@@ -88,6 +84,12 @@ import { SimpleDemoProviderService } from './demoProviderService/SimpleDemoProvi
 import { DrawElementTool } from '../widgets/designerView/tools/DrawElementTool.js';
 import { RoundPixelsDesignViewConfigButton } from '../widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js';
 import { MathMLElementsPropertiesService } from './propertiesService/services/MathMLElementsPropertiesService.js';
+import { SvgElementExtensionProvider } from '../widgets/designerView/extensions/svg/SvgElementExtensionProvider.js';
+import { ConditionExtensionProvider } from '../widgets/designerView/extensions/logic/ConditionExtensionProvider.js';
+import { GridToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridToolbarExtensionProvider.js';
+import { FlexToolbarExtensionProvider } from '../widgets/designerView/extensions/flex/FlexToolbarExtensionProvider.js';
+import { BlockToolbarExtensionProvider } from '../widgets/designerView/extensions/block/BlockToolbarExtensionProvider.js';
+import { ChildContextMenu } from '../widgets/designerView/extensions/contextMenu/ChildContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -124,22 +126,22 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
-    // new ResizeExtensionProvider(false),
     new InvisibleElementExtensionProvider(),
-    // new ElementDragTitleExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
-    new ElementDragTitleExtensionProvider(),
+    new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
     new TransformOriginExtensionProvider(true),
     new CanvasExtensionProvider(),
     new PositionExtensionProvider(),
-    new EllipsisExtensionProvider(),
-    new LineExtensionProvider(),
-    new PathExtensionProvider(),
-    new RectExtentionProvider(),
+    new SvgElementExtensionProvider(),
     new ResizeExtensionProvider(true),
     new RotateExtensionProvider(),
-    new MultipleSelectionRectExtensionProvider(),
+    new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionRefreshed, [
+    new GridToolbarExtensionProvider(),
+    new FlexToolbarExtensionProvider(),
+    new BlockToolbarExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionAndCanBeEntered, [
     new DisplayGridExtensionProvider(),
@@ -147,7 +149,7 @@ export function createDefaultServiceContainer() {
     new FlexboxExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Selection, [
-    new SelectionDefaultExtensionProvider()
+    new ConditionExtensionProvider(new SelectionDefaultExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainerAndCanBeEntered, [
     new DisplayGridExtensionProvider(),
@@ -225,14 +227,12 @@ export function createDefaultServiceContainer() {
   );
 
   serviceContainer.designerContextMenuExtensions = [
-    new CopyPasteContextMenu(),
+    new ChildContextMenu('edit', new CopyPasteContextMenu()),
     new SeperatorContextMenu(),
-    new RotateLeftAndRight(),
+    new ChildContextMenu('modify', new RotateLeftAndRight(), new SeperatorContextMenu(), new ZMoveContextMenu()),
     new SeperatorContextMenu(),
-    new JumpToElementContextMenu(),
-    new ZoomToElementContextMenu(),
+    new ChildContextMenu('view', new JumpToElementContextMenu(), new ZoomToElementContextMenu()),
     new SeperatorContextMenu(),
-    new ZMoveContextMenu(),
     new MultipleItemsSelectedContextMenu(),
     new PathContextMenu(),
     new RectContextMenu(),

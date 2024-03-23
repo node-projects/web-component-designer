@@ -34,8 +34,11 @@ export class RectExtension extends AbstractExtension {
         super(extensionManager, designerView, extendedItem);
     }
 
-
     override extend() {
+        this.refresh();
+    }
+
+    override refresh() {
         this._parentRect = (<SVGGeometryElement>this.extendedItem.element).parentElement.getBoundingClientRect();
         this._rectElement = (<SVGRectElement>this.extendedItem.node);
         this._startScrollOffset = this.designerCanvas.canvasOffset;
@@ -45,12 +48,13 @@ export class RectExtension extends AbstractExtension {
         this._w = this._rectElement.width.baseVal.value;
         this._h = this._rectElement.height.baseVal.value;
 
-        this._circle1 = this._drawPathCircle(this._x, this._y, this._rectElement, 0);
-        this._circle2 = this._drawPathCircle(this._x + this._w, this._y, this._rectElement, 1);
-        this._circle3 = this._drawPathCircle(this._x + this._w, this._y + this._h, this._rectElement, 2);
-        this._circle4 = this._drawPathCircle(this._x, this._y + this._h, this._rectElement, 3);
+        if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, this._x, this._y, this._w, this._h)) {
+            this._circle1 = this._drawPathCircle(this._x, this._y, this._rectElement, 0, this._circle1);
+            this._circle2 = this._drawPathCircle(this._x + this._w, this._y, this._rectElement, 1, this._circle2);
+            this._circle3 = this._drawPathCircle(this._x + this._w, this._y + this._h, this._rectElement, 2, this._circle3);
+            this._circle4 = this._drawPathCircle(this._x, this._y + this._h, this._rectElement, 3, this._circle4);
+        }
     }
-
 
     pointerEvent(event: PointerEvent, circle: SVGCircleElement, r: SVGRectElement, index: number) {
         event.stopPropagation();
@@ -160,19 +164,20 @@ export class RectExtension extends AbstractExtension {
         }
     }
 
-    _drawPathCircle(x: number, y: number, r: SVGRectElement, index: number) {
-        let circle = this._drawCircle(
+    _drawPathCircle(x: number, y: number, r: SVGRectElement, index: number, circle: SVGCircleElement) {
+        let newCircle = this._drawCircle(
             (this._parentRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor + x,
             (this._parentRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor + y,
             5 / this.designerCanvas.scaleFactor,
-            'svg-path');
-        circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+            'svg-path', circle);
+        newCircle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
 
-
-        circle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, circle, r, index));
-        circle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, circle, r, index));
-        circle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, circle, r, index));
-        return circle;
+        if (!circle) {
+            newCircle.addEventListener(EventNames.PointerDown, event => this.pointerEvent(event, newCircle, r, index));
+            newCircle.addEventListener(EventNames.PointerMove, event => this.pointerEvent(event, newCircle, r, index));
+            newCircle.addEventListener(EventNames.PointerUp, event => this.pointerEvent(event, newCircle, r, index));
+        }
+        return newCircle;
     }
 
     _redrawPathCircle(x: number, y: number, oldCircle: SVGCircleElement) {
@@ -254,11 +259,6 @@ export class RectExtension extends AbstractExtension {
         let diffY = oldParentCoords.y - newParentCoords.y;
         this.extendedItem.setAttribute('x', (this._rectElement.x.baseVal.value + diffX).toString());
         this.extendedItem.setAttribute('y', (this._rectElement.y.baseVal.value + diffY).toString());
-    }
-
-    override refresh() {
-        this._removeAllOverlays();
-        this.extend();
     }
 
     override dispose() {

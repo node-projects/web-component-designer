@@ -7,7 +7,7 @@ import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExten
 export class JumpToElementContextMenu implements IContextMenuExtension {
 
   public shouldProvideContextmenu(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    return true;
+    return designItem !== null;
   }
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
