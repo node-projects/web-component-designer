@@ -100,8 +100,7 @@ export class RectangleSelectorTool implements ITool {
             }
           }
         }
-        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
-
+        
         designerCanvas.overlayLayer.removeOverlay(this._rect);
         this._rect = null;
         this._initialPoint = null;

@@ -28,6 +28,7 @@ export class ExtensionManager implements IExtensionManager {
   _appliedDesignerExtensions = new WeakMap<DesignItem, Map<ExtensionType, IDesignerExtension[]>>
   _shouldAppliedDesignerExtensions = new WeakMap<DesignItem, Map<ExtensionType, IDesignerExtensionProvider[]>>
   _lastApplyEventPerType = new WeakMap<DesignItem, Map<ExtensionType, Event>>
+  _lastPrimarySelectionRefreshItem: WeakRef<IDesignItem>
 
   constructor(designerCanvas: IDesignerCanvas) {
     this.designerCanvas = designerCanvas;
@@ -75,6 +76,8 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
+    this._lastPrimarySelectionRefreshItem = null;
+
     if (selectionChangedEvent.oldSelectedElements && selectionChangedEvent.oldSelectedElements.length) {
       if (selectionChangedEvent.oldSelectedElements[0].parent) {
         const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
@@ -102,8 +105,9 @@ export class ExtensionManager implements IExtensionManager {
   private _selectedElementsRefresh(selectionChangedEvent: ISelectionRefreshEvent) {
     this.refreshAllAppliedExtentions(selectionChangedEvent.event);
 
-    if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
+    if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length && (!this._lastPrimarySelectionRefreshItem || this._lastPrimarySelectionRefreshItem.deref() !== selectionChangedEvent.selectedElements[0])) {
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionRefreshed, selectionChangedEvent.event);
+      this._lastPrimarySelectionRefreshItem = new WeakRef(selectionChangedEvent.selectedElements[0]);
     }
   }
 
@@ -224,8 +228,10 @@ export class ExtensionManager implements IExtensionManager {
           console.error(err);
         }
         e[1].splice(idx, 1);
-        if (e[1].length == 0)
+        if (e[1].length == 0) {
           wmGet(designItem, this._appliedDesignerExtensions).delete(e[0]);
+          wmGet(designItem, this._shouldAppliedDesignerExtensions).delete(e[0]);
+        }
         if (!wmGet(designItem, this._appliedDesignerExtensions).size)
           this.designItemsWithExtentions.delete(designItem);
       }
