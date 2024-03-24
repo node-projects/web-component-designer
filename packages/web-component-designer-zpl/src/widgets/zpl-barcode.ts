@@ -97,7 +97,10 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
                 break;
         }
 
-        zpl += "^FD" + this.content;
+        zpl += "^FD";
+        if (this.type == BarcodeFormat.QR) 
+            zpl += 'QA,'; // bar code configuration prefix
+        zpl += this.content;
         zpl += "^FS";
         return zpl;
     }
