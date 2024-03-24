@@ -204,7 +204,7 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                 case "FD":
                     if (bc) {
                         if (qr)
-                            barcode.setAttribute("content", fieldString.substring(3));
+                            barcode.setAttribute("content", fieldString);
                         else
                             barcode.setAttribute("content", fieldString);
                         designItems.push(DesignItem.createDesignItemFromInstance(barcode, serviceContainer, instanceServiceContainer));
