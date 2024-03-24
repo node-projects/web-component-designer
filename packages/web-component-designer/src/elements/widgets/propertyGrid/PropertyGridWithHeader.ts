@@ -179,6 +179,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
       PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
     });
+    this._pg.instanceServiceContainer = value;
   }
 }
 
