@@ -8,7 +8,7 @@ import { css } from "@node-projects/base-custom-webcomponent";
 
 export class ElementDragTitleExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    return true;
+    return !designItem.isRootItem;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas,  designItem: IDesignItem): IDesignerExtension {

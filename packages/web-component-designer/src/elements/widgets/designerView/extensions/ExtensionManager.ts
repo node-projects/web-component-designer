@@ -36,6 +36,10 @@ export class ExtensionManager implements IExtensionManager {
     designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
     designerCanvas.instanceServiceContainer.selectionService.onSelectionRefresh.on(this._selectedElementsRefresh.bind(this));
     designerCanvas.instanceServiceContainer.contentService.onContentChanged.on(this._contentChanged.bind(this));
+
+    designerCanvas.serviceContainer.globalContext.onToolChanged.on(() => {
+      this.removeExtension(designerCanvas.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
+    });
   }
 
   connected() {
@@ -79,14 +83,14 @@ export class ExtensionManager implements IExtensionManager {
     this._lastPrimarySelectionRefreshItem = null;
 
     if (selectionChangedEvent.oldSelectedElements && selectionChangedEvent.oldSelectedElements.length) {
+      this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionRefreshed);
+      this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
+      this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
+      this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.Selection);
       if (selectionChangedEvent.oldSelectedElements[0].parent) {
         const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
-        this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
-        this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionRefreshed);
-        this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
-        this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.Selection);
       }
     }
 
@@ -95,10 +99,12 @@ export class ExtensionManager implements IExtensionManager {
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection, selectionChangedEvent.event);
       if (selectionChangedEvent.selectedElements[0].getPlacementService()?.isEnterableContainer(selectionChangedEvent.selectedElements[0]))
         this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered, selectionChangedEvent.event);
-      const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
-      this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer, selectionChangedEvent.event);
-      if (primaryContainer.getPlacementService()?.isEnterableContainer(primaryContainer))
-        this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered, selectionChangedEvent.event);
+      if (selectionChangedEvent.selectedElements[0].parent) {
+        const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.selectedElements[0].parent.element, selectionChangedEvent.selectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
+        this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainer, selectionChangedEvent.event);
+        if (primaryContainer.getPlacementService()?.isEnterableContainer(primaryContainer))
+          this.applyExtension(primaryContainer, ExtensionType.PrimarySelectionContainerAndCanBeEntered, selectionChangedEvent.event);
+      }
     }
   }
 
@@ -451,7 +457,7 @@ export class ExtensionManager implements IExtensionManager {
 
   //TODO: does not work with permanant, when not applied... maybe we need to do in another way
   //maybe store the "shouldAppliedExtensions??"
-  reapplyAllAppliedExtentions(filterDesignItems?: IDesignItem[]) {
+  reapplyAllAppliedExtentions(filterDesignItems?: IDesignItem[], enabledExtensionTypes?: ExtensionType[]) {
     this.designerCanvas.overlayLayer.startBatch();
     for (let d of ExtensionManager.getAllChildElements(this.designerCanvas.rootDesignItem)) {
       if (!filterDesignItems || filterDesignItems.includes(d)) {
@@ -459,6 +465,7 @@ export class ExtensionManager implements IExtensionManager {
         for (let t of keys) {
           const evt = wmGet(d, this._lastApplyEventPerType).get(t);
           this.removeExtension(d, t);
+          if (enabledExtensionTypes == null || enabledExtensionTypes.includes(t))
           this.applyExtension(d, t, evt);
         }
       }

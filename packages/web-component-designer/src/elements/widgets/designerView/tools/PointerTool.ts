@@ -135,8 +135,8 @@ export class PointerTool implements ITool {
         if (currentDesignItem !== designerCanvas.rootDesignItem) {
           this._actionType = PointerActionType.Drag;
         } else if (currentElement === <any>designerCanvas || currentElement === designerCanvas.rootDesignItem.element || currentElement == null) {
-          if (!event.ctrlKey && !event.shiftKey)
-            designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null, event);
+          //if (!event.ctrlKey && !event.shiftKey)
+          //  designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null, event);
           this._actionType = PointerActionType.DrawSelection;
         } else {
           this._actionType = PointerActionType.DragOrSelect;

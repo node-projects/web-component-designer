@@ -105,7 +105,7 @@ export class RectangleSelectorTool implements ITool {
         this._rect = null;
         this._initialPoint = null;
 
-        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements);
+        designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(inSelectionElements, event);
 
         designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
         break;

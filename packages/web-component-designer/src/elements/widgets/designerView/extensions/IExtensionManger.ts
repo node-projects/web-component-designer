@@ -13,7 +13,7 @@ export interface IExtensionManager {
   refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, event?: Event, ignoredExtension?: IDesignerExtension, timeout?: number);
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension, event?: Event);
   refreshAllAppliedExtentions(event?: Event);
-  reapplyAllAppliedExtentions(filterDesignItems?: IDesignItem[]);
+  reapplyAllAppliedExtentions(filterDesignItems?: IDesignItem[], enabledExtensionTypes?: ExtensionType[]);
   connected();
   disconnected();
 }

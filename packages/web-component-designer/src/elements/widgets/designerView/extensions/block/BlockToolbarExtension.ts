@@ -29,14 +29,14 @@ export class BlockToolbarExtension extends AbstractExtension {
       this.extendedItem.updateStyleInSheetOrLocal('display', displayTypeEl.value);
       this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
     }
-    
+
     this.refresh(cache, event);
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: MouseEvent) {
     if (event) {
       const pos = this.designerCanvas.getNormalizedEventCoordinates(event);
-      this._toolbar.updatePosition({ x: (pos.x - 16), y: (pos.y - 44) });
+      this._toolbar.updatePosition({ x: (pos.x - (16 / this.designerCanvas.zoomFactor)), y: (pos.y - (44 / this.designerCanvas.zoomFactor)) });
     }
   }
 

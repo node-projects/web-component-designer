@@ -77,6 +77,8 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     this._path.setAttribute('fill-rule', 'evenodd');
     this._path.style.pointerEvents = 'auto';
     this._path.onpointerdown = (e) => {
+      this.designerCanvas.ignoreEvent(e);
+      this.commitchanges();
       this.extensionManager.removeExtensionInstance(this.extendedItem, this);
     }
     this._addOverlay(this._path, OverlayLayer.Background);
@@ -96,6 +98,12 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   }
 
   override dispose() {
+    this._removeAllOverlays();
+    this.extendedItem.element.removeAttribute('contenteditable');
+    this.designerCanvas.clickOverlay.style.pointerEvents = 'auto';
+  }
+
+  commitchanges() {
     this._removeAllOverlays();
     this.extendedItem.element.removeAttribute('contenteditable');
     this.extendedItem.updateChildrenFromNodesChildren();

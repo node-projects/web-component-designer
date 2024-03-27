@@ -17,7 +17,7 @@ export class AttributesPropertiesService implements IPropertiesService {
   }
 
   isHandledElement(designItem: IDesignItem): boolean {
-    return true;
+    return !designItem.isRootItem;
   }
 
   getProperty(designItem: IDesignItem, name: string): IProperty {

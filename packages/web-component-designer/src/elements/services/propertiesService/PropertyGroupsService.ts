@@ -12,6 +12,14 @@ import { CssPropertiesService } from './services/CssPropertiesService.js';
 export class PropertyGroupsService implements IPropertyGroupsService {
     protected _attachedPropertiesService = new AttachedPropertiesService();
 
+    protected _rootPgList: { name: string; propertiesService: IPropertiesService; }[] = [
+        { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
+        { name: 'css vars', propertiesService: new CssCustomPropertiesService() },
+        { name: 'layout', propertiesService: new CssPropertiesService("layout") },
+        { name: 'flex', propertiesService: new CssPropertiesService("flex") },
+        { name: 'grid', propertiesService: new CssPropertiesService("grid") },
+    ];
+
     protected _pgList: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'properties', propertiesService: null },
         { name: 'attached', propertiesService: this._attachedPropertiesService },
@@ -48,6 +56,9 @@ export class PropertyGroupsService implements IPropertyGroupsService {
             return [];
         if (designItems[0].nodeType == NodeType.TextNode || designItems[0].nodeType == NodeType.Comment)
             return [];
+        if (designItems[0].isRootItem)
+            return this._rootPgList;
+
         this._pgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
         this._svgPgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
 
@@ -62,6 +73,6 @@ export class PropertyGroupsService implements IPropertyGroupsService {
             else if (parentStyle.display.includes('flex'))
                 lst = [...lst, this._flexChild[0]];
         }
-        return lst;
+        return lst; //.filter(x => x.propertiesService.isHandledElement(designItems[0]));
     }
 }

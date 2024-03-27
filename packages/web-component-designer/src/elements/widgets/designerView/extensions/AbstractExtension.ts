@@ -38,7 +38,11 @@ export abstract class AbstractExtension extends AbstractExtensionBase implements
     foreignObject.classList.add('svg-toolbar-container');
     foreignObject.setAttribute('width', '' + width);
     foreignObject.setAttribute('height', '' + height);
-    foreignObject.appendChild(element)
+    foreignObject.appendChild(element);
+
+    foreignObject.style.scale = '' + 1 / this.designerCanvas.zoomFactor;
+    foreignObject.style.transformBox = 'fill-box';
+
     this._addOverlay(foreignObject, overlayLayer);
 
     foreignObject.updatePosition = (position: IPoint) => {

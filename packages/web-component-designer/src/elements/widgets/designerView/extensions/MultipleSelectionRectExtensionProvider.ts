@@ -8,7 +8,7 @@ import { MultipleSelectionRectExtension as MultipleSelectionRectExtension } from
 
 export class MultipleSelectionRectExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    return true;
+    return !designItem.isRootItem;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {

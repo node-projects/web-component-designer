@@ -13,6 +13,7 @@ import { ISelectionChangedEvent } from "./services/selectionService/ISelectionCh
 import { SimpleSplitView } from './controls/SimpleSplitView.js';
 import { IStylesheet } from "./services/stylesheetService/IStylesheetService.js";
 import { sleep } from "./helper/Helper.js";
+import { ExtensionType } from "./widgets/designerView/extensions/ExtensionType.js";
 
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;
@@ -282,7 +283,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         return this.designerView.parseHTML(this._content, this._firstLoad);
       else {
         this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
-        this.designerView.designerCanvas.extensionManager.refreshAllAppliedExtentions();
+        this.designerView.designerCanvas.overlayLayer.removeAllOverlays();
+        this.designerView.designerCanvas.extensionManager.reapplyAllAppliedExtentions(null, [ExtensionType.Permanent, ExtensionType.Selection, ExtensionType.PrimarySelection, ExtensionType.PrimarySelectionContainer]);
       }
     }
   }

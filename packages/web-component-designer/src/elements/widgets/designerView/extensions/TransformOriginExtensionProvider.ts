@@ -14,7 +14,7 @@ export class TransformOriginExtensionProvider implements IDesignerExtensionProvi
   }
 
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designItem.node instanceof HTMLElement || (designItem.node instanceof SVGElement && designItem.node.localName === 'svg')) {
+    if (!designItem.isRootItem && designItem.node instanceof HTMLElement || (designItem.node instanceof SVGElement && designItem.node.localName === 'svg')) {
       if (!this.showOnlyWhenSet)
         return true;
       if (designItem.hasStyle('transformOrigin'))

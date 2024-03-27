@@ -11,7 +11,7 @@ export class RotateExtensionProvider implements IDesignerExtensionProvider {
     if (designItem.element instanceof SVGElement) {
       return false;
     }
-    return true;
+    return !designItem.isRootItem;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas,  designItem: IDesignItem): IDesignerExtension {

@@ -109,7 +109,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
   public set canvasOffset(value: IPoint) {
     this._canvasOffset = value;
-    this._zoomFactorChanged(false);
+    this._zoomFactorChanged();
   }
   public get canvasOffsetUnzoomed(): IPoint {
     return { x: this._canvasOffset.x * this.zoomFactor, y: this._canvasOffset.y * this.zoomFactor };
@@ -734,7 +734,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.extensionManager.disconnected();
   }
 
-  private _zoomFactorChanged(refreshExtensions = true) {
+  private _zoomFactorChanged() {
     //a@ts-ignore
     //this._canvasContainer.style.zoom = <any>this._zoomFactor;
     //this._canvasContainer.style.transform = 'scale(' + this._zoomFactor+') translate(' + this._translate.x + ', '+this._translate.y+')';
@@ -744,10 +744,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._updateTransform();
     this.fillCalculationrects();
     this.onZoomFactorChanged.emit(this._zoomFactor);
-    if (refreshExtensions) {
-      this.extensionManager.refreshAllAppliedExtentions();
-      setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 200);
-    }
     if (!this.serviceContainer.options.zoomDesignerBackground)
       this._resizeBackgroundGrid();
   }
@@ -951,8 +947,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _onDblClick(event: KeyboardEvent) {
     event.preventDefault();
-    if (this.serviceContainer.globalContext.tool == null || this.serviceContainer.globalContext.tool === this.serviceContainer.designerTools.get(NamedTools.Pointer))
+    if (this.serviceContainer.globalContext.tool == null || this.serviceContainer.globalContext.tool === this.serviceContainer.designerTools.get(NamedTools.Pointer)) {
+      this.extensionManager.removeExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
       this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);
+    }
   }
 
   private _searchShowOverlay() {

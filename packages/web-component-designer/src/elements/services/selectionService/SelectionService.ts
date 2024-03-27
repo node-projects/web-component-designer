@@ -36,9 +36,12 @@ export class SelectionService implements ISelectionService {
   }
 
   setSelectedElements(designItems: IDesignItem[], event?: Event) {
+    if (designItems === null || designItems.length === 0)
+      designItems = [this._designerCanvas.rootDesignItem];
+
     if (this.selectedElements != designItems && !(this.selectedElements.length === 0 && (designItems == null || designItems.length === 0))) {
-      if (arraysEqual(designItems, this.selectedElements)) {
-         this.onSelectionRefresh.emit({ selectedElements: this.selectedElements, event });
+      if (this.selectedElements?.length === 1 && designItems?.length === 1 && designItems[0] === this.selectedElements[0]) {
+        this.onSelectionRefresh.emit({ selectedElements: this.selectedElements, event });
         return;
       }
       if (this._undoSelectionChanges) {
@@ -66,7 +69,7 @@ export class SelectionService implements ISelectionService {
     } else {
       let newSelection: IDesignItem[] = []
       for (let d of designItems) {
-        if (d && d != d.instanceServiceContainer.contentService.rootDesignItem)
+        if (d && (designItems.length == 1 || d !== d.instanceServiceContainer.contentService.rootDesignItem))
           newSelection.push(d)
       }
       this.selectedElements = newSelection;

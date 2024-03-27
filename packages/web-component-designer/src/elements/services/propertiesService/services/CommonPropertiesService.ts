@@ -46,7 +46,7 @@ export class CommonPropertiesService extends AbstractPropertiesService {
   public name = "common"
 
   override isHandledElement(designItem: IDesignItem): boolean {
-    return true;
+    return !designItem.isRootItem;
   }
 
   override getProperty(designItem: IDesignItem, name: string): IProperty {
