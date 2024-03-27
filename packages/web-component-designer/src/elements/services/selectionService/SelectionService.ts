@@ -4,7 +4,6 @@ import { ISelectionChangedEvent } from './ISelectionChangedEvent.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { SelectionChangedAction } from '../undoService/transactionItems/SelectionChangedAction.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
-import { arraysEqual } from '../../helper/Helper.js';
 import { ISelectionRefreshEvent } from './ISelectionRefreshEvent.js';
 
 function findDesignItem(designItem: IDesignItem, position: number): IDesignItem {
