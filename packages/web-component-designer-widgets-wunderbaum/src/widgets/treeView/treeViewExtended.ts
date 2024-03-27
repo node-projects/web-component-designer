@@ -70,6 +70,11 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     }
 
     this._treeDiv = this._getDomElement<HTMLTableElement>('treetable');
+    this._treeDiv.onscroll = () => {
+      for (let e of this._treeDiv.querySelectorAll('.cmd')) {
+        (<HTMLElement>e).style.right = '-' + this._treeDiv.scrollLeft + 'px';
+      }
+    }
   }
 
   _filterNodes() {
@@ -138,6 +143,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._tree = new Wunderbaum({
       ...defaultOptions,
       element: this._treeDiv,
+      //@ts-ignore
       click: (e) => {
         if (e.event) { // only for clicked items, not when elements selected via code.
           let node = e.node;
@@ -230,6 +236,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           e.nodeElem.onmouseenter = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(item.element, e);
           e.nodeElem.onmouseleave = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
 
+          let sp = document.createElement("span");
+          sp.style.display = "inline-block";
+          sp.style.width = "42px";
+          e.nodeElem.appendChild(sp);
           if (item && item.nodeType === NodeType.Element && item !== item.instanceServiceContainer.contentService.rootDesignItem) {
             let d = document.createElement("div");
             d.className = "cmd"

@@ -51,6 +51,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
           })));
         });
       },
+      //@ts-ignore
       dblclick: (e) => {
         this.objectDoubleclicked.emit();
         return true;
