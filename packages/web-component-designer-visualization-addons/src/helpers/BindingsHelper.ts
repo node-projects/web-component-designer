@@ -466,6 +466,10 @@ export class BindingsHelper {
                         signals[i] = s;
                     } else {
                         signals[i] = root[s];
+                        if (s[0] === '$') {
+                            s = s.substring(1);
+                            signals[i] = '$' + root[s];
+                        }
                         let evtCallback = () => {
                             cleanUp();
                             this.applyBinding(element, binding, relativeSignalPath, root);
