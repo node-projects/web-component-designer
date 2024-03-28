@@ -498,7 +498,11 @@ export class BindingsHelper {
                     if (!cleanupCalls)
                         cleanupCalls = [];
                     cleanupCalls.push(() => root.removeEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback));
-                    this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false);
+                    try {
+                        this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false);
+                    } catch (err) {
+                        console.error(err);
+                    }
                     if (binding[1].twoWay && i == 0) {
                         this.addTwoWayBinding(binding, element, v => root[nm] = v);
                     }
