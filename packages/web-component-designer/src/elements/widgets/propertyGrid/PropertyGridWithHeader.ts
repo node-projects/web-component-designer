@@ -168,6 +168,9 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         this._innerRect.style.background = '';
         this._type.value = ":host";
       } else {
+        this._id.disabled = false;
+        this._content.disabled = false;
+
         const srv = await this.serviceContainer?.getLastServiceWhereAsync('configUiService', x => x.hasConfigUi(this._instanceServiceContainer.selectionService.primarySelection));
         if (srv) {
           this._configButton.style.display = 'block';
