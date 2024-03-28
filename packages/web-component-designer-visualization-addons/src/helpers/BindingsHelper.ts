@@ -22,6 +22,12 @@ export function isLit(element: Element) {
     return element.constructor?.elementProperties != null;
 }
 
+export function getChangeEventName(element: Element, propertyName: string) {
+    if (isLit(element))
+        return propertyName
+    return propertyName + '-changed';
+}
+
 export function parseBindingString(id: string) {
     let parts: string[] = [];
     let signals: string[] = [];
@@ -180,11 +186,7 @@ export class BindingsHelper {
             else if (element instanceof HTMLSelectElement)
                 binding.events = ['change'];
             else {
-                if (isLit(element)) {
-                    binding.events = [propname];
-                } else {
-                    binding.events = [propname + '-changed'];
-                }
+                binding.events = [getChangeEventName(element, propname)];
             }
         }
         if (bindingTarget === BindingTarget.cssvar || bindingTarget === BindingTarget.class)
@@ -433,6 +435,19 @@ export class BindingsHelper {
     }
 
     applyBinding(element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement): () => void {
+        let unsubscribeList: [id: string, ((id: string, value: any) => void)][] = [];
+        let cleanupCalls: (() => void)[];
+        const cleanUp = () => {
+            for (const u of unsubscribeList) {
+                this._visualizationHandler.unsubscribeState(u[0], u[1]);
+            }
+            if (cleanupCalls) {
+                for (let e of cleanupCalls) {
+                    e();
+                }
+            }
+        };
+
         const signals = binding[1].signal.split(';');
         const signalVars: string[] = new Array(signals.length);
         for (let i = 0; i < signals.length; i++) {
@@ -451,6 +466,15 @@ export class BindingsHelper {
                         signals[i] = s;
                     } else {
                         signals[i] = root[s];
+                        let evtCallback = () => {
+                            cleanUp();
+                            this.applyBinding(element, binding, relativeSignalPath, root);
+                        };
+                        const evtNm = getChangeEventName(element, PropertiesHelper.camelToDashCase(s));
+                        root.addEventListener(evtNm, evtCallback);
+                        if (!cleanupCalls)
+                            cleanupCalls = [];
+                        cleanupCalls.push(() => root.removeEventListener(evtNm, evtCallback));
                     }
                 }
             }
@@ -458,8 +482,6 @@ export class BindingsHelper {
                 signals[i] = relativeSignalPath + sng;
             }
         }
-        let unsubscribeList: [id: string, ((id: string, value: any) => void)][] = [];
-        let cleanupCalls: (() => void)[];
 
         let valuesObject = new Array(signals.length);
         for (let i = 0; i < signals.length; i++) {
@@ -527,16 +549,7 @@ export class BindingsHelper {
             }
         }
 
-        return () => {
-            for (const u of unsubscribeList) {
-                this._visualizationHandler.unsubscribeState(u[0], u[1]);
-            }
-            if (cleanupCalls) {
-                for (let e of cleanupCalls) {
-                    e();
-                }
-            }
-        }
+        return cleanUp;
     }
 
     private addTwoWayBinding(binding: namedBinding, element: Element, setter: (value) => void) {
