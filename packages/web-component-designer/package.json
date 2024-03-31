@@ -1,5 +1,5 @@
 {
-  "description": "A UI designer for Polymer apps",
+  "description": "A WYSIWYG designer webcomponent for html components",
   "name": "@node-projects/web-component-designer",
   "version": "0.1.108",
   "type": "module",
