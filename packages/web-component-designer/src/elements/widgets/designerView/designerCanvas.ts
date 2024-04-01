@@ -700,6 +700,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this._resizeBackgroundGrid();
       });
     }
+
+    if (this.isConnected)
+      this.extensionManager.connected();
   }
 
   connectedCallback() {
@@ -727,7 +730,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this.canvasOffset = newCanvasOffset
       });
     }
-    this.extensionManager.connected();
+    if (this.extensionManager)
+      this.extensionManager.connected();
   }
 
   disconnectedCallback() {
