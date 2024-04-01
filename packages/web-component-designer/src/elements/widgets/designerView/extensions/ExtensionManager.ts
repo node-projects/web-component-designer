@@ -39,6 +39,7 @@ export class ExtensionManager implements IExtensionManager {
 
     designerCanvas.serviceContainer.globalContext.onToolChanged.on(() => {
       this.removeExtension(designerCanvas.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
+      this._lastPrimarySelectionRefreshItem = null;
     });
   }
 

@@ -947,6 +947,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _onDblClick(event: KeyboardEvent) {
     event.preventDefault();
+    if (event.target === this.overlayLayer)
+      return;
     if (this.serviceContainer.globalContext.tool == null || this.serviceContainer.globalContext.tool === this.serviceContainer.designerTools.get(NamedTools.Pointer)) {
       this.extensionManager.removeExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
       this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);

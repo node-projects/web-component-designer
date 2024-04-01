@@ -1,46 +1,23 @@
 import { html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
-import { AbstractExtension, toolbarObject } from "../AbstractExtension.js";
-import { IExtensionManager } from '../IExtensionManger.js';
+import { BasicDisplayToolbarExtension } from "../BasicDisplayToolbarExtension.js";
+import { IExtensionManager } from "../IExtensionManger.js";
 
-export class BlockToolbarExtension extends AbstractExtension {
+export class BlockToolbarExtension extends BasicDisplayToolbarExtension {
 
-  private static template = html`
-    <div style="height: 100%; width: 100%;">
-      <select id="displayType" style="pointer-events: all; height: 24px; width: 70px; padding: 0; font-weight: 900; text-transform: uppercase; margin-right: 10px;">
-        <option selected>block</option>
-        <option>flex</option>
-        <option>grid</option>
-      </select>
-    </div>
-  `;
-
-  private _toolbar: toolbarObject;
+  protected static template = html`
+      <div style="height: 100%; width: 100%;">
+        ${BasicDisplayToolbarExtension.basicTemplate}
+      </div>
+    `;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 
   override extend(cache: Record<string | symbol, any>, event: MouseEvent) {
-    this._toolbar = this.createToolbar(BlockToolbarExtension.template, 200, 30);
-    const displayTypeEl = this._toolbar.getById<HTMLSelectElement>('displayType');
-    displayTypeEl.onchange = () => {
-      this.extendedItem.updateStyleInSheetOrLocal('display', displayTypeEl.value);
-      this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
+      super.extend(cache, event);
+      this.refresh(cache, event);
     }
-
-    this.refresh(cache, event);
-  }
-
-  override refresh(cache: Record<string | symbol, any>, event?: MouseEvent) {
-    if (event) {
-      const pos = this.designerCanvas.getNormalizedEventCoordinates(event);
-      this._toolbar.updatePosition({ x: (pos.x - (16 / this.designerCanvas.zoomFactor)), y: (pos.y - (44 / this.designerCanvas.zoomFactor)) });
-    }
-  }
-
-  override dispose() {
-    this._removeAllOverlays();
-  }
 }

@@ -8,10 +8,12 @@ import { NodeType } from '../../../../item/NodeType.js';
 
 export class GridToolbarExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designItem.nodeType === NodeType.Element && getComputedStyle(designItem.element).display === 'grid')
-      return true;
-    return false;
-  }
+      if (designItem.nodeType === NodeType.Element) {
+        const d = getComputedStyle(designItem.element).display;
+        return d === 'grid' || d === 'inline-grid'
+      }
+      return false;
+    }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
     return new GridToolbarExtension(extensionManager, designerView, designItem);

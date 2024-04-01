@@ -35,7 +35,7 @@ export class ImageButtonListPropertyEditor extends BasePropertyEditor<ImageButto
         selector.appendChild(button);
       }
     }
-    selector.valueChanged.on((e) => this._valueChanged(e.newValue));
+    selector.addEventListener('value-changed', (e) => this._valueChanged(selector.value));
     this.element = selector;
   }
 

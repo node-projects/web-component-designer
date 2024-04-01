@@ -466,11 +466,38 @@ export class DesignItem implements IDesignItem {
     let nm = name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
-    if (this.isRootItem)
-      throw 'not allowed to set style on root item';
-    const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
-    this.instanceServiceContainer.undoService.execute(action);
+    if (this.isRootItem) {
+      throw 'not allowed to set style on root item or use async setStyle';
+    } else {
+      const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
+      this.instanceServiceContainer.undoService.execute(action);
+    }
   }
+  public async setStyleAsync(name: string, value?: string | null, important?: boolean): Promise<void> {
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
+    if (this.isRootItem) {
+      if (!this.instanceServiceContainer.stylesheetService)
+        throw 'not allowed to set style on root item';
+      else {
+        let rules = this.instanceServiceContainer.stylesheetService.getRules(':host')
+        if (rules === null || rules.length === 0) {
+          const cg = this.openGroup('add rule and set style: ' + name);
+          const sheets = this.instanceServiceContainer.stylesheetService.getStylesheets();
+          const rule = await this.instanceServiceContainer.stylesheetService.addRule(sheets[0], ':host')
+          this.instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(rule, name, value, important);
+          cg.commit();
+        } else {
+          this.instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(rules[0], name, value, important);
+        }
+      }
+    } else {
+      const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
+      this.instanceServiceContainer.undoService.execute(action);
+    }
+  }
+
   public removeStyle(name: string) {
     let nm = name;
     if (!nm.startsWith('--'))
@@ -490,6 +517,25 @@ export class DesignItem implements IDesignItem {
       // Set style locally
       if (this.getStyle(nm) != value || forceSet) {
         this.setStyle(nm, value);
+      } else if (value == null) {
+        this.removeStyle(nm);
+      }
+    } else {
+      this.instanceServiceContainer.stylesheetService.updateDeclarationValue(declarations[0], value, false);
+    }
+  }
+  public async updateStyleInSheetOrLocalAsync(name: string, value?: string | null, important?: boolean, forceSet?: boolean): Promise<void> {
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
+
+    // Pre-sorted by specificity
+    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
+
+    if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
+      // Set style locally
+      if (this.getStyle(nm) != value || forceSet) {
+        await this.setStyleAsync(nm, value);
       } else if (value == null) {
         this.removeStyle(nm);
       }

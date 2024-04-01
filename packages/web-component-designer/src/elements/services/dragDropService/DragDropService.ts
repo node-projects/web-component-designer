@@ -24,6 +24,9 @@ export class DragDropService implements IDragDropService {
 
   public dragOver(designerCanvas: IDesignerCanvas, event: DragEvent) {
     let [newContainer] = this.getPossibleContainerForDragDrop(designerCanvas, event);
+    if (!newContainer)
+      newContainer = designerCanvas.rootDesignItem;
+
     if (this._dragOverExtensionItem != newContainer) {
       designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOverAndCanBeEntered);
       designerCanvas.extensionManager.applyExtension(newContainer, ExtensionType.ContainerExternalDragOverAndCanBeEntered, event);

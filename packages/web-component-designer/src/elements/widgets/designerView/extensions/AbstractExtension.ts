@@ -9,7 +9,7 @@ import { IPoint } from '../../../../interfaces/IPoint.js';
 export type toolbarObject = SVGForeignObjectElement &
 {
   updatePosition: (position: IPoint) => void,
-  getById: <T>(id: string) => T
+  getById: <T extends HTMLElement>(id: string) => T
 }
 
 export abstract class AbstractExtension extends AbstractExtensionBase implements IDesignerExtension {
@@ -46,6 +46,18 @@ export abstract class AbstractExtension extends AbstractExtensionBase implements
     this._addOverlay(foreignObject, overlayLayer);
 
     foreignObject.updatePosition = (position: IPoint) => {
+      foreignObject.style.scale = '' + 1 / this.designerCanvas.zoomFactor;
+      const rect = this.overlayLayerView.getBoundingClientRect();
+      const innerRect = foreignObject.children[0].getBoundingClientRect();
+
+      const scaleFactor = this.designerCanvas.scaleFactor;
+      const effectiveRectWidth = (rect.width / scaleFactor) - this.designerCanvas.canvasOffset.x * scaleFactor;
+      if (innerRect.width + (position.x * scaleFactor) > effectiveRectWidth) {
+        position.x = (effectiveRectWidth - innerRect.width) / scaleFactor;
+      }
+      if (position.x < -this.designerCanvas.canvasOffset.x) {
+        position.x = -this.designerCanvas.canvasOffset.x;
+      }
       foreignObject.setAttribute('x', '' + position.x);
       foreignObject.setAttribute('y', '' + position.y);
     }

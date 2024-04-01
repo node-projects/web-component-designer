@@ -15,6 +15,8 @@ export class PointerTool implements ITool {
 
   public cursor: string = 'default';
 
+  private _minMoveOffset = 5;
+
   private _movedSinceStartedAction: boolean = false;
   private _initialPoint: IPoint;
   private _actionType?: PointerActionType;
@@ -145,7 +147,7 @@ export class PointerTool implements ITool {
     }
 
     if (event.type === EventNames.PointerMove) {
-      this._movedSinceStartedAction = this._movedSinceStartedAction || currentPoint.x != this._initialPoint.x || currentPoint.y != this._initialPoint.y;
+      this._movedSinceStartedAction = this._movedSinceStartedAction || Math.abs(currentPoint.x - this._initialPoint.x) > this._minMoveOffset || Math.abs(currentPoint.y - this._initialPoint.y) > this._minMoveOffset;
       if (this._actionType == PointerActionType.DrawSelection)
         this._actionType = PointerActionType.DrawingSelection;
     }
@@ -225,8 +227,6 @@ export class PointerTool implements ITool {
           if (event.buttons == 0) {
             return;
           }
-
-
 
           if (this._firstTimeInMove) {
             if (!currentDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(currentDesignItem)) {

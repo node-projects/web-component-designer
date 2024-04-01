@@ -16,6 +16,9 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
         this._instanceServiceContainer = designerCanvas.instanceServiceContainer;
     }
 
+    abstract getRules(rule: string): IStyleRule[];
+    abstract addRule(stylesheet: IStylesheet, rule: string): Promise<IStyleRule>;
+
     async setStylesheets(stylesheets: IStylesheet[]): Promise<void> {
         await this.internalSetStylesheets(stylesheets, this._stylesheets);
     }
@@ -72,6 +75,29 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
         }
     }
 
+    protected async internalReparseStylesheet(name: string) {
+        let lst = this._allStylesheets;
+        if (this._documentStylesheets.has(name))
+            lst = this._documentStylesheets;
+        if (this._stylesheets.has(name))
+            lst = this._stylesheets;
+
+        const ss = lst.get(name);
+        let ast = null;
+        try {
+            ast = await this.internalParse(ss.stylesheet.content)
+        }
+        catch (err) {
+            console.warn("error parsing stylesheet", name, err)
+        }
+        const v = {
+            stylesheet: ss.stylesheet,
+            ast: ast
+        }
+        this._stylesheets.set(name, v);
+        this._allStylesheets.set(name, v);
+    }
+
     protected abstract internalParse(style: string): Promise<any>;
 
     //TODO: rename to externalStylesheets
@@ -104,6 +130,9 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
     public stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();
 
     protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {
+        if (designItem == null)
+            return true;
+
         for (let selector of selectors) {
             if (selector == ':host') {
                 selector = DesignerCanvas.cssprefixConstant;

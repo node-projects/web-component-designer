@@ -140,11 +140,11 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         return true;
     }
 
-    updateCompleteStylesheet(name: string, newStyle: string) {
+    async updateCompleteStylesheet(name: string, newStyle: string) {
         this.updateCompleteStylesheetInternal(name, newStyle, 'styleupdate');
     }
 
-    updateCompleteStylesheetWithoutUndo(name: string, newStyle: string, noUndo = false) {
+    async updateCompleteStylesheetWithoutUndo(name: string, newStyle: string, noUndo = false) {
         this.updateCompleteStylesheetInternal(name, newStyle, 'undo');
     }
 
@@ -237,5 +237,14 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
             if (dec1.parent.specificity > dec2.parent.specificity) return -1;
             return 1;
         })
+    }
+
+    getRules(selector: string): IStyleRule[] {
+        const rules = this.getAppliedRules(null);
+        return rules.filter(x => x.selector == selector);
+    }
+
+    addRule(stylesheet: IStylesheet, rule: string): Promise<IStyleRule> {
+        throw new Error("not implemented");
     }
 }

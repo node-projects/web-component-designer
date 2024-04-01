@@ -1,46 +1,87 @@
 import { html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
-import { AbstractExtension, toolbarObject } from "../AbstractExtension.js";
 import { IExtensionManager } from '../IExtensionManger.js';
+import { assetsPath } from "../../../../../Constants.js";
+import { BasicDisplayToolbarExtension } from "../BasicDisplayToolbarExtension.js";
+import { ImageButtonListSelector } from "../../../../controls/ImageButtonListSelector.js";
 
-export class FlexToolbarExtension extends AbstractExtension {
+export class FlexToolbarExtension extends BasicDisplayToolbarExtension {
 
-  private static template = html`
+  protected static template = html`
     <div style="height: 100%; width: 100%;">
-      <select id="displayType" style="pointer-events: all; height: 24px; width: 70px; padding: 0; font-weight: 900; text-transform: uppercase; margin-right: 10px;">
-        <option>block</option>
-        <option selected>flex</option>
-        <option>grid</option>
-      </select>
+      ${BasicDisplayToolbarExtension.basicTemplate}
+      <node-projects-image-button-list-selector property="direction" no-value-in-header id="flex-direction">
+        <img data-value="row" src="${assetsPath}images/chromeDevtools/flex-direction-row-icon.svg">
+        <img data-value="column" src="${assetsPath}images/chromeDevtools/flex-direction-column-icon.svg">
+        <img data-value="row-reverse" style="transform: scaleX(-1);" src="${assetsPath}images/chromeDevtools/flex-direction-row-icon.svg">
+        <img data-value="column-reverse" style="transform: scaleY(-1);" src="${assetsPath}images/chromeDevtools/flex-direction-column-icon.svg">
+      </node-projects-image-button-list-selector>
+      <node-projects-image-button-list-selector property="wrap" no-value-in-header id="flex-wrap">
+        <img data-value="nowrap" src="${assetsPath}images/chromeDevtools/flex-wrap-nowrap-icon.svg">
+        <img data-value="wrap" src="${assetsPath}images/chromeDevtools/flex-wrap-wrap-icon.svg">
+      </node-projects-image-button-list-selector>
+      <node-projects-image-button-list-selector property="align-content" no-value-in-header id="align-content">
+        <img data-value="start" src="${assetsPath}images/chromeDevtools/align-content-flex-start-icon.svg">
+        <img data-value="center" src="${assetsPath}images/chromeDevtools/align-content-center-icon.svg">
+        <img data-value="end" src="${assetsPath}images/chromeDevtools/align-content-flex-end-icon.svg">
+        <img data-value="space-around" src="${assetsPath}images/chromeDevtools/align-content-space-around-icon.svg">
+        <img data-value="space-evenly" src="${assetsPath}images/chromeDevtools/align-content-space-evenly-icon.svg">
+        <img data-value="space-between" src="${assetsPath}images/chromeDevtools/align-content-space-between-icon.svg">
+        <img data-value="stretch" src="${assetsPath}images/chromeDevtools/align-content-stretch-icon.svg">
+      </node-projects-image-button-list-selector>
+      <node-projects-image-button-list-selector property="justify-content" no-value-in-header id="justify-content">
+        <img data-value="start" src="${assetsPath}images/chromeDevtools/justify-content-start-icon.svg">
+        <img data-value="center" src="${assetsPath}images/chromeDevtools/justify-content-center-icon.svg">
+        <img data-value="end" src="${assetsPath}images/chromeDevtools/justify-content-end-icon.svg">
+        <img data-value="space-around" src="${assetsPath}images/chromeDevtools/justify-content-space-around-icon.svg">
+        <img data-value="space-evenly" src="${assetsPath}images/chromeDevtools/justify-content-space-evenly-icon.svg">
+        <img data-value="space-between" src="${assetsPath}images/chromeDevtools/justify-content-space-between-icon.svg">
+      </node-projects-image-button-list-selector>
+      <node-projects-image-button-list-selector property="align-items" no-value-in-header id="align-items">
+        <img data-value="start" src="${assetsPath}images/chromeDevtools/align-items-start-icon.svg">
+        <img data-value="center" src="${assetsPath}images/chromeDevtools/align-items-center-icon.svg">
+        <img data-value="end" src="${assetsPath}images/chromeDevtools/align-items-end-icon.svg">
+        <img data-value="stretch" src="${assetsPath}images/chromeDevtools/align-items-stretch-icon.svg">
+        <img data-value="space-evenly" src="${assetsPath}images/chromeDevtools/align-items-baseline-icon.svg">
+      </node-projects-image-button-list-selector>
     </div>
   `;
 
-  private _toolbar: toolbarObject;
-
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
+    this._size.width = 515;
   }
 
   override extend(cache: Record<string | symbol, any>, event: MouseEvent) {
-    this._toolbar = this.createToolbar(FlexToolbarExtension.template, 200, 30);
-    const displayTypeEl = this._toolbar.getById<HTMLSelectElement>('displayType');
-    displayTypeEl.onchange = () => {
-      this.extendedItem.updateStyleInSheetOrLocal('display', displayTypeEl.value);
-      this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
-    }
-
+    super.extend(cache, event);
+    this._addFlexDirectionButton();
+    this._addStyleButton('flex-wrap');
+    this._addStyleButton('align-content');
+    this._addStyleButton('justify-content');
+    this._addStyleButton('align-items');
     this.refresh(cache, event);
   }
 
-  override refresh(cache: Record<string | symbol, any>, event?: MouseEvent) {
-    if (event) {
-      const pos = this.designerCanvas.getNormalizedEventCoordinates(event);
-      this._toolbar.updatePosition({ x: (pos.x - (16 / this.designerCanvas.zoomFactor)), y: (pos.y - (44 / this.designerCanvas.zoomFactor)) });
-    }
+  protected _addFlexDirectionButton() {
+    const cs = getComputedStyle(this.extendedItem.element);
+    const ctl = this._toolbar.getById<ImageButtonListSelector>('flex-direction')
+    ctl.addEventListener('value-changed', () => {
+      this.extendedItem.updateStyleInSheetOrLocal('flex-direction', ctl.value);
+      this.rotateImagesAcordingFlexDirection(ctl.value);
+    });
+    ctl.value = cs['flex-direction'];
+    this.rotateImagesAcordingFlexDirection(ctl.value);
   }
 
-  override dispose() {
-    this._removeAllOverlays();
+  rotateImagesAcordingFlexDirection(direction: string) {
+    let angle = 0
+    if (direction == 'column' || direction == 'column-reverse')
+      angle = -90;
+    this._toolbar.getById('flex-wrap').querySelectorAll('img').forEach(x => x.style.rotate = angle + 'deg');
+    this._toolbar.getById('align-content').querySelectorAll('img').forEach(x => x.style.rotate = angle + 'deg');
+    this._toolbar.getById('justify-content').querySelectorAll('img').forEach(x => x.style.rotate = angle + 'deg');
+    //@ts-ignore
+    this._toolbar.getById('align-items').querySelectorAll('img:nth-child(-n+4)').forEach(x => x.style.rotate = angle + 'deg');
   }
 }

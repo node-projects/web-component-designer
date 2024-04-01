@@ -155,7 +155,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       this._pg.instanceServiceContainer = value;
       await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
 
-      if (this._instanceServiceContainer.selectionService.primarySelection.isRootItem) {
+      if (this._instanceServiceContainer.selectionService?.primarySelection?.isRootItem) {
         this._configButton.style.display = 'none';
 
         this._id.value = '';

@@ -1,6 +1,4 @@
-import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-
-export type ImageButtonListSelectorValueChangedEventArgs = { newValue?: string, oldValue?: string };
+import { BaseCustomWebComponentConstructorAppend, css, html } from '@node-projects/base-custom-webcomponent';
 
 export class ImageButtonListSelector extends BaseCustomWebComponentConstructorAppend {
 
@@ -34,25 +32,35 @@ export class ImageButtonListSelector extends BaseCustomWebComponentConstructorAp
 
   public static override readonly template = html`
     <div>
-      <div><span id="property"></span>: <span id="value"></span></div>
-      <div class="container"><slot id="slot"></slot></div>
+      <div id="header" style="display: none"><span id="property"></span><span id="vhd">: <span id="value"></span></span></div>
+      <div part="container" class="container"><slot id="slot"></slot></div>
     </div>
   `;
+
+  public static properties = {
+    value: String,
+    property: String,
+    unsetValue: String,
+    noValueInHeader: Boolean
+  }
+
+  constructor() {
+    super();
+    this._restoreCachedInititalValues();
+  }
 
   private _value: string;
   public get value() {
     return this._value;
   }
   public set value(value) {
-    const oldValue = this._value;
     this._value = value;
     this._updateValue();
-    this.valueChanged.emit({ newValue: this._value, oldValue: oldValue });
   }
-  public valueChanged = new TypedEvent<ImageButtonListSelectorValueChangedEventArgs>();
 
   public property: string;
   public unsetValue: string;
+  public noValueInHeader: boolean;
 
   _updateValue() {
     if (this.value) {
@@ -73,12 +81,25 @@ export class ImageButtonListSelector extends BaseCustomWebComponentConstructorAp
   ready() {
     this._parseAttributesToProperties();
 
+    if (this.property)
+      this._getDomElement<HTMLSpanElement>('header').style.display = 'block';
+
+    if (this.noValueInHeader)
+      this._getDomElement<HTMLSpanElement>('vhd').style.display = 'none';
+
     const slot = this._getDomElement<HTMLSlotElement>('slot');
     slot.onclick = (e) => {
       const path = e.composedPath();
       for (let e of slot.assignedElements()) {
         if (path.indexOf(e) >= 0) {
+          const oldValue = this._value;
           this.value = (<HTMLElement>e).dataset.value;
+          const valueChangedEvent = new CustomEvent('value-changed', {
+            detail: {
+              newValue: this._value, oldValue: oldValue
+            }
+          });
+          this.dispatchEvent(valueChangedEvent);
         }
       }
     }

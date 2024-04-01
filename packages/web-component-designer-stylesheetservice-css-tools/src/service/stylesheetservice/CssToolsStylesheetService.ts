@@ -47,6 +47,17 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
         return rules;
     }
 
+    getRules(selector: string): IStyleRule[] {
+        const rules = this.getAppliedRules(null);
+        return rules.filter(x => x.selector == selector);
+    }
+
+    async addRule(stylesheet: IStylesheet, selector: string): Promise<IStyleRule> {
+        await this.updateCompleteStylesheet(stylesheet.name, stylesheet.content + '\n' + selector + ' {}');
+        const rules = this.getRules(selector).filter(x => x.stylesheetName == stylesheet.name);
+        return rules[rules.length - 1];
+    }
+
     private *getRulesFromAst(cssAtRuleAst: CssAtRuleAST[], stylesheet: IStylesheet, designItem: IDesignItem): IterableIterator<CssRuleAST> {
         for (const atRule of cssAtRuleAst) {
             if (atRule.type == 'media') {
@@ -107,19 +118,22 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
             this.stylesheetChanged.emit({ name: ss.stylesheet.name, newStyle: ss.stylesheet.content, oldStyle: old, changeSource: 'styleupdate' });
     }
 
-    updateCompleteStylesheet(name: string, newStyle: string) {
+    async updateCompleteStylesheet(name: string, newStyle: string) {
         this.updateCompleteStylesheetInternal(name, newStyle, 'styleupdate');
     }
 
-    updateCompleteStylesheetWithoutUndo(name: string, newStyle: string, noUndo = false) {
+    async updateCompleteStylesheetWithoutUndo(name: string, newStyle: string, noUndo = false) {
         this.updateCompleteStylesheetInternal(name, newStyle, 'undo');
     }
 
-    private updateCompleteStylesheetInternal(name: string, newStyle: string, changeSource: 'undo' | 'styleupdate') {
+    private async updateCompleteStylesheetInternal(name: string, newStyle: string, changeSource: 'undo' | 'styleupdate') {
         const ss = this._allStylesheets.get(name);
         if (ss.stylesheet.content != newStyle) {
             const old = ss.stylesheet.content;
             ss.stylesheet.content = newStyle;
+            if (changeSource == 'styleupdate') {
+                ss.ast = await this.internalParse(ss.stylesheet.content);
+            }
             if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
                 (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
             } else

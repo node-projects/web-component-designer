@@ -62,7 +62,7 @@ export interface IDesignItem {
 
   serviceContainer: ServiceContainer;
   instanceServiceContainer: InstanceServiceContainer;
-  
+
   getOrCreateDesignItem(node: Node);
 
   openGroup(title: string): ChangeGroup
@@ -71,8 +71,10 @@ export interface IDesignItem {
   getStyle(name: string): string
   hasStyle(name: string): boolean
   setStyle(name: string, value?: string | null, important?: boolean);
+  setStyleAsync(name: string, value?: string | null, important?: boolean): Promise<void>;
   removeStyle(name: string);
   updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean, forceSet?: boolean);
+  updateStyleInSheetOrLocalAsync(name: string, value?: string | null, important?: boolean, forceSet?: boolean) : Promise<void>;
   getStyleFromSheetOrLocal(name: string, fallback?: string);
   getStyleFromSheetOrLocalOrComputed(name: string, fallback?: string)
   getAllStyles(): IStyleRule[];
