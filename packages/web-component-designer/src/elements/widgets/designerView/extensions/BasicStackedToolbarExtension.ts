@@ -5,7 +5,7 @@ import { IDesignerCanvas } from "../IDesignerCanvas.js";
 import { IDesignItem } from "../../../item/IDesignItem.js";
 import { ImageButtonListSelector } from "../../../controls/ImageButtonListSelector.js";
 
-export class BasicDisplayToolbarExtension extends AbstractExtension {
+export class BasicStackedToolbarExtension extends AbstractExtension {
 
   protected static basicTemplate = `
       <node-projects-image-button-list-selector id="inline" no-value-in-header property="inline">
@@ -18,6 +18,8 @@ export class BasicDisplayToolbarExtension extends AbstractExtension {
         <option>grid</option>
       </select>
   `;
+
+  protected static toolBars: toolbarObject[] = [];
 
   protected _toolbar: toolbarObject;
   protected _size = { width: 200, height: 30 };
@@ -36,25 +38,29 @@ export class BasicDisplayToolbarExtension extends AbstractExtension {
 
     //@ts-ignore
     this._toolbar = this.createToolbar(this.constructor.template, this._size.width, this._size.height);
+    BasicStackedToolbarExtension.toolBars.push(this._toolbar);
 
     const displayTypeEl = this._toolbar.getById<HTMLSelectElement>('displayType');
-
-    displayTypeEl.value = this._display;
-    displayTypeEl.onchange = async () => {
-      this._display = displayTypeEl.value;
-      await this.updateDisplayValue();
-      this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
+    if (displayTypeEl) {
+      displayTypeEl.value = this._display;
+      displayTypeEl.onchange = async () => {
+        this._display = displayTypeEl.value;
+        await this.updateDisplayValue();
+        this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
+      }
     }
 
-    const inlineEl = this._toolbar.getById<ImageButtonListSelector>('inline')
-    inlineEl.value = this._inline;
-    inlineEl.addEventListener('value-changed', async () => {
-      this._inline = inlineEl.value;
-      if (this._inline && cs.position === 'absolute')
-        this.extendedItem.setStyle('position', 'static');
-      await this.updateDisplayValue();
-      this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
-    });
+    const inlineEl = this._toolbar.getById<ImageButtonListSelector>('inline');
+    if (inlineEl) {
+      inlineEl.value = this._inline;
+      inlineEl.addEventListener('value-changed', async () => {
+        this._inline = inlineEl.value;
+        if (this._inline && cs.position === 'absolute')
+          this.extendedItem.setStyle('position', 'static');
+        await this.updateDisplayValue();
+        this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
+      });
+    }
   }
 
   async updateDisplayValue() {
@@ -67,20 +73,27 @@ export class BasicDisplayToolbarExtension extends AbstractExtension {
   override refresh(cache: Record<string | symbol, any>, event?: MouseEvent) {
     if (event) {
       const pos = this.designerCanvas.getNormalizedEventCoordinates(event);
-      this._toolbar.updatePosition({ x: (pos.x - (16 / this.designerCanvas.zoomFactor)), y: (pos.y - (44 / this.designerCanvas.zoomFactor)) });
+      let tbOffset = 0;
+      for (let i = 0; i < BasicStackedToolbarExtension.toolBars.length - 1; i++) {
+        if (BasicStackedToolbarExtension.toolBars[i] === this._toolbar)
+          break;
+        tbOffset += this._toolbar.children[0].getBoundingClientRect().height + 4;
+      }
+      this._toolbar.updatePosition({ x: (pos.x - (16 / this.designerCanvas.zoomFactor)), y: (pos.y - tbOffset - ((this._size.height + 14) / this.designerCanvas.zoomFactor)) });
     }
   }
 
   protected _addStyleButton(styleAndControlName: string) {
     const cs = getComputedStyle(this.extendedItem.element);
     const ctl = this._toolbar.getById<ImageButtonListSelector>(styleAndControlName)
-    ctl.addEventListener('value-changed', () => {
-      this.extendedItem.updateStyleInSheetOrLocal(styleAndControlName, ctl.value);
+    ctl.addEventListener('value-changed', async () => {
+      await this.extendedItem.updateStyleInSheetOrLocalAsync(styleAndControlName, ctl.value);
     });
     ctl.value = cs[styleAndControlName];
   }
 
   override dispose() {
+    BasicStackedToolbarExtension.toolBars.splice(BasicStackedToolbarExtension.toolBars.indexOf(this._toolbar), 1);
     this._removeAllOverlays();
   }
 }

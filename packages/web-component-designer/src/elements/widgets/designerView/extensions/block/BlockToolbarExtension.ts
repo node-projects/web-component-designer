@@ -1,14 +1,14 @@
 import { html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
-import { BasicDisplayToolbarExtension } from "../BasicDisplayToolbarExtension.js";
+import { BasicStackedToolbarExtension } from "../BasicStackedToolbarExtension.js";
 import { IExtensionManager } from "../IExtensionManger.js";
 
-export class BlockToolbarExtension extends BasicDisplayToolbarExtension {
+export class BlockToolbarExtension extends BasicStackedToolbarExtension {
 
   protected static template = html`
       <div style="height: 100%; width: 100%;">
-        ${BasicDisplayToolbarExtension.basicTemplate}
+        ${BasicStackedToolbarExtension.basicTemplate}
       </div>
     `;
 

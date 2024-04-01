@@ -586,10 +586,9 @@ export class DesignItem implements IDesignItem {
   }
 
   getComputedStyle() {
-    /*if (this.isRootItem) {
-      return window.getComputedStyle((<ShadowRoot>this.node).host);
-    }*/
-    return window.getComputedStyle(this.element);
+    if (this.nodeType == NodeType.Element)
+      return window.getComputedStyle(this.element);
+    return null;
   }
 
   _stylesCache: IStyleRule[] = null;

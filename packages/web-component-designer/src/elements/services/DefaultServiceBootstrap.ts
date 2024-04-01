@@ -90,6 +90,7 @@ import { GridToolbarExtensionProvider } from '../widgets/designerView/extensions
 import { FlexToolbarExtensionProvider } from '../widgets/designerView/extensions/flex/FlexToolbarExtensionProvider.js';
 import { BlockToolbarExtensionProvider } from '../widgets/designerView/extensions/block/BlockToolbarExtensionProvider.js';
 import { ChildContextMenu } from '../widgets/designerView/extensions/contextMenu/ChildContextMenu.js';
+import { GridChildToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildToolbarExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -139,6 +140,7 @@ export function createDefaultServiceContainer() {
     new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionRefreshed, [
+    new GridChildToolbarExtensionProvider(),
     new GridToolbarExtensionProvider(),
     new FlexToolbarExtensionProvider(),
     new BlockToolbarExtensionProvider(),

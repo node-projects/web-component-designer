@@ -243,7 +243,7 @@ export * from "./elements/widgets/designerView/tools/ZoomTool.js";
 export type { IDesignerExtension } from "./elements/widgets/designerView/extensions/IDesignerExtension.js";
 export type { IDesignerExtensionProvider } from "./elements/widgets/designerView/extensions/IDesignerExtensionProvider.js";
 export type { IExtensionManager } from "./elements/widgets/designerView/extensions/IExtensionManger.js";
-export * from "./elements/widgets/designerView/extensions/BasicDisplayToolbarExtension.js";
+export * from "./elements/widgets/designerView/extensions/BasicStackedToolbarExtension.js";
 export * from "./elements/widgets/designerView/extensions/OverlayLayer.js";
 export * from "./elements/widgets/designerView/extensions/ExtensionType.js";
 export * from "./elements/widgets/designerView/extensions/AbstractExtension.js";

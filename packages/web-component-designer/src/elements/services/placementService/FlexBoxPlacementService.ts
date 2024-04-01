@@ -36,9 +36,12 @@ export class FlexBoxPlacementService implements IPlacementService {
     }
   }
 
-  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
-    if (containerStyle.display == 'flex' || containerStyle.display == 'inline-flex')
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration, item?: IDesignItem) {
+    if (containerStyle.display == 'flex' || containerStyle.display == 'inline-flex') {
+      if (item != null && item.getComputedStyle()?.position == 'absolute')
+        return false;
       return true;
+    }
     return false;
   }
 

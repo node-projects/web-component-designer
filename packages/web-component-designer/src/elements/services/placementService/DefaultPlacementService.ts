@@ -11,7 +11,9 @@ import { straightenLine } from '../../helper/PathDataPolyfill.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
-  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration, item?: IDesignItem) {
+    if (item != null && item.getComputedStyle()?.position == 'absolute')
+      return true;
     if (containerStyle.display === 'grid' || containerStyle.display === 'inline-grid' ||
       containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
       return false;

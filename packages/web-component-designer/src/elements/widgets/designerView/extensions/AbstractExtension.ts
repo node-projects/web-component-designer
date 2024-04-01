@@ -30,8 +30,18 @@ export abstract class AbstractExtension extends AbstractExtensionBase implements
 
   createToolbar(template: HTMLTemplateElement, width: number, height: number, overlayLayer: OverlayLayer = OverlayLayer.Foreground) {
     const element = <SVGGraphicsElement & {}>(<any>template.content.cloneNode(true));
-    element.querySelectorAll('*').forEach(x => (<HTMLElement>x).onpointerdown = (e) => {
-      this.designerCanvas.ignoreEvent(e);
+    element.querySelectorAll('*').forEach(x => {
+      (<HTMLElement>x).onpointerdown = (e) => {
+        this.designerCanvas.ignoreEvent(e);
+      }
+      if (x instanceof HTMLInputElement) {
+        x.addEventListener('keydown', (e) => {
+          this.designerCanvas.ignoreEvent(e);
+        }, { capture: true });
+        x.addEventListener('keyup', (e) => {
+          this.designerCanvas.ignoreEvent(e);
+        }, { capture: true });
+      }
     });
 
     const foreignObject = <toolbarObject><any>document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');

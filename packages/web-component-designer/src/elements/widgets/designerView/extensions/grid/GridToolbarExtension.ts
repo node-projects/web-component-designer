@@ -2,14 +2,14 @@ import { html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { IExtensionManager } from '../IExtensionManger.js';
-import { BasicDisplayToolbarExtension } from "../BasicDisplayToolbarExtension.js";
+import { BasicStackedToolbarExtension } from "../BasicStackedToolbarExtension.js";
 import { assetsPath } from "../../../../../Constants.js";
 
-export class GridToolbarExtension extends BasicDisplayToolbarExtension {
+export class GridToolbarExtension extends BasicStackedToolbarExtension {
 
   protected static template = html`
     <div style="height: 100%; width: 100%;">
-      ${BasicDisplayToolbarExtension.basicTemplate}
+      ${BasicStackedToolbarExtension.basicTemplate}
       <select title="display" id="gridType" style="pointer-events: all; height: 24px; width: 60px; padding: 0; margin-right: 10px">
         <option>1x1</option>
         <option>1x16</option>
@@ -67,18 +67,22 @@ export class GridToolbarExtension extends BasicDisplayToolbarExtension {
     op.innerText = style.gridTemplateColumns.split(' ').length + 'x' + style.gridTemplateRows.split(' ').length;
     gridTypeEl.insertAdjacentElement('afterbegin', op);
     gridTypeEl.selectedIndex = 0;
-    gridTypeEl.onchange = () => {
+    gridTypeEl.onchange = async () => {
       if (gridTypeEl.value == 'custom') {
         const columns = prompt("Number of columns?", '4');
         if (!columns) return;
         const rows = prompt("Number of rows?", '4');
         if (!rows) return;
-        this.extendedItem.updateStyleInSheetOrLocal('grid-template-columns', '1fr '.repeat(parseInt(columns)).trim());
-        this.extendedItem.updateStyleInSheetOrLocal('grid-template-rows', '1fr '.repeat(parseInt(rows)).trim());
+        const cg = this.extendedItem.openGroup('change grid type');
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-columns', '1fr '.repeat(parseInt(columns)).trim());
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-rows', '1fr '.repeat(parseInt(rows)).trim());
+        cg.commit();
       } else {
         const parts = gridTypeEl.value.split('x');
-        this.extendedItem.updateStyleInSheetOrLocal('grid-template-columns', '1fr '.repeat(parseInt(parts[0])).trim());
-        this.extendedItem.updateStyleInSheetOrLocal('grid-template-rows', '1fr '.repeat(parseInt(parts[1])).trim());
+        const cg = this.extendedItem.openGroup('change grid type');
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-columns', '1fr '.repeat(parseInt(parts[0])).trim());
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-rows', '1fr '.repeat(parseInt(parts[1])).trim());
+        cg.commit();
       }
     }
 

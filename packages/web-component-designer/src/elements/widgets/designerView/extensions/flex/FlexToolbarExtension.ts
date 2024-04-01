@@ -3,14 +3,14 @@ import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { IExtensionManager } from '../IExtensionManger.js';
 import { assetsPath } from "../../../../../Constants.js";
-import { BasicDisplayToolbarExtension } from "../BasicDisplayToolbarExtension.js";
+import { BasicStackedToolbarExtension } from "../BasicStackedToolbarExtension.js";
 import { ImageButtonListSelector } from "../../../../controls/ImageButtonListSelector.js";
 
-export class FlexToolbarExtension extends BasicDisplayToolbarExtension {
+export class FlexToolbarExtension extends BasicStackedToolbarExtension {
 
   protected static template = html`
     <div style="height: 100%; width: 100%;">
-      ${BasicDisplayToolbarExtension.basicTemplate}
+      ${BasicStackedToolbarExtension.basicTemplate}
       <node-projects-image-button-list-selector property="direction" no-value-in-header id="flex-direction">
         <img data-value="row" src="${assetsPath}images/chromeDevtools/flex-direction-row-icon.svg">
         <img data-value="column" src="${assetsPath}images/chromeDevtools/flex-direction-column-icon.svg">
@@ -66,8 +66,8 @@ export class FlexToolbarExtension extends BasicDisplayToolbarExtension {
   protected _addFlexDirectionButton() {
     const cs = getComputedStyle(this.extendedItem.element);
     const ctl = this._toolbar.getById<ImageButtonListSelector>('flex-direction')
-    ctl.addEventListener('value-changed', () => {
-      this.extendedItem.updateStyleInSheetOrLocal('flex-direction', ctl.value);
+    ctl.addEventListener('value-changed', async () => {
+      await this.extendedItem.updateStyleInSheetOrLocalAsync('flex-direction', ctl.value);
       this.rotateImagesAcordingFlexDirection(ctl.value);
     });
     ctl.value = cs['flex-direction'];

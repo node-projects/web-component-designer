@@ -40,9 +40,12 @@ export class GridPlacementService implements IPlacementService {
     }
   }
 
-  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
-    if (containerStyle.display == 'grid' || containerStyle.display == 'inline-grid')
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration, item?: IDesignItem) {
+    if (containerStyle.display == 'grid' || containerStyle.display == 'inline-grid') {
+      if (item != null && item.getComputedStyle()?.position == 'absolute')
+        return false;
       return true;
+    }
     return false;
   }
 

@@ -66,8 +66,8 @@ export class PropertyGroupsService implements IPropertyGroupsService {
         if (designItems[0].element instanceof SVGElement)
             lst = this._svgPgList;
 
-        if (designItems[0].element.parentElement) {
-            const parentStyle = getComputedStyle(designItems[0].element.parentElement);
+        if (designItems[0].parent) {
+            const parentStyle = designItems[0].parent.getComputedStyle();
             if (parentStyle.display.includes('grid'))
                 lst = [...lst, this._gridChild[0]];
             else if (parentStyle.display.includes('flex'))

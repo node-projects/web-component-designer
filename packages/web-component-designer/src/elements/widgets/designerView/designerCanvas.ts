@@ -713,8 +713,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
       this.clickOverlay.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
       this.clickOverlay.addEventListener(EventNames.Drop, event => this._onDrop(event));
-      this.clickOverlay.addEventListener(EventNames.KeyDown, this.onKeyDown, true);
-      this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp, true);
+      this.clickOverlay.addEventListener(EventNames.KeyDown, this.onKeyDown);
+      this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp);
       this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, true);
       this.clickOverlay.addEventListener('zoom', (e: CustomEvent) => {
         this.zoomFactor = this.zoomFactor + (e.detail.diff / 10);
@@ -983,6 +983,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private onKeyUp(event: KeyboardEvent) {
+    if (this._ignoreEvent === event)
+      return;
+
     if (this._moveGroup) {
       this._moveGroup.commit()
       this._moveGroup = null;
@@ -992,6 +995,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private onKeyDown(event: KeyboardEvent) {
+    if (this._ignoreEvent === event)
+      return;
+
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
       this.executeCommand({ type: CommandType.undo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
     else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)

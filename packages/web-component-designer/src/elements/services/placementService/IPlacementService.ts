@@ -4,7 +4,7 @@ import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { IPoint } from '../../../interfaces/IPoint.js';
 
 export interface IPlacementService extends IService {
-  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration): boolean;
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration, item?: IDesignItem): boolean;
   isEnterableContainer(container: IDesignItem): boolean;
   canEnter(container: IDesignItem, items: IDesignItem[]): boolean;
   canLeave(container: IDesignItem, items: IDesignItem[]): boolean;

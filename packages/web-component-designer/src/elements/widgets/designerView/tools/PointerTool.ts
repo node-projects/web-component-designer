@@ -282,7 +282,7 @@ export class PointerTool implements ITool {
 
           if (this._movedSinceStartedAction) {
             const containerStyle = getComputedStyle(this._actionStartedDesignItem.parent.element);
-            const currentContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent, containerStyle));
+            const currentContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent, containerStyle, this._actionStartedDesignItem));
             if (currentContainerService) {
               const dragItem = this._actionStartedDesignItem.parent;
               if (this._dragParentExtensionItem != dragItem) {
@@ -376,7 +376,7 @@ export class PointerTool implements ITool {
 
           if (this._movedSinceStartedAction) {
             const containerStyle = getComputedStyle(this._actionStartedDesignItem.parent.element);
-            let containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent, containerStyle))
+            let containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this._actionStartedDesignItem.parent, containerStyle, this._actionStartedDesignItem))
             const cp = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
 
             if (containerService) {
@@ -456,14 +456,14 @@ export class PointerTool implements ITool {
       } else if (e == designerCanvas.rootDesignItem.element) {
         newContainerElementDesignItem = designerCanvas.rootDesignItem;
         const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-        newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+        newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle, designItem));
         break;
       } else if (false) {
         //check we don't try to move a item over one of its children..
       } else {
         newContainerElementDesignItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
-        newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
+        newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle, designItem));
         if (newContainerService) {
           if (newContainerService.canEnter(newContainerElementDesignItem, designItems)) {
             break;
