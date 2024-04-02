@@ -18,16 +18,16 @@ export class GridChildToolbarExtension extends BasicStackedToolbarExtension {
         <input type="text" title="column" id="gridRow" style="pointer-events: all; height: 12px; width: 45px; padding: 0; margin-right: 10px">
       </div>
       <node-projects-image-button-list-selector property="align-self" no-value-in-header id="align-self">
-        <img data-value="start" src="${assetsPath}images/chromeDevtools/align-items-start-icon.svg">
-        <img data-value="center" src="${assetsPath}images/chromeDevtools/align-items-center-icon.svg">
-        <img data-value="end" src="${assetsPath}images/chromeDevtools/align-items-end-icon.svg">
-        <img data-value="stretch" src="${assetsPath}images/chromeDevtools/align-items-stretch-icon.svg">
+        <img title="start" data-value="start" src="${assetsPath}images/chromeDevtools/align-items-start-icon.svg">
+        <img title="center" data-value="center" src="${assetsPath}images/chromeDevtools/align-items-center-icon.svg">
+        <img title="end" data-value="end" src="${assetsPath}images/chromeDevtools/align-items-end-icon.svg">
+        <img title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/align-items-stretch-icon.svg">
       </node-projects-image-button-list-selector>
       <node-projects-image-button-list-selector property="justify-self" no-value-in-header id="justify-self">
-        <img data-value="start" src="${assetsPath}images/chromeDevtools/justify-items-start-icon.svg">
-        <img data-value="center" src="${assetsPath}images/chromeDevtools/justify-items-center-icon.svg">
-        <img data-value="end" src="${assetsPath}images/chromeDevtools/justify-items-end-icon.svg">
-        <img data-value="stretch" src="${assetsPath}images/chromeDevtools/justify-items-stretch-icon.svg">
+        <img title="start" data-value="start" src="${assetsPath}images/chromeDevtools/justify-items-start-icon.svg">
+        <img title="center" data-value="center" src="${assetsPath}images/chromeDevtools/justify-items-center-icon.svg">
+        <img title="end" data-value="end" src="${assetsPath}images/chromeDevtools/justify-items-end-icon.svg">
+        <img title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/justify-items-stretch-icon.svg">
       </node-projects-image-button-list-selector>
     </div>`;
 
