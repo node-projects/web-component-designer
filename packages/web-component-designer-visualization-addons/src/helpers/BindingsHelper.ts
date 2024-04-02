@@ -51,8 +51,8 @@ export class IndirectSignal {
     private parts: string[];
     private signals: string[];
     private values: string[];
-    private unsubscribeList: ((id: string, value: any) => void)[] = [];
-    private unsubscribeTargetValue: ((id: string, value: any) => void);
+    private unsubscribeList: [((id: string, value: any) => void),any][] = [];
+    private unsubscribeTargetValue: [((id: string, value: any) => void), any];
     private combinedName: string;
     private disposed: boolean;
     private valueChangedCb: (value: any) => void
@@ -65,8 +65,7 @@ export class IndirectSignal {
         this.values = new Array(this.signals.length);
         for (let i = 0; i < this.signals.length; i++) {
             let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
-            this.unsubscribeList.push(cb);
-            this.visualizationHandler.subscribeState(this.signals[i], cb);
+            this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(this.signals[i], cb)]);
         }
     }
 
@@ -87,13 +86,12 @@ export class IndirectSignal {
         }
         if (this.combinedName != nm) {
             if (this.unsubscribeTargetValue) {
-                this.visualizationHandler.unsubscribeState(this.combinedName, this.unsubscribeTargetValue);
+                this.visualizationHandler.unsubscribeState(this.combinedName, this.unsubscribeTargetValue[0], this.unsubscribeTargetValue[1]);
             }
             if (!this.disposed) {
                 this.combinedName = nm;
                 let cb = (id: string, value: any) => this.valueChangedCb(value);
-                this.unsubscribeTargetValue = cb;
-                this.visualizationHandler.subscribeState(nm, cb);
+                this.unsubscribeTargetValue = [cb, this.visualizationHandler.subscribeState(nm, cb)];
             }
         }
     }
@@ -101,11 +99,11 @@ export class IndirectSignal {
     dispose() {
         this.disposed = true;
         if (this.unsubscribeTargetValue) {
-            this.visualizationHandler.unsubscribeState(this.combinedName, this.unsubscribeTargetValue);
+            this.visualizationHandler.unsubscribeState(this.combinedName, this.unsubscribeTargetValue[0], this.unsubscribeTargetValue[1]);
             this.unsubscribeTargetValue = null;
         }
         for (let i = 0; i < this.signals.length; i++) {
-            this.visualizationHandler.unsubscribeState(this.signals[i], this.unsubscribeList[i]);
+            this.visualizationHandler.unsubscribeState(this.signals[i], this.unsubscribeList[i][0],this.unsubscribeList[i][1]);
         }
     }
 
@@ -435,11 +433,11 @@ export class BindingsHelper {
     }
 
     applyBinding(element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement): () => void {
-        let unsubscribeList: [id: string, ((id: string, value: any) => void)][] = [];
+        let unsubscribeList: [id: string, ((id: string, value: any) => void), any][] = [];
         let cleanupCalls: (() => void)[];
         const cleanUp = () => {
             for (const u of unsubscribeList) {
-                this._visualizationHandler.unsubscribeState(u[0], u[1]);
+                this._visualizationHandler.unsubscribeState(u[0], u[1], u[2]);
             }
             if (cleanupCalls) {
                 for (let e of cleanupCalls) {
@@ -546,8 +544,7 @@ export class BindingsHelper {
                             this._visualizationHandler.getHistoricData(s, binding[1].historic).then(x => this.handleValueChanged(element, binding, x?.values, valuesObject, i, signalVars, true))
                     } else {
                         const cb = (id: string, value: State) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false);
-                        unsubscribeList.push([s, cb]);
-                        this._visualizationHandler.subscribeState(s, cb);
+                        unsubscribeList.push([s, cb, this._visualizationHandler.subscribeState(s, cb)]);
                         this._visualizationHandler.getState(s).then(x => this.handleValueChanged(element, binding, x?.val, valuesObject, i, signalVars, false));
                         if (binding[1].twoWay && i == 0) {
                             this.addTwoWayBinding(binding, element, v => this._visualizationHandler.setState(s, v));
