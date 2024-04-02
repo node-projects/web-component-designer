@@ -33,6 +33,12 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     }
     `;
 
+  static readonly properties = {
+    serviceContainer: Object,
+    instanceServiceContainer: Object,
+    selectedItems: Array
+  }
+  
   constructor() {
     super();
     this._restoreCachedInititalValues();

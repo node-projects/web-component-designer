@@ -145,7 +145,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   }
 
   public set serviceContainer(value: ServiceContainer) {
-    this._waitForChildrenReady().then(() => this._pg.serviceContainer = value);
+    this._pg.serviceContainer = value;
   }
 
   public set instanceServiceContainer(value: InstanceServiceContainer) {

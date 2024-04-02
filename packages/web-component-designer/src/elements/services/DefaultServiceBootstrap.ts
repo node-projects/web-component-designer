@@ -154,7 +154,7 @@ export function createDefaultServiceContainer() {
     new ConditionExtensionProvider(new SelectionDefaultExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainerAndCanBeEntered, [
-    new DisplayGridExtensionProvider(),
+    new DisplayGridExtensionProvider('lightgray', '#8080807d'),
     new EditGridColumnRowSizesExtensionProvider(),
     new FlexboxExtensionProvider()
   ]);

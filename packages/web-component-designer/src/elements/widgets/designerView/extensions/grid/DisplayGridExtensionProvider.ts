@@ -10,6 +10,14 @@ export const gridExtensionShowOverlayOptionName = 'gridExtensionShowOverlay';
 
 export class DisplayGridExtensionProvider implements IDesignerExtensionProvider {
 
+  gridColor: string;
+  gridFillColor: string;
+
+  constructor(gridColor: string = 'orange', gridFillColor = '#ff944722') {
+    this.gridColor = gridColor;
+    this.gridFillColor = gridFillColor;
+  }
+
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
     if (display == 'grid' || display == 'inline-grid')
@@ -18,15 +26,15 @@ export class DisplayGridExtensionProvider implements IDesignerExtensionProvider 
   }
 
   getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new DisplayGridExtension(extensionManager, designerCanvas, designItem);
+    return new DisplayGridExtension(extensionManager, designerCanvas, designItem, this.gridColor, this.gridFillColor);
   }
 
   readonly style = css`
-    .svg-grid { stroke: orange; stroke-dasharray: 5; fill: #ff944722; }
-    .svg-grid-current-cell { stroke: orange; stroke-dasharray: 5; fill: #e3ff4722; }
+    .svg-grid { stroke: var(--svg-grid-stroke-color); stroke-dasharray: 5; fill: var(--svg-grid-fill-color); }
+    .svg-grid-current-cell { stroke: var(--svg-grid-stroke-color); stroke-dasharray: 5; fill: #e3ff4722; }
     .svg-grid-area { font-size: 8px; }
-    .svg-grid-gap { stroke: orange; stroke-dasharray: 5; fill: #0000ff22; }
-    .svg-grid-header { fill: #ff944722; stroke: orange; }
+    .svg-grid-gap { stroke: var(--svg-grid-stroke-color); stroke-dasharray: 5; fill: #0000ff22; }
+    .svg-grid-header { fill: var(--svg-grid-fill-color); stroke: var(--svg-grid-stroke-color); }
     .svg-grid-plus-sign { stroke: black; }
   `;
 }

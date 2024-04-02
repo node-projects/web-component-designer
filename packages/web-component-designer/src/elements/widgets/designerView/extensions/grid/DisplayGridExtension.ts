@@ -14,10 +14,15 @@ export class DisplayGridExtension extends AbstractExtension {
   private _group: SVGGElement;
 
   private gridInformation: ReturnType<typeof calculateGridInformation>
+  private gridInformationString: string;
   private _lastEvent: Event;
+  private gridColor: string;
+  private gridFillColor: string;
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem, gridColor: string, gridFillColor: string) {
     super(extensionManager, designerView, extendedItem);
+    this.gridColor = gridColor;
+    this.gridFillColor = gridFillColor;
   }
 
   override extend(cache: Record<string | symbol, any>, event?: Event) {
@@ -27,45 +32,52 @@ export class DisplayGridExtension extends AbstractExtension {
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     this.gridInformation = calculateGridInformation(this.extendedItem);
-    let cells = this.gridInformation.cells;
+    const gridInformationString = JSON.stringify(this.gridInformation);
 
-    if (event)
-      this._lastEvent = event;
+    if (gridInformationString !== this.gridInformationString || (event != null && this._lastEvent !== event)) {
+      if (event)
+        this._lastEvent = event;
 
-    if (cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
-      if (this.gridInformation.cells.length != this._cells.length || this.gridInformation.cells[0].length != this._cells[0].length)
-        this._initSVGArrays();
+      this.gridInformationString = gridInformationString;
+      let cells = this.gridInformation.cells;
 
-      if (!this._group) {
-        this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
-        this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
-        this._group.style.transformOrigin = '0 0';
-        this._group.style.transformBox = 'fill-box';
-      }
+      if (cells[0][0] && !isNaN(cells[0][0].height) && !isNaN(cells[0][0].width)) {
+        if (this.gridInformation.cells.length != this._cells.length || this.gridInformation.cells[0].length != this._cells[0].length)
+          this._initSVGArrays();
 
-      //draw gaps
-      this.gridInformation.gaps.forEach((gap, i) => {
-        this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Background);
-        this._group.appendChild(this._gaps[i]);
-      });
+        if (!this._group) {
+          this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
+          this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
+          this._group.style.transformOrigin = '0 0';
+          this._group.style.transformBox = 'fill-box';
+          this._group.style.setProperty("--svg-grid-stroke-color", this.gridColor)
+          this._group.style.setProperty("--svg-grid-fill-color", this.gridFillColor)
+        }
 
-      //draw cells
-      cells.forEach((row, i) => {
-        row.forEach((cell, j) => {
-          this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
-          this._group.appendChild(this._cells[i][j]);
-          if (cell.name) {
-            this._texts[i][j] = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', this._texts[i][j], OverlayLayer.Background);
-            this._texts[i][j].setAttribute("dominant-baseline", "hanging");
-          }
-          if (this._lastEvent && this._lastEvent instanceof MouseEvent) {
-            let crd = this.designerCanvas.getNormalizedEventCoordinates(this._lastEvent);
-            if (crd.x >= cell.x && crd.y >= cell.y && crd.x <= cell.x + cell.width && crd.y <= cell.y + cell.height) {
-              this._cells[i][j].setAttribute("class", "svg-grid-current-cell");
+        //draw gaps
+        this.gridInformation.gaps.forEach((gap, i) => {
+          this._gaps[i] = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-gap', this._gaps[i], OverlayLayer.Background);
+          this._group.appendChild(this._gaps[i]);
+        });
+
+        //draw cells
+        cells.forEach((row, i) => {
+          row.forEach((cell, j) => {
+            this._cells[i][j] = this._drawRect(cell.x, cell.y, cell.width, cell.height, 'svg-grid', this._cells[i][j], OverlayLayer.Background);
+            this._group.appendChild(this._cells[i][j]);
+            if (cell.name) {
+              this._texts[i][j] = this._drawText(cell.name, cell.x, cell.y, 'svg-grid-area', this._texts[i][j], OverlayLayer.Background);
+              this._texts[i][j].setAttribute("dominant-baseline", "hanging");
             }
-          }
-        })
-      });
+            if (this._lastEvent && this._lastEvent instanceof MouseEvent) {
+              let crd = this.designerCanvas.getNormalizedEventCoordinates(this._lastEvent);
+              if (crd.x >= cell.x && crd.y >= cell.y && crd.x <= cell.x + cell.width && crd.y <= cell.y + cell.height) {
+                this._cells[i][j].setAttribute("class", "svg-grid-current-cell");
+              }
+            }
+          })
+        });
+      }
     }
   }
 
