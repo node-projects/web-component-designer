@@ -242,10 +242,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   }
 
   getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
-    //TODO: optimize perf, do not call bindings service for each property. 
-    const bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
-      return s.getBindings(designItems[0]);
-    });
+    const bindings = AbstractPropertiesService.getOrBuildCachedBindings(designItems[0]);
     if (bindings != null) {
       if (property.propertyType == PropertyType.cssValue) {
         return bindings.find(x => (x.target == BindingTarget.css || x.target == BindingTarget.cssvar) && x.targetName == property.name);
