@@ -176,7 +176,7 @@ export class ScriptSystem {
     return retVal;
   }
 
-  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement): Promise<VisualisationElementScript> {
+  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, assignExternalScript?: (element: Element, event: string, scriptData: any) => void): Promise<VisualisationElementScript> {
     const allElements = shadowRoot.querySelectorAll('*');
     let jsObject: VisualisationElementScript = null;
     if (javascriptCode) {
@@ -207,6 +207,9 @@ export class ScriptSystem {
                     compiledFunc = await generateEventCodeFromBlockly(scriptObj);
                   compiledFunc(evt, shadowRoot);
                 });
+              } else {
+                if (assignExternalScript)
+                  assignExternalScript(e, evtName, scriptObj);
               }
             } else {
               e.addEventListener(evtName, (evt) => {
