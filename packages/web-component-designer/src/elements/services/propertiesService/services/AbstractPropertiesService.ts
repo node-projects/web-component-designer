@@ -21,7 +21,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   private static _stylesCache = new Map<IDesignItem, Set<string>>;
   private _cssCacheClearTimer: NodeJS.Timeout;
   private static _bindingsCache = new Map<IDesignItem, IBinding[]>;
-  private _bindingsCacheClearTimer: NodeJS.Timeout;
+  private static _bindingsCacheClearTimer: NodeJS.Timeout;
 
   abstract getRefreshMode(designItem: IDesignItem): RefreshMode;
 
@@ -144,13 +144,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           break;
       };
 
-      let bindings = AbstractPropertiesService._bindingsCache.get(designItems[0]);
-      if (!bindings) {
-        bindings = designItems[0].serviceContainer.forSomeServicesTillResult('bindingService', (s) => s.getBindings(designItems[0]));
-        AbstractPropertiesService._bindingsCache.set(designItems[0], bindings);
-        clearTimeout(this._bindingsCacheClearTimer);
-        this._bindingsCacheClearTimer = setTimeout(() => AbstractPropertiesService._bindingsCache.clear(), 30);
-      }
+      const bindings = AbstractPropertiesService.getOrBuildCachedBindings(designItems[0]);
       if (property.propertyType == PropertyType.cssValue) {
         if (bindings && bindings.find(x => (x.target == BindingTarget.css || x.target == BindingTarget.cssvar) && x.targetName == property.name))
           return ValueType.bound;
@@ -185,6 +179,24 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       return ValueType.none
 
     return all ? ValueType.all : some ? ValueType.some : ValueType.none;
+  }
+
+  static getOrBuildCachedBindings(designItem: IDesignItem) {
+    let bindings = AbstractPropertiesService._bindingsCache.get(designItem);
+    if (!bindings) {
+      const services = designItem.serviceContainer.getServices('bindingService');
+      const bindings = [];
+      for (const s of services) {
+        const bs = s.getBindings(designItem);
+        if (bs && bs.length > 0) {
+          bindings.push(...bs);
+        }
+      }
+      AbstractPropertiesService._bindingsCache.set(designItem, bindings);
+      clearTimeout(this._bindingsCacheClearTimer);
+      this._bindingsCacheClearTimer = setTimeout(() => AbstractPropertiesService._bindingsCache.clear(), 30);
+    }
+    return bindings;
   }
 
   getValue(designItems: IDesignItem[], property: IProperty) {
