@@ -55,7 +55,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       <div style="height: 100%;">
         <input id="input" style="width: 100%; box-sizing: border-box; height:27px;" placeholder="Filter... (regex)" autocomplete="off">
         <div style="height: calc(100% - 23px);">
-        <div id="treetable" class="wb-alternate" style="min-width: 100%;"></div>
+        <div id="treetable" class="wb-alternate" style="min-width: 100%; box-sizing: border-box;"></div>
         </div>
       </div>`;
 

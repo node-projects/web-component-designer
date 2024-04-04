@@ -19,7 +19,7 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
   static override readonly style = css``;
 
   static override template = html`
-      <div id="tree" style="height: 100%; overflow: auto;" class="wb-skeleton wb-initializing wb-no-select wb-alternate">
+      <div id="tree" style="height: 100%; overflow: auto; box-sizing: border-box;" class="wb-skeleton wb-initializing wb-no-select wb-alternate">
       </div>`
 
   constructor() {
