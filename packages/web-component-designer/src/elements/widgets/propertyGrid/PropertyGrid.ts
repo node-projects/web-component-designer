@@ -38,13 +38,12 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     instanceServiceContainer: Object,
     selectedItems: Array
   }
-  
+
   constructor() {
     super();
-    this._restoreCachedInititalValues();
-
     this._designerTabControl = new DesignerTabControl();
     this.shadowRoot.appendChild(this._designerTabControl);
+    this._restoreCachedInititalValues();
     this.addEventListener('contextmenu', (e) => {
       if ((<HTMLElement>e.composedPath()[0]).localName != 'input')
         e.preventDefault()
