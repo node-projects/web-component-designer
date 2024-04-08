@@ -30,6 +30,9 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             width: 100%;
             box-sizing: border-box;
         }
+        input::placeholder {
+            font-size: 8px;
+        }
         a {
             cursor: pointer;
         }
@@ -50,11 +53,11 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         <span style="grid-column: 1 / span 3; margin-top: 8px; margin-left: 3px;">add event:</span>
         <input id="addEventInput" style="grid-column: 1 / span 3; margin: 5px;" @keypress=[[this._addEvent(event)]] type="text">`;
 
-    static evtEdit = html`
+    static editRowTemplate = html`
             <div style="display: flex; justify-content: flex-end;">
-                <input title="name" style="min-width: 30px; flex-basis: 30px; flex-grow: 2;" class="mth" type="text">
-                <input title="relative signals path" style="min-width: 20px; flex-basis: 20px; flex-grow: 1;" class="mth" type="text">
-                <button style="display: flex; padding: 0; flex-grow: 0;" title="parameter" @click="[[this._editParameter(event, item)]]">p</button>
+                <input hidden="[[this._getScriptType(item) !== 'js']]" placeholder="name" title="name" style="min-width: 50px; flex-basis: 30px; flex-grow: 2;" class="mth" type="text">
+                <input placeholder="relative signals path" title="relative signals path" style="min-width: 50px; flex-basis: 20px; flex-grow: 1;" class="mth" type="text">
+                <button css:background="[[this._hasParameters(item) ? 'lime' : '']]" style="display: flex; padding: 0; flex-grow: 0;" title="parameter" @click="[[this._editParameter(event, item)]]">p</button>
             </div>`;
 
     static scriptTypeColors = {
@@ -105,8 +108,17 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             case 'none':
                 return '';
         }
-        const ctl = EventAssignment.evtEdit.content.cloneNode(true);
+        //@ts-ignore
+        const ctl = this.constructor.editRowTemplate.content.cloneNode(true);
         return ctl;
+    }
+
+    protected _hasParameters(eventItem: IEvent) {
+        if (this.selectedItems[0].hasAttribute('@' + eventItem.name)) {
+            const val = this.selectedItems[0].getAttribute('@' + eventItem.name);
+            return val.includes('parameters')
+        }
+        return false;
     }
 
     protected _getScriptTypeColor(eventItem: IEvent) {
@@ -238,8 +250,12 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                 newObj = JSON.parse(data);
                 newObj.parameters = par;
             }
+            if (par == null)
+                delete newObj.parameters;
+            
             const newData = JSON.stringify(newObj);
             this._selectedItems[0].setAttribute('@' + eventItem.name, newData);
+            this._bindingsRefresh();
         }
     }
 

@@ -9,6 +9,7 @@ export * from './components/BindingsEditorHistoric.js';
 export * from './components/SimpleScriptEditor.js';
 export * from './components/VisualizationPropertyGrid.js';
 export * from './components/ParameterEditor.js';
+export * from './components/EventAssignment.js';
 
 export * from './helpers/BindingsHelper.js';
 

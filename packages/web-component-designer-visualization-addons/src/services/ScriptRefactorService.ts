@@ -69,6 +69,13 @@ export class ScriptRefactorService implements IRefactorService {
                         } else if ('blocks' in script) {
 
                         }
+                        if ('parameters' in script) {
+                            for (let p in script.parameters) {
+                                if (typeof script.parameters[p] === 'string') {
+                                    refactorings.push({ name: script.parameters[p], itemType: 'parameter', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: 'parameters/' + p, refactor: newValue => script.parameters[p] = newValue });
+                                }
+                            }
+                        }
                     }
                 }
             }
