@@ -215,6 +215,18 @@ export class ScriptSystem {
               } else {
                 if (assignExternalScript)
                   assignExternalScript(e, evtName, scriptObj);
+                else {
+                  if ('name' in scriptObj) {
+                    //@ts-ignore
+                    const nm = scriptObj.name;
+                    e.addEventListener(evtName, (evt) => {
+                      if (!jsObject[nm])
+                        console.warn('javascript function named: ' + nm + ' not found, maybe missing a "export" ?');
+                      else
+                        jsObject[nm](evt, e, shadowRoot, instance, (<{ parameters: any }>scriptObj).parameters);
+                    });
+                  }
+                }
               }
             } else {
               e.addEventListener(evtName, (evt) => {

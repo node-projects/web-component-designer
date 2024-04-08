@@ -54,11 +54,11 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         <input id="addEventInput" style="grid-column: 1 / span 3; margin: 5px;" @keypress=[[this._addEvent(event)]] type="text">`;
 
     static editRowTemplate = html`
-            <div style="display: flex; justify-content: flex-end;">
-                <input hidden="[[this._getScriptType(item) !== 'js']]" placeholder="name" title="name" style="min-width: 50px; flex-basis: 30px; flex-grow: 2;" class="mth" type="text">
-                <input placeholder="relative signals path" title="relative signals path" style="min-width: 50px; flex-basis: 20px; flex-grow: 1;" class="mth" type="text">
-                <button css:background="[[this._hasParameters(item) ? 'lime' : '']]" style="display: flex; padding: 0; flex-grow: 0;" title="parameter" @click="[[this._editParameter(event, item)]]">p</button>
-            </div>`;
+        <div style="display: flex; justify-content: flex-end;">
+            <input hidden="[[this._getScriptType(item) !== 'js']]" placeholder="name" title="name" style="min-width: 50px; flex-basis: 30px; flex-grow: 2;" class="mth" type="text">
+            <input placeholder="relative signals path" title="relative signals path" style="min-width: 50px; flex-basis: 20px; flex-grow: 1;" class="mth" type="text">
+            <button css:background="[[this._hasParameters(item) ? 'lime' : '']]" style="display: flex; padding: 0; flex-grow: 0;" title="parameter" @click="[[this._editParameter(event, item)]]">p</button>
+        </div>`;
 
     static scriptTypeColors = {
         'js': 'purple',
