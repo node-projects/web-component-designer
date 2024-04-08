@@ -72,6 +72,20 @@ export default {
                 },
                 {
                     kind: 'block',
+                    type: 'get_parameter',
+                    inputs: {
+                        NAME: {
+                            shadow: {
+                                type: 'text',
+                                fields: {
+                                    TEXT: '',
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'block',
                     type: 'get_sub_property',
                     inputs: {
                         PROPERTYPATH: {

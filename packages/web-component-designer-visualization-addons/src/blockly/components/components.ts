@@ -1,6 +1,7 @@
 import './fields/FieldObjectId.js';
 import './Console.js';
 import './Debugger.js';
+import './GetParameter.js';
 import './GetState.js';
 import './GetSubProperty.js';
 import './OpenScreen.js';

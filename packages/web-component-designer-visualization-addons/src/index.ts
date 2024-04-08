@@ -8,6 +8,7 @@ export * from './components/BindingsEditor.js';
 export * from './components/BindingsEditorHistoric.js';
 export * from './components/SimpleScriptEditor.js';
 export * from './components/VisualizationPropertyGrid.js';
+export * from './components/ParameterEditor.js';
 
 export * from './helpers/BindingsHelper.js';
 

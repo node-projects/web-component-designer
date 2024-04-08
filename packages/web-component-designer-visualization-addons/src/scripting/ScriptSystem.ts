@@ -8,6 +8,8 @@ import { Script } from "./Script.js";
 import { ScriptCommands } from "./ScriptCommands.js";
 import Long from 'long'
 
+type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any> };
+
 export class ScriptSystem {
 
   _visualizationHandler: VisualizationHandler;
@@ -16,13 +18,13 @@ export class ScriptSystem {
     this._visualizationHandler = visualizationHandler;
   }
 
-  async execute(scriptCommands: ScriptCommands[], outerContext: { event: Event, element: Element, root: HTMLElement }) {
+  async execute(scriptCommands: ScriptCommands[], outerContext: contextType) {
     for (let c of scriptCommands) {
       this.runScriptCommand(c, outerContext);
     }
   }
 
-  async runScriptCommand<T extends ScriptCommands>(command: T, context) {
+  async runScriptCommand<T extends ScriptCommands>(command: T, context: contextType) {
     switch (command.type) {
 
       case 'OpenUrl': {
@@ -147,7 +149,7 @@ export class ScriptSystem {
     }
   }
 
-  async getValue<T>(value: string | number | boolean | IScriptMultiplexValue, outerContext: { event: Event, element: Element, root: HTMLElement }): Promise<any> {
+  async getValue<T>(value: string | number | boolean | IScriptMultiplexValue, outerContext: contextType): Promise<any> {
     if (typeof value === 'object') {
       switch ((<IScriptMultiplexValue>value).source) {
         case 'property': {
@@ -162,6 +164,9 @@ export class ScriptSystem {
           if ((<IScriptMultiplexValue>value).name)
             obj = ScriptSystem.extractPart(obj, (<IScriptMultiplexValue>value).name);
           return obj;
+        }
+        case 'parameter': {
+          return outerContext.parameters[(<IScriptMultiplexValue>value).name];
         }
       }
     }
@@ -199,7 +204,7 @@ export class ScriptSystem {
             if (script[0] == '{') {
               let scriptObj: Script = JSON.parse(script);
               if ('commands' in scriptObj) {
-                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, { event: evt, element: e, root: instance }));
+                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, { event: evt, element: e, root: instance, parameters: scriptObj.parameters }));
               } else if ('blocks' in scriptObj) {
                 let compiledFunc: Awaited<ReturnType<typeof generateEventCodeFromBlockly>> = null;
                 e.addEventListener(evtName, async (evt) => {
