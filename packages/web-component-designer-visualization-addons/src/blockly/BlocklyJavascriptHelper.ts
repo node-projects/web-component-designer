@@ -2,7 +2,7 @@
 import './components/components.js';
 
 //TODO: remove imports, only leave Runtime
-const prefix = `function extractPart(obj: any, propertyPath: string) {
+const prefix = `function extractPart(obj, propertyPath) {
     let retVal = obj;
     for (let p of propertyPath.split('.')) {
         retVal = retVal?.[p];
@@ -10,11 +10,11 @@ const prefix = `function extractPart(obj: any, propertyPath: string) {
     return retVal;
 }
 
-export async function run(eventData, shadowRoot) {
+export async function run(eventData, shadowRoot, parameters) {
 `;
 const postfix = `}`;
 
-export async function generateEventCodeFromBlockly(data: any): Promise<(event: Event, shadowRoot: ShadowRoot) => void> {
+export async function generateEventCodeFromBlockly(data: any): Promise<(event: Event, shadowRoot: ShadowRoot, parameters: Record<string, any>) => void> {
     //@ts-ignore
     const workspace = new Blockly.Workspace();
     //@ts-ignore
@@ -25,6 +25,8 @@ export async function generateEventCodeFromBlockly(data: any): Promise<(event: E
     Blockly.JavaScript.addReservedWords('shadowRoot');
     //@ts-ignore
     Blockly.JavaScript.addReservedWords('extractPart');
+    //@ts-ignore
+    Blockly.JavaScript.addReservedWords('parameters');
     //@ts-ignore
     Blockly.JavaScript.addReservedWords('IOB');
     //@ts-ignore

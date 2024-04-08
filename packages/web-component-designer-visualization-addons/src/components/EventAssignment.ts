@@ -47,7 +47,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     static override template = html`
         <template repeat:item="[[this.events]]">
             <div @click="[[this._ctxMenu(event, item)]]" @contextmenu="[[this._ctxMenu(event, item)]]" class="rect" css:background-color="[[this._getScriptTypeColor(item)]]"></div>
-            <a @click="[[this._showContextMenuAssignScript(event, item, false)]]" title="[[item.name]]">[[item.name]]</a>
+            <a @click="[[this._showContextMenuAssignScript(event, item, false)]]" @contextmenu="[[this._ctxMenu(event, item)]]" title="[[item.name]]">[[item.name]]</a>
             <div>[[this._createControlsForScript(item)]]</div>
         </template>
         <span style="grid-column: 1 / span 3; margin-top: 8px; margin-left: 3px;">add event:</span>
@@ -252,7 +252,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             }
             if (par == null)
                 delete newObj.parameters;
-            
+
             const newData = JSON.stringify(newObj);
             this._selectedItems[0].setAttribute('@' + eventItem.name, newData);
             this._bindingsRefresh();
