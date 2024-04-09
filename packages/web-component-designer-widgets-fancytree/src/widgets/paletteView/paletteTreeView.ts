@@ -68,7 +68,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
     this._restoreCachedInititalValues();
 
     //@ts-ignore
-    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { assert: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [cssFromString(x), this.constructor.style]);
+    import("jquery.fancytree/dist/skin-win8/ui.fancytree.css", { with: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [cssFromString(x), this.constructor.style]);
 
     this._filter = this._getDomElement<HTMLInputElement>('input');
     this._filter.onkeyup = () => {

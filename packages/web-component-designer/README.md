@@ -16,9 +16,7 @@ https://www.npmjs.com/package/@node-projects/web-component-designer
 
 ## Browser support
 
-  - At the moment Chrome, and Firefox Nightly with Experimental Import Assertions enabled.
-  But when import Assertions are landing in Safari and Firefox they will work again.
-  And you could transpile them away in the meantime.
+  - Chrome/Firefox & Safari
 
 ## Developing
 

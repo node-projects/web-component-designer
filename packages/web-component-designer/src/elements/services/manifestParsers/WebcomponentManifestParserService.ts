@@ -37,10 +37,10 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
       //@ts-ignore
       if (window.importShim)
         //@ts-ignore
-        importOfFile = importShim(fileOrObject, { assert: { type: 'json' } });
+        importOfFile = importShim(fileOrObject, { with: { type: 'json' } });
       else
         //@ts-ignore
-        importOfFile = import(fileOrObject, { assert: { type: 'json' } });
+        importOfFile = import(fileOrObject, { with: { type: 'json' } });
 
       importOfFile.then(module => {
         this._packageData = module.default;

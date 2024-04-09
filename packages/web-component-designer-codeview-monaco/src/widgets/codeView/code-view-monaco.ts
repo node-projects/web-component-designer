@@ -159,7 +159,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     this._parseAttributesToProperties();
 
     //@ts-ignore
-    let style = await import("monaco-editor/min/vs/editor/editor.main.css", { assert: { type: 'css' } });
+    let style = await import("monaco-editor/min/vs/editor/editor.main.css", { with: { type: 'css' } });
 
     this.shadowRoot.adoptedStyleSheets = [cssFromString(style), (<any>this.constructor).style];
 
