@@ -3,7 +3,7 @@ import { IElementDefinition, IElementsService, NamedTools, ServiceContainer, dra
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
-import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
+import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
 import { WbNodeData } from 'types';
 
 export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {

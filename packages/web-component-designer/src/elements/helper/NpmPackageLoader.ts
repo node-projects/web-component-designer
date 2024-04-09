@@ -5,7 +5,7 @@ import { WebcomponentManifestElementsService } from "../services/elementsService
 import { WebcomponentManifestPropertiesService } from "../services/propertiesService/services/WebcomponentManifestPropertiesService.js";
 import { ServiceContainer } from "../services/ServiceContainer.js";
 import { removeLeading, removeTrailing } from "./Helper.js";
-import packageHacks from "./NpmPackageHacks.json"  assert { type: 'json' };
+import packageHacks from "./NpmPackageHacks.json" with { type: 'json' };
 
 export class NpmPackageLoader {
 

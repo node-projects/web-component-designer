@@ -7,7 +7,7 @@ import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStyleshe
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
-import cssProperties from "./CssProperties.json"  assert { type: 'json' };
+import cssProperties from "./CssProperties.json" with { type: 'json' };
 import { BindingTarget } from '../../../item/BindingTarget.js';
 
 const localName = '&lt;local&gt;';

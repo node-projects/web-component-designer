@@ -4,7 +4,7 @@ import { WunderbaumNode } from 'wb_node';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js'
 //@ts-ignore
-import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
+import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 

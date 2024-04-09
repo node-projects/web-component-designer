@@ -8,7 +8,7 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 import { GridAssignedRowColumnPropertyEditor } from '../propertyEditors/special/GridAssignedRowColumnPropertyEditor.js';
 import { MetricsPropertyEditor } from '../propertyEditors/special/MetricsPropertyEditor.js';
-import cssProperties from "./CssProperties.json"  assert { type: 'json' };
+import cssProperties from "./CssProperties.json" with { type: 'json' };
 
 export class CssPropertiesService extends CommonPropertiesService {
 

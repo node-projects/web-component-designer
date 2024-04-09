@@ -4,7 +4,7 @@ import { WbNodeData } from 'types';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
-import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
+import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
 
 type serviceNode = { service: IBindableObjectsService, bindable: IBindableObject<any> }
 

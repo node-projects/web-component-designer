@@ -3,7 +3,7 @@ export class IScriptMultiplexValue {
      * signal - read the value from a Signal
      * property - read the value from a property of the customControl (not usable in screens)
      * event - read the value of a property of the event object
-     * parameter - a paremter you hand over 
+     * parameter - a parameter you hand over 
      */
     source: 'signal' | 'property' | 'event' | 'parameter';
     /**

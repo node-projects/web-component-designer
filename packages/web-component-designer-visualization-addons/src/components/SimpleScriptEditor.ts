@@ -6,7 +6,7 @@ import { IProperty, typeInfoFromJsonSchema } from "@node-projects/propertygrid.w
 import { defaultOptions } from "@node-projects/web-component-designer-widgets-wunderbaum";
 import { Wunderbaum } from 'wunderbaum';
 //@ts-ignore
-import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' assert { type: 'css' };
+import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
 import { WbRenderEventType } from "types";
 import { VisualizationPropertyGrid } from "./VisualizationPropertyGrid.js";
 import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
