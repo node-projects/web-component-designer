@@ -51,12 +51,12 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             <div>[[this._createControlsForScript(item)]]</div>
         </template>
         <span style="grid-column: 1 / span 3; margin-top: 8px; margin-left: 3px;">add event:</span>
-        <input id="addEventInput" style="grid-column: 1 / span 3; margin: 5px;" @keypress=[[this._addEvent(event)]] type="text">`;
+        <input id="addEventInput" style="grid-column: 1 / span 3; margin: 5px;" @keypress="[[this._addEvent(event)]]" type="text">`;
 
     static editRowTemplate = html`
         <div style="display: flex; justify-content: flex-end;">
-            <input hidden="[[this._getScriptType(item) !== 'js']]" placeholder="name" title="name" style="min-width: 50px; flex-basis: 30px; flex-grow: 2;" class="mth" type="text">
-            <input placeholder="relative signals path" title="relative signals path" style="min-width: 50px; flex-basis: 20px; flex-grow: 1;" class="mth" type="text">
+            <input value="[[this._getScriptName(item)]]" @keypress="[[this._changeScriptName(event, item)]]" hidden="[[this._getScriptType(item) !== 'js']]" placeholder="name" title="name" style="min-width: 50px; flex-basis: 30px; flex-grow: 2;" class="mth" type="text">
+            <input value="[[this._getRelativeSignalsPath(item)]]" @keypress="[[this._changeRelativeSignalsPath(event, item)]]" placeholder="relative signals path" title="relative signals path" style="min-width: 50px; flex-basis: 20px; flex-grow: 1;" class="mth" type="text">
             <button css:background="[[this._hasParameters(item) ? 'lime' : '']]" style="display: flex; padding: 0; flex-grow: 0;" title="parameter" @click="[[this._editParameter(event, item)]]">p</button>
         </div>`;
 
@@ -111,6 +111,69 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         //@ts-ignore
         const ctl = this.constructor.editRowTemplate.content.cloneNode(true);
         return ctl;
+    }
+
+    protected _getScriptName(eventItem: IEvent) {
+        if (this.selectedItems[0].hasAttribute('@' + eventItem.name)) {
+            const val = this.selectedItems[0].getAttribute('@' + eventItem.name);
+            if (val[0] === '{') {
+                if (val.includes('name')) {
+                    const parsed = JSON.parse(val);
+                    return parsed.name;
+                }
+            } else {
+                return val;
+            }
+        }
+        return null;
+    }
+
+    protected async _changeScriptName(e: KeyboardEvent, eventItem: IEvent) {
+        if (e.key == 'Enter') {
+            if (this.selectedItems && this.selectedItems.length) {
+                if (this.selectedItems[0].hasAttribute('@' + eventItem.name)) {
+                    const newValue = (<HTMLInputElement>e.target).value;
+                    const val = this.selectedItems[0].getAttribute('@' + eventItem.name);
+                    if (val.startsWith('{')) {
+                        const parsed = JSON.parse(val);
+                        parsed.name = newValue;
+                        this._selectedItems[0].setAttribute('@' + eventItem.name, JSON.stringify(parsed));
+                    } else {
+                        this._selectedItems[0].setAttribute('@' + eventItem.name, newValue);
+                    }
+                }
+            }
+        }
+    }
+
+    protected _getRelativeSignalsPath(eventItem: IEvent) {
+        if (this.selectedItems[0].hasAttribute('@' + eventItem.name)) {
+            const val = this.selectedItems[0].getAttribute('@' + eventItem.name);
+            if (val[0] === '{' && val.includes('relativeSignalsPath')) {
+                const parsed = JSON.parse(val);
+                return parsed.relativeSignalsPath;
+            }
+        }
+        return null;
+    }
+
+    protected async _changeRelativeSignalsPath(e: KeyboardEvent, eventItem: IEvent) {
+        if (e.key == 'Enter') {
+            if (this.selectedItems && this.selectedItems.length) {
+                if (this.selectedItems[0].hasAttribute('@' + eventItem.name)) {
+                    const newValue = (<HTMLInputElement>e.target).value;
+                    const val = this.selectedItems[0].getAttribute('@' + eventItem.name);
+                    if (val.startsWith('{')) {
+                        const parsed = JSON.parse(val);
+                        parsed.relativeSignalsPath = newValue;
+                        this._selectedItems[0].setAttribute('@' + eventItem.name, JSON.stringify(parsed));
+                    } else {
+                        let obj = { name: val, relativeSignalsPath: newValue };
+                        this._selectedItems[0].setAttribute('@' + eventItem.name, JSON.stringify(obj));
+                    }
+                }
+            }
+        }
     }
 
     protected _hasParameters(eventItem: IEvent) {
@@ -322,7 +385,6 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     }
 
     public async _editEvent(evtType: scriptType, e: MouseEvent, eventItem: IEvent) {
-
         if (evtType == 'js') {
             this._editJavascript(e, eventItem);
         } else if (evtType == 'blockly') {

@@ -122,55 +122,60 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
 
         this._propertygrid.getTypeInfo = (obj, type) => typeInfoFromJsonSchema(this.scriptCommandsTypeInfo, obj, type);
         this._propertygrid.getSpecialEditorForType = async (property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any) => {
-            if (typeof currentValue === 'object' && currentValue !== null) {
-                let rB = document.createElement('button');
-                rB.style.height = 'calc(100% - 6px)';
-                rB.style.position = 'relative';
-                rB.style.display = 'flex';
-                rB.style.justifyContent = 'center';
-                rB.style.width = '20px';
-                rB.style.boxSizing = 'content-box';
-                rB.innerText = 'del';
-                rB.onclick = () => {
-                    this._propertygrid.setPropertyValue(propertyPath, undefined);
-                    this._propertygrid.refresh();
-                }
-                wbRender.nodeElem.insertAdjacentElement('afterbegin', rB);
+            //@ts-ignore
+            if (!property.specialAllreadyAdded) {
+                 //@ts-ignore
+                property.specialAllreadyAdded = true
+                if (typeof currentValue === 'object' && currentValue !== null) {
+                    let rB = document.createElement('button');
+                    rB.style.height = 'calc(100% - 6px)';
+                    rB.style.position = 'relative';
+                    rB.style.display = 'flex';
+                    rB.style.justifyContent = 'center';
+                    rB.style.width = '20px';
+                    rB.style.boxSizing = 'content-box';
+                    rB.innerText = 'del';
+                    rB.onclick = () => {
+                        this._propertygrid.setPropertyValue(propertyPath, undefined);
+                        this._propertygrid.refresh();
+                    }
+                    wbRender.nodeElem.insertAdjacentElement('afterbegin', rB);
 
-                let d = document.createElement('div');
-                d.style.display = 'flex';
-                let sp = document.createElement('span');
-                sp.innerText = 'complex: ' + JSON.stringify(currentValue);
-                sp.style.overflow = 'hidden';
-                sp.style.whiteSpace = 'nowrap';
-                sp.style.textOverflow = 'ellipsis';
-                sp.style.flexGrow = '1';
-                sp.title = JSON.stringify(currentValue);
-                d.appendChild(sp);
-                let b = document.createElement('button');
-                b.innerText = '...';
-                b.onclick = () => {
-                    editComplex({ value: currentValue, propertyPath })
+                    let d = document.createElement('div');
+                    d.style.display = 'flex';
+                    let sp = document.createElement('span');
+                    sp.innerText = 'complex: ' + JSON.stringify(currentValue);
+                    sp.style.overflow = 'hidden';
+                    sp.style.whiteSpace = 'nowrap';
+                    sp.style.textOverflow = 'ellipsis';
+                    sp.style.flexGrow = '1';
+                    sp.title = JSON.stringify(currentValue);
+                    d.appendChild(sp);
+                    let b = document.createElement('button');
+                    b.innerText = '...';
+                    b.onclick = () => {
+                        editComplex({ value: currentValue, propertyPath })
+                    }
+                    d.appendChild(b);
+                    wbRender.nodeElem.style.display = 'flex';
+                    return d;
+                } else {
+                    let b = document.createElement('button');
+                    b.style.height = 'calc(100% - 6px)';
+                    b.style.position = 'relative';
+                    b.style.display = 'flex';
+                    b.style.justifyContent = 'center';
+                    b.style.width = '20px';
+                    b.style.boxSizing = 'content-box';
+                    b.title = 'complex property value';
+                    b.style.opacity = '0.2';
+                    b.innerText = '...';
+                    b.onclick = () => {
+                        editComplex({ value: currentValue, propertyPath })
+                    }
+                    wbRender.nodeElem.insertAdjacentElement('afterbegin', b);
+                    wbRender.nodeElem.style.display = 'flex';
                 }
-                d.appendChild(b);
-                wbRender.nodeElem.style.display = 'flex';
-                return d;
-            } else {
-                let b = document.createElement('button');
-                b.style.height = 'calc(100% - 6px)';
-                b.style.position = 'relative';
-                b.style.display = 'flex';
-                b.style.justifyContent = 'center';
-                b.style.width = '20px';
-                b.style.boxSizing = 'content-box';
-                b.title = 'complex';
-                b.style.opacity = '0.2';
-                b.innerText = '...';
-                b.onclick = () => {
-                    editComplex({ value: currentValue, propertyPath })
-                }
-                wbRender.nodeElem.insertAdjacentElement('afterbegin', b);
-                wbRender.nodeElem.style.display = 'flex';
             }
 
             return null;

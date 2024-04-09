@@ -13,6 +13,12 @@ export class VisualizationPropertyGrid extends PropertyGrid {
     public visualizationShell: VisualizationShell;
 
     public override async getEditorForType(property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any): Promise<HTMLElement> {
+        if (this.getSpecialEditorForType) {
+            let edt = await this.getSpecialEditorForType(property, currentValue, propertyPath, wbRender, additionalInfo);
+            if (edt)
+                return edt;
+        }
+        
         switch (property.format) {
             case 'screen': {
                 let editor = document.createElement('select');

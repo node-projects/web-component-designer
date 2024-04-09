@@ -8,7 +8,7 @@ import { Script } from "./Script.js";
 import { ScriptCommands } from "./ScriptCommands.js";
 import Long from 'long'
 
-type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any> };
+type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any>, relativeSignalsPath?: string };
 
 export class ScriptSystem {
 
@@ -47,32 +47,32 @@ export class ScriptSystem {
 
       case 'ToggleSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(signal);
-        await this._visualizationHandler.setState(signal, !state?.val);
+        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), !state?.val);
         break;
       }
       case 'SetSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        await this._visualizationHandler.setState(signal, await this.getValue(command.value, context));
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), await this.getValue(command.value, context));
         break;
       }
       case 'IncrementSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(signal);
-        await this._visualizationHandler.setState(signal, state.val + await this.getValue(command.value, context));
+        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), state.val + await this.getValue(command.value, context));
         break;
       }
       case 'DecrementSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(signal);
-        await this._visualizationHandler.setState(signal, <any>state.val - await this.getValue(command.value, context));
+        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), <any>state.val - await this.getValue(command.value, context));
         break;
       }
       case 'CalculateSignalValue': {
         const formula = await this.getValue(command.formula, context);
         const targetSignal = await this.getValue(command.targetSignal, context);
         let parsed = parseBindingString(formula);
-        let results = await Promise.all(parsed.signals.map(x => this._visualizationHandler.getState(x)));
+        let results = await Promise.all(parsed.signals.map(x => this._visualizationHandler.getState(this.getSignaName(x, context))));
         let nm = '';
         for (let i = 0; i < parsed.parts.length - 1; i++) {
           let v = results[i].val;
@@ -81,33 +81,33 @@ export class ScriptSystem {
           nm += v + parsed.parts[i + 1];
         }
         let result = eval(nm);
-        await this._visualizationHandler.setState(targetSignal, result);
+        await this._visualizationHandler.setState(this.getSignaName(targetSignal, context), result);
         break;
       }
 
       case 'SetBitInSignal': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(signal);
+        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
         let mask = Long.fromNumber(1).shiftLeft(command.bitNumber);
         const newVal = Long.fromNumber(<number>state.val).or(mask).toNumber();
-        await this._visualizationHandler.setState(signal, newVal);
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
         break;
       }
       case 'ClearBitInSignal': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(signal);
+        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
         let mask = Long.fromNumber(1).shiftLeft(command.bitNumber);
         mask.negate();
         const newVal = Long.fromNumber(<number>state.val).and(mask).toNumber();
-        await this._visualizationHandler.setState(signal, newVal);
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
         break;
       }
       case 'ToggleBitInSignal': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(signal);
+        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
         let mask = Long.fromNumber(1).shiftLeft(command.bitNumber);
         const newVal = Long.fromNumber(<number>state.val).xor(mask).toNumber();
-        await this._visualizationHandler.setState(signal, newVal);
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
         break;
       }
 
@@ -156,7 +156,7 @@ export class ScriptSystem {
           return outerContext.root[(<IScriptMultiplexValue>value).name];
         }
         case 'signal': {
-          let sng = await this._visualizationHandler.getState((<IScriptMultiplexValue>value).name);
+          let sng = await this._visualizationHandler.getState(this.getSignaName((<IScriptMultiplexValue>value).name, outerContext));
           return sng.val;
         }
         case 'event': {
@@ -171,6 +171,12 @@ export class ScriptSystem {
       }
     }
     return value;
+  }
+
+  getSignaName(name: string, outerContext: contextType) {
+    if (name[0] === '.')
+      return outerContext.relativeSignalsPath + name;
+    return name;
   }
 
   static extractPart(obj: any, propertyPath: string) {
@@ -204,7 +210,7 @@ export class ScriptSystem {
             if (script[0] == '{') {
               let scriptObj: Script = JSON.parse(script);
               if ('commands' in scriptObj) {
-                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, { event: evt, element: e, root: instance, parameters: scriptObj.parameters }));
+                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, { event: evt, element: e, root: instance, parameters: scriptObj.parameters, relativeSignalsPath: scriptObj.relativeSignalsPath }));
               } else if ('blocks' in scriptObj) {
                 let compiledFunc: Awaited<ReturnType<typeof generateEventCodeFromBlockly>> = null;
                 e.addEventListener(evtName, async (evt) => {
