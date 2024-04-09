@@ -38,15 +38,18 @@ export class EventsService implements IEventsService {
         { name: "keyup", propertyName: "onkeyup", eventObjectName: "KeyboardEvent" }
     ]
 
-    protected _form = [
-        { name: "beforeinput", propertyName: "onbeforeinput", eventObjectName: "InputEvent" },
+    protected _simpleForm = [
         { name: "input", propertyName: "oninput", eventObjectName: "InputEvent" },
-        { name: "change", propertyName: "onchange", eventObjectName: "Event" },
-        { name: "invalid", propertyName: "oninvalid", eventObjectName: "Event" },
-        { name: "reset", propertyName: "onreset", eventObjectName: "Event" },
-        { name: "select", propertyName: "onselect", eventObjectName: "Event" },
-        { name: "submit", propertyName: "onsubmit", eventObjectName: "SubmitEvent" }
+        { name: "change", propertyName: "onchange", eventObjectName: "Event" }
     ]
+
+    protected _form = [
+      { name: "beforeinput", propertyName: "onbeforeinput", eventObjectName: "InputEvent" },
+      { name: "invalid", propertyName: "oninvalid", eventObjectName: "Event" },
+      { name: "reset", propertyName: "onreset", eventObjectName: "Event" },
+      { name: "select", propertyName: "onselect", eventObjectName: "Event" },
+      { name: "submit", propertyName: "onsubmit", eventObjectName: "SubmitEvent" }
+  ]
 
     protected _simpleMouseEvents: IEvent[] = [
         { name: "click", propertyName: "onclick", eventObjectName: "PointerEvent" },
@@ -109,7 +112,7 @@ export class EventsService implements IEventsService {
         if (designItem.element instanceof HTMLInputElement ||
             designItem.element instanceof HTMLTextAreaElement ||
             designItem.element instanceof HTMLSelectElement) {
-            let events: IEvent[] = [...this._form, ...this._simpleMouseEvents, ...this._pointerEvents, ...this._allElements, ...this._focusableEvents];
+            let events: IEvent[] = [...this._simpleForm, ...this._simpleMouseEvents, ...this._form,  ...this._pointerEvents, ...this._allElements, ...this._focusableEvents];
             return events;
         }
         let events: IEvent[] = [...this._simpleMouseEvents, ...this._pointerEvents, ...this._allElements, ...this._focusableEvents];

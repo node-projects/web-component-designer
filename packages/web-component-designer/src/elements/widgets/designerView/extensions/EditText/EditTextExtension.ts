@@ -1,7 +1,7 @@
 import { html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
-import { AbstractExtension } from "../AbstractExtension.js";
+import { AbstractExtension, toolbarObject } from "../AbstractExtension.js";
 import { IExtensionManager } from '../IExtensionManger.js';
 import { OverlayLayer } from "../OverlayLayer.js";
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../../helper/TransformHelper.js";
@@ -42,7 +42,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
   private _foreignObject: SVGForeignObjectElement;
   private _path: SVGPathElement;
-  private _toolbar: import("/Users/jochenkuehner/Desktop/repos/github/nodeprojects/web-component-designer/packages/web-component-designer/src/elements/widgets/designerView/extensions/AbstractExtension").toolbarObject;
+  private _toolbar: toolbarObject;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);

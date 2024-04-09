@@ -14,6 +14,7 @@ export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend
             position: absolute;
             height: 100%;
             width: 100%;
+            display: block;
         }`;
 
     static readonly is = 'node-projects-blockly-script-editor';
