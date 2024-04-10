@@ -371,7 +371,10 @@ export class DesignItem implements IDesignItem {
       (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
     }
 
-    designItem.updateChildrenFromNodesChildren();
+    designItem._childArray = designItem._internalUpdateChildrenFromNodesChildren();
+    for (let c of designItem._childArray) {
+      (<DesignItem>c)._parent = designItem;
+    }
 
     return designItem;
   }
@@ -395,24 +398,46 @@ export class DesignItem implements IDesignItem {
     }
   }
 
-  updateChildrenFromNodesChildren() {
-    this._childArray = [];
+
+  _internalUpdateChildrenFromNodesChildren() {
+    const newChilds = [];
     if (this.nodeType == NodeType.Element) {
       if (this.element instanceof HTMLTemplateElement) {
         for (const c of this.element.content.childNodes) {
           const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
-          this._childArray.push(di);
-          (<DesignItem>di)._parent = this;
+          newChilds.push(di);
         }
       } else {
         for (const c of this.element.childNodes) {
           const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
-          this._childArray.push(di);
-          (<DesignItem>di)._parent = this;
+          newChilds.push(di);
         }
       }
     }
-    this._refreshIfStyleSheet();
+    return newChilds;
+  }
+
+  _backupWhenEditContent;
+  _inEditContent = false;
+  editContent() {
+    this._inEditContent = true;
+    this._backupWhenEditContent = [...this.element.childNodes];
+    const nn = this.element.innerHTML
+    this.element.innerHTML = '';
+    this.element.innerHTML = nn;
+    this.element.setAttribute('contenteditable', '');
+  }
+
+  editContentFinish() {
+    if (this._inEditContent) {
+      this._inEditContent = false;
+      this.element.removeAttribute('contenteditable');
+      this.element.innerHTML = '';
+      for (let n of this._backupWhenEditContent) {
+        this.element.appendChild(n);
+      }
+      this._backupWhenEditContent = null;
+    }
   }
 
   public constructor(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {

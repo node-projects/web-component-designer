@@ -48,7 +48,9 @@ export interface IDesignItem {
   clearChildren();
 
   removeDesignerAttributesAndStylesFromChildren();
-  updateChildrenFromNodesChildren();
+
+  editContent();
+  editContentFinish();
 
   readonly hasContent: boolean;
   content: string;

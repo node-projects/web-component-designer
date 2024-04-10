@@ -1,4 +1,4 @@
-import { html } from "@node-projects/base-custom-webcomponent";
+import { html, Disposable } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension, toolbarObject } from "../AbstractExtension.js";
@@ -43,6 +43,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   private _foreignObject: SVGForeignObjectElement;
   private _path: SVGPathElement;
   private _toolbar: toolbarObject;
+  private _selectionChangedListener: Disposable;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -54,6 +55,13 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     this.extendedItem.instanceServiceContainer.selectionService.clearSelectedElements();
     this.extendedItem.removeDesignerAttributesAndStylesFromChildren();
     this.extendedItem.element.setAttribute('contenteditable', '');
+    //@ts-ignore
+    this.extendedItem.editContent();
+
+    this._selectionChangedListener = this.extendedItem.instanceServiceContainer.selectionService.onSelectionChanged.on(() => {
+      this.commitchanges();
+      this.extensionManager.removeExtensionInstance(this.extendedItem, this);
+    });
 
     (<HTMLElement>this.extendedItem.element).focus();
 
@@ -98,15 +106,18 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   }
 
   override dispose() {
+    this._selectionChangedListener.dispose();
     this._removeAllOverlays();
-    this.extendedItem.element.removeAttribute('contenteditable');
+    this.extendedItem.editContentFinish();
     this.designerCanvas.clickOverlay.style.pointerEvents = 'auto';
   }
 
   commitchanges() {
     this._removeAllOverlays();
-    this.extendedItem.element.removeAttribute('contenteditable');
-    this.extendedItem.updateChildrenFromNodesChildren();
+
+    const newHTML = this.extendedItem.element.innerHTML;
+    this.extendedItem.editContentFinish();
+    this.extendedItem.innerHTML = newHTML;
 
     this.designerCanvas.clickOverlay.style.pointerEvents = 'auto';
   }

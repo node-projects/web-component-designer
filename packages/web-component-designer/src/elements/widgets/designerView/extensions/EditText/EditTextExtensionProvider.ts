@@ -8,6 +8,8 @@ import { css } from '@node-projects/base-custom-webcomponent';
 
 export class EditTextExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+    if (designItem.isRootItem)
+      return false;
     if (designItem.name === 'input')
       return false;
     return true;
@@ -19,5 +21,5 @@ export class EditTextExtensionProvider implements IDesignerExtensionProvider {
 
   readonly style = css`
     .svg-edit-text-clickoutside { stroke: transparent; fill: lightgray; opacity: 0.7 }
-  `;  
+  `;
 }
