@@ -6,11 +6,13 @@ import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { IRect } from "../../../interfaces/IRect.js";
 import { copyToClipboard, getFromClipboard, getTextFromClipboard } from "../../helper/ClipboardHelper.js";
 import { DesignItem } from "../../item/DesignItem.js";
+import { filterChildPlaceItems } from "../../helper/LayoutHelper.js";
 
 export class CopyPasteAsJsonService implements ICopyPasteService {
   async copyItems(designItems: IDesignItem[]): Promise<void> {
-    const copyText = DomConverter.ConvertToString(designItems, false);
-    const positions = designItems.map(x => x.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(x.element));
+    const items = filterChildPlaceItems(designItems);
+    const copyText = DomConverter.ConvertToString(items, false);
+    const positions = items.map(x => x.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(x.element));
     let data = { html: copyText, positions: positions };
     copyToClipboard([["application/json", JSON.stringify(data)]]);
   }
