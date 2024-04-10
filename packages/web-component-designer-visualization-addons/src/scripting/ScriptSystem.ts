@@ -71,15 +71,7 @@ export class ScriptSystem {
       case 'CalculateSignalValue': {
         const formula = await this.getValue(command.formula, context);
         const targetSignal = await this.getValue(command.targetSignal, context);
-        let parsed = parseBindingString(formula);
-        let results = await Promise.all(parsed.signals.map(x => this._visualizationHandler.getState(this.getSignaName(x, context))));
-        let nm = '';
-        for (let i = 0; i < parsed.parts.length - 1; i++) {
-          let v = results[i].val;
-          if (v == null)
-            return;
-          nm += v + parsed.parts[i + 1];
-        }
+        let nm = await this.parseStringWithValues(formula, context);
         let result = eval(nm);
         await this._visualizationHandler.setState(this.getSignaName(targetSignal, context), result);
         break;
@@ -168,9 +160,49 @@ export class ScriptSystem {
         case 'parameter': {
           return outerContext.parameters[(<IScriptMultiplexValue>value).name];
         }
+
+        case 'complexString': {
+          let text = (<IScriptMultiplexValue>value).name;
+          if (text != null) {
+            return await this.parseStringWithValues(text, outerContext);
+          }
+          return null;
+        }
+
+        case 'complexSignal': {
+          let text = (<IScriptMultiplexValue>value).name;
+          if (text != null) {
+            const signal =  await this.parseStringWithValues(text, outerContext);
+            return await this._visualizationHandler.getState(this.getSignaName(signal, outerContext));
+          }
+          return null;
+        }
       }
     }
     return value;
+  }
+
+  async getStateOrFieldOrParameter(name: string, context: contextType) {
+    //use same shortcuts as in bindings. $ = signals object, § = access context
+    if (name[0] === '§') {
+      //@ts-ignore
+      var ctx = context;
+      return eval('ctx.' + name.substring(1))
+    }
+    return await this._visualizationHandler.getState(this.getSignaName(name, context));
+  }
+
+  async parseStringWithValues(text: string, context: contextType) {
+    const parsed = parseBindingString(text);
+    let results = await Promise.all(parsed.signals.map(x => this.getStateOrFieldOrParameter(this.getSignaName(x, context), context)));
+    let nm = '';
+    for (let i = 0; i < parsed.parts.length - 1; i++) {
+      let v = results[i].val;
+      if (v == null)
+        v = '';
+      nm += v + parsed.parts[i + 1];
+    }
+    return nm;
   }
 
   getSignaName(name: string, outerContext: contextType) {

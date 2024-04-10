@@ -14,6 +14,24 @@ Object Values,
 Current Element Property
 */
 
+/*export interface Description {
+  type: 'Description';
+  description?: string;
+}
+
+export interface Label {
+  type: 'Label';
+  name: string;
+}
+
+export interface Condition {
+  type: 'Condition';
+  value1: any;
+  value2?: any;
+  comparisonType: '==null' | '!=null' | '==true' | '==false' | '==' | '!=' | '>' | '<' | '>=' | '<=';
+  labelTrue?: string;
+  labelFalse?: string;
+}*/
 
 export interface OpenScreen {
   type: 'OpenScreen';

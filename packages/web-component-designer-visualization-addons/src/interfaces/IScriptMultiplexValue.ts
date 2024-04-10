@@ -4,8 +4,10 @@ export class IScriptMultiplexValue {
      * property - read the value from a property of the customControl (not usable in screens)
      * event - read the value of a property of the event object
      * parameter - a parameter you hand over 
+     * complexString - a string with signals (contained in {})
+     * complexSignal - read the value from a signal wich name is build here (it can contain other signals in {})
      */
-    source: 'signal' | 'property' | 'event' | 'parameter';
+    source: 'signal' | 'property' | 'event' | 'parameter' | 'complexString' | 'complexSignal';
     /**
      * Name of the ioBroker object or the property of the component or the parameter of the script
      * or for example in a event : srcElement.value to get the value of a input wich raises the event

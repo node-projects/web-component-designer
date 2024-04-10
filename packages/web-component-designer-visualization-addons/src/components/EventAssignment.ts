@@ -327,9 +327,11 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         edt.title = "Blockly Script for '" + eventItem.name + "' of '" + this._selectedItems[0].name + "'";
         let data = this._selectedItems[0].getAttribute('@' + eventItem.name);
         let parameters = null;
+        let relativeSignalsPath = null;
         if (data) {
             const parsed = JSON.parse(data);
             parameters = parsed.parameters;
+            relativeSignalsPath = parsed.relativeSignalsPath;
             edt.load(parsed);
         }
         const result = await this._visualizationShell.openConfirmation(edt, { x: 100, y: 100, width: 700, height: 500 });
@@ -337,6 +339,9 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             const blockObj = edt.save();
             if (parameters) {
                 blockObj.parameters = parameters;
+            }
+            if (relativeSignalsPath) {
+                blockObj.relativeSignalsPath = relativeSignalsPath;
             }
             this._selectedItems[0].setAttribute('@' + eventItem.name, JSON.stringify(blockObj));
             this._bindingsRefresh();
@@ -352,10 +357,13 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         if (!scriptString || scriptString.startsWith('{')) {
             let script = { commands: [] };
             let parameters = null;
+            let relativeSignalsPath = null;
             if (scriptString) {
                 script = JSON.parse(scriptString);
                 //@ts-ignore
                 parameters = script.parameters;
+                //@ts-ignore
+                relativeSignalsPath = script.relativeSignalsPath;
             }
             let sc = new SimpleScriptEditor();
             sc.serviceContainer = this.selectedItems[0].serviceContainer;
@@ -375,6 +383,10 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                     if (parameters) {
                         //@ts-ignore
                         sc.parameters = parameters;
+                    }
+                    if (relativeSignalsPath) {
+                        //@ts-ignore
+                        sc.relativeSignalsPath = relativeSignalsPath;
                     }
                     let json = JSON.stringify(sc);
                     this.selectedItems[0].setAttribute('@' + eventItem.name, json);
