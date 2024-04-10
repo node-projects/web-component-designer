@@ -16,7 +16,7 @@ Blockly.Blocks['get_parameter'] = {
 Blockly.JavaScript['get_parameter'] = function (block, generator) {
     //@ts-ignore
     const name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC);
-    const code = `parameters[${name}]`;
+    const code = `context.parameters[${name}]`;
     //@ts-ignore
     return [code, Blockly.JavaScript.ORDER_NONE];
 };

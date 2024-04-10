@@ -8,7 +8,7 @@ import { Script } from "./Script.js";
 import { ScriptCommands } from "./ScriptCommands.js";
 import Long from 'long'
 
-type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any>, relativeSignalsPath?: string };
+export type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any>, relativeSignalsPath?: string };
 
 export class ScriptSystem {
 
@@ -248,7 +248,7 @@ export class ScriptSystem {
                 e.addEventListener(evtName, async (evt) => {
                   if (!compiledFunc)
                     compiledFunc = await generateEventCodeFromBlockly(scriptObj);
-                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters);
+                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '');
                 });
               } else {
                 if (assignExternalScript)
