@@ -8,7 +8,7 @@ import { css } from "@node-projects/base-custom-webcomponent";
 
 export class PositionExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (!designItem?.parent)
+    if (!designItem?.parent || designItem.element instanceof HTMLTemplateElement)
       return false;
     const cs = getComputedStyle((<HTMLElement>designItem.element));
     if (cs.position === 'relative' || cs.position === 'absolute')

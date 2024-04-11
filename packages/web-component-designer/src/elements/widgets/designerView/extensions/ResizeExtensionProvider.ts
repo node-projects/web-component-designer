@@ -15,7 +15,7 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
   }
 
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designItem.element instanceof SVGElement)
+    if (designItem.element instanceof SVGElement || designItem.element instanceof HTMLTemplateElement)
       return false;
     return !designItem.isRootItem && designItem.nodeType == NodeType.Element;
   }

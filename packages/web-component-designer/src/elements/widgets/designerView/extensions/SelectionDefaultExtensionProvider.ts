@@ -9,7 +9,7 @@ import { NodeType } from '../../../item/NodeType.js';
 
 export class SelectionDefaultExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    return !designItem.isRootItem && designItem.nodeType != NodeType.Comment;
+    return !designItem.isRootItem && designItem.nodeType != NodeType.Comment && !(designItem.element instanceof HTMLTemplateElement);
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {

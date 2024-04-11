@@ -5,7 +5,7 @@ import { ServiceContainer } from "../ServiceContainer.js";
 import { IDesignItemService } from "./IDesignItemService.js";
 
 export class DesignItemService implements IDesignItemService {
-    createDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
-        return new DesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
-    }
+  createDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
+    return new DesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
+  }
 }

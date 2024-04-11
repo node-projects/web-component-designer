@@ -8,7 +8,7 @@ import { css } from "@node-projects/base-custom-webcomponent";
 
 export class RotateExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designItem.element instanceof SVGElement) {
+    if (designItem.element instanceof SVGElement || designItem.element instanceof HTMLTemplateElement) {
       return false;
     }
     return !designItem.isRootItem;

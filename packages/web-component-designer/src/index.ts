@@ -66,6 +66,7 @@ export type { IDesignItemDocumentPositionService } from "./elements/services/des
 export type { IConfigUiService } from "./elements/services/configUiService/IConfigUiService.js";
 
 export * from "./elements/services/designItemService/DesignItemService.js";
+export * from "./elements/services/designItemService/BaseCustomWebcomponentDesignItemService.js";
 export type { IDesignItemService } from "./elements/services/designItemService/IDesignItemService.js";
 
 export * from "./elements/services/dragDropService/ExternalDragDropService.js";

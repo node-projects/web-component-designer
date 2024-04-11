@@ -8,7 +8,7 @@ import { css } from "@node-projects/base-custom-webcomponent";
 
 export class HighlightElementExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    return true;
+    return !(designItem.element instanceof HTMLTemplateElement);
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas,  designItem: IDesignItem): IDesignerExtension {
