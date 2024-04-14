@@ -91,6 +91,7 @@ import { FlexToolbarExtensionProvider } from '../widgets/designerView/extensions
 import { BlockToolbarExtensionProvider } from '../widgets/designerView/extensions/block/BlockToolbarExtensionProvider.js';
 import { ChildContextMenu } from '../widgets/designerView/extensions/contextMenu/ChildContextMenu.js';
 import { GridChildToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildToolbarExtensionProvider.js';
+import { ToolbarExtensionsDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -210,6 +211,8 @@ export function createDefaultServiceContainer() {
     new InvisibleElementExtensionDesignViewConfigButtons(),
     new ButtonSeperatorProvider(10),
     new StylesheetServiceDesignViewConfigButtons(),
+    new ButtonSeperatorProvider(10),
+    new ToolbarExtensionsDesignViewConfigButtons(),
     new ButtonSeperatorProvider(30),
     new RoundPixelsDesignViewConfigButton()
   );

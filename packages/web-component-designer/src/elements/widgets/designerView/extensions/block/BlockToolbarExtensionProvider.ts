@@ -5,12 +5,14 @@ import { IDesignerExtension } from '../IDesignerExtension.js';
 import { IExtensionManager } from '../IExtensionManger.js';
 import { BlockToolbarExtension } from './BlockToolbarExtension.js';
 import { NodeType } from '../../../../item/NodeType.js';
+import { basicStackedToolbarExtensionOverlayOptionName } from '../BasicStackedToolbarExtension.js';
 
 export class BlockToolbarExtensionProvider implements IDesignerExtensionProvider {
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designItem.nodeType === NodeType.Element) {
       const d = getComputedStyle(designItem.element).display;
-      return d === 'block' || d === 'inline'
+      if (d === 'block' || d === 'inline')
+        return designerCanvas.instanceServiceContainer.designContext.extensionOptions[basicStackedToolbarExtensionOverlayOptionName] !== false;
     }
     return false;
   }

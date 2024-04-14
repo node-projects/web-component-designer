@@ -5,6 +5,8 @@ import { IDesignerCanvas } from "../IDesignerCanvas.js";
 import { IDesignItem } from "../../../item/IDesignItem.js";
 import { ImageButtonListSelector } from "../../../controls/ImageButtonListSelector.js";
 
+export const basicStackedToolbarExtensionOverlayOptionName = 'basicStackedToolbarExtensionShowOverlay';
+
 export class BasicStackedToolbarExtension extends AbstractExtension {
 
   protected static basicTemplate = `

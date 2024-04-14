@@ -306,6 +306,7 @@ export * from "./elements/widgets/designerView/extensions/buttons/GridExtensionD
 export * from "./elements/widgets/designerView/extensions/buttons/AbstractDesignViewConfigButton.js";
 export * from "./elements/widgets/designerView/extensions/buttons/ButtonSeperatorProvider.js";
 export * from "./elements/widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js";
+export * from "./elements/widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js";
 export type { IDesignViewConfigButtonsProvider } from './elements/widgets/designerView/extensions/buttons/IDesignViewConfigButtonsProvider.js';
 
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtension.js";
