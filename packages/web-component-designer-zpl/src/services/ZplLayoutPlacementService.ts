@@ -1,5 +1,4 @@
-import { DefaultPlacementService, IDesignItem, IPoint, filterChildPlaceItems } from '@node-projects/web-component-designer';
-import { IPlacementView } from '@node-projects/web-component-designer/dist/elements/widgets/designerView/IPlacementView';
+import { DefaultPlacementService, IDesignItem, IDesignerCanvas, IPoint, filterChildPlaceItems } from '@node-projects/web-component-designer';
 
 export class ZplLayoutPlacementService extends DefaultPlacementService {
 
@@ -25,9 +24,9 @@ export class ZplLayoutPlacementService extends DefaultPlacementService {
     override leaveContainer(container: IDesignItem, items: IDesignItem[]) {
     }
 
-    override finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    override finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
         {
-            super.finishPlace(event, placementView, container, startPoint, offsetInControl, newPoint, items);
+            super.finishPlace(event, designerCanvas, container, startPoint, offsetInControl, newPoint, items);
         }
     }
 }

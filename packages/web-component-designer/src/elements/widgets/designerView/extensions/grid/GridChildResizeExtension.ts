@@ -6,7 +6,6 @@ import { roundValue } from "../../../../helper/LayoutHelper.js";
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints, getElementCombinedTransform, transformPointByInverseMatrix, normalizeToAbsolutePosition } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../../item/IDesignItem.js";
 import { IDesignerCanvas } from "../../IDesignerCanvas.js";
-import { IPlacementView } from "../../IPlacementView.js";
 import { AbstractExtension } from "../AbstractExtension.js";
 import { IExtensionManager } from "../IExtensionManger.js";
 
@@ -117,7 +116,7 @@ export class GridChildResizeExtension extends AbstractExtension {
           const containerStyle = getComputedStyle(this.extendedItem.parent.element);
           const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
-          const diff = containerService.placePoint(event, <IPlacementView><any>this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+          const diff = containerService.placePoint(event, this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
           let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
           let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
           let matrix = getElementCombinedTransform((<HTMLElement>this.extendedItem.element));

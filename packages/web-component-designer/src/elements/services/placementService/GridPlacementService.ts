@@ -1,7 +1,6 @@
 import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
-import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { calculateGridInformation, getElementGridInformation } from '../../helper/GridHelper.js';
 import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
@@ -65,17 +64,17 @@ export class GridPlacementService implements IPlacementService {
     return container.element.getBoundingClientRect();
   }
 
-  placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
+  placePoint(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
     const defaultPlacementService = container.serviceContainer.getLastServiceWhere('containerService', x => x instanceof DefaultPlacementService);
-    return defaultPlacementService.placePoint(event, placementView, container, startPoint, offsetInControl, newPoint, items);
+    return defaultPlacementService.placePoint(event, designerCanvas, container, startPoint, offsetInControl, newPoint, items);
   }
 
-  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  startPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
   }
 
-  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  place(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     const gridInformation = calculateGridInformation(container);
-    const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
+    const pos = designerCanvas.getNormalizedEventCoordinates(event);
     //pos.x -= offsetInControl.x;
     //pos.y -= offsetInControl.y;
     let row = 0;
@@ -99,12 +98,12 @@ export class GridPlacementService implements IPlacementService {
       }
       row++;
     }
-    (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
+    (<DesignerCanvas>designerCanvas).extensionManager.refreshAllExtensions([container]);
   }
 
-  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     const gridInformation = calculateGridInformation(container);
-    const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
+    const pos = designerCanvas.getNormalizedEventCoordinates(event);
     //pos.x -= offsetInControl.x;
     //pos.y -= offsetInControl.y;
 
@@ -134,7 +133,7 @@ export class GridPlacementService implements IPlacementService {
       }
       row++;
     }
-    (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
+    (<DesignerCanvas>designerCanvas).extensionManager.refreshAllExtensions([container]);
   }
 
   moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {

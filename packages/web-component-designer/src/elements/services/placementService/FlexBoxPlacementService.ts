@@ -3,7 +3,6 @@ import { IRect } from '../../../interfaces/IRect.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
-import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DefaultPlacementService } from './DefaultPlacementService.js';
 import { IPlacementService } from './IPlacementService.js';
 
@@ -61,19 +60,19 @@ export class FlexBoxPlacementService implements IPlacementService {
     return container.element.getBoundingClientRect();
   }
 
-  placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
+  placePoint(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
     const defaultPlacementService = container.serviceContainer.getLastServiceWhere('containerService', x => x instanceof DefaultPlacementService);
-    return defaultPlacementService.placePoint(event, placementView, container, startPoint, offsetInControl, newPoint, items);
+    return defaultPlacementService.placePoint(event, designerCanvas, container, startPoint, offsetInControl, newPoint, items);
   }
 
-  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  startPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
 
   }
 
-  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    const pos = (<IDesignerCanvas><unknown>placementView).getNormalizedEventCoordinates(event);
+  place(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    const pos = (<IDesignerCanvas><unknown>designerCanvas).getNormalizedEventCoordinates(event);
     const style = getComputedStyle(container.element);
-    const childrenWithPos: [IDesignItem, IRect][] = Array.from(container.children()).filter(x => !x.isEmptyTextNode).map(x => [x, (<IDesignerCanvas><unknown>placementView).getNormalizedElementCoordinates(x.element)]);
+    const childrenWithPos: [IDesignItem, IRect][] = Array.from(container.children()).filter(x => !x.isEmptyTextNode).map(x => [x, designerCanvas.getNormalizedElementCoordinates(x.element)]);
     if (style.flexDirection == 'row' || style.flexDirection == 'row-reverse') {
       childrenWithPos.sort(x => x[1].x);
       let elBefore: [IDesignItem, IRect] = null;
@@ -159,10 +158,10 @@ export class FlexBoxPlacementService implements IPlacementService {
       }
     }
 
-    (<DesignerCanvas>placementView).extensionManager.refreshAllExtensions([container]);
+    (<DesignerCanvas>designerCanvas).extensionManager.refreshAllExtensions([container]);
   }
 
-  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
   }
 
   moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {

@@ -6,7 +6,6 @@ import { roundValue } from '../../../helper/LayoutHelper.js';
 import { transformPointByInverseMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition, getElementCombinedTransform } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IPlacementView } from '../IPlacementView.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 
@@ -134,7 +133,7 @@ export class ResizeExtension extends AbstractExtension {
           const containerStyle = getComputedStyle(this.extendedItem.parent.element);
           const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
-          const diff = containerService.placePoint(event, <IPlacementView><any>this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+          const diff = containerService.placePoint(event, this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
           let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
           let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
           let matrix = getElementCombinedTransform((<HTMLElement>this.extendedItem.element));
@@ -280,46 +279,52 @@ export class ResizeExtension extends AbstractExtension {
         (<Element>event.target).releasePointerCapture(event.pointerId);
 
         let cg = this.extendedItem.openGroup((this.resizeAllSelected && this.designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 1) ? "Resize Elements" : "Resize &lt;" + this.extendedItem.name + "&gt;");
-        this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
-        this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
+        try {
+          this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
+          this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
 
-        this.extendedItem.setStyle('left', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'left'))) + 'px');
-        this.extendedItem.setStyle('top', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'top'))) + 'px');
+          this.extendedItem.setStyle('left', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'left'))) + 'px');
+          this.extendedItem.setStyle('top', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'top'))) + 'px');
 
-        let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
-        (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
+          let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
+          (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
 
-        let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
-        let p1 = new DOMPoint(p1Abs.x - p3Abs.x, -(p1Abs.y - p3Abs.y));
-        let matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
-        let deltaX = 0;
-        let deltaY = 0;
+          let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
+          let p1 = new DOMPoint(p1Abs.x - p3Abs.x, -(p1Abs.y - p3Abs.y));
+          let matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
+          let deltaX = 0;
+          let deltaY = 0;
 
-        let p1transformed = transformPointByInverseMatrix(p1, matrix);
-        let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
-        let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
-        let p1p2transformed = p1p2.matrixTransform(matrix);
-        let p4Abs = new DOMPoint(p1Abs.x + p1p2transformed.x, p1Abs.y - p1p2transformed.y);
-        deltaX = p4Abs.x - p1Abs.x;
-        deltaY = p4Abs.y - p1Abs.y;
+          let p1transformed = transformPointByInverseMatrix(p1, matrix);
+          let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
+          let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
+          let p1p2transformed = p1p2.matrixTransform(matrix);
+          let p4Abs = new DOMPoint(p1Abs.x + p1p2transformed.x, p1Abs.y - p1p2transformed.y);
+          deltaX = p4Abs.x - p1Abs.x;
+          deltaY = p4Abs.y - p1Abs.y;
 
-        (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
-        if (matrix.isIdentity) {
-          (<HTMLElement>this.extendedItem.element).style.transform = '';
-        }
-        this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
-        if (this.resizeAllSelected) {
-          for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-            if (designItem !== this.extendedItem) {
-              designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
-              designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
+          (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
+          if (matrix.isIdentity) {
+            (<HTMLElement>this.extendedItem.element).style.transform = '';
+          }
+          this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
+          if (this.resizeAllSelected) {
+            for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+              if (designItem !== this.extendedItem) {
+                designItem.setStyle('width', (<HTMLElement>designItem.element).style.width);
+                designItem.setStyle('height', (<HTMLElement>designItem.element).style.height);
 
-              designItem.setStyle('left', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>designItem.element, 'left'))) + 'px');
-              designItem.setStyle('top', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>designItem.element, 'top'))) + 'px');
+                designItem.setStyle('left', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>designItem.element, 'left'))) + 'px');
+                designItem.setStyle('top', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>designItem.element, 'top'))) + 'px');
+              }
             }
           }
+          cg.commit();
         }
-        cg.commit();
+        catch (err) {
+          cg.abort();
+          console.error(err)
+        }
         this._initialSizes = null;
         this._initialPoint = null;
         break;

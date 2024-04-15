@@ -1,17 +1,19 @@
 import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
-import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransformationBetweenElementAndAllAncestors } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 export class AbsolutePlacementService implements IPlacementService {
 
-  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration) {
+  serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration, item?: IDesignItem) {
+    if (item != null && item.getComputedStyle()?.position == 'absolute')
+      return true;
     if (containerStyle.display === 'grid' || containerStyle.display === 'inline-grid' ||
       containerStyle.display === 'flex' || containerStyle.display === 'inline-flex')
       return false;
@@ -42,21 +44,21 @@ export class AbsolutePlacementService implements IPlacementService {
     return container.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(container.element);
   }
 
-  private calculateTrack(event: MouseEvent, placementView: IPlacementView, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, item: IDesignItem): IPoint {
+  private calculateTrack(event: MouseEvent, designerCanvas: IDesignerCanvas, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, item: IDesignItem): IPoint {
     let trackX = newPoint.x - startPoint.x;
     let trackY = newPoint.y - startPoint.y;
 
     if (!event.ctrlKey) {
-      if (placementView.alignOnGrid) {
+      if (designerCanvas.alignOnGrid) {
         let p = getDesignItemCurrentPos(item, 'position');
-        p.x = p.x % placementView.gridSize;
-        p.y = p.y % placementView.gridSize;
-        trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize - p.x;
-        trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize - p.y;
+        p.x = p.x % designerCanvas.gridSize;
+        p.y = p.y % designerCanvas.gridSize;
+        trackX = Math.round(trackX / designerCanvas.gridSize) * designerCanvas.gridSize - p.x;
+        trackY = Math.round(trackY / designerCanvas.gridSize) * designerCanvas.gridSize - p.y;
       }
-      else if (placementView.alignOnSnap) {
+      else if (designerCanvas.alignOnSnap) {
         let rect = item.element.getBoundingClientRect();
-        let newPos = placementView.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / placementView.scaleFactor, height: rect.height / placementView.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+        let newPos = designerCanvas.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / designerCanvas.scaleFactor, height: rect.height / designerCanvas.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x - Math.round(startPoint.x) + Math.round(offsetInControl.x);
         } else {
@@ -72,17 +74,17 @@ export class AbsolutePlacementService implements IPlacementService {
     return { x: trackX, y: trackY };
   }
 
-  placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
+  placePoint(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
     let trackX = newPoint.x;
     let trackY = newPoint.y;
 
     if (!event.ctrlKey) {
-      if (placementView.alignOnGrid) {
-        trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize;
-        trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize;
+      if (designerCanvas.alignOnGrid) {
+        trackX = Math.round(trackX / designerCanvas.gridSize) * designerCanvas.gridSize;
+        trackY = Math.round(trackY / designerCanvas.gridSize) * designerCanvas.gridSize;
       }
-      else if (placementView.alignOnSnap) {
-        let newPos = placementView.snapLines.snapToPosition({ x: newPoint.x - offsetInControl.x, y: newPoint.y - offsetInControl.y }, null, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
+      else if (designerCanvas.alignOnSnap) {
+        let newPos = designerCanvas.snapLines.snapToPosition({ x: newPoint.x - offsetInControl.x, y: newPoint.y - offsetInControl.y }, null, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x;
         } else {
@@ -99,13 +101,13 @@ export class AbsolutePlacementService implements IPlacementService {
     return { x: trackX, y: trackY };
   }
 
-  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  startPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
   }
 
-  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  place(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     //TODO: this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
-    let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
+    let track = this.calculateTrack(event, designerCanvas, startPoint, offsetInControl, newPoint, items[0]);
 
     if (event.shiftKey) {
       track = straightenLine({ x: 0, y: 0 }, track, true);
@@ -159,7 +161,7 @@ export class AbsolutePlacementService implements IPlacementService {
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {
   }
 
-  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     let filterdItems = filterChildPlaceItems(items);
     for (const designItem of filterdItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
@@ -170,7 +172,7 @@ export class AbsolutePlacementService implements IPlacementService {
     }
 
     for (const item of items) {
-      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
+      (<DesignerCanvas>designerCanvas).extensionManager.removeExtension(item, ExtensionType.Placement);
     }
   }
 }
