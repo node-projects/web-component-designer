@@ -15,6 +15,13 @@ import { IStylesheet } from "./services/stylesheetService/IStylesheetService.js"
 import { sleep } from "./helper/Helper.js";
 import { ExtensionType } from "./widgets/designerView/extensions/ExtensionType.js";
 
+enum tabIndex {
+  designer = 0,
+  code = 1,
+  split = 2,
+  preview = 3
+}
+
 export class DocumentContainer extends BaseCustomWebComponentLazyAppend implements IUiCommandHandler, IDisposable {
   public designerView: DesignerView;
   public codeView: ICodeView & HTMLElement;
@@ -108,8 +115,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._codeDiv.appendChild(this.codeView);
     this.codeView.onTextChanged.on(text => {
       if (!this._disableChangeNotificationDesigner) {
-        this._disableChangeNotificationEditor = true;
-        if (this._tabControl.selectedIndex === 2) {
+        if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
+          this._disableChangeNotificationEditor = true;
           this._content = text;
           this.refreshInSplitViewDebounced();
         }
@@ -125,20 +132,23 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._tabControl.appendChild(this.demoView);
     queueMicrotask(() => {
       this.shadowRoot.appendChild(div);
-      this._tabControl.selectedIndex = 0;
+      this._tabControl.selectedIndex = tabIndex.designer;
     });
   }
 
   async refreshInSplitView() {
-    await this.updateDesignerHtml();
+    try {
+      await this.updateDesignerHtml();
+    } catch (err) {
+      console.error(err);
+    }
     this._disableChangeNotificationEditor = false;
   }
 
   designerSelectionChanged(e: ISelectionChangedEvent) {
-    if (this._tabControl.selectedIndex === 2) {
+    if (this._tabControl.selectedIndex === tabIndex.split) {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (primarySelection) {
-        //this._content = this.designerView.getHTML();
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
           this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
           if (this._selectionPosition)
@@ -154,7 +164,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
     if (!this._disableChangeNotificationEditor) {
       this._disableChangeNotificationDesigner = true;
-      if (this._tabControl.selectedIndex === 2) {
+      if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
         this._content = this.designerView.getHTML();
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
@@ -177,22 +187,22 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   executeCommand(command: IUiCommand) {
-    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2)
+    if (this._tabControl.selectedIndex === tabIndex.designer || this._tabControl.selectedIndex === tabIndex.split)
       this.designerView.executeCommand(command);
-    else if (this._tabControl.selectedIndex === 1)
+    else if (this._tabControl.selectedIndex === tabIndex.code)
       this.codeView.executeCommand(command);
-    else if (this._tabControl.selectedIndex === 3)
+    else if (this._tabControl.selectedIndex === tabIndex.preview)
       this.demoView.executeCommand(command);
   }
 
   canExecuteCommand(command: IUiCommand) {
-    if (this._tabControl.selectedIndex === 0 || this._tabControl.selectedIndex === 2) {
+    if (this._tabControl.selectedIndex === tabIndex.designer || this._tabControl.selectedIndex === tabIndex.split) {
       if (this.designerView?.canExecuteCommand)
         return this.designerView.canExecuteCommand(command);
-    } else if (this._tabControl.selectedIndex === 1) {
+    } else if (this._tabControl.selectedIndex === tabIndex.code) {
       if (this.codeView?.canExecuteCommand)
         return this.codeView.canExecuteCommand(command);
-    } else if (this._tabControl.selectedIndex === 3) {
+    } else if (this._tabControl.selectedIndex === tabIndex.preview) {
       if (this.demoView?.canExecuteCommand)
         return this.demoView.canExecuteCommand(command);
     }
@@ -203,22 +213,22 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._content = value;
 
     if (this._tabControl) {
-      if (this._tabControl.selectedIndex === 0)
+      if (this._tabControl.selectedIndex === tabIndex.designer)
         this.updateDesignerHtml();
-      else if (this._tabControl.selectedIndex === 1)
+      else if (this._tabControl.selectedIndex === tabIndex.code)
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
-      else if (this._tabControl.selectedIndex === 2) {
+      else if (this._tabControl.selectedIndex === tabIndex.split) {
 
       }
-      else if (this._tabControl.selectedIndex === 3)
+      else if (this._tabControl.selectedIndex === tabIndex.preview)
         this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
     }
   }
   get content() {
     if (this._tabControl) {
-      if (this._tabControl.selectedIndex === 0)
+      if (this._tabControl.selectedIndex === tabIndex.designer)
         this._content = this.designerView.getHTML();
-      else if (this._tabControl.selectedIndex === 1)
+      else if (this._tabControl.selectedIndex === tabIndex.code)
         this._content = this.codeView.getText();
       return this._content;
     }
@@ -240,9 +250,9 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this._codeDiv.appendChild(this.codeView);
       }
 
-      if (i.newIndex === 0 || i.newIndex === 2)
+      if (i.newIndex === tabIndex.designer || i.newIndex === tabIndex.split)
         this.updateDesignerHtml();
-      if (i.newIndex === 1 || i.newIndex === 2) {
+      if (i.newIndex === tabIndex.code || i.newIndex === tabIndex.split) {
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         if (this._selectionPosition) {
           this.codeView.setSelection(this._selectionPosition);
@@ -256,11 +266,11 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
           this.codeView.focusEditor();
         }
       }
-      if (i.newIndex === 2) {
+      if (i.newIndex === tabIndex.split) {
         this._splitDiv.appendChild(this.designerView);
         this._splitDiv.appendChild(this.codeView);
       }
-      if (i.newIndex === 3) {
+      if (i.newIndex === tabIndex.preview) {
         this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
       }
 
@@ -294,5 +304,4 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 }
 
-//@ts-ignore
 customElements.define("node-projects-document-container", DocumentContainer);
