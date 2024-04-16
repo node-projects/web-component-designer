@@ -949,9 +949,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return ctxMenu;
   }
 
-  private _onDblClick(event: KeyboardEvent) {
+  private _onDblClick(event: MouseEvent) {
     event.preventDefault();
     if (event.target === this.overlayLayer)
+      return;
+    if (event.altKey)
       return;
     if (this.serviceContainer.globalContext.tool == null || this.serviceContainer.globalContext.tool === this.serviceContainer.designerTools.get(NamedTools.Pointer)) {
       this.extensionManager.removeExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
