@@ -60,8 +60,9 @@ export class UnitEditor extends BaseCustomWebComponentConstructorAppend {
             <button type="button" class="arrow-up" id="arrow-up">&#9650;</button>
             <button type="button" class="arrow-down" id="arrow-down">&#9660;</button>
         <select id="unitSelect" style="display: none;">
-            <option value="px">px</option>
             <option value="%">%</option>
+            <option value="px">px</option>
+            <option value="cm">cm</option>
         </select> 
     </div>
     `;
@@ -81,23 +82,44 @@ export class UnitEditor extends BaseCustomWebComponentConstructorAppend {
         this._arrowUp = this._getDomElement<HTMLButtonElement>('arrow-up');
         this._arrowDown = this._getDomElement<HTMLButtonElement>('arrow-down');
 
+        this._ip.value = '100'
+
         this._container.addEventListener('mouseover', () => {
             this._unitSelect.style.display = 'block'
-        }) 
+        }); 
 
         this._container.addEventListener('mouseleave', () => { 
             this._unitSelect.style.display = 'none'   
-        })
+        });
 
         this._arrowUp.addEventListener('click', () => {
             console.log("+1")
-        })
+
+        });
 
         this._arrowDown.addEventListener('click', () => {
             console.log("-1")
-        })
-    }
+        });
 
+        this._ip.addEventListener('keydown', (event: KeyboardEvent) => {
+            if (event.key === 'Enter'){
+                const inputValue = this._ip.value;
+
+                if (inputValue.endsWith('%')) {
+                    this._unitSelect.value = '%';
+                    this._ip.value = inputValue.slice(0, -1);
+                }
+                else if (inputValue.endsWith('px')) {
+                    this._unitSelect.value = 'px';
+                    this._ip.value = inputValue.slice(0, -2);
+                }
+                else if (inputValue.endsWith('cm')) {
+                    this._unitSelect.value = 'cm';
+                    this._ip.value = inputValue.slice(0, -2);
+                }
+            }   
+        });
+    }
 }
 
 customElements.define("node-projects-web-component-designer-unit-editor", UnitEditor)
