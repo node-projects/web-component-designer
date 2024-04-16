@@ -1122,13 +1122,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: normEvt.x - normEl.x, y: normEvt.y - normEl.y };
   }
 
-  //TODO: remove
-  public elementFromPoint(x: number, y: number): Element {
-    let elements = this._canvasShadowRoot.elementsFromPoint(x, y);
-    let element = elements[0];
-    return element;
-  }
-
   public elementsFromPoint(x: number, y: number): Element[] {
     let retVal: Element[] = [];
     let elements = this._canvasShadowRoot.elementsFromPoint(x, y);
@@ -1302,8 +1295,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.zoomFactor = newZoom;
     this.canvasOffsetUnzoomed = newCanvasOffset;
   }
-
-
 }
 
 customElements.define('node-projects-designer-canvas', DesignerCanvas);
