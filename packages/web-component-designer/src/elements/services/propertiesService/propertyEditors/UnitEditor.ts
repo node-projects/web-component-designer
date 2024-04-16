@@ -61,7 +61,7 @@ export class UnitEditor extends BaseCustomWebComponentConstructorAppend {
             <button type="button" class="arrow-down" id="arrow-down">&#9660;</button>
         <select id="unitSelect" style="display: none;">
             <option value="px">px</option>
-            <option value="percent">%</option>
+            <option value="%">%</option>
         </select> 
     </div>
     `;
