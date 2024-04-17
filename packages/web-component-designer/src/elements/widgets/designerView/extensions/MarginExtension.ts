@@ -2,8 +2,9 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
+import { OverlayLayer } from './OverlayLayer.js';
 
-export class CanvasExtension extends AbstractExtension {
+export class MarginExtension extends AbstractExtension {
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
@@ -23,10 +24,10 @@ export class CanvasExtension extends AbstractExtension {
       if (!isNaN(left) && !isNaN(top) && !isNaN(right) && !isNaN(bottom)) {
         if (this._valuesHaveChanges(left, top, right, bottom, itemRect.x, itemRect.y, itemRect.width, itemRect.height)) {
           this._removeAllOverlays();
-          this._drawRect(itemRect.x - left, itemRect.y - top, left + itemRect.width + right, top, 'svg-margin');
-          this._drawRect(itemRect.x - left, itemRect.y, left, itemRect.height, 'svg-margin');
-          this._drawRect(itemRect.x + itemRect.width, itemRect.y, right, itemRect.height, 'svg-margin');
-          this._drawRect(itemRect.x - left, itemRect.y + itemRect.height, left + itemRect.width + right, bottom, 'svg-margin');
+          this._drawRect(itemRect.x - left, itemRect.y - top, left + itemRect.width + right, top, 'svg-margin', null, OverlayLayer.Background);
+          this._drawRect(itemRect.x - left, itemRect.y, left, itemRect.height, 'svg-margin', null, OverlayLayer.Background);
+          this._drawRect(itemRect.x + itemRect.width, itemRect.y, right, itemRect.height, 'svg-margin', null, OverlayLayer.Background);
+          this._drawRect(itemRect.x - left, itemRect.y + itemRect.height, left + itemRect.width + right, bottom, 'svg-margin', null, OverlayLayer.Background);
         }
       }
     }
