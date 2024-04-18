@@ -50,7 +50,7 @@ export class FlexToolbarExtension extends BasicStackedToolbarExtension {
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
-    this._size.width = 515;
+    this._size.width = 625;
   }
 
   override extend(cache: Record<string | symbol, any>, event: MouseEvent) {

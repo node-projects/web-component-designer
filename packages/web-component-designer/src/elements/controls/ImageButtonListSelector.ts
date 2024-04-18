@@ -18,7 +18,6 @@ export class ImageButtonListSelector extends BaseCustomWebComponentConstructorAp
     }
     .container {
       display: flex;
-      flex-wrap: wrap;
       flex-direction: row;
     }
     ::slotted(button) {

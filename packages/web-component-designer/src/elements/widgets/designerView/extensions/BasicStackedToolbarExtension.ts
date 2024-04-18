@@ -10,11 +10,17 @@ export const basicStackedToolbarExtensionOverlayOptionName = 'basicStackedToolba
 export class BasicStackedToolbarExtension extends AbstractExtension {
 
   protected static basicTemplate = `
+      <select title="position" id="position" style="pointer-events: all; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
+        <option>static</option>
+        <option>relative</option>
+        <option>absolute</option>
+        <option>fixed</option>
+      </select>
       <node-projects-image-button-list-selector id="inline" no-value-in-header property="inline">
         <img data-value="block" title="block" src="${assetsPath}images/display/block.svg">
         <img data-value="inline" title="inline" src="${assetsPath}images/display/inline.svg">
       </node-projects-image-button-list-selector>
-      <select title="display" id="displayType" style="pointer-events: all; height: 24px; width: 70px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
+      <select title="display" id="displayType" style="pointer-events: all; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
         <option>block</option>
         <option>flex</option>
         <option>grid</option>
@@ -24,7 +30,7 @@ export class BasicStackedToolbarExtension extends AbstractExtension {
   protected static toolBars: toolbarObject[] = [];
 
   protected _toolbar: toolbarObject;
-  protected _size = { width: 200, height: 30 };
+  protected _size = { width: 220, height: 30 };
 
   protected _display: string;
   protected _inline: string;
@@ -41,6 +47,15 @@ export class BasicStackedToolbarExtension extends AbstractExtension {
     //@ts-ignore
     this._toolbar = this.createToolbar(this.constructor.template, this._size.width, this._size.height);
     BasicStackedToolbarExtension.toolBars.push(this._toolbar);
+
+    const positionEl = this._toolbar.getById<HTMLSelectElement>('position');
+    if (positionEl) {
+      positionEl.value = cs.position;
+      positionEl.onchange = async () => {
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('position',  positionEl.value);
+        this.extensionManager.reapplyAllAppliedExtentions([this.extendedItem]);
+      }
+    }
 
     const displayTypeEl = this._toolbar.getById<HTMLSelectElement>('displayType');
     if (displayTypeEl) {
