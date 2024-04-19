@@ -51,7 +51,7 @@ export class IndirectSignal {
     private parts: string[];
     private signals: string[];
     private values: string[];
-    private unsubscribeList: [((id: string, value: any) => void),any][] = [];
+    private unsubscribeList: [((id: string, value: any) => void), any][] = [];
     private unsubscribeTargetValue: [((id: string, value: any) => void), any];
     private combinedName: string;
     private disposed: boolean;
@@ -103,7 +103,7 @@ export class IndirectSignal {
             this.unsubscribeTargetValue = null;
         }
         for (let i = 0; i < this.signals.length; i++) {
-            this.visualizationHandler.unsubscribeState(this.signals[i], this.unsubscribeList[i][0],this.unsubscribeList[i][1]);
+            this.visualizationHandler.unsubscribeState(this.signals[i], this.unsubscribeList[i][0], this.unsubscribeList[i][1]);
         }
     }
 
@@ -141,22 +141,29 @@ export class BindingsHelper {
             if (value[0] === '=') {
                 value = value.substring(1);
                 binding.signal = value;
+                if (value.includes('::')) {
+                    const parts = value.split('::');
+                    value = parts[0];
+                    binding.signal = value;
+                    binding.events = parts[1].split(',');
+                }
                 binding.twoWay = true;
-                if (element instanceof HTMLInputElement)
-                    binding.events = ['change'];
-                else if (element instanceof HTMLSelectElement)
-                    binding.events = ['change'];
-                else {
-                    if (isLit(element)) {
-                        binding.events = [propname];
-                    } else {
-                        binding.events = [propname + '-changed'];
-                        //Binding could be a lit elemnt but not yet loaded
-                        binding.maybeLitElement = true;
-                        binding.litEventNames = [propname];
+                if (!binding.events) {
+                    if (element instanceof HTMLInputElement)
+                        binding.events = ['change'];
+                    else if (element instanceof HTMLSelectElement)
+                        binding.events = ['change'];
+                    else {
+                        if (isLit(element)) {
+                            binding.events = [propname];
+                        } else {
+                            binding.events = [propname + '-changed'];
+                            //Binding could be a lit elemnt but not yet loaded
+                            binding.maybeLitElement = true;
+                            binding.litEventNames = [propname];
+                        }
                     }
                 }
-
             }
 
             if (value[0] === '!') {
@@ -208,17 +215,18 @@ export class BindingsHelper {
                 delete bindingCopy.events;
         }
 
+        const eventsString = binding.events?.length > 0 ? binding.events.join(',') : '';
+
         if (binding.target == BindingTarget.property &&
             !binding.expression && !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (bindingCopy.events == null || bindingCopy.events.length == 0)) {
+            !binding.historic) {
             if (targetName == 'textContent')
-                return [bindingPrefixContent + 'text', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+                return [bindingPrefixContent + 'text', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
             if (targetName == 'innerHTML')
-                return [bindingPrefixContent + 'html', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
-            return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+                return [bindingPrefixContent + 'html', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+            return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
         }
 
         //Multi Var Expressions
@@ -227,22 +235,20 @@ export class BindingsHelper {
             !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (bindingCopy.events == null || bindingCopy.events.length == 0)) {
+            !binding.historic) {
             if (targetName == 'textContent')
-                return [bindingPrefixContent + 'text', (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression];
+                return [bindingPrefixContent + 'text', (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
             if (targetName == 'innerHTML')
-                return [bindingPrefixContent + 'html', (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression];
-            return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression];
+                return [bindingPrefixContent + 'html', (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
+            return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
         }
 
         if (binding.target == BindingTarget.attribute &&
             !binding.expression && !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+            !binding.historic) {
+            return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
         }
 
         //Multi Var Expressions
@@ -251,18 +257,16 @@ export class BindingsHelper {
             !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression];
+            !binding.historic) {
+            return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
         }
 
         if (binding.target == BindingTarget.class &&
             !binding.expression && !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+            !binding.historic) {
+            return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
         }
 
         //Multi Var Expressions
@@ -271,18 +275,16 @@ export class BindingsHelper {
             !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression];
+            !binding.historic) {
+            return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
         }
 
         if (binding.target == BindingTarget.css &&
             !binding.expression && !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+            !binding.historic) {
+            return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
         }
 
 
@@ -292,18 +294,16 @@ export class BindingsHelper {
             !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression];
+            !binding.historic) {
+            return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
         }
 
         if (binding.target == BindingTarget.cssvar &&
             !binding.expression && !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+            !binding.historic) {
+            return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
         }
 
         //Multi Var Expressions
@@ -312,9 +312,8 @@ export class BindingsHelper {
             !binding.expressionTwoWay &&
             binding.converter == null &&
             !binding.type &&
-            !binding.historic &&
-            (binding.events == null || binding.events.length == 0)) {
-            return [bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression];
+            !binding.historic) {
+            return [bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
         }
 
         if (binding.inverted === null || binding.inverted === false) {
@@ -377,7 +376,7 @@ export class BindingsHelper {
         return bindingPrefixProperty + PropertiesHelper.camelToDashCase(propertyName);
     }
 
-    * getBindings(element: Element) {
+    *getBindings(element: Element) {
         if (element.attributes) {
             for (let a of element.attributes) {
                 if (a.name.startsWith(bindingPrefixProperty)) {
