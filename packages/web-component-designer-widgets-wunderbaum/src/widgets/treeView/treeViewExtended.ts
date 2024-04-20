@@ -270,9 +270,25 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     });
   }
 
-  public createTree(rootItem: IDesignItem): void {
+  _recomputeRunning;
+  _recomputeRequestedAgain;
+
+  public async createTree(rootItem: IDesignItem) {
     if (this._tree) {
-      this._recomputeTree(rootItem);
+      if (!this._recomputeRunning) {
+        this._recomputeRunning = true;
+        setTimeout(async () => {
+          this._recomputeRequestedAgain = false;
+          await this._recomputeTree(rootItem);
+          this._recomputeRunning = false;
+          if (this._recomputeRequestedAgain) {
+            this._recomputeRequestedAgain = false;
+            this.createTree(rootItem);
+          }
+        }, 20);
+      } else {
+        this._recomputeRequestedAgain = true;
+      }
     }
   }
 
@@ -293,12 +309,12 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._highlight(event.selectedElements);
   }
 
-  private _recomputeTree(rootItem: IDesignItem): void {
+  private async _recomputeTree(rootItem: IDesignItem) {
     try {
       this._tree.root.removeChildren();
 
       this._getChildren(rootItem, null);
-      this._tree.expandAll();
+      await this._tree.expandAll();
       this._filterNodes();
     }
     catch (err) {
