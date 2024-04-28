@@ -2,23 +2,24 @@ import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { IDesignerExtension } from './IDesignerExtension.js';
-import { CanvasExtension } from './CanvasExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
+import { NodeType } from '../../../item/NodeType.js';
+import { PaddingExtension } from './PaddingExtension.js';
 
-export class CanvasExtensionProvider implements IDesignerExtensionProvider {
+export class PaddingExtensionProvider implements IDesignerExtensionProvider {
 
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (getComputedStyle((<HTMLElement>designItem.element)).display == 'block')
+    if (designItem.nodeType == NodeType.Element)
       return true;
     return false;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new CanvasExtension(extensionManager, designerView, designItem);
+    return new PaddingExtension(extensionManager, designerView, designItem);
   }
 
   readonly style = css`
-    .svg-margin { fill: #ff944722; }
-  `;      
+    .svg-padding { fill: #32cd3266; }
+  `;
 }

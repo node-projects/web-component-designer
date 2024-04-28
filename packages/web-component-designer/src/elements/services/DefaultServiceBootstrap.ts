@@ -12,7 +12,7 @@ import { Lit2PropertiesService } from './propertiesService/services/Lit2Properti
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
 import { ElementDragTitleExtensionProvider } from '../widgets/designerView/extensions/ElementDragTitleExtensionProvider.js';
 import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider.js';
-import { CanvasExtensionProvider } from '../widgets/designerView/extensions/CanvasExtensionProvider.js';
+import { MarginExtensionProvider } from '../widgets/designerView/extensions/MarginExtensionProvider.js';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider.js';
 import { HighlightElementExtensionProvider } from '../widgets/designerView/extensions/HighlightElementExtensionProvider.js';
 import { NamedTools } from '../widgets/designerView/tools/NamedTools.js';
@@ -92,6 +92,7 @@ import { BlockToolbarExtensionProvider } from '../widgets/designerView/extension
 import { ChildContextMenu } from '../widgets/designerView/extensions/contextMenu/ChildContextMenu.js';
 import { GridChildToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildToolbarExtensionProvider.js';
 import { ToolbarExtensionsDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js';
+import { PaddingExtensionProvider } from '../widgets/designerView/extensions/PaddingExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -133,7 +134,8 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
     new TransformOriginExtensionProvider(true),
-    new CanvasExtensionProvider(),
+    new MarginExtensionProvider(),
+    new PaddingExtensionProvider(),
     new PositionExtensionProvider(),
     new SvgElementExtensionProvider(),
     new ResizeExtensionProvider(true),
