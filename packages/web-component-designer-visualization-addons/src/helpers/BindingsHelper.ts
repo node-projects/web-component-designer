@@ -215,7 +215,7 @@ export class BindingsHelper {
                 delete bindingCopy.events;
         }
 
-        const eventsString = binding.events?.length > 0 ? binding.events.join(',') : '';
+        const eventsString = binding.events?.length > 0 ? '::' + binding.events.join(',') : '';
 
         if (binding.target == BindingTarget.property &&
             !binding.expression && !binding.expressionTwoWay &&
