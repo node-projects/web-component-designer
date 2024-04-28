@@ -186,10 +186,12 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     if (!bindings) {
       const services = designItem.serviceContainer.getServices('bindingService');
       bindings = [];
-      for (const s of services) {
-        const bs = s.getBindings(designItem);
-        if (bs && bs.length > 0) {
-          bindings.push(...bs);
+      if (services) {
+        for (const s of services) {
+          const bs = s.getBindings(designItem);
+          if (bs && bs.length > 0) {
+            bindings.push(...bs);
+          }
         }
       }
       AbstractPropertiesService._bindingsCache.set(designItem, bindings);
