@@ -70,21 +70,40 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
   }
 
   private _initialize() {
-    let styles: CSSStyleSheet[] = [OverlayLayerView.style];
+    const styles: CSSStyleSheet[] = [OverlayLayerView.style];
+    const alreadyApplied = new Set();
+
     for (const extList of this._serviceContainer.designerExtensions) {
       for (const ext of extList[1]) {
-        if (ext.style) {
-          if (Array.isArray(ext.style))
-            styles.push(...ext.style);
-          else
-            styles.push(ext.style);
+        if (!alreadyApplied.has(ext.constructor)) {
+          alreadyApplied.add(ext.constructor);
+          if (ext.style) {
+            if (Array.isArray(ext.style))
+              styles.push(...ext.style);
+            else
+              styles.push(ext.style);
+          }
+          if (ext.svgDefs) {
+            const a = document.createElementNS("http://www.w3.org/2000/svg", "defs")
+            a.innerHTML = ext.svgDefs;
+            for (let n of [...a.children])
+              this._defs.appendChild(n);
+          }
         }
       }
     }
 
     for (const ext of this._serviceContainer.designerPointerExtensions) {
-      if (ext.style) {
-        styles.push(ext.style);
+      if (!alreadyApplied.has(ext.constructor)) {
+        if (ext.style) {
+          styles.push(ext.style);
+        }
+        if (ext.svgDefs) {
+          const a = document.createElementNS("http://www.w3.org/2000/svg", "defs")
+          a.innerHTML = ext.svgDefs;
+          for (let n of [...a.children])
+            this._defs.appendChild(n);
+        }
       }
     }
 
@@ -247,7 +266,7 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     return textEl;
   }
 
-  drawHTML(overlaySource: string, html: HTMLElement | string, x: number, y: number, w: number, h: number,  className?: string, htmlObj?: SVGForeignObjectElement, overlayLayer?: OverlayLayer) {
+  drawHTML(overlaySource: string, html: HTMLElement | string, x: number, y: number, w: number, h: number, className?: string, htmlObj?: SVGForeignObjectElement, overlayLayer?: OverlayLayer) {
     if (!htmlObj) {
       htmlObj = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
       this.addOverlay(overlaySource, htmlObj, overlayLayer);
