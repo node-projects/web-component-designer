@@ -75,15 +75,18 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
 
     for (const extList of this._serviceContainer.designerExtensions) {
       for (const ext of extList[1]) {
-        if (!alreadyApplied.has(ext.constructor)) {
-          alreadyApplied.add(ext.constructor);
-          if (ext.style) {
+        if (ext.style) {
+          if (!alreadyApplied.has(ext.style)) {
+            alreadyApplied.add(ext.style);
             if (Array.isArray(ext.style))
               styles.push(...ext.style);
             else
               styles.push(ext.style);
           }
-          if (ext.svgDefs) {
+        }
+        if (ext.svgDefs) {
+          if (!alreadyApplied.has(ext.svgDefs)) {
+            alreadyApplied.add(ext.svgDefs);
             const a = document.createElementNS("http://www.w3.org/2000/svg", "defs")
             a.innerHTML = ext.svgDefs;
             for (let n of [...a.children])
@@ -94,11 +97,16 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     }
 
     for (const ext of this._serviceContainer.designerPointerExtensions) {
-      if (!alreadyApplied.has(ext.constructor)) {
-        if (ext.style) {
+
+      if (ext.style) {
+        if (!alreadyApplied.has(ext.style)) {
+          alreadyApplied.add(ext.style);
           styles.push(ext.style);
         }
-        if (ext.svgDefs) {
+      }
+      if (ext.svgDefs) {
+        if (!alreadyApplied.has(ext.svgDefs)) {
+          alreadyApplied.add(ext.svgDefs);
           const a = document.createElementNS("http://www.w3.org/2000/svg", "defs")
           a.innerHTML = ext.svgDefs;
           for (let n of [...a.children])
