@@ -9,6 +9,7 @@ export class ApplyFirstMachingExtensionProvider implements IDesignerExtensionPro
   private extensions: IDesignerExtensionProvider[]
   private extIndex: number;
   public style: CSSStyleSheet[];
+  public svgDefs: string[];
 
   constructor(...extensions: IDesignerExtensionProvider[]) {
     this.extensions = extensions;
@@ -20,6 +21,30 @@ export class ApplyFirstMachingExtensionProvider implements IDesignerExtensionPro
           this.style.push(...e.style);
         else
           this.style.push(e.style);
+      }
+      if (e.constructor.style) {
+        if (!this.style)
+          this.style = [];
+        if (Array.isArray(e.constructor.style))
+          this.style.push(...e.constructor.style);
+        else
+          this.style.push(e.constructor.style);
+      }
+      if (e.svgDefs) {
+        if (!this.svgDefs)
+          this.svgDefs = [];
+        if (Array.isArray(e.svgDefs))
+          this.svgDefs.push(...e.svgDefs);
+        else
+          this.svgDefs.push(e.svgDefs);
+      }
+      if (e.constructor.svgDefs) {
+        if (!this.svgDefs)
+          this.svgDefs = [];
+        if (Array.isArray(e.constructor.svgDefs))
+          this.svgDefs.push(...e.svgDefs);
+        else
+          this.svgDefs.push(e.constructor.svgDefs);
       }
     }
   }

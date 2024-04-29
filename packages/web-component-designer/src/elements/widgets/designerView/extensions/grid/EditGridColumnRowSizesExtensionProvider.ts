@@ -20,7 +20,7 @@ export class EditGridColumnRowSizesExtensionProvider implements IDesignerExtensi
     return new EditGridColumnRowSizesExtension(extensionManager, designerCanvas, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-grid-resizer-v { fill: transparent; cursor: ew-resize; pointer-events: all; }
     .svg-grid-resizer-v:hover { fill: #ff7f5052; }
     .svg-grid-resizer-h { fill: transparent; cursor: ns-resize; pointer-events: all; }

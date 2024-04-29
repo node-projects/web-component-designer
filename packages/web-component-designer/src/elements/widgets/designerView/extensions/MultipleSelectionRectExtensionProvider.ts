@@ -15,7 +15,7 @@ export class MultipleSelectionRectExtensionProvider implements IDesignerExtensio
     return new MultipleSelectionRectExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-multiple-rect-selection { stroke: #909090; stroke-dasharray: 3; fill: transparent; stroke-width: 2; /*pointer-events: all;*/ }
   `;
 }

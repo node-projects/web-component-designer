@@ -29,7 +29,7 @@ export class DisplayGridExtensionProvider implements IDesignerExtensionProvider 
     return new DisplayGridExtension(extensionManager, designerCanvas, designItem, this.gridColor, this.gridFillColor);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-grid { stroke: var(--svg-grid-stroke-color); stroke-dasharray: 5; fill: var(--svg-grid-fill-color); }
     .svg-grid-current-cell { stroke: var(--svg-grid-stroke-color); stroke-dasharray: 5; fill: #e3ff4722; }
     .svg-grid-area { font-size: 8px; }
@@ -38,7 +38,7 @@ export class DisplayGridExtensionProvider implements IDesignerExtensionProvider 
     .svg-grid-plus-sign { stroke: black; }
   `;
 
-  readonly svgDefs = `
+  static readonly svgDefs = `
     <pattern id="pattern-stripe" 
       width="4" height="4" 
       patternUnits="userSpaceOnUse"

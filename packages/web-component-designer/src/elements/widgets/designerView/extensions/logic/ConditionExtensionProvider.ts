@@ -8,12 +8,14 @@ export class ConditionExtensionProvider implements IDesignerExtensionProvider {
     constructor(extensionProvider: IDesignerExtensionProvider, condition: (designItem: IDesignItem) => boolean) {
         this.extensionProvider = extensionProvider;
         this.condition = condition;
-        this.style = <any>extensionProvider.style;
+        this.style = <any>extensionProvider.style ?? extensionProvider.constructor.style;
+        this.svgDefs = <any>extensionProvider.svgDefs ?? extensionProvider.constructor.svgDefs;
     }
 
     extensionProvider: IDesignerExtensionProvider;
     condition: (designItem: IDesignItem) => boolean;
     style: CSSStyleSheet;
+    svgDefs: string;
 
     shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
         if (!this.condition(designItem))

@@ -15,7 +15,7 @@ export class GrayOutDragOverContainerExtensionProvider implements IDesignerExten
     return new GrayOutDragOverContainerExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-rect-enter-container { stroke: none; fill: #aa00ff2e; }
   `;
 }

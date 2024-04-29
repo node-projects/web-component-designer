@@ -19,7 +19,7 @@ export class PaddingExtensionProvider implements IDesignerExtensionProvider {
     return new PaddingExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-padding { fill: #32cd3266; }
   `;
 }

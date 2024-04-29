@@ -8,5 +8,6 @@ declare global {
 
   interface Function {
     style: CSSStyleSheet;
+    svgDefs: string;
   }
 }

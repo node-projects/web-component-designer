@@ -30,7 +30,7 @@ export class InvisibleElementExtensionProvider implements IDesignerExtensionProv
     return new InvisibleElementExtension(extensionManager, designerCanvas, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-invisible-div { stroke: lightgray; fill: transparent; stroke-width: 1;
   `;
 }

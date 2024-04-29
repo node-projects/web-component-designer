@@ -15,7 +15,7 @@ export class ElementDragTitleExtensionProvider implements IDesignerExtensionProv
     return new ElementDragTitleExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-text-primary { stroke: none; color: white; font-family: monospace; }
   `;
 }

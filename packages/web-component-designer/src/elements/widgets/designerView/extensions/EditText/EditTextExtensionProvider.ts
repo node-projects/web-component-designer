@@ -19,7 +19,7 @@ export class EditTextExtensionProvider implements IDesignerExtensionProvider {
     return new EditTextExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-edit-text-clickoutside { stroke: transparent; fill: lightgray; opacity: 0.7 }
   `;
 }

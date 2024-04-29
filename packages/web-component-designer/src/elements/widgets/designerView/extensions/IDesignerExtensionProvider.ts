@@ -7,5 +7,5 @@ export interface IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean;
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension;
   style?: CSSStyleSheet | CSSStyleSheet[];
-  svgDefs?: string;
+  svgDefs?: string | string[];
 }

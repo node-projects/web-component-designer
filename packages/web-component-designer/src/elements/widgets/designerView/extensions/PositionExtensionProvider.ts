@@ -20,7 +20,7 @@ export class PositionExtensionProvider implements IDesignerExtensionProvider {
     return new PositionExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-position-text { text-anchor: middle; alignment-baseline: central; }
   `;
 }

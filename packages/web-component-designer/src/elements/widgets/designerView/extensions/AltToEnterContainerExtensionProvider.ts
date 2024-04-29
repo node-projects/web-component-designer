@@ -15,7 +15,7 @@ export class AltToEnterContainerExtensionProvider implements IDesignerExtensionP
     return new AltToEnterContainerExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-text-enter-container { stroke: none; fill: black; stroke-width: 1; font-weight:800; font-family: monospace; }
   `;
 }
