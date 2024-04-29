@@ -85,7 +85,9 @@ interface ServiceNameMap {
   "designItemDocumentPositionService": (designerCanvas: IDesignerCanvas) => IDesignItemDocumentPositionService;
 }
 
-export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
+const isMobile = !!(navigator.maxTouchPoints && navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome'))
+
+export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   readonly config: {
     codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
@@ -119,7 +121,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap>  {
 
   public readonly options = {
     zoomDesignerBackground: true,
-    roundPixelsToDecimalPlaces: -1
+    roundPixelsToDecimalPlaces: -1,
+    resizerPixelSize: isMobile ? 8 : 3
   };
 
   public readonly designerTools: Map<string | NamedTools, ITool | (new (IElementDefinition) => ITool)> = new Map();
