@@ -99,9 +99,11 @@ export function calculateGridInformation(designItem: IDesignItem) {
   }
 
   const retVal: {
-    cells?: { x: number, y: number, width: number, height: number, name: string }[][];
-    gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number, type: 'h' | 'v' }[];
-  } = { cells: [], gaps: [] };
+    cells?: { x: number, y: number, width: number, height: number, name: string }[][],
+    gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number, type: 'h' | 'v' }[],
+    xGap: number
+    yGap: number
+  } = { cells: [], gaps: [], xGap, yGap };
 
   for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
     const r = rows[rowIdx];

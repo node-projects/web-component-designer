@@ -2,6 +2,7 @@ import { EventNames } from "../../../../../enums/EventNames.js";
 import { IPoint } from "../../../../../interfaces/IPoint.js";
 import { ISize } from "../../../../../interfaces/ISize.js";
 import { getContentBoxContentOffsets } from "../../../../helper/ElementHelper.js";
+import { calculateGridInformation } from "../../../../helper/GridHelper.js";
 import { roundValue } from "../../../../helper/LayoutHelper.js";
 import { getDesignerCanvasNormalizedTransformedCornerDOMPoints, getElementCombinedTransform, transformPointByInverseMatrix, normalizeToAbsolutePosition } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../../item/IDesignItem.js";
@@ -60,7 +61,7 @@ export class GridChildResizeExtension extends AbstractExtension {
   }
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
-    let circle = this._drawCircle(x, y, 3 / this.designerCanvas.zoomFactor, 'svg-primary-resizer', oldCircle);
+    let circle = this._drawCircle(x, y, 3 / this.designerCanvas.zoomFactor, 'svg-grid-resizer', oldCircle);
     circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     if (!oldCircle) {
       circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(circle, event, cursor));
@@ -105,9 +106,6 @@ export class GridChildResizeExtension extends AbstractExtension {
         this._initialComputedTransformOrigins.push(transformOrigin);
         this._initialTransformOrigins.push((<HTMLElement>this.extendedItem.element).style.transformOrigin);
 
-        if (this.designerCanvas.alignOnSnap)
-          this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-
         this.prepareResize(this.extendedItem, this._actionModeStarted)
         break;
 
@@ -129,52 +127,63 @@ export class GridChildResizeExtension extends AbstractExtension {
             deltaY = deltaX;
           }
 
-          let i = 0;
+          let posX = 0;
+          let posY = 0;
+          let cellX = 0;
+          let cellY = 0;
 
-          let width = null;
-          let height = null;
+          const gridInformation = calculateGridInformation(this.extendedItem.parent);
+          const gridPos = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.parent.element);
+          const evPos = this.designerCanvas.getNormalizedEventCoordinates(event);
+          const cs = getComputedStyle(this.extendedItem.element);
+          (<HTMLElement>this.extendedItem.element).style.gridColumnStart = cs.gridColumnStart;
+          (<HTMLElement>this.extendedItem.element).style.gridColumnEnd = cs.gridColumnEnd === 'auto' ? '' + (parseInt(cs.gridColumnStart) + 1) : cs.gridColumnEnd;
+          (<HTMLElement>this.extendedItem.element).style.gridRowStart = cs.gridRowStart;
+          (<HTMLElement>this.extendedItem.element).style.gridRowEnd = cs.gridRowEnd === 'auto' ? '' + (parseInt(cs.gridRowStart) + 1) : cs.gridRowEnd;
 
-          switch (this._actionModeStarted) {
-            case 'e-resize':
-              width = (this._initialSizes[i].width + deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              break;
-            case 'se-resize':
-              width = (this._initialSizes[i].width + deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height + deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 's-resize':
-              height = (this._initialSizes[i].height + deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'sw-resize':
-              width = (this._initialSizes[i].width - deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height + deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'w-resize':
-              width = (this._initialSizes[i].width - deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              break;
-            case 'nw-resize':
-              width = (this._initialSizes[i].width - deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height - deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'n-resize':
-              height = (this._initialSizes[i].height - deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'ne-resize':
-              width = (this._initialSizes[i].width + deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height - deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
+          if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'w-resize' || this._actionModeStarted == 'sw-resize') {
+            for (let i = 0; i < gridInformation.cells.length; i++) {
+              const cell = gridInformation.cells[i][0];
+              const cellMiddlePos = posX + (cell.width / 2);
+              if (evPos.x > gridPos.x + cellMiddlePos) {
+                cellX = i;
+              }
+              posX += cell.width + gridInformation.xGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridColumnStart = '' + (cellX + 2);
+          }
+          if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'n-resize' || this._actionModeStarted == 'ne-resize') {
+            for (let i = 0; i < gridInformation.cells.length; i++) {
+              const cell = gridInformation.cells[i][0];
+              const cellMiddlePos = posY + (cell.height / 2);
+              if (evPos.y > gridPos.y + cellMiddlePos) {
+                cellY = i;
+              }
+              posY += cell.height + gridInformation.yGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridRowStart = '' + (cellY + 2);
+          }
+          if (this._actionModeStarted == 'se-resize' || this._actionModeStarted == 'e-resize' || this._actionModeStarted == 'ne-resize') {
+            for (let i = 0; i < gridInformation.cells.length; i++) {
+              const cell = gridInformation.cells[i][0];
+              const cellMiddlePos = posX + (cell.width / 2);
+              if (evPos.x > gridPos.x + cellMiddlePos) {
+                cellX = i;
+              }
+              posX += cell.width + gridInformation.xGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridColumnEnd = '' + (cellX + 2);
+          }
+          if (this._actionModeStarted == 'sw-resize' || this._actionModeStarted == 's-resize' || this._actionModeStarted == 'se-resize') {
+            for (let i = 0; i < gridInformation.cells[0].length; i++) {
+              const cell = gridInformation.cells[0][i];
+              const cellMiddlePos = posY + (cell.height / 2);
+              if (evPos.y > gridPos.y + cellMiddlePos) {
+                cellY = i;
+              }
+              posY += cell.height + gridInformation.yGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridRowEnd = '' + (cellY + 2);
           }
 
           const resizedElements = [this.extendedItem, this.extendedItem.parent];
