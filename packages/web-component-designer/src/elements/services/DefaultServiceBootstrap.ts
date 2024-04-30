@@ -93,6 +93,7 @@ import { ChildContextMenu } from '../widgets/designerView/extensions/contextMenu
 import { GridChildToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildToolbarExtensionProvider.js';
 import { ToolbarExtensionsDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js';
 import { PaddingExtensionProvider } from '../widgets/designerView/extensions/PaddingExtensionProvider.js';
+import { GridChildResizeExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildResizeExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -138,7 +139,7 @@ export function createDefaultServiceContainer() {
     new PaddingExtensionProvider(),
     new PositionExtensionProvider(),
     new SvgElementExtensionProvider(),
-    new ResizeExtensionProvider(true),
+    new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new RotateExtensionProvider(),
     new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
   ]);
