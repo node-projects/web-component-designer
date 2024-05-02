@@ -50,6 +50,8 @@ export class ContextMenu implements IContextMenu {
 		padding-right: 1.7em;
 		cursor: pointer;
 		white-space: nowrap;
+		display: flex;
+		align-items: center;
 	  }
 	  
 	  .context_menu li:hover {
@@ -58,8 +60,14 @@ export class ContextMenu implements IContextMenu {
 	  
 	  .context_menu li .context_menu_icon_span {	
 		width: 28px;
-		display: inline-block;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		border-right: 1px solid #aaa;
+	  }
+
+	  .context_menu li .context_menu_icon_span img {	
+		height: 18px;
 	  }
 
 	  .context_menu li .context_menu_text {	

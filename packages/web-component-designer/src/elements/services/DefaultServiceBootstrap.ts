@@ -94,6 +94,7 @@ import { GridChildToolbarExtensionProvider } from '../widgets/designerView/exten
 import { ToolbarExtensionsDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js';
 import { PaddingExtensionProvider } from '../widgets/designerView/extensions/PaddingExtensionProvider.js';
 import { GridChildResizeExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildResizeExtensionProvider.js';
+import { AlignItemsContextMenu } from '../widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -237,7 +238,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerContextMenuExtensions = [
     new ChildContextMenu('edit', new CopyPasteContextMenu()),
     new SeperatorContextMenu(),
-    new ChildContextMenu('modify', new RotateLeftAndRight(), new SeperatorContextMenu(), new ZMoveContextMenu()),
+    new ChildContextMenu('modify', new RotateLeftAndRight(), new SeperatorContextMenu(), new ZMoveContextMenu(), new SeperatorContextMenu(), new AlignItemsContextMenu()),
     new SeperatorContextMenu(),
     new ChildContextMenu('view', new JumpToElementContextMenu(), new ZoomToElementContextMenu()),
     new SeperatorContextMenu(),

@@ -12,7 +12,7 @@ export class DefaultModelCommandService implements IModelCommandService {
       command.type == CommandType.moveForward ||
       command.type == CommandType.moveToBack ||
       command.type == CommandType.moveToFront)
-      return designerCanvas.instanceServiceContainer.selectionService.primarySelection != null;
+      return designerCanvas.instanceServiceContainer.selectionService.primarySelection != null && !designerCanvas.instanceServiceContainer.selectionService.primarySelection.isRootItem;
     if (command.type == CommandType.arrangeBottom ||
       command.type == CommandType.arrangeCenter ||
       command.type == CommandType.arrangeLeft ||
@@ -26,7 +26,7 @@ export class DefaultModelCommandService implements IModelCommandService {
       command.type == CommandType.rotateClockwise ||
       command.type == CommandType.mirrorHorizontal ||
       command.type == CommandType.mirrorVertical)
-      return designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 0;
+      return designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 0 && !designerCanvas.instanceServiceContainer.selectionService.primarySelection.isRootItem;
     return null;
   }
 

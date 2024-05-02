@@ -11,10 +11,10 @@ export class CopyPasteContextMenu implements IContextMenuExtension {
 
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
-      { title: 'copy', action: () => { designerView.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C', disabled: designItem === null },
-      { title: 'cut', action: () => { designerView.executeCommand({ type: CommandType.cut }); }, shortCut: 'Ctrl + X', disabled: designItem === null },
-      { title: 'paste', action: () => { designerView.executeCommand({ type: CommandType.paste }); }, shortCut: 'Ctrl + V' },
-      { title: 'delete', action: () => { designerView.executeCommand({ type: CommandType.delete }); }, shortCut: 'Del', disabled: designItem === null },
+      { title: 'copy', icon: `<img src="${new URL('../../../../../../assets/icons/copy.svg', import.meta.url)}">`, action: () => { designerView.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C', disabled: designItem === null },
+      { title: 'cut', icon: `<img src="${new URL('../../../../../../assets/icons/cut.svg', import.meta.url)}">`, action: () => { designerView.executeCommand({ type: CommandType.cut }); }, shortCut: 'Ctrl + X', disabled: designItem === null },
+      { title: 'paste', icon: `<img src="${new URL('../../../../../../assets/icons/paste.svg', import.meta.url)}">`, action: () => { designerView.executeCommand({ type: CommandType.paste }); }, shortCut: 'Ctrl + V' },
+      { title: 'delete', icon: `<img src="${new URL('../../../../../../assets/icons/delete.svg', import.meta.url)}">`, action: () => { designerView.executeCommand({ type: CommandType.delete }); }, shortCut: 'Del', disabled: designItem === null },
     ]
   }
 }

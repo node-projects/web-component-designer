@@ -397,6 +397,34 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   /* --- start IUiCommandHandler --- */
 
+  canExecuteCommand(command: IUiCommand) {
+    const modelCommandService = this.serviceContainer.modelCommandService;
+    if (modelCommandService) {
+      let handeled = modelCommandService.canExecuteCommand(this, command)
+      if (handeled !== null)
+        return handeled;
+    }
+
+    if (command.type === CommandType.undo) {
+      return this.instanceServiceContainer.undoService.canUndo();
+    }
+    if (command.type === CommandType.redo) {
+      return this.instanceServiceContainer.undoService.canRedo();
+    }
+    if (command.type === CommandType.setTool) {
+      return this.serviceContainer.designerTools.has(command.parameter);
+    }
+
+    if (command.type === CommandType.paste) {
+      return true;
+    }
+    if (command.type === CommandType.copy || command.type === CommandType.cut || command.type === CommandType.delete) {
+      return this.instanceServiceContainer.selectionService.primarySelection != null && !this.instanceServiceContainer.selectionService.primarySelection.isRootItem;
+    }
+
+    return true;
+  }
+
   async executeCommand(command: IUiCommand) {
     const modelCommandService = this.serviceContainer.modelCommandService;
     if (modelCommandService) {
@@ -525,29 +553,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (!isNaN(fak))
       this.zoomFactor = fak;
     //this._zoomInput.value = Math.round(this.zoomFactor * 100) + '%';
-  }
-
-
-  canExecuteCommand(command: IUiCommand) {
-    const modelCommandService = this.serviceContainer.modelCommandService;
-    if (modelCommandService) {
-      let handeled = modelCommandService.canExecuteCommand(this, command)
-      if (handeled !== null)
-        return handeled;
-    }
-
-    if (command.type === CommandType.undo) {
-      return this.instanceServiceContainer.undoService.canUndo();
-    }
-    if (command.type === CommandType.redo) {
-      return this.instanceServiceContainer.undoService.canRedo();
-    }
-    if (command.type === CommandType.setTool) {
-      return this.serviceContainer.designerTools.has(command.parameter);
-    }
-
-
-    return true;
   }
 
   /* --- end IUiCommandHandler --- */

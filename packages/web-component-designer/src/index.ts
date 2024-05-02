@@ -333,6 +333,7 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveConte
 export * from "./elements/widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
 export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";

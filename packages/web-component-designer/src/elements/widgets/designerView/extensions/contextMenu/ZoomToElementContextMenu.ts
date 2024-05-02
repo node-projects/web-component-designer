@@ -15,7 +15,7 @@ export class ZoomToElementContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
       {
-        title: 'zoom to', action: () => {          
+        title: 'zoom to', icon: `<img src="${new URL('../../../../../../assets/icons/zoomIn.svg', import.meta.url)}">`, action: () => {
           const coord = designerCanvas.getNormalizedElementCoordinates(designItem.element);
           const startPoint = { x: coord.x - offset, y: coord.y - offset };
           const endPoint = { x: coord.x + coord.width + offset, y: coord.y + coord.height + offset };
