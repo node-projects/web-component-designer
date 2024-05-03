@@ -29,12 +29,12 @@ export class SimpleDemoProviderService implements IDemoProviderService {
     }
     shadowRoot.adoptedStyleSheets = styles;
     shadowRoot.innerHTML = '';
-    //@ts-ignore
-    const myDocument = new DOMParser().parseFromString(code, 'text/html', { includeShadowRoots: true });
-    const fragment = document.createDocumentFragment();
-    for (let e of myDocument.childNodes)
-      fragment.appendChild(e)
-    shadowRoot.appendChild(fragment)
+    if ('setHTMLUnsafe' in shadowRoot)
+      //@ts-ignore
+      shadowRoot.setHTMLUnsafe(code);
+    else
+      shadowRoot.innerHTML = code;
+
     contentDiv.style.display = '';
   }
 }
