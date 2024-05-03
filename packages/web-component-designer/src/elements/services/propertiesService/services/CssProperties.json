@@ -526,7 +526,7 @@
             "visible",
             "hidden",
             "clip",
-            "scoll",
+            "scroll",
             "auto"
         ]
     },
@@ -539,7 +539,7 @@
             "visible",
             "hidden",
             "clip",
-            "scoll",
+            "scroll",
             "auto"
         ]
     },
@@ -549,7 +549,7 @@
             "visible",
             "hidden",
             "clip",
-            "scoll",
+            "scroll",
             "auto"
         ]
     },

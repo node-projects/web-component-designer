@@ -326,6 +326,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.onKeyUp = this.onKeyUp.bind(this);
     this._onDblClick = this._onDblClick.bind(this);
     this._pointerEventHandler = this._pointerEventHandler.bind(this);
+    this._onWheel = this._onWheel.bind(this);
 
     this._getDomElement<HTMLElement>('node-projects-designer-search-close').onclick = () => this._searchHideOverlay();
     this._getDomElement<HTMLElement>('node-projects-designer-search-start').onclick = () => this._searchRun();
@@ -724,6 +725,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.KeyDown, this.onKeyDown);
       this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp);
       this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, true);
+      this.clickOverlay.addEventListener(EventNames.Wheel, this._onWheel);
       this.clickOverlay.addEventListener('zoom', (e: CustomEvent) => {
         this.zoomFactor = this.zoomFactor + (e.detail.diff / 10);
       });
@@ -1164,6 +1166,26 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       if (currentDesignItem && currentDesignItem != this.rootDesignItem && (!element.parentNode || DomHelper.getHost(element.parentNode) !== this.overlayLayer))
         this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver, event);
       this._lastHoverDesignItem = currentDesignItem;
+    }
+  }
+
+  private _onWheel(event: WheelEvent) {
+    let el = this.getElementAtPoint({ x: event.clientX, y: event.clientY });
+    while (el) {
+      const cs = getComputedStyle(el);
+      if (cs.overflowY === 'scroll' || cs.overflowY === 'auto') {
+        const target = el;
+        if (target.scrollBy)
+          target.scrollBy(event.deltaX, event.deltaY);
+        else {
+          target.scrollLeft += event.deltaX;
+          target.scrollTop += event.deltaY;
+        }
+
+        event.stopPropagation();
+        break;
+      }
+      el = el.parentElement;
     }
   }
 
