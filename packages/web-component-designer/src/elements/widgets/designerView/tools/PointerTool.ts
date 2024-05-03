@@ -254,8 +254,10 @@ export class PointerTool implements ITool {
           if (!this._actionStartedDesignItem)
             return;
 
-          if (!this._changeGroup)
+          if (!this._changeGroup) {
             this._changeGroup = designerCanvas.rootDesignItem.openGroup("Move Elements");
+            window.addEventListener('pointerup', () => { this._changeGroup?.abort(); this._changeGroup = null; }, { once: true });
+          }
 
           if (event.ctrlKey && !this._copiedItemsInserted) {
             this._changeGroup.title = "Copy Elements";
@@ -385,6 +387,7 @@ export class PointerTool implements ITool {
               try {
                 containerService.finishPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
                 this._changeGroup.commit();
+                this._changeGroup = null;
               }
               catch (err) {
                 console.error(err);

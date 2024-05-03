@@ -744,10 +744,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _zoomFactorChanged() {
-    //a@ts-ignore
-    //this._canvasContainer.style.zoom = <any>this._zoomFactor;
-    //this._canvasContainer.style.transform = 'scale(' + this._zoomFactor+') translate(' + this._translate.x + ', '+this._translate.y+')';
-    //this._canvasContainer.style.transformOrigin = '0 0';
     this._canvasContainer.style.bottom = this._outercanvas2.offsetHeight >= this._canvasContainer.offsetHeight ? '0' : '';
     this._canvasContainer.style.right = this._outercanvas2.offsetWidth >= this._canvasContainer.offsetWidth ? '0' : '';
     this._updateTransform();

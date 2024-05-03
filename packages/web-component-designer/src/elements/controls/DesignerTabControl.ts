@@ -47,7 +47,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: cursive;
+            font-family: math;
         }
         .header-more:hover {
             background: var(--light-grey, #383f52);
