@@ -1,4 +1,5 @@
 export enum BindingTarget {
+    explicitProperty = 'explicitProperty',
     property = 'property',
     attribute = 'attribute',
     class = 'class',

@@ -82,7 +82,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
           some = some || has;
         });
         const bindings = AbstractPropertiesService.getOrBuildCachedBindings(designItems[0]);
-        if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+        if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty) && x.targetName == property.name))
           return ValueType.bound;
       }
       return all ? ValueType.all : some ? ValueType.some : ValueType.none;

@@ -153,10 +153,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           if (bindings && bindings.find(x => x.target == BindingTarget.attribute && x.targetName == property.name))
             return ValueType.bound;
         } else if (property.propertyType == PropertyType.property) {
-          if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+          if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty) && x.targetName == property.name))
             return ValueType.bound;
         } else {
-          if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name))
+          if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty || x.target == BindingTarget.attribute) && x.targetName == property.name))
             return ValueType.bound;
         }
       }
@@ -252,9 +252,9 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         if (property.propertyType == PropertyType.attribute) {
           return bindings.find(x => x.target == BindingTarget.attribute && x.targetName == property.name);
         } else if (property.propertyType == PropertyType.property) {
-          return bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name);
+          return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty) && x.targetName == property.name);
         } else {
-          return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
+          return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty || x.target == BindingTarget.attribute) && x.targetName == property.name);
         }
       }
     }

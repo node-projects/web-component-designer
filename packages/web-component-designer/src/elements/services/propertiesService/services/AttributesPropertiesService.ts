@@ -103,7 +103,7 @@ export class AttributesPropertiesService implements IPropertiesService {
 
   getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
     const bindings = AbstractPropertiesService.getOrBuildCachedBindings(designItems[0]);
-    return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
+    return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty || x.target == BindingTarget.attribute) && x.targetName == property.name);
   }
 
   getUnsetValue(designItems: IDesignItem[], property: IProperty) {
