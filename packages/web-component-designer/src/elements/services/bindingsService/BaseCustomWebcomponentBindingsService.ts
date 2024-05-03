@@ -39,7 +39,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
           bnd.target = BindingTarget.event;
           bnd.expression = value.substring(2, value.length - 2);
         } else if (a[0].startsWith('.')) {
-          bnd.targetName = name.substring(1);
+          bnd.targetName = PropertiesHelper.dashToCamelCase(name.substring(1));
           bnd.target = BindingTarget.explicitProperty;
           bnd.expression = value.substring(2, value.length - 2);
         } else {
