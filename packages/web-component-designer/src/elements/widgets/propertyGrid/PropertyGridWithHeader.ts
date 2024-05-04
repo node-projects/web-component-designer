@@ -62,10 +62,11 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   </div>
   <node-projects-web-component-designer-property-grid id="pg"></node-projects-web-component-designer-property-grid>`
 
+  public propertyGrid: PropertyGrid;
+
   private _type: HTMLInputElement;
   private _id: HTMLInputElement;
   private _content: HTMLInputElement;
-  private _pg: PropertyGrid;
   private _selectionChangedHandler: Disposable;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _idRect: HTMLDivElement;
@@ -81,7 +82,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._type = this._getDomElement<HTMLInputElement>('type');
     this._id = this._getDomElement<HTMLInputElement>('id');
     this._content = this._getDomElement<HTMLInputElement>('content');
-    this._pg = this._getDomElement<PropertyGrid>('pg');
+    this.propertyGrid = this._getDomElement<PropertyGrid>('pg');
     this._idRect = this._getDomElement<HTMLDivElement>('idRect');
     this._contentRect = this._getDomElement<HTMLDivElement>('contentRect');
     this._innerRect = this._getDomElement<HTMLDivElement>('innerRect');
@@ -145,14 +146,14 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   }
 
   public set serviceContainer(value: ServiceContainer) {
-    this._pg.serviceContainer = value;
+    this.propertyGrid.serviceContainer = value;
   }
 
   public set instanceServiceContainer(value: InstanceServiceContainer) {
     this._instanceServiceContainer = value;
     this._selectionChangedHandler?.dispose()
     this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(async e => {
-      this._pg.instanceServiceContainer = value;
+      this.propertyGrid.instanceServiceContainer = value;
       await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
 
       if (this._instanceServiceContainer.selectionService?.primarySelection?.isRootItem) {
@@ -199,7 +200,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
         PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
       }
     });
-    this._pg.instanceServiceContainer = value;
+    this.propertyGrid.instanceServiceContainer = value;
   }
 }
 

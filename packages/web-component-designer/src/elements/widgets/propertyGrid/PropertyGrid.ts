@@ -40,7 +40,9 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   static readonly properties = {
     serviceContainer: Object,
     instanceServiceContainer: Object,
-    selectedItems: Array
+    selectedItems: Array,
+    propertyGroupHover: Function,
+    propertyGroupClick: Function
   }
 
   constructor() {
