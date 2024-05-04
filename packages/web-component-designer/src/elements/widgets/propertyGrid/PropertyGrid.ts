@@ -5,6 +5,7 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
+import { IPropertyGroup } from '../../services/propertiesService/IPropertyGroup.js';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
@@ -17,6 +18,9 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _nodeReplacedCb: Disposable;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _selectionChangedHandler: Disposable;
+
+  public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
+  public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
 
   static override readonly style = css`
     :host {
@@ -84,6 +88,8 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
         if (!lst) {
           lst = new PropertyGridPropertyList(this.serviceContainer);
           lst.title = p.name;
+          lst.propertyGroupHover = this.propertyGroupHover;
+          lst.propertyGroupClick = this.propertyGroupClick;
           this._designerTabControl.appendChild(lst);
           this._propertyGridPropertyLists.push(lst);
           this._propertyGridPropertyListsDict[p.name] = lst;

@@ -19,6 +19,9 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
 
+  public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
+  public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
+
   public get propertiesService() {
     return this._propertiesService;
   }
@@ -95,10 +98,20 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       font-size: 10px;
       font-family: monospace;
     }
+    .group-header[clickable]:hover {
+      cursor:pointer;
+      color: orange;
+      text-decoration: underline;
+    }
     .group-desc {
       display: inline-flex;
       flex-direction: row-reverse;
       font-size: 10px;
+      text-decoration: underline;
+    }
+    .group-desc[clickable]:hover {
+      cursor:pointer;
+      color: orange;
       text-decoration: underline;
     }
     .dragOverProperty {
@@ -155,6 +168,28 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       let desc = document.createElement('span');
       desc.innerHTML = g.description ?? '';
       desc.className = 'group-desc';
+      if (this.propertyGroupHover) {
+        header.onmouseenter = () => {
+          if (this.propertyGroupHover(g, 'name'))
+            header.setAttribute('clickable', '')
+          else
+            header.removeAttribute('clickable')
+        }
+        header.onclick = () => {
+          if (this.propertyGroupClick)
+            this.propertyGroupClick(g, 'name');
+        }
+        desc.onmouseenter = () => {
+          if (this.propertyGroupHover(g, 'desc'))
+            desc.setAttribute('clickable', '')
+          else
+            desc.removeAttribute('clickable')
+        }
+        desc.onclick = () => {
+          if (this.propertyGroupClick)
+            this.propertyGroupClick(g, 'desc');
+        }
+      }
       this._div.appendChild(desc);
       this.createPropertyEditors(g.properties);
     }
