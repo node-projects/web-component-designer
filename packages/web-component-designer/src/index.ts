@@ -143,6 +143,7 @@ export * from "./elements/services/propertiesService/propertyEditors/special/Gri
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/AttachedPropertiesService.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
+export * from "./elements/services/propertiesService/services/BasicWebcomponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
 export * from "./elements/services/propertiesService/services/ContentAndIdPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CssCurrentPropertiesService.js";

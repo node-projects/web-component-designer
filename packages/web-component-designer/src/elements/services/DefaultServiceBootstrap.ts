@@ -95,6 +95,7 @@ import { ToolbarExtensionsDesignViewConfigButtons } from '../widgets/designerVie
 import { PaddingExtensionProvider } from '../widgets/designerView/extensions/PaddingExtensionProvider.js';
 import { GridChildResizeExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildResizeExtensionProvider.js';
 import { AlignItemsContextMenu } from '../widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js';
+import { BasicWebcomponentPropertiesService } from './propertiesService/services/BasicWebcomponentPropertiesService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -103,7 +104,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("containerService", defaultPlacementService);
   serviceContainer.register("containerService", new GridPlacementService(defaultPlacementService));
   serviceContainer.register("containerService", new FlexBoxPlacementService(defaultPlacementService));
-
+  serviceContainer.register("propertyService", new BasicWebcomponentPropertiesService());
   serviceContainer.register("propertyService", new PolymerPropertiesService());
   serviceContainer.register("propertyService", new LitElementPropertiesService());
   serviceContainer.register("propertyService", new NativeElementsPropertiesService());
