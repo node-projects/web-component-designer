@@ -4,6 +4,7 @@ import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { IModelCommandService } from "./IModelCommandService.js";
 import { ArrangeHelper } from "../../helper/ArrangeHelper.js";
 import { Orientation } from "../../../enums/Orientation.js";
+import { ExtensionManager } from "../../widgets/designerView/extensions/ExtensionManager.js";
 
 
 export class DefaultModelCommandService implements IModelCommandService {
@@ -41,11 +42,11 @@ export class DefaultModelCommandService implements IModelCommandService {
       let idx = sel.parent.indexOf(sel) + 1;
       if (idx < sel.parent.childCount)
         sel.parent.insertChild(sel, idx);
-    } else if (command.type == CommandType.moveToBack)
+    } else if (command.type == CommandType.moveToBack) {
       sel.parent.insertChild(sel, 0);
-    else if (command.type == CommandType.moveToFront)
+    } else if (command.type == CommandType.moveToFront) {
       sel.parent.insertChild(sel);
-    else if (command.type == CommandType.arrangeTop) {
+    } else if (command.type == CommandType.arrangeTop) {
       ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     } else if (command.type == CommandType.arrangeRight) {
       ArrangeHelper.arrangeElements(Orientation.RIGHT, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
@@ -136,6 +137,7 @@ export class DefaultModelCommandService implements IModelCommandService {
     } else
       return null;
 
+    designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null);
     designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(selection);
     return true;
   }
