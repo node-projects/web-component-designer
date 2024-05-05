@@ -4,7 +4,6 @@ import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { IModelCommandService } from "./IModelCommandService.js";
 import { ArrangeHelper } from "../../helper/ArrangeHelper.js";
 import { Orientation } from "../../../enums/Orientation.js";
-import { ExtensionManager } from "../../widgets/designerView/extensions/ExtensionManager.js";
 
 
 export class DefaultModelCommandService implements IModelCommandService {
