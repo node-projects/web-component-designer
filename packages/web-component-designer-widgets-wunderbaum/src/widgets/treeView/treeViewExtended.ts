@@ -132,7 +132,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     const mnuItems: IContextMenuItem[] = [];
     for (let cme of designItem.serviceContainer.designerContextMenuExtensions) {
       if (cme.shouldProvideContextmenu(event, designItem.instanceServiceContainer.designerCanvas, designItem, 'treeView')) {
-        mnuItems.push(...cme.provideContextMenuItems(event, designItem.instanceServiceContainer.designerCanvas, designItem));
+        mnuItems.push(...cme.provideContextMenuItems(event, designItem.instanceServiceContainer.designerCanvas, designItem, 'treeView', this));
       }
     }
     let ctxMnu = ContextMenu.show(mnuItems, event);
@@ -335,6 +335,24 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         }
       });
     });
+  }
+
+  public collapseChildren(designItem: IDesignItem) {
+    const node = this._tree.findFirst(x => designItem == x.data.ref);
+    if (node) {
+      node.visit(x => {
+        x.setExpanded(false);
+      });
+    }
+  }
+
+  public expandChildren(designItem: IDesignItem) {
+    const node = this._tree.findFirst(x => designItem == x.data.ref);
+    if (node) {
+      node.visit(x => {
+        x.setExpanded(true);
+      });
+    }
   }
 }
 

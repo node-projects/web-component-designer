@@ -8,7 +8,10 @@ import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExten
 export class AlignItemsContextMenu implements IContextMenuExtension {
 
   public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    return !designItem?.isRootItem && designItem?.nodeType == NodeType.Element;
+    if (designItem?.instanceServiceContainer.selectionService.selectedElements.length > 1) {
+      return !designItem?.isRootItem && designItem?.nodeType == NodeType.Element;
+    }
+    return false;
   }
 
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
