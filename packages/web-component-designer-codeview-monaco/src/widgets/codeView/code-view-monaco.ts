@@ -3,8 +3,6 @@ import { CommandType, IActivateable, ICodeView, InstanceServiceContainer, IStrin
 import type * as monacoType from 'monaco-editor'
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
-  private static _initalized: boolean;
-
   static monacoLib: { editor: typeof monacoType.editor, Range: typeof monacoType.Range };
 
   dispose(): void {
@@ -18,7 +16,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   public language: string = 'html';
   public singleRow: boolean = false;
 
-  private _theme: string = 'webComponentDesignerTheme';
+  private _theme: string = 'vs';
   public get theme(): string {
     return this._theme;
   }
@@ -133,23 +131,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     CodeViewMonaco.monacoLib = monaco;
   }
 
-  static initMonacoEditor(monaco: any) {
-    if (!CodeViewMonaco._initalized) {
-      CodeViewMonaco._initalized = true;
-      monaco.editor.defineTheme('webComponentDesignerTheme', {
-        base: 'vs',
-        inherit: true,
-        //@ts-ignore
-        rules: [{ background: 'EDF9FA' }],
-        colors: {
-          'editor.selectionBackground': '#add6ff',
-          'editor.inactiveSelectionBackground': '#add6ff'
-        }
-      });
-    }
-    monaco.editor.setTheme('webComponentDesignerTheme');
-  }
-
   constructor() {
     super();
     this._restoreCachedInititalValues();
@@ -167,8 +148,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
     //@ts-ignore
     CodeViewMonaco.monacoLib ??= window.monaco;
-
-    CodeViewMonaco.initMonacoEditor(CodeViewMonaco.monacoLib);
 
     const resizeObserver = new ResizeObserver(() => {
       if (this._editor.offsetWidth > 0) {
@@ -279,7 +258,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
       CodeViewMonaco.monacoLib.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
-      CodeViewMonaco.monacoLib.editor.setTheme(this.theme);
       this._disableSelectionAfterUpd = false;
     }
   }

@@ -5,6 +5,9 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
+import { IPropertyGroup } from '../../services/propertiesService/IPropertyGroup.js';
+import { IProperty } from '../../services/propertiesService/IProperty.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
@@ -17,6 +20,10 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _nodeReplacedCb: Disposable;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _selectionChangedHandler: Disposable;
+
+  public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
+  public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
+  public propertyContextMenuProvider: (designItems: IDesignItem[], property: IProperty) => IContextMenuItem[];
 
   static override readonly style = css`
     :host {
@@ -36,7 +43,10 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   static readonly properties = {
     serviceContainer: Object,
     instanceServiceContainer: Object,
-    selectedItems: Array
+    selectedItems: Array,
+    propertyGroupHover: Function,
+    propertyGroupClick: Function,
+    propertyContextMenuProvider: Function
   }
 
   constructor() {
@@ -84,6 +94,9 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
         if (!lst) {
           lst = new PropertyGridPropertyList(this.serviceContainer);
           lst.title = p.name;
+          lst.propertyGroupHover = this.propertyGroupHover;
+          lst.propertyGroupClick = this.propertyGroupClick;
+          lst.propertyContextMenuProvider = this.propertyContextMenuProvider;
           this._designerTabControl.appendChild(lst);
           this._propertyGridPropertyLists.push(lst);
           this._propertyGridPropertyListsDict[p.name] = lst;

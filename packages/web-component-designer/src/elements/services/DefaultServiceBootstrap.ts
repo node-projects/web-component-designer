@@ -93,6 +93,9 @@ import { ChildContextMenu } from '../widgets/designerView/extensions/contextMenu
 import { GridChildToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildToolbarExtensionProvider.js';
 import { ToolbarExtensionsDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js';
 import { PaddingExtensionProvider } from '../widgets/designerView/extensions/PaddingExtensionProvider.js';
+import { GridChildResizeExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildResizeExtensionProvider.js';
+import { AlignItemsContextMenu } from '../widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js';
+import { BasicWebcomponentPropertiesService } from './propertiesService/services/BasicWebcomponentPropertiesService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -101,7 +104,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("containerService", defaultPlacementService);
   serviceContainer.register("containerService", new GridPlacementService(defaultPlacementService));
   serviceContainer.register("containerService", new FlexBoxPlacementService(defaultPlacementService));
-
+  serviceContainer.register("propertyService", new BasicWebcomponentPropertiesService());
   serviceContainer.register("propertyService", new PolymerPropertiesService());
   serviceContainer.register("propertyService", new LitElementPropertiesService());
   serviceContainer.register("propertyService", new NativeElementsPropertiesService());
@@ -138,7 +141,7 @@ export function createDefaultServiceContainer() {
     new PaddingExtensionProvider(),
     new PositionExtensionProvider(),
     new SvgElementExtensionProvider(),
-    new ResizeExtensionProvider(true),
+    new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new RotateExtensionProvider(),
     new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
   ]);
@@ -236,7 +239,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerContextMenuExtensions = [
     new ChildContextMenu('edit', new CopyPasteContextMenu()),
     new SeperatorContextMenu(),
-    new ChildContextMenu('modify', new RotateLeftAndRight(), new SeperatorContextMenu(), new ZMoveContextMenu()),
+    new ChildContextMenu('modify', new RotateLeftAndRight(), new SeperatorContextMenu(), new ZMoveContextMenu(), new SeperatorContextMenu(), new AlignItemsContextMenu()),
     new SeperatorContextMenu(),
     new ChildContextMenu('view', new JumpToElementContextMenu(), new ZoomToElementContextMenu()),
     new SeperatorContextMenu(),

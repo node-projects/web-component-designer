@@ -4,22 +4,22 @@ import { PropertyType } from '../PropertyType.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStylesheetService.js';
-import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
 import cssProperties from "./CssProperties.json" with { type: 'json' };
 import { BindingTarget } from '../../../item/BindingTarget.js';
+import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
 
 const localName = '&lt;local&gt;';
 
-export class CssCurrentPropertiesService extends CommonPropertiesService {
+export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
 
   public override getRefreshMode(designItem: IDesignItem) {
     return RefreshMode.fullOnValueChange;
   }
 
   constructor() {
-    super(false);
+    super();
     this.name = 'styles';
   }
 
@@ -55,7 +55,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
     return arr;
   }
 
-  override setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
+  override async setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
     // No selector means local style, styleDeclaration is null means new property
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
       // styleDeclaration stored Propertygrid is not refreshed after entering a new value, so we need to reload
@@ -107,7 +107,7 @@ export class CssCurrentPropertiesService extends CommonPropertiesService {
       if (designItems[0].hasStyle(property.name))
         return ValueType.none;
       //TODO: we need to check if this is the dec. with the highest specifity
-      return ValueType.all;
+      return ValueType.fromStylesheet;
     }
     return super.isSet(designItems, property);
   }

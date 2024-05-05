@@ -5,11 +5,11 @@ import { IPropertyEditor } from '../../services/propertiesService/IPropertyEdito
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { IPropertiesService, RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
 import { ValueType } from '../../services/propertiesService/ValueType.js';
-import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { PropertyType } from '../../services/propertiesService/PropertyType.js';
 import { IPropertyGroup } from '../../services/propertiesService/IPropertyGroup.js';
 import { dragDropFormatNameBindingObject, dragDropFormatNamePropertyGrid } from '../../../Constants.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
@@ -18,6 +18,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _serviceContainer: ServiceContainer;
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
+
+  public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
+  public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
+  public propertyContextMenuProvider: (designItems: IDesignItem[], property: IProperty) => IContextMenuItem[];
 
   public get propertiesService() {
     return this._propertiesService;
@@ -95,10 +99,20 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       font-size: 10px;
       font-family: monospace;
     }
+    .group-header[clickable]:hover {
+      cursor:pointer;
+      color: orange;
+      text-decoration: underline;
+    }
     .group-desc {
       display: inline-flex;
       flex-direction: row-reverse;
       font-size: 10px;
+      text-decoration: underline;
+    }
+    .group-desc[clickable]:hover {
+      cursor:pointer;
+      color: orange;
       text-decoration: underline;
     }
     .dragOverProperty {
@@ -155,6 +169,28 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       let desc = document.createElement('span');
       desc.innerHTML = g.description ?? '';
       desc.className = 'group-desc';
+      if (this.propertyGroupHover) {
+        header.onmouseenter = () => {
+          if (this.propertyGroupHover(g, 'name'))
+            header.setAttribute('clickable', '')
+          else
+            header.removeAttribute('clickable')
+        }
+        header.onclick = () => {
+          if (this.propertyGroupClick)
+            this.propertyGroupClick(g, 'name');
+        }
+        desc.onmouseenter = () => {
+          if (this.propertyGroupHover(g, 'desc'))
+            desc.setAttribute('clickable', '')
+          else
+            desc.removeAttribute('clickable')
+        }
+        desc.onclick = () => {
+          if (this.propertyGroupClick)
+            this.propertyGroupClick(g, 'desc');
+        }
+      }
       this._div.appendChild(desc);
       this.createPropertyEditors(g.properties);
     }
@@ -219,12 +255,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             let label = document.createElement("input");
             let input = <HTMLInputElement>editor.element;
             label.value = p.name;
-            label.onkeyup = e => {
+            label.onkeyup = async e => {
               if (e.key == 'Enter' && label.value) {
                 const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
                 p.service.clearValue(this._designItems, p, 'all');
                 p.name = label.value;
-                p.service.setValue(this._designItems, p, input.value);
+                await p.service.setValue(this._designItems, p, input.value);
                 pg.commit();
                 this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
               }
@@ -300,49 +336,11 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public openContextMenu(event: MouseEvent, property: IProperty) {
-    PropertyGridPropertyList.openContextMenu(event, this._designItems, property);
-  }
-
-  public static openContextMenu(event: MouseEvent, designItems: IDesignItem[], property: IProperty) {
-    const ctxMenuItems: IContextMenuItem[] = [
-      {
-        title: 'clear', action: (e) => {
-          property.service.clearValue(designItems, property, 'value');
-          designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
-        }
-      },
-      {
-        title: 'edit as text', action: (e, _1, _2, menu) => {
-          menu.close();
-          setTimeout(() => {
-            const oldValue = property.service.getValue(designItems, property);
-            let value = prompt(`edit value of '${property.name}' as string:`, oldValue);
-            if (value && value != oldValue) {
-              property.service.setValue(designItems, property, value);
-            }
-            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
-          }, 10)
-        }
-      },
-    ];
-    if (designItems[0].serviceContainer.config.openBindingsEditor) {
-      ctxMenuItems.push(...[
-        { title: '-' },
-        {
-          title: 'edit binding', action: () => {
-            let target = property.service.getPropertyTarget(designItems[0], property);
-            let binding = property.service.getBinding(designItems, property);
-            designItems[0].serviceContainer.config.openBindingsEditor(property, designItems, binding, target);
-          }
-        },
-        {
-          title: 'clear binding', action: () => {
-            property.service.clearValue(designItems, property, 'binding');
-            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
-          }
-        }
-      ]);
-    };
+    let ctxMenuItems: IContextMenuItem[];
+    if (this.propertyContextMenuProvider)
+      ctxMenuItems = this.propertyContextMenuProvider(this._designItems, property)
+    if (!ctxMenuItems)
+      ctxMenuItems = property.service.getContextMenu(this._designItems, property);
     ContextMenu.show(ctxMenuItems, event);
   }
 

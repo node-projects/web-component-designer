@@ -118,7 +118,7 @@ export * from "./elements/services/multiplayerService/MultiplayerService.js";
 export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";
 export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
 
-export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
+export type { IPropertiesService, RefreshMode } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";
 export type { IPropertyEditor } from "./elements/services/propertiesService/IPropertyEditor.js";
 export type { IPropertyGroup } from "./elements/services/propertiesService/IPropertyGroup.js";
@@ -142,13 +142,16 @@ export * from "./elements/services/propertiesService/propertyEditors/special/Gri
 
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
 export * from "./elements/services/propertiesService/services/AttachedPropertiesService.js";
+export * from "./elements/services/propertiesService/services/AbstractCssPropertiesService.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
+export * from "./elements/services/propertiesService/services/BasicWebcomponentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CommonPropertiesService.js";
 export * from "./elements/services/propertiesService/services/ContentAndIdPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CssCurrentPropertiesService.js";
 export * from "./elements/services/propertiesService/services/CssPropertiesService.js";
 export * from "./elements/services/propertiesService/services/ListPropertiesService.js";
 export * from "./elements/services/propertiesService/services/LitElementPropertiesService.js";
+export * from "./elements/services/propertiesService/services/Lit2PropertiesService.js";
 export * from "./elements/services/propertiesService/services/MathMLElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/NativeElementsPropertiesService.js";
 export * from "./elements/services/propertiesService/services/SVGElementsPropertiesService.js";
@@ -266,6 +269,8 @@ export * from "./elements/widgets/designerView/extensions/InvisibleElementExtens
 export * from "./elements/widgets/designerView/extensions/InvisibleElementExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/HighlightElementExtension.js";
 export * from "./elements/widgets/designerView/extensions/HighlightElementExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/MultipleSelectionRectExtension.js";
+export * from "./elements/widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/SvgElementExtension.js";
 export * from "./elements/widgets/designerView/extensions/svg/SvgElementExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/PathExtension.js";
@@ -282,6 +287,8 @@ export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtens
 export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/PlacementExtension.js";
+export * from "./elements/widgets/designerView/extensions/PlacementExtensionProvider.js";
 
 export * from "./elements/widgets/designerView/extensions/block/BlockToolbarExtension.js";
 export * from "./elements/widgets/designerView/extensions/block/BlockToolbarExtensionProvider.js";
@@ -309,6 +316,7 @@ export * from "./elements/widgets/designerView/extensions/buttons/AbstractDesign
 export * from "./elements/widgets/designerView/extensions/buttons/ButtonSeperatorProvider.js";
 export * from "./elements/widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js";
+export * from "./elements/widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js";
 export type { IDesignViewConfigButtonsProvider } from './elements/widgets/designerView/extensions/buttons/IDesignViewConfigButtonsProvider.js';
 
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtension.js";
@@ -327,6 +335,7 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/ZMoveConte
 export * from "./elements/widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
 export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";

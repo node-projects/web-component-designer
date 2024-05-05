@@ -15,7 +15,7 @@ export class PlacementExtensionProvider implements IDesignerExtensionProvider {
     return new PlacementExtension(extensionManager, designerView, designItem);
   }
   
-  readonly style = css`
+  static readonly style = css`
     .svg-hover { stroke: #90caf9; fill: none; }
   `;    
 }

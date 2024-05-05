@@ -16,7 +16,7 @@ export class SelectionDefaultExtensionProvider implements IDesignerExtensionProv
     return new SelectionDefaultExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; /*pointer-events: all;*/ }
   `;
 }

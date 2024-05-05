@@ -6,5 +6,5 @@ export type ContextmenuInitiator =  'designer' | 'treeView' | 'other';
 
 export interface IContextMenuExtension {
   shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator);
-  provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[];
+  provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator, provider?: any): IContextMenuItem[];
 }

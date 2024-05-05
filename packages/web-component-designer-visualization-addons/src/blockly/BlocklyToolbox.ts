@@ -30,6 +30,20 @@ export default {
                 },
                 {
                     kind: 'block',
+                    type: 'delay',
+                    inputs: {
+                        DELAY: {
+                            shadow: {
+                                type: 'math_number',
+                                fields: {
+                                    NUM: 1000,
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'block',
                     type: 'open_screen',
                     inputs: {
                         SCREEN: {

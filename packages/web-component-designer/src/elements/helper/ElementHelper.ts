@@ -108,9 +108,18 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 
     let scrollLeft = 0;
     let scrollTop = 0;
+    if (element instanceof HTMLElement) {
+      let parent = element.parentElement;
+      while (parent !== null && parent !== nextParent) {
+        scrollLeft += parent.scrollLeft;
+        scrollTop += parent.scrollTop;
+        parent = parent.parentElement;
+      }
+    }
+
     if (nextParent) {
-      scrollLeft = nextParent.scrollLeft ?? 0;
-      scrollTop = nextParent.scrollTop ?? 0;
+      scrollLeft += nextParent.scrollLeft;
+      scrollTop += nextParent.scrollTop;
     }
 
     let currLeft = 0;

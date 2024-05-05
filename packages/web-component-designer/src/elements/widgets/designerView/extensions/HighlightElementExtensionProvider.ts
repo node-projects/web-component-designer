@@ -15,7 +15,7 @@ export class HighlightElementExtensionProvider implements IDesignerExtensionProv
     return new HighlightElementExtension(extensionManager, designerView, designItem);
   }
   
-  readonly style = css`
+  static readonly style = css`
     .svg-hover { stroke: #90caf9; fill: none; }
   `;    
 }

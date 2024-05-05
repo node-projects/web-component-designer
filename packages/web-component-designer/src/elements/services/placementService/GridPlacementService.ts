@@ -90,8 +90,15 @@ export class GridPlacementService implements IPlacementService {
             (<HTMLElement>items[0].element).style.gridArea = cell.name;
           } else {
             (<HTMLElement>items[0].element).style.gridArea = '';
-            (<HTMLElement>items[0].element).style.gridColumn = (column + 1) + (info.colSpan > 1 ? ' / span ' + info.colSpan : '');
-            (<HTMLElement>items[0].element).style.gridRow = (row + 1) + (info.rowSpan > 1 ? ' / span ' + info.rowSpan : '');
+            if (info.colSpan <= 1) {
+              (<HTMLElement>items[0].element).style.gridColumn = '' + (column + 1);
+              (<HTMLElement>items[0].element).style.gridRow = '' + (row + 1);
+            } else {
+              (<HTMLElement>items[0].element).style.gridColumnStart = '' + (column + 1);
+              (<HTMLElement>items[0].element).style.gridRowStart = '' + (row + 1);
+              (<HTMLElement>items[0].element).style.gridColumnEnd = '' + (column + info.colSpan + 1);
+              (<HTMLElement>items[0].element).style.gridRowEnd = '' + (row + info.rowSpan + 1);
+            }
           }
         }
         column++;
@@ -118,15 +125,32 @@ export class GridPlacementService implements IPlacementService {
           //Grid Area is shorthand for grid row/column, to make undo work correctly we need to set befor and after clear
           if (cell.name) {
             items[0].setStyle('grid-area', cell.name);
+            items[0].removeStyle('grid-row-start');
+            items[0].removeStyle('grid-row-end');
+            items[0].removeStyle('grid-column-start');
+            items[0].removeStyle('grid-column-end');
             items[0].removeStyle('grid-column');
             items[0].removeStyle('grid-row');
             items[0].setStyle('grid-area', cell.name);
           } else {
-            items[0].setStyle('grid-column', (column + 1) + (info.colSpan > 1 ? ' / span ' + info.colSpan : ''));
-            items[0].setStyle('grid-row', (row + 1) + (info.rowSpan > 1 ? ' / span ' + info.rowSpan : ''));
-            items[0].removeStyle('grid-area');
-            items[0].setStyle('grid-column', (column + 1) + (info.colSpan > 1 ? ' / span ' + info.colSpan : ''));
-            items[0].setStyle('grid-row', (row + 1) + (info.rowSpan > 1 ? ' / span ' + info.rowSpan : ''));
+            if (info.colSpan <= 1) {
+              items[0].removeStyle('grid-area');
+              items[0].removeStyle('grid-row-start');
+              items[0].removeStyle('grid-row-end');
+              items[0].removeStyle('grid-column-start');
+              items[0].removeStyle('grid-column-end');
+              items[0].setStyle('grid-column', '' + (column + 1));
+              items[0].setStyle('grid-row', '' + (row + 1));
+            }
+            else {
+              items[0].removeStyle('grid-area');
+              items[0].removeStyle('grid-column');
+              items[0].removeStyle('grid-row');
+              items[0].setStyle('grid-column-start', '' + (column + 1));
+              items[0].setStyle('grid-row-start', '' + (row + 1));
+              items[0].setStyle('grid-column-end', '' + (column + info.colSpan + 1));
+              items[0].setStyle('grid-row-end', '' + (row + info.rowSpan + 1));
+            }
           }
         }
         column++;

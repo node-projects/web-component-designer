@@ -10,6 +10,12 @@ const prefix = `function extractPart(obj, propertyPath) {
     return retVal;
 }
 
+function delay(ms) {
+    return new Promise(res => {
+        setTimeout(() => res(), ms);
+    });
+}
+
 export async function run(eventData, shadowRoot, parameters, relativeSignalsPath) {
 `;
 const postfix = `}`;
@@ -29,6 +35,8 @@ export async function generateEventCodeFromBlockly(data: any): Promise<(event: E
     Blockly.JavaScript.addReservedWords('parameters');
     //@ts-ignore
     Blockly.JavaScript.addReservedWords('relativeSignalsPath');
+    //@ts-ignore
+    Blockly.JavaScript.addReservedWords('delay');
     //@ts-ignore
     Blockly.JavaScript.addReservedWords('IOB');
     //@ts-ignore

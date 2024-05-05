@@ -24,7 +24,7 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
     return new ResizeExtension(extensionManager, designerView, designItem, this.resizeAllSelected);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
   `;
 }

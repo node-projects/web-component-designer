@@ -1,11 +1,11 @@
 import { IProperty } from '../IProperty.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
-import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { PropertyType } from '../PropertyType.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
+import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 
-export class NativeElementsPropertiesService extends CommonPropertiesService {
+export class NativeElementsPropertiesService extends AbstractPropertiesService {
 
   private inputProperties: IProperty[] = [
     {
@@ -193,7 +193,7 @@ export class NativeElementsPropertiesService extends CommonPropertiesService {
     }
   ];
 
-  public override name = "native"
+  public name = "native"
 
   public override getRefreshMode(designItem: IDesignItem) {
     return RefreshMode.full;

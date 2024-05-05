@@ -163,7 +163,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     const mnuItems: IContextMenuItem[] = [];
     for (let cme of designItem.serviceContainer.designerContextMenuExtensions) {
       if (cme.shouldProvideContextmenu(event, designItem.instanceServiceContainer.designerCanvas, designItem, 'treeView')) {
-        mnuItems.push(...cme.provideContextMenuItems(event, designItem.instanceServiceContainer.designerCanvas, designItem));
+        mnuItems.push(...cme.provideContextMenuItems(event, designItem.instanceServiceContainer.designerCanvas, designItem, 'treeView'));
       }
     }
     let ctxMnu = ContextMenu.show(mnuItems, event);

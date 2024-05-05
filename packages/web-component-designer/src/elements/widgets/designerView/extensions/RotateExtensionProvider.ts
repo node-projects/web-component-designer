@@ -18,7 +18,7 @@ export class RotateExtensionProvider implements IDesignerExtensionProvider {
     return new RotateExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-primary-rotate { stroke: #3899ec; fill: #3899ec; pointer-events: all }
     .svg-rotate-text { text-anchor: middle; alignment-baseline: central; }
   `;   

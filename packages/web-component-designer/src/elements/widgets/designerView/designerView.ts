@@ -365,7 +365,6 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   public async parseHTML(html: string, disableUndo: boolean = false) {
     const parserService = this.serviceContainer.htmlParserService;
     if (!html) {
-      this.instanceServiceContainer.undoService.clear();
       this._designerCanvas.overlayLayer.removeAllOverlays();
       DomHelper.removeAllChildnodes(this._designerCanvas.overlayLayer);
       this._designerCanvas.rootDesignItem.clearChildren();

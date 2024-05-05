@@ -9,6 +9,7 @@ import { PropertyType } from '../PropertyType.js';
 import { NodeType } from '../../../item/NodeType.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { newElementFromString } from '../../../helper/ElementHelper.js';
+import { IContextMenuItem } from '../../../helper/contextMenu/IContextMenuItem.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
@@ -41,7 +42,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
 
   abstract getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
 
-  setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+  async setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("property changed: " + property.name + " to " + value);
     for (let d of designItems) {
       if (!this.isHandledElement(d))
@@ -50,9 +51,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         continue;
 
       if (property.propertyType == PropertyType.cssValue) {
-        d.updateStyleInSheetOrLocal(property.name, value);
+         //TODO: use async version here, but then everything needs to be async
+        await d.updateStyleInSheetOrLocalAsync(property.name, value);
         //unkown css property names do not trigger the mutation observer of property grid, 
-        //fixed by assinging stle again to the attribute
+        //fixed by assinging style again to the attribute
         (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
       } else {
         let attributeName = property.attributeName
@@ -153,10 +155,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           if (bindings && bindings.find(x => x.target == BindingTarget.attribute && x.targetName == property.name))
             return ValueType.bound;
         } else if (property.propertyType == PropertyType.property) {
-          if (bindings && bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name))
+          if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty) && x.targetName == property.name))
             return ValueType.bound;
         } else {
-          if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name))
+          if (bindings && bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty || x.target == BindingTarget.attribute) && x.targetName == property.name))
             return ValueType.bound;
         }
       }
@@ -186,10 +188,12 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     if (!bindings) {
       const services = designItem.serviceContainer.getServices('bindingService');
       bindings = [];
-      for (const s of services) {
-        const bs = s.getBindings(designItem);
-        if (bs && bs.length > 0) {
-          bindings.push(...bs);
+      if (services) {
+        for (const s of services) {
+          const bs = s.getBindings(designItem);
+          if (bs && bs.length > 0) {
+            bindings.push(...bs);
+          }
         }
       }
       AbstractPropertiesService._bindingsCache.set(designItem, bindings);
@@ -250,9 +254,9 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         if (property.propertyType == PropertyType.attribute) {
           return bindings.find(x => x.target == BindingTarget.attribute && x.targetName == property.name);
         } else if (property.propertyType == PropertyType.property) {
-          return bindings.find(x => x.target == BindingTarget.property && x.targetName == property.name);
+          return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty) && x.targetName == property.name);
         } else {
-          return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.attribute) && x.targetName == property.name);
+          return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty || x.target == BindingTarget.attribute) && x.targetName == property.name);
         }
       }
     }
@@ -292,5 +296,52 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         (<HTMLElement>d.node.parentNode).removeChild(d.node);
       d.replaceNode(element);
     }
+  }
+
+  public getContextMenu(designItems: IDesignItem[], property: IProperty): IContextMenuItem[] {
+    const ctxMenuItems: IContextMenuItem[] = [
+      {
+        title: 'clear', action: (e) => {
+          property.service.clearValue(designItems, property, 'value');
+          designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+        }
+      },
+      {
+        title: 'edit as text', action: (e, _1, _2, menu) => {
+          menu.close();
+          setTimeout(async () => {
+            const oldValue = property.service.getValue(designItems, property);
+            let value = prompt(`edit value of '${property.name}' as string:`, oldValue);
+            if (value && value != oldValue) {
+              await property.service.setValue(designItems, property, value);
+            }
+            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+          }, 10)
+        }
+      },
+    ];
+    if (designItems[0].serviceContainer.config.openBindingsEditor) {
+      ctxMenuItems.push(...[
+        { title: '-' },
+        {
+          title: 'edit binding', action: () => {
+            let target = property.service.getPropertyTarget(designItems[0], property);
+            let binding = property.service.getBinding(designItems, property);
+            designItems[0].serviceContainer.config.openBindingsEditor(property, designItems, binding, target);
+          }
+        }
+      ]);
+      if (property.service.isSet(designItems, property) == ValueType.bound) {
+        ctxMenuItems.push(...[
+          {
+            title: 'clear binding', action: () => {
+              property.service.clearValue(designItems, property, 'binding');
+              designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+            }
+          }
+        ]);
+      }
+    };
+    return ctxMenuItems;
   }
 }

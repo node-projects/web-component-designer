@@ -9,7 +9,7 @@ import { GridChildResizeExtension } from "./GridChildResizeExtension.js";
 
 export class GridChildResizeExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    if (designItem.nodeType === NodeType.Element && getComputedStyle(designItem.parent.element).display === 'grid')
+    if (designItem.nodeType === NodeType.Element && designItem.parent?.nodeType === NodeType.Element && getComputedStyle(designItem.parent.element).display === 'grid')
       return true;
     return false;
   }
@@ -18,7 +18,7 @@ export class GridChildResizeExtensionProvider implements IDesignerExtensionProvi
     return new GridChildResizeExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
-    .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
+  static readonly style = css`
+    .svg-grid-resizer { stroke: #3899ec; fill: white; pointer-events: all }
   `;
 }

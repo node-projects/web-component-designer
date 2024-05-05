@@ -63,7 +63,7 @@ export class ResizeExtension extends AbstractExtension {
   }
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
-    let circle = this._drawCircle(x, y, 3 / this.designerCanvas.zoomFactor, 'svg-primary-resizer', oldCircle);
+    let circle = this._drawCircle(x, y, this.designerCanvas.serviceContainer.options.resizerPixelSize / this.designerCanvas.zoomFactor, 'svg-primary-resizer', oldCircle);
     circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     if (!oldCircle) {
       circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(circle, event, cursor));

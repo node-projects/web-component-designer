@@ -72,7 +72,7 @@ export class DragDropService implements IDragDropService {
     let newContainerElementDesignItem: IDesignItem = null;
     let newContainerService: IPlacementService = null;
 
-    const elementsFromPoint = designerCanvas.elementsFromPoint(event.x, event.y);
+    const elementsFromPoint = designerCanvas.elementsFromPoint(event.clientX, event.clientY);
     for (let e of elementsFromPoint) {
       if (e == designerCanvas.rootDesignItem.element) {
         newContainerElementDesignItem = designerCanvas.rootDesignItem;

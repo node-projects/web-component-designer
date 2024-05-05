@@ -15,7 +15,7 @@ export class ChildContextMenu implements IContextMenuExtension {
         return this._contextMenus.some(x => x.shouldProvideContextmenu(event, designerView, designItem, initiator));
     }
 
-    public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
-        return [{ title: this._title, children: this._contextMenus.map(x => x.provideContextMenuItems(event, designerView, designItem)).flat() }];
+    public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator): IContextMenuItem[] {
+        return [{ title: this._title, children: this._contextMenus.map(x => x.shouldProvideContextmenu(event, designerView, designItem, initiator) ? x.provideContextMenuItems(event, designerView, designItem, initiator) : []).flat() }];
     }
 }

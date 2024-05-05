@@ -12,7 +12,7 @@ export class DefaultModelCommandService implements IModelCommandService {
       command.type == CommandType.moveForward ||
       command.type == CommandType.moveToBack ||
       command.type == CommandType.moveToFront)
-      return designerCanvas.instanceServiceContainer.selectionService.primarySelection != null;
+      return designerCanvas.instanceServiceContainer.selectionService.primarySelection != null && !designerCanvas.instanceServiceContainer.selectionService.primarySelection.isRootItem;
     if (command.type == CommandType.arrangeBottom ||
       command.type == CommandType.arrangeCenter ||
       command.type == CommandType.arrangeLeft ||
@@ -26,7 +26,7 @@ export class DefaultModelCommandService implements IModelCommandService {
       command.type == CommandType.rotateClockwise ||
       command.type == CommandType.mirrorHorizontal ||
       command.type == CommandType.mirrorVertical)
-      return designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 0;
+      return designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 0 && !designerCanvas.instanceServiceContainer.selectionService.primarySelection.isRootItem;
     return null;
   }
 
@@ -41,11 +41,11 @@ export class DefaultModelCommandService implements IModelCommandService {
       let idx = sel.parent.indexOf(sel) + 1;
       if (idx < sel.parent.childCount)
         sel.parent.insertChild(sel, idx);
-    } else if (command.type == CommandType.moveToBack)
+    } else if (command.type == CommandType.moveToBack) {
       sel.parent.insertChild(sel, 0);
-    else if (command.type == CommandType.moveToFront)
+    } else if (command.type == CommandType.moveToFront) {
       sel.parent.insertChild(sel);
-    else if (command.type == CommandType.arrangeTop) {
+    } else if (command.type == CommandType.arrangeTop) {
       ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
     } else if (command.type == CommandType.arrangeRight) {
       ArrangeHelper.arrangeElements(Orientation.RIGHT, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
@@ -136,6 +136,7 @@ export class DefaultModelCommandService implements IModelCommandService {
     } else
       return null;
 
+    designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null);
     designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(selection);
     return true;
   }

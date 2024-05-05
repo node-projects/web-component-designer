@@ -15,7 +15,7 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
     this.property = property;
   }
 
-  protected _valueChanged(newValue) {
+  protected async _valueChanged(newValue) {
     if (!this.disableChangeNotification) {
       if (this.designItems && this.designItems.length) {
         const cg = this.designItems[0].openGroup("set property: " + this.property.name);
@@ -23,7 +23,7 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
           if (newValue == null)
             this.property.service.clearValue([d], this.property, 'value');
           else
-            this.property.service.setValue([d], this.property, newValue);
+            await this.property.service.setValue([d], this.property, newValue);
         }
         cg.commit();
       }

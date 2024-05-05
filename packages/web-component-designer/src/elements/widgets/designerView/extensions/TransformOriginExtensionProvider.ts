@@ -36,7 +36,7 @@ export class TransformOriginExtensionProvider implements IDesignerExtensionProvi
     return new TransformOriginExtension(extensionManager, designerView, designItem);
   }
 
-  readonly style = css`
+  static readonly style = css`
     .svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
   `;
 }

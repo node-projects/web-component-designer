@@ -1,21 +1,15 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { IPoint } from "../../../../../interfaces/IPoint.js";
-import { ISize } from "../../../../../interfaces/ISize.js";
-import { getContentBoxContentOffsets } from "../../../../helper/ElementHelper.js";
-import { roundValue } from "../../../../helper/LayoutHelper.js";
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints, getElementCombinedTransform, transformPointByInverseMatrix, normalizeToAbsolutePosition } from "../../../../helper/TransformHelper.js";
+import { calculateGridInformation } from "../../../../helper/GridHelper.js";
+import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from "../../../../item/IDesignItem.js";
 import { IDesignerCanvas } from "../../IDesignerCanvas.js";
 import { AbstractExtension } from "../AbstractExtension.js";
 import { IExtensionManager } from "../IExtensionManger.js";
 
-//      also when elment aligned to bottom, will it later also be?
 export class GridChildResizeExtension extends AbstractExtension {
-
-  private _initialSizes: ISize[];
   private _actionModeStarted: string;
   private _initialPoint: IPoint;
-  private _offsetPoint: IPoint;
   private _circle1: SVGCircleElement;
   private _circle2: SVGCircleElement;
   private _circle3: SVGCircleElement;
@@ -26,6 +20,7 @@ export class GridChildResizeExtension extends AbstractExtension {
   private _circle8: SVGCircleElement;
   private _initialComputedTransformOrigins: DOMPoint[];
   private _initialTransformOrigins: string[];
+  private _styleBackup: string;
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerCanvas, extendedItem);
@@ -60,7 +55,7 @@ export class GridChildResizeExtension extends AbstractExtension {
   }
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
-    let circle = this._drawCircle(x, y, 3 / this.designerCanvas.zoomFactor, 'svg-primary-resizer', oldCircle);
+    let circle = this._drawCircle(x, y, this.designerCanvas.serviceContainer.options.resizerPixelSize / this.designerCanvas.zoomFactor, 'svg-grid-resizer', oldCircle);
     circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     if (!oldCircle) {
       circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(circle, event, cursor));
@@ -77,104 +72,79 @@ export class GridChildResizeExtension extends AbstractExtension {
 
     switch (event.type) {
       case EventNames.PointerDown:
-        const cx = parseFloat(circle.getAttribute('cx'));
-        const cy = parseFloat(circle.getAttribute('cy'));
-        this._offsetPoint = { x: cx - currentPoint.x, y: cy - currentPoint.y };
+        this._styleBackup = this.extendedItem.element.getAttribute('style');
+
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._initialPoint = currentPoint;
-        this._initialSizes = [];
         this._actionModeStarted = actionMode;
         this._initialComputedTransformOrigins = [];
         this._initialTransformOrigins = [];
-
-        //#region Calc elements' dimension
-        const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
-        (<HTMLElement>this.extendedItem.element).style.transform = '';
-        let rect = this.extendedItem.element.getBoundingClientRect();
-        (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
-        //#endregion Calc element's dimension
-
-        let contentBoxOffset: IPoint = { x: 0, y: 0 };
-        if (getComputedStyle(<HTMLElement>this.extendedItem.element).boxSizing == 'content-box') {
-          contentBoxOffset = getContentBoxContentOffsets(<HTMLElement>this.extendedItem.element);
-        }
-        this._initialSizes.push({ width: (rect.width - contentBoxOffset.x * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor, height: (rect.height - contentBoxOffset.y * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor });
 
         const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseFloat(x.replace('px', '')));
         const transformOrigin: DOMPoint = new DOMPoint(toArr[0], toArr[1]);
         this._initialComputedTransformOrigins.push(transformOrigin);
         this._initialTransformOrigins.push((<HTMLElement>this.extendedItem.element).style.transformOrigin);
-
-        if (this.designerCanvas.alignOnSnap)
-          this.designerCanvas.snapLines.calculateSnaplines(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-
-        this.prepareResize(this.extendedItem, this._actionModeStarted)
         break;
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          const containerStyle = getComputedStyle(this.extendedItem.parent.element);
-          const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
+          let posX = 0;
+          let posY = 0;
+          let cellX = 0;
+          let cellY = 0;
 
-          const diff = containerService.placePoint(event, this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-          let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
-          let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
-          let matrix = getElementCombinedTransform((<HTMLElement>this.extendedItem.element));
-          let transformedTrack = transformPointByInverseMatrix(new DOMPoint(trackX, trackY, 0, 0), matrix);
+          const gridInformation = calculateGridInformation(this.extendedItem.parent);
+          const gridPos = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.parent.element);
+          const evPos = this.designerCanvas.getNormalizedEventCoordinates(event);
+          const cs = getComputedStyle(this.extendedItem.element);
+          (<HTMLElement>this.extendedItem.element).style.gridColumnStart = cs.gridColumnStart;
+          (<HTMLElement>this.extendedItem.element).style.gridColumnEnd = cs.gridColumnEnd === 'auto' ? '' + (parseInt(cs.gridColumnStart) + 1) : cs.gridColumnEnd;
+          (<HTMLElement>this.extendedItem.element).style.gridRowStart = cs.gridRowStart;
+          (<HTMLElement>this.extendedItem.element).style.gridRowEnd = cs.gridRowEnd === 'auto' ? '' + (parseInt(cs.gridRowStart) + 1) : cs.gridRowEnd;
 
-          let deltaX = transformedTrack.x;
-          let deltaY = transformedTrack.y;
-          if (event.shiftKey) {
-            deltaX = deltaX < deltaY ? deltaX : deltaY;
-            deltaY = deltaX;
+          if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'w-resize' || this._actionModeStarted == 'sw-resize') {
+            for (let i = 0; i < gridInformation.cells.length; i++) {
+              const cell = gridInformation.cells[i][0];
+              const cellMiddlePos = posX + (cell.width / 2);
+              if (evPos.x > gridPos.x + cellMiddlePos) {
+                cellX = i;
+              }
+              posX += cell.width + gridInformation.xGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridColumnStart = '' + (cellX + 2);
           }
-
-          let i = 0;
-
-          let width = null;
-          let height = null;
-
-          switch (this._actionModeStarted) {
-            case 'e-resize':
-              width = (this._initialSizes[i].width + deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              break;
-            case 'se-resize':
-              width = (this._initialSizes[i].width + deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height + deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 's-resize':
-              height = (this._initialSizes[i].height + deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'sw-resize':
-              width = (this._initialSizes[i].width - deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height + deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'w-resize':
-              width = (this._initialSizes[i].width - deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              break;
-            case 'nw-resize':
-              width = (this._initialSizes[i].width - deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height - deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'n-resize':
-              height = (this._initialSizes[i].height - deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
-            case 'ne-resize':
-              width = (this._initialSizes[i].width + deltaX);
-              (<HTMLElement>this.extendedItem.element).style.width = roundValue(this.extendedItem, width) + 'px';
-              height = (this._initialSizes[i].height - deltaY);
-              (<HTMLElement>this.extendedItem.element).style.height = roundValue(this.extendedItem, height) + 'px';
-              break;
+          if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'n-resize' || this._actionModeStarted == 'ne-resize') {
+            for (let i = 0; i < gridInformation.cells.length; i++) {
+              const cell = gridInformation.cells[i][0];
+              const cellMiddlePos = posY + (cell.height / 2);
+              if (evPos.y > gridPos.y + cellMiddlePos) {
+                cellY = i;
+              }
+              posY += cell.height + gridInformation.yGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridRowStart = '' + (cellY + 2);
+          }
+          if (this._actionModeStarted == 'se-resize' || this._actionModeStarted == 'e-resize' || this._actionModeStarted == 'ne-resize') {
+            for (let i = 0; i < gridInformation.cells.length; i++) {
+              const cell = gridInformation.cells[i][0];
+              const cellMiddlePos = posX + (cell.width / 2);
+              if (evPos.x > gridPos.x + cellMiddlePos) {
+                cellX = i;
+              }
+              posX += cell.width + gridInformation.xGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridColumnEnd = '' + (cellX + 2);
+          }
+          if (this._actionModeStarted == 'sw-resize' || this._actionModeStarted == 's-resize' || this._actionModeStarted == 'se-resize') {
+            for (let i = 0; i < gridInformation.cells[0].length; i++) {
+              const cell = gridInformation.cells[0][i];
+              const cellMiddlePos = posY + (cell.height / 2);
+              if (evPos.y > gridPos.y + cellMiddlePos) {
+                cellY = i;
+              }
+              posY += cell.height + gridInformation.yGap;
+            }
+            (<HTMLElement>this.extendedItem.element).style.gridRowEnd = '' + (cellY + 2);
           }
 
           const resizedElements = [this.extendedItem, this.extendedItem.parent];
@@ -184,109 +154,23 @@ export class GridChildResizeExtension extends AbstractExtension {
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
 
+        const cs = getComputedStyle(this.extendedItem.element);
+        const gridColumnStart = cs.gridColumnStart;
+        const gridColumnEnd = cs.gridColumnEnd;
+        const gridRowStart = cs.gridRowStart;
+        const gridRowEnd = cs.gridRowEnd;
+        if (this._styleBackup)
+          this.extendedItem.element.setAttribute('style', this._styleBackup);
+        else
+          this.extendedItem.element.removeAttribute('style');
+
         let cg = this.extendedItem.openGroup("Resize &lt;" + this.extendedItem.name + "&gt;");
-        this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
-        this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
-
-        this.extendedItem.setStyle('left', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'left'))) + 'px');
-        this.extendedItem.setStyle('top', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'top'))) + 'px');
-
-        let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
-        (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
-
-        let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
-        let p1 = new DOMPoint(p1Abs.x - p3Abs.x, -(p1Abs.y - p3Abs.y));
-        let matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
-        let deltaX = 0;
-        let deltaY = 0;
-
-        let p1transformed = transformPointByInverseMatrix(p1, matrix);
-        let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
-        let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
-        let p1p2transformed = p1p2.matrixTransform(matrix);
-        let p4Abs = new DOMPoint(p1Abs.x + p1p2transformed.x, p1Abs.y - p1p2transformed.y);
-        deltaX = p4Abs.x - p1Abs.x;
-        deltaY = p4Abs.y - p1Abs.y;
-
-        (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
-        if (matrix.isIdentity) {
-          (<HTMLElement>this.extendedItem.element).style.transform = '';
-        }
-        this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
+        this.extendedItem.setStyle("gridColumnStart", gridColumnStart);
+        this.extendedItem.setStyle("gridColumnEnd", gridColumnEnd);
+        this.extendedItem.setStyle("gridRowStart", gridRowStart);
+        this.extendedItem.setStyle("gridRowEnd", gridRowEnd);
         cg.commit();
-        this._initialSizes = null;
         this._initialPoint = null;
-        break;
-    }
-  }
-
-  private prepareResize(designItem: IDesignItem, mode: string) {
-    let i = 0;
-    let top: string = null;
-    let bottom: string = null;
-    let left: string = null;
-    let right: string = null;
-
-    switch (this._actionModeStarted) {
-      case 'e-resize':
-        left = getComputedStyle(designItem.element).left;
-        (<HTMLElement>designItem.element).style.removeProperty('right');
-        (<HTMLElement>designItem.element).style.left = left;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
-        break;
-      case 'se-resize':
-        top = getComputedStyle(designItem.element).top;
-        (<HTMLElement>designItem.element).style.removeProperty('bottom');
-        (<HTMLElement>designItem.element).style.top = top;
-        left = getComputedStyle(designItem.element).left;
-        (<HTMLElement>designItem.element).style.removeProperty('right');
-        (<HTMLElement>designItem.element).style.left = left;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
-        break;
-      case 's-resize':
-        top = getComputedStyle(designItem.element).top;
-        (<HTMLElement>designItem.element).style.removeProperty('bottom');
-        (<HTMLElement>designItem.element).style.top = top;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
-        break;
-      case 'sw-resize':
-        top = getComputedStyle(designItem.element).top;
-        (<HTMLElement>designItem.element).style.removeProperty('bottom');
-        (<HTMLElement>designItem.element).style.top = top;
-        right = getComputedStyle(designItem.element).right;
-        (<HTMLElement>designItem.element).style.removeProperty('left');
-        (<HTMLElement>designItem.element).style.right = right;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
-        break;
-      case 'w-resize':
-        right = getComputedStyle(designItem.element).right;
-        (<HTMLElement>designItem.element).style.removeProperty('left');
-        (<HTMLElement>designItem.element).style.right = right;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
-        break;
-      case 'nw-resize':
-        bottom = getComputedStyle(designItem.element).bottom;
-        (<HTMLElement>designItem.element).style.removeProperty('top');
-        (<HTMLElement>designItem.element).style.bottom = bottom;
-        right = getComputedStyle(designItem.element).right;
-        (<HTMLElement>designItem.element).style.removeProperty('left');
-        (<HTMLElement>designItem.element).style.right = right;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
-        break;
-      case 'n-resize':
-        bottom = getComputedStyle(designItem.element).bottom;
-        (<HTMLElement>designItem.element).style.removeProperty('top');
-        (<HTMLElement>designItem.element).style.bottom = bottom;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
-        break;
-      case 'ne-resize':
-        bottom = getComputedStyle(designItem.element).bottom;
-        (<HTMLElement>designItem.element).style.removeProperty('top');
-        (<HTMLElement>designItem.element).style.bottom = bottom;
-        left = getComputedStyle(designItem.element).left;
-        (<HTMLElement>designItem.element).style.removeProperty('right');
-        (<HTMLElement>designItem.element).style.left = left;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
         break;
     }
   }

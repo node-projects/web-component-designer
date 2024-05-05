@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Code Editor using Monaco",
   "name": "@node-projects/web-component-designer-codeview-monaco",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "type": "module",
   "main": "./dist/widgets/codeView/code-view-monaco.js",
   "author": "jochen.kuehner@gmx.de",
@@ -14,7 +14,7 @@
   "dependencies": {
     "monaco-editor": ">=0.30.0",
     "@node-projects/base-custom-webcomponent": ">=0.19.0",
-    "@node-projects/web-component-designer": ">=0.1.8"    
+    "@node-projects/web-component-designer": ">=0.1.137"    
   },
   "repository": {
     "type": "git",
