@@ -255,12 +255,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             let label = document.createElement("input");
             let input = <HTMLInputElement>editor.element;
             label.value = p.name;
-            label.onkeyup = e => {
+            label.onkeyup = async e => {
               if (e.key == 'Enter' && label.value) {
                 const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
                 p.service.clearValue(this._designItems, p, 'all');
                 p.name = label.value;
-                p.service.setValue(this._designItems, p, input.value);
+                await p.service.setValue(this._designItems, p, input.value);
                 pg.commit();
                 this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
               }

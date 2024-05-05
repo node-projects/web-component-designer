@@ -55,7 +55,7 @@ export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
     return arr;
   }
 
-  override setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
+  override async setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
     // No selector means local style, styleDeclaration is null means new property
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
       // styleDeclaration stored Propertygrid is not refreshed after entering a new value, so we need to reload

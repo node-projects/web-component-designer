@@ -37,7 +37,7 @@ export class AttributesPropertiesService extends AbstractPropertiesService {
     return null;
   }
 
-  override setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+  override async setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       d.setAttribute(<string>property.name, value);

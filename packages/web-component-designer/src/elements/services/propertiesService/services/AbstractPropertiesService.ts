@@ -42,7 +42,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
 
   abstract getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
 
-  setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+  async setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("property changed: " + property.name + " to " + value);
     for (let d of designItems) {
       if (!this.isHandledElement(d))
@@ -51,9 +51,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         continue;
 
       if (property.propertyType == PropertyType.cssValue) {
-        d.updateStyleInSheetOrLocal(property.name, value);
+         //TODO: use async version here, but then everything needs to be async
+        await d.updateStyleInSheetOrLocalAsync(property.name, value);
         //unkown css property names do not trigger the mutation observer of property grid, 
-        //fixed by assinging stle again to the attribute
+        //fixed by assinging style again to the attribute
         (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
       } else {
         let attributeName = property.attributeName
@@ -308,11 +309,11 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       {
         title: 'edit as text', action: (e, _1, _2, menu) => {
           menu.close();
-          setTimeout(() => {
+          setTimeout(async () => {
             const oldValue = property.service.getValue(designItems, property);
             let value = prompt(`edit value of '${property.name}' as string:`, oldValue);
             if (value && value != oldValue) {
-              property.service.setValue(designItems, property, value);
+              await property.service.setValue(designItems, property, value);
             }
             designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
           }, 10)

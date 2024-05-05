@@ -56,6 +56,15 @@ Your index.html should be extended as follows:
     <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
 
+## Similar Frameworks
+
+| Name                    | Licence  | Edit Source |   |   |
+|-------------------------|----------|-------------|---|---|
+| web-component-designer  | MIT      | yes         |   |   |
+| GrapeJS                 | BSD-3    | yes         |   |   |
+| CraftJS                 | MIT      | no          |   |   |
+
+
 ## Copyright notice
 
 The Library uses Images from the Chrome Dev Tools, see
