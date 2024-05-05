@@ -328,14 +328,18 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
             let binding = property.service.getBinding(designItems, property);
             designItems[0].serviceContainer.config.openBindingsEditor(property, designItems, binding, target);
           }
-        },
-        {
-          title: 'clear binding', action: () => {
-            property.service.clearValue(designItems, property, 'binding');
-            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
-          }
         }
       ]);
+      if (property.service.isSet(designItems, property) == ValueType.bound) {
+        ctxMenuItems.push(...[
+          {
+            title: 'clear binding', action: () => {
+              property.service.clearValue(designItems, property, 'binding');
+              designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+            }
+          }
+        ]);
+      }
     };
     return ctxMenuItems;
   }
