@@ -102,6 +102,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._designerDiv.title = 'Designer';
     this._designerDiv.appendChild(this.designerView);
     this.designerView.initialize(this._serviceContainer);
+    this.designerView.instanceServiceContainer.documentContainer = this;
     this.designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e))
     this.designerView.designerCanvas.onContentChanged.on(() => this.designerContentChanged())
 
@@ -143,6 +144,28 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       console.error(err);
     }
     this._disableChangeNotificationEditor = false;
+  }
+
+  get currentView(): 'designer' | 'split' | 'code' | 'preview' {
+    if (this._tabControl.selectedIndex == tabIndex.designer)
+      return 'designer'
+    if (this._tabControl.selectedIndex == tabIndex.split)
+      return 'split'
+    if (this._tabControl.selectedIndex == tabIndex.code)
+      return 'code'
+    if (this._tabControl.selectedIndex == tabIndex.preview)
+      return 'preview'
+    return null;
+  }
+  set currentView(view: 'designer' | 'split' | 'code' | 'preview') {
+    if (view == 'designer')
+      this._tabControl.selectedIndex = tabIndex.designer;
+    if (view == 'split')
+      this._tabControl.selectedIndex = tabIndex.split;
+    if (view == 'code')
+      this._tabControl.selectedIndex = tabIndex.code;
+    if (view == 'preview')
+      this._tabControl.selectedIndex = tabIndex.preview;
   }
 
   designerSelectionChanged(e: ISelectionChangedEvent) {

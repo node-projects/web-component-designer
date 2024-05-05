@@ -5,6 +5,7 @@ import { ValueType } from './ValueType.js';
 import { BindingTarget } from '../../item/BindingTarget.js';
 import { IBinding } from '../../item/IBinding.js';
 import { IPropertyGroup } from './IPropertyGroup.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 
 export enum RefreshMode {
   none,
@@ -13,7 +14,6 @@ export enum RefreshMode {
 }
 
 export interface IPropertiesService extends IService {
-  //readonly name: string;
   getRefreshMode(designItem: IDesignItem): RefreshMode;
 
   isHandledElement(designItem: IDesignItem): boolean;
@@ -27,4 +27,6 @@ export interface IPropertiesService extends IService {
   isSet(designItems: IDesignItem[], property: IProperty): ValueType;
   getValue(designItems: IDesignItem[], property: IProperty): any;
   getUnsetValue(designItems: IDesignItem[], property: IProperty): any;
+
+  getContextMenu(designItems: IDesignItem[], property: IProperty): IContextMenuItem[];
 }

@@ -3,18 +3,18 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { PropertyType } from '../PropertyType.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
-import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { ValueType } from '../ValueType.js';
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { DesignerCanvas } from '../../../widgets/designerView/designerCanvas.js';
+import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
 
-export class CssCustomPropertiesService extends CommonPropertiesService {
+export class CssCustomPropertiesService extends AbstractCssPropertiesService {
 
 
   removeInheritedCustomProperties: boolean
 
   constructor(removeInheritedCustomProperties = true) {
-    super(false);
+    super();
     this.name = 'customProperties';
     this.removeInheritedCustomProperties = removeInheritedCustomProperties;
   }

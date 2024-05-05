@@ -1,4 +1,4 @@
-import { IPropertiesService, RefreshMode } from '../IPropertiesService.js';
+import { RefreshMode } from '../IPropertiesService.js';
 import { IProperty } from '../IProperty.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { ValueType } from '../ValueType.js';
@@ -9,7 +9,7 @@ import { PropertiesHelper } from './PropertiesHelper.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 
-export class AttributesPropertiesService implements IPropertiesService {
+export class AttributesPropertiesService extends AbstractPropertiesService {
 
   public name = "attributes"
 
@@ -21,7 +21,7 @@ export class AttributesPropertiesService implements IPropertiesService {
     return !designItem.isRootItem;
   }
 
-  getProperty(designItem: IDesignItem, name: string): IProperty {
+  override getProperty(designItem: IDesignItem, name: string): IProperty {
     return { name: name, type: 'string', service: this, propertyType: PropertyType.attribute };
   }
 
@@ -37,7 +37,7 @@ export class AttributesPropertiesService implements IPropertiesService {
     return null;
   }
 
-  setValue(designItems: IDesignItem[], property: IProperty, value: any) {
+  override setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("properties changed");
     for (let d of designItems) {
       d.setAttribute(<string>property.name, value);
@@ -45,11 +45,11 @@ export class AttributesPropertiesService implements IPropertiesService {
     cg.commit();
   }
 
-  getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
+  override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
     return BindingTarget.attribute;
   }
 
-  clearValue(designItems: IDesignItem[], property: IProperty) {
+  override clearValue(designItems: IDesignItem[], property: IProperty) {
     for (let d of designItems) {
       d.removeAttribute(<string>property.name);
       d.serviceContainer.forSomeServicesTillResult('bindingService', (s) => {
@@ -58,7 +58,7 @@ export class AttributesPropertiesService implements IPropertiesService {
     }
   }
 
-  isSet(designItems: IDesignItem[], property: IProperty): ValueType {
+  override isSet(designItems: IDesignItem[], property: IProperty): ValueType {
     let all = true;
     let some = false;
     if (designItems != null && designItems.length !== 0) {
@@ -81,7 +81,7 @@ export class AttributesPropertiesService implements IPropertiesService {
     return all ? ValueType.all : some ? ValueType.some : ValueType.none;
   }
 
-  getValue(designItems: IDesignItem[], property: IProperty) {
+  override getValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
       let attributeName = property.name;
       let lastValue = designItems[0].getAttribute(attributeName);
@@ -101,12 +101,12 @@ export class AttributesPropertiesService implements IPropertiesService {
     return null;
   }
 
-  getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
+  override getBinding(designItems: IDesignItem[], property: IProperty): IBinding {
     const bindings = AbstractPropertiesService.getOrBuildCachedBindings(designItems[0]);
     return bindings.find(x => (x.target == BindingTarget.property || x.target == BindingTarget.explicitProperty || x.target == BindingTarget.attribute) && x.targetName == property.name);
   }
 
-  getUnsetValue(designItems: IDesignItem[], property: IProperty) {
+  override getUnsetValue(designItems: IDesignItem[], property: IProperty) {
     return property.defaultValue;
   }
 }

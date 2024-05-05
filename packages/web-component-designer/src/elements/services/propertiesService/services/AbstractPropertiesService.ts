@@ -9,6 +9,7 @@ import { PropertyType } from '../PropertyType.js';
 import { NodeType } from '../../../item/NodeType.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { newElementFromString } from '../../../helper/ElementHelper.js';
+import { IContextMenuItem } from '../../../helper/contextMenu/IContextMenuItem.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
@@ -294,5 +295,48 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         (<HTMLElement>d.node.parentNode).removeChild(d.node);
       d.replaceNode(element);
     }
+  }
+
+  public getContextMenu(designItems: IDesignItem[], property: IProperty): IContextMenuItem[] {
+    const ctxMenuItems: IContextMenuItem[] = [
+      {
+        title: 'clear', action: (e) => {
+          property.service.clearValue(designItems, property, 'value');
+          designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+        }
+      },
+      {
+        title: 'edit as text', action: (e, _1, _2, menu) => {
+          menu.close();
+          setTimeout(() => {
+            const oldValue = property.service.getValue(designItems, property);
+            let value = prompt(`edit value of '${property.name}' as string:`, oldValue);
+            if (value && value != oldValue) {
+              property.service.setValue(designItems, property, value);
+            }
+            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+          }, 10)
+        }
+      },
+    ];
+    if (designItems[0].serviceContainer.config.openBindingsEditor) {
+      ctxMenuItems.push(...[
+        { title: '-' },
+        {
+          title: 'edit binding', action: () => {
+            let target = property.service.getPropertyTarget(designItems[0], property);
+            let binding = property.service.getBinding(designItems, property);
+            designItems[0].serviceContainer.config.openBindingsEditor(property, designItems, binding, target);
+          }
+        },
+        {
+          title: 'clear binding', action: () => {
+            property.service.clearValue(designItems, property, 'binding');
+            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+          }
+        }
+      ]);
+    };
+    return ctxMenuItems;
   }
 }

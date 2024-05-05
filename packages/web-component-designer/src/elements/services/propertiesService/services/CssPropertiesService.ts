@@ -2,15 +2,15 @@ import { IProperty } from '../IProperty.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertyType } from '../PropertyType.js';
-import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 import { GridAssignedRowColumnPropertyEditor } from '../propertyEditors/special/GridAssignedRowColumnPropertyEditor.js';
 import { MetricsPropertyEditor } from '../propertyEditors/special/MetricsPropertyEditor.js';
 import cssProperties from "./CssProperties.json" with { type: 'json' };
+import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
 
-export class CssPropertiesService extends CommonPropertiesService {
+export class CssPropertiesService extends AbstractCssPropertiesService {
 
   public override getRefreshMode(designItem: IDesignItem) {
     return RefreshMode.none;
@@ -93,7 +93,7 @@ export class CssPropertiesService extends CommonPropertiesService {
 
 
   constructor(name: 'layout' | 'grid' | 'gridChild' | 'flex' | 'flexChild' | 'svg') {
-    super(false);
+    super();
     this.name = name;
   }
 

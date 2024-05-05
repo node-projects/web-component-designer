@@ -7,6 +7,9 @@ import { sleep } from '../../helper/Helper.js';
 import { NodeType } from '../../item/NodeType.js';
 import { PropertyGridPropertyList } from './PropertyGridPropertyList.js';
 import { ContentAndIdPropertiesService } from '../../services/propertiesService/services/ContentAndIdPropertiesService.js';
+import { IProperty } from '../../services/propertiesService/IProperty.js';
+import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
@@ -97,17 +100,17 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._idRect.oncontextmenu = (event) => {
       event.preventDefault();
       if (!this._instanceServiceContainer.selectionService.primarySelection?.isRootItem)
-        PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.idProperty);
+        this._openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.idProperty);
     };
     this._contentRect.oncontextmenu = (event) => {
       event.preventDefault();
       if (!this._instanceServiceContainer.selectionService.primarySelection?.isRootItem)
-        PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.contentProperty);
+        this._openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.contentProperty);
     };
     this._innerRect.oncontextmenu = (event) => {
       event.preventDefault();
       if (!this._instanceServiceContainer.selectionService.primarySelection?.isRootItem)
-        PropertyGridPropertyList.openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.innerHtmlProperty);
+        this._openContextMenu(event, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService.innerHtmlProperty);
     };
 
     this._id.onkeydown = e => {
@@ -201,6 +204,15 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       }
     });
     this.propertyGrid.instanceServiceContainer = value;
+  }
+
+  private _openContextMenu(event: MouseEvent, designItems: IDesignItem[], property: IProperty) {
+    let ctxMenuItems: IContextMenuItem[];
+    if (this.propertyGrid.propertyContextMenuProvider)
+      ctxMenuItems = this.propertyGrid.propertyContextMenuProvider(designItems, property)
+    if (!ctxMenuItems)
+      ctxMenuItems = property.service.getContextMenu(designItems, property);
+    ContextMenu.show(ctxMenuItems, event);
   }
 }
 
