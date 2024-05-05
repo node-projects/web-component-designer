@@ -221,11 +221,14 @@ export class ContextMenu implements IContextMenu {
 				} else {
 					if (item.action)
 						li.addEventListener('click', (e) => {
+							e.stopPropagation();
+							e.preventDefault();
 							item.action(e, item, this.context, this);
 							this.close();
 						});
 					if (this.options?.mode == 'undo') {
 						li.addEventListener('mouseup', (e) => {
+							e.stopPropagation();
 							item.action(e, item, this.context, this);
 							this.close();
 						});

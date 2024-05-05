@@ -45,7 +45,8 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     instanceServiceContainer: Object,
     selectedItems: Array,
     propertyGroupHover: Function,
-    propertyGroupClick: Function
+    propertyGroupClick: Function,
+    propertyContextMenuProvider: Function
   }
 
   constructor() {
