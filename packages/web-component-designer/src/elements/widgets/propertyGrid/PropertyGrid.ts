@@ -106,6 +106,17 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
           visibleDict.add(p.name);
       }
 
+      let parentEl: HTMLElement = this._designerTabControl;
+
+      for (const v of visibleDict) {
+        let el = this._propertyGridPropertyListsDict[v];
+        if (parentEl === this._designerTabControl)
+          parentEl.insertAdjacentElement('afterbegin', el);
+        else
+          parentEl.insertAdjacentElement('afterend', el);
+        parentEl = el;
+      }
+
       for (let p of this._propertyGridPropertyLists) {
         if (visibleDict.has(p.title))
           p.style.display = 'block';

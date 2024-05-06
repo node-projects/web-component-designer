@@ -14,11 +14,6 @@ export class CommonPropertiesService extends AbstractPropertiesService {
   //@ts-ignore
   private commonProperties: IProperty[] = [
     {
-      name: "id",
-      type: "string",
-      service: this,
-      propertyType: PropertyType.propertyAndAttribute
-    }, {
       name: "class",
       type: "string",
       service: this,
