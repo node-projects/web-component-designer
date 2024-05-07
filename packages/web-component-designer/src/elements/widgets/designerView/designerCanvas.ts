@@ -293,7 +293,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           <div title="" id="node-projects-designer-canvas-canvas" part="canvas"></div>
         </div>
       </div>
-      <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;  margin: 0 !important; padding: 0 !important; border: none !important;"></div>
+      <div id="node-projects-designer-canvas-clickOverlay" title="" tabindex="0" style="pointer-events: auto;  margin: 0 !important; padding: 0 !important; border: none !important;"></div>
       </div>
       
       <div id="node-projects-designer-search-container" style="display: none;">

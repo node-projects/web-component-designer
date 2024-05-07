@@ -47,7 +47,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
     const angle = Math.atan2((transformedCornerPoints[1].y - transformedCornerPoints[0].y), (transformedCornerPoints[1].x - transformedCornerPoints[0].x)) * 180 / Math.PI;
 
     if (!isNaN(transformedCornerPoints[0].x)) {
-      if (this._valuesHaveChanges(transformedCornerPoints[0].x, transformedCornerPoints[0].y, angle)) {
+      if (this._valuesHaveChanges(transformedCornerPoints[0].x, transformedCornerPoints[0].y, angle, this.designerCanvas.scaleFactor)) {
         const h = (15 / this.designerCanvas.scaleFactor);
         const w = (this._width / this.designerCanvas.scaleFactor);
         this._rect.setAttribute('x', '' + transformedCornerPoints[0].x);

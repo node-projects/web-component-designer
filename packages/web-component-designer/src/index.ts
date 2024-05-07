@@ -289,6 +289,8 @@ export * from "./elements/widgets/designerView/extensions/TransformOriginExtensi
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/PlacementExtension.js";
 export * from "./elements/widgets/designerView/extensions/PlacementExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/PreviousElementSelectExtension.js";
+export * from "./elements/widgets/designerView/extensions/PreviousElementSelectExtensionProvider.js";
 
 export * from "./elements/widgets/designerView/extensions/block/BlockToolbarExtension.js";
 export * from "./elements/widgets/designerView/extensions/block/BlockToolbarExtensionProvider.js";

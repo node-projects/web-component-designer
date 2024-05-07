@@ -96,6 +96,7 @@ import { PaddingExtensionProvider } from '../widgets/designerView/extensions/Pad
 import { GridChildResizeExtensionProvider } from '../widgets/designerView/extensions/grid/GridChildResizeExtensionProvider.js';
 import { AlignItemsContextMenu } from '../widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js';
 import { BasicWebcomponentPropertiesService } from './propertiesService/services/BasicWebcomponentPropertiesService.js';
+import { PreviousElementSelectExtensionProvider } from '../widgets/designerView/extensions/PreviousElementSelectExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -136,6 +137,7 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
+    new PreviousElementSelectExtensionProvider(),
     new TransformOriginExtensionProvider(true),
     new MarginExtensionProvider(),
     new PaddingExtensionProvider(),
@@ -165,7 +167,9 @@ export function createDefaultServiceContainer() {
     new FlexboxExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
-    new HighlightElementExtensionProvider()
+    new HighlightElementExtensionProvider(),
+    new ElementDragTitleExtensionProvider(),
+    new PreviousElementSelectExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Placement, [
     new PlacementExtensionProvider()

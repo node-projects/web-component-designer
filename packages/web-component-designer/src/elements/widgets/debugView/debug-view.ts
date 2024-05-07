@@ -48,6 +48,21 @@ const getClosestStackingContext = function (node) {
         return { node: node, reason: `transform: ${computedStyle.transform}` };
     }
 
+    // elements with a scale value other than "none".
+    if (computedStyle.scale !== 'none') {
+        return { node: node, reason: `scale: ${computedStyle.scale}` };
+    }
+
+    // elements with a transform value other than "none".
+    if (computedStyle.translate !== 'none') {
+        return { node: node, reason: `translate: ${computedStyle.translate}` };
+    }
+
+    // elements with a transform value other than "none".
+    if (computedStyle.rotate !== 'none') {
+        return { node: node, reason: `rotate: ${computedStyle.rotate}` };
+    }
+
     // elements with a mix-blend-mode value other than "normal".
     if (computedStyle.mixBlendMode !== 'normal') {
         return { node: node, reason: `mixBlendMode: ${computedStyle.mixBlendMode}` };
@@ -56,6 +71,11 @@ const getClosestStackingContext = function (node) {
     // elements with a filter value other than "none".
     if (computedStyle.filter !== 'none') {
         return { node: node, reason: `filter: ${computedStyle.filter}` };
+    }
+
+    // elements with a filter value other than "none".
+    if (computedStyle.backdropFilter !== 'none') {
+        return { node: node, reason: `backdropFilter: ${computedStyle.backdropFilter}` };
     }
 
     // elements with a perspective value other than "none".
@@ -93,7 +113,7 @@ const getClosestStackingContext = function (node) {
     }
 
     // transform or opacity in will-change even if you don't specify values for these attributes directly.
-    if (computedStyle.willChange === 'transform' || computedStyle.willChange === 'opacity') {
+    if (computedStyle.willChange === 'transform' || computedStyle.willChange === 'opacity' || computedStyle.willChange === 'scale' || computedStyle.willChange === 'translate' || computedStyle.willChange === 'rotate') {
         return { node: node, reason: `willChange: ${computedStyle.willChange}` };
     }
 
@@ -155,6 +175,7 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
         overflow: auto;
         height: 100%;
         display: block;
+        font-size: 12px;
       }
       table {
         font-family: Arial, Helvetica, sans-serif;
@@ -187,8 +208,8 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
 
     private _ready: boolean;
     computedStyle: CSSStyleDeclaration;
-    createsStackingContext: boolean;
-    createsStackingContextReason: string;
+    createsStackingContext: boolean = <any>'';
+    createsStackingContextReason: string = '';
     parentStackingContext: Element;
     parentStackingContextText: string;
     selectedElementOffsetParent: Element;
@@ -229,7 +250,8 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
                 if (element && element.nodeType != 8 && element.nodeType != 11) {
                     this.computedStyle = getComputedStyle(element);
                     this.selectedElementOffsetParent = (<HTMLElement>element).offsetParent;
-                    if (this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element) {
+                    if (this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element ||
+                        this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.parentElement) {
                         this.selectedElementOffsetParentText = null;
                         this.selectedElementOffsetParent = null;
                     } else
@@ -244,7 +266,8 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
                         if (this.createsStackingContext && element.nodeName !== 'HTML') {
                             this.parentStackingContext = getClosestStackingContext(element.parentNode).node;
                         }
-                        if (this.parentStackingContext == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.parentElement.parentElement) {
+                        if (this.parentStackingContext == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.parentElement ||
+                            this.parentStackingContext == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.parentElement.parentElement) {
                             this.parentStackingContextText = null;
                             this.parentStackingContext = null;
                         } else
