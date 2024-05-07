@@ -29,7 +29,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
         text = '#' + this.extendedItem.id;
       this._width = Math.max(Math.min(elementWidth, w), extensionWidth);
       this._rect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-primary-selection-move', this._rect);
-      this._text = this._drawHTML('<div style="position:relative"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0;">' + text + '</span></div>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
+      this._text = this._drawHTML('<div style="position:relative"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0; padding-left: 2px;">' + text + '</span></div>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
       this._text.style.overflow = 'visible';
 
       this._rect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
