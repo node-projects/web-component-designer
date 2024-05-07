@@ -5,6 +5,9 @@ i.wb-icon > span.wb-badge {
   font-size: 70%;
   background-color: #486471;
 }
+div.wunderbaum {
+  --wb-active-color-grayscale: #dddddd;
+}
 div.wunderbaum span.wb-node i.wb-icon {
   background-size: 12px 12px;
   background-position-x: 5px;

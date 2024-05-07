@@ -329,6 +329,9 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       this._tree.visit((node) => {
         const flag = activeElements && activeElements.includes(node.data.ref);
         node.setSelected(flag);
+        node.setActive(flag);
+        if (flag)
+          node.setFocus(true);
         if (flag && !scrolled) {
           scrolled = true;
           node.scrollIntoView();
