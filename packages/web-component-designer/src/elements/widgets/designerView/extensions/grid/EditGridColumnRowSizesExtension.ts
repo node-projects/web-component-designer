@@ -16,12 +16,13 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
   private _initalPos: number;
   private _initialSizes: string;
   private _group: SVGGElement;
+  private _hasChanged: boolean;
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override extend(cache: Record<string|symbol, any>, event?: Event) {
+  override extend(cache: Record<string | symbol, any>, event?: Event) {
     this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
     this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
     this._group.style.transformOrigin = '0 0';
@@ -30,7 +31,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     this.refresh(event);
   }
 
-  override refresh(cache: Record<string|symbol, any>, event?: Event) {
+  override refresh(cache: Record<string | symbol, any>, event?: Event) {
     this.gridInformation = calculateGridInformation(this.extendedItem);
     this.gridInformation.gaps.forEach((gap, i) => {
       if (gap.width < 3) { gap.width = 3; gap.x--; }
@@ -63,32 +64,37 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
       case EventNames.PointerMove:
         if (this._initialSizes) {
           const diff = this._initalPos - pos;
-          let parts = this._initialSizes.split(' ');
-          parts[index] = (parseFloat(parts[index]) - diff) + 'px';
-          parts[index + 1] = (parseFloat(parts[index + 1]) + diff) + 'px';
-          (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = parts.join(' ');
-          this.extensionManager.refreshExtensions([this.extendedItem], null, event);
+          if (Math.abs(diff) > 5 || this._hasChanged) {
+            this._hasChanged = true;
+            let parts = this._initialSizes.split(' ');
+            parts[index] = (parseFloat(parts[index]) - diff) + 'px';
+            parts[index + 1] = (parseFloat(parts[index + 1]) + diff) + 'px';
+            (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = parts.join(' ');
+            this.extensionManager.refreshExtensions([this.extendedItem], null, event);
+          }
         }
         break;
       case EventNames.PointerUp:
         rect.releasePointerCapture(event.pointerId);
         const diff = this._initalPos - pos;
-        const realStyle = this.extendedItem.getStyleFromSheetOrLocalOrComputed(templatePropertyName);
-        const initialParts = this._initialSizes.split(' ');
-        const parts = realStyle.split(' ');
-        let units = parts.map(x => getCssUnit(x));
-        if (parts.length != initialParts.length) {
-          units = initialParts.map(x => getCssUnit(x));
+        if (this._hasChanged) {
+          this._hasChanged = false;
+          const realStyle = this.extendedItem.getStyleFromSheetOrLocalOrComputed(templatePropertyName);
+          const initialParts = this._initialSizes.split(' ');
+          const parts = realStyle.split(' ');
+          let units = parts.map(x => getCssUnit(x));
+          if (parts.length != initialParts.length) {
+            units = initialParts.map(x => getCssUnit(x));
+          }
+          (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = '';
+
+          const targetPixelSizes = initialParts.map(x => parseFloat(x));
+          targetPixelSizes[index] -= diff;
+          targetPixelSizes[index + 1] += diff;
+          const newSizes = this._convertCssUnits(targetPixelSizes, units, <HTMLElement>this.extendedItem.element, sizeType);
+
+          this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, newSizes.join(' '), null, true);
         }
-        (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = '';
-
-        const targetPixelSizes = initialParts.map(x => parseFloat(x));
-        targetPixelSizes[index] -= diff;
-        targetPixelSizes[index + 1] += diff;
-        const newSizes = this._convertCssUnits(targetPixelSizes, units, <HTMLElement>this.extendedItem.element, sizeType);
-
-        this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, newSizes.join(' '), null, true);
-
         this._initalPos = null;
         this._initialSizes = null;
         this.extensionManager.refreshExtensions([this.extendedItem]);
