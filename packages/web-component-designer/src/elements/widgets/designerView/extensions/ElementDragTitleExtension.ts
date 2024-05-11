@@ -11,6 +11,7 @@ const extensionWidth = 60;
 
 export class ElementDragTitleExtension extends AbstractExtension {
   private _rect: SVGRectElement;
+  private _clickRect: SVGRectElement;
   private _text: SVGForeignObjectElement;
   private _width: number;
 
@@ -28,13 +29,15 @@ export class ElementDragTitleExtension extends AbstractExtension {
       if (this.extendedItem.id)
         text = '#' + this.extendedItem.id;
       this._width = Math.max(Math.min(elementWidth, w), extensionWidth);
-      this._rect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-primary-selection-move', this._rect);
+      this._rect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y, this._width, 15, 'svg-primary-selection-move', this._rect);
+      this._clickRect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y, this._width, 18, 'svg-invisible', this._clickRect);
+      this._clickRect.style.background = 'transparent';
       this._text = this._drawHTML('<div style="position:relative"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0; padding-left: 2px;">' + text + '</span></div>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
       this._text.style.overflow = 'visible';
 
-      this._rect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
-      this._rect.addEventListener('pointermove', (e) => this._pointerEvent(e));
-      this._rect.addEventListener('pointerup', (e) => this._pointerEvent(e));
+      this._clickRect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
+      this._clickRect.addEventListener('pointermove', (e) => this._pointerEvent(e));
+      this._clickRect.addEventListener('pointerup', (e) => this._pointerEvent(e));
       this.refresh(cache, event);
     }
   }
@@ -57,6 +60,13 @@ export class ElementDragTitleExtension extends AbstractExtension {
         this._rect.setAttribute('height', '' + h);
         this._rect.setAttribute('width', '' + w);
         this._rect.style.strokeWidth = (1 / this.designerCanvas.scaleFactor).toString();
+        this._clickRect.setAttribute('x', '' + transformedCornerPoints[0].x);
+        this._clickRect.setAttribute('y', '' + transformedCornerPoints[0].y);
+        this._clickRect.style.rotate = angle + 'deg';
+        this._clickRect.style.transformBox = 'fill-box'
+        this._clickRect.setAttribute('height', '' + (h + 3));
+        this._clickRect.setAttribute('width', '' + w);
+        this._clickRect.style.strokeWidth = (1 / this.designerCanvas.scaleFactor).toString();
         this._text.setAttribute('x', '' + transformedCornerPoints[0].x);
         this._text.setAttribute('y', '' + transformedCornerPoints[0].y);
         this._text.style.fontSize = (10 / this.designerCanvas.scaleFactor) + 'px';

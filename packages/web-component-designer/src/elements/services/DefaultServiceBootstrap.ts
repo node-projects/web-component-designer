@@ -168,8 +168,8 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new HighlightElementExtensionProvider(),
-    new ElementDragTitleExtensionProvider(),
-    new PreviousElementSelectExtensionProvider()
+    new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
+    new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Placement, [
     new PlacementExtensionProvider()
