@@ -160,6 +160,12 @@ export class NativeElementsPropertiesService extends AbstractPropertiesService {
       type: "string",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
+    },
+    {
+      name: "alt",
+      type: "string",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
     }
   ];
 
