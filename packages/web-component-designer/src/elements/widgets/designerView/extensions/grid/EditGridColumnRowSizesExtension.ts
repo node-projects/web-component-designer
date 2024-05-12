@@ -1,5 +1,5 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
-import { convertCssUnit, convertCssUnitToPixel, getCssUnit } from "../../../../helper/CssUnitConverter.js";
+import { convertCssUnit, convertCssUnitToPixel, getCssUnit, getExpandedCssGridColumnSizes } from "../../../../helper/CssUnitConverter.js";
 import { calculateGridInformation } from "../../../../helper/GridHelper.js";
 import { getElementCombinedTransform } from "../../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
@@ -81,9 +81,8 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
           this._hasChanged = false;
           const realStyle = this.extendedItem.getStyleFromSheetOrLocalOrComputed(templatePropertyName);
           const initialParts = this._initialSizes.split(' ');
-          const parts = realStyle.split(' ');
-          let units = parts.map(x => getCssUnit(x));
-          if (parts.length != initialParts.length) {
+          let units = getExpandedCssGridColumnSizes(realStyle);
+          if (units.length != initialParts.length) {
             units = initialParts.map(x => getCssUnit(x));
           }
           (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = '';
