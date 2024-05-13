@@ -11,9 +11,11 @@ export class UndoService implements IUndoService {
   private _redoStack: ITransactionItem[] = [];
   private _transactionStack: ChangeGroup[] = [];
   private _designerCanvas: IDesignerCanvas;
+  private _storeRedoBranches: boolean;
 
-  constructor(designerCanvas: IDesignerCanvas) {
+  constructor(designerCanvas: IDesignerCanvas, storeRedoBranches: boolean = false) {
     this._designerCanvas = designerCanvas;
+    this._storeRedoBranches = storeRedoBranches;
   }
 
   openGroup(title: string): ChangeGroup {
@@ -32,8 +34,13 @@ export class UndoService implements IUndoService {
       if (this._transactionStack.length > 0) {
         this._transactionStack[this._transactionStack.length - 1].addCommitedSubchangeGroup(itm);
       } else {
-        this._undoStack.push(itm);
+        if (this._storeRedoBranches && this._redoStack.length) {
+          if (itm.redoBranches == null)
+            itm.redoBranches = [];
+          itm.redoBranches.push(this._redoStack);
+        }
         this._redoStack = [];
+        this._undoStack.push(itm);
       }
     }
     if (this._transactionStack.length == 0) {
@@ -56,8 +63,13 @@ export class UndoService implements IUndoService {
   execute(item: ITransactionItem) {
     if (this._transactionStack.length == 0) {
       item.do();
-      this._undoStack.push(item);
+      if (this._storeRedoBranches && this._redoStack.length) {
+        if (item.redoBranches == null)
+          item.redoBranches = [];
+        item.redoBranches.push(this._redoStack);
+      }
       this._redoStack = [];
+      this._undoStack.push(item);
     } else {
       this._transactionStack[this._transactionStack.length - 1].execute(item);
     }
@@ -122,6 +134,14 @@ export class UndoService implements IUndoService {
 
   canRedo(): boolean {
     return this._redoStack.length > 0;
+  }
+
+  get undoCount(): number {
+    return this._undoStack.length;
+  }
+
+  get redoCount(): number {
+    return this._redoStack.length;
   }
 
   *getUndoEntries(count: number = 999): Generator<string, void, unknown> {
