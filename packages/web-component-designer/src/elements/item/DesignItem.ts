@@ -34,6 +34,22 @@ export class DesignItem implements IDesignItem {
   instanceServiceContainer: InstanceServiceContainer;
   nodeReplaced = new TypedEvent<void>;
 
+  get window() {
+    return this.node.ownerDocument.defaultView;
+  }
+
+  get document() {
+    return this.node.ownerDocument;
+  }
+
+  get usableContainer() {
+    if (this.isRootItem && this.element instanceof HTMLIFrameElement)
+      return this.element.contentWindow.document;
+    else if (this.isRootItem)
+      return (<HTMLElement>this.node).shadowRoot;
+    return this.element;
+  }
+
   async clone() {
     try {
       const html = DomConverter.ConvertToString([this], false);
@@ -398,12 +414,23 @@ export class DesignItem implements IDesignItem {
     }
   }
 
+  updateChildrenFromNodesChildren() {
+    this._childArray = this._internalUpdateChildrenFromNodesChildren();
+    for (let c of this._childArray) {
+      (<DesignItem>c)._parent = this;
+    }
+  }
 
   _internalUpdateChildrenFromNodesChildren() {
     const newChilds = [];
     if (this.nodeType == NodeType.Element) {
       if (this.element instanceof HTMLTemplateElement) {
         for (const c of this.element.content.childNodes) {
+          const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
+          newChilds.push(di);
+        }
+      } else if (this.element instanceof HTMLIFrameElement) {
+        for (const c of this.element.contentWindow.document.childNodes) {
           const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
           newChilds.push(di);
         }
@@ -612,7 +639,7 @@ export class DesignItem implements IDesignItem {
 
   getComputedStyle() {
     if (this.nodeType == NodeType.Element)
-      return window.getComputedStyle(this.element);
+      return this.window.getComputedStyle(this.element);
     return null;
   }
 

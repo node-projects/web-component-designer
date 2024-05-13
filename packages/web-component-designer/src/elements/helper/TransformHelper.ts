@@ -318,12 +318,12 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top2Transformed = top2.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
   let top3Transformed = top3.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
 
-  let transformedCornerPoints: [DOMPoint, DOMPoint, DOMPoint, DOMPoint] = <any>[];
-  transformedCornerPoints[0] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top0Transformed.x, designerCanvasNormalizedTransformOrigin.y + top0Transformed.y);
-  transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y);
-  transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y);
-  transformedCornerPoints[3] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top3Transformed.x, designerCanvasNormalizedTransformOrigin.y + top3Transformed.y);
-
+  const transformedCornerPoints: [DOMPoint, DOMPoint, DOMPoint, DOMPoint] = <any>[];
+  const offset = designerCanvas.containerOffset;
+  transformedCornerPoints[0] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top0Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top0Transformed.y + offset.y);
+  transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y + offset.y);
+  transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y + offset.y);
+  transformedCornerPoints[3] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top3Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top3Transformed.y + offset.y);
 
   return transformedCornerPoints;
 }

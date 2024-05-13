@@ -20,7 +20,7 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
       const positionsV: [number, IRect][] = [];
       const positionsMiddleV: [number, IRect][] = [];
 
-      const tw = document.createTreeWalker(containerItem.isRootItem ? containerItem.element.shadowRoot : containerItem.element, NodeFilter.SHOW_ELEMENT);
+      const tw = containerItem.document.createTreeWalker(containerItem.usableContainer, NodeFilter.SHOW_ELEMENT);
       let n: Element = <Element>tw.nextNode();
       while (n != null) {
         if (ignMap.has(<Element>n)) {
