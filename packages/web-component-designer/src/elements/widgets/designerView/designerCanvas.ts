@@ -493,8 +493,20 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       case CommandType.undo:
         this.instanceServiceContainer.undoService.undo();
         break;
+      case CommandType.holdUndo:
+        let undoEntries = this.instanceServiceContainer.undoService.getUndoEntries(20);
+        let undoMnu: IContextMenuItem[] = Array.from(undoEntries).map((x, idx) => ({ title: 'undo: ' + x, action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.undo() } }));
+        if (undoMnu.length > 0)
+          ContextMenu.show(undoMnu, <MouseEvent>command.event, { mode: 'undo' });
+        break;
       case CommandType.redo:
         this.instanceServiceContainer.undoService.redo();
+        break;
+      case CommandType.holdRedo:
+        let redoEntries = this.instanceServiceContainer.undoService.getRedoEntries(20);
+        let redoMnu: IContextMenuItem[] = Array.from(redoEntries).map((x, idx) => ({ title: 'redo: ' + x, action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.redo() } }));
+        if (redoMnu.length > 0)
+          ContextMenu.show(redoMnu, <MouseEvent>command.event, { mode: 'undo' });
         break;
       case CommandType.copy:
         this.handleCopyCommand();
