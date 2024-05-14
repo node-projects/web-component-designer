@@ -3,6 +3,8 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 
 export class ChangeGroup implements ITransactionItem {
 
+  redoBranches?: ITransactionItem[][];
+  
   title: string;
   get affectedItems(): IDesignItem[] {
     let s = new Set<IDesignItem>();

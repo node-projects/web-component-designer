@@ -72,14 +72,14 @@ export class GridToolbarExtension extends BasicStackedToolbarExtension {
         const rows = prompt("Number of rows?", '4');
         if (!rows) return;
         const cg = this.extendedItem.openGroup('change grid type');
-        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-columns', '1fr '.repeat(parseInt(columns)).trim());
-        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-rows', '1fr '.repeat(parseInt(rows)).trim());
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-columns', 'repeat(' + columns + ', 1fr)');
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-rows', 'repeat(' + rows + ', 1fr)');
         cg.commit();
       } else {
         const parts = gridTypeEl.value.split('x');
         const cg = this.extendedItem.openGroup('change grid type');
-        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-columns', '1fr '.repeat(parseInt(parts[0])).trim());
-        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-rows', '1fr '.repeat(parseInt(parts[1])).trim());
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-columns', 'repeat(' + parts[0] + ', 1fr)');
+        await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-rows', 'repeat(' + parts[1] + ', 1fr)');
         cg.commit();
       }
     }

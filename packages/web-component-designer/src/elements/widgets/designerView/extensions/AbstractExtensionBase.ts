@@ -81,6 +81,14 @@ export abstract class AbstractExtensionBase {
     return newRect;
   }
 
+  protected _drawPath(data: string, className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
+    const newPath = this.overlayLayerView.drawPath(this.constructor.name, data, className, path, overlayLayer);
+    if (!path) {
+      this.overlays.push(newPath);
+    }
+    return newPath;
+  }
+
   protected _drawText(text: string, x: number, y: number, className?: string, textEl?: SVGTextElement, overlayLayer?: OverlayLayer) {
     const newText = this.overlayLayerView.drawText(this.constructor.name, text, x, y, className, textEl, overlayLayer);
     if (!textEl) {

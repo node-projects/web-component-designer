@@ -127,3 +127,36 @@ export function convertCssUnit(cssValue: string | number, target: HTMLElement, p
 function getOriginalSizeBeforeTransformation(element: HTMLElement): { width: number, height: number } {
     return { width: element.offsetWidth, height: element.offsetHeight };
 }
+
+export function splitCssGridColumnSizes(sizes: String) {
+    const parts = sizes.split(' ');
+    const ret: string[] = [];
+    for (let i = 0; i < parts.length; i++) {
+        let p = parts[i];
+        if (p.startsWith('repeat(')) {
+            while (!p.includes(")")) {
+                i++;
+                if (!parts[i])
+                    continue;
+                p += parts[i];
+            }
+
+        }
+        ret.push(p);
+    }
+    return ret;
+}
+
+export function getExpandedCssGridColumnSizes(sizes: String) {
+    const parts = splitCssGridColumnSizes(sizes);
+    const ret: string[] = [];
+    for (let p of parts) {
+        if (p.startsWith('repeat(')) {
+            const prt = p.split(',');
+            for (let i = 0; i < parseInt(prt[0].substring(7)); i++)
+                ret.push(prt[1].substring(0, prt[1].length - 1));
+        } else
+            ret.push(p);
+    }
+    return ret.map(x => getCssUnit(x));
+}

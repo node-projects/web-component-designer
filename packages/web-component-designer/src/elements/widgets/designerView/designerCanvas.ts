@@ -290,10 +290,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative; margin: 0 !important; padding: 0 !important; border: none !important; isolation: isolate !important;">
           <div id="node-projects-designer-canvas-canvasContainer"
           style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none; margin: 0 !important; padding: 0 !important; border: none !important;">
-          <div id="node-projects-designer-canvas-canvas" part="canvas"></div>
+          <div title="" id="node-projects-designer-canvas-canvas" part="canvas"></div>
         </div>
       </div>
-      <div id="node-projects-designer-canvas-clickOverlay" tabindex="0" style="pointer-events: auto;  margin: 0 !important; padding: 0 !important; border: none !important;"></div>
+      <div id="node-projects-designer-canvas-clickOverlay" title="" tabindex="0" style="pointer-events: auto;  margin: 0 !important; padding: 0 !important; border: none !important;"></div>
       </div>
       
       <div id="node-projects-designer-search-container" style="display: none;">
@@ -493,8 +493,20 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       case CommandType.undo:
         this.instanceServiceContainer.undoService.undo();
         break;
+      case CommandType.holdUndo:
+        let undoEntries = this.instanceServiceContainer.undoService.getUndoEntries(20);
+        let undoMnu: IContextMenuItem[] = Array.from(undoEntries).map((x, idx) => ({ title: 'undo: ' + x, action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.undo() } }));
+        if (undoMnu.length > 0)
+          ContextMenu.show(undoMnu, <MouseEvent>command.event, { mode: 'undo' });
+        break;
       case CommandType.redo:
         this.instanceServiceContainer.undoService.redo();
+        break;
+      case CommandType.holdRedo:
+        let redoEntries = this.instanceServiceContainer.undoService.getRedoEntries(20);
+        let redoMnu: IContextMenuItem[] = Array.from(redoEntries).map((x, idx) => ({ title: 'redo: ' + x, action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.redo() } }));
+        if (redoMnu.length > 0)
+          ContextMenu.show(redoMnu, <MouseEvent>command.event, { mode: 'undo' });
         break;
       case CommandType.copy:
         this.handleCopyCommand();

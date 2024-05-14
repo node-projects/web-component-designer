@@ -115,7 +115,21 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   commitchanges() {
     this._removeAllOverlays();
 
+    this.extendedItem.element.normalize();
+    let stop = false;
+    outer:
+    while (!stop) {
+      for (let e of this.extendedItem.element.querySelectorAll('*')) {
+        if (e.childNodes.length == 0) {
+          e.remove();
+          continue outer;
+        }
+      }
+      stop = true;
+    }
+
     const newHTML = this.extendedItem.element.innerHTML;
+
     this.extendedItem.editContentFinish();
     this.extendedItem.innerHTML = newHTML;
 

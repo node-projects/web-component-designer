@@ -43,8 +43,8 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
   if (mode === 'position') {
     let positionedContainerElement = container.element;
     let computedStylePositionedContainer = getComputedStyle(container.element);
-    while (computedStylePositionedContainer.position !== 'relative' && computedStylePositionedContainer.position !== 'absolute') {
-      positionedContainerElement = positionedContainerElement.parentElement;
+    if (computedStylePositionedContainer.position !== 'relative' && computedStylePositionedContainer.position !== 'absolute') {
+      positionedContainerElement = (<HTMLElement> positionedContainerElement).offsetParent;
       computedStylePositionedContainer = getComputedStyle(positionedContainerElement);
     }
 

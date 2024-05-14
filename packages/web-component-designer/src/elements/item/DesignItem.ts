@@ -299,7 +299,7 @@ export class DesignItem implements IDesignItem {
       const range = document.createRange();
       range.selectNode(document.body);
       const fragment = range.createContextualFragment(value);
-      for (const n of fragment.childNodes) {
+      for (const n of [...fragment.childNodes]) {
         let di = DesignItem.createDesignItemFromInstance(n, this.serviceContainer, this.instanceServiceContainer)
         this.insertChild(di);
       }

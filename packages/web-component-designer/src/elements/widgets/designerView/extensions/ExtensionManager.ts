@@ -25,9 +25,9 @@ export class ExtensionManager implements IExtensionManager {
   designItemsWithExtentions: Set<IDesignItem> = new Set();
   _timeout: ReturnType<typeof setTimeout>;
 
-  _appliedDesignerExtensions = new WeakMap<DesignItem, Map<ExtensionType, IDesignerExtension[]>>
-  _shouldAppliedDesignerExtensions = new WeakMap<DesignItem, Map<ExtensionType, IDesignerExtensionProvider[]>>
-  _lastApplyEventPerType = new WeakMap<DesignItem, Map<ExtensionType, Event>>
+  _appliedDesignerExtensions = new WeakMap<IDesignItem, Map<ExtensionType, IDesignerExtension[]>>
+  _shouldAppliedDesignerExtensions = new WeakMap<IDesignItem, Map<ExtensionType, IDesignerExtensionProvider[]>>
+  _lastApplyEventPerType = new WeakMap<IDesignItem, Map<ExtensionType, Event>>
   _lastPrimarySelectionRefreshItem: WeakRef<IDesignItem>
 
   constructor(designerCanvas: IDesignerCanvas) {
@@ -112,10 +112,11 @@ export class ExtensionManager implements IExtensionManager {
   private _selectedElementsRefresh(selectionChangedEvent: ISelectionRefreshEvent) {
     this.refreshAllAppliedExtentions(selectionChangedEvent.event);
 
-    if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length && (!this._lastPrimarySelectionRefreshItem || this._lastPrimarySelectionRefreshItem.deref() !== selectionChangedEvent.selectedElements[0])) {
-      this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionRefreshed, selectionChangedEvent.event);
-      this._lastPrimarySelectionRefreshItem = new WeakRef(selectionChangedEvent.selectedElements[0]);
+    if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length && this._lastPrimarySelectionRefreshItem?.deref() === selectionChangedEvent.selectedElements[0]) {
+      if (!this._appliedDesignerExtensions.get(selectionChangedEvent.selectedElements[0])?.get(ExtensionType.PrimarySelectionRefreshed))
+        this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionRefreshed, selectionChangedEvent.event);
     }
+    this._lastPrimarySelectionRefreshItem = new WeakRef(selectionChangedEvent.selectedElements[0]);
   }
 
   applyExtension(designItem: IDesignItem, extensionType: ExtensionType, event?: Event, recursive: boolean = false) {
@@ -467,7 +468,7 @@ export class ExtensionManager implements IExtensionManager {
           const evt = wmGet(d, this._lastApplyEventPerType).get(t);
           this.removeExtension(d, t);
           if (enabledExtensionTypes == null || enabledExtensionTypes.includes(t))
-          this.applyExtension(d, t, evt);
+            this.applyExtension(d, t, evt);
         }
       }
     }

@@ -6,4 +6,5 @@ export interface ITransactionItem {
   do: () => void
   undo: () => void
   mergeWith(other: ITransactionItem): boolean;
+  redoBranches?: ITransactionItem[][];
 };
