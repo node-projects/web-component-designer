@@ -60,7 +60,6 @@ export class DrawElementTool implements ITool {
     this._createdItem.setStyle('top', roundValue(this._createdItem, evPos.y) + 'px');
     this._createdItem.setStyle('width', '0');
     this._createdItem.setStyle('height', '0');
-    (<HTMLElement>this._createdItem.element).style.overflow = 'hidden';
 
     designerCanvas.rootDesignItem.insertChild(this._createdItem);
     //draw via containerService??? how to draw into a grid, a stackpanel???
