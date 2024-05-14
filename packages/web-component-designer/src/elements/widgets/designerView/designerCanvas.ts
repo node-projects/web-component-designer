@@ -2,7 +2,7 @@ import { EventNames } from '../../../enums/EventNames.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
-import { DesignItem } from '../../item/DesignItem.js';
+import { DesignItem, forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameBindingObject } from '../../../Constants.js';
@@ -386,7 +386,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this.instanceServiceContainer.stylesheetService) {
       styles.push(...this.instanceServiceContainer.stylesheetService
         .getStylesheets()
-        .map(x => cssFromString(x.content)));
+        .map(x => cssFromString(this._patchStylesheetForDesigner(x.content))));
     }
 
     this._canvasShadowRoot.adoptedStyleSheets = styles;
@@ -1152,12 +1152,26 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         currentElement = null;
         continue;
       }
+      if (!this.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements && DesignItem.GetDesignItem(currentElement).getStyleFromSheetOrLocal('pointer-events') == 'none') {
+        currentElement = null;
+        continue;
+      }
       break;
     }
 
     return currentElement;
   }
 
+  public _patchStylesheetForDesigner(text: string) {
+    return text.replace(':hover', '[' + forceHoverAttributeName + ']')
+      .replace(':active', '[' + forceActiveAttributeName + ']')
+      .replace(':visited', '[' + forceVisitedAttributeName + ']')
+      .replace(':focus', '[' + forceFocusAttributeName + ']')
+      .replace(':focus-within', '[' + forceFocusWithinAttributeName + ']')
+      .replace(':focus-visible', '[' + forceFocusVisibleAttributeName + ']');
+  }
+
+  private _hoverElement: Element;
   public showHoverExtension(element: Element, event: Event) {
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer);
     if (this._lastHoverDesignItem != currentDesignItem) {
@@ -1166,6 +1180,25 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       if (currentDesignItem && currentDesignItem != this.rootDesignItem && (!element.parentNode || DomHelper.getHost(element.parentNode) !== this.overlayLayer))
         this.extensionManager.applyExtension(currentDesignItem, ExtensionType.MouseOver, event);
       this._lastHoverDesignItem = currentDesignItem;
+    }
+
+    if (this.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover && this._hoverElement !== element) {
+      let el = this._hoverElement;
+      while (el && el !== this._canvas) {
+        el.removeAttribute(forceHoverAttributeName);
+        el = el.parentElement;
+      }
+      this._hoverElement = null;
+      if (element) {
+        if (element.nodeType == NodeType.TextNode)
+          element = element.parentElement;
+        el = element;
+        while (el && el !== this._canvas) {
+          el.setAttribute(forceHoverAttributeName, '');
+          el = el.parentElement;
+        }
+        this._hoverElement = element;
+      }
     }
   }
 

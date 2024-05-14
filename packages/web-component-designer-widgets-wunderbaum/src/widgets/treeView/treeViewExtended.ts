@@ -1,5 +1,5 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, Disposable, cssFromString } from '@node-projects/base-custom-webcomponent';
-import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter } from '@node-projects/web-component-designer';
+import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter, ForceCssContextMenu } from '@node-projects/web-component-designer';
 import { WunderbaumNode } from 'wb_node';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js'
@@ -49,6 +49,15 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       div.wunderbaum span.wb-node span.wb-title {
         text-overflow: unset;
         width: unset !important;
+      }
+      div.forced {
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+        background: orange;
+        top: 5px;
+        left: 5px;
+        position: relative;
       }`;
 
   static override readonly template = html`
@@ -241,28 +250,40 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           sp.style.width = "42px";
           e.nodeElem.appendChild(sp);
           if (item && item.nodeType === NodeType.Element && item !== item.instanceServiceContainer.contentService.rootDesignItem) {
-            let d = document.createElement("div");
-            d.className = "cmd"
+            const d = document.createElement("div");
+            d.className = "cmd";
 
-            let imgL = document.createElement('img');
+            const imgL = document.createElement('img');
             this._showLockAtDesignTimeState(imgL, item);
             imgL.onclick = () => this._switchLockAtDesignTimeState(imgL, item);
             imgL.title = 'lock';
             d.appendChild(imgL);
 
-            let img = document.createElement('img');
+            const img = document.createElement('img');
             this._showHideAtDesignTimeState(img, item);
             img.onclick = () => this._switchHideAtDesignTimeState(img, item);
             img.title = 'hide in designer';
             d.appendChild(img);
 
-            let imgH = document.createElement('img');
+            const imgH = document.createElement('img');
             this._showHideAtRunTimeState(imgH, item);
             imgH.onclick = () => this._switchHideAtRunTimeState(imgH, item);
             imgH.title = 'hide at runtime';
             d.appendChild(imgH);
 
             rowElem.appendChild(d);
+
+            if (item.hasForcedCss) {
+              const f = document.createElement("div");
+              f.className = "forced";
+              f.title = "has forced style";
+              rowElem.appendChild(f);
+              f.addEventListener('click', (event) => {
+                const items = new ForceCssContextMenu().provideContextMenuItems(event, item.instanceServiceContainer.designerCanvas, item);
+                let ctxMenu = new ContextMenu(items, null);
+                ctxMenu.display(event);
+              })
+            }
           }
         }
         e.nodeElem.querySelector("span.wb-title").innerHTML = e.node.title;

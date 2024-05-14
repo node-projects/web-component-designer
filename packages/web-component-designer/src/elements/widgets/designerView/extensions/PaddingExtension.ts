@@ -16,7 +16,7 @@ export class PaddingExtension extends AbstractExtension {
   override refresh() {
     const itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
     const computedStyle = getComputedStyle(this.extendedItem.element);
-    if (computedStyle.margin !== '0px') {
+    if (computedStyle.padding !== '0px') {
       const left = Number.parseFloat(computedStyle.paddingLeft.replace('px', ''));
       const top = Number.parseFloat(computedStyle.paddingTop.replace('px', ''));
       const right = Number.parseFloat(computedStyle.paddingRight.replace('px', ''));

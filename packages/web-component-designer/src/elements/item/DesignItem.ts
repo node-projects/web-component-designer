@@ -18,9 +18,16 @@ import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
 import { TextContentChangeAction } from '../services/undoService/transactionItems/TextContentChangeAction.js';
 
-const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time'
-const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time'
-const lockAtDesignTimeAttributeName = 'node-projects-lock-at-design-time'
+const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time';
+const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time';
+const lockAtDesignTimeAttributeName = 'node-projects-lock-at-design-time';
+
+export const forceHoverAttributeName = 'node-projects-force-hover';
+export const forceActiveAttributeName = 'node-projects-force-active';
+export const forceVisitedAttributeName = 'node-projects-force-visited';
+export const forceFocusAttributeName = 'node-projects-force-focus';
+export const forceFocusWithinAttributeName = 'node-projects-force-focus-within';
+export const forceFocusVisibleAttributeName = 'node-projects-force-focus-visible';
 
 export class DesignItem implements IDesignItem {
 
@@ -739,9 +746,79 @@ export class DesignItem implements IDesignItem {
         const img = document.createElement('img');
         img.src = <string>reader.result;
         const di = DesignItem.createDesignItemFromInstance(img, serviceContainer, instanceServiceContainer);
-        return resolve(di)
+        return resolve(di);
       }
       reader.readAsDataURL(data);
     })
+  }
+
+  get hasForcedCss() {
+    return this.cssForceHover || this.cssForceActive || this.cssForceVisited || this.cssForceFocus || this.cssForceFocusWithin || this.cssForceFocusVisible;
+  }
+
+  get cssForceHover() {
+    return this.element.hasAttribute(forceHoverAttributeName);
+  }
+  set cssForceHover(value: boolean) {
+    if (value)
+      this.element.setAttribute(forceHoverAttributeName, '');
+    else
+      this.element.removeAttribute(forceHoverAttributeName);
+    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+  }
+
+  get cssForceActive() {
+    return this.element.hasAttribute(forceActiveAttributeName);
+  }
+  set cssForceActive(value: boolean) {
+    if (value)
+      this.element.setAttribute(forceActiveAttributeName, '');
+    else
+      this.element.removeAttribute(forceActiveAttributeName);
+    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+  }
+
+  get cssForceVisited() {
+    return this.element.hasAttribute(forceVisitedAttributeName);
+  }
+  set cssForceVisited(value: boolean) {
+    if (value)
+      this.element.setAttribute(forceVisitedAttributeName, '');
+    else
+      this.element.removeAttribute(forceVisitedAttributeName);
+    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+  }
+
+  get cssForceFocus() {
+    return this.element.hasAttribute(forceFocusAttributeName);
+  }
+  set cssForceFocus(value: boolean) {
+    if (value)
+      this.element.setAttribute(forceFocusAttributeName, '');
+    else
+      this.element.removeAttribute(forceFocusAttributeName);
+    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+  }
+
+  get cssForceFocusWithin() {
+    return this.element.hasAttribute(forceFocusWithinAttributeName);
+  }
+  set cssForceFocusWithin(value: boolean) {
+    if (value)
+      this.element.setAttribute(forceFocusWithinAttributeName, '');
+    else
+      this.element.removeAttribute(forceFocusWithinAttributeName);
+    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+  }
+
+  get cssForceFocusVisible() {
+    return this.element.hasAttribute(forceFocusVisibleAttributeName);
+  }
+  set cssForceFocusVisible(value: boolean) {
+    if (value)
+      this.element.setAttribute(forceFocusVisibleAttributeName, '');
+    else
+      this.element.removeAttribute(forceFocusVisibleAttributeName);
+    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
   }
 }
