@@ -42,10 +42,10 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
 
   if (mode === 'position') {
     let positionedContainerElement = container.element;
-    let computedStylePositionedContainer = getComputedStyle(container.element);
-    if (computedStylePositionedContainer.position !== 'relative' && computedStylePositionedContainer.position !== 'absolute') {
-      positionedContainerElement = (<HTMLElement> positionedContainerElement).offsetParent;
-      computedStylePositionedContainer = getComputedStyle(positionedContainerElement);
+    let computedStylePositionedContainer = container.getComputedStyle();
+    if (computedStylePositionedContainer.position !== 'relative' && computedStylePositionedContainer.position !== 'absolute' && (<HTMLElement>positionedContainerElement).offsetParent) {
+      positionedContainerElement = (<HTMLElement>positionedContainerElement).offsetParent;
+      computedStylePositionedContainer = container.window.getComputedStyle(positionedContainerElement);
     }
 
     let oldLeft = null;

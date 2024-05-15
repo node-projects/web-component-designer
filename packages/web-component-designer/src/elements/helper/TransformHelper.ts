@@ -233,14 +233,14 @@ export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement
 export function getElementSize(element: HTMLElement) {
   let width = element.offsetWidth;
   let height = element.offsetHeight;
-  if (element instanceof SVGElement && (<any>element).width) {
+  if (element instanceof element.ownerDocument.defaultView.SVGElement && (<any>element).width) {
     width = (<SVGAnimatedLength>(<any>element).width).baseVal.value
     height = (<SVGAnimatedLength>(<any>element).height).baseVal.value
-  } else if (element instanceof SVGGraphicsElement) {
+  } else if (element instanceof element.ownerDocument.defaultView.SVGGraphicsElement) {
     let bbox = element.getBBox()
     width = bbox.width;
     height = bbox.height;
-  } else if (element instanceof MathMLElement) {
+  } else if (element instanceof element.ownerDocument.defaultView.MathMLElement) {
     let bbox = element.getBoundingClientRect()
     width = bbox.width;
     height = bbox.height;
@@ -318,12 +318,12 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let top2Transformed = top2.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
   let top3Transformed = top3.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
 
-  let transformedCornerPoints: [DOMPoint, DOMPoint, DOMPoint, DOMPoint] = <any>[];
-  transformedCornerPoints[0] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top0Transformed.x, designerCanvasNormalizedTransformOrigin.y + top0Transformed.y);
-  transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y);
-  transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y);
-  transformedCornerPoints[3] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top3Transformed.x, designerCanvasNormalizedTransformOrigin.y + top3Transformed.y);
-
+  const transformedCornerPoints: [DOMPoint, DOMPoint, DOMPoint, DOMPoint] = <any>[];
+  const offset = designerCanvas.containerOffset;
+  transformedCornerPoints[0] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top0Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top0Transformed.y + offset.y);
+  transformedCornerPoints[1] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top1Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top1Transformed.y + offset.y);
+  transformedCornerPoints[2] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top2Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top2Transformed.y + offset.y);
+  transformedCornerPoints[3] = new DOMPoint(designerCanvasNormalizedTransformOrigin.x + top3Transformed.x + offset.x, designerCanvasNormalizedTransformOrigin.y + top3Transformed.y + offset.y);
 
   return transformedCornerPoints;
 }

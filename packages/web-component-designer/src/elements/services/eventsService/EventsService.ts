@@ -109,9 +109,9 @@ export class EventsService implements IEventsService {
     }
 
     public getPossibleEvents(designItem: IDesignItem): IEvent[] {
-        if (designItem.element instanceof HTMLInputElement ||
-            designItem.element instanceof HTMLTextAreaElement ||
-            designItem.element instanceof HTMLSelectElement) {
+        if (designItem.element instanceof designItem.window.HTMLInputElement ||
+            designItem.element instanceof designItem.window.HTMLTextAreaElement ||
+            designItem.element instanceof designItem.window.HTMLSelectElement) {
             let events: IEvent[] = [...this._simpleForm, ...this._simpleMouseEvents, ...this._form,  ...this._pointerEvents, ...this._allElements, ...this._focusableEvents];
             return events;
         }

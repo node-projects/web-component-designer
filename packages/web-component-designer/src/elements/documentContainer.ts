@@ -83,7 +83,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       `;
   }
 
-  constructor(serviceContainer: ServiceContainer, content?: string) {
+  constructor(serviceContainer: ServiceContainer, content?: string, useIframe: boolean = false) {
     super();
 
     this.refreshInSplitViewDebounced = debounce(this.refreshInSplitView, 200)
@@ -94,7 +94,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     let div = document.createElement("div");
     this._tabControl = new DesignerTabControl();
     div.appendChild(this._tabControl);
-    this.designerView = new DesignerView();
+    this.designerView = new DesignerView(useIframe);
     this.designerView.setAttribute('exportparts', 'canvas');
     this.designerView.slot = 'top';
     this._designerDiv = document.createElement("div");

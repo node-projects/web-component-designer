@@ -60,7 +60,7 @@ export class MathMLElementsPropertiesService extends CommonPropertiesService {
   }
 
   override isHandledElement(designItem: IDesignItem): boolean {
-    return designItem.element instanceof MathMLElement;
+    return designItem.element instanceof designItem.window.MathMLElement;
   }
 
   override getProperty(designItem: IDesignItem, name: string): IProperty {

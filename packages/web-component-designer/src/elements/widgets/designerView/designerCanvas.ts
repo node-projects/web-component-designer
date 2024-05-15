@@ -4,7 +4,7 @@ import { InstanceServiceContainer } from '../../services/InstanceServiceContaine
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
 import { DesignItem, forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
-import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent, cssFromString } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameBindingObject } from '../../../Constants.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
@@ -38,6 +38,7 @@ import { IDocumentStylesheet } from '../../services/stylesheetService/IStyleshee
 import { filterChildPlaceItems } from '../../helper/LayoutHelper.js';
 import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
 import { TouchGestureHelper } from '../../helper/TouchGestureHelper.js';
+import { stylesheetFromString } from '../../helper/StylesheetHelper.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -118,6 +119,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.canvasOffset = { x: value.x / this.zoomFactor, y: value.y / this.zoomFactor };
   }
 
+  /** Offset when using an iframe as container */
+  public get containerOffset(): IPoint {
+    if (this._useIframe) {
+      const rect = this._outercanvas2.getBoundingClientRect();
+      return rect;
+    }
+    return { x: 0, y: 0 }
+  }
+
   public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();
 
@@ -127,7 +137,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   // Private Variables
   private _canvas: HTMLDivElement;
-  private _canvasShadowRoot: ShadowRoot;
+  private _canvasShadowRoot: Document | ShadowRoot;
   private _canvasContainer: HTMLDivElement;
   private _outercanvas2: HTMLDivElement;
 
@@ -190,6 +200,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       cursor: pointer;
       user-select: none;
       -webkit-user-select: none;
+    }
+
+    #node-projects-designer-canvas-canvas iframe {
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      border: none;
+      width: 100%;
+      height: 100%;
     }
     
     #node-projects-designer-canvas-clickOverlay {
@@ -312,12 +331,30 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _lastCopiedPrimaryItem: IDesignItem;
   private _ignoreEvent: Event;
 
-  constructor() {
+  private _useIframe = true;
+  private _iframe: HTMLIFrameElement;
+  private _window: Window;
+
+  constructor(useIframe: boolean = false) {
     super();
+    this._useIframe = useIframe;
+    
     this._restoreCachedInititalValues();
 
     this._canvas = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvas');
-    this._canvasShadowRoot = this._canvas.attachShadow({ mode: 'open' })
+    if (this._useIframe) {
+      this._iframe = document.createElement('iframe');
+      this._iframe.setAttribute("sandbox", "allow-same-origin");
+      this._canvas.appendChild(this._iframe);
+      requestAnimationFrame(() => {
+        this._window = this._iframe.contentWindow;
+        this._canvasShadowRoot = this._iframe.contentWindow.document;
+      })
+    } else {
+      this._window = window;
+      this._canvasShadowRoot = this._canvas.attachShadow({ mode: 'open' });
+    }
+
     this._canvasContainer = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvasContainer');
     this._outercanvas2 = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-outercanvas2');
     this.clickOverlay = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-clickOverlay');
@@ -380,16 +417,24 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private applyAllStyles() {
-    let styles: CSSStyleSheet[] = []
-    if (this._additionalStyle)
-      styles.push(...this._additionalStyle);
-    if (this.instanceServiceContainer.stylesheetService) {
-      styles.push(...this.instanceServiceContainer.stylesheetService
-        .getStylesheets()
-        .map(x => cssFromString(this._patchStylesheetForDesigner(x.content))));
-    }
+    if (this._window) {
+      let styles: CSSStyleSheet[] = []
+      if (this._additionalStyle)
+        styles.push(...this._additionalStyle);
+      if (this.instanceServiceContainer.stylesheetService) {
+        styles.push(...this.instanceServiceContainer.stylesheetService
+          .getStylesheets()
+          .map(x => stylesheetFromString(this._window, this._patchStylesheetForDesigner(x.content))));
+      }
 
-    this._canvasShadowRoot.adoptedStyleSheets = styles;
+      if (this._useIframe) {
+        this._iframe.contentWindow.document.adoptedStyleSheets = styles;
+      } else {
+        this._canvasShadowRoot.adoptedStyleSheets = styles;
+      }
+    } else {
+      requestAnimationFrame(() => this.applyAllStyles());
+    }
   }
 
   ignoreEvent(event: Event) {
@@ -540,7 +585,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.zoomFactor = 1;
 
     for (let n of this.rootDesignItem.querySelectorAll('*')) {
-      if (n instanceof Element) {
+      if (n instanceof n.ownerDocument.defaultView.Element) {
         const rect = n.getBoundingClientRect();
         minX = minX < rect.x ? minX : rect.x;
         minY = minY < rect.y ? minY : rect.y;
@@ -663,9 +708,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (designItemDocumentPositionService) {
       this.instanceServiceContainer.register("designItemDocumentPositionService", designItemDocumentPositionService(this));
     }
-
-    this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this._canvas, this.serviceContainer, this.instanceServiceContainer);
-    //this.rootDesignItem.setView(<any>this._canvasShadowRoot);
+    if (this._useIframe) {
+      this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._iframe, this._iframe, this.serviceContainer, this.instanceServiceContainer);
+      requestAnimationFrame(() => {
+        this.rootDesignItem.updateChildrenFromNodesChildren();
+      });
+    } else {
+      this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this._canvas, this.serviceContainer, this.instanceServiceContainer);
+    }
     const contentService = this.serviceContainer.getLastService('contentService')
     if (contentService) {
       this.instanceServiceContainer.register("contentService", contentService(this));
@@ -1109,7 +1159,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     let range = document.createRange();
     range.selectNodeContents(element);
     let targetRect = range.getBoundingClientRect();
-    return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
+    const offset = this.containerOffset;
+    return { x: offset.x + (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: offset.y + (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
   }
 
   public getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect {
@@ -1117,8 +1168,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       return this.getNormalizedTextNodeCoordinates(<Text><any>element, ignoreScalefactor)
     }
     const targetRect = element.getBoundingClientRect();
-
-    return { x: (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
+    const offset = this.containerOffset;
+    return { x: offset.x + (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: offset.y + (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
   }
 
   public getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number } {
@@ -1139,9 +1190,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: normEvt.x - normEl.x, y: normEvt.y - normEl.y };
   }
 
+  private transformPoint(point: IPoint) {
+    if (this._useIframe) {
+      const rect = this._canvasContainer.getBoundingClientRect();
+      return { x: point.x - rect.x, y: point.y - rect.y };
+    }
+    return point;
+  }
+
   public elementsFromPoint(x: number, y: number): Element[] {
     let retVal: Element[] = [];
-    let elements = this._canvasShadowRoot.elementsFromPoint(x, y);
+    const t = this.transformPoint({ x, y });
+    const elements = this._canvasShadowRoot.elementsFromPoint(t.x, t.y);
     for (let e of elements) {
       if (e.getRootNode() !== this._canvasShadowRoot)
         continue;
@@ -1151,7 +1211,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
-    const elements = this._canvasShadowRoot.elementsFromPoint(point.x, point.y);
+    const t = this.transformPoint(point);
+    const elements = this._canvasShadowRoot.elementsFromPoint(t.x, t.y);
     let currentElement: HTMLElement = null;
 
     for (let i = 0; i < elements.length; i++) {

@@ -6,7 +6,7 @@ export class TextRefactorService implements IRefactorService {
     getRefactorings(designItems: IDesignItem[]): IRefactoring[] {
         let refactorings: IRefactoring[] = [];
         for (let d of designItems) {
-            if (d.element instanceof HTMLInputElement || d.element instanceof HTMLTextAreaElement) {
+            if (d.element instanceof d.window.HTMLInputElement || d.element instanceof d.window.HTMLTextAreaElement) {
                 if (d.element.value)
                     refactorings.push({ service: this, name: d.element.value, itemType: 'text', designItem: d, type: 'attribute', sourceObject: d, display: 'attribute' + '/' + 'value' });
             }

@@ -11,6 +11,11 @@ export interface IDesignItem {
 
   lastContainerSize: ISize;
 
+  readonly window: Window & typeof globalThis;
+  readonly document: Document;
+  readonly usableContainer: ShadowRoot | Element | Document;
+  updateChildrenFromNodesChildren();
+
   setView(node: Element);
 
   replaceNode(newNode: Node);
@@ -76,7 +81,7 @@ export interface IDesignItem {
   setStyleAsync(name: string, value?: string | null, important?: boolean): Promise<void>;
   removeStyle(name: string);
   updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean, forceSet?: boolean);
-  updateStyleInSheetOrLocalAsync(name: string, value?: string | null, important?: boolean, forceSet?: boolean) : Promise<void>;
+  updateStyleInSheetOrLocalAsync(name: string, value?: string | null, important?: boolean, forceSet?: boolean): Promise<void>;
   getStyleFromSheetOrLocal(name: string, fallback?: string);
   getStyleFromSheetOrLocalOrComputed(name: string, fallback?: string)
   getAllStyles(): IStyleRule[];

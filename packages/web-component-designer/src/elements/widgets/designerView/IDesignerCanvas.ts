@@ -37,6 +37,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   designerOffsetHeight: number;
   readonly scaleFactor: number;
   canvasOffset: IPoint;
+  readonly containerOffset: IPoint;
   canvas: HTMLElement;
   additionalStyles: CSSStyleSheet[];
 
