@@ -9,6 +9,7 @@ export class PreviousElementSelectExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
+  private _path: SVGPathElement;
   private _rect: SVGRectElement;
   private _clickRect: SVGRectElement;
   private _g: SVGGElement;
@@ -21,16 +22,18 @@ export class PreviousElementSelectExtension extends AbstractExtension {
 
     const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
     if (!isNaN(transformedCornerPoints[1].x)) {
-      if (this._valuesHaveChanges(transformedCornerPoints[1].x, transformedCornerPoints[1].y, this.designerCanvas.scaleFactor)) {
+      if (this._valuesHaveChanges(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, this.designerCanvas.scaleFactor)) {
+        const angle = Math.atan2((transformedCornerPoints[1].y - transformedCornerPoints[0].y), (transformedCornerPoints[1].x - transformedCornerPoints[0].x)) * 180 / Math.PI;
         const h = (16 / this.designerCanvas.scaleFactor);
-        this._rect = this._drawRect(transformedCornerPoints[1].x - (15 / this.designerCanvas.scaleFactor), transformedCornerPoints[1].y - (16.5 / this.designerCanvas.scaleFactor), h, h, 'svg-previous-select', this._rect);
-        this._clickRect = this._drawRect(transformedCornerPoints[1].x - (15 / this.designerCanvas.scaleFactor), transformedCornerPoints[1].y - (16.5 / this.designerCanvas.scaleFactor), h, h+3, 'svg-invisible', this._clickRect);
+        this._rect = this._drawRect(0, 0, h, h, 'svg-previous-select', this._rect);
+        this._clickRect = this._drawRect(0, 0, h, h + 3, 'svg-invisible', this._clickRect);
         if (!this._g) {
           this._g = document.createElementNS("http://www.w3.org/2000/svg", "g");
           this._g.setAttribute('class', 'svg-previous-select');
-          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          path.setAttribute('d', 'm4 12 1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z');
-          this._g.appendChild(path);
+          this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          this._path.setAttribute('d', 'm4 12 1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z');
+          this._g.appendChild(this._rect);
+          this._g.appendChild(this._path);
           this._addOverlay(this._g);
           this._clickRect.onpointerdown = (e) => {
             e.preventDefault();
@@ -41,8 +44,12 @@ export class PreviousElementSelectExtension extends AbstractExtension {
             e.preventDefault();
             e.stopPropagation();
           }
+          this._g.appendChild(this._clickRect);
         }
-        this._g.setAttribute('transform', 'translate(' + (transformedCornerPoints[1].x - (14.5 / this.designerCanvas.scaleFactor)) + ',' + (transformedCornerPoints[1].y - (15.5 / this.designerCanvas.scaleFactor)) + ') scale(' + 0.6 / this.designerCanvas.scaleFactor + ')');
+        this._path.style.scale = (0.6 / this.designerCanvas.scaleFactor).toString();
+        this._g.style.transform = 'translate(' + (transformedCornerPoints[1].x - (14.5 / this.designerCanvas.scaleFactor)) + 'px,' + (transformedCornerPoints[1].y - (15.5 / this.designerCanvas.scaleFactor)) + 'px) rotate(' + angle + 'deg)';
+        this._g.style.transformOrigin = '100% 100%';
+        this._g.style.transformBox = 'fill-box'
       }
     }
   }

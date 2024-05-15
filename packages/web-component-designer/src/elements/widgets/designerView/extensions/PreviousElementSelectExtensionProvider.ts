@@ -17,6 +17,6 @@ export class PreviousElementSelectExtensionProvider implements IDesignerExtensio
 
   static readonly style = css`
     rect.svg-previous-select { stroke: none; fill: #3899ec; pointer-events: auto; }
-    g.svg-previous-select { stroke: none; fill: white; }
+    g.svg-previous-select { fill: white; pointer-events: auto; }
   `;
 }
