@@ -407,11 +407,7 @@ export class DesignItem implements IDesignItem {
   }
 
   querySelectorAll(selectors: string): NodeListOf<HTMLElement> {
-    if (this.isRootItem) {
-      return (<HTMLElement>this.node).shadowRoot.querySelectorAll(selectors);
-    } else {
-      return this.element.querySelectorAll(selectors);
-    }
+    return this.usableContainer.querySelectorAll(selectors);
   }
 
   removeDesignerAttributesAndStylesFromChildren() {
@@ -706,7 +702,7 @@ export class DesignItem implements IDesignItem {
     if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
       this._childArray.push(designItem);
       if (this.isRootItem) {
-        (<HTMLElement>this.node).shadowRoot.appendChild(designItem.view);
+        this.usableContainer.appendChild(designItem.view);
       } else if (this.view instanceof this.node.ownerDocument.defaultView.HTMLTemplateElement) {
         this.view.content.appendChild(designItem.view);
       } else
@@ -714,7 +710,7 @@ export class DesignItem implements IDesignItem {
     } else {
       let el = this._childArray[index];
       if (this.isRootItem) {
-        (<HTMLElement>this.node).shadowRoot.insertBefore(designItem.view, el.element);
+        this.usableContainer.insertBefore(designItem.view, el.element);
       } else if (this.view instanceof this.node.ownerDocument.defaultView.HTMLTemplateElement) {
         this.view.content.insertBefore(designItem.view, el.element)
       } else

@@ -322,6 +322,9 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._contentChangedHandler?.dispose()
     this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
       this.createTree(value.contentService.rootDesignItem);
+      setTimeout(() => {
+        this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
+      }, 20);
     });
     this.createTree(value.contentService.rootDesignItem);
   }
