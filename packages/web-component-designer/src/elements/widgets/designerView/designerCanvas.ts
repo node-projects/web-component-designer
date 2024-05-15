@@ -1175,12 +1175,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public _patchStylesheetForDesigner(text: string) {
-    return text.replace(':hover', '[' + forceHoverAttributeName + ']')
-      .replace(':active', '[' + forceActiveAttributeName + ']')
-      .replace(':visited', '[' + forceVisitedAttributeName + ']')
-      .replace(':focus', '[' + forceFocusAttributeName + ']')
-      .replace(':focus-within', '[' + forceFocusWithinAttributeName + ']')
-      .replace(':focus-visible', '[' + forceFocusVisibleAttributeName + ']');
+    return text.replaceAll(':hover', '[' + forceHoverAttributeName + ']')
+      .replaceAll(':active', '[' + forceActiveAttributeName + ']')
+      .replaceAll(':visited', '[' + forceVisitedAttributeName + ']')
+      .replaceAll(':focus', '[' + forceFocusAttributeName + ']')
+      .replaceAll(':focus-within', '[' + forceFocusWithinAttributeName + ']')
+      .replaceAll(':focus-visible', '[' + forceFocusVisibleAttributeName + ']');
   }
 
   private _hoverElement: Element;

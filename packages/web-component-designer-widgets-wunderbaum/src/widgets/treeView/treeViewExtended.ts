@@ -371,7 +371,9 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           node.setFocus(true);
         if (flag && !scrolled) {
           scrolled = true;
-          node.scrollIntoView();
+          requestAnimationFrame(() => {
+            node.scrollIntoView();
+          });
         }
       });
     });
