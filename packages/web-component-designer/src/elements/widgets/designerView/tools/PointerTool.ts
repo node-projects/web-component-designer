@@ -130,7 +130,9 @@ export class PointerTool implements ITool {
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, currentElement);
-      if (event.type == EventNames.PointerDown) {
+      if (event.altKey) {
+        this._actionType = PointerActionType.DrawSelection;
+      } else if (event.type == EventNames.PointerDown) {
         this._actionStartedDesignItem = currentDesignItem;
         this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
         designerCanvas.snapLines.clearSnaplines();
