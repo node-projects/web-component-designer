@@ -1,0 +1,20 @@
+<html>
+
+<head>
+    <script>
+        window.addEventListener("message",
+            (event) => {
+                const data = event.data;
+                const obj = JSON.parse(data);
+                switch (obj.type) {
+                    case 'elementsFromPoint': {
+                        const ret = document.elementsFromPoint(...obj.par);
+                    }
+                }
+            }, false);
+    </script>
+</head>
+
+<body></body>
+
+</html>
