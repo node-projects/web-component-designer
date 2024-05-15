@@ -316,7 +316,16 @@
             "wrap-reverse"
         ]
     },
-    "float": {},
+    "float": {
+      "type": "list",
+      "values": [
+          "none",
+          "left",
+          "right",
+          "inline-start",
+          "inline-end"
+      ]
+  },
     "floodColor": {
         "type": "color"
     },

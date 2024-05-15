@@ -52,7 +52,7 @@ export class GridToolbarExtension extends BasicStackedToolbarExtension {
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
-    this._size.width = 524;
+    this._size.width = 624;
   }
 
   override extend(cache: Record<string | symbol, any>, event: MouseEvent) {

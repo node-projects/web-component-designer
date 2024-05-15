@@ -97,6 +97,8 @@ import { GridChildResizeExtensionProvider } from '../widgets/designerView/extens
 import { AlignItemsContextMenu } from '../widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js';
 import { BasicWebcomponentPropertiesService } from './propertiesService/services/BasicWebcomponentPropertiesService.js';
 import { PreviousElementSelectExtensionProvider } from '../widgets/designerView/extensions/PreviousElementSelectExtensionProvider.js';
+import { ForceCssContextMenu } from '../widgets/designerView/extensions/contextMenu/ForceCssContextMenu.js';
+import { OptionsContextMenuButton } from '../widgets/designerView/extensions/buttons/OptionsContextMenuButton.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -223,7 +225,9 @@ export function createDefaultServiceContainer() {
     new ButtonSeperatorProvider(10),
     new ToolbarExtensionsDesignViewConfigButtons(),
     new ButtonSeperatorProvider(30),
-    new RoundPixelsDesignViewConfigButton()
+    new RoundPixelsDesignViewConfigButton(),
+    new ButtonSeperatorProvider(30),
+    new OptionsContextMenuButton()
   );
 
   serviceContainer.designViewToolbarButtons.push(
@@ -246,6 +250,8 @@ export function createDefaultServiceContainer() {
     new ChildContextMenu('modify', new RotateLeftAndRight(), new SeperatorContextMenu(), new ZMoveContextMenu(), new SeperatorContextMenu(), new AlignItemsContextMenu()),
     new SeperatorContextMenu(),
     new ChildContextMenu('view', new JumpToElementContextMenu(), new ZoomToElementContextMenu()),
+    new SeperatorContextMenu(),
+    new ChildContextMenu('force', new ForceCssContextMenu()),
     new SeperatorContextMenu(),
     new MultipleItemsSelectedContextMenu(),
     new PathContextMenu(),

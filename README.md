@@ -9,9 +9,11 @@ There is also a Preview VS-Code Addon using the Designer: https://github.com/nod
 
 ## NPM Package
 
-https://www.npmjs.com/package/@node-projects/web-component-designer
+[Comparison of Designer Frameworks](COMPARISON.md)
 
-     npm i @node-projects/web-component-designer
+## Comparison
+
+https://www.npmjs.com/package/@node-projects/web-component-designer
 
 ## Additional NPM Packages
 
@@ -37,9 +39,7 @@ So the designer now should work with bundlers.
 
 ## Browser support
 
-  - At the moment Chrome, and Firefox Nightly with Experimental Import Assertions enabled.
-  But when import Assertions are landing in Safari and Firefox they will work again.
-  And you could transpile them away in the meantime.
+  - Chroe, Firefox and Safari
   
 ## Projects using it
 

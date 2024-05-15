@@ -86,6 +86,14 @@ export interface IDesignItem {
   getStyleFromSheetOrLocalOrComputed(name: string, fallback?: string)
   getAllStyles(): IStyleRule[];
 
+  readonly hasForcedCss: boolean;
+  cssForceHover: boolean;
+  cssForceActive: boolean;
+  cssForceVisited: boolean;
+  cssForceFocus: boolean;
+  cssForceFocusWithin: boolean;
+  cssForceFocusVisible: boolean;
+
   attributes(): Iterable<[name: string, value: string]>
   getAttribute(name: string): string
   hasAttribute(name: string): boolean

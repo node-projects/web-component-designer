@@ -319,6 +319,7 @@ export * from "./elements/widgets/designerView/extensions/buttons/ButtonSeperato
 export * from "./elements/widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/buttons/ToolbarExtensionsDesignViewConfigButtons.js";
 export * from "./elements/widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js";
+export * from "./elements/widgets/designerView/extensions/buttons/OptionsContextMenuButton.js";
 export type { IDesignViewConfigButtonsProvider } from './elements/widgets/designerView/extensions/buttons/IDesignViewConfigButtonsProvider.js';
 
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtension.js";
@@ -338,6 +339,7 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/RotateLeft
 export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElementContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/ForceCssContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
 export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";

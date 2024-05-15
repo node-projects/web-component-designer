@@ -56,13 +56,13 @@ Your index.html should be extended as follows:
     <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
 
-## Similar Frameworks
+## Keys
 
-| Name                    | Licence  | Edit Source |   |   |
-|-------------------------|----------|-------------|---|---|
-| web-component-designer  | MIT      | yes         |   |   |
-| GrapeJS                 | BSD-3    | yes         |   |   |
-| CraftJS                 | MIT      | no          |   |   |
+Pointer Tool:
+alt:   select element behind
+meta:  draw selection rect
+ctrl:  add to selection
+shift: remove from selection
 
 
 ## Copyright notice

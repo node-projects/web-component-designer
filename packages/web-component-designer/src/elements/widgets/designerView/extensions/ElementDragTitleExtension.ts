@@ -32,12 +32,16 @@ export class ElementDragTitleExtension extends AbstractExtension {
       this._rect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y, this._width, 15, 'svg-primary-selection-move', this._rect);
       this._clickRect = this._drawRect(transformedCornerPoints[0].x, transformedCornerPoints[0].y, this._width, 18, 'svg-invisible', this._clickRect);
       this._clickRect.style.background = 'transparent';
-      this._text = this._drawHTML('<div style="position:relative"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0; padding-left: 2px;">' + text + '</span></div>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
+      this._text = this._drawHTML('<div style="position:relative; pointer-events: none;"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0; padding-left: 2px;">' + text + '</span></div>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints[0].y - 16, this._width, 15, 'svg-text-primary', this._text);
       this._text.style.overflow = 'visible';
 
       this._clickRect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
       this._clickRect.addEventListener('pointermove', (e) => this._pointerEvent(e));
       this._clickRect.addEventListener('pointerup', (e) => this._pointerEvent(e));
+      this._clickRect.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this.designerCanvas.showDesignItemContextMenu(this.extendedItem, e);
+      });
       this.refresh(cache, event);
     }
   }
@@ -80,8 +84,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
   _pointerEvent(event: PointerEvent) {
     event.preventDefault();
     event.stopPropagation();
-
-    (<ITool>this.designerCanvas.serviceContainer.designerTools.get(NamedTools.Pointer)).pointerEventHandler(this.designerCanvas, event, this.extendedItem.element);
+    if (event.button != 2)
+      (<ITool>this.designerCanvas.serviceContainer.designerTools.get(NamedTools.Pointer)).pointerEventHandler(this.designerCanvas, event, this.extendedItem.element);
   }
 
   override dispose() {
