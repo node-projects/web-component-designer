@@ -583,7 +583,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.zoomFactor = 1;
 
     for (let n of this.rootDesignItem.querySelectorAll('*')) {
-      if (n instanceof Element) {
+      if (n instanceof n.ownerDocument.defaultView.Element) {
         const rect = n.getBoundingClientRect();
         minX = minX < rect.x ? minX : rect.x;
         minY = minY < rect.y ? minY : rect.y;
@@ -1188,10 +1188,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: normEvt.x - normEl.x, y: normEvt.y - normEl.y };
   }
 
+  private transformPoint(point: IPoint) {
+    if (this._useIframe) {
+      const rect = this._canvasContainer.getBoundingClientRect();
+      return { x: point.x - rect.x, y: point.y - rect.y };
+    }
+    return point;
+  }
+
   public elementsFromPoint(x: number, y: number): Element[] {
     let retVal: Element[] = [];
-    const offset = this.containerOffset;
-    const elements = this._canvasShadowRoot.elementsFromPoint(x - offset.x, y - offset.y);
+    const t = this.transformPoint({ x, y });
+    const elements = this._canvasShadowRoot.elementsFromPoint(t.x, t.y);
     for (let e of elements) {
       if (e.getRootNode() !== this._canvasShadowRoot)
         continue;
@@ -1201,8 +1209,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public getElementAtPoint(point: IPoint, ignoreElementCallback?: (element: HTMLElement) => boolean) {
-    const offset = this.containerOffset;
-    const elements = this._canvasShadowRoot.elementsFromPoint(point.x - offset.x, point.y - offset.y);
+    const t = this.transformPoint(point);
+    const elements = this._canvasShadowRoot.elementsFromPoint(t.x, t.y);
     let currentElement: HTMLElement = null;
 
     for (let i = 0; i < elements.length; i++) {

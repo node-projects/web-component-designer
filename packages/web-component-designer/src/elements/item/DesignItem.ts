@@ -43,7 +43,7 @@ export class DesignItem implements IDesignItem {
   }
 
   get usableContainer() {
-    if (this.isRootItem && this.element instanceof HTMLIFrameElement)
+    if (this.isRootItem && this.element instanceof this.element.ownerDocument.defaultView.HTMLIFrameElement)
       return this.element.contentWindow.document;
     else if (this.isRootItem)
       return (<HTMLElement>this.node).shadowRoot;
@@ -83,9 +83,9 @@ export class DesignItem implements IDesignItem {
   }
 
   public get nodeType(): NodeType {
-    if (this.node instanceof Comment)
+    if (this.node instanceof this.node.ownerDocument.defaultView.Comment)
       return NodeType.Comment;
-    if (this.node instanceof Text)
+    if (this.node instanceof this.node.ownerDocument.defaultView.Text)
       return NodeType.TextNode;
     return NodeType.Element;
   }
@@ -116,21 +116,21 @@ export class DesignItem implements IDesignItem {
 
   _reparseSpecialAttributes(name: string) {
     if (name == hideAtDesignTimeAttributeName) {
-      if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
+      if (this.element instanceof this.node.ownerDocument.defaultView.HTMLElement || this.element instanceof this.node.ownerDocument.defaultView.SVGElement) {
         if (!this._attributes.has(hideAtDesignTimeAttributeName))
           this.element.style.display = <any>this._styles.get('display') ?? "";
         else
           this.element.style.display = 'none';
       }
     } else if (name == hideAtRunTimeAttributeName) {
-      if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
+      if (this.element instanceof this.node.ownerDocument.defaultView.HTMLElement || this.element instanceof this.node.ownerDocument.defaultView.SVGElement) {
         if (!this._attributes.has(hideAtRunTimeAttributeName))
           this.element.style.opacity = <any>this._styles.get('opacity') ?? "";
         else
           this.element.style.opacity = '0.3';
       }
     } else if (name == lockAtDesignTimeAttributeName) {
-      if (this.element instanceof HTMLElement || this.element instanceof SVGElement) {
+      if (this.element instanceof this.node.ownerDocument.defaultView.HTMLElement || this.element instanceof this.node.ownerDocument.defaultView.SVGElement) {
         if (!this._attributes.has(lockAtDesignTimeAttributeName))
           this.element.style.pointerEvents = 'auto';
         else
@@ -353,7 +353,7 @@ export class DesignItem implements IDesignItem {
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
     let designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
 
-    if (node instanceof HTMLTemplateElement && node.getAttribute('shadowrootmode') == 'open') {
+    if (node instanceof node.ownerDocument.defaultView.HTMLTemplateElement && node.getAttribute('shadowrootmode') == 'open') {
       try {
         const shadow = (<HTMLElement>node.parentNode).attachShadow({ mode: 'open' });
         shadow.appendChild(node.content.cloneNode(true));
@@ -369,7 +369,7 @@ export class DesignItem implements IDesignItem {
         }
       }
 
-      if (node instanceof HTMLElement || node instanceof SVGElement) {
+      if (node instanceof node.ownerDocument.defaultView.HTMLElement || node instanceof node.ownerDocument.defaultView.SVGElement) {
         const cssParser = new CssAttributeParser();
         const st = node.getAttribute("style");
         if (st) {
@@ -424,12 +424,12 @@ export class DesignItem implements IDesignItem {
   _internalUpdateChildrenFromNodesChildren() {
     const newChilds = [];
     if (this.nodeType == NodeType.Element) {
-      if (this.element instanceof HTMLTemplateElement) {
+      if (this.element instanceof this.node.ownerDocument.defaultView.HTMLTemplateElement) {
         for (const c of this.element.content.childNodes) {
           const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
           newChilds.push(di);
         }
-      } else if (this.element instanceof HTMLIFrameElement) {
+      } else if (this.element instanceof this.node.ownerDocument.defaultView.HTMLIFrameElement) {
         for (const c of this.element.contentWindow.document.childNodes) {
           const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
           newChilds.push(di);
@@ -696,7 +696,7 @@ export class DesignItem implements IDesignItem {
       this._childArray.push(designItem);
       if (this.isRootItem) {
         (<HTMLElement>this.node).shadowRoot.appendChild(designItem.view);
-      } else if (this.view instanceof HTMLTemplateElement) {
+      } else if (this.view instanceof this.node.ownerDocument.defaultView.HTMLTemplateElement) {
         this.view.content.appendChild(designItem.view);
       } else
         this.view.appendChild(designItem.view);
@@ -704,7 +704,7 @@ export class DesignItem implements IDesignItem {
       let el = this._childArray[index];
       if (this.isRootItem) {
         (<HTMLElement>this.node).shadowRoot.insertBefore(designItem.view, el.element);
-      } else if (this.view instanceof HTMLTemplateElement) {
+      } else if (this.view instanceof this.node.ownerDocument.defaultView.HTMLTemplateElement) {
         this.view.content.insertBefore(designItem.view, el.element)
       } else
         this.view.insertBefore(designItem.view, el.element)

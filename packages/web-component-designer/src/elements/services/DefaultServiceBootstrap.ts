@@ -136,7 +136,7 @@ export function createDefaultServiceContainer() {
     new InvisibleElementExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
-    new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
+    new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
     new PreviousElementSelectExtensionProvider(),
     new TransformOriginExtensionProvider(true),
     new MarginExtensionProvider(),
@@ -145,7 +145,7 @@ export function createDefaultServiceContainer() {
     new SvgElementExtensionProvider(),
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new RotateExtensionProvider(),
-    new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
+    new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionRefreshed, [
     new GridChildToolbarExtensionProvider(),
@@ -159,7 +159,7 @@ export function createDefaultServiceContainer() {
     new FlexboxExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Selection, [
-    new ConditionExtensionProvider(new SelectionDefaultExtensionProvider(), item => !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
+    new ConditionExtensionProvider(new SelectionDefaultExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainerAndCanBeEntered, [
     new DisplayGridExtensionProvider('lightgray', '#8080802b'),
@@ -168,8 +168,8 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new HighlightElementExtensionProvider(),
-    new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
-    new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof SVGElement) || item.node instanceof SVGSVGElement),
+    new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
+    new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Placement, [
     new PlacementExtensionProvider()

@@ -233,14 +233,14 @@ export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement
 export function getElementSize(element: HTMLElement) {
   let width = element.offsetWidth;
   let height = element.offsetHeight;
-  if (element instanceof SVGElement && (<any>element).width) {
+  if (element instanceof element.ownerDocument.defaultView.SVGElement && (<any>element).width) {
     width = (<SVGAnimatedLength>(<any>element).width).baseVal.value
     height = (<SVGAnimatedLength>(<any>element).height).baseVal.value
-  } else if (element instanceof SVGGraphicsElement) {
+  } else if (element instanceof element.ownerDocument.defaultView.SVGGraphicsElement) {
     let bbox = element.getBBox()
     width = bbox.width;
     height = bbox.height;
-  } else if (element instanceof MathMLElement) {
+  } else if (element instanceof element.ownerDocument.defaultView.MathMLElement) {
     let bbox = element.getBoundingClientRect()
     width = bbox.width;
     height = bbox.height;
