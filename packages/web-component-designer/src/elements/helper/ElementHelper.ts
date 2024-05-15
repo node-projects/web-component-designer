@@ -13,7 +13,6 @@ export function inDesigner(element: Element): boolean {
 
 export function newElementFromString(text, document: Document): Element {
   const range = document.createRange();
-  range.selectNode(document.body);
   //@ts-ignore
   const fragment = range.createContextualFragment(text, { includeShadowRoots: true });
   return fragment.firstChild as Element;
