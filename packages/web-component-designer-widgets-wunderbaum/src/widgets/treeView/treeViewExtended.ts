@@ -148,6 +148,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     return ctxMnu;
   }
 
+  selectedFromTree = false;
+
   async ready() {
     this._tree = new Wunderbaum({
       ...defaultOptions,
@@ -158,6 +160,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           let node = e.node;
           let designItem: IDesignItem = node.data.ref;
           if (designItem) {
+            this.selectedFromTree = true;
+            setTimeout(() => {
+              this.selectedFromTree = false;
+            }, 50);
             if (e.event.ctrlKey) {
               const sel = [...designItem.instanceServiceContainer.selectionService.selectedElements];
               const idx = sel.indexOf(designItem);
@@ -368,15 +374,19 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._tree.runWithDeferredUpdate(() => {
       this._tree.visit((node) => {
         const flag = activeElements && activeElements.includes(node.data.ref);
-        node.setSelected(flag);
-        node.setActive(flag);
-        if (flag)
-          node.setFocus(true);
-        if (flag && !scrolled) {
-          scrolled = true;
-          requestAnimationFrame(() => {
-            node.scrollIntoView();
-          });
+        if (flag != node.selected)
+          node.setSelected(flag);
+        if (flag != node.isActive())
+          node.setActive(flag);
+        if (!this.selectedFromTree) {
+          if (flag)
+            node.setFocus(true);
+          if (flag && !scrolled) {
+            scrolled = true;
+            requestAnimationFrame(() => {
+              node.scrollIntoView();
+            });
+          }
         }
       });
     });
