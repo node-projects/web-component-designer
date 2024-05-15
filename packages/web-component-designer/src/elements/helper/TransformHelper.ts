@@ -14,7 +14,7 @@ let identityMatrix: number[] = [
 
 export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
   //https://www.w3.org/TR/css-transforms-2/#ctm
-  let s = getComputedStyle(element);
+  let s = element.ownerDocument.defaultView.getComputedStyle(element);
 
   let m = new DOMMatrix();
   if (s.translate != 'none' && s.translate) {
@@ -46,9 +46,6 @@ export function combineTransforms(element: HTMLElement, actualTransforms: string
 
 export function transformPointByInverseMatrix(point: DOMPoint, matrix: DOMMatrix) {
   const inverse = matrix.inverse();
-  //fix chrome bug: https://bugs.chromium.org/p/chromium/issues/detail?id=1395645
-  inverse.m33 = 1;
-  inverse.m44 = 1;
   return point.matrixTransform(inverse);
 }
 
@@ -170,11 +167,12 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
     if (newElement) {
       actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
       newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
-      newElementMatrix.m41 = newElementMatrix.m42 = 0;
+      actualElementMatrix.m41 = actualElementMatrix.m42 = actualElementMatrix.m43 = 0;
+      newElementMatrix.m41 = newElementMatrix.m42 = newElementMatrix.m43 = 0;
       if (actualElement == element) {
-        originalElementAndAllParentsMultipliedMatrix = actualElementMatrix.multiply(newElementMatrix);
+        originalElementAndAllParentsMultipliedMatrix = newElementMatrix.multiply(actualElementMatrix);
       } else if (newElement != ancestor || !excludeAncestor) {
-        originalElementAndAllParentsMultipliedMatrix = originalElementAndAllParentsMultipliedMatrix.multiply(newElementMatrix);
+        originalElementAndAllParentsMultipliedMatrix = newElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
       }
 
       lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
@@ -207,8 +205,10 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
       elementWindowOffset.offsetLeft - designerCanvas.outerRect.x + tfX,
       elementWindowOffset.offsetTop - designerCanvas.outerRect.y + tfY,
     )
-    if (actualElement == element) {
-      const mtx = extractTranslationFromDOMMatrix(new DOMMatrix(element.style.transform));
+    //if (actualElement == element) 
+    {
+      const transf = element.ownerDocument.defaultView.getComputedStyle(element).transform;
+      const mtx = extractTranslationFromDOMMatrix(new DOMMatrix(transf));
       parentElementTransformOrigin.x -= mtx.x;
       parentElementTransformOrigin.y -= mtx.y;
     }
@@ -329,25 +329,10 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
 }
 
 export function extractTranslationFromDOMMatrix(matrix: DOMMatrix): DOMPoint {
+  //TODO: maybe we also need m43 here??
   return new DOMPoint(matrix.m41, matrix.m42, 0, 0);
 }
 
 export function extractRotationAngleFromDOMMatrix(matrix: DOMMatrix): number {
   return getRotationAngleFromMatrix(null, matrix);
-}
-
-export function normalizeToAbsolutePosition(element: HTMLElement, normalizeProperty: "left" | "top") {
-  switch (normalizeProperty) {
-    case "left":
-      let left = getComputedStyle(element).left;
-      (<HTMLElement>element).style.removeProperty('right');
-      (<HTMLElement>element).style.left = left;
-      return left;
-    case "top":
-      let top = getComputedStyle(element).top;
-      (<HTMLElement>element).style.removeProperty('bottom');
-      (<HTMLElement>element).style.top = top;
-      return top;
-  }
-  return null;
 }

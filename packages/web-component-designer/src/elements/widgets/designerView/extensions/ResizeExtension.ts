@@ -3,11 +3,26 @@ import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
 import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
-import { transformPointByInverseMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, normalizeToAbsolutePosition, getElementCombinedTransform } from "../../../helper/TransformHelper.js";
+import { transformPointByInverseMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, getElementCombinedTransform } from "../../../helper/TransformHelper.js";
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
+
+export function normalizeToAbsolutePosition(element: HTMLElement, normalizeProperty: "left" | "top") {
+  switch (normalizeProperty) {
+    case "left":
+      let left = getComputedStyle(element).left;
+      (<HTMLElement>element).style.removeProperty('right');
+      (<HTMLElement>element).style.left = left;
+      return left;
+    case "top":
+      let top = getComputedStyle(element).top;
+      (<HTMLElement>element).style.removeProperty('bottom');
+      (<HTMLElement>element).style.top = top;
+      return top;
+  }
+}
 
 //TODO: use PlacementService, size is not always width/height could also be margin etc...
 //      also when elment aligned to bottom, will it later also be?
