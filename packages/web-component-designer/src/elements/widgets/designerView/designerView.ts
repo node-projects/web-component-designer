@@ -166,7 +166,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       </div>
     </div>`;
 
-  constructor() {
+  constructor(useIframe: boolean = false) {
     super();
     this._restoreCachedInititalValues();
 
@@ -174,7 +174,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._sHor = this._getDomElement<PlainScrollbar>('s-hor');
 
     const outer = this._getDomElement<DesignerCanvas>('outer');
-    this._designerCanvas = new DesignerCanvas();
+    this._designerCanvas = new DesignerCanvas(useIframe);
     this._designerCanvas.id = "canvas";
     this._designerCanvas.appendChild(document.createElement("slot"));
     outer.insertAdjacentElement('afterbegin', this._designerCanvas);

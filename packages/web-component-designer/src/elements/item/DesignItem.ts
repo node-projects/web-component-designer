@@ -42,10 +42,14 @@ export class DesignItem implements IDesignItem {
   nodeReplaced = new TypedEvent<void>;
 
   get window() {
+    if (this.isRootItem && this.node instanceof HTMLIFrameElement)
+      return this.node.contentDocument.defaultView;
     return this.node.ownerDocument.defaultView;
   }
 
   get document() {
+    if (this.isRootItem && this.node instanceof HTMLIFrameElement)
+      return this.node.contentDocument;
     return this.node.ownerDocument;
   }
 

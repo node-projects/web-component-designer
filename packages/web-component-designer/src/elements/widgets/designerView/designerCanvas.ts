@@ -335,8 +335,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _iframe: HTMLIFrameElement;
   private _window: Window;
 
-  constructor() {
+  constructor(useIframe: boolean = false) {
     super();
+    this._useIframe = useIframe;
+    
     this._restoreCachedInititalValues();
 
     this._canvas = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvas');

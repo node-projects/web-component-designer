@@ -11,7 +11,7 @@ export function inDesigner(element: Element): boolean {
   return false;
 }
 
-export function newElementFromString(text): Element {
+export function newElementFromString(text, document: Document): Element {
   const range = document.createRange();
   range.selectNode(document.body);
   //@ts-ignore

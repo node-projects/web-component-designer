@@ -25,20 +25,18 @@ export class NodeHtmlParserService implements IHtmlParserService {
     return designItems;
   }
 
-  private _parseDiv = document.createElement("div");
-
   _createDesignItemsRecursive(item: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, namespace: string, snippet: boolean, positionOffset = 0): IDesignItem {
     let designItem: IDesignItem = null;
     if (item.nodeType == 1) {
       let element: Element;
       let manualCreatedElement = false;
       if (!namespace)
-        element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call 
+        element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>', instanceServiceContainer.designerCanvas.rootDesignItem.document); // some custom elements only parse attributes during constructor call 
       if (!element) {
         if (namespace)
-          element = document.createElementNS(namespace, item.rawTagName);
+          element = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElementNS(namespace, item.rawTagName);
         else
-          element = document.createElement(item.rawTagName);
+          element = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElement(item.rawTagName);
         manualCreatedElement = true;
       }
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
@@ -97,8 +95,9 @@ export class NodeHtmlParserService implements IHtmlParserService {
         }
       }
     } else if (item.nodeType == 3) {
-      this._parseDiv.innerHTML = item.rawText;
-      let element = this._parseDiv.childNodes[0];
+      const parseDiv = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElement("div");
+      parseDiv.innerHTML = item.rawText;
+      let element = parseDiv.childNodes[0];
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });

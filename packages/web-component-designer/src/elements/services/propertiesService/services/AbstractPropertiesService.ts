@@ -287,7 +287,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         txt += a.name + '="' + a.value.replaceAll('"', '&quot;') + '" ';
       }
       txt += '></' + d.name + '>';
-      let element = newElementFromString(txt); // some custom elements only parse attributes during constructor call 
+      let element = newElementFromString(txt, designItems[0].document); // some custom elements only parse attributes during constructor call 
       for (let c of [...d.element.childNodes])
         element.appendChild(c);
       (<HTMLElement>element).style.pointerEvents = 'auto';

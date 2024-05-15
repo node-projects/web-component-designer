@@ -54,7 +54,7 @@ export class DefaultInstanceService implements IInstanceService {
 
     const elementString = '<' + definition.tag + attr + '></' + definition.tag + '>';
 
-    const element = <HTMLElement>newElementFromString(elementString);
+    const element = <HTMLElement>newElementFromString(elementString, instanceServiceContainer.designerCanvas.rootDesignItem.document);
     (<IDesignerInstance><any>element)._inNodeProjectsDesignerView = true;
     if (definition.defaultWidth)
       element.style.width = definition.defaultWidth;
@@ -69,7 +69,7 @@ export class DefaultInstanceService implements IInstanceService {
 
     if (definition.defaultContent) {
       if (typeof definition.defaultContent === "string") {
-        const parser = new DOMParser();
+        const parser = new instanceServiceContainer.designerCanvas.rootDesignItem.window.DOMParser();
         //@ts-ignore
         const doc = parser.parseFromString(definition.defaultContent, 'text/html', { includeShadowRoots: true });
         element.append(...doc.head.childNodes);
