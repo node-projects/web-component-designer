@@ -56,6 +56,15 @@ Your index.html should be extended as follows:
     <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
     <script src="/node_modules/mobile-drag-drop/index.js"></script>
 
+## Keys
+
+Pointer Tool:
+alt:   select element behind
+meta:  draw selection rect
+ctrl:  add to selection
+shift: remove from selection
+
+
 ## Copyright notice
 
 The Library uses Images from the Chrome Dev Tools, see
