@@ -5,7 +5,7 @@ Meanwhile polymer is not used anymore.
 
 ![image](https://user-images.githubusercontent.com/364896/117482820-358e2d80-af65-11eb-97fd-9d15ebf1966f.png)
 
-There is also a Preview VS-Code Addon using the Designer: https://github.com/node-projects/vs-code-designer-addon
+There is also a preview VSCode addon using the designer: https://github.com/node-projects/vs-code-designer-addon
 
 ## NPM Package
 
@@ -17,7 +17,7 @@ https://www.npmjs.com/package/@node-projects/web-component-designer
 
 ## Additional NPM Packages
 
-All Modules wich need an external dependency are now extracted to extra NPM packges.
+All Modules which need an external dependency are now extracted to extra NPM packges.
 So the designer now should work with bundlers.
 
 | Name                                                                   | Description                                  |
@@ -39,7 +39,7 @@ So the designer now should work with bundlers.
 
 ## Browser support
 
-  - Chroe, Firefox and Safari
+  - Chrome, Firefox and Safari
   
 ## Projects using it
 
@@ -48,7 +48,7 @@ A ZPL-Label Designer:
 
 ![image](https://github.com/node-projects/web-component-designer/assets/364896/e1f1e3cc-29a3-4749-a676-389577fab69a)
 
-A Materialflow Layout Editor in a comercial Application:
+A material flow layout editor in a comercial application:
 ![image](https://github.com/node-projects/web-component-designer/assets/364896/0062562a-4224-4b11-aaa4-03e31494fcfa)
 
 ## Demo
@@ -67,7 +67,7 @@ repository: https://github.com/node-projects/web-component-designer-simple-demo
 - optional - code mirror code editor (if you use code-view-codemirror) (workin but buggy)
 - optional - fancytree (if you use tree-view-extended, palette-tree-view or bindable-objects-browser)
 
-## Features we are workin on
+## Features we are working on
 
 https://github.com/node-projects/web-component-designer/issues
 
