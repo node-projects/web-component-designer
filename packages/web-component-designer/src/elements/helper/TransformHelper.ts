@@ -167,7 +167,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
     if (newElement) {
       actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
       newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
-      actualElementMatrix.m41 = actualElementMatrix.m42 = actualElementMatrix.m43 = 0;
+      actualElementMatrix.m43 = 0;
       newElementMatrix.m41 = newElementMatrix.m42 = newElementMatrix.m43 = 0;
       if (actualElement == element) {
         originalElementAndAllParentsMultipliedMatrix = newElementMatrix.multiply(actualElementMatrix);
