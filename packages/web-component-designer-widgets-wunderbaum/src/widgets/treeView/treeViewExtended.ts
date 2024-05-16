@@ -6,6 +6,9 @@ import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js'
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
 
+
+const wbNodeSymbol = Symbol.for('wunderbaumnode');
+
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
   private _treeDiv: HTMLTableElement;
@@ -54,10 +57,15 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         border-radius: 50%;
         width: 10px;
         height: 10px;
-        background: orange;
+        background: transparent;
+        pointer-events: none;
         top: 5px;
         left: 5px;
         position: relative;
+      }
+      div.isforced {
+        background: orange;
+        pointer-events: all;
       }`;
 
   static override readonly template = html`
@@ -279,16 +287,18 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
             rowElem.appendChild(d);
 
+            const f = document.createElement("div");
+            f.className = "forced";
+            f.title = "has forced style";
+            rowElem.appendChild(f);
+            f.addEventListener('click', (event) => {
+              const items = new ForceCssContextMenu().provideContextMenuItems(event, item.instanceServiceContainer.designerCanvas, item);
+              let ctxMenu = new ContextMenu(items, null);
+              ctxMenu.display(event);
+            });
+
             if (item.hasForcedCss) {
-              const f = document.createElement("div");
-              f.className = "forced";
-              f.title = "has forced style";
-              rowElem.appendChild(f);
-              f.addEventListener('click', (event) => {
-                const items = new ForceCssContextMenu().provideContextMenuItems(event, item.instanceServiceContainer.designerCanvas, item);
-                let ctxMenu = new ContextMenu(items, null);
-                ctxMenu.display(event);
-              })
+              f.className = "forced isforced";
             }
           }
         }
@@ -299,6 +309,15 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   _recomputeRunning;
   _recomputeRequestedAgain;
+
+  public async refreshNode(node: WunderbaumNode, item: IDesignItem) {
+    const el = node.getColElem(0).parentElement;
+    const f = el.querySelector('.forced')
+    if (item.hasForcedCss)
+      f.classList.add('isforced');
+    else
+      f.classList.remove('isforced');
+  }
 
   public async createTree(rootItem: IDesignItem) {
     if (this._tree) {
@@ -327,10 +346,16 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     });
     this._contentChangedHandler?.dispose()
     this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
-      this.createTree(value.contentService.rootDesignItem);
-      setTimeout(() => {
-        this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
-      }, 20);
+      if (e.changeType === 'changed') {
+        for (const d of e.designItems) {
+          this.refreshNode(d[wbNodeSymbol], d);
+        }
+      } else {
+        this.createTree(value.contentService.rootDesignItem);
+        setTimeout(() => {
+          this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
+        }, 20);
+      }
     });
     this.createTree(value.contentService.rootDesignItem);
   }
@@ -352,6 +377,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     }
   }
 
+
   private _getChildren(item: IDesignItem, currentNode: WunderbaumNode): any {
     if (currentNode == null) {
       currentNode = this._tree.root;
@@ -361,6 +387,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       title: item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
       ref: item
     });
+    //@ts-ignore
+    item[wbNodeSymbol] = newNode;
 
     for (let i of item.children()) {
       if (!i.isEmptyTextNode) {
