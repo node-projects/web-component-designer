@@ -329,6 +329,7 @@ export type { IContextMenuExtension, ContextmenuInitiator } from "./elements/wid
 export * from "./elements/widgets/designerView/extensions/contextMenu/ChildContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/ChildrenContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/MultipleItemsSelectedContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/PathContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/RectContextMenu.js";

@@ -4,16 +4,18 @@ import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
 
-export class ItemsBelowContextMenu implements IContextMenuExtension {
+export class ChildrenContextMenu implements IContextMenuExtension {
 
   public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
     return initiator == 'designer';
   }
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
-    const lstItems = designerCanvas.elementsFromPoint(event.x, event.y);
-    if (lstItems.length > 0) {
-      return [{ title: 'items below', children: [...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (#' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))] }];
+    if (designItem) {
+      const lstItems = [...designItem.element.children];
+      if (lstItems.length > 0) {
+        return [{ title: 'children', children: [...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (#' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))] }];
+      }
     }
     return [];
   }

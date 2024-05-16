@@ -99,6 +99,7 @@ import { BasicWebcomponentPropertiesService } from './propertiesService/services
 import { PreviousElementSelectExtensionProvider } from '../widgets/designerView/extensions/PreviousElementSelectExtensionProvider.js';
 import { ForceCssContextMenu } from '../widgets/designerView/extensions/contextMenu/ForceCssContextMenu.js';
 import { OptionsContextMenuButton } from '../widgets/designerView/extensions/buttons/OptionsContextMenuButton.js';
+import { ChildrenContextMenu } from '../widgets/designerView/extensions/contextMenu/ChildrenContextMenu.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -260,6 +261,7 @@ export function createDefaultServiceContainer() {
     new SelectAllChildrenContextMenu(),
     new SeperatorContextMenu(),
     new ItemsBelowContextMenu(),
+    new ChildrenContextMenu(),
   ];
 
   return serviceContainer;
