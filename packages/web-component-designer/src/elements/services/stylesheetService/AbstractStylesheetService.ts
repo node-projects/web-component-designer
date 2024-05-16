@@ -1,9 +1,9 @@
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from '../../item/IDesignItem.js';
-import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStylesheetService } from './IStylesheetService.js';
 import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
+import { forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from "../../item/DesignItem.js";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
@@ -129,15 +129,24 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
     public stylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' | 'undo' }>();
     public stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();
 
+    public static patchStylesheetSelectorForDesigner(text: string) {
+        return text.replaceAll(':hover', '[' + forceHoverAttributeName + ']')
+            .replaceAll(':active', '[' + forceActiveAttributeName + ']')
+            .replaceAll(':visited', '[' + forceVisitedAttributeName + ']')
+            .replaceAll(':focus', '[' + forceFocusAttributeName + ']')
+            .replaceAll(':focus-within', '[' + forceFocusWithinAttributeName + ']')
+            .replaceAll(':focus-visible', '[' + forceFocusVisibleAttributeName + ']');
+    }
+
     protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {
         if (designItem == null)
             return true;
 
         for (let selector of selectors) {
-            if (selector == ':host') {
+            /*if (selector == ':host') {
                 selector = DesignerCanvas.cssprefixConstant;
-            }
-            if (designItem.element.matches(selector)) return true;
+            }*/
+            if (designItem.element.matches(AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector))) return true;
         }
         return false;
     }

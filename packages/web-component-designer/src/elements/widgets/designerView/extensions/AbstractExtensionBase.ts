@@ -81,6 +81,15 @@ export abstract class AbstractExtensionBase {
     return newRect;
   }
 
+  protected _drawComplexRect(points: [IPoint, IPoint, IPoint, IPoint], className?: string, rect?: SVGPathElement, overlayLayer?: OverlayLayer) {
+    const d = "M" + points.map(x => x.x + ',' + x.y).join(' ') + 'Z';
+    const newRect = this.overlayLayerView.drawPath(this.constructor.name, d, className, rect, overlayLayer);
+    if (!rect) {
+      this.overlays.push(newRect);
+    }
+    return newRect;
+  }
+
   protected _drawPath(data: string, className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
     const newPath = this.overlayLayerView.drawPath(this.constructor.name, data, className, path, overlayLayer);
     if (!path) {

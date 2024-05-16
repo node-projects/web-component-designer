@@ -2,7 +2,7 @@ import { EventNames } from '../../../enums/EventNames.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
-import { DesignItem, forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from '../../item/DesignItem.js';
+import { DesignItem, forceHoverAttributeName } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameBindingObject } from '../../../Constants.js';
@@ -39,6 +39,7 @@ import { filterChildPlaceItems } from '../../helper/LayoutHelper.js';
 import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
 import { TouchGestureHelper } from '../../helper/TouchGestureHelper.js';
 import { stylesheetFromString } from '../../helper/StylesheetHelper.js';
+import { AbstractStylesheetService } from '../../services/stylesheetService/AbstractStylesheetService.js';
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -144,7 +145,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _firstConnect: boolean;
 
-  public static cssprefixConstant = '#node-projects-designer-canvas-canvas ';
+  //public static cssprefixConstant = '#node-projects-designer-canvas-canvas ';
 
   static override readonly style = css`
     :host {
@@ -425,7 +426,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       if (this.instanceServiceContainer.stylesheetService) {
         styles.push(...this.instanceServiceContainer.stylesheetService
           .getStylesheets()
-          .map(x => stylesheetFromString(this._window, this._patchStylesheetForDesigner(x.content))));
+          .map(x => stylesheetFromString(this._window, AbstractStylesheetService.patchStylesheetSelectorForDesigner(x.content))));
       }
 
       if (this._useIframe) {
@@ -1234,15 +1235,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
 
     return currentElement;
-  }
-
-  public _patchStylesheetForDesigner(text: string) {
-    return text.replaceAll(':hover', '[' + forceHoverAttributeName + ']')
-      .replaceAll(':active', '[' + forceActiveAttributeName + ']')
-      .replaceAll(':visited', '[' + forceVisitedAttributeName + ']')
-      .replaceAll(':focus', '[' + forceFocusAttributeName + ']')
-      .replaceAll(':focus-within', '[' + forceFocusWithinAttributeName + ']')
-      .replaceAll(':focus-visible', '[' + forceFocusVisibleAttributeName + ']');
   }
 
   private _hoverElement: Element;

@@ -24,17 +24,19 @@ export class MultipleSelectionRectExtension extends AbstractExtension {
 
   override refresh() {
     let selection = this._designerView.instanceServiceContainer.selectionService.selectedElements;
-    selection = filterChildPlaceItems(selection);
-    let rect = calculateOuterRect(selection, this._designerView)
+    if (selection.length > 1) {
+      selection = filterChildPlaceItems(selection);
+      let rect = calculateOuterRect(selection, this._designerView)
 
-    this._line1 = this._drawLine(rect.x, rect.y, rect.x + rect.width, rect.y, 'svg-multiple-rect-selection', this._line1, OverlayLayer.Background);
-    this._line2 = this._drawLine(rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height, 'svg-multiple-rect-selection', this._line2, OverlayLayer.Background);
-    this._line3 = this._drawLine(rect.x + rect.width, rect.y + rect.height, rect.x, rect.y + rect.height, 'svg-multiple-rect-selection', this._line3, OverlayLayer.Background);
-    this._line4 = this._drawLine(rect.x, rect.y + rect.height, rect.x, rect.y, 'svg-multiple-rect-selection', this._line4, OverlayLayer.Background);
-    this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-    this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-    this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-    this._line4.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._line1 = this._drawLine(rect.x, rect.y, rect.x + rect.width, rect.y, 'svg-multiple-rect-selection', this._line1, OverlayLayer.Background);
+      this._line2 = this._drawLine(rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height, 'svg-multiple-rect-selection', this._line2, OverlayLayer.Background);
+      this._line3 = this._drawLine(rect.x + rect.width, rect.y + rect.height, rect.x, rect.y + rect.height, 'svg-multiple-rect-selection', this._line3, OverlayLayer.Background);
+      this._line4 = this._drawLine(rect.x, rect.y + rect.height, rect.x, rect.y, 'svg-multiple-rect-selection', this._line4, OverlayLayer.Background);
+      this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._line4.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+    }
   }
 
   override dispose() {

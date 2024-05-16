@@ -20,6 +20,6 @@ export class PaddingExtensionProvider implements IDesignerExtensionProvider {
   }
 
   static readonly style = css`
-    .svg-padding { fill: #32cd3266; }
+    .svg-padding { fill: #32cd3266; fill-rule: evenodd; }
   `;
 }

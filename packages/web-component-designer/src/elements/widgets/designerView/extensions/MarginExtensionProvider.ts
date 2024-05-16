@@ -20,6 +20,6 @@ export class MarginExtensionProvider implements IDesignerExtensionProvider {
   }
 
   readonly style = css`
-    .svg-margin { fill: #ff944766; }
+    .svg-margin { fill: #ff944766; fill-rule: evenodd; }
   `;
 }
