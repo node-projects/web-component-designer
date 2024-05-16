@@ -20,7 +20,7 @@ export class DesignContext implements IDesignContext {
       enableStylesheetService: false,
       basicStackedToolbarExtensionShowOverlay: false,
       simulateHoverOnHover: false,
-      selectUnhitableElements: false,
+      selectUnhitableElements: true,
     };
   extensionOptionsChanged = new TypedEvent<void>;
 }

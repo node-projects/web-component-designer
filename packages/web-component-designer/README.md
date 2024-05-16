@@ -60,10 +60,9 @@ Your index.html should be extended as follows:
 
 Pointer Tool:
 alt:   select element behind
-meta:  draw selection rect
-ctrl:  add to selection
-shift: remove from selection
-
+shift:  draw selection rect
+ctrl:  add/remove from selection
+ctrl+shift: pan
 
 ## Copyright notice
 
