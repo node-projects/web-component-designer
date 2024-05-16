@@ -69,6 +69,8 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
+    event.preventDefault();
+    
     if (event.ctrlKey || event.shiftKey)
       this.cursor = 'copy';
     else
