@@ -9,6 +9,8 @@
   "scripts": {
     "tsc": "tsc",
     "build": "tsc",
+    "link": "npm link",
+    "watch": "pm2 start tsc --watch",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

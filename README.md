@@ -73,19 +73,10 @@ https://github.com/node-projects/web-component-designer/issues
 
 ## Developing
 
-  * Install dependencies
-```
-  $ npm install
-```
+  * This will install all required packages, link all the npm packages and build everyone once. (in mac or linux you need to run the script with sudo, or the "npm link" will not work)
 
-  * Compile typescript after doing changes
 ```
-  $ npm run build (if you use Visual Studio Code, you can also run the build task via Ctrl + Shift + B > tsc:build - tsconfig.json)
-```
-
-  * *Link node module*<br/>
-```
-  $ npm link 
+  $ npm run develop
 ```
 
 ## Using

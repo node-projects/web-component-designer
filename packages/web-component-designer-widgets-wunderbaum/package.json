@@ -9,6 +9,7 @@
   "scripts": {
     "tsc": "tsc",
     "build": "tsc",
+    "link": "npm link",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {    

@@ -31,7 +31,7 @@ export class LitElementParserService implements IHtmlParserService {
       let element: Element;
       let manualCreatedElement = false;
       if (!namespace)
-        element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>'); // some custom elements only parse attributes during constructor call 
+        element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>', instanceServiceContainer.designerCanvas.rootDesignItem.document); // some custom elements only parse attributes during constructor call 
       if (!element) {
         if (namespace)
           element = document.createElementNS(namespace, item.rawTagName);
