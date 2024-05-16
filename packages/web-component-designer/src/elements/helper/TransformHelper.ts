@@ -138,31 +138,23 @@ export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransfo
   return designerCanvasNormalizedTransformedOrigin;
 }
 
-//const elementMatrixCacheKey = Symbol('windowOffsetsCacheKey');
+const elementMatrixCacheKey = Symbol('windowOffsetsCacheKey');
 export function getResultingTransformationBetweenElementAndAllAncestors(element: HTMLElement, ancestor: HTMLElement, excludeAncestor?: boolean, cache: Record<string | symbol, any> = {}) {
-
-  /*let ch: Map<any, [DOMMatrix]>;
+  let ch: Map<any, DOMMatrix>;
   if (cache)
-    ch = cache[elementMatrixCacheKey] ??= new Map<any, [DOMMatrix]>();
+    ch = cache[elementMatrixCacheKey] ??= new Map<any, DOMMatrix>();
   else
-    ch = new Map<any, [DOMMatrix]>();*/
-  let lst: [DOMMatrix][] = [];
+    ch = new Map<any, DOMMatrix>();
+
+  const res = ch.get(element);
+  if (res)
+    return res;
 
   let actualElement: HTMLElement = element;
   let actualElementMatrix: DOMMatrix;
   let newElementMatrix: DOMMatrix;
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
   while (actualElement != ancestor && actualElement != null) {
-    /*let cachedObj = ch.get(actualElement);
-    if (cachedObj) {
-      if (originalElementAndAllParentsMultipliedMatrix)
-        originalElementAndAllParentsMultipliedMatrix = cachedObj[0].multiply(originalElementAndAllParentsMultipliedMatrix);
-      else
-        originalElementAndAllParentsMultipliedMatrix = cachedObj[0];
-      lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
-      break;
-    }*/
-
     const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
     if (newElement) {
       actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
@@ -174,16 +166,12 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
       } else if (newElement != ancestor || !excludeAncestor) {
         originalElementAndAllParentsMultipliedMatrix = newElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
       }
-
-      lst.forEach(x => x[0] = x[0].multiply(originalElementAndAllParentsMultipliedMatrix));
-      const cacheEntry: [DOMMatrix] = [originalElementAndAllParentsMultipliedMatrix];
-      lst.push(cacheEntry);
-      //ch.set(actualElement, cacheEntry);
     }
 
     actualElement = newElement;
   }
 
+  ch.set(element, originalElementAndAllParentsMultipliedMatrix);
   return originalElementAndAllParentsMultipliedMatrix;
 }
 
