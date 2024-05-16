@@ -87,7 +87,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _canvasOffset: IPoint = { x: 0, y: 0 };
 
   private _additionalStyle: CSSStyleSheet[];
-  private _currentContextMenu: ContextMenu
   private _backgroundImage: string;
 
   private _enableSelectTextNodesOnClick = false;
@@ -1004,7 +1003,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
-    this._currentContextMenu?.close();
     const mnuItems: IContextMenuItem[] = [];
     for (let cme of this.serviceContainer.designerContextMenuExtensions) {
       if (cme.shouldProvideContextmenu(event, this, designItem, 'designer')) {
@@ -1013,6 +1011,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     let ctxMenu = new ContextMenu(mnuItems, null)
     ctxMenu.display(event);
+    
     return ctxMenu;
   }
 

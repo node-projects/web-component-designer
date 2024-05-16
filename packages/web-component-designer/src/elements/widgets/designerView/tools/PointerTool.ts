@@ -69,8 +69,6 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    event.preventDefault();
-
     if (event.ctrlKey)
       this.cursor = 'copy';
     else
@@ -133,6 +131,7 @@ export class PointerTool implements ITool {
       this._initialPoint = currentPoint;
       this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, currentElement);
       if (event.shiftKey) {
+        event.preventDefault();
         this._actionType = PointerActionType.DrawSelection;
       } else if (event.type == EventNames.PointerDown) {
         this._actionStartedDesignItem = currentDesignItem;
