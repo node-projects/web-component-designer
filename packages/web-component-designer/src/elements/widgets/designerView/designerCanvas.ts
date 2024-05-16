@@ -587,7 +587,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.zoomFactor = 1;
 
     for (let n of this.rootDesignItem.querySelectorAll('*')) {
-      if (n instanceof n.ownerDocument.defaultView.Element) {
+      if (n instanceof (n.ownerDocument.defaultView ?? window).Element) {
         const rect = n.getBoundingClientRect();
         minX = minX < rect.x ? minX : rect.x;
         minY = minY < rect.y ? minY : rect.y;

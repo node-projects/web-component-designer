@@ -14,7 +14,7 @@ let identityMatrix: number[] = [
 
 export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
   //https://www.w3.org/TR/css-transforms-2/#ctm
-  let s = element.ownerDocument.defaultView.getComputedStyle(element);
+  let s = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
 
   let m = new DOMMatrix();
   if (s.translate != 'none' && s.translate) {
@@ -195,7 +195,7 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
     )
     //if (actualElement == element) 
     {
-      const transf = element.ownerDocument.defaultView.getComputedStyle(element).transform;
+      const transf = (element.ownerDocument.defaultView ?? window).getComputedStyle(element).transform;
       const mtx = extractTranslationFromDOMMatrix(new DOMMatrix(transf));
       parentElementTransformOrigin.x -= mtx.x;
       parentElementTransformOrigin.y -= mtx.y;
@@ -221,14 +221,14 @@ export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement
 export function getElementSize(element: HTMLElement) {
   let width = element.offsetWidth;
   let height = element.offsetHeight;
-  if (element instanceof element.ownerDocument.defaultView.SVGElement && (<any>element).width) {
+  if (element instanceof (element.ownerDocument.defaultView ?? window).SVGElement && (<any>element).width) {
     width = (<SVGAnimatedLength>(<any>element).width).baseVal.value
     height = (<SVGAnimatedLength>(<any>element).height).baseVal.value
-  } else if (element instanceof element.ownerDocument.defaultView.SVGGraphicsElement) {
+  } else if (element instanceof (element.ownerDocument.defaultView ?? window).SVGGraphicsElement) {
     let bbox = element.getBBox()
     width = bbox.width;
     height = bbox.height;
-  } else if (element instanceof element.ownerDocument.defaultView.MathMLElement) {
+  } else if (element instanceof (element.ownerDocument.defaultView ?? window).MathMLElement) {
     let bbox = element.getBoundingClientRect()
     width = bbox.width;
     height = bbox.height;

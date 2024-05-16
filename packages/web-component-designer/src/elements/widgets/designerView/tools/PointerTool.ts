@@ -50,7 +50,7 @@ export class PointerTool implements ITool {
 
   private _showContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
     event.preventDefault();
-    if (!event.ctrlKey && !event.shiftKey) {
+    if (!event.ctrlKey) {
       let items = designerCanvas.elementsFromPoint(event.x, event.y);
       for (let e of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         if (items.indexOf(e.element) >= 0) {
@@ -70,8 +70,8 @@ export class PointerTool implements ITool {
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     event.preventDefault();
-    
-    if (event.ctrlKey || event.shiftKey)
+
+    if (event.ctrlKey)
       this.cursor = 'copy';
     else
       this.cursor = 'default';
@@ -132,7 +132,7 @@ export class PointerTool implements ITool {
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
       this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, currentElement);
-      if (event.metaKey) {
+      if (event.shiftKey) {
         this._actionType = PointerActionType.DrawSelection;
       } else if (event.type == EventNames.PointerDown) {
         this._actionStartedDesignItem = currentDesignItem;
@@ -234,7 +234,7 @@ export class PointerTool implements ITool {
 
           if (this._firstTimeInMove) {
             if (!currentDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(currentDesignItem)) {
-              if (event.ctrlKey || event.shiftKey)
+              if (event.ctrlKey)
                 currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([...currentDesignItem.instanceServiceContainer.selectionService.selectedElements, currentDesignItem], event);
               else
                 currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem], event);
@@ -372,7 +372,7 @@ export class PointerTool implements ITool {
         {
           this._started = false;
           if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
-            if (this._previousEventName == EventNames.PointerDown && !event.shiftKey && !event.ctrlKey) {
+            if (this._previousEventName == EventNames.PointerDown && !event.ctrlKey) {
               designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem], event);
             } else {
               this.checkSelectElement(event, designerCanvas, currentDesignItem);
@@ -430,7 +430,7 @@ export class PointerTool implements ITool {
   }
 
   private checkSelectElement(event: PointerEvent, designerCanvas: IDesignerCanvas, currentDesignItem: IDesignItem) {
-    if (event.shiftKey || event.ctrlKey) {
+    if (event.ctrlKey) {
       const index = designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
       if (index >= 0) {
         let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);
