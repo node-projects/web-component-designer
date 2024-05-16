@@ -7,7 +7,7 @@ import { IDesignItemService } from "./IDesignItemService.js";
 export class BaseCustomWebcomponentDesignItemService implements IDesignItemService {
   createDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     const di = new DesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
-    if (node instanceof node.ownerDocument.defaultView.HTMLTemplateElement) {
+    if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLTemplateElement) {
       requestAnimationFrame(() => {
         let repeatCount = 1;
         const attr = node.getAttribute('sample-repeat-count');
