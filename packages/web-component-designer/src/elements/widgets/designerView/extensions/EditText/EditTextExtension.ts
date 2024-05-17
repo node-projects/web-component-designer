@@ -90,19 +90,17 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
       this.extensionManager.removeExtensionInstance(this.extendedItem, this);
     }
     this._addOverlay(this._path, OverlayLayer.Background);
-    let points = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
-    let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
-    let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
-    data += "M" + points[0].x + " " + points[0].y + " L" + points[1].x + " " + points[1].y + " L" + points[3].x + " " + points[3].y + " L" + points[2].x + " " + points[2].y + " Z";
-    this._path.setAttribute("d", data);
+    this.refresh();
   }
 
   override refresh() {
-    let points = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
-    let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
-    let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
-    data += "M" + points[0].x + " " + points[0].y + " L" + points[1].x + " " + points[1].y + " L" + points[3].x + " " + points[3].y + " L" + points[2].x + " " + points[2].y + " Z";
-    this._path.setAttribute("d", data);
+    let p = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
+    if (this._valuesHaveChanges(this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, this.designerCanvas.scaleFactor, p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y)) {
+      let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
+      let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
+      data += "M" + [p[0], p[1], p[3], p[2]].map(x => x.x + ',' + x.y).join(' ') + 'Z ';
+      this._path.setAttribute("d", data);
+    }
   }
 
   override dispose() {
