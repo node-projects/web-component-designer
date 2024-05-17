@@ -16,6 +16,6 @@ export class HighlightElementExtensionProvider implements IDesignerExtensionProv
   }
   
   static readonly style = css`
-    .svg-hover { stroke: #90caf9; fill: none; }
+    .svg-hover { stroke: #90caf966; fill: none; }
   `;    
 }

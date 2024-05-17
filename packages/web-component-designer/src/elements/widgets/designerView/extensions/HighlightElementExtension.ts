@@ -3,6 +3,7 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
+import { OverlayLayer } from './OverlayLayer.js';
 
 const offset = 3;
 
@@ -21,7 +22,7 @@ export class HighlightElementExtension extends AbstractExtension {
   override refresh() {
     let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: offset, y: offset }, this.designerCanvas);
     if (!isNaN(transformedCornerPoints[0].x)) {
-      this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect);
+      this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect, OverlayLayer.Background);
       this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
     }
   }

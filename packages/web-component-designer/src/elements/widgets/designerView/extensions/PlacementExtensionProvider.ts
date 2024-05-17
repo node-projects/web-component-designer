@@ -16,6 +16,6 @@ export class PlacementExtensionProvider implements IDesignerExtensionProvider {
   }
   
   static readonly style = css`
-    .svg-hover { stroke: #90caf9; fill: none; }
+    .svg-placement { stroke: #90caf9; fill: none; }
   `;    
 }

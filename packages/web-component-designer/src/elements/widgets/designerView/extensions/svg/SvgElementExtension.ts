@@ -50,8 +50,7 @@ export class SvgElementExtension extends AbstractExtension {
 
     override refresh() {
         let points = getSvgElementPoints(this._svgElement);
-
-        if (this._valuesHaveChanges(this.designerCanvas.scaleFactor, ...points.map(x => x.x), ...points.map(x => x.y))) {
+        if (points && this._valuesHaveChanges(this.designerCanvas.scaleFactor, ...points.map(x => x.x), ...points.map(x => x.y))) {
             this._points = points;
             for (let i = 0; i < this._points.length; i++) {
                 this._circles[i] = this._drawPathCircle(i, this._circles[i]);
