@@ -193,8 +193,7 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
       elementWindowOffset.offsetLeft - designerCanvas.outerRect.x + tfX,
       elementWindowOffset.offsetTop - designerCanvas.outerRect.y + tfY,
     )
-    //if (actualElement == element) 
-    {
+    if (actualElement == element) {
       const transf = (element.ownerDocument.defaultView ?? window).getComputedStyle(element).transform;
       const mtx = extractTranslationFromDOMMatrix(new DOMMatrix(transf));
       parentElementTransformOrigin.x -= mtx.x;
@@ -243,6 +242,8 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   const topright = 1;
   const bottomleft = 2;
   const bottomright = 3;
+
+  //offset points for calculation
   let intUntransformedCornerPointsOffset = nullOffsetArray;
   if (untransformedCornerPointsOffset != null) {
     if (Array.isArray(untransformedCornerPointsOffset)) {

@@ -128,7 +128,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
     let currLeft = 0;
     let currTop = 0;
     if (element instanceof (element.ownerDocument.defaultView ?? window).SVGSVGElement || element instanceof (element.ownerDocument.defaultView ?? window).MathMLElement) {
-      //TODO: !huge Perf impact! - fix without transformation
+      //TODO: !maybe huge Perf impact! - fix without transformation
       let t = element.style.transform;
       element.style.transform = '';
       const bcEl = element.getBoundingClientRect();
