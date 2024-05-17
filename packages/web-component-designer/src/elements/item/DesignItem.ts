@@ -668,7 +668,9 @@ export class DesignItem implements IDesignItem {
           return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
         }
       }
-      catch (err) { }
+      catch (err) {
+        console.warn('getAppliedRules', err);
+      }
     }
     styles = [{ selector: null, declarations: localStyles, specificity: -1 }];
     this._stylesCache = styles;

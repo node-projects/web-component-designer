@@ -143,10 +143,14 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
             return true;
 
         for (let selector of selectors) {
-            /*if (selector == ':host') {
-                selector = DesignerCanvas.cssprefixConstant;
-            }*/
-            if (designItem.element.matches(AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector))) return true;
+            const patched = AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector);
+            try {
+                if (designItem.element.matches(patched))
+                    return true;
+            }
+            catch (err) {
+                console.warn("invalid selector: ", selector, "patched: " + patched);
+            }
         }
         return false;
     }
