@@ -360,7 +360,7 @@ export class ContextMenu implements IContextMenu {
   close() {
     this._menuElement.remove();
     window.removeEventListener("keyup", this._windowKeyUp);
-    window.removeEventListener("mousedown", this._windowDown, true);
+    window.removeEventListener("mousedown", this._windowDown);
     window.removeEventListener("resize", this._windowResize);
     setTimeout(() => window.removeEventListener("contextmenu", this._windowDown), 10);
   }
