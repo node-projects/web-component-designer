@@ -15,5 +15,6 @@ It is used for example by the iobroker.webui.
 
 - long
 - blockly
+- @adobe/css-tools ( only if you use Bindingshelper.parseCssBindings() )
 
 ## Usage

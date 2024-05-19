@@ -1,4 +1,4 @@
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+import { TypedEvent, cssFromString } from "@node-projects/base-custom-webcomponent";
 import { VisualizationBinding } from "../interfaces/VisualizationBinding.js";
 import { State, VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { BindingTarget } from "@node-projects/web-component-designer/dist/elements/item/BindingTarget.js";
@@ -12,6 +12,8 @@ export const bindingPrefixClass = 'bind-class:';
 export const bindingPrefixCss = 'bind-css:';
 export const bindingPrefixCssVar = 'bind-cssvar:';
 export const bindingPrefixContent = 'bind-content:';
+export const bindingPrefixInsideCss = 'bind(';
+export const bindingPrefixInsideCssVarName = '--tmpBinding_';
 
 export const bindingsInCssRegex = /{{(.*)}}/;
 
@@ -431,6 +433,90 @@ export class BindingsHelper {
         return retVal;
     }
 
+    static #cssBindingsVarId = 0;
+
+    async parseCssBindings(sheet: string, element: Element, root: HTMLElement): Promise<[stylesheet: CSSStyleSheet, unsub: (() => void)[]]> {
+        const parser = (await import("@adobe/css-tools"));
+        const ast = parser.parse(sheet);
+
+        let unsub: (() => void)[];
+        for (let r of ast.stylesheet.rules) {
+            if (r.type === parser.CssTypes.rule) {
+                for (const d of r.declarations) {
+                    if (d.type === parser.CssTypes.declaration) {
+                        if (d.value.includes(bindingPrefixInsideCss)) {
+                            const newValue = this.parseCssBinding(d.value, element, root);
+                            d.value = newValue[0];
+                            if (unsub) {
+                                unsub.push(...newValue[1])
+                            } else {
+                                unsub = newValue[1];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        const newStyle = parser.stringify(ast, { indent: '', compress: true });
+        return [cssFromString(newStyle), unsub];
+    }
+
+    parseCssBinding(value: string, element: Element, root: HTMLElement): [name: string, unsub: (() => void)[]] {
+        value = value.trim();
+        let res = '';
+        let tmp = '';
+        let inBind = false;
+        let binding = '';
+        let escape = false;
+        let quote = null;
+        let unsub: (() => void)[] = [];
+        for (let n = 0; n < value.length; n++) {
+            const c = value[n];
+            if (inBind) {
+                if (escape)
+                    binding += c;
+                else if (quote && c === '\\')
+                    escape = true;
+                else if (c === quote)
+                    quote = null;
+                else if (quote === null && c === ')') {
+                    const id = BindingsHelper.#cssBindingsVarId++;
+                    const varName = bindingPrefixInsideCssVarName + id;
+                    let bnd: namedBinding = [varName, { signal: binding, target: BindingTarget.cssvar }];
+                    if (binding.startsWith('{')) {
+                        bnd = JSON.parse(binding);
+                    }
+                    unsub.push(this.applyBinding(element, bnd, '', root));
+                    res += 'var(' + varName + ')';
+                    inBind = false;
+                    binding = '';
+                } else
+                    binding += c;
+            } else if (c === '(') {
+                if (tmp !== 'bind') {
+                    res += tmp;
+                    res += c;
+                } else {
+                    inBind = true;
+                    if (value[n + 1] === '\'' || value[n + 1] === '"') {
+                        n++;
+                        quote = value[n];
+                    } else {
+                        quote = null;
+                    }
+                }
+                tmp = '';
+            } else if (c === ' ' || c === ',' || c === '(' || c === '+' || c === '-' || c === '*' || c === '/') {
+                res += tmp + c;
+                tmp = '';
+            } else {
+                tmp += c;
+            }
+        }
+        return [res + tmp, unsub];
+    }
+
     applyBinding(element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement): () => void {
         let unsubscribeList: [id: string, ((id: string, value: any) => void), any][] = [];
         let cleanupCalls: (() => void)[];
@@ -490,7 +576,14 @@ export class BindingsHelper {
             if (s[0] == '?') {
                 if (root) {
                     const nm = s.substring(1);
-                    let evtCallback = () => this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false);
+                    let evtCallback = () => {
+                        let disableValueChanged = false;
+                        if (disableValueChanged) {
+                            disableValueChanged = true;
+                            this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false);
+                            disableValueChanged = false;
+                        }
+                    };
                     root.addEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback);
                     if (!cleanupCalls)
                         cleanupCalls = [];
