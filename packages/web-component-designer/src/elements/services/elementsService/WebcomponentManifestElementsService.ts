@@ -23,7 +23,7 @@ export class WebcomponentManifestElementsService implements IElementsService {
     for (let m of manifest.modules) {
       for (let e of m.exports) {
         if (e.kind == 'custom-element-definition') {
-          let elDef: IElementDefinition = { tag: e.name, import: removeTrailing(this._importPrefix, '/') + '/' + removeLeading(e.declaration.module, '/'), defaultWidth: "200px", defaultHeight: "200px", className: e.declaration.name }
+          let elDef: IElementDefinition = { tag: e.name, import: removeTrailing(this._importPrefix, '/') + '/' + removeLeading(m.path, '/'), defaultWidth: "200px", defaultHeight: "200px", className: e.declaration.name }
           this._elementList.push(elDef);
         }
       }
