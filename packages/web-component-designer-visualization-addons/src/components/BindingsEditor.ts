@@ -16,7 +16,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                             <span style="cursor: pointer;" title="to use multiple objects, seprate them with semicolon (;). access iobroker objects in properties via ?propertyName, access the propertyValue via ??propertyName. Bind to ioBroker object via $objectId. You could also use ioBroker signals inside of a Signal Name via {name}">objects</span>
                         </div>
                         <div style="display:flex;align-items: flex-end;">
-                            <input class="row" value="{{?this.objectNames::change}}" style="flex-grow: 1;">
+                            <input id="objnm" class="row" value="{{?this.objectNames::change}}" style="flex-grow: 1;">
                             <button @click="_clear" style="height: 22px">X</button>
                             <button @click="_select" style="height: 22px">...</button>
                         </div>
@@ -193,10 +193,13 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   private _serviceContainer: ServiceContainer;
   private _shell: VisualizationShell
   private _activeRow: number = -1;
+  private _objNmInput: HTMLInputElement;
 
   constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, serviceContainer: ServiceContainer, shell: VisualizationShell) {
     super();
     super._restoreCachedInititalValues();
+
+    this._objNmInput = this._getDomElement<HTMLInputElement>('objnm');
 
     this._property = property;
     this._binding = binding;
@@ -246,6 +249,8 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
     }
 
     this._bindingsParse();
+
+    this._objNmInput.focus();
   }
 
   _focusRow(index: number) {
