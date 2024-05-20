@@ -578,7 +578,7 @@ export class BindingsHelper {
                     const nm = s.substring(1);
                     let evtCallback = () => {
                         let disableValueChanged = false;
-                        if (disableValueChanged) {
+                        if (!disableValueChanged) {
                             disableValueChanged = true;
                             this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false);
                             disableValueChanged = false;
