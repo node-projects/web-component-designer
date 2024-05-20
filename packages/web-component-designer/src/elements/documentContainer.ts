@@ -260,17 +260,20 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   ready() {
     this._tabControl.onSelectedTabChanged.on(i => {
-      if (i.oldIndex === 0) {
+      if (i.oldIndex === tabIndex.designer) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
         this._content = this.designerView.getHTML();
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
           this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
         }
-      } else if (i.oldIndex === 1) {
+      } else if (i.oldIndex === tabIndex.code) {
         this._content = this.codeView.getText();
-      } else if (i.oldIndex === 2) {
+      } else if (i.oldIndex === tabIndex.split) {
         this._designerDiv.appendChild(this.designerView);
         this._codeDiv.appendChild(this.codeView);
+      } else if (i.oldIndex === tabIndex.preview) {
+        if (this.demoView?.stopDisplay)
+          this.demoView.stopDisplay();
       }
 
       if (i.newIndex === tabIndex.designer || i.newIndex === tabIndex.split)
