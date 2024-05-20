@@ -435,7 +435,7 @@ export class BindingsHelper {
 
     static #cssBindingsVarId = 0;
 
-    async parseCssBindings(sheet: string, element: Element, root: HTMLElement): Promise<[stylesheet: CSSStyleSheet, unsub: (() => void)[]]> {
+    async parseCssBindings(sheet: string, element: Element, relativeSignalPath: string, root: HTMLElement): Promise<[stylesheet: CSSStyleSheet, unsub: (() => void)[]]> {
         const parser = (await import("@adobe/css-tools"));
         const ast = parser.parse(sheet);
 
@@ -445,7 +445,7 @@ export class BindingsHelper {
                 for (const d of r.declarations) {
                     if (d.type === parser.CssTypes.declaration) {
                         if (d.value.includes(bindingPrefixInsideCss)) {
-                            const newValue = this.parseCssBinding(d.value, element, root);
+                            const newValue = this.parseCssBinding(d.value, element, relativeSignalPath, root);
                             d.value = newValue[0];
                             if (unsub) {
                                 unsub.push(...newValue[1])
@@ -462,7 +462,7 @@ export class BindingsHelper {
         return [cssFromString(newStyle), unsub];
     }
 
-    parseCssBinding(value: string, element: Element, root: HTMLElement): [name: string, unsub: (() => void)[]] {
+    parseCssBinding(value: string, element: Element, relativeSignalPath: string, root: HTMLElement): [name: string, unsub: (() => void)[]] {
         value = value.trim();
         let res = '';
         let tmp = '';
@@ -487,7 +487,7 @@ export class BindingsHelper {
                     if (binding.startsWith('{')) {
                         bnd = JSON.parse(binding);
                     }
-                    unsub.push(this.applyBinding(element, bnd, '', root));
+                    unsub.push(this.applyBinding(element, bnd, relativeSignalPath, root));
                     res += 'var(' + varName + ')';
                     inBind = false;
                     binding = '';
