@@ -338,7 +338,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   constructor(useIframe: boolean = false) {
     super();
     this._useIframe = useIframe;
-    
+
     this._restoreCachedInititalValues();
 
     this._canvas = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvas');
@@ -731,8 +731,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         if (ss.changeSource != 'undo') {
           const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
           this.instanceServiceContainer.undoService.execute(ssca);
+        } else {
+          this.applyAllStyles();
         }
-        this.applyAllStyles();
       });
       this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
         this.applyAllStyles();
@@ -1012,7 +1013,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     let ctxMenu = new ContextMenu(mnuItems, null)
     ctxMenu.display(event);
-    
+
     return ctxMenu;
   }
 
