@@ -101,11 +101,11 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
     return true;
   }
 
-  override getProperty(designItem: IDesignItem, name: string): IProperty {
+  override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     return this._getPropertyDef(name);
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     const propNames: string[] | Record<string, string[]> = this[this.name];
     if (Array.isArray(propNames)) {
       const propertiesList = propNames.map(x => this._getPropertyDef(x));

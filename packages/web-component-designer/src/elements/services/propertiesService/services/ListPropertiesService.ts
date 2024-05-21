@@ -53,7 +53,7 @@ export class ListPropertiesService extends AbstractPropertiesService {
   protected override _notifyChangedProperty(designItem: IDesignItem, property: IProperty, value: any) {
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     return this._propertys.get(designItem.element.localName);
   }
 }

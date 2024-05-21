@@ -17,8 +17,8 @@ export interface IPropertiesService extends IService {
   getRefreshMode(designItem: IDesignItem): RefreshMode;
 
   isHandledElement(designItem: IDesignItem): boolean;
-  getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
-  getProperty(designItem: IDesignItem, name: string): IProperty;
+  getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]>;
+  getProperty(designItem: IDesignItem, name: string): Promise<IProperty>;
   getBinding(designItems: IDesignItem[], property: IProperty): IBinding
   getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget;
 

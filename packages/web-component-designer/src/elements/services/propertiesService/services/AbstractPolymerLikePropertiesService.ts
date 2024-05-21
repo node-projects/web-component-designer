@@ -12,7 +12,7 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
     return RefreshMode.full;
   }
   
-  public override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  public override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     if (!this.isHandledElement(designItem))
       return null;
     return this.parseProperties((<any>designItem.element.constructor).properties);

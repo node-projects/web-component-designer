@@ -86,66 +86,69 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   set selectedItems(items: IDesignItem[]) {
     if (this._selectedItems != items) {
       this._selectedItems = items;
+      this._selectedItemsSet();
+    }
+  }
 
-      const pgGroups = this._serviceContainer.propertyGroupService.getPropertygroups(items);
-      const visibleDict = new Set<string>()
-      for (let p of pgGroups) {
-        let lst = this._propertyGridPropertyListsDict[p.name];
-        if (!lst) {
-          lst = new PropertyGridPropertyList(this.serviceContainer);
-          lst.title = p.name;
-          lst.propertyGroupHover = this.propertyGroupHover;
-          lst.propertyGroupClick = this.propertyGroupClick;
-          lst.propertyContextMenuProvider = this.propertyContextMenuProvider;
-          this._designerTabControl.appendChild(lst);
-          this._propertyGridPropertyLists.push(lst);
-          this._propertyGridPropertyListsDict[p.name] = lst;
+  async _selectedItemsSet() {
+    const pgGroups = this._serviceContainer.propertyGroupService.getPropertygroups(this._selectedItems);
+    const visibleDict = new Set<string>()
+    for (let p of pgGroups) {
+      let lst = this._propertyGridPropertyListsDict[p.name];
+      if (!lst) {
+        lst = new PropertyGridPropertyList(this.serviceContainer);
+        lst.title = p.name;
+        lst.propertyGroupHover = this.propertyGroupHover;
+        lst.propertyGroupClick = this.propertyGroupClick;
+        lst.propertyContextMenuProvider = this.propertyContextMenuProvider;
+        this._designerTabControl.appendChild(lst);
+        this._propertyGridPropertyLists.push(lst);
+        this._propertyGridPropertyListsDict[p.name] = lst;
+      }
+      lst.setPropertiesService(p.propertiesService);
+      if (await lst.createElements(this._selectedItems[0]))
+        visibleDict.add(p.name);
+    }
+
+    let parentEl: HTMLElement = this._designerTabControl;
+
+    for (const v of visibleDict) {
+      let el = this._propertyGridPropertyListsDict[v];
+      if (parentEl === this._designerTabControl)
+        parentEl.insertAdjacentElement('afterbegin', el);
+      else
+        parentEl.insertAdjacentElement('afterend', el);
+      parentEl = el;
+    }
+
+    for (let p of this._propertyGridPropertyLists) {
+      if (visibleDict.has(p.title))
+        p.style.display = 'block';
+      else
+        p.style.display = 'none';
+    }
+
+    this._designerTabControl.refreshItems();
+    if (this._designerTabControl.selectedIndex < 0)
+      this._designerTabControl.selectedIndex = 0;
+
+    for (const a of this._propertyGridPropertyLists) {
+      if (visibleDict.has(a.title))
+        a.designItemsChanged(this._selectedItems);
+    }
+
+    if (this._selectedItems) {
+      if (this._selectedItems.length == 1) {
+        for (const a of this._propertyGridPropertyLists) {
+          if (visibleDict.has(a.title))
+            a.refreshForDesignItems(this._selectedItems);
         }
-        lst.setPropertiesService(p.propertiesService);
-        if (lst.createElements(items[0]))
-          visibleDict.add(p.name);
+        this._observePrimarySelectionForChanges();
       }
-
-      let parentEl: HTMLElement = this._designerTabControl;
-
-      for (const v of visibleDict) {
-        let el = this._propertyGridPropertyListsDict[v];
-        if (parentEl === this._designerTabControl)
-          parentEl.insertAdjacentElement('afterbegin', el);
-        else
-          parentEl.insertAdjacentElement('afterend', el);
-        parentEl = el;
-      }
-
-      for (let p of this._propertyGridPropertyLists) {
-        if (visibleDict.has(p.title))
-          p.style.display = 'block';
-        else
-          p.style.display = 'none';
-      }
-
-      this._designerTabControl.refreshItems();
-      if (this._designerTabControl.selectedIndex < 0)
-        this._designerTabControl.selectedIndex = 0;
-
-      for (const a of this._propertyGridPropertyLists) {
-        if (visibleDict.has(a.title))
-          a.designItemsChanged(items);
-      }
-
-      if (items) {
-        if (items.length == 1) {
-          for (const a of this._propertyGridPropertyLists) {
-            if (visibleDict.has(a.title))
-              a.refreshForDesignItems(items);
-          }
-          this._observePrimarySelectionForChanges();
-        }
-      } else {
-        this._itemsObserver.disconnect();
-        this._nodeReplacedCb?.dispose();
-        this._nodeReplacedCb = null;
-      }
+    } else {
+      this._itemsObserver.disconnect();
+      this._nodeReplacedCb?.dispose();
+      this._nodeReplacedCb = null;
     }
   }
 

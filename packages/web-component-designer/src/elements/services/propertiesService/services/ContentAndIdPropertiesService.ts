@@ -43,11 +43,11 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
     return true;
   }
 
-  override getProperty(designItem: IDesignItem, name: string): IProperty {
+  override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     return name == 'id' ? this.idProperty : this.contentProperty;
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     return [this.idProperty, this.contentProperty, this.innerHtmlProperty];
   }
 

@@ -104,11 +104,11 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
     return false
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[]> {
     return this._propertiesList[designItem.name];
   }
 
-  override getProperty(designItem: IDesignItem, name: string): IProperty {
+  override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     return this._propertiesList[designItem.name].find(x => x.name == name);
   }
 

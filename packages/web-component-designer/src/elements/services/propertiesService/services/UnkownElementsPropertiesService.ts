@@ -15,7 +15,7 @@ export class UnkownElementsPropertiesService extends AbstractPropertiesService {
     return true;
   }
 
-  getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     let list = Object.getOwnPropertyNames(Object.getPrototypeOf(designItem.element));
     let props: IProperty[] = [];
     for (let p of list) {

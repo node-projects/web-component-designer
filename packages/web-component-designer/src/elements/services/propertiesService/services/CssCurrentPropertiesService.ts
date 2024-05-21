@@ -27,11 +27,11 @@ export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
     return true;
   }
 
-  override getProperty(designItem: IDesignItem, name: string): IProperty {
+  override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     if (!designItem || designItem.nodeType != NodeType.Element)
       return [];
 

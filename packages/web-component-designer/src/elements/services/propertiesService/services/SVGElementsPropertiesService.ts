@@ -252,11 +252,11 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
     return false;
   }
 
-  override getProperty(designItem: IDesignItem, name: string): IProperty {
-    return (<IProperty[]>this.getProperties(designItem)).find(x => x.name == name);
+  override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
+    return (<IProperty[]>await this.getProperties(designItem)).find(x => x.name == name);
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     if (!this.isHandledElement(designItem))
       return null;
     switch (designItem.element.localName) {

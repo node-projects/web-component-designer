@@ -21,11 +21,11 @@ export class AttributesPropertiesService extends AbstractPropertiesService {
     return !designItem.isRootItem;
   }
 
-  override getProperty(designItem: IDesignItem, name: string): IProperty {
+  override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     return { name: name, type: 'string', service: this, propertyType: PropertyType.attribute };
   }
 
-  getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     if (designItem) {
       let p: IProperty[] = [];
       for (let a of designItem.attributes()) {

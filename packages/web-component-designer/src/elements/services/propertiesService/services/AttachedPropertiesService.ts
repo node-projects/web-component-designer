@@ -16,7 +16,7 @@ export class AttachedPropertiesService extends AbstractPropertiesService {
     return designItem.serviceContainer.forSomeServicesTillResult('attachedPropertyService', x => x.isHandledElement(designItem));
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     let p: IProperty[] | IPropertyGroup[] = [];
     if (designItem.serviceContainer.attachedPropertyServices) {
       for (let s of designItem.serviceContainer.attachedPropertyServices) {

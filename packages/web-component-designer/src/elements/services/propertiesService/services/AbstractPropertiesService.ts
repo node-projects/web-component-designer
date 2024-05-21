@@ -31,8 +31,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   protected _notifyChangedProperty(designItem: IDesignItem, property: IProperty, value: any) {
   }
 
-  getProperty(designItem: IDesignItem, name: string): IProperty {
-    let properties = this.getProperties(designItem);
+  async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
+    let properties = await this.getProperties(designItem);
     if ('properties' in properties[0]) {
       return (<IPropertyGroup[]>properties).flatMap(x => x.properties).find(x => x.name == name);
     }
@@ -40,7 +40,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       return (<IProperty[]>properties).find(x => x.name == name);
   }
 
-  abstract getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[];
+  abstract getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]>;
 
   async setValue(designItems: IDesignItem[], property: IProperty, value: any) {
     const cg = designItems[0].openGroup("property changed: " + property.name + " to " + value);

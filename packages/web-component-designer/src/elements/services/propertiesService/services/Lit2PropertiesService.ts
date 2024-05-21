@@ -16,7 +16,7 @@ export class Lit2PropertiesService extends AbstractPolymerLikePropertiesService 
     return false;
   }
 
-  public override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  public override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     if (!this.isHandledElement(designItem))
       return null;
     let properties: IProperty[] = [];

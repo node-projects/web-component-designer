@@ -44,11 +44,11 @@ export class CommonPropertiesService extends AbstractPropertiesService {
     return !designItem.isRootItem;
   }
 
-  override getProperty(designItem: IDesignItem, name: string): IProperty {
+  override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     return this.commonProperties.find(x => x.name == name);
   }
 
-  override getProperties(designItem: IDesignItem): IProperty[] | IPropertyGroup[] {
+  override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     return this.commonProperties;
   }
 }

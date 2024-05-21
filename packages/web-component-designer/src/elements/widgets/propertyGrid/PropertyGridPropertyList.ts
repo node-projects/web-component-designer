@@ -141,12 +141,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
   }
 
-  public createElements(designItem: IDesignItem): boolean {
+  public async createElements(designItem: IDesignItem): Promise<boolean> {
     if (this._propertiesService && (this._propertiesService.getRefreshMode(designItem) != RefreshMode.none) || this._propertyMap.size == 0) {
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
       if (this._propertiesService) {
-        let properties = this._propertiesService.getProperties(designItem);
+        let properties = await this._propertiesService.getProperties(designItem);
         if (properties?.length) {
           if ('properties' in properties[0])
             this.createPropertyGroups(<IPropertyGroup[]>properties);
