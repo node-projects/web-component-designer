@@ -1,0 +1,5 @@
+{
+    "name": "@node-projects/web-component-designer",
+    "version": "0.1.180",
+    "exports": "./src/index.ts"
+}
