@@ -18,13 +18,13 @@ export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
 
   let m = new DOMMatrix();
   if (s.translate != 'none' && s.translate) {
-    m = m.multiply(new DOMMatrix('translate(' + s.translate + ')'));
+    m = m.multiply(new DOMMatrix('translate(' + s.translate.replace(' ', ',') + ')'));
   }
   if (s.rotate != 'none' && s.rotate) {
-    m = m.multiply(new DOMMatrix('rotate(' + s.rotate + ')'));
+    m = m.multiply(new DOMMatrix('rotate(' + s.rotate.replace(' ', ',') + ')'));
   }
   if (s.scale != 'none' && s.scale) {
-    m = m.multiply(new DOMMatrix('scale(' + s.scale + ')'));
+    m = m.multiply(new DOMMatrix('scale(' + s.scale.replace(' ', ',') + ')'));
   }
   if (s.transform != 'none' && s.transform) {
     m = m.multiply(new DOMMatrix(s.transform));
