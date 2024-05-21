@@ -53,7 +53,10 @@ export class Screenshot {
     const rect = element.getBoundingClientRect();
     Screenshot._canvas.width = width;
     Screenshot._canvas.height = height;
-    Screenshot._context.drawImage(Screenshot._video, rect.left, rect.top, rect.width, rect.height, 0, 0, width, height);
+    Screenshot._context.drawImage(Screenshot._video, 0, 0, 1, 1, 0, 0, width, height);
+    const factorX = Screenshot._video.videoWidth / window.innerWidth;
+    const factorY = Screenshot._video.videoHeight / window.innerHeight;
+    Screenshot._context.drawImage(Screenshot._video, rect.left * factorX, rect.top * factorY, rect.width * factorX, rect.height * factorY, 0, 0, width, height);
     const frame = Screenshot._canvas.toDataURL("image/png");
     return frame;
   }
