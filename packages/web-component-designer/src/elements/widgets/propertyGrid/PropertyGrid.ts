@@ -152,13 +152,18 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     }
   }
 
-  _mutationOccured() {
-    for (const a of this._propertyGridPropertyLists) {
-      if (a.propertiesService?.getRefreshMode(this._selectedItems[0]) == RefreshMode.fullOnValueChange) {
-        a.createElements(this._selectedItems[0]);
-        a.designItemsChanged(this._selectedItems);
+  _blockDoubleRun = false;
+  async _mutationOccured() {
+    if (!this._blockDoubleRun) {
+      this._blockDoubleRun = true;
+      for (const a of this._propertyGridPropertyLists) {
+        if (a.propertiesService?.getRefreshMode(this._selectedItems[0]) == RefreshMode.fullOnValueChange) {
+          await a.createElements(this._selectedItems[0]);
+          a.designItemsChanged(this._selectedItems);
+        }
+        a.refreshForDesignItems(this._selectedItems);
       }
-      a.refreshForDesignItems(this._selectedItems);
+      this._blockDoubleRun = false;
     }
   }
 
