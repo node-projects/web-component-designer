@@ -134,6 +134,8 @@ export class ContextMenu implements IContextMenu {
 
   static count = 0;
 
+  private static _openedContextMenus = new Set<ContextMenu>();
+
   menu: IContextMenuItem[];
   public options: IContextMenuOptions;
   public context: any
@@ -331,6 +333,8 @@ export class ContextMenu implements IContextMenu {
     window.addEventListener("mousedown", this._windowDown);
     window.addEventListener("resize", this._windowResize);
     setTimeout(() => window.addEventListener("contextmenu", this._windowDown), 100);
+
+    ContextMenu._openedContextMenus.add(this);
   }
 
   _windowResize() {
@@ -363,6 +367,12 @@ export class ContextMenu implements IContextMenu {
     window.removeEventListener("mousedown", this._windowDown);
     window.removeEventListener("resize", this._windowResize);
     setTimeout(() => window.removeEventListener("contextmenu", this._windowDown), 10);
+    ContextMenu._openedContextMenus.delete(this);
+  }
+
+  static closeAll() {
+    for (const c of ContextMenu._openedContextMenus.values())
+      c.close();
   }
 }
 
