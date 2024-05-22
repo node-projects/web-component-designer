@@ -4,6 +4,7 @@ import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStyle
 import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from "../../item/DesignItem.js";
+import { Specificity, calculateSpecifity } from "./SpecifityCalculator.js";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
@@ -138,20 +139,24 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
             .replaceAll(':focus-visible', '[' + forceFocusVisibleAttributeName + ']');
     }
 
-    protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]) {
+    protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]): false | Specificity {
         if (designItem == null)
-            return true;
+            return false;
 
+        let s: Specificity = null;
         for (let selector of selectors) {
             const patched = AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector);
             try {
-                if (designItem.element.matches(patched))
-                    return true;
+                if (designItem.element.matches(patched)) {
+                    let spec = calculateSpecifity(selector);
+                    if (s === null || spec.A > s.A || spec.B > s.B || spec.C > s.C)
+                        s = spec;
+                }
             }
             catch (err) {
                 console.warn("invalid selector: ", selector, "patched: " + patched);
             }
         }
-        return false;
+        return s === null ? false : s;
     }
 }

@@ -665,14 +665,14 @@ export class DesignItem implements IDesignItem {
       try {
         const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
         if (rules) {
-          return [{ selector: null, declarations: localStyles, specificity: -1 }, ...rules];
+          return [{ selector: null, declarations: localStyles, specificity: null }, ...rules];
         }
       }
       catch (err) {
         console.warn('getAppliedRules', err);
       }
     }
-    styles = [{ selector: null, declarations: localStyles, specificity: -1 }];
+    styles = [{ selector: null, declarations: localStyles, specificity: null }];
     this._stylesCache = styles;
     clearTimeout(this._cacheClearTimer);
     this._cacheClearTimer = setTimeout(() => this._stylesCache = null, 30);

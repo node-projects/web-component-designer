@@ -1,10 +1,11 @@
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from "../../item/IDesignItem.js";
+import { Specificity } from "./SpecifityCalculator.js";
 
 export interface IStyleRule {
     selector: string;
     declarations: IStyleDeclaration[];
-    specificity: number;
+    specificity: Specificity;
     stylesheetName?: string;
 }
 

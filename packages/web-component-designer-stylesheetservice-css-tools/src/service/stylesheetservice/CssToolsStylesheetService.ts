@@ -1,11 +1,13 @@
 import { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST, parse, stringify } from "@adobe/css-tools";
 import { AbstractStylesheetService, IDocumentStylesheet, IStyleRule, IStylesheet, IStyleDeclaration, IDesignerCanvas, IDesignItem } from "@node-projects/web-component-designer";
+import { Specificity } from "@node-projects/web-component-designer/src/elements/services/stylesheetService/SpecifityCalculator";
 
 interface IRuleWithAST extends IStyleRule {
     ast: CssRuleAST,
     declarations: IDeclarationWithAST[],
     stylesheet: IStylesheet;
     stylesheetName: string;
+    specificity: Specificity;
 }
 
 interface IDeclarationWithAST extends IStyleDeclaration {
@@ -28,8 +30,8 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
             if (!item[1].ast?.stylesheet?.rules) continue;
             let rs = Array.from(this.getRulesFromAst(item[1].ast?.stylesheet?.rules, item[1].stylesheet, designItem))
                 .map(x => (<IRuleWithAST>{
-                    selector: x.selectors.join(', '),
-                    declarations: x.declarations.filter(y => y.type == 'declaration').map(y => ({
+                    selector: x[0].selectors.join(', '),
+                    declarations: x[0].declarations.filter(y => y.type == 'declaration').map(y => ({
                         name: (<CssDeclarationAST>y).property,
                         value: (<CssDeclarationAST>y).value.endsWith('!important') ? (<CssDeclarationAST>y).value.substring(0, (<CssDeclarationAST>y).value.length - 10).trimEnd() : (<CssDeclarationAST>y).value,
                         important: (<CssDeclarationAST>y).value.endsWith('!important'),
@@ -37,9 +39,9 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
                         ast: <CssDeclarationAST>y,
                         stylesheet: item[1].stylesheet
                     })),
-                    specificity: 0,
+                    specificity: x[1],
                     stylesheetName: item[0],
-                    ast: x,
+                    ast: x[0],
                 }));
             rs.forEach(x => x.declarations.forEach(y => y.parent = x));
             rules.push(...rs);
@@ -58,15 +60,16 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
         return rules[rules.length - 1];
     }
 
-    private *getRulesFromAst(cssAtRuleAst: CssAtRuleAST[], stylesheet: IStylesheet, designItem: IDesignItem): IterableIterator<CssRuleAST> {
+    private *getRulesFromAst(cssAtRuleAst: CssAtRuleAST[], stylesheet: IStylesheet, designItem: IDesignItem): IterableIterator<[CssRuleAST, Specificity]> {
         for (const atRule of cssAtRuleAst) {
             if (atRule.type == 'media') {
                 yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem);
             } else if (atRule.type == 'supports') {
                 yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem);
             } else if (atRule.type == 'rule') {
-                if (this.elementMatchesASelector(designItem, atRule.selectors))
-                    yield atRule;
+                let spec = this.elementMatchesASelector(designItem, atRule.selectors)
+                if (spec)
+                    yield [atRule, spec];
             }
         }
         return null;
