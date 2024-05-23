@@ -1,6 +1,6 @@
 import { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST, parse, stringify } from "@adobe/css-tools";
 import { AbstractStylesheetService, IDocumentStylesheet, IStyleRule, IStylesheet, IStyleDeclaration, IDesignerCanvas, IDesignItem } from "@node-projects/web-component-designer";
-import { Specificity } from "@node-projects/web-component-designer/src/elements/services/stylesheetService/SpecifityCalculator";
+import { Specificity } from "@node-projects/web-component-designer";
 
 interface IRuleWithAST extends IStyleRule {
     ast: CssRuleAST,
