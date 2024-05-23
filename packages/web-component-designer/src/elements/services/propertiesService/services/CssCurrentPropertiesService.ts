@@ -35,14 +35,16 @@ export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
     if (!designItem || designItem.nodeType != NodeType.Element)
       return [];
 
-    let styles = designItem.getAllStyles().toReversed().sort((a, b) => {
+    let styles = designItem.getAllStyles().reverse().sort((a, b) => {
       if (a.specificity == null)
         return -1;
       if (b.specificity == null)
         return 1;
       if (a.specificity.A > b.specificity.A || a.specificity.B > b.specificity.B || a.specificity.C > b.specificity.C)
         return -1;
-      return 0;
+      if (a.specificity.A === b.specificity.A && a.specificity.B === b.specificity.B && a.specificity.C === b.specificity.C)
+        return 0;
+      return 1;
     });
 
     let arr = styles.map(x => ({
