@@ -40,7 +40,11 @@ export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
         return -1;
       if (b.specificity == null)
         return 1;
-      if (a.specificity.A > b.specificity.A || a.specificity.B > b.specificity.B || a.specificity.C > b.specificity.C)
+      if (a.specificity.A > b.specificity.A)
+        return -1;
+      if (a.specificity.A === b.specificity.A && a.specificity.B > b.specificity.B)
+        return -1;
+      if (a.specificity.A === b.specificity.A && a.specificity.B === b.specificity.B && a.specificity.C > b.specificity.C)
         return -1;
       if (a.specificity.A === b.specificity.A && a.specificity.B === b.specificity.B && a.specificity.C === b.specificity.C)
         return 0;
