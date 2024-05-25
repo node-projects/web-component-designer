@@ -3,7 +3,7 @@ import { IDesignItem } from "../../item/IDesignItem.js";
 import { DesignItem } from "../../item/DesignItem.js";
 
 
-function generateSelector(element) {
+function generateSelector(element: Element) {
     if (!element)
         return '';
     let selector, tag = element.nodeName.toLowerCase();
@@ -15,18 +15,18 @@ function generateSelector(element) {
     return selector ? tag + selector : tag;
 }
 
-const getClosestStackingContext = function (node) {
+const getClosestStackingContext = function (node: Node) {
     // the root element (HTML).
-    if (!node || node.nodeName === 'HTML') {
+    if (!node || node.nodeName === 'HTML' || node.nodeName === '#document') {
         return { node: document.documentElement, reason: 'root' };
     }
 
     // handle shadow root elements.
     if (node.nodeName === '#document-fragment') {
-        return getClosestStackingContext(node.host);
+        return getClosestStackingContext((<ShadowRoot>node).host);
     }
 
-    const computedStyle = getComputedStyle(node);
+    const computedStyle = node.ownerDocument.defaultView.getComputedStyle(<Element>node);
 
     // position: fixed or sticky.
     if (computedStyle.position === 'fixed' || computedStyle.position === 'sticky') {
@@ -119,7 +119,7 @@ const getClosestStackingContext = function (node) {
 
     // an item with a z-index value other than "auto".
     if (computedStyle.zIndex !== 'auto') {
-        const parentStyle = getComputedStyle(node.parentNode);
+        const parentStyle = node.ownerDocument.defaultView.getComputedStyle(<Element>node.parentNode);
         // with a flex|inline-flex parent.
         if (parentStyle.display === 'flex' || parentStyle.display === 'inline-flex') {
             return {
@@ -248,7 +248,7 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
                 if (element?.nodeType == 3)
                     element = element.parentNode as Element;
                 if (element && element.nodeType != 8 && element.nodeType != 11) {
-                    this.computedStyle = getComputedStyle(element);
+                    this.computedStyle = element.ownerDocument.defaultView.getComputedStyle(element);
                     this.selectedElementOffsetParent = (<HTMLElement>element).offsetParent;
                     if (this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element ||
                         this.selectedElementOffsetParent == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.parentElement) {
