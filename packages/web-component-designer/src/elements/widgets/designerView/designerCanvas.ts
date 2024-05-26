@@ -4,7 +4,7 @@ import { InstanceServiceContainer } from '../../services/InstanceServiceContaine
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
 import { DesignItem, forceHoverAttributeName } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
-import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, cssFromString, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameBindingObject } from '../../../Constants.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
@@ -40,6 +40,11 @@ import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
 import { TouchGestureHelper } from '../../helper/TouchGestureHelper.js';
 import { stylesheetFromString } from '../../helper/StylesheetHelper.js';
 import { AbstractStylesheetService } from '../../services/stylesheetService/AbstractStylesheetService.js';
+
+const disableAnimationsSheet = cssFromString`
+  * {
+    animation-play-state: paused !important;
+  }`
 
 export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
   // Public Properties
@@ -117,6 +122,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
   public set canvasOffsetUnzoomed(value: IPoint) {
     this.canvasOffset = { x: value.x / this.zoomFactor, y: value.y / this.zoomFactor };
+  }
+
+  private _pauseAnimations: boolean;
+  public get pauseAnimations() {
+    return this._pauseAnimations;
+  }
+  public set pauseAnimations(value: boolean) {
+    this._pauseAnimations = value;
+    this.applyAllStyles();
   }
 
   /** Offset when using an iframe as container */
@@ -427,6 +441,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         styles.push(...this.instanceServiceContainer.stylesheetService
           .getStylesheets()
           .map(x => stylesheetFromString(this._window, AbstractStylesheetService.patchStylesheetSelectorForDesigner(x.content))));
+      }
+
+      if (this._pauseAnimations) {
+        styles.push(disableAnimationsSheet);
       }
 
       if (this._useIframe) {

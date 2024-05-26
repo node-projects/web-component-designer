@@ -39,6 +39,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
   canvasOffset: IPoint;
   readonly containerOffset: IPoint;
   canvas: HTMLElement;
+  pauseAnimations: boolean;
   additionalStyles: CSSStyleSheet[];
 
   ignoreEvent(event: Event);

@@ -35,6 +35,11 @@ export class OptionsContextMenuButton implements IDesignViewConfigButtonsProvide
         title: 'select unhitable elements', checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements, action: () => {
           designerCanvas.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements = !designerCanvas.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements;
         }
+      },
+      {
+        title: 'pause animations', checked: designerCanvas.pauseAnimations, action: () => {
+          designerCanvas.pauseAnimations = !designerCanvas.pauseAnimations;
+        }
       }
     ], event);
   }
