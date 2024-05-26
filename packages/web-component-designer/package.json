@@ -1,12 +1,13 @@
 {
   "description": "A WYSIWYG designer webcomponent for html components",
   "name": "@node-projects/web-component-designer",
-  "version": "0.1.185",
+  "version": "0.1.186",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
   "license": "MIT",
   "scripts": {
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
     "tsc": "tsc",
     "build": "tsc",
     "link": "npm link",

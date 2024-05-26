@@ -8,6 +8,10 @@
 		}
 	],
 	"settings": {
-		"window.title": "${dirty}${activeEditorShort}${separator}${rootName}${separator}${profileName}${separator}${appName}${separator}[Branch: main]"
+		"jestrunner.debugOptions": {
+			"runtimeArgs": [
+				"--experimental-vm-modules", "--enable-source-maps"
+			]
+		}
 	}
 }

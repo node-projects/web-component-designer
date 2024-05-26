@@ -4,7 +4,7 @@ import { IDocumentStylesheet, IStyleDeclaration, IStyleRule, IStylesheet, IStyle
 import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from "../../item/DesignItem.js";
-import { Specificity, calculateSpecifity } from "./SpecifityCalculator.js";
+import { Specificity, calculateSpecificity } from "./SpecificityCalculator.js";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
@@ -148,7 +148,7 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
             const patched = AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector);
             try {
                 if (designItem.element.matches(patched)) {
-                    let spec = calculateSpecifity(selector);
+                    let spec = calculateSpecificity(selector);
                     if (s === null || spec.A > s.A || spec.B > s.B || spec.C > s.C)
                         s = spec;
                 }

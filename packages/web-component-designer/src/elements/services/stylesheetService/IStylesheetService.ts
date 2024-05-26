@@ -1,6 +1,6 @@
 import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { Specificity } from "./SpecifityCalculator.js";
+import { Specificity } from "./SpecificityCalculator.js";
 
 export interface IStyleRule {
     selector: string;

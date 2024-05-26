@@ -176,7 +176,7 @@ export * from "./elements/services/selectionService/SelectionService.js";
 
 export type { IStyleRule, IStyleDeclaration, IStylesheet, IStylesheetService, IDocumentStylesheet } from "./elements/services/stylesheetService/IStylesheetService.js";
 export * from "./elements/services/stylesheetService/AbstractStylesheetService.js";
-export * from "./elements/services/stylesheetService/SpecifityCalculator.js";
+export * from "./elements/services/stylesheetService/SpecificityCalculator.js";
 
 export * from "./elements/services/undoService/ChangeGroup.js";
 export type { ITransactionItem } from "./elements/services/undoService/ITransactionItem.js";
