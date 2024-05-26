@@ -181,9 +181,13 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
   let parentElementTransformOriginToPointVectorTransformed: DOMPointReadOnly;
   let byParentTransformedPointRelatedToCanvas: IPoint = { x: 0, y: 0 };
   while (actualElement != canvas) {
-    const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    if (!parentElement)
-      break;
+    let parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
+    if (!parentElement) {
+      if (element instanceof (element.ownerDocument.defaultView ?? window).HTMLHtmlElement)
+        parentElement = element;
+      else
+        break;
+    }
     const elementWindowOffset = getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement, designerCanvas.zoomFactor, cache);
 
     const toSplit = getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ');
@@ -207,6 +211,8 @@ export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement
 
     parentElementTransformOriginToPointVectorTransformed = parentElementTransformOriginToPointVector.matrixTransform(new DOMMatrix(getComputedStyle((<HTMLElement>parentElement)).transform));
     byParentTransformedPointRelatedToCanvas = new DOMPoint(parentElementTransformOrigin.x + parentElementTransformOriginToPointVectorTransformed.x, parentElementTransformOrigin.y + parentElementTransformOriginToPointVectorTransformed.y);
+    if (parentElement === element)
+      break;
     actualElement = parentElement;
   }
 
