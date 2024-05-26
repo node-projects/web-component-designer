@@ -63,3 +63,10 @@ test('test 9', () => {
     expect(res.B).toBe(0);
     expect(res.C).toBe(1);
 });
+
+test('test 10', () => {
+    const res = calculateSpecificity('*.aa:is(button, button.cc#bb):hover');
+    expect(res.A).toBe(1);
+    expect(res.B).toBe(3);
+    expect(res.C).toBe(1);
+});

@@ -54,23 +54,24 @@ function calculateSpecificityInternal(selector: string, startIndex: number): [Sp
                         parseState = ParseState.parseName;
                     } else {
                         if (selector.substring(n + 1, n + 4) === 'is(') {
+                            parseState = ParseState.none;
                             n += 4;
                             const res = getMaxSpecificityFromSelectorList(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
                         } else if (selector.substring(n + 1, n + 5) === 'has(') {
                             n += 5;
                             const res = getMaxSpecificityFromSelectorList(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
                         } else if (selector.substring(n + 1, n + 5) === 'not(') {
                             n += 5;
                             const res = getMaxSpecificityFromSelectorList(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
@@ -78,7 +79,7 @@ function calculateSpecificityInternal(selector: string, startIndex: number): [Sp
                             s.B++;
                             n += 11;
                             const res = getMaxSpecificityFromSelectorList(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
@@ -86,7 +87,7 @@ function calculateSpecificityInternal(selector: string, startIndex: number): [Sp
                             s.B++;
                             n += 16;
                             const res = getMaxSpecificityFromSelectorList(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
@@ -94,7 +95,7 @@ function calculateSpecificityInternal(selector: string, startIndex: number): [Sp
                             s.B++;
                             n += 6;
                             const res = calculateSpecificityInternal(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
@@ -102,7 +103,7 @@ function calculateSpecificityInternal(selector: string, startIndex: number): [Sp
                             s.B++;
                             n += 14;
                             const res = calculateSpecificityInternal(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
@@ -110,7 +111,7 @@ function calculateSpecificityInternal(selector: string, startIndex: number): [Sp
                             s.B++;
                             n += 9;
                             const res = calculateSpecificityInternal(selector, n);
-                            n += res[1];
+                            n = res[1];
                             s.A += res[0].A;
                             s.B += res[0].B;
                             s.C += res[0].C;
