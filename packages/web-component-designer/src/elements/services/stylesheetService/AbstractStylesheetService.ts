@@ -5,6 +5,7 @@ import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from "../../item/DesignItem.js";
 import { Specificity, calculateSpecificity } from "./SpecificityCalculator.js";
+import { spec } from "node:test/reporters";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
@@ -140,21 +141,21 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
     }
 
     protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]): false | Specificity {
-        if (designItem == null)
-            return false;
-
         let s: Specificity = null;
         for (let selector of selectors) {
-            const patched = AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector);
             try {
-                if (designItem.element.matches(patched)) {
+                if (designItem && selector === ':host' && designItem.isRootItem) {
+                    let spec = calculateSpecificity(selector);
+                    if (s === null || spec.A > s.A || spec.B > s.B || spec.C > s.C)
+                        s = spec;
+                } else if (!designItem || designItem.element.matches(AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector))) {
                     let spec = calculateSpecificity(selector);
                     if (s === null || spec.A > s.A || spec.B > s.B || spec.C > s.C)
                         s = spec;
                 }
             }
             catch (err) {
-                console.warn("invalid selector: ", selector, "patched: " + patched);
+                console.warn("invalid selector: ", selector, "patched: " + AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector));
             }
         }
         return s === null ? false : s;
