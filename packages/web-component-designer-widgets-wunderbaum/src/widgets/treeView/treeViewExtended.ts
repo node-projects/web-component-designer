@@ -71,6 +71,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   static override readonly template = html`
       <div style="height: 100%;">
         <input id="input" style="width: 100%; box-sizing: border-box; height:27px;" placeholder="Filter... (regex)" autocomplete="off">
+        <div style="height: 18px; border: solid black 1px; padding-left:2px; background: gray;">
+          <svg id="expandAll" style="width: 16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M64 80a16 16 0 0 0-16 16v320a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM0 96a64 64 0 0 1 64-64h320a64 64 0 0 1 64 64v320a64 64 0 0 1-64 64H64a64 64 0 0 1-64-64zm200 248v-64h-64a24 24 0 1 1 0-48h64v-64a24 24 0 1 1 48 0v64h64a24 24 0 1 1 0 48h-64v64a24 24 0 1 1-48 0"></path></svg>
+          <svg id="collapseAll" style="width: 16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M64 80a16 16 0 0 0-16 16v320a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM0 96a64 64 0 0 1 64-64h320a64 64 0 0 1 64 64v320a64 64 0 0 1-64 64H64a64 64 0 0 1-64-64zm152 136h144a24 24 0 1 1 0 48H152a24 24 0 1 1 0-48"></path></svg>
+        </div>
         <div style="height: calc(100% - 23px);">
         <div id="treetable" class="wb-alternate" style="min-width: 100%; box-sizing: border-box;"></div>
         </div>
@@ -91,6 +95,24 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       for (let e of this._treeDiv.querySelectorAll('.cmd')) {
         (<HTMLElement>e).style.right = '-' + this._treeDiv.scrollLeft + 'px';
       }
+    }
+
+    const expand = this._getDomElement<SVGSVGElement>('expandAll');
+    expand.onclick = () => {
+      this._tree.root
+        .visit((node) => {
+          if (!node.isExpanded())
+            node.setExpanded(true);
+        });
+    }
+
+    const collapse = this._getDomElement<SVGSVGElement>('collapseAll');
+    collapse.onclick = () => {
+      this._tree.root
+        .visit((node) => {
+          if (node.isExpanded())
+            node.setExpanded(false);
+        });
     }
   }
 
