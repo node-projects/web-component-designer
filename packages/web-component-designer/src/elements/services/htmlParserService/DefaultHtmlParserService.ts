@@ -6,9 +6,16 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 
 export class DefaultHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
-    const parser = new DOMParser();
+    let doc: Document;
     //@ts-ignore
-    const doc = parser.parseFromString(html, 'text/html', { includeShadowRoots: true });
+    if (Document.parseHTMLUnsafe) {
+      //@ts-ignore
+      doc = Document.parseHTMLUnsafe(html);
+    } else {
+      //@ts-ignore
+      doc = new DOMParser().parseFromString(html, 'text/html', { includeShadowRoots: true });
+    }
+
     const headNodes = this.createDesignItems(doc.head.childNodes, serviceContainer, instanceServiceContainer);
     const bodyNodes = this.createDesignItems(doc.body.childNodes, serviceContainer, instanceServiceContainer);
     return [...headNodes, ...bodyNodes];

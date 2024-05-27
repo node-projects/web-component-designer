@@ -69,9 +69,17 @@ export class DefaultInstanceService implements IInstanceService {
 
     if (definition.defaultContent) {
       if (typeof definition.defaultContent === "string") {
-        const parser = new instanceServiceContainer.designerCanvas.rootDesignItem.window.DOMParser();
+        let doc: Document;
         //@ts-ignore
-        const doc = parser.parseFromString(definition.defaultContent, 'text/html', { includeShadowRoots: true });
+        if (instanceServiceContainer.designerCanvas.rootDesignItem.window.Document.parseHTMLUnsafe) {
+          //@ts-ignore
+          doc = instanceServiceContainer.designerCanvas.rootDesignItem.window.Document.parseHTMLUnsafe(definition.defaultContent);
+        } else {
+          const parser = new instanceServiceContainer.designerCanvas.rootDesignItem.window.DOMParser();
+          //@ts-ignore
+          doc = parser.parseFromString(definition.defaultContent, 'text/html', { includeShadowRoots: true });
+        }
+
         element.append(...doc.head.childNodes);
         element.append(...doc.body.childNodes);
       } else {
