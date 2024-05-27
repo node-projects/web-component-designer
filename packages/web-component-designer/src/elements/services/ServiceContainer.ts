@@ -121,7 +121,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   public readonly options = {
     zoomDesignerBackground: true,
-    roundPixelsToDecimalPlaces: -1,
+    roundPixelsToDecimalPlaces: 0,
     resizerPixelSize: isMobile ? 8 : 3
   };
 
