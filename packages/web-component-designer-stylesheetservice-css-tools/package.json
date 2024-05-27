@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Stylesheet Parser Service using @adobe/css-tools",
   "name": "@node-projects/web-component-designer-stylesheetservice-css-tools",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "module",
   "main": "./dist/service/stylesheetservice/CssToolsStylesheetService.js",
   "author": "jochen.kuehner@gmx.de",
@@ -13,8 +13,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@adobe/css-tools": "4.3.1",
-    "@node-projects/web-component-designer": ">=0.1.183"    
+    "@adobe/css-tools": "4.3.3",
+    "@node-projects/web-component-designer": ">=0.1.183"
   },
   "repository": {
     "type": "git",
