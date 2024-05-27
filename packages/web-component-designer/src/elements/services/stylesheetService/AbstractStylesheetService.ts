@@ -5,7 +5,6 @@ import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from "../../item/DesignItem.js";
 import { Specificity, calculateSpecificity } from "./SpecificityCalculator.js";
-import { spec } from "node:test/reporters";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
@@ -116,6 +115,28 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
 
     abstract getAppliedRules(designItem: IDesignItem): IStyleRule[]
     abstract getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[]
+
+
+    getDeclarationsSortedBySpecificity(designItem: IDesignItem, styleName: string): IStyleDeclaration[] {
+        const decls = this.getDeclarations(designItem, styleName);
+        decls.reverse().sort((a, b) => {
+            if (a.parent.specificity == null)
+                return -1;
+            if (b.parent.specificity == null)
+                return 1;
+            if (a.parent.specificity.A > b.parent.specificity.A)
+                return -1;
+            if (a.parent.specificity.A === b.parent.specificity.A && a.parent.specificity.B > b.parent.specificity.B)
+                return -1;
+            if (a.parent.specificity.A === b.parent.specificity.A && a.parent.specificity.B === b.parent.specificity.B && a.parent.specificity.C > b.parent.specificity.C)
+                return -1;
+            if (a.parent.specificity.A === b.parent.specificity.A && a.parent.specificity.B === b.parent.specificity.B && a.parent.specificity.C === b.parent.specificity.C)
+                return 0;
+            return 1;
+        });
+        return decls;
+    }
+
 
     public updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean) {
         this.updateDeclarationValueWithoutUndo(declaration, value, important);

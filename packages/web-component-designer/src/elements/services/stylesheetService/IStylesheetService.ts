@@ -36,6 +36,7 @@ export interface IStylesheetService {
 
     getAppliedRules(designItem: IDesignItem): IStyleRule[];
     getDeclarations(designItem: IDesignItem, styleName: string): IStyleDeclaration[];
+    getDeclarationsSortedBySpecificity(designItem: IDesignItem, styleName: string): IStyleDeclaration[];
 
     updateDeclarationValue(declaration: IStyleDeclaration, value: string, important: boolean);
     updateDeclarationValueWithoutUndo(declaration: IStyleDeclaration, value: string, important: boolean)

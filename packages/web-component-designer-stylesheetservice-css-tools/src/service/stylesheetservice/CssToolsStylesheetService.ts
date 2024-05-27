@@ -45,7 +45,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
                 }));
             rs.forEach(x => x.declarations.forEach(y => y.parent = x));
             rules.push(...rs);
-        };
+        }
         return rules;
     }
 

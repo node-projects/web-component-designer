@@ -749,6 +749,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         if (ss.changeSource != 'undo') {
           const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
           this.instanceServiceContainer.undoService.execute(ssca);
+          this.applyAllStyles();
         } else {
           this.applyAllStyles();
         }

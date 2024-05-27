@@ -536,19 +536,26 @@ export class DesignItem implements IDesignItem {
     let nm = name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
+    //TODO: remove this special case (I think), should be in CSSSytleChangeAction.
+    //Maybe we should be able to set a setscope (sheet, local, pseudo selctor, ...)
     if (this.isRootItem) {
       if (!this.instanceServiceContainer.stylesheetService)
         throw 'not allowed to set style on root item';
       else {
-        let rules = this.instanceServiceContainer.stylesheetService.getRules(':host')
-        if (rules === null || rules.length === 0) {
-          const cg = this.openGroup('add rule and set style: ' + name);
-          const sheets = this.instanceServiceContainer.stylesheetService.getStylesheets();
-          const rule = await this.instanceServiceContainer.stylesheetService.addRule(sheets[0], ':host')
-          this.instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(rule, name, value, important);
-          cg.commit();
+        let decls = this.instanceServiceContainer.stylesheetService.getDeclarationsSortedBySpecificity(this, name);
+        if (decls !== null && decls.length > 0) {
+          this.instanceServiceContainer.stylesheetService.updateDeclarationValue(decls[0], value, important);
         } else {
-          this.instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(rules[0], name, value, important);
+          let rules = this.instanceServiceContainer.stylesheetService.getRules(':host')
+          if (decls === null || rules.length === 0) {
+            const cg = this.openGroup('add rule and set style: ' + name);
+            const sheets = this.instanceServiceContainer.stylesheetService.getStylesheets();
+            const rule = await this.instanceServiceContainer.stylesheetService.addRule(sheets[0], ':host')
+            this.instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(rule, name, value, important);
+            cg.commit();
+          } else {
+            this.instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(rules[0], name, value, important);
+          }
         }
       }
     } else {
@@ -569,8 +576,7 @@ export class DesignItem implements IDesignItem {
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
 
-    // Pre-sorted by specificity
-    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
+    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarationsSortedBySpecificity(this, nm);
 
     if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
       // Set style locally
@@ -588,8 +594,7 @@ export class DesignItem implements IDesignItem {
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
 
-    // Pre-sorted by specificity
-    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
+    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarationsSortedBySpecificity(this, nm);
 
     if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
       // Set style locally
@@ -612,8 +617,7 @@ export class DesignItem implements IDesignItem {
       // Get style locally
       return this.getStyle(nm);
 
-    // Pre-sorted by specificity
-    let decls = this.instanceServiceContainer.stylesheetService?.getDeclarations(this, nm);
+    let decls = this.instanceServiceContainer.stylesheetService?.getDeclarationsSortedBySpecificity(this, nm);
     if (decls && decls.length > 0)
       return decls[0].value;
 
