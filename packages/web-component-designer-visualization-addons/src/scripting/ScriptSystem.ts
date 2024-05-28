@@ -117,16 +117,7 @@ export class ScriptSystem {
       case 'SetElementProperty': {
         const name = await this.getValue(command.name, context);
         const value = await this.getValue(command.value, context);
-        let host = (<ShadowRoot>context.element.getRootNode()).host;
-        if (command.targetSelectorTarget == 'currentElement')
-          host = context.element;
-        else if (command.targetSelectorTarget == 'parentElement')
-          host = context.element.parentElement;
-        else if (command.targetSelectorTarget == 'parentScreen')
-          host = (<ShadowRoot>host.getRootNode()).host;
-        let elements: Iterable<Element> = [host];
-        if (command.targetSelector)
-          elements = host.shadowRoot.querySelectorAll(command.targetSelector);
+        let elements = this.getTargetFromTargetSelector(context, command.targetSelectorTarget, command.targetSelector);
         for (let e of elements) {
           if (command.target == 'attribute') {
             e.setAttribute(name, value);
@@ -139,6 +130,20 @@ export class ScriptSystem {
         break;
       }
     }
+  }
+
+  getTargetFromTargetSelector(context: contextType, targetSelectorTarget: 'currentScreen' | 'parentScreen' | 'currentElement' | 'parentElement', targetSelector: string): Iterable<Element> {
+    let host = (<ShadowRoot>context.element.getRootNode()).host;
+    if (targetSelector == 'currentElement')
+      host = context.element;
+    else if (targetSelector == 'parentElement')
+      host = context.element.parentElement;
+    else if (targetSelector == 'parentScreen')
+      host = (<ShadowRoot>host.getRootNode()).host;
+    let elements: Iterable<Element> = [host];
+    if (targetSelector)
+      elements = host.shadowRoot.querySelectorAll(targetSelector);
+    return elements;
   }
 
   async getValue<T>(value: string | number | boolean | IScriptMultiplexValue, outerContext: contextType): Promise<any> {
@@ -172,7 +177,7 @@ export class ScriptSystem {
         case 'complexSignal': {
           let text = (<IScriptMultiplexValue>value).name;
           if (text != null) {
-            const signal =  await this.parseStringWithValues(text, outerContext);
+            const signal = await this.parseStringWithValues(text, outerContext);
             return await this._visualizationHandler.getState(this.getSignaName(signal, outerContext));
           }
           return null;
