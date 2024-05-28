@@ -16,6 +16,7 @@ export type { ITextWriter } from "./elements/helper/ITextWriter.js";
 export * from "./elements/helper/w3color.js";
 export * from "./elements/helper/contextMenu/ContextMenu.js";
 export * from "./elements/helper/Helper.js";
+export * from "./elements/helper/Browser.js";
 export * from "./elements/helper/SwitchContainerHelper.js";
 export * from "./elements/helper/NpmPackageLoader.js";
 export * from "./elements/helper/LayoutHelper.js";

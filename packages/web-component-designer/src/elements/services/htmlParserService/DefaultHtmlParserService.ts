@@ -3,12 +3,13 @@ import { ServiceContainer } from '../ServiceContainer.js';
 import { IHtmlParserService } from './IHtmlParserService.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
+import { isFirefox } from '../../helper/Browser.js';
 
 export class DefaultHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
     let doc: Document;
     //@ts-ignore
-    if (Document.parseHTMLUnsafe) {
+    if (Document.parseHTMLUnsafe && !isFirefox) {
       //@ts-ignore
       doc = Document.parseHTMLUnsafe(html);
     } else {

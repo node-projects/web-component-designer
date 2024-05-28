@@ -71,7 +71,7 @@ export class DefaultInstanceService implements IInstanceService {
       if (typeof definition.defaultContent === "string") {
         let doc: Document;
         //@ts-ignore
-        if (instanceServiceContainer.designerCanvas.rootDesignItem.window.Document.parseHTMLUnsafe) {
+        if (instanceServiceContainer.designerCanvas.rootDesignItem.window.Document.parseHTMLUnsafe && !isFirefox) {
           //@ts-ignore
           doc = instanceServiceContainer.designerCanvas.rootDesignItem.window.Document.parseHTMLUnsafe(definition.defaultContent);
         } else {
