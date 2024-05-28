@@ -7,6 +7,7 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { encodeXMLChars } from '../../helper/XmlHelper.js';
 import { newElementFromString } from '../../helper/ElementHelper.js';
+import { isFirefox } from '../../helper/Browser.js';
 
 export class DefaultInstanceService implements IInstanceService {
   async getElement(definition: IElementDefinition, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<IDesignItem> {
