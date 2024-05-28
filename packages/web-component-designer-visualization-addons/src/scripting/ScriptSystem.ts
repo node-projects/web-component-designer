@@ -125,6 +125,14 @@ export class ScriptSystem {
             e[name] = value;
           } else if (command.target == 'css') {
             (<HTMLElement>e).style[name] = value;
+          } else if (command.target == 'class') {
+            if (command.mode === 'toggle') {
+              (<HTMLElement>e).classList.toggle(value);
+            } else if (command.mode === 'remove') {
+              (<HTMLElement>e).classList.remove(value);
+            } else {
+              (<HTMLElement>e).classList.add(value);
+            }
           }
         }
         break;
