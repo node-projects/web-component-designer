@@ -10,6 +10,6 @@ Blockly.Blocks['debugger'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['debugger'] = function (block) {
+Blockly.JavaScript.forBlock['debugger'] = function (block) {
     return 'debugger;\n';
 };

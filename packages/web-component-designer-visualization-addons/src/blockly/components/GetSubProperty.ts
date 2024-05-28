@@ -19,7 +19,7 @@ Blockly.Blocks['get_sub_property'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['get_sub_property'] = function (block, generator) {
+Blockly.JavaScript.forBlock['get_sub_property'] = function (block, generator) {
     //@ts-ignore
     const obj = Blockly.JavaScript.valueToCode(block, 'OBJECT', Blockly.JavaScript.ORDER_ATOMIC);
     //@ts-ignore

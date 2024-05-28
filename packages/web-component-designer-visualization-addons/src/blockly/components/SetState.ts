@@ -18,7 +18,7 @@ Blockly.Blocks['set_state'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['set_state'] = function (block) {
+Blockly.JavaScript.forBlock['set_state'] = function (block) {
     //@ts-ignore
     const id = Blockly.JavaScript.valueToCode(block, 'OID', Blockly.JavaScript.ORDER_ATOMIC);
     //@ts-ignore

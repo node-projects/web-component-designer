@@ -24,7 +24,7 @@ Blockly.Blocks['open_screen'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['open_screen'] = function (block) {
+Blockly.JavaScript.forBlock['open_screen'] = function (block) {
     //@ts-ignore
     const screen = Blockly.JavaScript.valueToCode(block, 'SCREEN', Blockly.JavaScript.ORDER_ATOMIC);
     //@ts-ignore

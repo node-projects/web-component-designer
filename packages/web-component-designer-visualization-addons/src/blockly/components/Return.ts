@@ -13,7 +13,7 @@ Blockly.Blocks['return'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['return'] = function (block) {
+Blockly.JavaScript.forBlock['return'] = function (block) {
     //@ts-ignore
     const value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC);
     let code = 'return ' + value + ';';

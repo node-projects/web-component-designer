@@ -18,7 +18,7 @@ Blockly.Blocks['query_selector'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['query_selector'] = function (block, generator) {
+Blockly.JavaScript.forBlock['query_selector'] = function (block, generator) {
     var dropdown_source = block.getFieldValue('SOURCE');
     //@ts-ignore
     const selector = Blockly.JavaScript.valueToCode(block, 'SELECTOR', Blockly.JavaScript.ORDER_ATOMIC);

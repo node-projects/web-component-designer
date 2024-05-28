@@ -18,11 +18,11 @@ Blockly.Blocks['console'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['console'] = function (block) {
+Blockly.JavaScript.forBlock['console'] = function(block, generator) {
     var level = block.getFieldValue('LEVEL');
     //@ts-ignore
     const value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC);
     let code = `console['${(<string>level).toLowerCase()}'](${value});
 `;
     return code;
-};
+  }

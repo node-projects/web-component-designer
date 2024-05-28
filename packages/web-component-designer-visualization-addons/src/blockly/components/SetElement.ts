@@ -27,7 +27,7 @@ Blockly.Blocks['set_element'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['set_element'] = function (block) {
+Blockly.JavaScript.forBlock['set_element'] = function (block) {
     var dropdown_target = block.getFieldValue('TARGET');
     //@ts-ignore
     const element = Blockly.JavaScript.valueToCode(block, 'ELEMENT', Blockly.JavaScript.ORDER_ATOMIC);

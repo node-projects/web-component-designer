@@ -13,7 +13,7 @@ Blockly.Blocks['delay'] = {
 };
 
 //@ts-ignore
-Blockly.JavaScript['delay'] = function (block) {
+Blockly.JavaScript.forBlock['delay'] = function (block) {
     //@ts-ignore
     const delay = Blockly.JavaScript.valueToCode(block, 'DELAY', Blockly.JavaScript.ORDER_ATOMIC);
     let code = 'await delay(' + delay + ');\n';
