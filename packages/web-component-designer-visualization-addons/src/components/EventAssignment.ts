@@ -6,7 +6,7 @@ import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { BlocklyScriptEditor } from "../blockly/BlocklyScriptEditor.js";
 import { SimpleScriptEditor } from "./SimpleScriptEditor.js";
 
-type scriptType = 'jsdirect' | 'js' | 'script' | 'blockly' | 'none';
+type scriptType = 'jsdirect' | 'js' | 'script' | 'blockly' | 'none' | 'empty';
 export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
 
     static override style = css`
@@ -64,7 +64,8 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     static scriptTypeColors = {
         'js': 'purple',
         'blockly': 'yellow',
-        'script': 'lightgreen'
+        'script': 'lightgreen',
+        'empty': 'pink'
     }
 
     static readonly is = 'node-projects-visualization-event-assignment';
@@ -202,7 +203,9 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                     if ('commands' in parsed)
                         return 'script';
                     return 'js';
-                } else
+                } else if (val == '')
+                    return 'empty';
+                else
                     return 'js';
             }
         }
@@ -223,7 +226,9 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     protected _ctxMenu(e: MouseEvent, eventItem: IEvent) {
         e.preventDefault();
         const evtType = this._getScriptType(eventItem);
-        if (evtType != 'none')
+        if (evtType == 'empty')
+            this._showContextMenuAssignScript(e, eventItem, true)
+        else if (evtType != 'none')
             ContextMenu.show([{ title: 'remove', action: () => { this.selectedItems[0].removeAttribute('@' + eventItem.name); this._bindingsRefresh(); } }], e);
         else
             this._showContextMenuAssignScript(e, eventItem, true)
@@ -282,10 +287,10 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     protected async _showContextMenuAssignScript(event: MouseEvent, eventItem: IEvent, isCtxMenu: boolean) {
         event.preventDefault();
         const evtType = this._getScriptType(eventItem);
-        if (evtType != 'none' && !isCtxMenu) {
+        if (evtType != 'none' && evtType != 'empty' && !isCtxMenu) {
             this._editEvent(evtType, event, eventItem);
         } else {
-            const ctxMenu = this._createAssignScriptContextMenu(event, eventItem);
+            let ctxMenu = this._createAssignScriptContextMenu(event, eventItem)
             ContextMenu.show(ctxMenu, event);
         }
     }
