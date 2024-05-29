@@ -408,7 +408,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
 
     public refresh() {
         if (this._selectedItems != null && this._selectedItems.length) {
-            this.events = this._selectedItems[0].serviceContainer.getLastServiceWhere('eventsService', x => x.isHandledElement(this._selectedItems[0])).getPossibleEvents(this._selectedItems[0]);
+            this.events = this._selectedItems[0].serviceContainer.getLastServiceWhere('eventsService', x => x.isHandledElementFromEventsService(this._selectedItems[0])).getPossibleEvents(this._selectedItems[0]);
         } else {
             this.events = [];
         }
