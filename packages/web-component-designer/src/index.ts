@@ -90,6 +90,7 @@ export * from "./elements/services/elementsService/WebcomponentManifestElementsS
 export type { IEvent } from "./elements/services/eventsService/IEvent.js";
 export type { IEventsService } from "./elements/services/eventsService/IEventsService.js";
 export * from "./elements/services/eventsService/EventsService.js";
+export * from "./elements/services/eventsService/WebcomponentManifestEventsService.js";
 
 export type { IHtmlWriterService } from "./elements/services/htmlWriterService/IHtmlWriterService.js";
 export type { IHtmlWriterOptions } from "./elements/services/htmlWriterService/IHtmlWriterOptions.js";

@@ -2,7 +2,7 @@ import { IDesignItem } from "../../item/IDesignItem.js";
 import { IEvent } from "./IEvent.js";
 
 export interface IEventsService {
-    isHandledElement(designItem: IDesignItem): boolean;
+    isHandledElementFromEventsService(designItem: IDesignItem): boolean;
     getPossibleEvents(designItem: IDesignItem): IEvent[];
-    getEvent(name: string): IEvent;
+    getEvent(designItem: IDesignItem, name: string): IEvent;
 }

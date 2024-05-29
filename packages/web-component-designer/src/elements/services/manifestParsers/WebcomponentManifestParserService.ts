@@ -8,6 +8,8 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { AbstractPropertiesService } from '../propertiesService/services/AbstractPropertiesService.js';
 import { removeLeading, removeTrailing } from '../../helper/Helper.js';
 import { WebcomponentManifestPropertiesService } from '../propertiesService/services/WebcomponentManifestPropertiesService.js';
+import { IEvent } from '../eventsService/IEvent.js';
+import { EventsService } from '../eventsService/EventsService.js';
 
 export class WebcomponentManifestParserService extends AbstractPropertiesService implements IElementsService, IPropertiesService {
 
@@ -21,6 +23,7 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
   private _packageData: any;
   private _elementList: IElementDefinition[];
   private _propertiesList: Record<string, IProperty[]>;
+  private __eventsList: Record<string, IEvent[]>;
   private _resolveStored: ((value: IElementDefinition[]) => void)[];
   private _rejectStored: ((errorCode: number) => void)[];
   private _importPrefix = '';
@@ -77,6 +80,14 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
             }
           }
           this._propertiesList[e.name] = properties;
+          if (declaration.events) {
+            let events: IEvent[] = [];
+            for (let e of declaration.events) {
+              events.push({ name: e.name })
+            }
+            if (events.length)
+              this.__eventsList[e.name] = events;
+          }
         }
       }
       if (this._resolveStored) {
@@ -114,5 +125,20 @@ export class WebcomponentManifestParserService extends AbstractPropertiesService
 
   override getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget {
     return this._propertiesList[designItem.name].find(x => x.name == property.name).propertyType == PropertyType.attribute ? BindingTarget.attribute : BindingTarget.property
+  }
+
+  public isHandledElementFromEventsService(designItem: IDesignItem): boolean {
+    if (this.__eventsList)
+      return this.__eventsList[designItem.name] != null
+    return false
+  }
+
+  public getPossibleEvents(designItem: IDesignItem): IEvent[] {
+    return [...this.__eventsList[designItem.name], ...EventsService._simpleMouseEvents, ...EventsService._pointerEvents, ...EventsService._allElements, ...EventsService._focusableEvents];
+  }
+
+  public getEvent(designItem: IDesignItem, name: string): IEvent {
+    let evt = this.getPossibleEvents(designItem).find(x => x.name == name);
+    return evt ?? { name, propertyName: 'on' + name, eventObjectName: 'Event' };
   }
 }
