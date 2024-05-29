@@ -1,8 +1,15 @@
 ## Similar Frameworks
 
-| Name                    | Licence  | Edit Source (split View) | Zooming | Resize Transformed | No Iframe | Iframe | Iframe isolation | URL  
-|-------------------------|----------|--------------------------|---------|----------------   -| --------------------------------------------
-| web-component-designer  | MIT      | yes                      | yes     | yes                | yes       | WIP    | WIP              |
-| GrapeJS                 | BSD-3    | yes                      | no      | broken             | no        | yes    | no               | https://grapesjs.com/
-| CraftJS                 | MIT      | no                       | no      |                    | no        | yes    | no               | https://craft.js.org/
-| raisins                 | MIT      | -                        | no      |                    | no        | yes    | yes              | https://github.com/saasquatch/raisins
+| Name                    | Licence  | Edit Source (split View) | Zooming | Resize Transformed | No Iframe | Iframe | Iframe isolation | Multiplayer | URL                                    |
+|-------------------------|----------|--------------------------|---------|--------------------| ----------|--------|------------------|-------------|----------------------------------------|
+| web-component-designer  | MIT      | yes                      | yes     | yes                | yes       | yes    | allow-same-origin| no          |                                        |
+| GrapeJS                 | BSD-3    | yes                      | no      | broken             | no        | yes    | no               | no          | https://grapesjs.com/                  |
+| CraftJS                 | MIT      | no                       | no      |                    | no        | yes    | no               | no          | https://craft.js.org/                  |
+| raisins                 | MIT      | -                        | no      |                    | no        | yes    | yes              | no          | https://github.com/saasquatch/raisins  |
+
+
+Zooming          => can zoom Designer Canvas
+No iframe        => can Design in a Shadow Root (No Iframe, all Components already loaded are usable)
+Iframe           => can Designe insdie of an Iframe
+Iframe Isolation => 
+Multiplayer      => Multiple Users can design a document at the same time
