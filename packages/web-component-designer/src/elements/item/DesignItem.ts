@@ -436,7 +436,7 @@ export class DesignItem implements IDesignItem {
           const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
           newChilds.push(di);
         }
-      } else if (this.element instanceof (this.node.ownerDocument.defaultView ?? window).HTMLIFrameElement) {
+      } else if (this.isRootItem && this.element instanceof (this.node.ownerDocument.defaultView ?? window).HTMLIFrameElement) {
         for (const c of this.element.contentWindow.document.childNodes) {
           const di = DesignItem.createDesignItemFromInstance(c, this.serviceContainer, this.instanceServiceContainer);
           newChilds.push(di);
