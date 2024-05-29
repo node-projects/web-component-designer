@@ -19,7 +19,7 @@ export class WebcomponentManifestEventsService extends EventsService {
 
   private __eventsList: Record<string, IEvent[]>;
 
-  constructor(manifest: any) {
+  constructor(name: string, manifest: any) {
     super();
     this._parseManifest(manifest);
   }
