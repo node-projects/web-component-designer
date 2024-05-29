@@ -35,6 +35,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         }
         a {
             cursor: pointer;
+            white-space: nowrap;
         }
         a:hover {
             cursor: pointer;
