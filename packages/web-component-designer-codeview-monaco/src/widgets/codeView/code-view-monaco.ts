@@ -154,6 +154,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
         let options: monacoType.editor.IStandaloneEditorConstructionOptions = {
           automaticLayout: true,
+          theme: this._theme,
           language: this.language,
           value: this.#code,
           fixedOverflowWidgets: true,
@@ -257,6 +258,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       this._disableSelectionAfterUpd = true;
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
+      CodeViewMonaco.monacoLib.editor.setTheme(this._theme);
       CodeViewMonaco.monacoLib.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
       this._disableSelectionAfterUpd = false;
     }
