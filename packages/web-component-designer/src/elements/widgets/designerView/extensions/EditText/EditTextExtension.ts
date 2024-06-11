@@ -71,6 +71,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     this._toolbar.updatePosition({ x: (itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, y: ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 36) });
 
     FontPropertyEditor.addFontsToSelect(this._toolbar.getById<HTMLSelectElement>('fontFamily'));
+    this._setInitialValues();
     this._toolbar.querySelectorAll('button').forEach(x => x.onpointerdown = (e) => {
       this._formatSelection(x.dataset['command'], x.dataset['commandParameter'])
     });
@@ -148,5 +149,50 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     for (const span of spans)
       span.style[type] = value;
     (<HTMLElement>this.extendedItem.element).focus()
+  }
+
+  _setInitialValues() {
+    const selection = shadowrootGetSelection(this.designerCanvas.rootDesignItem.element.shadowRoot);
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const startContainer = range.startContainer as HTMLElement;
+
+      const targetElement = startContainer.nodeType === Node.TEXT_NODE ? startContainer.parentElement : startContainer;
+      if (!targetElement) return;
+
+      const computedStyle = window.getComputedStyle(targetElement);
+
+      this._applyStylesToToolbar(computedStyle);
+    }
+  }
+
+  _applyStylesToToolbar(computedStyle) {
+    this._toolbar.querySelectorAll<HTMLButtonElement>('button').forEach(button => {
+      const command = button.dataset['command'];
+      const parameter = button.dataset['commandParameter'];
+      switch (command) {
+        case 'font-weight':
+          button.style.fontWeight = computedStyle.fontWeight === parameter ? parameter : 'normal';
+          break;
+        case 'font-style':
+          button.style.fontStyle = computedStyle.fontStyle === parameter ? parameter : 'normal';
+          break;
+        case 'text-decoration':
+          button.style.textDecoration = computedStyle.textDecoration.includes(parameter) ? parameter : 'none';
+          break;
+      }
+    });
+
+    this._toolbar.querySelectorAll<HTMLSelectElement>('select').forEach(select => {
+      const command = select.dataset['command'];
+      switch (command) {
+        case 'fontSize':
+          select.value = computedStyle.fontSize;
+          break;
+        case 'font-family':
+          select.value = computedStyle.fontFamily;
+          break;
+      }
+    });
   }
 }
