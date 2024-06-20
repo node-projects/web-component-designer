@@ -213,7 +213,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
     this._assignEvents();
 
     this.twoWayPossible = false;
-    if (this._bindingTarget == BindingTarget.property)
+    if (this._bindingTarget == BindingTarget.property || this._bindingTarget == BindingTarget.attribute)
       this.twoWayPossible = true;
 
     if (this._binding) {
