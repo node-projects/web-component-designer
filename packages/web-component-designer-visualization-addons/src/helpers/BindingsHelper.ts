@@ -181,6 +181,8 @@ export class BindingsHelper {
 
             if (bindingTarget === BindingTarget.cssvar || bindingTarget === BindingTarget.class)
                 return [BindingsHelper.dotToCamelCase(propname), binding];
+            if (bindingTarget === BindingTarget.attribute)
+                return [propname, binding];
             return [PropertiesHelper.dashToCamelCase(propname), binding];
         }
 
@@ -198,6 +200,8 @@ export class BindingsHelper {
         }
         if (bindingTarget === BindingTarget.cssvar || bindingTarget === BindingTarget.class)
             return [BindingsHelper.dotToCamelCase(propname), binding];
+        if (bindingTarget === BindingTarget.attribute)
+            return [propname, binding];
         return [PropertiesHelper.dashToCamelCase(propname), binding];
     }
 

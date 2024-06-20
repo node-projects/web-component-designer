@@ -17,6 +17,9 @@ Blockly.Blocks['query_selector_all'] = {
     }
 };
 
+//TODO helper for current & parent screen queryselector
+//TODO also a query selector for screen directly
+
 //@ts-ignore
 Blockly.JavaScript.forBlock['query_selector_all'] = function (block, generator) {
     var dropdown_source = block.getFieldValue('SOURCE');
