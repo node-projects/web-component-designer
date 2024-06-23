@@ -1,0 +1,22 @@
+{
+  "description": "web-component-designer addon for multiplayer via webrtc",
+  "name": "@node-projects/web-component-designer-webrtc-multiplayer",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "author": "jochen.kuehner@gmx.de",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc",
+    "link": "npm link",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@node-projects/web-component-designer": ">=0.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-projects/web-component-designer.git"
+  }
+}

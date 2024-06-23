@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Client B</title>
+</head>
+<body>
+    <h1>Client B</h1>
+    <textarea id="remoteOffer" placeholder="Paste Offer here" rows="10" cols="50"></textarea><br>
+    <textarea id="localAnswer" placeholder="Answer will appear here" rows="10" cols="50"></textarea><br>
+    <textarea id="iceCandidates" placeholder="Paste ICE candidates from Client A here" rows="10" cols="50"></textarea><br>
+    <button onclick="setRemoteOffer()">Set Remote Offer</button>
+    <button onclick="createAnswer()">Create Answer</button>
+    <button onclick="addIceCandidates()">Add ICE Candidates</button>
+    <script>
+        let peerConnection = new RTCPeerConnection();
+
+        peerConnection.ondatachannel = (event) => {
+            let dataChannel = event.channel;
+            dataChannel.onopen = () => {
+                console.log("Data channel is open");
+                dataChannel.send("Hello from Client B!");
+            };
+            dataChannel.onmessage = (event) => {
+                console.log("Message from Client A:", event.data);
+            };
+        };
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                console.log("ICE Candidate:", JSON.stringify(event.candidate));
+            }
+        };
+
+        function setRemoteOffer() {
+            let offer = document.getElementById("remoteOffer").value;
+            peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
+        }
+
+        function createAnswer() {
+            peerConnection.createAnswer().then((answer) => {
+                return peerConnection.setLocalDescription(answer);
+            }).then(() => {
+                document.getElementById("localAnswer").value = JSON.stringify(peerConnection.localDescription);
+            });
+        }
+
+        function addIceCandidates() {
+            let candidates = document.getElementById("iceCandidates").value.split('\n');
+            candidates.forEach(candidate => {
+                if (candidate) {
+                    peerConnection.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
+                }
+            });
+        }
+    </script>
+</body>
+</html>
