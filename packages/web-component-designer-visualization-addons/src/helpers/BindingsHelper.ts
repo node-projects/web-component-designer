@@ -59,15 +59,17 @@ export class IndirectSignal {
     private disposed: boolean;
     private valueChangedCb: (value: any) => void
     private visualizationHandler: VisualizationHandler;
+    private element: Element;
 
-    constructor(visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void) {
+    constructor(visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element) {
         this.visualizationHandler = visualizationHandler;
         this.valueChangedCb = valueChangedCb;
+        this.element = element;
         this.parseIndirectBinding(id);
         this.values = new Array(this.signals.length);
         for (let i = 0; i < this.signals.length; i++) {
             let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
-            this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(this.signals[i], cb)]);
+            this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(this.signals[i], cb, element)]);
         }
     }
 
@@ -93,7 +95,7 @@ export class IndirectSignal {
             if (!this.disposed) {
                 this.combinedName = nm;
                 let cb = (id: string, value: any) => this.valueChangedCb(value);
-                this.unsubscribeTargetValue = [cb, this.visualizationHandler.subscribeState(nm, cb)];
+                this.unsubscribeTargetValue = [cb, this.visualizationHandler.subscribeState(nm, cb, this.element)];
             }
         }
     }
@@ -611,7 +613,7 @@ export class BindingsHelper {
                 });
             } else {
                 if (s.includes('{')) {
-                    let indirectSignal = new IndirectSignal(this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false));
+                    let indirectSignal = new IndirectSignal(this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false), element);
                     if (!cleanupCalls)
                         cleanupCalls = [];
                     cleanupCalls.push(() => indirectSignal.dispose());
@@ -640,7 +642,7 @@ export class BindingsHelper {
                             this._visualizationHandler.getHistoricData(s, binding[1].historic).then(x => this.handleValueChanged(element, binding, x?.values, valuesObject, i, signalVars, true))
                     } else {
                         const cb = (id: string, value: State) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false);
-                        unsubscribeList.push([s, cb, this._visualizationHandler.subscribeState(s, cb)]);
+                        unsubscribeList.push([s, cb, this._visualizationHandler.subscribeState(s, cb, element)]);
                         this._visualizationHandler.getState(s).then(x => this.handleValueChanged(element, binding, x?.val, valuesObject, i, signalVars, false));
                         if (binding[1].twoWay && i == 0) {
                             this.addTwoWayBinding(binding, element, v => this._visualizationHandler.setState(s, v));

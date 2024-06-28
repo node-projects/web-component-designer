@@ -20,7 +20,7 @@ type StateChangeHandler = (id: string, state: State) => void
 export interface VisualizationHandler {
   getState(id: string): Promise<State>;
   setState(id: string, val: State | StateValue, ack?: boolean): Promise<void>;
-  subscribeState(id: string, cb: StateChangeHandler): any;
+  subscribeState(id: string, cb: StateChangeHandler, element: Element): any;
   unsubscribeState(id: string, cb: StateChangeHandler, info: any): void;
   getObject(id: string): Promise<Signal>;
   getHistoricData(id: string, config: any);
