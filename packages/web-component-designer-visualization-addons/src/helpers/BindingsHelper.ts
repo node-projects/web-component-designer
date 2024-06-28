@@ -608,7 +608,7 @@ export class BindingsHelper {
                 if (mS[0] === '.') {
                     mS = relativeSignalPath + mS;
                 }
-                this._visualizationHandler.getObject(mS).then(x => {
+                this._visualizationHandler.getObject(mS, element).then(x => {
                     this.handleValueChanged(element, binding, x, valuesObject, i, signalVars, true);
                 });
             } else {
