@@ -12,7 +12,7 @@ export class VisualizationBindingsService implements IBindingService {
   getBindings(designItem: IDesignItem): (IBinding & { converter: Record<string, any> })[] {
     const iobBindings = Array.from(this._bindingsHelper.getBindings(designItem.element));
     return iobBindings.map(x => ({
-      targetName: x[1].target == 'css' ? PropertiesHelper.camelToDashCase(x[0]) : x[0],
+      targetName: (x[1].target === BindingTarget.css || x[1].target === BindingTarget.attribute) ? PropertiesHelper.camelToDashCase(x[0]) : x[0],
       target: x[1].target,
       mode: x[1].twoWay ? BindingMode.twoWay : BindingMode.oneWay,
       invert: x[1].inverted,
