@@ -262,8 +262,10 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
                         const closest = getClosestStackingContext(element);
                         this.createsStackingContext = element === closest.node;
                         this.createsStackingContextReason = this.createsStackingContext ? closest.reason : 'not a stacking context';
+                         //@ts-ignore
                         this.parentStackingContext = closest.node;
                         if (this.createsStackingContext && element.nodeName !== 'HTML') {
+                             //@ts-ignore
                             this.parentStackingContext = getClosestStackingContext(element.parentNode).node;
                         }
                         if (this.parentStackingContext == designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.parentElement ||
