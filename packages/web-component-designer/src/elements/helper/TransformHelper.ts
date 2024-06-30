@@ -135,12 +135,11 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   else
     ch = new Map<any, DOMMatrix>();
 
-  //const res = ch.get(element);
-  //if (res)
-  //  return res;
+  const res = ch.get(element);
+  if (res)
+    return res;
 
   let actualElement: HTMLElement = element;
-  //let actualElementMatrix: DOMMatrix;
   let parentElementMatrix: DOMMatrix;
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
 
@@ -208,16 +207,17 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   let arr = [{ x: 0, y: 0 }, { x: width, y: 0 }, { x: 0, y: height }, { x: width, y: height }];
   const transformedCornerPoints: [DOMPoint, DOMPoint, DOMPoint, DOMPoint] = <any>Array<DOMPoint>(4);
 
+  //@ts-ignore
+  let off: [IPoint, IPoint, IPoint, IPoint] = untransformedCornerPointsOffset;
+  if (off && !Array.isArray(off)) {
+    //@ts-ignore
+    off = [{ x: off.x, y: off.y }, { x: -off.x, y: off.y }, { x: off.x, y: -off.y }, { x: -off.x, y: -off.y }];
+  }
   for (let i = 0; i < 4; i++) {
     let p = new DOMPoint(arr[i].x, arr[i].y);
     let o = { x: 0, y: 0 };
-    if (untransformedCornerPointsOffset !== null) {
-      if (Array.isArray(untransformedCornerPointsOffset)) {
-        o = { x: untransformedCornerPointsOffset[i].x, y: untransformedCornerPointsOffset[i].y };
-      } else {
-        o = { x: untransformedCornerPointsOffset.x, y: untransformedCornerPointsOffset.y };
-      }
-    }
+    if (off)
+      o = { x: off[i].x, y: off[i].y };
     p = new DOMPoint(arr[i].x - (o.x / designerCanvas.scaleFactor), arr[i].y - (o.y / designerCanvas.scaleFactor));
 
     let pTransformed = p.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
