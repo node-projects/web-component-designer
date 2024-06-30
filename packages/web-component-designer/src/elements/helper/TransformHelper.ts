@@ -208,17 +208,14 @@ export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: H
   const transformedCornerPoints: [DOMPoint, DOMPoint, DOMPoint, DOMPoint] = <any>Array<DOMPoint>(4);
 
   //@ts-ignore
-  let off: [IPoint, IPoint, IPoint, IPoint] = untransformedCornerPointsOffset;
-  if (off && !Array.isArray(off)) {
+  let offset: [IPoint, IPoint, IPoint, IPoint] = untransformedCornerPointsOffset ?? { x: 0, y: 0 };
+  if (!Array.isArray(offset)) {
     //@ts-ignore
-    off = [{ x: off.x, y: off.y }, { x: -off.x, y: off.y }, { x: off.x, y: -off.y }, { x: -off.x, y: -off.y }];
+    offset = [{ x: offset.x, y: offset.y }, { x: -offset.x, y: offset.y }, { x: offset.x, y: -offset.y }, { x: -offset.x, y: -offset.y }];
   }
   for (let i = 0; i < 4; i++) {
     let p = new DOMPoint(arr[i].x, arr[i].y);
-    let o = { x: 0, y: 0 };
-    if (off)
-      o = { x: off[i].x, y: off[i].y };
-    p = new DOMPoint(arr[i].x - (o.x / designerCanvas.scaleFactor), arr[i].y - (o.y / designerCanvas.scaleFactor));
+    p = new DOMPoint(arr[i].x - (offset[i].x / designerCanvas.scaleFactor), arr[i].y - (offset[i].y / designerCanvas.scaleFactor));
 
     let pTransformed = p.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
     transformedCornerPoints[i] = new DOMPoint(pTransformed.x + canvasOffset.x, pTransformed.y + canvasOffset.y);
