@@ -1,6 +1,6 @@
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
-import { getElementsWindowOffsetWithoutSelfAndParentTransformations, getParentElementIncludingSlots } from "./ElementHelper.js";
+import { getParentElementIncludingSlots } from "./ElementHelper.js";
 
 //TODO:
 //transform-box
@@ -21,8 +21,9 @@ export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
   const originX = parseFloat(origin[0]);
   const originY = parseFloat(origin[1]);
 
-  const mOri = new DOMMatrix([1, 0, 0, 1, originX, originY]);
-  const mOriInv = new DOMMatrix([1, 0, 0, 1, -originX, -originY]);
+  //todo: 3d?
+  const mOri = new DOMMatrix().translate(originX, originY);
+  const mOriInv = new DOMMatrix().translate(-originX, -originY);
 
   if (s.translate != 'none' && s.translate) {
     m = m.multiply(new DOMMatrix('translate(' + s.translate.replace(' ', ',') + ')'));
@@ -126,25 +127,6 @@ export function addVectors(vectorA: [number, number], vectorB: [number, number])
   return [vectorA[0] + vectorB[0], vectorA[1] + vectorB[1]];
 }
 
-export function getDesignerCanvasNormalizedTransformedOriginWithoutParentTransformation(element: HTMLElement, designerCanvas: IDesignerCanvas): DOMPoint {
-  const toSplit = getComputedStyle(<HTMLElement>element).transformOrigin.split(' ');
-  const tfX = parseFloat(toSplit[0]);
-  const tfY = parseFloat(toSplit[1]);
-  const top0: DOMPointReadOnly = new DOMPointReadOnly(
-    -tfX,
-    -tfY,
-    0,
-    0
-  )
-
-  const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element, designerCanvas.zoomFactor);
-
-  const transformOriginAbsolutRelatedToWindowWithoutAnyTransformation = new DOMPoint(p0Offsets.offsetLeft - top0.x, p0Offsets.offsetTop - top0.y);
-  const designerCanvasNormalizedTransformedOrigin = new DOMPoint(transformOriginAbsolutRelatedToWindowWithoutAnyTransformation.x - designerCanvas.containerBoundingRect.x, transformOriginAbsolutRelatedToWindowWithoutAnyTransformation.y - designerCanvas.containerBoundingRect.y);
-
-  return designerCanvasNormalizedTransformedOrigin;
-}
-
 const elementMatrixCacheKey = Symbol('windowOffsetsCacheKey');
 export function getResultingTransformationBetweenElementAndAllAncestors(element: HTMLElement, ancestor: HTMLElement, excludeAncestor?: boolean, cache: Record<string | symbol, any> = {}) {
   let ch: Map<any, DOMMatrix>;
@@ -163,7 +145,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
 
   while (actualElement != ancestor && actualElement != null) {
-    const mvMat = new DOMMatrix([1, 0, 0, 1, actualElement.offsetLeft, actualElement.offsetTop]);
+    const mvMat = new DOMMatrix().translate(actualElement.offsetLeft, actualElement.offsetTop);
     originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
 
     const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
