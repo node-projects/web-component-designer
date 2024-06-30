@@ -1,6 +1,6 @@
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignerCanvas } from "../widgets/designerView/IDesignerCanvas.js";
-import { getParentElementIncludingSlots, instanceOf } from "./ElementHelper.js";
+import { getElementOffsetsInContainer, getParentElementIncludingSlots, instanceOf } from "./ElementHelper.js";
 
 //TODO:
 //transform-box
@@ -104,6 +104,7 @@ export function matrixArrayToCssMatrix(matrixArray: number[]) {
   return "matrix3d(" + matrixArray.join(',') + ")";
 }
 
+//maybe remove -> refactor rotate extension
 export function cssMatrixToMatrixArray(cssMatrix: string) {
   if (!cssMatrix.includes('matrix')) {
     if (cssMatrix != 'none')
@@ -161,18 +162,6 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
 
   ch.set(element, originalElementAndAllParentsMultipliedMatrix);
   return originalElementAndAllParentsMultipliedMatrix;
-}
-
-export function getElementOffsetsInContainer(element: Element) {
-  if (instanceOf(element, HTMLElement)) {
-    //@ts-ignore
-    return { x: element.offsetLeft, y: element.offsetTop };
-  } else {
-    //todo: this will nor work correctly with transformed SVGs
-    const r1 = element.getBoundingClientRect();
-    const r2 = element.parentElement.getBoundingClientRect();
-    return { x: r1.x - r2.x, y: r1.y - r2.y }
-  }
 }
 
 export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement, point: IPoint, designerCanvas: IDesignerCanvas, cache: Record<string | symbol, any>): IPoint {

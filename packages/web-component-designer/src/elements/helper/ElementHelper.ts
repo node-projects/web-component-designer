@@ -89,6 +89,32 @@ export function getParentElementIncludingSlots(element: Element): Element {
   return element.parentElement;
 }
 
+export function getElementOffsetParent(element: Element) {
+  let el = getParentElementIncludingSlots(element);
+  while (el) {
+    const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+    if (cs.position === 'absolute' || cs.position === 'relative' || cs.position === 'fixed') {
+      return el;
+    }
+    el = getParentElementIncludingSlots(el);
+  }
+  return document.body;
+}
+
+export function getElementOffsetsInContainer(element: Element) {
+  if (instanceOf(element, HTMLElement)) {
+    //@ts-ignore
+    return { x: element.offsetLeft, y: element.offsetTop };
+  } else {
+    //const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+   
+    //todo: this will not work correctly with transformed SVGs or MathML Elements 
+    const r1 = element.getBoundingClientRect();
+    const r2 = element.parentElement.getBoundingClientRect();
+    return { x: r1.x - r2.x, y: r1.y - r2.y }
+  }
+}
+
 const windowOffsetsCacheKey = Symbol('windowOffsetsCacheKey');
 export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element, zoom: number, cache: Record<string | symbol, any> = {}) {
   let offsetLeft = 0;
