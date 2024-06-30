@@ -17,6 +17,13 @@ export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
   let s = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
 
   let m = new DOMMatrix();
+  const origin = s.transformOrigin.split(' ');
+  const originX = parseFloat(origin[0]);
+  const originY = parseFloat(origin[1]);
+
+  const mOri = new DOMMatrix([1, 0, 0, 1, originX, originY]);
+  const mOriInv = new DOMMatrix([1, 0, 0, 1, -originX, -originY]);
+
   if (s.translate != 'none' && s.translate) {
     m = m.multiply(new DOMMatrix('translate(' + s.translate.replace(' ', ',') + ')'));
   }
@@ -29,7 +36,7 @@ export function getElementCombinedTransform(element: HTMLElement): DOMMatrix {
   if (s.transform != 'none' && s.transform) {
     m = m.multiply(new DOMMatrix(s.transform));
   }
-  return m;
+  return mOri.multiply(m.multiply(mOriInv));
 }
 
 export function combineTransforms(element: HTMLElement, actualTransforms: string, requestedTransformation: string) {
@@ -146,77 +153,32 @@ export function getResultingTransformationBetweenElementAndAllAncestors(element:
   else
     ch = new Map<any, DOMMatrix>();
 
-  const res = ch.get(element);
-  if (res)
-    return res;
+  //const res = ch.get(element);
+  //if (res)
+  //  return res;
 
   let actualElement: HTMLElement = element;
-  let actualElementMatrix: DOMMatrix;
-  let newElementMatrix: DOMMatrix;
-  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix;
+  //let actualElementMatrix: DOMMatrix;
+  let parentElementMatrix: DOMMatrix;
+  let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
+
   while (actualElement != ancestor && actualElement != null) {
-    const newElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    if (newElement) {
-      actualElementMatrix = getElementCombinedTransform((<HTMLElement>actualElement));
-      newElementMatrix = getElementCombinedTransform((<HTMLElement>newElement));
-      actualElementMatrix.m43 = 0;
-      newElementMatrix.m41 = newElementMatrix.m42 = newElementMatrix.m43 = 0;
-      if (actualElement == element) {
-        originalElementAndAllParentsMultipliedMatrix = newElementMatrix.multiply(actualElementMatrix);
-      } else if (newElement != ancestor || !excludeAncestor) {
-        originalElementAndAllParentsMultipliedMatrix = newElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
+    const mvMat = new DOMMatrix([1, 0, 0, 1, actualElement.offsetLeft, actualElement.offsetTop]);
+    originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+
+    const parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
+    if (parentElement) {
+      parentElementMatrix = getElementCombinedTransform((<HTMLElement>parentElement));
+      if (parentElement != ancestor || !excludeAncestor) {
+        originalElementAndAllParentsMultipliedMatrix = parentElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
       }
     }
 
-    actualElement = newElement;
+    actualElement = parentElement;
   }
 
   ch.set(element, originalElementAndAllParentsMultipliedMatrix);
   return originalElementAndAllParentsMultipliedMatrix;
-}
-
-export function getByParentsTransformedPointRelatedToCanvas(element: HTMLElement, point: DOMPoint, designerCanvas: IDesignerCanvas, cache?: Record<string | symbol, any>) {
-  const canvas = designerCanvas.rootDesignItem.node;
-  let actualElement: HTMLElement = element;
-  let parentElementTransformOriginToPointVectorTransformed: DOMPointReadOnly;
-  let byParentTransformedPointRelatedToCanvas: IPoint = { x: 0, y: 0 };
-  while (actualElement != canvas) {
-    let parentElement = <HTMLElement>getParentElementIncludingSlots(actualElement);
-    if (!parentElement) {
-      if (element instanceof (element.ownerDocument.defaultView ?? window).HTMLHtmlElement)
-        parentElement = element;
-      else
-        break;
-    }
-    const elementWindowOffset = getElementsWindowOffsetWithoutSelfAndParentTransformations(parentElement, designerCanvas.zoomFactor, cache);
-
-    const toSplit = getComputedStyle(<HTMLElement>parentElement).transformOrigin.split(' ');
-    const tfX = parseFloat(toSplit[0]);
-    const tfY = parseFloat(toSplit[1]);
-    const parentElementTransformOrigin: DOMPoint = new DOMPoint(
-      elementWindowOffset.offsetLeft - designerCanvas.outerRect.x + tfX,
-      elementWindowOffset.offsetTop - designerCanvas.outerRect.y + tfY,
-    )
-    if (actualElement == element) {
-      const transf = (element.ownerDocument.defaultView ?? window).getComputedStyle(element).transform;
-      const mtx = extractTranslationFromDOMMatrix(new DOMMatrix(transf));
-      parentElementTransformOrigin.x -= mtx.x;
-      parentElementTransformOrigin.y -= mtx.y;
-    }
-
-    const parentElementTransformOriginToPointVector: DOMPointReadOnly = new DOMPointReadOnly(
-      -parentElementTransformOrigin.x + (element == actualElement ? point.x : byParentTransformedPointRelatedToCanvas.x),
-      -parentElementTransformOrigin.y + (element == actualElement ? point.y : byParentTransformedPointRelatedToCanvas.y)
-    )
-
-    parentElementTransformOriginToPointVectorTransformed = parentElementTransformOriginToPointVector.matrixTransform(new DOMMatrix(getComputedStyle((<HTMLElement>parentElement)).transform));
-    byParentTransformedPointRelatedToCanvas = new DOMPoint(parentElementTransformOrigin.x + parentElementTransformOriginToPointVectorTransformed.x, parentElementTransformOrigin.y + parentElementTransformOriginToPointVectorTransformed.y);
-    if (parentElement === element)
-      break;
-    actualElement = parentElement;
-  }
-
-  return byParentTransformedPointRelatedToCanvas;
 }
 
 export function getDesignerCanvasNormalizedTransformedPoint(element: HTMLElement, point: IPoint, designerCanvas: IDesignerCanvas, cache: Record<string | symbol, any>): IPoint {
@@ -241,84 +203,16 @@ export function getElementSize(element: HTMLElement) {
   return { width, height }
 }
 
-const nullOffsetArray = [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }];
+//const nullOffsetArray = [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }];
 
 export function getDesignerCanvasNormalizedTransformedCornerDOMPoints(element: HTMLElement, untransformedCornerPointsOffset: IPoint | [IPoint, IPoint, IPoint, IPoint] | null, designerCanvas: IDesignerCanvas, cache?: Record<string | symbol, any>): [DOMPoint, DOMPoint, DOMPoint, DOMPoint] {
-  const topleft = 0;
-  const topright = 1;
-  const bottomleft = 2;
-  const bottomright = 3;
-
-  //offset points for calculation
-  let intUntransformedCornerPointsOffset = nullOffsetArray;
-  if (untransformedCornerPointsOffset != null) {
-    if (Array.isArray(untransformedCornerPointsOffset)) {
-      const v0 = { x: untransformedCornerPointsOffset[0].x / designerCanvas.scaleFactor, y: untransformedCornerPointsOffset[0].y / designerCanvas.scaleFactor };
-      const v1 = { x: untransformedCornerPointsOffset[1].x / designerCanvas.scaleFactor, y: untransformedCornerPointsOffset[1].y / designerCanvas.scaleFactor };
-      const v2 = { x: untransformedCornerPointsOffset[2].x / designerCanvas.scaleFactor, y: untransformedCornerPointsOffset[2].y / designerCanvas.scaleFactor };
-      const v3 = { x: untransformedCornerPointsOffset[3].x / designerCanvas.scaleFactor, y: untransformedCornerPointsOffset[3].y / designerCanvas.scaleFactor };
-      intUntransformedCornerPointsOffset = [v0, v1, v2, v3];
-    } else {
-      const v = { x: untransformedCornerPointsOffset.x / designerCanvas.scaleFactor, y: untransformedCornerPointsOffset.y / designerCanvas.scaleFactor };
-      intUntransformedCornerPointsOffset = [v, v, v, v];
-    }
-  }
-
-  const p0Offsets = getElementsWindowOffsetWithoutSelfAndParentTransformations(element, designerCanvas.zoomFactor, cache);
-  const p0OffsetsRelatedToCanvas = DOMPoint.fromPoint(
-    {
-      x: p0Offsets.offsetLeft - designerCanvas.containerBoundingRect.left,
-      y: p0Offsets.offsetTop - designerCanvas.containerBoundingRect.top
-    }
-  )
+  const designerCanvasNormalizedTransformOrigin = { x: 0, y: 0 };
 
   let { width, height } = getElementSize(element);
-
-  const elementWithoutTransformCornerDOMPoints: DOMPoint[] = [];
-  elementWithoutTransformCornerDOMPoints[topleft] = DOMPoint.fromPoint(
-    {
-      x: p0OffsetsRelatedToCanvas.x - intUntransformedCornerPointsOffset[0].x,
-      y: p0OffsetsRelatedToCanvas.y - intUntransformedCornerPointsOffset[0].y
-    }
-  )
-  elementWithoutTransformCornerDOMPoints[topright] = DOMPoint.fromPoint(
-    {
-      x: p0OffsetsRelatedToCanvas.x + width + intUntransformedCornerPointsOffset[1].x,
-      y: p0OffsetsRelatedToCanvas.y - intUntransformedCornerPointsOffset[1].y
-    }
-  )
-  elementWithoutTransformCornerDOMPoints[bottomleft] = DOMPoint.fromPoint(
-    {
-      x: p0OffsetsRelatedToCanvas.x - intUntransformedCornerPointsOffset[2].x,
-      y: p0OffsetsRelatedToCanvas.y + height + intUntransformedCornerPointsOffset[2].y
-    }
-  )
-  elementWithoutTransformCornerDOMPoints[bottomright] = DOMPoint.fromPoint(
-    {
-      x: p0OffsetsRelatedToCanvas.x + width + intUntransformedCornerPointsOffset[3].x,
-      y: p0OffsetsRelatedToCanvas.y + height + intUntransformedCornerPointsOffset[3].y
-    }
-  )
-
-  const toSplit = getComputedStyle(<HTMLElement>element).transformOrigin.split(' ');
-  const tfX = parseFloat(toSplit[0]);
-  const tfY = parseFloat(toSplit[1]);
-
-  const transformOriginWithoutTransformRelatedToCanvas: DOMPointReadOnly = DOMPointReadOnly.fromPoint(
-    {
-      x: p0OffsetsRelatedToCanvas.x + tfX,
-      y: p0OffsetsRelatedToCanvas.y + tfY,
-      z: 0,
-      w: 0
-    }
-  )
-
-  const designerCanvasNormalizedTransformOrigin = getByParentsTransformedPointRelatedToCanvas(element, new DOMPoint(p0Offsets.offsetLeft - designerCanvas.outerRect.left + tfX, p0Offsets.offsetTop - designerCanvas.outerRect.top + tfY), designerCanvas, cache);
-
-  let top0 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topleft].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topleft].y));
-  let top1 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[topright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[topright].y));
-  let top2 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[bottomleft].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[bottomleft].y));
-  let top3 = new DOMPoint(-(transformOriginWithoutTransformRelatedToCanvas.x - elementWithoutTransformCornerDOMPoints[bottomright].x), -(transformOriginWithoutTransformRelatedToCanvas.y - elementWithoutTransformCornerDOMPoints[bottomright].y));
+  let top0 = new DOMPoint(0, 0);
+  let top1 = new DOMPoint(width, 0);
+  let top2 = new DOMPoint(0, height);
+  let top3 = new DOMPoint(width, height);
 
   let originalElementAndAllParentsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(element, <HTMLElement>designerCanvas.canvas, true, cache);
 
