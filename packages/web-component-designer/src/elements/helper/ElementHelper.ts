@@ -24,10 +24,23 @@ export enum ElementDisplayType {
   block,
 }
 
+export function instanceOf<T extends Function>(node: any, fnc: T): node is T {
+  if (node instanceof fnc || node instanceof (node.ownerDocument.defaultView ?? window)[fnc.name])
+    return true;
+  return false;
+}
+
+export function instanceOfAny(node: Node, ...fnc: Function[]) {
+  for (const f of fnc)
+    if (node instanceof f || node instanceof (node.ownerDocument.defaultView ?? window)[f.name])
+      return true;
+  return false;
+}
+
 export function isInline(element: HTMLElement): boolean {
   if (element == null)
     return false;
-  if (element instanceof (element.ownerDocument.defaultView ?? window).SVGElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLHtmlElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLHeadElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLBodyElement)
+  if (instanceOfAny(element, SVGElement, HTMLHtmlElement, HTMLHeadElement, HTMLBodyElement))
     return false;
   return (element.ownerDocument.defaultView ?? window).getComputedStyle(element).display.startsWith('inline');
 }
@@ -35,15 +48,15 @@ export function isInline(element: HTMLElement): boolean {
 export function isInlineAfter(element: HTMLElement): boolean {
   if (element == null)
     return false;
-  if (element instanceof (element.ownerDocument.defaultView ?? window).SVGElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLHtmlElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLHeadElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLBodyElement)
+  if (instanceOfAny(element, SVGElement, HTMLHtmlElement, HTMLHeadElement, HTMLBodyElement))
     return false;
   return (element.ownerDocument.defaultView ?? window).getComputedStyle(element).display.startsWith('inline');
 }
 
 export function getElementDisplaytype(element: HTMLElement): ElementDisplayType {
-  if (element instanceof (element.ownerDocument.defaultView ?? window).SVGElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLHtmlElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLHeadElement || element instanceof (element.ownerDocument.defaultView ?? window).HTMLBodyElement)
+  if (instanceOfAny(element, SVGElement, HTMLHtmlElement, HTMLHeadElement, HTMLBodyElement))
     return ElementDisplayType.block;
-  if (element instanceof (element.ownerDocument.defaultView ?? window).MathMLElement)
+  if (instanceOf(element, MathMLElement))
     return ElementDisplayType.block;
   const display = (element.ownerDocument.defaultView ?? window).getComputedStyle(element).display;
   return display == 'none' ? ElementDisplayType.none : display.startsWith('inline') ? ElementDisplayType.inline : ElementDisplayType.block;
@@ -68,11 +81,38 @@ export function getParentElementIncludingSlots(element: Element): Element {
   if (element.assignedSlot)
     return element.assignedSlot;
   if (element.parentElement == null) {
-    if (element.parentNode instanceof ShadowRoot) {
+    if (instanceOf(element.parentNode, ShadowRoot)) {
+      //@ts-ignore
       return element.parentNode.host;
     }
   }
   return element.parentElement;
+}
+
+export function getElementOffsetParent(element: Element) {
+  let el = getParentElementIncludingSlots(element);
+  while (el) {
+    const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+    if (cs.position === 'absolute' || cs.position === 'relative' || cs.position === 'fixed') {
+      return el;
+    }
+    el = getParentElementIncludingSlots(el);
+  }
+  return document.body;
+}
+
+export function getElementOffsetsInContainer(element: Element) {
+  if (instanceOf(element, HTMLElement)) {
+    //@ts-ignore
+    return { x: element.offsetLeft, y: element.offsetTop };
+  } else {
+    //const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+   
+    //todo: this will not work correctly with transformed SVGs or MathML Elements 
+    const r1 = element.getBoundingClientRect();
+    const r2 = element.parentElement.getBoundingClientRect();
+    return { x: r1.x - r2.x, y: r1.y - r2.y }
+  }
 }
 
 const windowOffsetsCacheKey = Symbol('windowOffsetsCacheKey');
@@ -101,19 +141,20 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 
     let nextParent = currentElement.offsetParent ? currentElement.offsetParent : (<ShadowRoot>currentElement.getRootNode()).host;
 
-    if (currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).SVGSVGElement ||
-      currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).HTMLBodyElement ||
-      currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).HTMLHtmlElement) {
+    if (instanceOfAny(currentElement, SVGSVGElement, HTMLBodyElement, HTMLHtmlElement)) {
       nextParent = currentElement.parentElement ? currentElement.parentElement : (<ShadowRoot>currentElement.getRootNode()).host;
-    } else if (currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).SVGGraphicsElement) {
+    } else if (instanceOf(currentElement, SVGGraphicsElement)) {
+      //@ts-ignore
       nextParent = currentElement.ownerSVGElement;
-    } else if (currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).MathMLElement) {
+    } else if (instanceOf(currentElement, MathMLElement)) {
+      //@ts-ignore
       nextParent = currentElement.parentElement ?? nextParent;
     }
 
     let scrollLeft = 0;
     let scrollTop = 0;
-    if (currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).HTMLElement) {
+    if (instanceOf(currentElement, HTMLElement)) {
+      //@ts-ignore
       let parent = currentElement.parentElement;
       while (parent !== null && parent !== nextParent) {
         scrollLeft += parent.scrollLeft;
@@ -129,8 +170,7 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
 
     let currLeft = 0;
     let currTop = 0;
-    if (currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).SVGSVGElement ||
-      currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).MathMLElement) {
+    if (instanceOfAny(currentElement, SVGSVGElement, MathMLElement)) {
       //TODO: !maybe huge Perf impact! - fix without transformation
       let t = currentElement.style.transform;
       currentElement.style.transform = '';
@@ -139,11 +179,12 @@ export function getElementsWindowOffsetWithoutSelfAndParentTransformations(eleme
       currentElement.style.transform = t;
       currLeft = (bcEl.left - bcPar.left) / zoom;
       currTop = (bcEl.top - bcPar.top) / zoom;
-    } else if (currentElement instanceof (currentElement.ownerDocument.defaultView ?? window).SVGGraphicsElement) {
+    } else if (instanceOf(currentElement, SVGGraphicsElement)) {
+      //@ts-ignore
       let bbox = currentElement.getBBox();
       currLeft = bbox.x
       currTop = bbox.y;
-    } else if (element == currentElement && (element === element.ownerDocument.body || element instanceof (element.ownerDocument.defaultView ?? window).HTMLHtmlElement)) {
+    } else if (element == currentElement && (element === element.ownerDocument.body || instanceOf(element, HTMLHtmlElement))) {
       const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
       currLeft = element.offsetLeft - scrollLeft + parseInt(cs.marginLeft);
       currTop = element.offsetTop - scrollTop + parseInt(cs.marginTop);
