@@ -18,12 +18,14 @@ export interface SignalInformation {
 type StateChangeHandler = (id: string, state: State) => void
 
 export interface VisualizationHandler {
+  getNormalizedSignalName(id: string, relativeSignalPath?: string, element?: Element): string;
+  
   getState(id: string): Promise<State>;
   setState(id: string, val: State | StateValue, ack?: boolean): Promise<void>;
-  subscribeState(id: string, cb: StateChangeHandler, element?: Element): any;
+  subscribeState(id: string, cb: StateChangeHandler): any;
   unsubscribeState(id: string, cb: StateChangeHandler, info: any): void;
-  getObject(id: string, element?: Element): Promise<Signal>;
   getHistoricData(id: string, config: any);
+  getObject(id: string): Promise<Signal>;
 
   getAllNames(type: string);
   getSignalInformation(signal: Signal): SignalInformation;

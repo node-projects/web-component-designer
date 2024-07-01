@@ -46,7 +46,7 @@ export class BindableObjectDragDropService implements IBindableObjectDragDropSer
     this.rectMap.clear();
 
     const designItem = DesignItem.GetDesignItem(element);
-    const obj = await this._visualizationHandler.getObject(bindableObject.fullName, null);
+    const obj = await this._visualizationHandler.getObject(bindableObject.fullName);
     const info = this._visualizationHandler.getSignalInformation(obj);
 
     if (designItem && !designItem.isRootItem) {
