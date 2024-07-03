@@ -1,4 +1,4 @@
-import { IStyleRule, IStylesheet, IStyleDeclaration, AbstractStylesheetService, IDesignerCanvas, IDesignItem, IDocumentStylesheet } from "@node-projects/web-component-designer";
+import { IStyleRule, IStylesheet, IStyleDeclaration, AbstractStylesheetService, IDesignerCanvas, IDesignItem, IDocumentStylesheet, Specificity } from "@node-projects/web-component-designer";
 import { calculate as calculateSpecifity } from "./SpecificityCalculator.js";
 import type * as csstree from 'css-tree';
 
@@ -212,12 +212,9 @@ export class CssTreeStylesheetService extends AbstractStylesheetService {
         }
     }
 
-    private getSpecificity(selector: csstree.SelectorListPlain): number {
+    private getSpecificity(selector: csstree.SelectorListPlain): Specificity {
         const specificities = calculateSpecifity(selector);
-        let sum = 0;
-        specificities.forEach(specificity => sum += specificity.a * 10000 + specificity.b * 100 + specificity.c);
-
-        return sum;
+        return specificities[0];
     }
 
     private findDeclarationInRule(rule: csstree.RulePlain, styleName: string): csstree.DeclarationPlain {
