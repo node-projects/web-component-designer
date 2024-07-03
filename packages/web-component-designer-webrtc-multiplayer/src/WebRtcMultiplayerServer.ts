@@ -2,17 +2,15 @@ type ExchangeData = { offer: RTCSessionDescription, ice: RTCIceCandidate }
 
 export class WebRtcMultiplayerServer {
 
-    connection: RTCPeerConnection;
-    dataChannel: RTCDataChannel;
-    broadcastChannel: BroadcastChannel;
+    private connection: RTCPeerConnection;
+    private dataChannel: RTCDataChannel;
+    private broadcastChannel: BroadcastChannel;
 
     useBroadcast() {
         this.broadcastChannel = new BroadcastChannel('webrtc-signaling');
         this.broadcastChannel.onmessage = (event) => {
             if (event.data.type === 'answer') {
                 this.connection.setRemoteDescription(new RTCSessionDescription(event.data.answer));
-            } else if (event.data.type === 'ice') {
-                this.connection.addIceCandidate(new RTCIceCandidate(event.data.candidate));
             } else if (event.data.type === 'ice') {
                 this.connection.addIceCandidate(new RTCIceCandidate(event.data.candidate));
             }
@@ -27,7 +25,7 @@ export class WebRtcMultiplayerServer {
                 if (event.candidate) {
                     result.ice = event.candidate;
                     if (this.broadcastChannel)
-                        this.broadcastChannel.postMessage({ type: 'ice', candidate: event.candidate });
+                        this.broadcastChannel.postMessage({ type: 'ice', candidate: event.candidate.toJSON() });
                     res(result);
                 }
             };
@@ -40,7 +38,7 @@ export class WebRtcMultiplayerServer {
 
             let offer = await this.connection.createOffer();
             await this.connection.setLocalDescription(offer);
-            this.broadcastChannel.postMessage({ type: 'offer', offer: this.connection.localDescription });
+            this.broadcastChannel.postMessage({ type: 'offer', offer: this.connection.localDescription.toJSON() });
             result.offer = this.connection.localDescription;
         });
     }
@@ -83,7 +81,7 @@ export class WebRtcMultiplayerServer {
         this.dataChannel.send(data);
     }
 
-    _message(event: MessageEvent<any>) {
+    private _message(event: MessageEvent<any>) {
         console.log("Message from ...", event.data);
     }
 }

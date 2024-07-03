@@ -1,7 +1,7 @@
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
-import { WebRtcMultiplayerServer } from "./WebRtcMultiplayerServer.js";
+//import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+//import { WebRtcMultiplayerServer } from "./WebRtcMultiplayerServer.js";
 
-export class WebRtcDataExchangeService implements IDataExchangeService {
+/*export class WebRtcDataExchangeService implements IDataExchangeService {
 
     _connection: WebRtcMultiplayerServer;
 
@@ -16,4 +16,4 @@ this._connection._message
     }
 
     received=new TypedEvent<IMultiplayerMessage<any>>;
-}
+}*/
