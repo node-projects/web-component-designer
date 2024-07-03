@@ -1,4 +1,4 @@
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+/*import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IPoint } from "../../../interfaces/IPoint";
 
 export interface IMultiplayerService {
@@ -27,4 +27,4 @@ export type cursor = {
     point: IPoint
     state: 'none' | 'pointing' | 'chat'
     document: string
-}
+}*/

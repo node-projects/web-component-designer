@@ -1,4 +1,4 @@
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+/*import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { userInfo } from "./IMultiplayerService";
 
 export class MultiplayerService {
@@ -9,4 +9,4 @@ export class MultiplayerService {
     
     cursorsChanged: TypedEvent<string>;
 
-}
+}*/

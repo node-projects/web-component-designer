@@ -113,8 +113,8 @@ export * from "./elements/services/manifestParsers/WebcomponentManifestParserSer
 export type { IModelCommandService } from "./elements/services/modelCommandService/IModelCommandService.js";
 export * from "./elements/services/modelCommandService/DefaultModelCommandService.js";
 
-export type { IMultiplayerService } from "./elements/services/multiplayerService/IMultiplayerService.js";
-export * from "./elements/services/multiplayerService/MultiplayerService.js";
+//export type { IMultiplayerService } from "./elements/services/multiplayerService/IMultiplayerService.js";
+//export * from "./elements/services/multiplayerService/MultiplayerService.js";
 
 
 export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";

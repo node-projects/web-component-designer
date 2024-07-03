@@ -1,4 +1,4 @@
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+/*import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { IMultiplayerMessage } from "../IMultiplayerService.js";
 
@@ -23,4 +23,4 @@ let a:IMultiplayerChatMessage = {
     data: {
 
     }
-}
+}*/

@@ -1,4 +1,4 @@
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+/*import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IMultiplayerMessage } from "./IMultiplayerService";
 
 export class MultiplayerDataService {
@@ -19,4 +19,4 @@ export class MultiplayerDataService {
     }
 
     received = new TypedEvent<IMultiplayerMessage<any>>
-}
+}*/

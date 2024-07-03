@@ -1,4 +1,4 @@
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
+/*import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { IChatMessage, IChatService } from "./IChatService.js";
 
@@ -15,4 +15,4 @@ export class ChatService implements IChatService {
     }
 
     newMessage: TypedEvent<IChatMessage>;
-}
+}*/
