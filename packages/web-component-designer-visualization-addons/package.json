@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon for visualizations",
   "name": "@node-projects/web-component-designer-visualization-addons",
-  "version": "0.1.43",
+  "version": "0.1.44",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
