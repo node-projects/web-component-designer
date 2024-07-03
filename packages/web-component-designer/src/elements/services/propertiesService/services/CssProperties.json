@@ -597,7 +597,8 @@
         "values": [
             "static",
             "relative",
-            "absolute"
+            "absolute",
+            "fixed"
         ]
     },
     "prefix": {},

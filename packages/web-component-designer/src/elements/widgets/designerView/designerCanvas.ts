@@ -359,6 +359,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this._useIframe) {
       this._iframe = document.createElement('iframe');
       this._iframe.setAttribute("sandbox", "allow-same-origin");
+      this._iframe.setAttribute("scrolling", "no");
       //TODO: add option to allow scripts in iframes...
       //this._iframe.setAttribute("sandbox", "allow-same-origin allow-scripts");
       this._canvas.appendChild(this._iframe);
@@ -849,7 +850,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _updateTransform() {
     this._scaleFactor = this._zoomFactor;
-    this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + (isNaN(this._canvasOffset.x) ? '0' : this._canvasOffset.x) + 'px, ' + (isNaN(this._canvasOffset.y) ? '0' : this._canvasOffset.y) + 'px)';
+    if (this._useIframe) {
+      let offX = this._canvasOffset.x;
+      let offY = this._canvasOffset.y;
+      this._iframe.contentWindow.scrollTo(offX * -1, offY * -1);
+      offX += this._iframe.contentWindow.scrollX;
+      offY += this._iframe.contentWindow.scrollY;
+      this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + offX + 'px, ' + offY + 'px)'
+
+    } else {
+      this._canvasContainer.style.transform = 'scale(' + this._zoomFactor + ') translate(' + (isNaN(this._canvasOffset.x) ? '0' : this._canvasOffset.x) + 'px, ' + (isNaN(this._canvasOffset.y) ? '0' : this._canvasOffset.y) + 'px)';
+    }
     this._canvasContainer.style.transformOrigin = '0 0';
     this.overlayLayer.style.transform = this._canvasContainer.style.transform;
     this.overlayLayer.style.transformOrigin = '0 0';

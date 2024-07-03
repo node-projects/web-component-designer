@@ -33,6 +33,7 @@ export class SimpleDemoProviderService implements IDemoProviderService {
       //@ts-ignore
       shadowRoot.setHTMLUnsafe(code);
     else
+      //@ts-ignore
       shadowRoot.innerHTML = code;
 
     contentDiv.style.display = '';
