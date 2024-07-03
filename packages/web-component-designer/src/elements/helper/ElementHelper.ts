@@ -106,9 +106,16 @@ export function getElementOffsetsInContainer(element: Element) {
     //@ts-ignore
     return { x: element.offsetLeft, y: element.offsetTop };
   } else {
-    //const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
-   
-    //todo: this will not work correctly with transformed SVGs or MathML Elements 
+    if (element instanceof (element.ownerDocument.defaultView ?? window).SVGGraphicsElement && !(element instanceof (element.ownerDocument.defaultView ?? window).SVGSVGElement)) {
+      const bb = element.getBBox();
+      return new DOMPoint(bb.x, bb.y);
+    }
+
+    const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+    if (cs.position === 'absolute') {
+      return new DOMPoint(parseFloat(cs.left), parseFloat(cs.top));
+    }
+
     const r1 = element.getBoundingClientRect();
     const r2 = element.parentElement.getBoundingClientRect();
     return { x: r1.x - r2.x, y: r1.y - r2.y }
