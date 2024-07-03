@@ -9,7 +9,7 @@
     "test": "node node_modules/jest/bin/jest.js",
     "develop": "npm i && npm run link && npm run build",
     "link": "npm run link --workspaces",
-    "watch": "npm run watch --workspaces",
+    "watch": "tsc -b --watch",
     "build": "npm run build --workspaces",
     "prepublishOnly": "npm run build"
   },

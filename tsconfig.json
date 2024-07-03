@@ -2,5 +2,23 @@
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
     "noEmit": true
-  }
+  },
+  "references": [
+    { "path": "./packages/web-component-designer" },
+    { "path": "./packages/web-component-designer-codeview-ace" },
+    { "path": "./packages/web-component-designer-codeview-codemirror" },
+    { "path": "./packages/web-component-designer-codeview-codemirror5" },
+    { "path": "./packages/web-component-designer-codeview-monaco" },
+    { "path": "./packages/web-component-designer-htmlparserservice-base-custom-webcomponent" },
+    { "path": "./packages/web-component-designer-htmlparserservice-lit-element" },
+    { "path": "./packages/web-component-designer-htmlparserservice-nodehtmlparser" },
+    { "path": "./packages/web-component-designer-miniatureview-html2canvas" },
+    { "path": "./packages/web-component-designer-stylesheetservice-css-tools" },
+    { "path": "./packages/web-component-designer-stylesheetservice-css-tree" },
+    { "path": "./packages/web-component-designer-visualization-addons" },
+    { "path": "./packages/web-component-designer-webrtc-multiplayer" },
+    { "path": "./packages/web-component-designer-widgets-fancytree" },
+    { "path": "./packages/web-component-designer-widgets-wunderbaum" },
+    { "path": "./packages/web-component-designer-zpl" }
+  ]
 }
