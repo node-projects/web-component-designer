@@ -1,6 +1,8 @@
 src/
-test/
+tests/
 node_modules/
 tsconfig.json
 tsconfig.tsbuildinfo
+jest.config.js
+jsr.json
 !dist
