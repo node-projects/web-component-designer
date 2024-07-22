@@ -679,7 +679,11 @@ export class BindingsHelper {
       const evt = element[e];
       if (evt instanceof TypedEvent) {
         evt.on(() => {
-          let v = element[binding[0]];
+          let v;
+          if (binding[1].target == BindingTarget.attribute)
+            v = element.getAttribute(binding[0]);
+          else
+            v = element[binding[0]];
           v = BindingsHelper.parseValueWithType(v, binding);
           if (binding[1].compiledExpressionTwoWay)
             v = binding[1].compiledExpressionTwoWay(v);
@@ -687,7 +691,11 @@ export class BindingsHelper {
         })
       } else {
         element.addEventListener(e, (evt) => {
-          let v = element[binding[0]];
+          let v;
+          if (binding[1].target == BindingTarget.attribute)
+            v = element.getAttribute(binding[0]);
+          else
+            v = element[binding[0]];
           v = BindingsHelper.parseValueWithType(v, binding);
           if (binding[1].compiledExpressionTwoWay)
             v = binding[1].compiledExpressionTwoWay(v);
