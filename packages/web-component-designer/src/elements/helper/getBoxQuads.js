@@ -306,6 +306,8 @@ function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor)
 * @returns {Element}
 */
 function getParentElementIncludingSlots(element) {
+    if (element instanceof HTMLElement)
+        return element.offsetParent;
     if (element.assignedSlot)
         return element.assignedSlot;
     if (element.parentElement == null) {
