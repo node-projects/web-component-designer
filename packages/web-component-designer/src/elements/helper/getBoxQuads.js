@@ -257,8 +257,8 @@ function getElementOffsetsInContainer(node) {
 * @param {Element} ancestor
 */
 function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor) {
-     /** @type {Element } */
-     //@ts-ignore
+    /** @type {Element } */
+    //@ts-ignore
     let actualElement = node;
     /** @type {DOMMatrix } */
     let parentElementMatrix;
@@ -398,21 +398,23 @@ function getElementPerspectiveTransform(element) {
     /** @type { Element } */
     //@ts-ignore
     const perspectiveNode = getParentElementIncludingSlots(element);
-    //https://drafts.csswg.org/css-transforms-2/#perspective-matrix-computation
-    let s = (element.ownerDocument.defaultView ?? window).getComputedStyle(perspectiveNode);
-    if (s.perspective !== 'none') {
-        let m = new DOMMatrix();
-        let p = parseFloat(s.perspective);
-        m.m34 = -1.0 / p;
-        //https://drafts.csswg.org/css-transforms-2/#PerspectiveDefined
-        const origin = s.perspectiveOrigin.split(' ');
-        const originX = parseFloat(origin[0]) - element.offsetLeft;
-        const originY = parseFloat(origin[1]) - element.offsetTop;
+    if (perspectiveNode) {
+        //https://drafts.csswg.org/css-transforms-2/#perspective-matrix-computation
+        let s = (element.ownerDocument.defaultView ?? window).getComputedStyle(perspectiveNode);
+        if (s.perspective !== 'none') {
+            let m = new DOMMatrix();
+            let p = parseFloat(s.perspective);
+            m.m34 = -1.0 / p;
+            //https://drafts.csswg.org/css-transforms-2/#PerspectiveDefined
+            const origin = s.perspectiveOrigin.split(' ');
+            const originX = parseFloat(origin[0]) - element.offsetLeft;
+            const originY = parseFloat(origin[1]) - element.offsetTop;
 
-        const mOri = new DOMMatrix().translate(originX, originY);
-        const mOriInv = new DOMMatrix().translate(-originX, -originY);
+            const mOri = new DOMMatrix().translate(originX, originY);
+            const mOriInv = new DOMMatrix().translate(-originX, -originY);
 
-        return mOri.multiply(m.multiply(mOriInv));
+            return mOri.multiply(m.multiply(mOriInv));
+        }
     }
     return null;
 }
