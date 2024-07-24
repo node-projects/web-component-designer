@@ -95,7 +95,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
   override refresh() {
     const p = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas })[0];
-    if (this._valuesHaveChanges(this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, this.designerCanvas.scaleFactor, p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y)) {
+    if (this._valuesHaveChanges(this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, this.designerCanvas.scaleFactor, p.p1.x, p.p1.y, p.p2.x, p.p2.y, p.p3.x, p.p3.y, p.p4.x, p.p4.y)) {
       let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
       let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
       data += "M" + [p.p1, p.p2, p.p3, p.p4].map(x => x.x + ',' + x.y).join(' ') + 'Z ';
