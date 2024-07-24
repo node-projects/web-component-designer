@@ -75,7 +75,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           <svg id="expandAll" style="width: 16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M64 80a16 16 0 0 0-16 16v320a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM0 96a64 64 0 0 1 64-64h320a64 64 0 0 1 64 64v320a64 64 0 0 1-64 64H64a64 64 0 0 1-64-64zm200 248v-64h-64a24 24 0 1 1 0-48h64v-64a24 24 0 1 1 48 0v64h64a24 24 0 1 1 0 48h-64v64a24 24 0 1 1-48 0"></path></svg>
           <svg id="collapseAll" style="width: 16px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M64 80a16 16 0 0 0-16 16v320a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM0 96a64 64 0 0 1 64-64h320a64 64 0 0 1 64 64v320a64 64 0 0 1-64 64H64a64 64 0 0 1-64-64zm152 136h144a24 24 0 1 1 0 48H152a24 24 0 1 1 0-48"></path></svg>
         </div>
-        <div style="height: calc(100% - 23px);">
+        <div style="height: calc(100% - 46px);">
         <div id="treetable" class="wb-alternate" style="min-width: 100%; box-sizing: border-box;"></div>
         </div>
       </div>`;
