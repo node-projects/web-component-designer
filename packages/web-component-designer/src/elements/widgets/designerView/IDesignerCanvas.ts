@@ -13,7 +13,7 @@ import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 
-export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler {
+export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler, HTMLElement {
   readonly serviceContainer: ServiceContainer;
   readonly instanceServiceContainer: InstanceServiceContainer;
   readonly containerBoundingRect: DOMRect;

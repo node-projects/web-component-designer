@@ -1,6 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
-import { cssMatrixToMatrixArray, extractRotationAngleFromDOMMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from '../../../helper/TransformHelper.js';
+import { cssMatrixToMatrixArray, extractRotationAngleFromDOMMatrix, getRotationAngleFromMatrix, getRotationMatrix3d, rotateElementByMatrix3d } from '../../../helper/TransformHelper.js';
+import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -29,11 +30,11 @@ export class RotateExtension extends AbstractExtension {
     this._rotateIcon = this._drawRotateOverlay(rect, this._rotateIcon, cache);
   }
 
-  _drawRotateOverlay(itemRect: DOMRect, oldRotateIcon: any, cache: Record<string | symbol, any>) {
-    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 10, y: 10 }, this.designerCanvas, cache);
-    let rotateIconPosition: DOMPoint = transformedCornerPoints[0];
+  _drawRotateOverlay(itemRect: DOMRect, oldRotateIcon: any, cache: Record<string | symbol, any>) {   
+    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, {box: 'border', offset: new DOMQuad({ x: 10, y: 10 }), relativeTo: this.designerCanvas.canvas})[0];
+    let rotateIconPosition: DOMPoint = transformedCornerPoints.p1;
 
-    if (isNaN(transformedCornerPoints[0].x) || isNaN(transformedCornerPoints[1].x)) {
+    if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p2.x)) {
       this.remove();
       return;
     }
@@ -102,8 +103,8 @@ export class RotateExtension extends AbstractExtension {
           const rotationMatrix3d = getRotationMatrix3d('z', angle);
           rotateElementByMatrix3d((<HTMLElement>this.extendedItem.element), rotationMatrix3d);
 
-          const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: 30, y: 30 }, this.designerCanvas);
-          const angleTextPosition = transformedCornerPoints[0];
+          const transformedCornerPoints = getBoxQuads(this.extendedItem.element, {box: 'border', offset: new DOMQuad({ x: 30, y: 30 }), relativeTo: this.designerCanvas.canvas})[0];
+          const angleTextPosition = transformedCornerPoints.p1;
           this._textAngle = this._drawTextWithBackground(this._actualRotationAngle + '°', angleTextPosition.x, angleTextPosition.y, 'white', 'svg-rotate-text', this._textAngle);
           this._textAngle[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
           this._textAngle[3].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';

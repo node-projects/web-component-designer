@@ -1,4 +1,4 @@
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
+import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -17,8 +17,8 @@ export class InvisibleElementExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    const t = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
-    if (this._valuesHaveChanges(t[0].x, t[0].y, t[1].x, t[1].y, t[2].x, t[2].y, t[3].x, t[3].y)) {
+    const t = getBoxQuads(this.extendedItem.element, {relativeTo: this.designerCanvas.canvas})[0];
+    if (this._valuesHaveChanges(t.p1.x, t.p1.y, t.p2.x, t.p2.y, t.p3.x, t.p3.y, t.p4.x, t.p4.y)) {
       this._rect = this._drawTransformedRect(t, 'svg-invisible-div', this._rect, OverlayLayer.Background);
     }
   }

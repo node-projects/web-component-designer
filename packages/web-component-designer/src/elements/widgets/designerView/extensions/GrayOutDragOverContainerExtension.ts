@@ -1,4 +1,4 @@
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
+import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -18,7 +18,7 @@ export class GrayOutDragOverContainerExtension extends AbstractExtension {
   }
 
   override refresh() {
-    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
+    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas })[0];
     this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-rect-enter-container', this._rect, OverlayLayer.Background);
   }
 

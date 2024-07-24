@@ -1,6 +1,5 @@
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
+import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
-import { NodeType } from '../../../item/NodeType.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
@@ -20,22 +19,16 @@ export class SelectionDefaultExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    let transformedCornerPoints: { x: number, y: number }[];
-    if (this.extendedItem.nodeType == NodeType.TextNode) {
-      let rect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element)
-      transformedCornerPoints = [{ x: rect.x, y: rect.y }, { x: rect.x + rect.width, y: rect.y }, { x: rect.x, y: rect.y + rect.height }, { x: rect.x + rect.width, y: rect.y + rect.height }]
-    }
-    else
-      transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
-
-    if (isNaN(transformedCornerPoints[0].x) || isNaN(transformedCornerPoints[1].x)) {
+    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, {box: 'border', relativeTo: this.designerCanvas.canvas})[0];
+    
+    if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p2.x)) {
       this.remove();
       return;
     }
-    this._line1 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'svg-selection', this._line1);
-    this._line2 = this._drawLine(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'svg-selection', this._line2);
-    this._line3 = this._drawLine(transformedCornerPoints[1].x, transformedCornerPoints[1].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-selection', this._line3);
-    this._line4 = this._drawLine(transformedCornerPoints[2].x, transformedCornerPoints[2].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'svg-selection', this._line4);
+    this._line1 = this._drawLine(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, 'svg-selection', this._line1);
+    this._line2 = this._drawLine(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, 'svg-selection', this._line2);
+    this._line3 = this._drawLine(transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'svg-selection', this._line3);
+    this._line4 = this._drawLine(transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'svg-selection', this._line4);
     this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
     this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
     this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();

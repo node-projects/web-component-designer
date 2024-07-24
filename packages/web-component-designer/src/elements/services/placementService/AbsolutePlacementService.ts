@@ -2,12 +2,13 @@ import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { combineTransforms, extractTranslationFromDOMMatrix, getResultingTransformationBetweenElementAndAllAncestors } from '../../helper/TransformHelper.js';
+import { combineTransforms, extractTranslationFromDOMMatrix } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
+import { convertPointFromNode } from '../../helper/getBoxQuads.js';
 
 export class AbsolutePlacementService implements IPlacementService {
 
@@ -115,16 +116,8 @@ export class AbsolutePlacementService implements IPlacementService {
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
       const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
-      let originalElementAndAllAncestorsMultipliedMatrix: DOMMatrix = getResultingTransformationBetweenElementAndAllAncestors(<HTMLElement>designItem.parent.element, <HTMLElement>canvas, true);
-
-      let transformMatrixParentTransformsCompensated = null;
-      if (originalElementAndAllAncestorsMultipliedMatrix) {
-        transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0).matrixTransform(originalElementAndAllAncestorsMultipliedMatrix.inverse());
-      } else {
-        transformMatrixParentTransformsCompensated = new DOMPoint(track.x, track.y, 0, 0);
-      }
-
-      const translationMatrix = new DOMMatrix().translate(transformMatrixParentTransformsCompensated.x, transformMatrixParentTransformsCompensated.y);
+      const transformedPoint: DOMPoint = convertPointFromNode(<HTMLElement>designItem.parent.element, new DOMPoint(track.x, track.y, 0, 0), <HTMLElement>canvas);
+      const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
   }

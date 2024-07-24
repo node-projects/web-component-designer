@@ -122,8 +122,8 @@ export abstract class AbstractExtensionBase {
     return newEls;
   }
 
-  protected _drawTransformedRect(points: [IPoint, IPoint, IPoint, IPoint], className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
-    let data = "M" + points[0].x + " " + points[0].y + " L" + points[1].x + " " + points[1].y + " L" + points[3].x + " " + points[3].y + " L" + points[2].x + " " + points[2].y + "Z";
+  protected _drawTransformedRect(points: DOMQuad, className?: string, path?: SVGPathElement, overlayLayer?: OverlayLayer) {
+    let data = "M" + points.p1.x + " " + points.p1.y + " L" + points.p2.x + " " + points.p2.y + " L" + points.p3.x + " " + points.p3.y + " L" + points.p4.x + " " + points.p4.y + "Z";
     const newPath = this.overlayLayerView.drawPath(this.constructor.name, data, className, path, overlayLayer);
     if (!path) {
       this.overlays.push(newPath);

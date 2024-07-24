@@ -3,7 +3,8 @@ import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
 import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
-import { transformPointByInverseMatrix, getDesignerCanvasNormalizedTransformedCornerDOMPoints, getElementCombinedTransform } from "../../../helper/TransformHelper.js";
+import { transformPointByInverseMatrix } from "../../../helper/TransformHelper.js";
+import { getBoxQuads, getElementCombinedTransform } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -55,24 +56,24 @@ export class ResizeExtension extends AbstractExtension {
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     //#region Resizer circles
-    let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
+    let transformedCornerPoints = getBoxQuads(this.extendedItem.element, {box: 'border', relativeTo: this.designerCanvas.canvas })[0];
 
-    if (isNaN(transformedCornerPoints[0].x) || isNaN(transformedCornerPoints[1].x)) {
+    if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p1.x)) {
       this.remove();
       return;
     }
-    if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, transformedCornerPoints[2].x, transformedCornerPoints[2].y, transformedCornerPoints[3].x, transformedCornerPoints[3].y)) {
-      this._circle1 = this._drawResizerOverlay(transformedCornerPoints[0].x, transformedCornerPoints[0].y, 'nw-resize', this._circle1);
-      this._circle2 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[1].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[1].y - transformedCornerPoints[0].y) / 2), 'n-resize', this._circle2);
-      this._circle3 = this._drawResizerOverlay(transformedCornerPoints[1].x, transformedCornerPoints[1].y, 'ne-resize', this._circle3);
+    if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y)) {
+      this._circle1 = this._drawResizerOverlay(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, 'nw-resize', this._circle1);
+      this._circle2 = this._drawResizerOverlay((transformedCornerPoints.p1.x + (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x) / 2), (transformedCornerPoints.p1.y + (transformedCornerPoints.p2.y - transformedCornerPoints.p1.y) / 2), 'n-resize', this._circle2);
+      this._circle3 = this._drawResizerOverlay(transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, 'ne-resize', this._circle3);
 
-      this._circle4 = this._drawResizerOverlay((transformedCornerPoints[0].x + (transformedCornerPoints[2].x - transformedCornerPoints[0].x) / 2), (transformedCornerPoints[0].y + (transformedCornerPoints[2].y - transformedCornerPoints[0].y) / 2), 'w-resize', this._circle4);
-      this._circle5 = this._drawResizerOverlay(transformedCornerPoints[2].x, transformedCornerPoints[2].y, 'sw-resize', this._circle5);
+      this._circle4 = this._drawResizerOverlay((transformedCornerPoints.p1.x + (transformedCornerPoints.p4.x - transformedCornerPoints.p1.x) / 2), (transformedCornerPoints.p1.y + (transformedCornerPoints.p4.y - transformedCornerPoints.p1.y) / 2), 'w-resize', this._circle4);
+      this._circle5 = this._drawResizerOverlay(transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, 'sw-resize', this._circle5);
 
-      this._circle6 = this._drawResizerOverlay((transformedCornerPoints[2].x + (transformedCornerPoints[3].x - transformedCornerPoints[2].x) / 2), (transformedCornerPoints[2].y + (transformedCornerPoints[3].y - transformedCornerPoints[2].y) / 2), 's-resize', this._circle6);
-      this._circle8 = this._drawResizerOverlay((transformedCornerPoints[1].x + (transformedCornerPoints[3].x - transformedCornerPoints[1].x) / 2), (transformedCornerPoints[1].y + (transformedCornerPoints[3].y - transformedCornerPoints[1].y) / 2), 'e-resize', this._circle8);
+      this._circle6 = this._drawResizerOverlay((transformedCornerPoints.p4.x + (transformedCornerPoints.p3.x - transformedCornerPoints.p4.x) / 2), (transformedCornerPoints.p4.y + (transformedCornerPoints.p3.y - transformedCornerPoints.p4.y) / 2), 's-resize', this._circle6);
+      this._circle8 = this._drawResizerOverlay((transformedCornerPoints.p2.x + (transformedCornerPoints.p3.x - transformedCornerPoints.p2.x) / 2), (transformedCornerPoints.p2.y + (transformedCornerPoints.p3.y - transformedCornerPoints.p2.y) / 2), 'e-resize', this._circle8);
 
-      this._circle7 = this._drawResizerOverlay(transformedCornerPoints[3].x, transformedCornerPoints[3].y, 'se-resize', this._circle7);
+      this._circle7 = this._drawResizerOverlay(transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'se-resize', this._circle7);
     }
     //#endregion Circles
   }

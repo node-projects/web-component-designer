@@ -4,9 +4,9 @@ import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension, toolbarObject } from "../AbstractExtension.js";
 import { IExtensionManager } from '../IExtensionManger.js';
 import { OverlayLayer } from "../OverlayLayer.js";
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "../../../../helper/TransformHelper.js";
 import { shadowrootGetSelection, wrapSelectionInSpans } from "../../../../helper/SelectionHelper.js";
 import { FontPropertyEditor } from "../../../../services/propertiesService/propertyEditors/FontPropertyEditor.js";
+import { getBoxQuads } from "../../../../helper/getBoxQuads.js";
 
 export type handlesPointerEvent = { handlesPointerEvent(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element): boolean }
 
@@ -94,11 +94,11 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   }
 
   override refresh() {
-    let p = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas);
+    const p = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas })[0];
     if (this._valuesHaveChanges(this.designerCanvas.containerBoundingRect.width, this.designerCanvas.containerBoundingRect.height, this.designerCanvas.scaleFactor, p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, p[3].x, p[3].y)) {
       let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
       let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
-      data += "M" + [p[0], p[1], p[3], p[2]].map(x => x.x + ',' + x.y).join(' ') + 'Z ';
+      data += "M" + [p.p1, p.p2, p.p3, p.p4].map(x => x.x + ',' + x.y).join(' ') + 'Z ';
       this._path.setAttribute("d", data);
     }
   }

@@ -1,5 +1,5 @@
 import { calculateGridInformation } from "../../../../helper/GridHelper.js";
-import { getElementCombinedTransform } from "../../../../helper/TransformHelper.js";
+import { getElementCombinedTransform } from "../../../../helper/getBoxQuads.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension } from '../AbstractExtension.js';

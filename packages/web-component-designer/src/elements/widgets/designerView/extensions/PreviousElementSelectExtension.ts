@@ -1,4 +1,4 @@
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
+import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -20,10 +20,10 @@ export class PreviousElementSelectExtension extends AbstractExtension {
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
 
-    const transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, null, this.designerCanvas, cache);
-    if (!isNaN(transformedCornerPoints[1].x)) {
-      if (this._valuesHaveChanges(transformedCornerPoints[0].x, transformedCornerPoints[0].y, transformedCornerPoints[1].x, transformedCornerPoints[1].y, this.designerCanvas.scaleFactor)) {
-        const angle = Math.atan2((transformedCornerPoints[1].y - transformedCornerPoints[0].y), (transformedCornerPoints[1].x - transformedCornerPoints[0].x)) * 180 / Math.PI;
+    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, {box: 'border', relativeTo: this.designerCanvas.canvas})[0];
+    if (!isNaN(transformedCornerPoints.p2.x)) {
+      if (this._valuesHaveChanges(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, this.designerCanvas.scaleFactor)) {
+        const angle = Math.atan2((transformedCornerPoints.p2.y - transformedCornerPoints.p1.y), (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x)) * 180 / Math.PI;
         const h = (16 / this.designerCanvas.scaleFactor);
         this._rect = this._drawRect(0, 0, h, h, 'svg-previous-select', this._rect);
         this._clickRect = this._drawRect(0, 0, h, h + 3, 'svg-invisible', this._clickRect);
@@ -47,7 +47,7 @@ export class PreviousElementSelectExtension extends AbstractExtension {
           this._g.appendChild(this._clickRect);
         }
         this._path.style.scale = (0.6 / this.designerCanvas.scaleFactor).toString();
-        this._g.style.transform = 'translate(' + (transformedCornerPoints[1].x - (14.5 / this.designerCanvas.scaleFactor)) + 'px,' + (transformedCornerPoints[1].y - (15.5 / this.designerCanvas.scaleFactor)) + 'px) rotate(' + angle + 'deg)';
+        this._g.style.transform = 'translate(' + (transformedCornerPoints.p2.x - (14.5 / this.designerCanvas.scaleFactor)) + 'px,' + (transformedCornerPoints.p2.y - (15.5 / this.designerCanvas.scaleFactor)) + 'px) rotate(' + angle + 'deg)';
         this._g.style.transformOrigin = '100% 100%';
         this._g.style.transformBox = 'fill-box'
       }

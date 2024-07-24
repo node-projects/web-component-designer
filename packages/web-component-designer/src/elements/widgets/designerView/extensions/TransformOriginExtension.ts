@@ -1,7 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { convertCssUnit, getCssUnit } from '../../../helper/CssUnitConverter.js';
-import { getDesignerCanvasNormalizedTransformedPoint } from '../../../helper/TransformHelper.js';
+import { convertPointFromNode } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -21,8 +21,7 @@ export class TransformOriginExtension extends AbstractExtension {
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
-    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas, cache);
-
+    const toDOMPoint = convertPointFromNode(this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas);
     if (this._valuesHaveChanges(toDOMPoint.x, toDOMPoint.y, this.designerCanvas.zoomFactor)) {
       this._removeAllOverlays();
       this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
@@ -41,7 +40,7 @@ export class TransformOriginExtension extends AbstractExtension {
   override extend(cache: Record<string | symbol, any>, event?: Event) {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
-    const toDOMPoint = getDesignerCanvasNormalizedTransformedPoint(<HTMLElement>this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas, cache);
+    const toDOMPoint = convertPointFromNode(this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas);
     if (isNaN(toDOMPoint.x) || isNaN(toDOMPoint.y)) {
       this.remove();
       return;

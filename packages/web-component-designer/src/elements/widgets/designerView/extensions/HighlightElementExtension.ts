@@ -1,4 +1,4 @@
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from '../../../helper/TransformHelper.js';
+import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -20,8 +20,8 @@ export class HighlightElementExtension extends AbstractExtension {
   }
 
   override refresh() {
-    let transformedCornerPoints = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>this.extendedItem.element, { x: offset, y: offset }, this.designerCanvas);
-    if (!isNaN(transformedCornerPoints[0].x)) {
+    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas, offset: new DOMQuad({ x: offset, y: offset }) })[0];
+    if (!isNaN(transformedCornerPoints.p1.x)) {
       this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect, OverlayLayer.Background);
       this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
     }

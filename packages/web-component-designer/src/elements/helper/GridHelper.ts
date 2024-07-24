@@ -1,5 +1,6 @@
 import { IDesignItem } from "../item/IDesignItem.js";
-import { getDesignerCanvasNormalizedTransformedCornerDOMPoints } from "./TransformHelper.js";
+import { DesignerCanvas } from "../widgets/designerView/designerCanvas.js";
+import { getBoxQuads } from "./getBoxQuads.js";
 
 export function getElementGridInformation(element: HTMLElement) {
   let cs = getComputedStyle(element);
@@ -26,7 +27,7 @@ export function calculateGridInformation(designItem: IDesignItem) {
   //TODO: same name should combine columns/rows
 
   let itemRect = designItem.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(designItem.element);
-  let transformedCornerPoints: DOMPoint[] = getDesignerCanvasNormalizedTransformedCornerDOMPoints(<HTMLElement>designItem.element, null, designItem.instanceServiceContainer.designerCanvas);
+  let transformedCornerPoints: DOMQuad = getBoxQuads(designItem.element, { relativeTo: <DesignerCanvas>designItem.instanceServiceContainer.designerCanvas.canvas })[0];
 
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');
@@ -34,16 +35,16 @@ export function calculateGridInformation(designItem: IDesignItem) {
 
   const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
   const paddingTop = Number.parseFloat(computedStyle.paddingTop);
- 
+
 
   let y = 0;
   let xGap = 0;
   let yGap = 0;
   let rw = 0;
-  let xOffset = transformedCornerPoints[0].x;
-  let yOffset = transformedCornerPoints[0].y;
-  xOffset+=parseFloat(computedStyle.borderLeftWidth);
-  yOffset+=parseFloat(computedStyle.borderTopWidth);
+  let xOffset = transformedCornerPoints.p1.x;
+  let yOffset = transformedCornerPoints.p1.y;
+  xOffset += parseFloat(computedStyle.borderLeftWidth);
+  yOffset += parseFloat(computedStyle.borderTopWidth);
 
   let gridA: string[] = null;
   if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')
