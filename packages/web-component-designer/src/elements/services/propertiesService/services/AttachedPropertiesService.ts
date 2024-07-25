@@ -21,7 +21,7 @@ export class AttachedPropertiesService extends AbstractPropertiesService {
     if (designItem.serviceContainer.attachedPropertyServices) {
       for (let s of designItem.serviceContainer.attachedPropertyServices) {
         if (s.isHandledElement(designItem)) {
-          p.push(...<any>s.getProperties(designItem));
+          p.push(...<any>await s.getProperties(designItem));
         }
       }
     }
