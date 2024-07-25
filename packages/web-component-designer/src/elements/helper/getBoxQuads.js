@@ -271,12 +271,21 @@ function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor)
             projectTo2D(originalElementAndAllParentsMultipliedMatrix);
         }
     }
-
+    let lastOffsetParent = null;
     while (actualElement != ancestor && actualElement != null) {
-        const offsets = getElementOffsetsInContainer(actualElement);
-        const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
-        originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
-
+        if (actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
+            if (lastOffsetParent !== actualElement.offsetParent && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement)) {
+                const offsets = getElementOffsetsInContainer(actualElement);
+                lastOffsetParent = actualElement.offsetParent;
+                const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
+                originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+            }
+        } else {
+            const offsets = getElementOffsetsInContainer(actualElement);
+            lastOffsetParent = null;
+            const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
+            originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+        }
         const parentElement = getParentElementIncludingSlots(actualElement);
         if (parentElement) {
             parentElementMatrix = getElementCombinedTransform(parentElement);
@@ -306,8 +315,6 @@ function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor)
 * @returns {Element}
 */
 function getParentElementIncludingSlots(node) {
-    if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement)
-        return node.offsetParent;
     if (node instanceof (node.ownerDocument.defaultView ?? window).Element && node.assignedSlot)
         return node.assignedSlot;
     if (node.parentElement == null) {
