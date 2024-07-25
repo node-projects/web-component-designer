@@ -113,12 +113,14 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     let parentEl: HTMLElement = this._designerTabControl;
 
     for (const v of visibleDict) {
-      let el = this._propertyGridPropertyListsDict[v];
+      const el = this._propertyGridPropertyListsDict[v];
+      const scrollTop = el.scrollTop;
       if (parentEl === this._designerTabControl)
         parentEl.insertAdjacentElement('afterbegin', el);
       else
         parentEl.insertAdjacentElement('afterend', el);
       parentEl = el;
+      el.scrollTo(0, scrollTop);
     }
 
     for (let p of this._propertyGridPropertyLists) {
