@@ -9,7 +9,7 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 export abstract class AbstractPolymerLikePropertiesService extends AbstractPropertiesService {
 
   public override getRefreshMode(designItem: IDesignItem) {
-    return RefreshMode.full;
+    return RefreshMode.fullOnClassChange;
   }
   
   public override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {

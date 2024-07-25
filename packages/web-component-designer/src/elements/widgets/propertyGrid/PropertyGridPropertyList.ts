@@ -18,6 +18,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _serviceContainer: ServiceContainer;
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
+  private _lastClassType: any;
 
   public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
   public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
@@ -142,7 +143,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public async createElements(designItem: IDesignItem): Promise<boolean> {
-    if (this._propertiesService && (this._propertiesService.getRefreshMode(designItem) != RefreshMode.none) || this._propertyMap.size == 0) {
+    if (this._propertiesService && (this._propertiesService.getRefreshMode(designItem) !== RefreshMode.none && (this._propertiesService.getRefreshMode(designItem) !== RefreshMode.fullOnClassChange || this._lastClassType !== designItem.element.constructor)) || this._propertyMap.size == 0) {
+      this._lastClassType = designItem.element.constructor;
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
       if (this._propertiesService) {

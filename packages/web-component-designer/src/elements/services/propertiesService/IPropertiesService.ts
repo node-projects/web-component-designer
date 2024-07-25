@@ -10,7 +10,8 @@ import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 export enum RefreshMode {
   none,
   full,
-  fullOnValueChange
+  fullOnValueChange,
+  fullOnClassChange
 }
 
 export interface IPropertiesService extends IService {
