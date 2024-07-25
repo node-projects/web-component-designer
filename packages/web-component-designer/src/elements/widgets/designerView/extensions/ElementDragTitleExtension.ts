@@ -50,7 +50,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas, offset: new DOMQuad({ x: 0, y: 16 }, { x: 0, y: 16 }) })[0];
+    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas, offset: new DOMQuad({ x: 0, y: 16 / this.designerCanvas.scaleFactor }, { x: 0, y: 16 /  this.designerCanvas.scaleFactor }) })[0];
     if (!isNaN(transformedCornerPoints.p1.x)) {
       const angle = Math.atan2((transformedCornerPoints.p2.y - transformedCornerPoints.p1.y), (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x)) * 180 / Math.PI;
       if (this._valuesHaveChanges(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, angle, this.designerCanvas.scaleFactor)) {

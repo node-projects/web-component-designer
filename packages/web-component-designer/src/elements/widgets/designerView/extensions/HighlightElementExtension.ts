@@ -20,10 +20,10 @@ export class HighlightElementExtension extends AbstractExtension {
   }
 
   override refresh() {
-    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas, offset: new DOMQuad({ x: offset, y: offset }) })[0];
+    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas, offset: new DOMQuad({ x: offset / this.designerCanvas.scaleFactor, y: offset / this.designerCanvas.scaleFactor }, { x: -offset / this.designerCanvas.scaleFactor, y: offset / this.designerCanvas.scaleFactor }, { x: -offset / this.designerCanvas.scaleFactor, y: -offset / this.designerCanvas.scaleFactor }, { x: offset / this.designerCanvas.scaleFactor, y: -offset / this.designerCanvas.scaleFactor }) })[0];
     if (!isNaN(transformedCornerPoints.p1.x)) {
       this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect, OverlayLayer.Background);
-      this._rect.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._rect.style.strokeWidth = (2 / this.designerCanvas.scaleFactor).toString();
     }
   }
 
