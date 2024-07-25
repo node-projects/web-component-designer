@@ -235,7 +235,7 @@ function getElementOffsetsInContainer(node) {
         let range = document.createRange();
         range.selectNodeContents(node);
         let r1 = range.getBoundingClientRect();
-        const r2 = node.parentElement.getBoundingClientRect();
+        const r2 = getParentElementIncludingSlots(node).getBoundingClientRect();
         return new DOMPoint(r1.x - r2.x, r1.y - r2.y);
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Element) {
         if (node instanceof (node.ownerDocument.defaultView ?? window).SVGGraphicsElement && !(node instanceof (node.ownerDocument.defaultView ?? window).SVGSVGElement)) {
@@ -247,7 +247,7 @@ function getElementOffsetsInContainer(node) {
             return new DOMPoint(parseFloat(cs.left), parseFloat(cs.top));
         }
         const r1 = node.getBoundingClientRect();
-        const r2 = node.parentElement.getBoundingClientRect();
+        const r2 = getParentElementIncludingSlots(node).getBoundingClientRect();
         return new DOMPoint(r1.x - r2.x, r1.y - r2.y);
     }
 }
@@ -302,27 +302,27 @@ function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor)
 }
 
 /**
-* @param {Element} element
+* @param {Node} node
 * @returns {Element}
 */
-function getParentElementIncludingSlots(element) {
-    if (element instanceof HTMLElement)
-        return element.offsetParent;
-    if (element.assignedSlot)
-        return element.assignedSlot;
-    if (element.parentElement == null) {
-        if (element.parentNode instanceof (element.ownerDocument.defaultView ?? window).ShadowRoot) {
-            return element.parentNode.host;
+function getParentElementIncludingSlots(node) {
+    if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement)
+        return node.offsetParent;
+    if (node instanceof (node.ownerDocument.defaultView ?? window).Element && node.assignedSlot)
+        return node.assignedSlot;
+    if (node.parentElement == null) {
+        if (node.parentNode instanceof (node.ownerDocument.defaultView ?? window).ShadowRoot) {
+            return node.parentNode.host;
         }
     }
-    return element.parentElement;
+    return node.parentElement;
 }
 
 /**
 * @param {Element} element
 */
 export function getElementCombinedTransform(element) {
-    if (element instanceof Text)
+    if (element instanceof (element.ownerDocument.defaultView ?? window).Text)
         return new DOMMatrix;
 
     //https://www.w3.org/TR/css-transforms-2/#ctm
