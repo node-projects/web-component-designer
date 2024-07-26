@@ -235,103 +235,107 @@ export class BindingsHelper {
 
     const eventsString = binding.twoWay && binding.events?.length > 0 ? '::' + binding.events.join(',') : '';
 
-    if (binding.target == BindingTarget.property &&
+    let needsJson = false;
+    if (eventsString && binding.expression?.includes('::') || binding.expressionTwoWay?.includes('::'))
+      needsJson = true;
+
+    if (!needsJson && binding.target == BindingTarget.property &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
       if (targetName == 'textContent')
-        return [bindingPrefixContent + 'text', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+        return [bindingPrefixContent + 'text', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
       if (targetName == 'innerHTML')
-        return [bindingPrefixContent + 'html', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
-      return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+        return [bindingPrefixContent + 'html', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
+      return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
     //Multi Var Expressions
-    if (binding.target == BindingTarget.property &&
+    if (!needsJson && binding.target == BindingTarget.property &&
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
       if (targetName == 'textContent')
-        return [bindingPrefixContent + 'text', (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
+        return [bindingPrefixContent + 'text', (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
       if (targetName == 'innerHTML')
-        return [bindingPrefixContent + 'html', (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
-      return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
+        return [bindingPrefixContent + 'html', (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
+      return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
-    if (binding.target == BindingTarget.attribute &&
+    if (!needsJson && binding.target == BindingTarget.attribute &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+      return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
     //Multi Var Expressions
-    if (binding.target == BindingTarget.attribute &&
+    if (!needsJson && binding.target == BindingTarget.attribute &&
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
+      return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
-    if (binding.target == BindingTarget.class &&
+    if (!needsJson && binding.target == BindingTarget.class &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+      return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
     //Multi Var Expressions
-    if (binding.target == BindingTarget.class &&
+    if (!needsJson && binding.target == BindingTarget.class &&
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
+      return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
-    if (binding.target == BindingTarget.css &&
+    if (!needsJson && binding.target == BindingTarget.css &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+      return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
 
     //Multi Var Expressions
-    if (binding.target == BindingTarget.css &&
+    if (!needsJson && binding.target == BindingTarget.css &&
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
+      return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
-    if (binding.target == BindingTarget.cssvar &&
+    if (!needsJson && binding.target == BindingTarget.cssvar &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), (binding.inverted ? '!' : '') + binding.signal + eventsString + (!binding.twoWay && binding.signal.includes(';') ? ';' : '')];
+      return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
     //Multi Var Expressions
-    if (binding.target == BindingTarget.cssvar &&
+    if (!needsJson && binding.target == BindingTarget.cssvar &&
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
       !binding.historic) {
-      return [bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + eventsString + ';' + binding.expression];
+      return [bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
     if (binding.inverted === null || binding.inverted === false) {
