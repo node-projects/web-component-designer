@@ -546,7 +546,7 @@ export class DesignItem implements IDesignItem {
         if (decls !== null && decls.length > 0) {
           this.instanceServiceContainer.stylesheetService.updateDeclarationValue(decls[0], value, important);
         } else {
-          let rules = this.instanceServiceContainer.stylesheetService.getRules(':host').filter(x => !x.stylesheet.readOnly);
+          let rules = this.instanceServiceContainer.stylesheetService.getRules(':host').filter(x => !x.stylesheet?.readOnly);
           if (decls === null || rules.length === 0) {
             const cg = this.openGroup('add rule and set style: ' + name);
             const sheets = this.instanceServiceContainer.stylesheetService.getStylesheets();
@@ -576,7 +576,7 @@ export class DesignItem implements IDesignItem {
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
 
-    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarationsSortedBySpecificity(this, nm);
+    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarationsSortedBySpecificity(this, nm).filter(x => !x.stylesheet?.readOnly);
 
     if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
       // Set style locally
@@ -594,7 +594,7 @@ export class DesignItem implements IDesignItem {
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
 
-    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarationsSortedBySpecificity(this, nm);
+    let declarations = this.instanceServiceContainer.stylesheetService?.getDeclarationsSortedBySpecificity(this, nm).filter(x => !x.stylesheet?.readOnly);
 
     if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
       // Set style locally
