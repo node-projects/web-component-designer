@@ -546,7 +546,7 @@ export class DesignItem implements IDesignItem {
         if (decls !== null && decls.length > 0) {
           this.instanceServiceContainer.stylesheetService.updateDeclarationValue(decls[0], value, important);
         } else {
-          let rules = this.instanceServiceContainer.stylesheetService.getRules(':host')
+          let rules = this.instanceServiceContainer.stylesheetService.getRules(':host').filter(x => !x.stylesheet.readOnly);
           if (decls === null || rules.length === 0) {
             const cg = this.openGroup('add rule and set style: ' + name);
             const sheets = this.instanceServiceContainer.stylesheetService.getStylesheets();
@@ -669,14 +669,14 @@ export class DesignItem implements IDesignItem {
       try {
         const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);
         if (rules) {
-          return [{ selector: null, declarations: localStyles, specificity: null }, ...rules];
+          return [{ selector: null, declarations: localStyles, specificity: null, stylesheet: null }, ...rules];
         }
       }
       catch (err) {
         console.warn('getAppliedRules', err);
       }
     }
-    styles = [{ selector: null, declarations: localStyles, specificity: null }];
+    styles = [{ selector: null, declarations: localStyles, specificity: null, stylesheet: null }];
     this._stylesCache = styles;
     clearTimeout(this._cacheClearTimer);
     this._cacheClearTimer = setTimeout(() => this._stylesCache = null, 30);

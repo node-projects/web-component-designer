@@ -7,6 +7,7 @@ export interface IStyleRule {
     declarations: IStyleDeclaration[];
     specificity: Specificity;
     stylesheetName?: string;
+    stylesheet: IStylesheet;
 }
 
 export interface IStyleDeclaration {
@@ -20,6 +21,7 @@ export interface IStyleDeclaration {
 export interface IStylesheet {
     content: string;
     name: string;
+    readOnly?: boolean;
 }
 
 export interface IDocumentStylesheet extends IStylesheet {

@@ -41,6 +41,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
                     })),
                     specificity: x[1],
                     stylesheetName: item[0],
+                    stylesheet: item[1].stylesheet,
                     ast: x[0],
                 }));
             rs.forEach(x => x.declarations.forEach(y => y.parent = x));
