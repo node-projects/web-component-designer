@@ -11,8 +11,11 @@ export interface IUndoService extends IService {
   clearTransactionstackIfNotEmpty();
   undo();
   redo();
-  getUndoEntries(count?: number): Generator<string, void, unknown>;
-  getRedoEntries(count?: number): Generator<string, void, unknown>;
+  redoTo(transactionItems: ITransactionItem[]);
+  getUndoEntryNames(count?: number): Generator<string, void, unknown>;
+  getUndoEntries(count?: number): Generator<ITransactionItem, void, unknown>;
+  getRedoEntryNames(count?: number): Generator<string, void, unknown>;
+  getRedoEntries(count?: number): Generator<ITransactionItem, void, unknown>;
   readonly undoCount: number;
   readonly redoCount: number;
 }

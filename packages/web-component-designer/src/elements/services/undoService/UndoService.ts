@@ -128,6 +128,12 @@ export class UndoService implements IUndoService {
     this._designerCanvas.onContentChanged.emit();
   }
 
+  redoTo(transactionItems: ITransactionItem[]) {
+    this._redoStack = transactionItems.toReversed();
+    for (let n = 0; n < transactionItems.length; n++)
+      this.redo();
+  }
+
   canUndo(): boolean {
     return this._undoStack.length > 0;
   }
@@ -144,13 +150,23 @@ export class UndoService implements IUndoService {
     return this._redoStack.length;
   }
 
-  *getUndoEntries(count: number = 999): Generator<string, void, unknown> {
+  *getUndoEntryNames(count: number = 999): Generator<string, void, unknown> {
     for (let i = Math.min(this._undoStack.length, count) - 1; i >= 0; i--)
       yield this._undoStack[i].title;
   }
 
-  *getRedoEntries(count: number = 999): Generator<string, void, unknown> {
+  *getUndoEntries(count: number = 999): Generator<ITransactionItem, void, unknown> {
+    for (let i = Math.min(this._undoStack.length, count) - 1; i >= 0; i--)
+      yield this._undoStack[i];
+  }
+
+  *getRedoEntryNames(count: number = 999): Generator<string, void, unknown> {
     for (let i = Math.min(this._redoStack.length, count) - 1; i >= 0; i--)
       yield this._redoStack[i].title;
+  }
+
+  *getRedoEntries(count: number = 999): Generator<ITransactionItem, void, unknown> {
+    for (let i = Math.min(this._redoStack.length, count) - 1; i >= 0; i--)
+      yield this._redoStack[i];
   }
 }

@@ -6,5 +6,6 @@ export enum BindingTarget {
     css = 'css',
     cssvar = 'cssvar',
     event = 'event',
-    content = 'content' //innertext or html... mhmmm
+    content = 'content', //innertext or html... mhmmm,
+    visible = 'visible'
 }
