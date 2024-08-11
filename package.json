@@ -43,6 +43,6 @@
     "ts-jest": "^29.1.3",
     "typescript": "^5.5.2",
     "typescript-lit-html-plugin": "^0.9.0",
-    "wunderbaum": ">=0.6.0"
+    "wunderbaum": ">=0.11.0"
   }
 }

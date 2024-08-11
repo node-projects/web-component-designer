@@ -1,12 +1,14 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, Disposable, cssFromString } from '@node-projects/base-custom-webcomponent';
 import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter, ForceCssContextMenu } from '@node-projects/web-component-designer';
-import { WunderbaumNode } from 'wb_node';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js'
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
 
-
+type WunderbaumNode = {
+  getColElem(n:number);
+  addChildren({}: any);
+}
 const wbNodeSymbol = Symbol.for('wunderbaumnode');
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
@@ -263,9 +265,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       filter: {
         autoApply: true,   // Re-apply last filter if lazy data is loaded
         autoExpand: true, // Expand all branches that contain matches while filtered
-        counter: true,     // Show a badge with number of matching child nodes near parent icons
         fuzzy: true,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
-        hideExpandedCounter: true,  // Hide counter badge if parent is expanded
         hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
         highlight: true,   // Highlight matches by wrapping inside <mark> tags
         leavesOnly: false, // Match end nodes only
@@ -332,7 +332,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   _recomputeRunning;
   _recomputeRequestedAgain;
 
-  public async refreshNode(node: WunderbaumNode, item: IDesignItem) {
+  private async refreshNode(node: WunderbaumNode, item: IDesignItem) {
     const el = node.getColElem(0).parentElement;
     const f = el.querySelector('.forced')
     if (item.hasForcedCss)
