@@ -17,6 +17,6 @@ export class SelectionDefaultExtensionProvider implements IDesignerExtensionProv
   }
 
   static readonly style = css`
-    .svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; /*pointer-events: all;*/ }
+    .svg-selection { stroke: #3899ec; fill: transparent; stroke-width: 2; }
   `;
 }

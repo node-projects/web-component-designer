@@ -21,7 +21,7 @@ export class TransformOriginExtension extends AbstractExtension {
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' '); // This value remains the same regardless of scalefactor
-    const toDOMPoint = convertPointFromNode(this.extendedItem.element, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.designerCanvas);
+    const toDOMPoint = convertPointFromNode(this.designerCanvas, { x: parseFloat(to[0]) * this.designerCanvas.zoomFactor, y: parseFloat(to[1]) * this.designerCanvas.zoomFactor }, this.extendedItem.element);
     if (this._valuesHaveChanges(toDOMPoint.x, toDOMPoint.y, this.designerCanvas.zoomFactor)) {
       this._removeAllOverlays();
       this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');

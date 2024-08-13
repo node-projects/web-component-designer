@@ -198,7 +198,7 @@ function as2DPoint(point) {
 /**
 * @param {Node} node
 */
-function getElementSize(node) {
+export function getElementSize(node) {
     let width = 0;
     let height = 0;
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement) {
@@ -256,7 +256,7 @@ function getElementOffsetsInContainer(node) {
 * @param {Node} node
 * @param {Element} ancestor
 */
-function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor) {
+export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor) {
     /** @type {Element } */
     //@ts-ignore
     let actualElement = node;
