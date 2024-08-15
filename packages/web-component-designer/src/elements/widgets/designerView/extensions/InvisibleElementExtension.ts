@@ -1,4 +1,3 @@
-import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -17,7 +16,7 @@ export class InvisibleElementExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    const t = getBoxQuads(this.extendedItem.element, {relativeTo: this.designerCanvas.canvas})[0];
+    const t = this.extendedItem.element.getBoxQuads({relativeTo: this.designerCanvas.canvas})[0];
     if (this._valuesHaveChanges(t.p1.x, t.p1.y, t.p2.x, t.p2.y, t.p3.x, t.p3.y, t.p4.x, t.p4.y)) {
       this._rect = this._drawTransformedRect(t, 'svg-invisible-div', this._rect, OverlayLayer.Background);
     }

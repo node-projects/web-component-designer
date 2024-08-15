@@ -40,6 +40,7 @@ import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
 import { TouchGestureHelper } from '../../helper/TouchGestureHelper.js';
 import { stylesheetFromString } from '../../helper/StylesheetHelper.js';
 import { AbstractStylesheetService } from '../../services/stylesheetService/AbstractStylesheetService.js';
+import { addPolyfill as addBoxQuadsPolyfill } from '../../helper/getBoxQuads.js';
 
 const disableAnimationsSheet = cssFromString`
   * {
@@ -337,7 +338,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         <span id="node-projects-designer-search-result">0 selected</span>
         <button id="node-projects-designer-search-close"></button>
       </div>
-    </div>`;
+    </div>
+  `;
 
   public extensionManager: IExtensionManager;
   private _pointerextensions: IDesignerPointerExtension[];
@@ -351,9 +353,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   constructor(useIframe: boolean = false) {
     super();
-    this._useIframe = useIframe;
-
     this._restoreCachedInititalValues();
+
+    addBoxQuadsPolyfill();
+
+    this._useIframe = useIframe;
 
     this._canvas = this._getDomElement<HTMLDivElement>('node-projects-designer-canvas-canvas');
     if (this._useIframe) {

@@ -1,7 +1,6 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { IPoint } from "../../../../../interfaces/IPoint.js";
 import { calculateGridInformation } from "../../../../helper/GridHelper.js";
-import { getBoxQuads } from "../../../../helper/getBoxQuads.js";
 import { IDesignItem } from "../../../../item/IDesignItem.js";
 import { IDesignerCanvas } from "../../IDesignerCanvas.js";
 import { AbstractExtension } from "../AbstractExtension.js";
@@ -32,7 +31,7 @@ export class GridChildResizeExtension extends AbstractExtension {
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     //#region Resizer circles
-    let transformedCornerPoints = getBoxQuads(this.extendedItem.element, { box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+    let transformedCornerPoints = this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
 
     if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p2.x)) {
       this.remove();

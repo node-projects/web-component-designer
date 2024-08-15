@@ -141,7 +141,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
     new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
-    new TransformOriginExtensionProvider(true),
+    new TransformOriginExtensionProvider(false),
     new MarginExtensionProvider(),
     new PaddingExtensionProvider(),
     new PositionExtensionProvider(),

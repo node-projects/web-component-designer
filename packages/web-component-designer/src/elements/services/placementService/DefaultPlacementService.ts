@@ -8,7 +8,6 @@ import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from 
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
-import { convertPointFromNode } from '../../helper/getBoxQuads.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -116,7 +115,18 @@ export class DefaultPlacementService implements IPlacementService {
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
       const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
-      const transformedPoint: DOMPoint = convertPointFromNode(<HTMLElement>designItem.parent.element, new DOMPoint(track.x, track.y, 0, 0), <HTMLElement>canvas);
+      let transformedPoint: DOMPoint = designItem.parent.element.convertPointFromNode(new DOMPoint(track.x, track.y), <HTMLElement>canvas);
+
+      const cs = getComputedStyle(designItem.element);
+      let m = new DOMMatrix();
+      if (cs.rotate != 'none' && cs.rotate) {
+        m = m.multiply(new DOMMatrix('rotate(' + cs.rotate.replace(' ', ',') + ')'));
+      }
+      if (cs.scale != 'none' && cs.scale) {
+        m = m.multiply(new DOMMatrix('scale(' + cs.scale.replace(' ', ',') + ')'));
+      }
+      transformedPoint = m.inverse().transformPoint(transformedPoint);
+
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
@@ -161,6 +171,17 @@ export class DefaultPlacementService implements IPlacementService {
       const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.getStyle('transform') ?? ''));
       (<HTMLElement>designItem.element).style.transform = designItem.getStyle('transform') ?? '';
       let track = { x: translation.x, y: translation.y };
+
+      const cs = getComputedStyle(designItem.element);
+      let m = new DOMMatrix();
+      if (cs.rotate != 'none' && cs.rotate) {
+        m = m.multiply(new DOMMatrix('rotate(' + cs.rotate.replace(' ', ',') + ')'));
+      }
+      if (cs.scale != 'none' && cs.scale) {
+        m = m.multiply(new DOMMatrix('scale(' + cs.scale.replace(' ', ',') + ')'));
+      }
+      track = m.inverse().transformPoint(track);
+
       placeDesignItem(container, designItem, { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y }, 'position');
     }
 

@@ -1,6 +1,5 @@
 import { IDesignItem } from "../item/IDesignItem.js";
 import { DesignerCanvas } from "../widgets/designerView/designerCanvas.js";
-import { getBoxQuads } from "./getBoxQuads.js";
 
 export function getElementGridInformation(element: HTMLElement) {
   let cs = getComputedStyle(element);
@@ -27,7 +26,7 @@ export function calculateGridInformation(designItem: IDesignItem) {
   //TODO: same name should combine columns/rows
 
   let itemRect = designItem.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(designItem.element);
-  let transformedCornerPoints: DOMQuad = getBoxQuads(designItem.element, { relativeTo: <DesignerCanvas>designItem.instanceServiceContainer.designerCanvas.canvas })[0];
+  let transformedCornerPoints: DOMQuad = designItem.element.getBoxQuads({ relativeTo: <DesignerCanvas>designItem.instanceServiceContainer.designerCanvas.canvas })[0];
 
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');

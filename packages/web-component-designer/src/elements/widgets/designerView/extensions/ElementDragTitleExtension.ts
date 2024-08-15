@@ -20,7 +20,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
   }
 
   override extend(cache: Record<string | symbol, any>, event?: Event) {
-    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas })[0];
+    const transformedCornerPoints = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.canvas })[0];
     if (!isNaN(transformedCornerPoints.p1.x)) {
       const boundRect = this.extendedItem.element.getBoundingClientRect();
       let w = getTextWidth(this.extendedItem.name, '10px monospace');

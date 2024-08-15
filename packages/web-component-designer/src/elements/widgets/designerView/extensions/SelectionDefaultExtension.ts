@@ -1,4 +1,3 @@
-import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -19,8 +18,8 @@ export class SelectionDefaultExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, {box: 'border', relativeTo: this.designerCanvas.canvas})[0];
-    
+    const transformedCornerPoints = this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+
     if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p2.x)) {
       this.remove();
       return;

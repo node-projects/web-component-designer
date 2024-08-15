@@ -1,4 +1,3 @@
-import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -25,7 +24,7 @@ export class GrayOutExtension extends AbstractExtension {
       this._addOverlay(this._path, OverlayLayer.Background);
     }
 
-    const p = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas })[0];
+    const p = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.canvas })[0];
     let outsideRect = { width: this.designerCanvas.containerBoundingRect.width / this.designerCanvas.scaleFactor, height: this.designerCanvas.containerBoundingRect.height / this.designerCanvas.scaleFactor };
     let data = "M0 0 L" + outsideRect.width + " 0 L" + outsideRect.width + ' ' + outsideRect.height + " L0 " + outsideRect.height + " Z ";
     data += "M" + p.p1.x + " " + p.p1.y + " L" + p.p2.x + " " + p.p2.y + " L" + p.p3.x + " " + p.p3.y + " L" + p.p4.x + " " + p.p4.y + " Z";

@@ -8,7 +8,6 @@ import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
-import { convertPointFromNode } from '../../helper/getBoxQuads.js';
 
 export class AbsolutePlacementService implements IPlacementService {
 
@@ -116,7 +115,7 @@ export class AbsolutePlacementService implements IPlacementService {
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
       const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
-      const transformedPoint: DOMPoint = convertPointFromNode(<HTMLElement>designItem.parent.element, new DOMPoint(track.x, track.y, 0, 0), <HTMLElement>canvas);
+      const transformedPoint: DOMPoint = designItem.parent.element.convertPointFromNode(new DOMPoint(track.x, track.y, 0, 0), <HTMLElement>canvas);
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
