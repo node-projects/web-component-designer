@@ -118,7 +118,6 @@ function transformPointBox(point, box, style, operator) {
 * @returns {DOMQuad[]}
 */
 export function getBoxQuads(node, options) {
-
     let { width, height } = getElementSize(node);
     /** @type {DOMMatrix} */
     let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body);
@@ -246,9 +245,14 @@ function getElementOffsetsInContainer(node) {
         if (cs.position === 'absolute') {
             return new DOMPoint(parseFloat(cs.left), parseFloat(cs.top));
         }
+        
+        const m = getResultingTransformationBetweenElementAndAllAncestors(node.parentNode, document.body);
         const r1 = node.getBoundingClientRect();
+        const r1t = m.inverse().transformPoint(r1);
         const r2 = getParentElementIncludingSlots(node).getBoundingClientRect();
-        return new DOMPoint(r1.x - r2.x, r1.y - r2.y);
+        const r2t = m.inverse().transformPoint(r2);
+
+        return new DOMPoint(r1t.x - r2t.x, r1t.y - r2t.y);
     }
 }
 
@@ -342,7 +346,6 @@ export function getElementCombinedTransform(element) {
     const originZ = origin[2] ? parseFloat(origin[2]) : 0;
 
     const mOri = new DOMMatrix().translate(originX, originY, originZ);
-    const mOriInv = new DOMMatrix().translate(-originX, -originY, -originZ);
 
     if (s.translate != 'none' && s.translate) {
         m = m.multiply(new DOMMatrix('translate(' + s.translate.replace(' ', ',') + ')'));
@@ -357,7 +360,7 @@ export function getElementCombinedTransform(element) {
         m = m.multiply(new DOMMatrix(s.transform));
     }
 
-    let res = mOri.multiply(m.multiply(mOriInv));
+    let res = mOri.multiply(m.multiply(mOri.inverse()));
 
     //@ts-ignore
     const pt = getElementPerspectiveTransform(element);
