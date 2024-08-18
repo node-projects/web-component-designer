@@ -114,7 +114,7 @@ function transformPointBox(point, box, style, operator) {
 
 /**
 * @param {Node} node
-* @param {{box?: 'margin'|'border'|'padding'|'content', relativeTo?: Element, offset?: DOMQuad}=} options
+* @param {{box?: 'margin'|'border'|'padding'|'content', relativeTo?: Element}=} options
 * @returns {DOMQuad[]}
 */
 export function getBoxQuads(node, options) {
@@ -140,18 +140,6 @@ export function getBoxQuads(node, options) {
             const cs = (node.ownerDocument.defaultView ?? window).getComputedStyle(node);
             o = [{ x: -parseFloat(cs.borderLeftWidth) - parseFloat(cs.paddingLeft), y: -parseFloat(cs.borderTopWidth) - parseFloat(cs.paddingTop) }, { x: parseFloat(cs.borderRightWidth) + parseFloat(cs.paddingRight), y: -parseFloat(cs.borderTopWidth) - parseFloat(cs.paddingTop) }, { x: parseFloat(cs.borderRightWidth) + parseFloat(cs.paddingRight), y: parseFloat(cs.borderBottomWidth) + parseFloat(cs.paddingBottom) }, { x: -parseFloat(cs.borderLeftWidth) - parseFloat(cs.paddingLeft), y: parseFloat(cs.borderBottomWidth) + parseFloat(cs.paddingBottom) }];
         }
-    }
-    if (options?.offset) {
-        if (!o)
-            o = [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }];
-        o[0].x = o[0].x + options.offset.p1.x;
-        o[0].y = o[0].y + options.offset.p1.y;
-        o[1].x = o[1].x + options.offset.p2.x;
-        o[1].y = o[1].y + options.offset.p2.y;
-        o[2].x = o[2].x + options.offset.p3.x;
-        o[2].y = o[2].y + options.offset.p3.y;
-        o[3].x = o[3].x + options.offset.p4.x;
-        o[3].y = o[3].y + options.offset.p4.y;
     }
 
     for (let i = 0; i < 4; i++) {

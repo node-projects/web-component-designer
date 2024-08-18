@@ -1,11 +1,8 @@
-import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { OverlayLayer } from './OverlayLayer.js';
-
-const offset = 3;
 
 export class HighlightElementExtension extends AbstractExtension {
 
@@ -20,10 +17,10 @@ export class HighlightElementExtension extends AbstractExtension {
   }
 
   override refresh() {
-    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas, offset: new DOMQuad({ x: offset / this.designerCanvas.scaleFactor, y: offset / this.designerCanvas.scaleFactor }, { x: -offset / this.designerCanvas.scaleFactor, y: offset / this.designerCanvas.scaleFactor }, { x: -offset / this.designerCanvas.scaleFactor, y: -offset / this.designerCanvas.scaleFactor }, { x: offset / this.designerCanvas.scaleFactor, y: -offset / this.designerCanvas.scaleFactor }) })[0];
+    const transformedCornerPoints = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.canvas })[0];
     if (!isNaN(transformedCornerPoints.p1.x)) {
       this._rect = this._drawTransformedRect(transformedCornerPoints, 'svg-hover', this._rect, OverlayLayer.Background);
-      this._rect.style.strokeWidth = (2 / this.designerCanvas.scaleFactor).toString();
+      this._rect.style.strokeWidth = (3 / this.designerCanvas.scaleFactor).toString();
     }
   }
 

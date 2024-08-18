@@ -114,8 +114,9 @@ export class DefaultPlacementService implements IPlacementService {
     }
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
-      const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
-      let transformedPoint: DOMPoint = designItem.parent.element.convertPointFromNode(new DOMPoint(track.x, track.y), <HTMLElement>canvas);
+      const canvas = designItem.instanceServiceContainer.designerCanvas.canvas;
+      const quad = designItem.parent.element.getBoxQuads({relativeTo: canvas})[0];
+      let transformedPoint: DOMPoint = designItem.parent.element.convertPointFromNode(new DOMPoint(track.x + quad.p1.x, track.y + quad.p1.y), <HTMLElement>canvas);
 
       const cs = getComputedStyle(designItem.element);
       let m = new DOMMatrix();

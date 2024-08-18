@@ -149,7 +149,7 @@ export function createDefaultServiceContainer() {
     new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.OnlyOneItemSelected, [
-    new TransformOriginExtensionProvider(false),
+    new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionRefreshed, [

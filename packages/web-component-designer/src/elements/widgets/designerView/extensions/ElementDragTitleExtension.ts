@@ -1,5 +1,4 @@
 import { getTextWidth } from '../../../helper/TextHelper.js';
-import { getBoxQuads } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { ITool } from '../tools/ITool.js';
@@ -50,23 +49,28 @@ export class ElementDragTitleExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    const transformedCornerPoints = getBoxQuads(this.extendedItem.element, { relativeTo: this.designerCanvas.canvas, offset: new DOMQuad({ x: 0, y: 16 / this.designerCanvas.scaleFactor }, { x: 0, y: 16 /  this.designerCanvas.scaleFactor }) })[0];
+    const transformedCornerPoints = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.canvas })[0];
     if (!isNaN(transformedCornerPoints.p1.x)) {
       const angle = Math.atan2((transformedCornerPoints.p2.y - transformedCornerPoints.p1.y), (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x)) * 180 / Math.PI;
       if (this._valuesHaveChanges(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, angle, this.designerCanvas.scaleFactor)) {
         const h = (15 / this.designerCanvas.scaleFactor);
+        const o = -(16 / this.designerCanvas.scaleFactor);
         const w = (this._width / this.designerCanvas.scaleFactor);
         this._rect.setAttribute('x', '' + transformedCornerPoints.p1.x);
         this._rect.setAttribute('y', '' + transformedCornerPoints.p1.y);
         this._rect.style.rotate = angle + 'deg';
-        this._rect.style.transformBox = 'fill-box'
+        this._rect.style.translate = '0 ' + o + 'px';
+        this._rect.style.transformOrigin = '0 100%';
+        this._rect.style.transformBox = 'fill-box';
         this._rect.setAttribute('height', '' + h);
         this._rect.setAttribute('width', '' + w);
         this._rect.style.strokeWidth = (1 / this.designerCanvas.scaleFactor).toString();
         this._clickRect.setAttribute('x', '' + transformedCornerPoints.p1.x);
         this._clickRect.setAttribute('y', '' + transformedCornerPoints.p1.y);
         this._clickRect.style.rotate = angle + 'deg';
-        this._clickRect.style.transformBox = 'fill-box'
+        this._clickRect.style.translate = '0 ' + o + 'px';
+        this._clickRect.style.transformOrigin = '0 100%';
+        this._clickRect.style.transformBox = 'fill-box';
         this._clickRect.setAttribute('height', '' + (h + 3));
         this._clickRect.setAttribute('width', '' + w);
         this._clickRect.style.strokeWidth = (1 / this.designerCanvas.scaleFactor).toString();
@@ -76,6 +80,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
         this._text.setAttribute('height', '' + h);
         this._text.setAttribute('width', '' + w);
         (<HTMLElement>this._text.children[0].children[0]).style.rotate = angle + 'deg';
+        (<HTMLElement>this._text.children[0].children[0]).style.translate = '0 ' + o + 'px';
+        (<HTMLElement>this._text.children[0].children[0]).style.transformOrigin = '0 100%';
       }
     }
   }

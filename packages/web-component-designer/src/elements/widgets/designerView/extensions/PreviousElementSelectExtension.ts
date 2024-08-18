@@ -23,9 +23,9 @@ export class PreviousElementSelectExtension extends AbstractExtension {
     if (!isNaN(transformedCornerPoints.p2.x)) {
       if (this._valuesHaveChanges(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, this.designerCanvas.scaleFactor)) {
         const angle = Math.atan2((transformedCornerPoints.p2.y - transformedCornerPoints.p1.y), (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x)) * 180 / Math.PI;
-        const h = (16 / this.designerCanvas.scaleFactor);
+        const h = (15 / this.designerCanvas.scaleFactor);
         this._rect = this._drawRect(0, 0, h, h, 'svg-previous-select', this._rect);
-        this._clickRect = this._drawRect(0, 0, h, h + 3, 'svg-invisible', this._clickRect);
+        this._clickRect = this._drawRect(0, 0, h, h, 'svg-invisible', this._clickRect);
         if (!this._g) {
           this._g = document.createElementNS("http://www.w3.org/2000/svg", "g");
           this._g.setAttribute('class', 'svg-previous-select');
@@ -46,7 +46,9 @@ export class PreviousElementSelectExtension extends AbstractExtension {
           this._g.appendChild(this._clickRect);
         }
         this._path.style.scale = (0.6 / this.designerCanvas.scaleFactor).toString();
-        this._g.style.transform = 'translate(' + (transformedCornerPoints.p2.x - (14.5 / this.designerCanvas.scaleFactor)) + 'px,' + (transformedCornerPoints.p2.y - (15.5 / this.designerCanvas.scaleFactor)) + 'px) rotate(' + angle + 'deg)';
+        //this._g.style.transform = 'translate(' + (transformedCornerPoints.p2.x - (14.5 / this.designerCanvas.scaleFactor)) + 'px,' + (transformedCornerPoints.p2.y - (16 / this.designerCanvas.scaleFactor)) + 'px) rotate(' + angle + 'deg)';
+        this._g.style.translate = (transformedCornerPoints.p2.x - (14.5 / this.designerCanvas.scaleFactor)) + 'px ' + (transformedCornerPoints.p2.y - (15 / this.designerCanvas.scaleFactor)) + 'px';
+        this._g.style.rotate =  angle + 'deg';
         this._g.style.transformOrigin = '100% 100%';
         this._g.style.transformBox = 'fill-box'
       }
