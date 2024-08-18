@@ -141,14 +141,16 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
     new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
     new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
-    new TransformOriginExtensionProvider(true),
     new MarginExtensionProvider(),
     new PaddingExtensionProvider(),
     new PositionExtensionProvider(),
     new SvgElementExtensionProvider(),
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
-    new RotateExtensionProvider(),
     new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.OnlyOneItemSelected, [
+    new TransformOriginExtensionProvider(false),
+    new RotateExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionRefreshed, [
     new GridChildToolbarExtensionProvider(),

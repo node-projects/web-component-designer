@@ -87,7 +87,9 @@ export class ExtensionManager implements IExtensionManager {
       this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionRefreshed);
       this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelection);
       this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered);
+      this.removeExtension(selectionChangedEvent.oldSelectedElements[0], ExtensionType.OnlyOneItemSelected);
       this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.Selection);
+      this.removeExtensions(selectionChangedEvent.oldSelectedElements, false, ExtensionType.MultipleItemsSelected);
       if (selectionChangedEvent.oldSelectedElements[0].parent) {
         const primaryContainer = DesignItem.GetOrCreateDesignItem(selectionChangedEvent.oldSelectedElements[0].parent.element, selectionChangedEvent.oldSelectedElements[0].parent.element, this.designerCanvas.serviceContainer, this.designerCanvas.instanceServiceContainer)
         this.removeExtension(primaryContainer, ExtensionType.PrimarySelectionContainer);
@@ -98,6 +100,10 @@ export class ExtensionManager implements IExtensionManager {
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length) {
       this.applyExtensions(selectionChangedEvent.selectedElements, ExtensionType.Selection, selectionChangedEvent.event);
       this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelection, selectionChangedEvent.event);
+      if (selectionChangedEvent.selectedElements.length === 1)
+        this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.OnlyOneItemSelected, selectionChangedEvent.event);
+      else if (selectionChangedEvent.selectedElements.length > 1)
+        this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.MultipleItemsSelected, selectionChangedEvent.event);
       if (selectionChangedEvent.selectedElements[0].getPlacementService()?.isEnterableContainer(selectionChangedEvent.selectedElements[0]))
         this.applyExtension(selectionChangedEvent.selectedElements[0], ExtensionType.PrimarySelectionAndCanBeEntered, selectionChangedEvent.event);
       if (selectionChangedEvent.selectedElements[0].parent) {

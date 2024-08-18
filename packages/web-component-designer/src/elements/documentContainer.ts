@@ -320,7 +320,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       else {
         this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
         this.designerView.designerCanvas.overlayLayer.removeAllOverlays();
-        this.designerView.designerCanvas.extensionManager.reapplyAllAppliedExtentions(null, [ExtensionType.Permanent, ExtensionType.Selection, ExtensionType.PrimarySelection, ExtensionType.PrimarySelectionContainer]);
+        this.designerView.designerCanvas.extensionManager.reapplyAllAppliedExtentions(null, [ExtensionType.Permanent, ExtensionType.Selection, ExtensionType.PrimarySelection, ExtensionType.PrimarySelectionContainer, ExtensionType.OnlyOneItemSelected, ExtensionType.MultipleItemsSelected]);
       }
     }
   }
