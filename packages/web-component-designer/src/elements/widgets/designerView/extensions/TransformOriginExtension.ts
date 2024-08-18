@@ -90,10 +90,10 @@ export class TransformOriginExtension extends AbstractExtension {
           if (this._oldValue) {
             try {
               const oldSplit = this._oldValue.split(' ');
-              let newXs = convertCssUnit(evPoint.x, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]));
-              let newYs = convertCssUnit(evPoint.x, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]));
+              let newXs = convertCssUnit(evPoint.x, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]), (nr) => roundValue(this.extendedItem, nr));
+              let newYs = convertCssUnit(evPoint.x, <HTMLElement>this.extendedItem.element, 'width', getCssUnit(oldSplit[0]), (nr) => roundValue(this.extendedItem, nr));
               if (oldSplit.length > 1) {
-                newYs = convertCssUnit(evPoint.y, <HTMLElement>this.extendedItem.element, 'height', getCssUnit(oldSplit[1]));
+                newYs = convertCssUnit(evPoint.y, <HTMLElement>this.extendedItem.element, 'height', getCssUnit(oldSplit[1]), (nr) => roundValue(this.extendedItem, nr));
               }
               this.extendedItem.updateStyleInSheetOrLocal('transform-origin', newXs + ' ' + newYs);
             } catch (err) {
@@ -105,8 +105,11 @@ export class TransformOriginExtension extends AbstractExtension {
           const quadsNew = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.rootDesignItem.element })[0];
           const translateP = { x: quadsOld.p1.x - quadsNew.p1.x, y: quadsOld.p1.y - quadsNew.p1.y };
           if (computed.translate && computed.translate !== 'none') {
-            translateP.x += parseFloat(computed.translate.split(' ')[0])
-            translateP.y += parseFloat(computed.translate.split(' ')[1])
+            translateP.x += parseFloat(computed.translate.split(' ')[0]);
+            if (computed.translate.split(' ').length === 1)
+              translateP.y += parseFloat(computed.translate.split(' ')[0]);
+            else
+              translateP.y += parseFloat(computed.translate.split(' ')[1]);
           }
           this.extendedItem.updateStyleInSheetOrLocal('translate', roundValue(this.extendedItem, translateP.x) + 'px' + ' ' + roundValue(this.extendedItem, translateP.y) + 'px');
           cg.commit();

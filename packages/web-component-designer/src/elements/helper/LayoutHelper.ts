@@ -97,7 +97,7 @@ export function roundValue(designItem: IDesignItem, value: number) {
   if (designItem.serviceContainer.options.roundPixelsToDecimalPlaces >= 0) {
     return value.toFixed(designItem.serviceContainer.options.roundPixelsToDecimalPlaces);
   }
-  return value;
+  return value.toString();
 }
 
 /*function placeViaPosition(container: IDesignItem, designItem: IDesignItem, offset: IPoint, mode: 'position' | 'transform' | 'margin' | 'padding') {

@@ -77,7 +77,7 @@ export function getCssUnit(cssValue: string) {
     return null;
 }
 
-export function convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string): string {
+export function convertCssUnit(cssValue: string | number, target: HTMLElement, percentTarget: 'width' | 'height', unit: string, roundFunc?: (val: number) => string): string {
 
     if (!cssValue)
         return null;
@@ -118,9 +118,14 @@ export function convertCssUnit(cssValue: string | number, target: HTMLElement, p
     if (typeof cssValue == 'string')
         cssValue = convertCssUnitToPixel(cssValue, target, percentTarget);
     if (unit in supportedUnits) {
-        return supportedUnits[unit](cssValue) + unit;
+        const val = supportedUnits[unit](cssValue);
+        if (roundFunc)
+            return roundFunc(val) + unit
+        return val + unit;
     }
 
+    if (roundFunc)
+        return roundFunc(cssValue);
     return <any>cssValue;
 }
 
