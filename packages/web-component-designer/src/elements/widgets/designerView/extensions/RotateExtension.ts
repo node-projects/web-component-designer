@@ -1,4 +1,5 @@
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { roundValue } from '../../../helper/LayoutHelper.js';
 import { getElementSize } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -24,10 +25,10 @@ export class RotateExtension extends AbstractExtension {
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     const size = getElementSize(this.extendedItem.element);
 
-    let p1 = { x: size.width / 2, y: -30 };
+    let p1 = { x: size.width / 2, y: -30 / this.designerCanvas.zoomFactor };
 
-    let l1 = { x: size.width / 2, y: -22 };
-    let l2 = { x: size.width / 2, y: -6 };
+    let l1 = { x: size.width / 2, y: -22 / this.designerCanvas.zoomFactor };
+    let l2 = { x: size.width / 2, y: -6 / this.designerCanvas.zoomFactor };
 
     this._rotateCirclePosition = p1;
 
@@ -35,9 +36,11 @@ export class RotateExtension extends AbstractExtension {
     let l1t = this.designerCanvas.canvas.convertPointFromNode(l1, this.extendedItem.element);
     let l2t = this.designerCanvas.canvas.convertPointFromNode(l2, this.extendedItem.element);
     this._rotateLine = this._drawLine(l1t.x, l1t.y, l2t.x, l2t.y, 'svg-primary-rotate-line', this._rotateLine);
+    this._rotateLine.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
 
     if (!this._rotateCircle) {
-      this._rotateCircle = this._drawCircle(p1t.x, p1t.y, 5, 'svg-primary-rotate', this._rotateCircle);
+      this._rotateCircle = this._drawCircle(p1t.x, p1t.y, 5 / this.designerCanvas.zoomFactor, 'svg-primary-rotate', this._rotateCircle);
+      this._rotateCircle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
 
       this._rotateCircle.addEventListener("pointerdown", e => {
         e.stopPropagation();
@@ -64,7 +67,8 @@ export class RotateExtension extends AbstractExtension {
         this.extendedItem.setStyle('rotate', this.getAngle(e) + 'deg')
       });
     } else {
-      this._rotateCircle = this._drawCircle(p1t.x, p1t.y, 5, 'svg-primary-rotate', this._rotateCircle);
+      this._rotateCircle = this._drawCircle(p1t.x, p1t.y, 5 / this.designerCanvas.zoomFactor, 'svg-primary-rotate', this._rotateCircle);
+      this._rotateCircle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     }
   }
 
@@ -82,7 +86,7 @@ export class RotateExtension extends AbstractExtension {
 
     if (!e.ctrlKey)
       angle = Math.round(angle / 15) * 15;
-    return angle;
+    return roundValue(this.extendedItem, angle);
   }
 
   override dispose() {

@@ -1,31 +1,31 @@
 //todo:
 //transform-box  https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box
 
-export function addPolyfill() {
-    if (!Node.prototype.getBoxQuads) {
+export function addPolyfill(windowObj = window) {
+    if (!windowObj.Node.prototype.getBoxQuads) {
         //@ts-ignore
-        Node.prototype.getBoxQuads = function (options) {
+        windowObj.Node.prototype.getBoxQuads = function (options) {
             return getBoxQuads(this, options)
         }
     }
 
-    if (!Node.prototype.convertQuadFromNode) {
+    if (!windowObj.Node.prototype.convertQuadFromNode) {
         //@ts-ignore
-        Node.prototype.convertQuadFromNode = function (quad, from, options) {
+        windowObj.Node.prototype.convertQuadFromNode = function (quad, from, options) {
             return convertQuadFromNode(this, quad, from, options)
         }
     }
 
-    if (!Node.prototype.convertRectFromNode) {
+    if (!windowObj.Node.prototype.convertRectFromNode) {
         //@ts-ignore
-        Node.prototype.convertRectFromNode = function (rect, from, options) {
+        windowObj.Node.prototype.convertRectFromNode = function (rect, from, options) {
             return convertRectFromNode(this, rect, from, options)
         }
     }
 
-    if (!Node.prototype.convertPointFromNode) {
+    if (!windowObj.Node.prototype.convertPointFromNode) {
         //@ts-ignore
-        Node.prototype.convertPointFromNode = function (point, from, options) {
+        windowObj.Node.prototype.convertPointFromNode = function (point, from, options) {
             return convertPointFromNode(this, point, from, options)
         }
     }

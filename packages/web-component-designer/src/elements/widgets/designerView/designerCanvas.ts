@@ -369,6 +369,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this._canvas.appendChild(this._iframe);
       requestAnimationFrame(() => {
         this._window = this._iframe.contentWindow;
+        //@ts-ignore
+        addBoxQuadsPolyfill(this._iframe.contentWindow);
         this._canvasShadowRoot = this._iframe.contentWindow.document;
       })
     } else {

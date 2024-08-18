@@ -4,7 +4,7 @@ import { ISize } from '../../../../interfaces/ISize.js';
 import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
 import { transformPointByInverseMatrix } from "../../../helper/TransformHelper.js";
-import { getBoxQuads, getElementCombinedTransform } from '../../../helper/getBoxQuads.js';
+import { getElementCombinedTransform } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -56,7 +56,7 @@ export class ResizeExtension extends AbstractExtension {
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     //#region Resizer circles
-    let transformedCornerPoints = getBoxQuads(this.extendedItem.element, {box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+    let transformedCornerPoints = this.extendedItem.element.getBoxQuads({box: 'border', relativeTo: this.designerCanvas.canvas })[0];
 
     if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p1.x)) {
       this.remove();
@@ -348,7 +348,6 @@ export class ResizeExtension extends AbstractExtension {
   }
 
   private prepareResize(designItem: IDesignItem, mode: string) {
-    let i = 0;
     let top: string = null;
     let bottom: string = null;
     let left: string = null;
@@ -359,7 +358,7 @@ export class ResizeExtension extends AbstractExtension {
         left = getComputedStyle(designItem.element).left;
         (<HTMLElement>designItem.element).style.removeProperty('right');
         (<HTMLElement>designItem.element).style.left = left;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+        //(<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
         break;
       case 'se-resize':
         top = getComputedStyle(designItem.element).top;
@@ -368,13 +367,13 @@ export class ResizeExtension extends AbstractExtension {
         left = getComputedStyle(designItem.element).left;
         (<HTMLElement>designItem.element).style.removeProperty('right');
         (<HTMLElement>designItem.element).style.left = left;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+        //(<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
         break;
       case 's-resize':
         top = getComputedStyle(designItem.element).top;
         (<HTMLElement>designItem.element).style.removeProperty('bottom');
         (<HTMLElement>designItem.element).style.top = top;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
+        //(<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + this._initialComputedTransformOrigins[i].y + 'px';
         break;
       case 'sw-resize':
         top = getComputedStyle(designItem.element).top;
@@ -383,13 +382,13 @@ export class ResizeExtension extends AbstractExtension {
         right = getComputedStyle(designItem.element).right;
         (<HTMLElement>designItem.element).style.removeProperty('left');
         (<HTMLElement>designItem.element).style.right = right;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
+        //(<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
         break;
       case 'w-resize':
         right = getComputedStyle(designItem.element).right;
         (<HTMLElement>designItem.element).style.removeProperty('left');
         (<HTMLElement>designItem.element).style.right = right;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
+        //(<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + this._initialComputedTransformOrigins[i].y + 'px';
         break;
       case 'nw-resize':
         bottom = getComputedStyle(designItem.element).bottom;
@@ -398,13 +397,13 @@ export class ResizeExtension extends AbstractExtension {
         right = getComputedStyle(designItem.element).right;
         (<HTMLElement>designItem.element).style.removeProperty('left');
         (<HTMLElement>designItem.element).style.right = right;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+        //(<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
         break;
       case 'n-resize':
         bottom = getComputedStyle(designItem.element).bottom;
         (<HTMLElement>designItem.element).style.removeProperty('top');
         (<HTMLElement>designItem.element).style.bottom = bottom;
-        (<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+        //(<HTMLElement>designItem.element).style.transformOrigin = 'calc(100% - ' + this._initialComputedTransformOrigins[i].x + 'px) ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
         break;
       case 'ne-resize':
         bottom = getComputedStyle(designItem.element).bottom;
@@ -413,7 +412,7 @@ export class ResizeExtension extends AbstractExtension {
         left = getComputedStyle(designItem.element).left;
         (<HTMLElement>designItem.element).style.removeProperty('right');
         (<HTMLElement>designItem.element).style.left = left;
-        (<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
+        //(<HTMLElement>designItem.element).style.transformOrigin = this._initialComputedTransformOrigins[i].x + 'px ' + 'calc(100% - ' + this._initialComputedTransformOrigins[i].y + 'px)';
         break;
     }
   }
