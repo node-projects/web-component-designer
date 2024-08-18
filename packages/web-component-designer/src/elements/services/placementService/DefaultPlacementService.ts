@@ -180,7 +180,7 @@ export class DefaultPlacementService implements IPlacementService {
       if (cs.scale != 'none' && cs.scale) {
         m = m.multiply(new DOMMatrix('scale(' + cs.scale.replace(' ', ',') + ')'));
       }
-      track = m.inverse().transformPoint(track);
+      track = m.transformPoint(track);
 
       placeDesignItem(container, designItem, { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y }, 'position');
     }
