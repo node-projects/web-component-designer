@@ -296,10 +296,11 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     }
 
     protected async _editParameter(e: MouseEvent, eventItem: IEvent) {
+        let selectedItem = this.selectedItems[0];
         const edt = new ParameterEditor();
         let existingParameter = {};
-        edt.title = "ParameterEditor for '" + eventItem.name + "' of '" + this._selectedItems[0].name + "'";
-        let data = this._selectedItems[0].getAttribute('@' + eventItem.name);
+        edt.title = "ParameterEditor for '" + eventItem.name + "' of '" + selectedItem.name + "'";
+        let data = selectedItem.getAttribute('@' + eventItem.name);
         if (data && data[0] == '{') {
             try {
                 const parsed = JSON.parse(data);
@@ -323,15 +324,16 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                 delete newObj.parameters;
 
             const newData = JSON.stringify(newObj);
-            this._selectedItems[0].setAttribute('@' + eventItem.name, newData);
+            selectedItem.setAttribute('@' + eventItem.name, newData);
             this._bindingsRefresh();
         }
     }
 
     protected async _editBlockly(e: MouseEvent, eventItem: IEvent) {
+        let selectedItem = this.selectedItems[0];
         const edt = new BlocklyScriptEditor();
-        edt.title = "Blockly Script for '" + eventItem.name + "' of '" + this._selectedItems[0].name + "'";
-        let data = this._selectedItems[0].getAttribute('@' + eventItem.name);
+        edt.title = "Blockly Script for '" + eventItem.name + "' of '" + selectedItem.name + "'";
+        let data = selectedItem.getAttribute('@' + eventItem.name);
         let parameters = null;
         let relativeSignalsPath = null;
         if (data) {
@@ -349,7 +351,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             if (relativeSignalsPath) {
                 blockObj.relativeSignalsPath = relativeSignalsPath;
             }
-            this._selectedItems[0].setAttribute('@' + eventItem.name, JSON.stringify(blockObj));
+            selectedItem.setAttribute('@' + eventItem.name, JSON.stringify(blockObj));
             this._bindingsRefresh();
         }
     }
@@ -359,7 +361,8 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     }
 
     protected async _editSimpleScript(e: MouseEvent, eventItem: IEvent) {
-        let scriptString = <string>this.selectedItems[0].getAttribute('@' + eventItem.name);
+        let selectedItem = this.selectedItems[0];
+        let scriptString = <string>selectedItem.getAttribute('@' + eventItem.name);
         if (!scriptString || scriptString.startsWith('{')) {
             let script = { commands: [] };
             let parameters = null;
@@ -372,14 +375,14 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                 relativeSignalsPath = script.relativeSignalsPath;
             }
             let sc = new SimpleScriptEditor();
-            sc.serviceContainer = this.selectedItems[0].serviceContainer;
+            sc.serviceContainer = selectedItem.serviceContainer;
             sc.scriptCommandsTypeInfo = this._scriptCommandsTypeInfo;
             sc.propertiesTypeInfo = this._propertiesTypeInfo;
             sc.visualizationShell = this._visualizationShell;
             sc.visualizationHandler = this._visualizationHandler;
 
             sc.loadScript(script);
-            sc.title = "Script '" + eventItem.name + "' on " + this.selectedItems[0].name;
+            sc.title = "Script '" + eventItem.name + "' on " + selectedItem.name;
 
             let res = await this._visualizationShell.openConfirmation(sc, { x: 100, y: 100, width: 600, height: 500 });
             if (res) {
@@ -395,7 +398,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                         sc.relativeSignalsPath = relativeSignalsPath;
                     }
                     let json = JSON.stringify(sc);
-                    this.selectedItems[0].setAttribute('@' + eventItem.name, json);
+                    selectedItem.setAttribute('@' + eventItem.name, json);
                     this._bindingsRefresh();
                 }
             }
