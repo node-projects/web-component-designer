@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon for visualizations",
   "name": "@node-projects/web-component-designer-visualization-addons",
-  "version": "0.1.47",
+  "version": "0.1.48",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
@@ -13,15 +13,15 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@adobe/css-tools": "^4.3.3",
-    "@blockly/zoom-to-fit": "^6.0.0",
+    "@adobe/css-tools": "^4.4.0",
+    "@blockly/zoom-to-fit": "^6.0.7",
     "@node-projects/base-custom-webcomponent": ">=0.19.0",
-    "@node-projects/propertygrid.webcomponent": ">=1.0.2",
+    "@node-projects/propertygrid.webcomponent": ">=1.1.1",
     "@node-projects/splitview.webcomponent": ">=1.0.1",
-    "@node-projects/web-component-designer": ">=0.1.1",
-    "@node-projects/web-component-designer-codeview-monaco": ">=0.1.18",
-    "@node-projects/web-component-designer-widgets-wunderbaum": ">=0.1.12",
-    "blockly": "^11.0.0",
+    "@node-projects/web-component-designer": ">=0.1.215",
+    "@node-projects/web-component-designer-codeview-monaco": ">=0.1.27",
+    "@node-projects/web-component-designer-widgets-wunderbaum": ">=0.1.27",
+    "blockly": "^11.1.1",
     "long": "^5.2.3"
   },
   "repository": {

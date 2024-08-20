@@ -14,12 +14,12 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@adobe/css-tools": "4.3.3",
+    "@adobe/css-tools": "4.4.0",
     "@blockly/zoom-to-fit": "^6.0.0",
     "@node-projects/base-custom-webcomponent": ">=0.19.0",
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^6.1.5",
-    "@node-projects/propertygrid.webcomponent": "^1.0.2",
+    "@node-projects/propertygrid.webcomponent": "^1.1.1",
     "@types/codemirror": "^5.60.10",
     "@types/css-tree": "^2.3.2",
     "@types/jest": "^29.5.12",
@@ -27,7 +27,7 @@
     "@types/jquery.fancytree": "0.0.8",
     "@types/node": "^20.8.4",
     "ace-builds": "^1.29.0",
-    "blockly": "^11.0.0",
+    "blockly": "^11.1.1",
     "codemirror": "^6.0.1",
     "codemirror5": "npm:codemirror@^5.0.0",
     "css-tree": "^2.3.1",
