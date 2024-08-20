@@ -63,7 +63,7 @@ export class IndirectSignal {
   private element: Element;
   private relativeSignalPath: string;
 
-  constructor(visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element, relativeSignalPath: string) {
+  constructor(visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element, relativeSignalPath: string, root: HTMLElement) {
     this.visualizationHandler = visualizationHandler;
     this.valueChangedCb = valueChangedCb;
     this.element = element;
@@ -73,10 +73,10 @@ export class IndirectSignal {
     for (let i = 0; i < this.signals.length; i++) {
       let nm = this.signals[i];
       if (nm[0] === '?' && nm[1] === '?') {
-        this.handleValueChanged(element[nm.substring(2)], i);
+        this.handleValueChanged(root[nm.substring(2)], i);
         continue;
       } else if (nm[0] === '?') {
-        nm = element[nm.substring(1)];
+        nm = root[nm.substring(1)];
       }
       let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
       this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(nm, cb)]);
@@ -641,7 +641,7 @@ export class BindingsHelper {
         });
       } else {
         if (s.includes('{')) {
-          let indirectSignal = new IndirectSignal(this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false), element, relativeSignalPath);
+          let indirectSignal = new IndirectSignal(this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false), element, relativeSignalPath, root);
           if (!cleanupCalls)
             cleanupCalls = [];
           cleanupCalls.push(() => indirectSignal.dispose());
