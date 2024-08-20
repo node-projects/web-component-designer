@@ -32,6 +32,8 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler, HTML
 
   readonly onContentChanged: TypedEvent<void>;
 
+  readonly iframes: HTMLIFrameElement[];
+
   zoomFactor: number;
   designerOffsetWidth: number;
   designerOffsetHeight: number;

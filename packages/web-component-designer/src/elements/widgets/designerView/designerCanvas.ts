@@ -351,6 +351,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _iframe: HTMLIFrameElement;
   private _window: Window;
 
+  public readonly iframes: HTMLIFrameElement[];
+
   constructor(useIframe: boolean = false) {
     super();
     this._restoreCachedInititalValues();
@@ -364,6 +366,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this._iframe = document.createElement('iframe');
       this._iframe.setAttribute("sandbox", "allow-same-origin");
       this._iframe.setAttribute("scrolling", "no");
+      this.iframes = [this._iframe];
       //TODO: add option to allow scripts in iframes...
       //this._iframe.setAttribute("sandbox", "allow-same-origin allow-scripts");
       this._canvas.appendChild(this._iframe);

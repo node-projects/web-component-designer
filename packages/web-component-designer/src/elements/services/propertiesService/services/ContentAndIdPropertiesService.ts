@@ -53,6 +53,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
 
   override clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value' = 'all'): void {
     if (property.name == this.contentProperty.name || property.name == this.innerHtmlProperty.name) {
+      const cg = designItems[0].openGroup("property cleared: " + property.name);
       for (let d of designItems) {
         if (clearType != 'binding') {
           d.clearChildren();
@@ -64,6 +65,7 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
         }
         this._notifyChangedProperty(d, property, undefined);
       }
+      cg.commit();
     } else {
       super.clearValue(designItems, property, clearType);
     }

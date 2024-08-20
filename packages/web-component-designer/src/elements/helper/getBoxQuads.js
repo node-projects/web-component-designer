@@ -35,12 +35,12 @@ export function addPolyfill(windowObj = window) {
 * @param {Node} node
 * @param {DOMQuadInit} quad
 * @param {Element} from
-* @param {{fromBox?: 'margin'|'border'|'padding'|'content', toBox?: 'margin'|'border'|'padding'|'content'}=} options
+* @param {{fromBox?: 'margin'|'border'|'padding'|'content', toBox?: 'margin'|'border'|'padding'|'content', iframes?: HTMLIFrameElement[]}=} options
 * @returns {DOMQuad}
 */
 export function convertQuadFromNode(node, quad, from, options) {
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body);
-    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body).inverse();
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body, options?.iframes);
+    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body, options?.iframes).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         quad = new DOMQuad(transformPointBox(quad.p1, options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), -1), transformPointBox(quad.p2, options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), -1), transformPointBox(quad.p3, options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), -1), transformPointBox(quad.p4, options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), -1))
     }
@@ -56,12 +56,12 @@ export function convertQuadFromNode(node, quad, from, options) {
 * @param {Node} node
 * @param {DOMRectReadOnly} rect
 * @param {Element} from
-* @param {{fromBox?: 'margin'|'border'|'padding'|'content', toBox?: 'margin'|'border'|'padding'|'content'}=} options
+* @param {{fromBox?: 'margin'|'border'|'padding'|'content', toBox?: 'margin'|'border'|'padding'|'content', iframes?: HTMLIFrameElement[]}=} options
 * @returns {DOMQuad}
 */
 export function convertRectFromNode(node, rect, from, options) {
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body);
-    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body).inverse();
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body, options?.iframes);
+    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body, options?.iframes).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         const p = transformPointBox(new DOMPoint(rect.x, rect.y), options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), 1);
         rect = new DOMRect(p.x, p.y, rect.width, rect.height);
@@ -77,12 +77,12 @@ export function convertRectFromNode(node, rect, from, options) {
 * @param {Node} node
 * @param {DOMPointInit} point
 * @param {Element} from
-* @param {{fromBox?: 'margin'|'border'|'padding'|'content', toBox?: 'margin'|'border'|'padding'|'content'}=} options
+* @param {{fromBox?: 'margin'|'border'|'padding'|'content', toBox?: 'margin'|'border'|'padding'|'content', iframes?: HTMLIFrameElement[]}=} options
 * @returns {DOMPoint}
 */
 export function convertPointFromNode(node, point, from, options) {
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body);
-    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body).inverse();
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body, options?.iframes);
+    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body, options?.iframes).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         point = transformPointBox(point, options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), 1);
     }
@@ -114,13 +114,13 @@ function transformPointBox(point, box, style, operator) {
 
 /**
 * @param {Node} node
-* @param {{box?: 'margin'|'border'|'padding'|'content', relativeTo?: Element}=} options
+* @param {{box?: 'margin'|'border'|'padding'|'content', relativeTo?: Element, iframes?: HTMLIFrameElement[]}=} options
 * @returns {DOMQuad[]}
 */
 export function getBoxQuads(node, options) {
     let { width, height } = getElementSize(node);
     /** @type {DOMMatrix} */
-    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body);
+    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options.iframes);
 
     let arr = [{ x: 0, y: 0 }, { x: width, y: 0 }, { x: width, y: height }, { x: 0, y: height }];
     /** @type { [DOMPoint, DOMPoint, DOMPoint, DOMPoint] } */
@@ -214,15 +214,16 @@ export function getElementSize(node) {
 
 /**
 * @param {Node} node
+* @param {HTMLIFrameElement[]} iframes
 */
-function getElementOffsetsInContainer(node) {
+function getElementOffsetsInContainer(node, iframes) {
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement) {
         return new DOMPoint(node.offsetLeft - node.scrollLeft, node.offsetTop - node.scrollTop);
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Text) {
         let range = document.createRange();
         range.selectNodeContents(node);
         let r1 = range.getBoundingClientRect();
-        const r2 = getParentElementIncludingSlots(node).getBoundingClientRect();
+        const r2 = getParentElementIncludingSlots(node, iframes).getBoundingClientRect();
         return new DOMPoint(r1.x - r2.x, r1.y - r2.y);
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Element) {
         if (node instanceof (node.ownerDocument.defaultView ?? window).SVGGraphicsElement && !(node instanceof (node.ownerDocument.defaultView ?? window).SVGSVGElement)) {
@@ -233,11 +234,11 @@ function getElementOffsetsInContainer(node) {
         if (cs.position === 'absolute') {
             return new DOMPoint(parseFloat(cs.left), parseFloat(cs.top));
         }
-        
-        const m = getResultingTransformationBetweenElementAndAllAncestors(node.parentNode, document.body);
+
+        const m = getResultingTransformationBetweenElementAndAllAncestors(node.parentNode, document.body, iframes);
         const r1 = node.getBoundingClientRect();
         const r1t = m.inverse().transformPoint(r1);
-        const r2 = getParentElementIncludingSlots(node).getBoundingClientRect();
+        const r2 = getParentElementIncludingSlots(node, iframes).getBoundingClientRect();
         const r2t = m.inverse().transformPoint(r2);
 
         return new DOMPoint(r1t.x - r2t.x, r1t.y - r2t.y);
@@ -247,16 +248,17 @@ function getElementOffsetsInContainer(node) {
 /**
 * @param {Node} node
 * @param {Element} ancestor
+* @param {HTMLIFrameElement[]} iframes
 */
-export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor) {
+export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, iframes) {
     /** @type {Element } */
     //@ts-ignore
     let actualElement = node;
     /** @type {DOMMatrix } */
     let parentElementMatrix;
     /** @type {DOMMatrix } */
-    let originalElementAndAllParentsMultipliedMatrix = getElementCombinedTransform(actualElement);
-    let perspectiveParentElement = getParentElementIncludingSlots(actualElement);
+    let originalElementAndAllParentsMultipliedMatrix = getElementCombinedTransform(actualElement, iframes);
+    let perspectiveParentElement = getParentElementIncludingSlots(actualElement, iframes);
     if (perspectiveParentElement) {
         let s = (actualElement.ownerDocument.defaultView ?? window).getComputedStyle(perspectiveParentElement);
         if (s.transformStyle !== 'preserve-3d') {
@@ -267,25 +269,25 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
     while (actualElement != ancestor && actualElement != null) {
         if (actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
             if (lastOffsetParent !== actualElement.offsetParent && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement)) {
-                const offsets = getElementOffsetsInContainer(actualElement);
+                const offsets = getElementOffsetsInContainer(actualElement, iframes);
                 lastOffsetParent = actualElement.offsetParent;
                 const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
                 originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
             }
         } else {
-            const offsets = getElementOffsetsInContainer(actualElement);
+            const offsets = getElementOffsetsInContainer(actualElement, iframes);
             lastOffsetParent = null;
             const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
             originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
         }
-        const parentElement = getParentElementIncludingSlots(actualElement);
+        const parentElement = getParentElementIncludingSlots(actualElement, iframes);
         if (parentElement) {
-            parentElementMatrix = getElementCombinedTransform(parentElement);
+            parentElementMatrix = getElementCombinedTransform(parentElement, iframes);
 
             if (parentElement != ancestor)
                 originalElementAndAllParentsMultipliedMatrix = parentElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
 
-            perspectiveParentElement = getParentElementIncludingSlots(parentElement);
+            perspectiveParentElement = getParentElementIncludingSlots(parentElement, iframes);
             if (perspectiveParentElement) {
                 const s = (perspectiveParentElement.ownerDocument.defaultView ?? window).getComputedStyle(perspectiveParentElement);
                 if (s.transformStyle !== 'preserve-3d') {
@@ -304,9 +306,10 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
 
 /**
 * @param {Node} node
+* @param {HTMLIFrameElement[]} iframes
 * @returns {Element}
 */
-function getParentElementIncludingSlots(node) {
+function getParentElementIncludingSlots(node, iframes) {
     if (node instanceof (node.ownerDocument.defaultView ?? window).Element && node.assignedSlot)
         return node.assignedSlot;
     if (node.parentElement == null) {
@@ -314,13 +317,21 @@ function getParentElementIncludingSlots(node) {
             return node.parentNode.host;
         }
     }
+    if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLHtmlElement) {
+        if (iframes) {
+            for (const f of iframes)
+                if (f?.contentDocument == node.ownerDocument)
+                    return f;
+        }
+    }
     return node.parentElement;
 }
 
 /**
 * @param {Element} element
+* @param {HTMLIFrameElement[]=} iframes
 */
-export function getElementCombinedTransform(element) {
+export function getElementCombinedTransform(element, iframes) {
     if (element instanceof (element.ownerDocument.defaultView ?? window).Text)
         return new DOMMatrix;
 
@@ -351,7 +362,7 @@ export function getElementCombinedTransform(element) {
     let res = mOri.multiply(m.multiply(mOri.inverse()));
 
     //@ts-ignore
-    const pt = getElementPerspectiveTransform(element);
+    const pt = getElementPerspectiveTransform(element, iframes);
     if (pt != null) {
         res = pt.multiply(res);
     }
@@ -391,11 +402,12 @@ function projectTo2D(m) {
 
 /**
 * @param {HTMLElement} element
+* @param {HTMLIFrameElement[]} iframes
 */
-function getElementPerspectiveTransform(element) {
+function getElementPerspectiveTransform(element, iframes) {
     /** @type { Element } */
     //@ts-ignore
-    const perspectiveNode = getParentElementIncludingSlots(element);
+    const perspectiveNode = getParentElementIncludingSlots(element, iframes);
     if (perspectiveNode) {
         //https://drafts.csswg.org/css-transforms-2/#perspective-matrix-computation
         let s = (element.ownerDocument.defaultView ?? window).getComputedStyle(perspectiveNode);

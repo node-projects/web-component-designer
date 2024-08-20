@@ -139,6 +139,12 @@ export function createDefaultServiceContainer() {
     new InvisibleElementExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
+    new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.Selection, [
+    new ConditionExtensionProvider(new SelectionDefaultExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.OnlyOneItemSelected, [
     new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
     new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
     new MarginExtensionProvider(),
@@ -146,9 +152,6 @@ export function createDefaultServiceContainer() {
     new PositionExtensionProvider(),
     new SvgElementExtensionProvider(),
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
-    new ConditionExtensionProvider(new MultipleSelectionRectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
-  ]);
-  serviceContainer.designerExtensions.set(ExtensionType.OnlyOneItemSelected, [
     new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),
   ]);
@@ -163,9 +166,6 @@ export function createDefaultServiceContainer() {
     new EditGridColumnRowSizesExtensionProvider(),
     new FlexboxExtensionProvider(),
   ]);
-  serviceContainer.designerExtensions.set(ExtensionType.Selection, [
-    new ConditionExtensionProvider(new SelectionDefaultExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
-  ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainerAndCanBeEntered, [
     new DisplayGridExtensionProvider('lightgray', '#8080802b'),
     new EditGridColumnRowSizesExtensionProvider(),
@@ -173,8 +173,8 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
     new HighlightElementExtensionProvider(),
-    new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
-    new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
+    //new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
+    //new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => item.instanceServiceContainer.selectionService.primarySelection !== item && !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.Placement, [
     new PlacementExtensionProvider()

@@ -46,7 +46,6 @@ export class PreviousElementSelectExtension extends AbstractExtension {
           this._g.appendChild(this._clickRect);
         }
         this._path.style.scale = (0.6 / this.designerCanvas.scaleFactor).toString();
-        //this._g.style.transform = 'translate(' + (transformedCornerPoints.p2.x - (14.5 / this.designerCanvas.scaleFactor)) + 'px,' + (transformedCornerPoints.p2.y - (16 / this.designerCanvas.scaleFactor)) + 'px) rotate(' + angle + 'deg)';
         this._g.style.translate = (transformedCornerPoints.p2.x - (14.5 / this.designerCanvas.scaleFactor)) + 'px ' + (transformedCornerPoints.p2.y - (15 / this.designerCanvas.scaleFactor)) + 'px';
         this._g.style.rotate =  angle + 'deg';
         this._g.style.transformOrigin = '100% 100%';
