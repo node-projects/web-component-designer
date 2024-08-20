@@ -4,6 +4,7 @@ import type * as monacoType from 'monaco-editor'
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
   static monacoLib: { editor: typeof monacoType.editor, Range: typeof monacoType.Range };
+  private _disableSelectionAfterSel: boolean;
 
   dispose(): void {
     this._monacoEditor?.dispose();
@@ -216,7 +217,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           const sel = this._monacoEditor.getSelection();
           const offsetStart = this._monacoEditor.getModel().getOffsetAt(sel.getStartPosition());
           const offsetEnd = this._monacoEditor.getModel().getOffsetAt(sel.getEndPosition());
-          if (this._instanceServiceContainer && !this._disableSelectionAfterUpd && !disableCursorChange) {
+          if (this._instanceServiceContainer && !this._disableSelectionAfterUpd && !this._disableSelectionAfterSel && !disableCursorChange) {
             this._disableSelection = true;
             if (selectionTimeout)
               clearTimeout(selectionTimeout);
@@ -269,13 +270,17 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   setSelection(position: IStringPosition) {
-    if (this._monacoEditor && !this._disableSelection && position) {
+    if (this._monacoEditor && !this._disableSelection && !this._disableSelectionAfterSel && position) {
+      this._disableSelectionAfterSel = true;
       let model = this._monacoEditor.getModel();
       let point1 = model.getPositionAt(position.start);
       let point2 = model.getPositionAt(position.start + position.length);
       setTimeout(() => {
         this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
         this._monacoEditor.revealRangeInCenterIfOutsideViewport(new CodeViewMonaco.monacoLib.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
+        setTimeout(() => {
+          this._disableSelectionAfterSel = false;
+        }, 50);
       }, 50);
     }
   }
