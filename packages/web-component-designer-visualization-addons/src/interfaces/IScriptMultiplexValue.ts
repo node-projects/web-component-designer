@@ -6,10 +6,11 @@ export class IScriptMultiplexValue {
      * parameter - a parameter you hand over 
      * complexString - a string with signals (contained in {})
      * complexSignal - read the value from a signal wich name is build here (it can contain other signals in {})
+     * not yet implemented: expression - js expression, member access needs to be defined {event, parameter, component/this, signals??? - async? }
      */
-    source: 'signal' | 'property' | 'event' | 'parameter' | 'complexString' | 'complexSignal';
+    source: 'signal' | 'property' | 'event' | 'parameter' | 'complexString' | 'complexSignal' | 'expression';
     /**
-     * Name of the ioBroker object or the property of the component or the parameter of the script
+     * Name of the signal, the property of the component or the parameter of the script
      * or for example in a event : srcElement.value to get the value of a input wich raises the event
      * @TJS-format signal
      */
