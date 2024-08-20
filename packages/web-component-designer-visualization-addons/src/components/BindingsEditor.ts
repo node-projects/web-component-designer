@@ -50,7 +50,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                             <span style="cursor: pointer;" title="javascript expression. access property with 'value'">formula write back (two way)</span>
                         </div>
                         <div class="row">
-                            <node-projects-code-view-monaco id="expression2way" read-only="[[!this.twoWay]]" $readonly="[[!this.twoWay]]" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expressionTwoWay}}"></iobroker-webui-monaco-editor>
+                            <node-projects-code-view-monaco id="expression2way" .read-only="[[!this.twoWay]]" $readonly="[[!this.twoWay]]" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expressionTwoWay}}"></iobroker-webui-monaco-editor>
                         </div>
                     </div>
                 </div>
