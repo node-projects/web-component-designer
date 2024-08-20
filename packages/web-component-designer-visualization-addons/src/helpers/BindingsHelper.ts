@@ -71,8 +71,15 @@ export class IndirectSignal {
     this.parseIndirectBinding(id);
     this.values = new Array(this.signals.length);
     for (let i = 0; i < this.signals.length; i++) {
+      let nm = this.signals[i];
+      if (nm[0] === '?' && nm[1] === '?') {
+        this.handleValueChanged(element[nm.substring(2)], i);
+        continue;
+      } else if (nm[0] === '?') {
+        nm = element[nm.substring(1)];
+      }
       let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
-      this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(this.signals[i], cb)]);
+      this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(nm, cb)]);
     }
   }
 
