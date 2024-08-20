@@ -12,6 +12,7 @@ export const bindingPrefixClass = 'bind-class:';
 export const bindingPrefixCss = 'bind-css:';
 export const bindingPrefixCssVar = 'bind-cssvar:';
 export const bindingPrefixContent = 'bind-content:';
+export const bindingPrefixVisible = 'bind-visible:';
 export const bindingPrefixInsideCss = 'bind(';
 export const bindingPrefixInsideCssVarName = '--tmpBinding_';
 
@@ -233,7 +234,7 @@ export class BindingsHelper {
         delete bindingCopy.events;
     }
 
-    const eventsString = binding.twoWay && binding.events?.length > 0 ? '::' + binding.events.join(',') : '';
+    const eventsString = bindingCopy.twoWay && bindingCopy.events?.length > 0 ? '::' + bindingCopy.events.join(',') : '';
 
     let needsJson = false;
     if (eventsString && binding.expression?.includes('::') || binding.expressionTwoWay?.includes('::'))
@@ -386,6 +387,9 @@ export class BindingsHelper {
     if (propertyTarget == BindingTarget.css) {
       return bindingPrefixCss + PropertiesHelper.camelToDashCase(propertyName);
     }
+    if (propertyTarget == BindingTarget.visible) {
+      return bindingPrefixVisible;
+    }
     if (propertyTarget == BindingTarget.cssvar) {
       return bindingPrefixCssVar + BindingsHelper.camelToDotCase(propertyName);
     }
@@ -418,6 +422,9 @@ export class BindingsHelper {
         }
         else if (a.name.startsWith(bindingPrefixCssVar)) {
           yield this.parseBinding(element, a.name, a.value, BindingTarget.cssvar, bindingPrefixCssVar);
+        }
+        else if (a.name.startsWith(bindingPrefixVisible)) {
+          yield this.parseBinding(element, a.name, a.value, BindingTarget.visible, bindingPrefixVisible);
         }
       }
     }
@@ -804,6 +811,8 @@ export class BindingsHelper {
       else
         (<HTMLElement>element).classList.remove(binding[0]);
     }
+    else if (binding[1].target == BindingTarget.visible)
+      (<HTMLElement>element).style.visibility = v ? '' : 'collapse';
   }
 
   public static camelToDotCase(text: string) {
