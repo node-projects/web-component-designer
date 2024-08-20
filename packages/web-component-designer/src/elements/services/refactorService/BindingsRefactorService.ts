@@ -5,13 +5,19 @@ import { IRefactoring } from "./IRefactoring.js";
 
 export class BindingsRefactorService implements IRefactorService {
     getRefactorings(designItems: IDesignItem[]): IRefactoring[] {
-        let refactorings: IRefactoring[] = [];
+        let refactorings: (IRefactoring & { shortName?: string })[] = [];
         for (let d of designItems) {
             let bindings = d.serviceContainer.bindingService.getBindings(d);
             if (bindings) {
                 for (let b of bindings) {
                     for (let s of b.bindableObjectNames) {
-                        refactorings.push({ service: this, name: s, itemType: 'bindableObject', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName });
+                        if (s.includes(':')) {
+                            let nm = s.split(':')[0];
+                            let sng = s.substring(nm.length + 1);
+                            refactorings.push({ service: this, name: sng, itemType: 'bindableObject', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName + ' - ' + nm + ':', shortName: nm });
+                        } else {
+                            refactorings.push({ service: this, name: s, itemType: 'bindableObject', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName });
+                        }
                     }
                 }
             }
@@ -19,9 +25,12 @@ export class BindingsRefactorService implements IRefactorService {
         return refactorings;
     }
 
-    refactor(refactoring: IRefactoring, oldValue: string, newValue: string) {
+    refactor(refactoring: (IRefactoring & { shortName?: string }), oldValue: string, newValue: string) {
         let binding = refactoring.sourceObject as IBinding;
-        binding.bindableObjectNames = binding.bindableObjectNames.map(x => x == oldValue ? newValue : x);
+        if (refactoring.shortName)
+            binding.bindableObjectNames = binding.bindableObjectNames.map(x => x == refactoring.shortName + ':' + oldValue ? refactoring.shortName + ':' + newValue : x);
+        else
+            binding.bindableObjectNames = binding.bindableObjectNames.map(x => x == oldValue ? newValue : x);
         refactoring.designItem.serviceContainer.bindingService.setBinding(refactoring.designItem, binding);
     }
 }
