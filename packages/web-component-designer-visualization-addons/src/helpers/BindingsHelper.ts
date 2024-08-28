@@ -251,7 +251,8 @@ export class BindingsHelper {
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       if (targetName == 'textContent')
         return [bindingPrefixContent + 'text', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
       if (targetName == 'innerHTML')
@@ -265,7 +266,8 @@ export class BindingsHelper {
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       if (targetName == 'textContent')
         return [bindingPrefixContent + 'text', (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
       if (targetName == 'innerHTML')
@@ -277,7 +279,8 @@ export class BindingsHelper {
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
@@ -287,7 +290,8 @@ export class BindingsHelper {
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
@@ -295,7 +299,8 @@ export class BindingsHelper {
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
@@ -305,7 +310,8 @@ export class BindingsHelper {
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
@@ -313,7 +319,8 @@ export class BindingsHelper {
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
@@ -324,7 +331,8 @@ export class BindingsHelper {
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
@@ -332,7 +340,8 @@ export class BindingsHelper {
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
     }
 
@@ -342,7 +351,8 @@ export class BindingsHelper {
       !binding.expressionTwoWay &&
       binding.converter == null &&
       !binding.type &&
-      !binding.historic) {
+      !binding.historic &&
+      !binding.writeBackSignal) {
       return [bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
     }
 
@@ -614,7 +624,7 @@ export class BindingsHelper {
             let disableValueChanged = false;
             if (!disableValueChanged) {
               disableValueChanged = true;
-              this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false);
+              this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
               disableValueChanged = false;
             }
           };
@@ -623,7 +633,7 @@ export class BindingsHelper {
             cleanupCalls = [];
           cleanupCalls.push(() => root.removeEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback));
           try {
-            this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false);
+            this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
           } catch (err) {
             console.error(err);
           }
@@ -637,11 +647,11 @@ export class BindingsHelper {
           mS = this._visualizationHandler.getNormalizedSignalName(mS, relativeSignalPath, element);
         }
         this._visualizationHandler.getObject(mS).then(x => {
-          this.handleValueChanged(element, binding, x, valuesObject, i, signalVars, true);
+          this.handleValueChanged(element, binding, x, valuesObject, i, signalVars, true, relativeSignalPath);
         });
       } else {
         if (s.includes('{')) {
-          let indirectSignal = new IndirectSignal(this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false), element, relativeSignalPath, root);
+          let indirectSignal = new IndirectSignal(this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root);
           if (!cleanupCalls)
             cleanupCalls = [];
           cleanupCalls.push(() => indirectSignal.dispose());
@@ -654,7 +664,7 @@ export class BindingsHelper {
               let myTimer = { timerId: <any>-1 };
               const loadHistoric = async () => {
                 const res = await this._visualizationHandler.getHistoricData(s, binding[1].historic);
-                this.handleValueChanged(element, binding, res?.values, valuesObject, i, signalVars, true);
+                this.handleValueChanged(element, binding, res?.values, valuesObject, i, signalVars, true, relativeSignalPath);
                 if (myTimer.timerId !== null)
                   myTimer.timerId = setTimeout(loadHistoric, binding[1].historic.reloadInterval);
               }
@@ -667,11 +677,11 @@ export class BindingsHelper {
                 myTimer.timerId = null;
               });
             } else
-              this._visualizationHandler.getHistoricData(s, binding[1].historic).then(x => this.handleValueChanged(element, binding, x?.values, valuesObject, i, signalVars, true))
+              this._visualizationHandler.getHistoricData(s, binding[1].historic).then(x => this.handleValueChanged(element, binding, x?.values, valuesObject, i, signalVars, true, relativeSignalPath))
           } else {
-            const cb = (id: string, value: State) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false);
+            const cb = (id: string, value: State) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath);
             unsubscribeList.push([s, cb, this._visualizationHandler.subscribeState(s, cb)]);
-            this._visualizationHandler.getState(s).then(x => this.handleValueChanged(element, binding, x?.val, valuesObject, i, signalVars, false));
+            this._visualizationHandler.getState(s).then(x => this.handleValueChanged(element, binding, x?.val, valuesObject, i, signalVars, false, relativeSignalPath));
             if (binding[1].twoWay && i == 0) {
               this.addTwoWayBinding(binding, element, v => this._visualizationHandler.setState(s, v));
             }
@@ -734,14 +744,14 @@ export class BindingsHelper {
           return value?.toString();
         case 'integer':
           return parseInt(<any>value);
-        case 'bitOfNumber':
-          return parseInt(<any>value);
+        //case 'bitOfNumber':
+        //  return parseInt(<any>value);
       }
     }
     return value;
   }
 
-  handleValueChanged(element: Element, binding: namedBinding, value: any, valuesObject: any[], index: number, signalVarNames: string[], noParse: boolean) {
+  handleValueChanged(element: Element, binding: namedBinding, value: any, valuesObject: any[], index: number, signalVarNames: string[], noParse: boolean, relativeSignalPath: string) {
     let v: (number | boolean | string) = value;
     //should this be done??
     if (!noParse && index == 0)
@@ -804,6 +814,15 @@ export class BindingsHelper {
     }
     if (binding[1].inverted)
       v = !v;
+
+    if (binding[1].writeBackSignal) {
+      let wb = binding[1].writeBackSignal;
+      if (wb[0] === '.') {
+        wb = relativeSignalPath + wb;
+      }
+      this._visualizationHandler.setState(wb, v, true);
+    }
+
     if (binding[1].target == BindingTarget.property)
       element[binding[0]] = v;
     else if (binding[1].target == BindingTarget.attribute)

@@ -1,5 +1,4 @@
 import { BaseCustomWebComponentConstructorAppend, html, css } from '@node-projects/base-custom-webcomponent';
-import toolbox from './BlocklyToolbox.js'
 //import Blockly from 'blockly';
 
 export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend {
@@ -24,11 +23,13 @@ export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend
     static blocklyStyle1: CSSStyleSheet;
     static blocklyStyle2: CSSStyleSheet;
     resizeObserver: ResizeObserver;
+    private _toolbox: any;
 
-    constructor() {
+    constructor(toolbox: any) {
         super();
         super._restoreCachedInititalValues();
 
+        this._toolbox = toolbox;
         this.blocklyDiv = this._getDomElement<HTMLDivElement>('blocklyDiv');
 
         this._assignEvents();
@@ -61,7 +62,7 @@ export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend
         //@ts-ignore
         this.workspace = Blockly.inject(this.blocklyDiv, {
             theme: theme,
-            toolbox: toolbox,
+            toolbox: this._toolbox,
             renderer: renderer,
             trashcan: true,
             zoom: {

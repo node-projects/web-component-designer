@@ -73,11 +73,12 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         super();
         this._restoreCachedInititalValues();
     }
-
+    
     ready() {
         this._bindingsParse();
     }
-
+    
+    private _blocklyToolbox: any;
     private _instanceServiceContainer: InstanceServiceContainer;
     private _selectionChangedHandler: Disposable;
     private _selectedItems: IDesignItem[];
@@ -88,11 +89,12 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
 
     public events: IEvent[];
 
-    public initialize(visualizationHandler: VisualizationHandler, visualizationShell: VisualizationShell, scriptCommandsTypeInfo: any, propertiesTypeInfo: any) {
+    public initialize(visualizationHandler: VisualizationHandler, visualizationShell: VisualizationShell, scriptCommandsTypeInfo: any, propertiesTypeInfo: any, blocklyToolbox: any) {
         this._visualizationHandler = visualizationHandler;
         this._visualizationShell = visualizationShell;
         this._scriptCommandsTypeInfo = scriptCommandsTypeInfo;
         this._propertiesTypeInfo = propertiesTypeInfo;
+        this._blocklyToolbox = blocklyToolbox;
     }
 
     public set instanceServiceContainer(value: InstanceServiceContainer) {
@@ -331,7 +333,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
 
     protected async _editBlockly(e: MouseEvent, eventItem: IEvent) {
         let selectedItem = this.selectedItems[0];
-        const edt = new BlocklyScriptEditor();
+        const edt = new BlocklyScriptEditor(this._blocklyToolbox);
         edt.title = "Blockly Script for '" + eventItem.name + "' of '" + selectedItem.name + "'";
         let data = selectedItem.getAttribute('@' + eventItem.name);
         let parameters = null;

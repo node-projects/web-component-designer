@@ -23,7 +23,7 @@ Blockly.JavaScript.forBlock['set_state'] = function (block) {
     const id = Blockly.JavaScript.valueToCode(block, 'OID', Blockly.JavaScript.ORDER_ATOMIC);
     //@ts-ignore
     const value = Blockly.JavaScript.valueToCode(block, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC);
-    const code = `await IOB.setState((${id}[0] === '.' ? relativeSignalsPath : '') + ${id}, ${value});\n`;
+    const code = `await visualizationHandler.setState((${id}[0] === '.' ? relativeSignalsPath : '') + ${id}, ${value});\n`;
 
     return code;
 };

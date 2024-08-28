@@ -16,7 +16,7 @@ Blockly.Blocks['get_state'] = {
 Blockly.JavaScript.forBlock['get_state'] = function (block, generator) {
     //@ts-ignore
     const id = Blockly.JavaScript.valueToCode(block, 'OID', Blockly.JavaScript.ORDER_ATOMIC);
-    const code = `(await IOB.getState((${id}[0] === '.' ? relativeSignalsPath : '') + ${id})).val`;
+    const code = `(await visualizationHandler.getState((${id}[0] === '.' ? relativeSignalsPath : '') + ${id})).val`;
     //@ts-ignore
     return [code, Blockly.JavaScript.ORDER_NONE];
 };

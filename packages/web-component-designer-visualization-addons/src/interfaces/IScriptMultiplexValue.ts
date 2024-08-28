@@ -6,7 +6,7 @@ export class IScriptMultiplexValue {
      * parameter - a parameter you hand over 
      * complexString - a string with signals (contained in {})
      * complexSignal - read the value from a signal wich name is build here (it can contain other signals in {})
-     * not yet implemented: expression - js expression, member access needs to be defined {event, parameter, component/this, signals??? - async? }
+     * expression - js expression, 'ctx' is context object
      */
     source: 'signal' | 'property' | 'event' | 'parameter' | 'complexString' | 'complexSignal' | 'expression';
     /**

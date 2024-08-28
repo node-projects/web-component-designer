@@ -190,6 +190,12 @@ export class ScriptSystem {
           }
           return null;
         }
+
+        case 'expression': {
+          //@ts-ignore
+          var ctx = outerContext;
+          return eval(value.name);
+        }
       }
     }
     return value;
@@ -200,7 +206,11 @@ export class ScriptSystem {
     if (name[0] === '§') {
       //@ts-ignore
       var ctx = context;
-      return eval('ctx.' + name.substring(1))
+      return eval('ctx.' + name.substring(1));
+    } else if (name[0] === '?' && name[1] === '??') {
+      return context.root[name.substring(2)];
+    } else if (name[0] === '?') {
+      return await this._visualizationHandler.getState(this.getSignaName(context.root[name.substring(2)], context));
     }
     return await this._visualizationHandler.getState(this.getSignaName(name, context));
   }
@@ -232,7 +242,7 @@ export class ScriptSystem {
     return retVal;
   }
 
-  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, assignExternalScript?: (element: Element, event: string, scriptData: any) => void): Promise<VisualisationElementScript> {
+  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, visualizationHandler: VisualizationHandler, context: any, assignExternalScript?: (element: Element, event: string, scriptData: any) => void): Promise<VisualisationElementScript> {
     const allElements = shadowRoot.querySelectorAll('*');
     let jsObject: VisualisationElementScript = null;
     if (javascriptCode) {
@@ -261,7 +271,7 @@ export class ScriptSystem {
                 e.addEventListener(evtName, async (evt) => {
                   if (!compiledFunc)
                     compiledFunc = await generateEventCodeFromBlockly(scriptObj);
-                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '');
+                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '', visualizationHandler, context);
                 });
               } else {
                 if (assignExternalScript)

@@ -17,8 +17,9 @@ export interface VisualizationBinding {
     compiledExpression?: Function;
     compiledExpressionTwoWay?: Function;
     type?: string;
-    historic?: { reloadInterval?: number };
+    writeBackSignal?: string;
+    historic?: { reloadInterval?: number, [nm: string]: any };
 
-    maybeLitElement?: boolean, 
+    maybeLitElement?: boolean,
     litEventNames?: string[]
 }
