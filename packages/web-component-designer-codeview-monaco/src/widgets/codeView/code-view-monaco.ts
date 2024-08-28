@@ -135,6 +135,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   constructor() {
     super();
     this._restoreCachedInititalValues();
+    this.addEventListener("keydown", e => e.stopPropagation());
   }
 
   async ready() {

@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Code Editor using Monaco",
   "name": "@node-projects/web-component-designer-codeview-monaco",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "type": "module",
   "main": "./dist/widgets/codeView/code-view-monaco.js",
   "author": "jochen.kuehner@gmx.de",
