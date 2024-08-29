@@ -45,11 +45,11 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                             <span style="cursor: pointer;" title="javascript expression. access objects with __0, __1, ...">formula</span>
                         </div>
                         <div class="row">
-                            <node-projects-code-view-monaco id="expression" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expression}}"></iobroker-webui-monaco-editor>
+                            <node-projects-code-view-monaco id="expression" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expression}}" @@code-changed="_refresh"></iobroker-webui-monaco-editor>
                         </div>
                         <div class="row">
                           <span style="text-wrap: nowrap" style="cursor: pointer;" title="write back the value build by a formula to a signal. maybe only usefull when a formula is used.">write back signal :</span>
-                          <input style="width: 100%; margin-left: 5px;" .disabled="[[!this.expression]]" value="{{?this.writeBackSignal::change}}" @change="_refresh">
+                          <input style="width: 100%; margin-left: 5px;" .disabled="[[!this.expression]]" value="{{?this.writeBackSignal::change}}">
                         </div>
                         <div class="row">
                             <span style="cursor: pointer;" title="javascript expression. access property with 'value'">formula write back (two way)</span>
