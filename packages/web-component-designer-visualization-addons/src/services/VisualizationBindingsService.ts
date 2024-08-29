@@ -22,7 +22,8 @@ export class VisualizationBindingsService implements IBindingService {
       converter: x[1].converter,
       type: x[1].type,
       changedEvents: x[1].events,
-      historic: x[1].historic
+      historic: x[1].historic,
+      writeBackSignal: x[1].writeBackSignal,
     }));
   }
 
