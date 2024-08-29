@@ -4,6 +4,7 @@ import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-m
 import { BindableObjectsBrowser } from "@node-projects/web-component-designer-widgets-wunderbaum";
 import { VisualizationShell } from '../interfaces/VisualizationShell.js';
 import { BindingsEditorHistoric } from './BindingsEditorHistoric.js';
+import { VisualizationBinding } from '../interfaces/VisualizationBinding.js';
 
 export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
 
@@ -45,6 +46,10 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                         </div>
                         <div class="row">
                             <node-projects-code-view-monaco id="expression" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expression}}"></iobroker-webui-monaco-editor>
+                        </div>
+                        <div class="row">
+                          <span style="text-wrap: nowrap" style="cursor: pointer;" title="write back the value build by a formula to a signal">write back signal :</span>
+                          <input style="width: 100% margin-left: 5px;" .disabled="[[!this.expression]]" .value="{{?this.writeBackSignal}}" >
                         </div>
                         <div class="row">
                             <span style="cursor: pointer;" title="javascript expression. access property with 'value'">formula write back (two way)</span>
@@ -179,6 +184,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   public twoWayPossible: boolean = false;
   public twoWay: boolean = false;
   public expression: string = '';
+  public writeBackSignal: string = '';
   public expressionTwoWay: string = '';
   public historic: any;
   public objectNames: string = '';
@@ -219,6 +225,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
     if (this._binding) {
       this.twoWay = this._binding.mode == BindingMode.twoWay;
       this.expression = this._binding.expression;
+      this.writeBackSignal = (<VisualizationBinding>this._binding).writeBackSignal;
       this.expressionTwoWay = (<any>this._binding).expressionTwoWay;
       this.historic = (<any>this._binding).historic;
       this.invert = this._binding.invert;
