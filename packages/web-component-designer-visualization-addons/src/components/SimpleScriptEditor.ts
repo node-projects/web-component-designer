@@ -145,7 +145,9 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
                     d.style.display = 'flex';
                     let sp = document.createElement('span');
                     if (currentValue)
-                        sp.innerText = 'complex: ' + JSON.stringify(currentValue);
+                        sp.innerText = (currentValue.source ?? '') + ': ' + (currentValue.name ?? '');
+                    else
+                        sp.innerText = '';
                     sp.style.overflow = 'hidden';
                     sp.style.whiteSpace = 'nowrap';
                     sp.style.textOverflow = 'ellipsis';
