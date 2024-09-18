@@ -10,6 +10,7 @@ export class MarginExtension extends AbstractExtension {
   }
 
   private _path: SVGPathElement;
+  private _path2: SVGPathElement;
 
   override extend(cache: Record<string | symbol, any>, event?: Event) {
     this.refresh(cache, event);
@@ -29,7 +30,8 @@ export class MarginExtension extends AbstractExtension {
             const p2 = this.extendedItem.element.getBoxQuads({ box: 'margin', relativeTo: this.designerCanvas.canvas })[0];
             let d = "M" + [p.p1, p.p2, p.p3, p.p4].map(x => x.x + ',' + x.y).join(' ') + 'Z ';
             d += "M" + [p2.p1, p2.p2, p2.p3, p2.p4].map(x => x.x + ',' + x.y).join(' ') + 'Z ';
-            this._path = this._drawPath(d, 'svg-margin', this._path, OverlayLayer.Background);
+            this._path = this._drawPath(d, 'svg-margin-fill', this._path, OverlayLayer.Background);
+            this._path2 = this._drawPath(d, 'svg-margin', this._path2, OverlayLayer.Background);
           }
         }
       }

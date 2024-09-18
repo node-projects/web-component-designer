@@ -46,6 +46,9 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
     this._div.onpointerdown = () => {
       if (this.currentToolOnButton) {
         (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setTool(this.currentToolOnButton);
+        setTimeout(() => {
+          designerCanvas.clickOverlay.focus();
+        }, 50);
         if (this.popup) {
           this._longPress = setTimeout(() => {
             this._longPress = null;

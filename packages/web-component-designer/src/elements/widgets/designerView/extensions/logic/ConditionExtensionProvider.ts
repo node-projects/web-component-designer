@@ -5,7 +5,7 @@ import { IDesignerExtension } from '../IDesignerExtension.js';
 import { IExtensionManager } from '../IExtensionManger.js';
 
 export class ConditionExtensionProvider implements IDesignerExtensionProvider {
-    constructor(extensionProvider: IDesignerExtensionProvider, condition: (designItem: IDesignItem) => boolean) {
+    constructor(extensionProvider: IDesignerExtensionProvider, condition: (designItem: IDesignItem, designerCanvas: IDesignerCanvas) => boolean, recheckOnRefresh: boolean = false) {
         this.extensionProvider = extensionProvider;
         this.condition = condition;
         this.style = <any>extensionProvider.style ?? extensionProvider.constructor.style;
@@ -13,17 +13,17 @@ export class ConditionExtensionProvider implements IDesignerExtensionProvider {
     }
 
     extensionProvider: IDesignerExtensionProvider;
-    condition: (designItem: IDesignItem) => boolean;
+    condition: (designItem: IDesignItem, designerCanvas: IDesignerCanvas) => boolean;
     style: CSSStyleSheet;
     svgDefs: string;
 
-    shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-        if (!this.condition(designItem))
+    shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
+        if (!this.condition(designItem, designerCanvas))
             return false;
-        return this.extensionProvider.shouldExtend(extensionManager, designerView, designItem);
+        return this.extensionProvider.shouldExtend(extensionManager, designerCanvas, designItem);
     }
 
-    getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-        return this.extensionProvider.getExtension(extensionManager, designerView, designItem);
+    getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
+        return this.extensionProvider.getExtension(extensionManager, designerCanvas, designItem);
     }
 }

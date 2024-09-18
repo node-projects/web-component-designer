@@ -33,19 +33,19 @@ export class DisplayGridExtensionProvider implements IDesignerExtensionProvider 
     .svg-grid { stroke: var(--svg-grid-stroke-color); stroke-dasharray: 5; fill: var(--svg-grid-fill-color); }
     .svg-grid-current-cell { stroke: var(--svg-grid-stroke-color); stroke-dasharray: 5; fill: #e3ff4722; }
     .svg-grid-area { font-size: 8px; }
-    .svg-grid-gap { stroke: transparent; fill: var(--svg-grid-stroke-color); opacity: 0.3; mask: url(#mask-stripe) }
+    .svg-grid-gap { stroke: transparent; fill: var(--svg-grid-stroke-color); opacity: 0.3; mask: url(#mask-stripe-grid) }
     .svg-grid-header { fill: var(--svg-grid-fill-color); stroke: var(--svg-grid-stroke-color); }
     .svg-grid-plus-sign { stroke: black; }
   `;
 
   static readonly svgDefs = `
-    <pattern id="pattern-stripe" 
+    <pattern id="pattern-stripe-grid" 
       width="4" height="4" 
       patternUnits="userSpaceOnUse"
       patternTransform="rotate(45)">
       <rect width="1" height="4" transform="translate(0,0)" fill="white"></rect>
     </pattern>
-    <mask id="mask-stripe">
-      <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-stripe)" />
+    <mask id="mask-stripe-grid">
+      <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-stripe-grid)" />
     </mask>`;
 }

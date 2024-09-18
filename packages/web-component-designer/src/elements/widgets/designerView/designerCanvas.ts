@@ -548,6 +548,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         break;
       case CommandType.setTool: {
         this.serviceContainer.globalContext.tool = <ITool>this.serviceContainer.designerTools.get(command.parameter);
+        this.extensionManager.reapplyAllAppliedExtentions();
       }
         break;
       case CommandType.setStrokeColor: {
@@ -1099,6 +1100,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this._ignoreEvent === event)
       return;
 
+    if (this.activeTool.keyboardEventHandler) {
+      this.activeTool.keyboardEventHandler(this, event, this.instanceServiceContainer.selectionService.primarySelection.element);
+      if (event.defaultPrevented)
+        return;
+    }
+
     if (this._moveGroup) {
       this._moveGroup.commit()
       this._moveGroup = null;
@@ -1110,6 +1117,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private onKeyDown(event: KeyboardEvent) {
     if (this._ignoreEvent === event)
       return;
+
+    if (this.activeTool.keyboardEventHandler) {
+      this.activeTool.keyboardEventHandler(this, event, this.instanceServiceContainer.selectionService.primarySelection.element);
+      if (event.defaultPrevented)
+        return;
+    }
 
     if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
       this.executeCommand({ type: CommandType.undo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
@@ -1393,6 +1406,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public releaseActiveTool() {
     this._activeTool = null;
+  }
+
+  public get activeTool() {
+    return this.serviceContainer.globalContext.tool;
   }
 
   public fillCalculationrects() {

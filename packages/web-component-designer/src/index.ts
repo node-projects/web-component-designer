@@ -219,7 +219,7 @@ export * from "./elements/widgets/designerView/tools/toolBar/buttons/SeperatorTo
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js";
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js";
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/TransformToolButtonProvider.js";
-
+export * from "./elements/widgets/designerView/tools/toolBar/buttons/SimpleToolButtonProvider.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/popups/AbstractBaseToolPopup.js";
 export * from "./elements/widgets/designerView/tools/toolBar/popups/DrawToolPopup.js";
@@ -246,6 +246,8 @@ export * from "./elements/widgets/designerView/tools/PointerTool.js";
 export * from "./elements/widgets/designerView/tools/RectangleSelectorTool.js";
 export * from "./elements/widgets/designerView/tools/TextTool.js";
 export * from "./elements/widgets/designerView/tools/ZoomTool.js";
+export * from "./elements/widgets/designerView/tools/MarginTool.js";
+export * from "./elements/widgets/designerView/tools/PaddingTool.js";
 
 export type { IDesignerExtension } from "./elements/widgets/designerView/extensions/IDesignerExtension.js";
 export type { IDesignerExtensionProvider } from "./elements/widgets/designerView/extensions/IDesignerExtensionProvider.js";

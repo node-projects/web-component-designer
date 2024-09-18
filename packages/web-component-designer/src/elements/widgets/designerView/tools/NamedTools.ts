@@ -12,6 +12,18 @@ export enum NamedTools {
   RectangleSelector = 'RectangleSelector',
   PickColor = 'PickColor',
   Text = 'Text',
-  
-  DrawElementTool = "DrawElementTool"
+
+  DrawElementTool = "DrawElementTool",
+
+  Guides = 'Guides',
+  Inspect = 'Inspect',
+  Accessibility = 'Accessibility',
+  Position = 'Position',
+  Padding = "Padding",
+  Margin = 'Margin',
+  Flexbox = 'Flexbox',
+  Move = 'Move',
+  HueShift = 'HueShift',
+  BoxShadows = 'BoxShadows',
+  FontStyles = 'FontStyles'
 }

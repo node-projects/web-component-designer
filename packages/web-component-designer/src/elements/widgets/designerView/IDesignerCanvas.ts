@@ -56,6 +56,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler, HTML
 
   captureActiveTool(tool: ITool);
   releaseActiveTool();
+  readonly activeTool: ITool;
 
   getDesignSurfaceDimensions(): ISize;
 

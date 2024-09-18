@@ -100,6 +100,10 @@ import { PreviousElementSelectExtensionProvider } from '../widgets/designerView/
 import { ForceCssContextMenu } from '../widgets/designerView/extensions/contextMenu/ForceCssContextMenu.js';
 import { OptionsContextMenuButton } from '../widgets/designerView/extensions/buttons/OptionsContextMenuButton.js';
 import { ChildrenContextMenu } from '../widgets/designerView/extensions/contextMenu/ChildrenContextMenu.js';
+import { MarginTool } from '../widgets/designerView/tools/MarginTool.js';
+import { SimpleToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/SimpleToolButtonProvider.js';
+import { assetsPath } from '../../Constants.js';
+import { PaddingTool } from '../widgets/designerView/tools/PaddingTool.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -147,8 +151,8 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.OnlyOneItemSelected, [
     new ConditionExtensionProvider(new ElementDragTitleExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
     new ConditionExtensionProvider(new PreviousElementSelectExtensionProvider(), item => !(item.node instanceof item.window.SVGElement) || item.node instanceof item.window.SVGSVGElement),
-    new MarginExtensionProvider(),
-    new PaddingExtensionProvider(),
+    new ConditionExtensionProvider(new MarginExtensionProvider, (_, c) => c.activeTool instanceof MarginTool || c.activeTool instanceof PaddingTool, true),
+    new ConditionExtensionProvider(new PaddingExtensionProvider, (_, c) => c.activeTool instanceof MarginTool || c.activeTool instanceof PaddingTool, true),
     new PositionExtensionProvider(),
     new SvgElementExtensionProvider(),
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
@@ -212,6 +216,8 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerTools.set(NamedTools.PickColor, new PickColorTool());
   serviceContainer.designerTools.set(NamedTools.Text, new TextTool());
   serviceContainer.designerTools.set(NamedTools.DrawElementTool, DrawElementTool);
+  serviceContainer.designerTools.set(NamedTools.Margin, new MarginTool());
+  serviceContainer.designerTools.set(NamedTools.Padding, new PaddingTool());
 
   serviceContainer.designerPointerExtensions.push(
     //new CursorLinePointerExtensionProvider()
@@ -237,6 +243,10 @@ export function createDefaultServiceContainer() {
     new PointerToolButtonProvider(),
     new SeperatorToolProvider(22),
     new SelectorToolButtonProvider(),
+    new SeperatorToolProvider(22),
+    new SimpleToolButtonProvider("Margin", assetsPath + 'images/tools/Margin.svg'),
+    new SeperatorToolProvider(22),
+    new SimpleToolButtonProvider("Padding", assetsPath + 'images/tools/Padding.svg'),
     new SeperatorToolProvider(22),
     new ZoomToolButtonProvider(),
     new SeperatorToolProvider(22),
