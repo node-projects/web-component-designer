@@ -1100,7 +1100,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this._ignoreEvent === event)
       return;
 
-    if (this.activeTool.keyboardEventHandler) {
+    if (this.activeTool?.keyboardEventHandler) {
       this.activeTool.keyboardEventHandler(this, event, this.instanceServiceContainer.selectionService.primarySelection.element);
       if (event.defaultPrevented)
         return;
@@ -1118,7 +1118,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (this._ignoreEvent === event)
       return;
 
-    if (this.activeTool.keyboardEventHandler) {
+    if (this.activeTool?.keyboardEventHandler) {
       this.activeTool.keyboardEventHandler(this, event, this.instanceServiceContainer.selectionService.primarySelection.element);
       if (event.defaultPrevented)
         return;

@@ -1,4 +1,6 @@
+import { EventNames } from '../../../../enums/EventNames.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
+import { ChangeGroup } from '../../../services/undoService/ChangeGroup.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { ITool } from './ITool.js';
 import { NamedTools } from './NamedTools.js';
@@ -6,6 +8,7 @@ import { NamedTools } from './NamedTools.js';
 export class PaddingTool implements ITool {
 
   readonly cursor: string = 'pointer';
+  private _changeGroup: ChangeGroup;
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     (<ITool>designerCanvas.serviceContainer.designerTools.get(NamedTools.Pointer)).pointerEventHandler(designerCanvas, event, currentElement);
@@ -31,7 +34,15 @@ export class PaddingTool implements ITool {
         break;
     }
     if (nm) {
-      sel.setStyle(nm, (parseFloat(cs[nm]) + (event.altKey ? -1 : 1)) + "px");
+      if (event.type == EventNames.KeyDown && !this._changeGroup)
+        this._changeGroup = sel.openGroup("change padding");
+      if (this._changeGroup) {
+        sel.setStyleAsync(nm, (parseFloat(cs[nm]) + (event.altKey ? -1 : 1)) + "px");
+        if (event.type == EventNames.KeyUp) {
+          this._changeGroup.commit();
+          this._changeGroup = null;
+        }
+      }
     }
   }
 
@@ -39,5 +50,9 @@ export class PaddingTool implements ITool {
   }
 
   dispose(): void {
+    if (this._changeGroup) {
+      this._changeGroup.abort();
+      this._changeGroup = null;
+    }
   }
 }
