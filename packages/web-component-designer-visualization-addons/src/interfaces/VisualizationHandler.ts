@@ -27,6 +27,9 @@ export interface VisualizationHandler {
   getHistoricData(id: string, config: any);
   getObject(id: string): Promise<Signal>;
 
+  writeSignalsInGroup?(group: string): Promise<void>;
+  clearSignalsInGroup?(group: string): Promise<void>;
+
   getAllNames(type: string);
   getSignalInformation(signal: Signal): SignalInformation;
 };

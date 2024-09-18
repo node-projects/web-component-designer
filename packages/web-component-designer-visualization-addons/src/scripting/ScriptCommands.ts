@@ -1,8 +1,11 @@
-export declare type ScriptCommands = OpenScreen | OpenUrl | OpenDialog | CloseDialog |
+export declare type ScriptCommands = Comment | OpenScreen | OpenUrl | OpenDialog | CloseDialog |
   ToggleSignalValue | SetSignalValue | IncrementSignalValue | DecrementSignalValue |
   SetBitInSignal | ClearBitInSignal | ToggleBitInSignal | Console | CalculateSignalValue |
   Javascript | SetElementProperty | Delay | SwitchLanguage |
-  Login | Logout;
+  Login | Logout |
+  SubscribeSignal | UnsubscribeSignal |
+  WriteSignalsInGroup | ClearSiganlsInGroup |
+  Condition | Exit | Label | RunScript | Goto;
 
 
 /* 
@@ -14,24 +17,10 @@ Object Values,
 Current Element Property
 */
 
-/*export interface Description {
-  type: 'Description';
-  description?: string;
+export interface Comment {
+  type: 'Comment';
+  comment: string;
 }
-
-export interface Label {
-  type: 'Label';
-  name: string;
-}
-
-export interface Condition {
-  type: 'Condition';
-  value1: any;
-  value2?: any;
-  comparisonType: '==null' | '!=null' | '==true' | '==false' | '==' | '!=' | '>' | '<' | '>=' | '<=';
-  labelTrue?: string;
-  labelFalse?: string;
-}*/
 
 export interface OpenScreen {
   type: 'OpenScreen';
@@ -247,4 +236,78 @@ export interface Login {
    * password
    */
   password: string;
+}
+
+export interface SubscribeSignal {
+  type: 'SubscribeSignal';
+  /**
+   * Name of the signal
+   * @TJS-format signal
+   */
+  signal: string;
+  oneTime: boolean;
+}
+
+export interface UnsubscribeSignal {
+  type: 'UnsubscribeSignal';
+  /**
+   * Name of the signal
+   * @TJS-format signal
+   */
+  signal: string;
+}
+
+export interface WriteSignalsInGroup {
+  type: 'WriteSignalsInGroup';
+  /**
+  * Name of the Group
+  */
+  group: string;
+}
+
+export interface ClearSiganlsInGroup {
+  type: 'ClearSiganlsInGroup';
+  /**
+  * Name of the Group
+  */
+  group: string;
+}
+
+export interface Condition {
+  type: 'Condition';
+  value1: any;
+  value2?: any;
+  comparisonType: '==null' | '!=null' | '==true' | '==false' | '==' | '!=' | '>' | '<' | '>=' | '<=';
+  trueGotoLabel?: string;
+  trueScriptName?: string;
+  trueScriptType?: string;
+  falseGotoLabel?: string;
+  falseScriptName?: string;
+  falseScriptType?: string;
+}
+
+export interface Exit {
+  type: 'Exit';
+}
+
+export interface Label {
+  type: 'Label';
+  label: string;
+}
+
+export interface Goto {
+  type: 'Goto';
+  label: string;
+}
+
+export interface RunScript {
+  type: 'RunScript';
+  /**
+  * Name of the Script
+  */
+  name: 'string';
+  /**
+  * Type of the Script
+  */
+  scriptType: 'string';
 }

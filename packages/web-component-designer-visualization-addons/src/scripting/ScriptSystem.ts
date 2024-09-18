@@ -13,19 +13,77 @@ export type contextType = { event: Event, element: Element, root: HTMLElement, p
 export class ScriptSystem {
 
   _visualizationHandler: VisualizationHandler;
+  _subscriptionCallback = () => { };
 
   constructor(visualizationHandler: VisualizationHandler) {
     this._visualizationHandler = visualizationHandler;
   }
 
   async execute(scriptCommands: ScriptCommands[], outerContext: contextType) {
-    for (let c of scriptCommands) {
-      this.runScriptCommand(c, outerContext);
+    for (let i = 0; i < scriptCommands.length; i++) {
+      let c = scriptCommands[i];
+      if (c.type == "Exit") {
+        break;
+      } else if (c.type == "Goto") {
+        const label = await this.getValue(c.label, outerContext);
+        i = scriptCommands.findIndex(x => x.type == "Label" && x.label == label);
+        if (i < 0)
+          break;
+      } else if (c.type == "Condition") {
+        const value1 = await this.getValue(c.value1, outerContext);
+        const value2 = await this.getValue(c.value2, outerContext);
+        const comparisonType = await this.getValue(c.comparisonType, outerContext);
+        let res = false;
+        switch (comparisonType) {
+          case '==null': res = value1 == null; break;
+          case '!=null': res = value1 != null; break;
+          case '==true': res = value1 == true; break;
+          case '==false': res = value1 == false; break;
+          case '==': res = value1 == value2; break;
+          case '!=': res = value1 != value2; break;
+          case '>': res = value1 > value2; break;
+          case '<': res = value1 < value2; break;
+          case '>=': res = value1 >= value2; break;
+          case '<=': res = value1 <= value2; break;
+        }
+        if (res) {
+          await this.runExternalScript(await this.getValue(c.trueScriptName, outerContext), await this.getValue(c.trueScriptType, outerContext));
+          const trueGotoLabel = await this.getValue(c.trueGotoLabel, outerContext);
+          if (trueGotoLabel) {
+            i = scriptCommands.findIndex(x => x.type == "Label" && x.label == trueGotoLabel);
+            if (i < 0)
+              break;
+          }
+        } else {
+          await this.runExternalScript(await this.getValue(c.falseScriptName, outerContext), await this.getValue(c.falseScriptType, outerContext));
+          const falseGotoLabel = await this.getValue(c.falseGotoLabel, outerContext);
+          if (falseGotoLabel) {
+            i = scriptCommands.findIndex(x => x.type == "Label" && x.label == falseGotoLabel);
+            if (i < 0)
+              break;
+          }
+        }
+      } else
+        this.runScriptCommand(c, outerContext);
     }
+  }
+
+  async runExternalScript(name: string, type: string) {
+    //TODO...
   }
 
   async runScriptCommand<T extends ScriptCommands>(command: T, context: contextType) {
     switch (command.type) {
+
+      case 'Comment':
+      case 'Label':
+      case 'Condition':
+      case 'Goto':
+      case 'Exit':
+        {
+          //Do nothing on this commands
+          break;
+        }
 
       case 'OpenUrl': {
         window.open(await this.getValue(command.url, context), command.target);
@@ -135,6 +193,45 @@ export class ScriptSystem {
             }
           }
         }
+        break;
+      }
+
+      case 'SubscribeSignal': {
+        const signal = await this.getValue(command.signal, context);
+        const oneTime = await this.getValue(command.oneTime, context);
+        if (oneTime) {
+          let cb = () => {
+            this._visualizationHandler.unsubscribeState(signal, cb, null);
+          }
+          this._visualizationHandler.subscribeState(signal, cb);
+        }
+        else
+          this._visualizationHandler.subscribeState(signal, this._subscriptionCallback);
+        break;
+      }
+
+      case 'UnsubscribeSignal': {
+        const signal = await this.getValue(command.signal, context);
+        this._visualizationHandler.unsubscribeState(signal, this._subscriptionCallback, null);
+        break;
+      }
+
+      case 'WriteSignalsInGroup': {
+        const group = await this.getValue(command.group, context);
+        this._visualizationHandler.writeSignalsInGroup(group);
+        break;
+      }
+
+      case 'ClearSiganlsInGroup': {
+        const group = await this.getValue(command.group, context);
+        this._visualizationHandler.clearSignalsInGroup(group);
+        break;
+      }
+
+      case 'RunScript': {
+        const name = await this.getValue(command.name, context);
+        const scriptType = await this.getValue(command.scriptType, context);
+        this.runExternalScript(name, scriptType);
         break;
       }
     }
