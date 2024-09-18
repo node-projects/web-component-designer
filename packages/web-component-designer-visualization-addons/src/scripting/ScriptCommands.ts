@@ -275,9 +275,16 @@ export interface ClearSiganlsInGroup {
 
 export interface Condition {
   type: 'Condition';
+  /**
+  * Name of the value1
+  * @TJS-format complex
+  */
   value1: any;
   value2?: any;
   comparisonType: '==null' | '!=null' | '==true' | '==false' | '==' | '!=' | '>' | '<' | '>=' | '<=';
+  /**
+  * Name of the label to jumpe to when condition is true
+  */
   trueGotoLabel?: string;
   trueScriptName?: string;
   trueScriptType?: string;

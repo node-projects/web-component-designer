@@ -124,9 +124,9 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
         this._propertygrid.getSpecialEditorForType = async (property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any) => {
             //@ts-ignore
             if (!property.specialAllreadyAdded) {
-                 //@ts-ignore
+                //@ts-ignore
                 property.specialAllreadyAdded = true
-                if (typeof currentValue === 'object' && currentValue !== null) {
+                if ((typeof currentValue === 'object' && currentValue !== null) || property.format === 'complex') {
                     let rB = document.createElement('button');
                     rB.style.height = 'calc(100% - 6px)';
                     rB.style.position = 'relative';
@@ -144,7 +144,8 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
                     let d = document.createElement('div');
                     d.style.display = 'flex';
                     let sp = document.createElement('span');
-                    sp.innerText = 'complex: ' + JSON.stringify(currentValue);
+                    if (currentValue)
+                        sp.innerText = 'complex: ' + JSON.stringify(currentValue);
                     sp.style.overflow = 'hidden';
                     sp.style.whiteSpace = 'nowrap';
                     sp.style.textOverflow = 'ellipsis';
