@@ -41,6 +41,7 @@ import { TouchGestureHelper } from '../../helper/TouchGestureHelper.js';
 import { stylesheetFromString } from '../../helper/StylesheetHelper.js';
 import { AbstractStylesheetService } from '../../services/stylesheetService/AbstractStylesheetService.js';
 import { addPolyfill as addBoxQuadsPolyfill } from '../../helper/getBoxQuads.js';
+import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 
 const disableAnimationsSheet = cssFromString`
   * {
@@ -1124,21 +1125,21 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         return;
     }
 
-    if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey)
-      this.executeCommand({ type: CommandType.undo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
-    else if ((event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey)
-      this.executeCommand({ type: CommandType.redo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
-    else if ((event.ctrlKey || event.metaKey) && event.key === 'y')
-      this.executeCommand({ type: CommandType.redo, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
-    else if ((event.ctrlKey || event.metaKey) && event.key === 'a')
-      this.executeCommand({ type: CommandType.selectAll, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
-    else if ((event.ctrlKey || event.metaKey) && event.key === 'c')
-      this.executeCommand({ type: CommandType.copy, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
-    else if ((event.ctrlKey || event.metaKey) && event.key === 'v')
-      this.executeCommand({ type: CommandType.paste, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
-    else if ((event.ctrlKey || event.metaKey) && event.key === 'x')
-      this.executeCommand({ type: CommandType.cut, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
-    else if ((event.ctrlKey || event.metaKey) && event.key === 'f')
+    if (hasCommandKey(event) && event.key === 'z' && !event.shiftKey)
+      this.executeCommand({ type: CommandType.undo, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if (hasCommandKey(event) && event.key === 'z' && event.shiftKey)
+      this.executeCommand({ type: CommandType.redo, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if (hasCommandKey(event) && event.key === 'y')
+      this.executeCommand({ type: CommandType.redo, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if (hasCommandKey(event) && event.key === 'a')
+      this.executeCommand({ type: CommandType.selectAll, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if (hasCommandKey(event) && event.key === 'c')
+      this.executeCommand({ type: CommandType.copy, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if (hasCommandKey(event) && event.key === 'v')
+      this.executeCommand({ type: CommandType.paste, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if (hasCommandKey(event) && event.key === 'x')
+      this.executeCommand({ type: CommandType.cut, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+    else if (hasCommandKey(event) && event.key === 'f')
       this._searchShowOverlay();
     else {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
@@ -1152,7 +1153,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       switch (event.key) {
         case 'Delete':
         case 'Backspace':
-          this.executeCommand({ type: CommandType.delete, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
+          this.executeCommand({ type: CommandType.delete, metaKey: event.metaKey, ctrlKey: event.ctrlKey, altKey: event.altKey, shiftKey: event.shiftKey });
           break;
         case 'ArrowDown':
         case 'ArrowUp':

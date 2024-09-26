@@ -10,6 +10,7 @@ import { ITool } from './ITool.js';
 import { NamedTools } from './NamedTools.js';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
 import { ChangeGroup } from '../../../services/undoService/ChangeGroup.js';
+import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 
 export class PointerTool implements ITool {
 
@@ -50,7 +51,7 @@ export class PointerTool implements ITool {
 
   private _showContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
     event.preventDefault();
-    if (!event.ctrlKey) {
+    if (!hasCommandKey(event)) {
       let items = designerCanvas.elementsFromPoint(event.x, event.y);
       for (let e of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
         if (items.indexOf(e.element) >= 0) {
@@ -69,7 +70,7 @@ export class PointerTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    if (event.ctrlKey)
+    if (hasCommandKey(event))
       this.cursor = 'copy';
     else
       this.cursor = 'default';
@@ -86,7 +87,7 @@ export class PointerTool implements ITool {
       return;
     }
 
-    if (((event.ctrlKey || event.metaKey) && event.shiftKey) || event.buttons == 4) {
+    if ((hasCommandKey(event) && event.shiftKey) || event.buttons == 4) {
       const panTool = <ITool>designerCanvas.serviceContainer.designerTools.get(NamedTools.Pan);
       if (panTool) {
         panTool.pointerEventHandler(designerCanvas, event, currentElement);
@@ -140,7 +141,7 @@ export class PointerTool implements ITool {
         if (currentDesignItem !== designerCanvas.rootDesignItem) {
           this._actionType = PointerActionType.Drag;
         } else if (currentElement === <any>designerCanvas || currentElement === designerCanvas.rootDesignItem.element || currentElement == null) {
-          //if (!event.ctrlKey && !event.shiftKey)
+          //if (!hasCommandKey(event) && !event.shiftKey)
           //  designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null, event);
           this._actionType = PointerActionType.DrawSelection;
         } else {
@@ -233,7 +234,7 @@ export class PointerTool implements ITool {
 
           if (this._firstTimeInMove) {
             if (!currentDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(currentDesignItem)) {
-              if (event.ctrlKey)
+              if (hasCommandKey(event))
                 currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([...currentDesignItem.instanceServiceContainer.selectionService.selectedElements, currentDesignItem], event);
               else
                 currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem], event);
@@ -262,14 +263,14 @@ export class PointerTool implements ITool {
             window.addEventListener('pointerup', () => { this._changeGroup?.abort(); this._changeGroup = null; }, { once: true });
           }
 
-          if (event.ctrlKey && !this._copiedItemsInserted) {
+          if (hasCommandKey(event) && !this._copiedItemsInserted) {
             this._changeGroup.title = "Copy Elements";
             this._copiedItemsInserted = true;
             for (let i = 0; i < this._clonedItems.length; i++) {
               this._actionStartedDesignItems[i].insertAdjacentElement(this._clonedItems[i], 'beforebegin');
             }
             designerCanvas.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'added', designItems: this._clonedItems });
-          } else if (!event.ctrlKey && this._copiedItemsInserted) {
+          } else if (!hasCommandKey(event) && this._copiedItemsInserted) {
             this._changeGroup.title = "Move Elements";
             for (let d of this._clonedItems) {
               d.remove();
@@ -371,7 +372,7 @@ export class PointerTool implements ITool {
         {
           this._started = false;
           if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
-            if (this._previousEventName == EventNames.PointerDown && !event.ctrlKey) {
+            if (this._previousEventName == EventNames.PointerDown && !hasCommandKey(event)) {
               designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem], event);
             } else {
               this.checkSelectElement(event, designerCanvas, currentDesignItem);
@@ -429,7 +430,7 @@ export class PointerTool implements ITool {
   }
 
   private checkSelectElement(event: PointerEvent, designerCanvas: IDesignerCanvas, currentDesignItem: IDesignItem) {
-    if (event.ctrlKey) {
+    if (hasCommandKey(event)) {
       const index = designerCanvas.instanceServiceContainer.selectionService.selectedElements.indexOf(currentDesignItem);
       if (index >= 0) {
         let newSelectedList = designerCanvas.instanceServiceContainer.selectionService.selectedElements.slice(0);

@@ -1,5 +1,6 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 import { DesignItem } from '../../../item/DesignItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
@@ -17,7 +18,7 @@ export class RectangleSelectorTool implements ITool {
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    if (event.ctrlKey || event.shiftKey)
+    if (hasCommandKey(event) || event.shiftKey)
       this.cursor = 'copy';
     else if (event.altKey)
       this.cursor = 'default';
@@ -72,7 +73,7 @@ export class RectangleSelectorTool implements ITool {
         const elements = designerCanvas.rootDesignItem.querySelectorAll('*');
         let inSelectionElements: IDesignItem[] = [];
 
-        if ((event.ctrlKey || event.shiftKey || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+        if ((hasCommandKey(event) || event.shiftKey || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
           inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
         let point = designerCanvas.overlayLayer.createPoint();

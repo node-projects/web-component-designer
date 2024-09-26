@@ -4,6 +4,7 @@ export * from "./elements/controls/PlainScrollbar.js"
 export * from "./elements/services/DefaultServiceBootstrap.js";
 
 export * from "./elements/helper/CssAttributeParser.js";
+export * from "./elements/helper/KeyboardHelper.js";
 export * from "./elements/helper/CssCombiner.js";
 export * from "./elements/helper/ElementHelper.js";
 export * from "./elements/helper/IndentedTextWriter.js";

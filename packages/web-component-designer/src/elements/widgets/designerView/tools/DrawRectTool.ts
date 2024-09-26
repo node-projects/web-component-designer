@@ -7,6 +7,7 @@ import { calculateNormLegth } from '../../../helper/PathDataPolyfill.js';
 import { DesignItem } from '../../../item/DesignItem.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 
 export class DrawRectTool implements ITool {
 
@@ -61,7 +62,7 @@ export class DrawRectTool implements ITool {
           this._minY = currentPoint.y < this._startPoint.y ? currentPoint.y : this._startPoint.y;
           this._maxY = currentPoint.y > this._startPoint.y ? currentPoint.y : this._startPoint.y;
 
-          if (event.ctrlKey) {
+          if (hasCommandKey(event)) {
             if (event.shiftKey) {
               const normLength = 2 * calculateNormLegth(this._startPoint, currentPoint);
               this._px = this._startPoint.x - normLength / 2;

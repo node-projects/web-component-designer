@@ -1,4 +1,5 @@
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
 import { getElementSize } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
@@ -84,7 +85,7 @@ export class RotateExtension extends AbstractExtension {
     const angleFromRotatingPoint = (Math.atan2(this._rotateCirclePosition.y - pOrg.y, this._rotateCirclePosition.x - pOrg.x) * 180 / Math.PI) + 90;
     let angle = (Math.atan2(p1t.y - pOrg.y, p1t.x - pOrg.x) * 180 / Math.PI) + 90 - angleFromRotatingPoint;
 
-    if (!e.ctrlKey)
+    if (!hasCommandKey(e))
       angle = Math.round(angle / 15) * 15;
     return roundValue(this.extendedItem, angle);
   }

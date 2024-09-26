@@ -7,6 +7,7 @@ import { calculateNormLegth } from '../../../helper/PathDataPolyfill.js';
 import { DesignItem } from '../../../item/DesignItem.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 
 export class DrawEllipsisTool implements ITool {
 
@@ -54,7 +55,7 @@ export class DrawEllipsisTool implements ITool {
         if (this._path) {
           this._radius = { x: Math.abs(currentPoint.x - this._startPoint.x), y: Math.abs(currentPoint.y - this._startPoint.y) }
 
-          if (event.ctrlKey) {
+          if (hasCommandKey(event)) {
             this._path.setAttribute("cx", this._startPoint.x.toString());
             this._path.setAttribute("cy", this._startPoint.y.toString());
             this._cx = this._startPoint.x;

@@ -1,6 +1,10 @@
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IRect } from "../../interfaces/IRect.js";
 
+export function isAppleDevice() {
+  return window.navigator.platform?.startsWith("Mac") || window.navigator.platform === "iPhone" || window.navigator.platform === "iPad" || window.navigator.platform === "iPod";
+}
+
 export function sleep(ms): Promise<unknown> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

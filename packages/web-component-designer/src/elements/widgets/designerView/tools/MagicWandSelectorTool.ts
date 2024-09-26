@@ -1,4 +1,5 @@
 import { EventNames } from '../../../../enums/EventNames.js';
+import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 import { DesignItem } from '../../../item/DesignItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
@@ -13,7 +14,7 @@ export class MagicWandSelectorTool implements ITool {
   private _path: SVGPathElement;
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
-    if (event.ctrlKey)
+    if (hasCommandKey(event))
       this.cursor = 'copy';
     else if (event.altKey)
       this.cursor = 'default';
@@ -50,7 +51,7 @@ export class MagicWandSelectorTool implements ITool {
         const elements = designerCanvas.rootDesignItem.querySelectorAll('*');
         const inSelectionElements: IDesignItem[] = [];
 
-        if ((event.ctrlKey || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
+        if ((hasCommandKey(event) || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
           inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
         let point: DOMPointInit = designerCanvas.overlayLayer.createPoint();

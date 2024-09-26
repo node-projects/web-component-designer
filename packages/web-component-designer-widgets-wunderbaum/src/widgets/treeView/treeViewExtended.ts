@@ -1,5 +1,5 @@
 import { css, html, BaseCustomWebComponentConstructorAppend, Disposable, cssFromString } from '@node-projects/base-custom-webcomponent';
-import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter, ForceCssContextMenu } from '@node-projects/web-component-designer';
+import { NodeType, ITreeView, InstanceServiceContainer, IDesignItem, assetsPath, IContextMenuItem, ContextMenu, switchContainer, ISelectionChangedEvent, DomConverter, ForceCssContextMenu, hasCommandKey } from '@node-projects/web-component-designer';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js'
 //@ts-ignore
@@ -196,7 +196,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             setTimeout(() => {
               this.selectedFromTree = false;
             }, 50);
-            if (e.event.ctrlKey) {
+            if (hasCommandKey(e.event)) {
               const sel = [...designItem.instanceServiceContainer.selectionService.selectedElements];
               const idx = sel.indexOf(designItem);
               if (idx >= 0) {

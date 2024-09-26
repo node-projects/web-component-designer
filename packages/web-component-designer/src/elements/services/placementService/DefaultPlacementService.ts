@@ -8,6 +8,7 @@ import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from 
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
+import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -48,7 +49,7 @@ export class DefaultPlacementService implements IPlacementService {
     let trackX = newPoint.x - startPoint.x;
     let trackY = newPoint.y - startPoint.y;
 
-    if (!event.ctrlKey) {
+    if (!hasCommandKey(event)) {
       if (placementView.alignOnGrid) {
         let p = getDesignItemCurrentPos(item, 'position');
         p.x = p.x % placementView.gridSize;
@@ -78,7 +79,7 @@ export class DefaultPlacementService implements IPlacementService {
     let trackX = newPoint.x;
     let trackY = newPoint.y;
 
-    if (!event.ctrlKey) {
+    if (!hasCommandKey(event)) {
       if (placementView.alignOnGrid) {
         trackX = Math.round(trackX / placementView.gridSize) * placementView.gridSize;
         trackY = Math.round(trackY / placementView.gridSize) * placementView.gridSize;

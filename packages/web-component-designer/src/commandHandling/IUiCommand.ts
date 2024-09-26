@@ -8,5 +8,6 @@ export interface IUiCommand {
 
     altKey?: boolean;
     ctrlKey?: boolean;
+    metaKey?: boolean;
     shiftKey?: boolean;
 }
