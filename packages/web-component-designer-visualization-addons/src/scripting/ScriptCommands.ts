@@ -97,6 +97,19 @@ export interface ToggleSignalValue {
   signal: string;
 }
 
+//export interface ToggleSignalValueFromJsonArray {
+//  type: 'ToggleSignalValueFromJsonArray';
+//  /**
+//   * Name of the signal
+//   * @TJS-format signal
+//   */
+//  signal: string;
+//  /**
+//   * list of values (as json array string e.g. ['aa', 1, false])
+//   */
+//  list: string;
+//}
+
 export interface IncrementSignalValue {
   type: 'IncrementSignalValue';
   /**
