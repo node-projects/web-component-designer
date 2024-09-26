@@ -283,7 +283,8 @@ export class ScriptSystem {
           let text = (<IScriptMultiplexValue>value).name;
           if (text != null) {
             const signal = await this.parseStringWithValues(text, outerContext);
-            return await this._visualizationHandler.getState(this.getSignaName(signal, outerContext));
+            const state = await this._visualizationHandler.getState(this.getSignaName(signal, outerContext));
+            return state.val;
           }
           return null;
         }
