@@ -92,7 +92,6 @@ export class IndirectSignal {
       if (signals[n][0] == '.')
         signals[n] = this.visualizationHandler.getNormalizedSignalName(signals[n], this.relativeSignalPath, this.element);
     }
-
   }
 
   handleValueChanged(value: any, index: number) {

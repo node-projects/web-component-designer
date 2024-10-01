@@ -316,7 +316,7 @@ export class ScriptSystem {
   async parseStringWithValues(text: string, context: contextType) {
     const parsed = parseBindingString(text);
     let results = await Promise.all(parsed.signals.map(x => this.getStateOrFieldOrParameter(this.getSignaName(x, context), context)));
-    let nm = '';
+    let nm = parsed.parts[0];
     for (let i = 0; i < parsed.parts.length - 1; i++) {
       let v = results[i].val;
       if (v == null)
