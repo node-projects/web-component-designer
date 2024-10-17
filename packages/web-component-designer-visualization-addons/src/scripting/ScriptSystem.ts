@@ -117,7 +117,7 @@ export class ScriptSystem {
       case 'IncrementSignalValue': {
         const signal = await this.getValue(command.signal, context);
         let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), state.val + await this.getValue(command.value, context));
+        await this._visualizationHandler.setState(this.getSignaName(signal, context), (<number>state.val + await this.getValue(command.value, context)));
         break;
       }
       case 'DecrementSignalValue': {
@@ -251,40 +251,40 @@ export class ScriptSystem {
     return elements;
   }
 
-  async getValue<T>(value: string | number | boolean | IScriptMultiplexValue, outerContext: contextType): Promise<any> {
+  async getValue<T>(value: T, outerContext: contextType): Promise<T> {
     if (typeof value === 'object') {
-      switch ((<IScriptMultiplexValue>value).source) {
+      switch ((<IScriptMultiplexValue><any>value).source) {
         case 'property': {
-          return outerContext.root[(<IScriptMultiplexValue>value).name];
+          return outerContext.root[(<IScriptMultiplexValue><any>value).name];
         }
         case 'signal': {
-          let sng = await this._visualizationHandler.getState(this.getSignaName((<IScriptMultiplexValue>value).name, outerContext));
-          return sng.val;
+          let sng = await this._visualizationHandler.getState(this.getSignaName((<IScriptMultiplexValue><any>value).name, outerContext));
+          return <T>sng.val;
         }
         case 'event': {
           let obj = outerContext.event;
-          if ((<IScriptMultiplexValue>value).name)
-            obj = ScriptSystem.extractPart(obj, (<IScriptMultiplexValue>value).name);
-          return obj;
+          if ((<IScriptMultiplexValue><any>value).name)
+            obj = ScriptSystem.extractPart(obj, (<IScriptMultiplexValue><any>value).name);
+          return <T>obj;
         }
         case 'parameter': {
-          return outerContext.parameters[(<IScriptMultiplexValue>value).name];
+          return outerContext.parameters[(<IScriptMultiplexValue><any>value).name];
         }
 
         case 'complexString': {
-          let text = (<IScriptMultiplexValue>value).name;
+          let text = (<IScriptMultiplexValue><any>value).name;
           if (text != null) {
-            return await this.parseStringWithValues(text, outerContext);
+            return <T>await this.parseStringWithValues(text, outerContext);
           }
           return null;
         }
 
         case 'complexSignal': {
-          let text = (<IScriptMultiplexValue>value).name;
+          let text = (<IScriptMultiplexValue><any>value).name;
           if (text != null) {
             const signal = await this.parseStringWithValues(text, outerContext);
             const state = await this._visualizationHandler.getState(this.getSignaName(signal, outerContext));
-            return state.val;
+            return <T>state.val;
           }
           return null;
         }
@@ -292,7 +292,7 @@ export class ScriptSystem {
         case 'expression': {
           //@ts-ignore
           var ctx = outerContext;
-          return eval(value.name);
+          return eval((<any>value).name);
         }
       }
     }

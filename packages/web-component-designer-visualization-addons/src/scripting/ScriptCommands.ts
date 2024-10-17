@@ -71,9 +71,13 @@ export interface ShowMessageBox {
    */
   message: string;
   /**
+   * message type
+   */
+  messageType?: 'info' | 'warning' | 'error';
+  /**
    * message text
    */
-  buttons: 'Ok' | 'OkCancel' | 'YesNo' | 'RetryCancel' | 'YesNoCancel' | 'AbortRetryIgnore' | 'CancelTryContinue';
+  buttons: 'ok' | 'okCancel' | 'yesNo' | 'retryCancel' | 'yesNoCancel' | 'abortRetryIgnore' | 'cancelTryContinue';
   /**
    * number of the clicked button
    * @TJS-format signal
@@ -330,7 +334,7 @@ export interface ExportSignalValuesAsJson {
   /**
    * wait for updated values from the connection
    */
-  updateTagValues?: number;
+  waitForUpdatedValues?: boolean;
   /**
    * download filename
    */
