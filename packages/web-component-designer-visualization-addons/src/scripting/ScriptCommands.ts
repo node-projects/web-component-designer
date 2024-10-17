@@ -83,6 +83,9 @@ export interface ShowMessageBox {
    * @TJS-format signal
    */
   resultSignal: string;
+
+  width?: string;
+  height?: string;
 }
 
 //TODO: dialogId, closeChildDialogs
