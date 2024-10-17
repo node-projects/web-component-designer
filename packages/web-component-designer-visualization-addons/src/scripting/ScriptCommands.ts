@@ -5,7 +5,9 @@ export declare type ScriptCommands = Comment | OpenScreen | OpenUrl | OpenDialog
   Login | Logout |
   SubscribeSignal | UnsubscribeSignal |
   WriteSignalsInGroup | ClearSiganlsInGroup |
-  Condition | Exit | Label | RunScript | Goto;
+  Condition | Exit | Label | RunScript | Goto |
+  CopySignalValuesFromFolder | ShowMessageBox |
+  ExportSignalValuesAsJson | ImportSignalValuesFromJson;
 
 
 /* 
@@ -56,6 +58,27 @@ export interface OpenDialog {
 
   left?: string;
   top?: string;
+}
+
+export interface ShowMessageBox {
+  type: 'ShowMessageBox';
+  /**
+   * title text
+   */
+  title: string;
+  /**
+   * message text
+   */
+  message: string;
+  /**
+   * message text
+   */
+  buttons: 'Ok' | 'OkCancel' | 'YesNo' | 'RetryCancel' | 'YesNoCancel' | 'AbortRetryIgnore' | 'CancelTryContinue';
+  /**
+   * number of the clicked button
+   * @TJS-format signal
+   */
+  resultSignal: string;
 }
 
 //TODO: dialogId, closeChildDialogs
@@ -284,6 +307,42 @@ export interface ClearSiganlsInGroup {
   * Name of the Group
   */
   group: string;
+}
+
+export interface CopySignalValuesFromFolder {
+  type: 'CopySignalValuesFromFolder';
+  /**
+   * name of the source folder
+   */
+  sourceFolder: string;
+  /**
+   * name of destination folder
+   */
+  destinationFolder?: number;
+}
+
+export interface ExportSignalValuesAsJson {
+  type: 'ExportSignalValuesAsJson';
+  /**
+   * regex to select the signals (every matching one)
+   */
+  regex: string;
+  /**
+   * wait for updated values from the connection
+   */
+  updateTagValues?: number;
+  /**
+   * download filename
+   */
+  fileName?: string
+}
+
+export interface ImportSignalValuesFromJson {
+  type: 'ImportSignalValuesFromJson';
+  /**
+   * json data with the values
+   */
+  data: string;
 }
 
 export interface Condition {

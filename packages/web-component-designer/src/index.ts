@@ -40,6 +40,7 @@ export type { IBindingService } from "./elements/services/bindingsService/IBindi
 export * from "./elements/services/bindingsService/BaseCustomWebcomponentBindingsService.js";
 
 export * from "./elements/services/placementService/AbsolutePlacementService.js";
+export * from "./elements/services/placementService/AlwaysAbsolutePlacementService.js";
 export * from "./elements/services/placementService/DefaultPlacementService.js";
 export * from "./elements/services/placementService/FlexBoxPlacementService.js";
 export * from "./elements/services/placementService/GridPlacementService.js";

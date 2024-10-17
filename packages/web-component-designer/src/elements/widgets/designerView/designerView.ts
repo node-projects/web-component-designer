@@ -354,7 +354,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._toolbar.initialize(this.serviceContainer, this);
   }
 
-  public getHTML() {
+  public getDesignerHTML() {
     if (this._designerCanvas.rootDesignItem.childCount > 0) {
       return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), true, true);
 
@@ -362,7 +362,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     return '';
   }
 
-  public async parseHTML(html: string, disableUndo: boolean = false) {
+  public async parseDesignerHTML(html: string, disableUndo: boolean = false) {
     const parserService = this.serviceContainer.htmlParserService;
     if (!html) {
       this._designerCanvas.overlayLayer.removeAllOverlays();

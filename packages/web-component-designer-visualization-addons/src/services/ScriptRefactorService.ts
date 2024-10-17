@@ -4,17 +4,17 @@ import { IScriptMultiplexValue } from "../interfaces/IScriptMultiplexValue.js";
 
 export class ScriptRefactorService implements IRefactorService {
     getRefactorings(designItems: IDesignItem[]): (IRefactoring & { refactor: (newValue) => void })[] {
-        let refactorings: (IRefactoring & { refactor: (newValue) => void })[] = [];
+        const refactorings: (IRefactoring & { refactor: (newValue) => void })[] = [];
         for (let d of designItems) {
             for (let a of d.attributes()) {
                 if (a[0][0] == '@') {
-                    let sc = a[1];
+                    const sc = a[1];
                     if (sc[0] == '{') {
-                        let script = JSON.parse(sc) as Script;
+                        const script = JSON.parse(sc) as Script;
                         if ('commands' in script) {
                             for (let c of script.commands) {
                                 for (let p in c) {
-                                    let cp = c[p];
+                                    const cp = c[p];
                                     if (cp != null && typeof cp === 'object') {
                                         let mp = cp as IScriptMultiplexValue;
                                         if (mp.source == 'signal') {

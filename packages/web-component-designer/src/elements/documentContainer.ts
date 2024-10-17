@@ -189,7 +189,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this._disableChangeNotificationDesigner = true;
       if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        this._content = this.designerView.getHTML();
+        this._content = this.designerView.getDesignerHTML();
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         if (primarySelection) {
           if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
@@ -250,7 +250,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   get content() {
     if (this._tabControl) {
       if (this._tabControl.selectedIndex === tabIndex.designer)
-        this._content = this.designerView.getHTML();
+        this._content = this.designerView.getDesignerHTML();
       else if (this._tabControl.selectedIndex === tabIndex.code)
         this._content = this.codeView.getText();
       return this._content;
@@ -262,7 +262,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._tabControl.onSelectedTabChanged.on(i => {
       if (i.oldIndex === tabIndex.designer) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        this._content = this.designerView.getHTML();
+        this._content = this.designerView.getDesignerHTML();
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
           this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
         }
@@ -312,11 +312,11 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   private async updateDesignerHtml() {
     if (this._firstLoad)
-      return this.designerView.parseHTML(this._content, this._firstLoad);
+      return this.designerView.parseDesignerHTML(this._content, this._firstLoad);
     else {
-      const html = this.designerView.getHTML();
+      const html = this.designerView.getDesignerHTML();
       if (html != this._content)
-        return this.designerView.parseHTML(this._content, this._firstLoad);
+        return this.designerView.parseDesignerHTML(this._content, this._firstLoad);
       else {
         this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
         this.designerView.designerCanvas.overlayLayer.removeAllOverlays();
