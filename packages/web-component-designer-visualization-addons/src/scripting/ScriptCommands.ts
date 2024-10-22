@@ -38,6 +38,7 @@ export interface OpenScreen {
   relativeSignalsPath?: string;
   noHistory?: boolean;
   closeable?: boolean;
+  additionalData?: string;
 }
 
 export interface OpenDialog {
@@ -60,6 +61,7 @@ export interface OpenDialog {
 
   left?: string;
   top?: string;
+  additionalData?: string;
 }
 
 export interface ShowMessageBox {
@@ -88,6 +90,7 @@ export interface ShowMessageBox {
 
   width?: string;
   height?: string;
+  additionalData?: string;
 }
 
 //TODO: dialogId, closeChildDialogs
@@ -98,6 +101,7 @@ export interface CloseDialog {
    * @TJS-format signal
    */
   //dialogId: string;
+  additionalData?: string;
 }
 
 export interface OpenUrl {
@@ -108,6 +112,7 @@ export interface OpenUrl {
    */
   target: string;
   openInDialog: boolean;
+  additionalData?: string;
 }
 
 export interface SetSignalValue {
@@ -118,6 +123,7 @@ export interface SetSignalValue {
    */
   signal: string;
   value: any;
+  additionalData?: string;
 }
 
 export interface ToggleSignalValue {
@@ -127,6 +133,7 @@ export interface ToggleSignalValue {
    * @TJS-format signal
    */
   signal: string;
+  additionalData?: string;
 }
 
 //export interface ToggleSignalValueFromJsonArray {
@@ -150,6 +157,7 @@ export interface IncrementSignalValue {
    */
   signal: string;
   value: number;
+  additionalData?: string;
 }
 
 export interface CalculateSignalValue {
@@ -164,6 +172,7 @@ export interface CalculateSignalValue {
    * Example: {adapter.0.level} * 100 + 30
    */
   formula: string;
+  additionalData?: string;
 }
 
 export interface DecrementSignalValue {
@@ -174,6 +183,7 @@ export interface DecrementSignalValue {
    */
   signal: string;
   value: number;
+  additionalData?: string;
 }
 
 export interface SetBitInSignal {
@@ -184,6 +194,7 @@ export interface SetBitInSignal {
    */
   signal: string;
   bitNumber: number;
+  additionalData?: string;
 }
 export interface ClearBitInSignal {
   type: 'ClearBitInSignal';
@@ -193,6 +204,7 @@ export interface ClearBitInSignal {
    */
   signal: string;
   bitNumber: number;
+  additionalData?: string;
 }
 export interface ToggleBitInSignal {
   type: 'ToggleBitInSignal';
@@ -202,6 +214,7 @@ export interface ToggleBitInSignal {
    */
   signal: string;
   bitNumber: number;
+  additionalData?: string;
 }
 
 export interface Javascript {
@@ -212,6 +225,7 @@ export interface Javascript {
    * @TJS-format script
    */
   script: string;
+  additionalData?: string;
 }
 
 export interface SetElementProperty {
@@ -240,6 +254,7 @@ export interface SetElementProperty {
    * value you want to set
    */
   value: any;
+  additionalData?: string;
 }
 
 export interface Delay {
@@ -248,6 +263,7 @@ export interface Delay {
    * miliseconds to delay
    */
   value: number;
+  additionalData?: string;
 }
 
 export interface Console {
@@ -260,15 +276,18 @@ export interface Console {
    * console message
    */
   message: string;
+  additionalData?: string;
 }
 
 export interface SwitchLanguage {
   type: 'SwitchLanguage';
   language: string;
+  additionalData?: string;
 }
 
 export interface Logout {
   type: 'Logout';
+  additionalData?: string;
 }
 
 export interface Login {
@@ -281,6 +300,7 @@ export interface Login {
    * password
    */
   password: string;
+  additionalData?: string;
 }
 
 export interface SubscribeSignal {
@@ -291,6 +311,7 @@ export interface SubscribeSignal {
    */
   signal: string;
   oneTime: boolean;
+  additionalData?: string;
 }
 
 export interface UnsubscribeSignal {
@@ -300,6 +321,7 @@ export interface UnsubscribeSignal {
    * @TJS-format signal
    */
   signal: string;
+  additionalData?: string;
 }
 
 export interface WriteSignalsInGroup {
@@ -308,6 +330,7 @@ export interface WriteSignalsInGroup {
   * Name of the Group
   */
   group: string;
+  additionalData?: string;
 }
 
 export interface ClearSiganlsInGroup {
@@ -316,6 +339,7 @@ export interface ClearSiganlsInGroup {
   * Name of the Group
   */
   group: string;
+  additionalData?: string;
 }
 
 export interface CopySignalValuesFromFolder {
@@ -328,6 +352,7 @@ export interface CopySignalValuesFromFolder {
    * name of destination folder
    */
   destinationFolder?: number;
+  additionalData?: string;
 }
 
 export interface ExportSignalValuesAsJson {
@@ -343,7 +368,8 @@ export interface ExportSignalValuesAsJson {
   /**
    * download filename
    */
-  fileName?: string
+  fileName?: string;
+  additionalData?: string;
 }
 
 export interface ImportSignalValuesFromJson {
@@ -352,6 +378,7 @@ export interface ImportSignalValuesFromJson {
    * json data with the values
    */
   data: string;
+  additionalData?: string;
 }
 
 export interface Condition {
@@ -372,20 +399,24 @@ export interface Condition {
   falseGotoLabel?: string;
   falseScriptName?: string;
   falseScriptType?: string;
+  additionalData?: string;
 }
 
 export interface Exit {
   type: 'Exit';
+  additionalData?: string;
 }
 
 export interface Label {
   type: 'Label';
   label: string;
+  additionalData?: string;
 }
 
 export interface Goto {
   type: 'Goto';
   label: string;
+  additionalData?: string;
 }
 
 export interface RunScript {
@@ -398,4 +429,5 @@ export interface RunScript {
   * Type of the Script
   */
   scriptType: 'string';
+  additionalData?: string;
 }
