@@ -31,11 +31,13 @@ export interface OpenScreen {
    * @TJS-format screen
    */
   screen: string;
+  title?: string;
   /**
    * If signals in screen are defined relative (starting with a '.'), this will be prepended
    */
   relativeSignalsPath?: string;
   noHistory?: boolean;
+  closeable?: boolean;
 }
 
 export interface OpenDialog {
