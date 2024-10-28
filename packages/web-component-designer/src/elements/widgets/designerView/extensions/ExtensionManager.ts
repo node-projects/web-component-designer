@@ -338,6 +338,8 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType, event?: Event) {
+    if (this.designerCanvas.checkVisibility && !this.designerCanvas.checkVisibility())
+      return;
     if (designItem) {
       if (extensionType) {
         if (!designItem.element.isConnected) {
@@ -375,6 +377,8 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshExtensions(designItems: IDesignItem[], extensionType?: ExtensionType, event?: Event, ignoredExtension?: IDesignerExtension, timeout?: number) {
+    if (this.designerCanvas.checkVisibility && !this.designerCanvas.checkVisibility())
+      return;
     this.designerCanvas.overlayLayer.startBatch();
     const start = performance.now();
     if (designItems) {
