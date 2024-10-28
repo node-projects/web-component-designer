@@ -18,8 +18,10 @@ export class PreviousElementSelectExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-
     const transformedCornerPoints = this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+    if (!transformedCornerPoints)
+      return;
+
     if (!isNaN(transformedCornerPoints.p2.x)) {
       if (this._valuesHaveChanges(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, this.designerCanvas.scaleFactor)) {
         const angle = Math.atan2((transformedCornerPoints.p2.y - transformedCornerPoints.p1.y), (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x)) * 180 / Math.PI;

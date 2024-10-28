@@ -19,6 +19,8 @@ export class SelectionDefaultExtension extends AbstractExtension {
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     const transformedCornerPoints = this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+    if (!transformedCornerPoints)
+      return;
 
     if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p2.x)) {
       this.remove();

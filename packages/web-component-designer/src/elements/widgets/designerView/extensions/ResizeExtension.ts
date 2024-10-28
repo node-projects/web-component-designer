@@ -57,6 +57,8 @@ export class ResizeExtension extends AbstractExtension {
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     //#region Resizer circles
     let transformedCornerPoints = this.extendedItem.element.getBoxQuads({box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+    if (!transformedCornerPoints)
+      return;
 
     if (isNaN(transformedCornerPoints.p1.x) || isNaN(transformedCornerPoints.p1.x)) {
       this.remove();
