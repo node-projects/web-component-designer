@@ -92,13 +92,13 @@ export class ScriptSystem {
       }
 
       case 'Delay': {
-        const value = await this.getValue(command.value, context);
+        const value = await this.getValue(command.value ?? 500, context);
         await sleep(value)
         break;
       }
 
       case 'Console': {
-        const target = await this.getValue(command.target, context);
+        const target = await this.getValue(command.target ?? 'log', context);
         const message = await this.getValue(command.message, context);
         console[target](message);
         break;
@@ -138,16 +138,18 @@ export class ScriptSystem {
 
       case 'SetBitInSignal': {
         const signal = await this.getValue(command.signal, context);
+        const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
         let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
-        let mask = Long.fromNumber(1).shiftLeft(command.bitNumber);
+        let mask = Long.fromNumber(1).shiftLeft(bitNumber);
         const newVal = Long.fromNumber(<number>state.val).or(mask).toNumber();
         await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
         break;
       }
       case 'ClearBitInSignal': {
         const signal = await this.getValue(command.signal, context);
+        const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
         let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
-        let mask = Long.fromNumber(1).shiftLeft(command.bitNumber);
+        let mask = Long.fromNumber(1).shiftLeft(bitNumber);
         mask.negate();
         const newVal = Long.fromNumber(<number>state.val).and(mask).toNumber();
         await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
@@ -155,8 +157,9 @@ export class ScriptSystem {
       }
       case 'ToggleBitInSignal': {
         const signal = await this.getValue(command.signal, context);
+        const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
         let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
-        let mask = Long.fromNumber(1).shiftLeft(command.bitNumber);
+        let mask = Long.fromNumber(1).shiftLeft(bitNumber);
         const newVal = Long.fromNumber(<number>state.val).xor(mask).toNumber();
         await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
         break;
@@ -178,19 +181,23 @@ export class ScriptSystem {
         command = ScriptUpgrades.upgradeSetElementProperty(command);
         const name = await this.getValue(command.name, context);
         const value = await this.getValue(command.value, context);
-        const parentIndex = await this.getValue(command.parentIndex, context);
-        let elements = this.getTargetFromTargetSelector(context, command.targetSelectorTarget, parentIndex, command.targetSelector);
+        const parentIndex = await this.getValue(command.parentIndex ?? 0, context);
+        const target = await this.getValue(command.target ?? 'property', context);
+        const targetSelectorTarget = await this.getValue(command.targetSelectorTarget ?? 'property', context);
+        const targetSelector = await this.getValue(command.targetSelector ?? 'container', context);
+        const mode = await this.getValue(command.mode, context);
+        let elements = this.getTargetFromTargetSelector(context, <any>targetSelectorTarget, parentIndex, targetSelector);
         for (let e of elements) {
-          if (command.target == 'attribute') {
+          if (target == 'attribute') {
             e.setAttribute(name, value);
-          } else if (command.target == 'property') {
+          } else if (target == 'property') {
             e[name] = value;
-          } else if (command.target == 'css') {
+          } else if (target == 'css') {
             (<HTMLElement>e).style[name] = value;
-          } else if (command.target == 'class') {
-            if (command.mode === 'toggle') {
+          } else if (target == 'class') {
+            if (mode === 'toggle') {
               (<HTMLElement>e).classList.toggle(value);
-            } else if (command.mode === 'remove') {
+            } else if (mode === 'remove') {
               (<HTMLElement>e).classList.remove(value);
             } else {
               (<HTMLElement>e).classList.add(value);

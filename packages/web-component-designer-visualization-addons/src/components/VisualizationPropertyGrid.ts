@@ -7,7 +7,6 @@ import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-m
 import { ServiceContainer } from '@node-projects/web-component-designer';
 
 export class VisualizationPropertyGrid extends PropertyGrid {
-
     public serviceContainer: ServiceContainer;
     public visualizationHandler: VisualizationHandler;
     public visualizationShell: VisualizationShell;
