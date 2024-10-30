@@ -76,10 +76,12 @@ export interface ShowMessageBox {
   message: string;
   /**
    * message type
+   * @default info
    */
   messageType?: 'info' | 'warning' | 'error';
   /**
    * message text
+   * @default ok
    */
   buttons: 'ok' | 'okCancel' | 'yesNo' | 'retryCancel' | 'yesNoCancel' | 'abortRetryIgnore' | 'cancelTryContinue';
   /**
@@ -193,6 +195,9 @@ export interface SetBitInSignal {
    * @TJS-format signal
    */
   signal: string;
+  /**
+   * @default 0
+   */
   bitNumber: number;
   additionalData?: string;
 }
@@ -203,6 +208,9 @@ export interface ClearBitInSignal {
    * @TJS-format signal
    */
   signal: string;
+  /**
+   * @default 0
+   */
   bitNumber: number;
   additionalData?: string;
 }
@@ -213,6 +221,9 @@ export interface ToggleBitInSignal {
    * @TJS-format signal
    */
   signal: string;
+  /**
+   * @default 0
+   */
   bitNumber: number;
   additionalData?: string;
 }
@@ -232,14 +243,14 @@ export interface SetElementProperty {
   type: 'SetElementProperty';
   /**
    * what of the elements do you want to set
-   * @default 'property'
+   * @default property
    */
   target: 'property' | 'attribute' | 'css' | 'class';
   /**
    * where to search for the elements.
    * element
    * container = screen or customControl
-   * @default 'container'
+   * @default container
    */
   targetSelectorTarget: 'container' | 'element';
   /**
@@ -270,6 +281,7 @@ export interface Delay {
   type: 'Delay';
   /**
    * miliseconds to delay
+   * @default 500
    */
   value: number;
   additionalData?: string;
@@ -279,6 +291,7 @@ export interface Console {
   type: 'Console';
   /**
   * target where to log
+  * @default log
   */
   target: 'log' | 'info' | 'debug' | 'warn' | 'error';
   /**
