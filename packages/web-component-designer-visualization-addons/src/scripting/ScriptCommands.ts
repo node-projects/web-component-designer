@@ -232,16 +232,19 @@ export interface SetElementProperty {
   type: 'SetElementProperty';
   /**
    * what of the elements do you want to set
+   * @default 'property'
    */
   target: 'property' | 'attribute' | 'css' | 'class';
   /**
    * where to search for the elements.
    * element
    * container = screen or customControl
+   * @default 'container'
    */
-  targetSelectorTarget: 'element' | 'container';
+  targetSelectorTarget: 'container' | 'element';
   /**
    * wich parent, 0 = current, 1 = first parent, 2 = ...
+   * @default 0
    */
   parentIndex: number;
   /**
