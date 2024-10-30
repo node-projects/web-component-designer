@@ -242,12 +242,12 @@ export class ScriptSystem {
   }
 
   getTarget(context: contextType, targetSelectorTarget: 'element' | 'container', parentLevel: number) {
-    if (targetSelectorTarget == 'element') {
+    if (targetSelectorTarget === 'container') {
       let el = (<ShadowRoot>context.element.getRootNode()).host
       for (let i = 0; i < (parentLevel ?? 0); i++)
         el = (<ShadowRoot>el.getRootNode()).host;
       return el;
-    } else if (targetSelectorTarget == "container") {
+    } else if (targetSelectorTarget === "element") {
       let el = context.element;
       for (let i = 0; i < (parentLevel ?? 0); i++)
         el = el.parentElement;
