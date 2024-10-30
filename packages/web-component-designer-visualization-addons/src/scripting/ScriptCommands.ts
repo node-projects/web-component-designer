@@ -247,19 +247,20 @@ export interface SetElementProperty {
    */
   target: 'property' | 'attribute' | 'css' | 'class';
   /**
-   * where to search for the elements.
-   * element
+   * where to search for the elements (used as a start)
+   * element = currentElement
    * container = screen or customControl
    * @default container
    */
   targetSelectorTarget: 'container' | 'element';
   /**
    * wich parent, 0 = current, 1 = first parent, 2 = ...
+   * of the targetSelectorTarget
    * @default 0
    */
   parentIndex: number;
   /**
-   * css selector to find elements, if empty the targetSelectorTarget is used
+   * css selector to find elements on targetSelectorTarget, if empty the targetSelectorTarget directly is used
    */
   targetSelector: string;
   /**
