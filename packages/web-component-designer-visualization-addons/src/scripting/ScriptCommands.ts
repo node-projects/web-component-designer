@@ -235,9 +235,15 @@ export interface SetElementProperty {
    */
   target: 'property' | 'attribute' | 'css' | 'class';
   /**
-   * where to search for the elements
+   * where to search for the elements.
+   * element
+   * container = screen or customControl
    */
-  targetSelectorTarget: 'currentScreen' | 'parentScreen' | 'currentElement' | 'parentElement';
+  targetSelectorTarget: 'element' | 'container';
+  /**
+   * wich parent, 0 = current, 1 = first parent, 2 = ...
+   */
+  parentIndex: number;
   /**
    * css selector to find elements, if empty the targetSelectorTarget is used
    */
@@ -247,8 +253,8 @@ export interface SetElementProperty {
    */
   name: string;
   /**
- * only for class
- */
+   * only for target: class
+   */
   mode: 'add' | 'remove' | 'toggle';
   /**
    * value you want to set

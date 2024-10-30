@@ -12,6 +12,7 @@ import { VisualizationPropertyGrid } from "./VisualizationPropertyGrid.js";
 import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { VisualizationShell } from "../interfaces/VisualizationShell.js";
 import '@node-projects/splitview.webcomponent';
+import { ScriptUpgrades } from "../scripting/ScriptUpgrader.js";
 
 export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
@@ -220,6 +221,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
         let commandListTreeItems = [];
 
         for (let c of this._script.commands) {
+            c = ScriptUpgrades.upgradeScriptCommand(c);
             commandListTreeItems.push(this.createTreeItem(c));
         };
 

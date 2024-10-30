@@ -7,6 +7,7 @@ import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { Script } from "./Script.js";
 import { ScriptCommands } from "./ScriptCommands.js";
 import Long from 'long'
+import { ScriptUpgrades } from "./ScriptUpgrader.js";
 
 export type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any>, relativeSignalsPath?: string };
 
@@ -173,9 +174,12 @@ export class ScriptSystem {
       }
 
       case 'SetElementProperty': {
+        //@ts-ignore
+        command = ScriptUpgrades.upgradeSetElementProperty(command);
         const name = await this.getValue(command.name, context);
         const value = await this.getValue(command.value, context);
-        let elements = this.getTargetFromTargetSelector(context, command.targetSelectorTarget, command.targetSelector);
+        const parentIndex = await this.getValue(command.parentIndex, context);
+        let elements = this.getTargetFromTargetSelector(context, command.targetSelectorTarget, parentIndex, command.targetSelector);
         for (let e of elements) {
           if (command.target == 'attribute') {
             e.setAttribute(name, value);
@@ -237,17 +241,30 @@ export class ScriptSystem {
     }
   }
 
-  getTargetFromTargetSelector(context: contextType, targetSelectorTarget: 'currentScreen' | 'parentScreen' | 'currentElement' | 'parentElement', targetSelector: string): Iterable<Element> {
-    let host = (<ShadowRoot>context.element.getRootNode()).host;
-    if (targetSelector == 'currentElement')
-      host = context.element;
-    else if (targetSelector == 'parentElement')
-      host = context.element.parentElement;
-    else if (targetSelector == 'parentScreen')
-      host = (<ShadowRoot>host.getRootNode()).host;
-    let elements: Iterable<Element> = [host];
-    if (targetSelector)
-      elements = host.shadowRoot.querySelectorAll(targetSelector);
+  getTarget(context: contextType, targetSelectorTarget: 'element' | 'container', parentLevel: number) {
+    if (targetSelectorTarget == 'element') {
+      let el = (<ShadowRoot>context.element.getRootNode()).host
+      for (let i = 0; i < (parentLevel ?? 0); i++)
+        el = (<ShadowRoot>el.getRootNode()).host;
+      return el;
+    } else if (targetSelectorTarget == "container") {
+      let el = context.element;
+      for (let i = 0; i < (parentLevel ?? 0); i++)
+        el = el.parentElement;
+      return el;
+    }
+    return null;
+  }
+
+  getTargetFromTargetSelector(context: contextType, targetSelectorTarget: 'element' | 'container', parentLevel: number, targetSelector: string): Iterable<Element> {
+    const target = this.getTarget(context, targetSelectorTarget, parentLevel);
+    let elements: Iterable<Element> = [target];
+    if (targetSelector) {
+      if (targetSelectorTarget === 'container')
+        elements = target.shadowRoot.querySelectorAll(targetSelector);
+      else
+        elements = target.querySelectorAll(targetSelector);
+    }
     return elements;
   }
 
@@ -270,7 +287,10 @@ export class ScriptSystem {
         case 'parameter': {
           return outerContext.parameters[(<IScriptMultiplexValue><any>value).name];
         }
-
+        case 'context': {
+          const obj = ScriptSystem.extractPart(outerContext, (<IScriptMultiplexValue><any>value).name);
+          return obj;
+        }
         case 'complexString': {
           let text = (<IScriptMultiplexValue><any>value).name;
           if (text != null) {
