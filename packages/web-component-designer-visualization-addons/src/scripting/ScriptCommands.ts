@@ -85,7 +85,7 @@ export interface ShowMessageBox {
    */
   buttons: 'ok' | 'okCancel' | 'yesNo' | 'retryCancel' | 'yesNoCancel' | 'abortRetryIgnore' | 'cancelTryContinue';
   /**
-   * number of the clicked button
+   * number of the clicked button, starting with 1
    * @TJS-format signal
    */
   resultSignal: string;
@@ -269,6 +269,7 @@ export interface SetElementProperty {
   name: string;
   /**
    * only for target: class
+   * @default toggle
    */
   mode: 'add' | 'remove' | 'toggle';
   /**

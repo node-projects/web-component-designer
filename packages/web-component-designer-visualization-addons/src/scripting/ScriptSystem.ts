@@ -185,7 +185,7 @@ export class ScriptSystem {
         const target = await this.getValue(command.target ?? 'property', context);
         const targetSelectorTarget = await this.getValue(command.targetSelectorTarget ?? 'container', context);
         const targetSelector = await this.getValue(command.targetSelector, context);
-        const mode = await this.getValue(command.mode, context);
+        const mode = await this.getValue(command.mode ?? 'toggle', context);
         let elements = this.getTargetFromTargetSelector(context, <any>targetSelectorTarget, parentIndex, targetSelector);
         for (let e of elements) {
           if (target == 'attribute') {
@@ -243,6 +243,39 @@ export class ScriptSystem {
         const name = await this.getValue(command.name, context);
         const scriptType = await this.getValue(command.scriptType, context);
         this.runExternalScript(name, scriptType);
+        break;
+      }
+
+      case 'ShowMessageBox': {
+        let res = null;
+        const buttons = await this.getValue(command.buttons, context);
+        if (buttons == 'ok') {
+          const message = await this.getValue(command.message, context);
+          alert(message);
+          res = 1;
+        } else if (buttons == 'yesNo') {
+          const message = await this.getValue(command.message, context);
+          if (confirm(message))
+            res = 1;
+          else res = 2;
+        }
+        const resultSignal = await this.getValue(command.resultSignal, context);
+        if (resultSignal) {
+          this._visualizationHandler.setState(resultSignal, res);
+        }
+        break;
+      }
+
+      case 'Login':
+      case 'Logout':
+      case 'CloseDialog':
+      case 'OpenDialog':
+      case 'OpenScreen':
+      case 'SwitchLanguage':
+      case 'CopySignalValuesFromFolder':
+      case 'ExportSignalValuesAsJson':
+      case 'ImportSignalValuesFromJson': {
+        alert('command: "' + command.type + '" is not yet implemented');
         break;
       }
     }
