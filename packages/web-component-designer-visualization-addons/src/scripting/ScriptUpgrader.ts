@@ -11,14 +11,14 @@ export class ScriptUpgrades {
 
     static upgradeSetElementProperty(scriptCommand: SetElementProperty): SetElementProperty {
         if (<string>scriptCommand.targetSelectorTarget === 'currentScreen') {
-            scriptCommand.targetSelector = 'container';
+            scriptCommand.targetSelectorTarget = 'container';
         } else if (<string>scriptCommand.targetSelectorTarget === 'parentScreen') {
-            scriptCommand.targetSelector = 'container';
+            scriptCommand.targetSelectorTarget = 'container';
             scriptCommand.parentIndex = 1;
         } else if (<string>scriptCommand.targetSelectorTarget === 'currentElement') {
-            scriptCommand.targetSelector = 'element';
+            scriptCommand.targetSelectorTarget = 'element';
         } else if (<string>scriptCommand.targetSelectorTarget === 'parentElement') {
-            scriptCommand.targetSelector = 'element';
+            scriptCommand.targetSelectorTarget = 'element';
             scriptCommand.parentIndex = 1;
         }
         return scriptCommand;
