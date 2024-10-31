@@ -183,8 +183,8 @@ export class ScriptSystem {
         const value = await this.getValue(command.value, context);
         const parentIndex = await this.getValue(command.parentIndex ?? 0, context);
         const target = await this.getValue(command.target ?? 'property', context);
-        const targetSelectorTarget = await this.getValue(command.targetSelectorTarget ?? 'property', context);
-        const targetSelector = await this.getValue(command.targetSelector ?? 'container', context);
+        const targetSelectorTarget = await this.getValue(command.targetSelectorTarget ?? 'container', context);
+        const targetSelector = await this.getValue(command.targetSelector, context);
         const mode = await this.getValue(command.mode, context);
         let elements = this.getTargetFromTargetSelector(context, <any>targetSelectorTarget, parentIndex, targetSelector);
         for (let e of elements) {
