@@ -39,7 +39,7 @@ export class SpecialTagsBindingService implements IBindingService {
   }
 
   private _parseBindingElement(b: Element): IBinding {
-    let bnd: IBinding = { targetName: b.getAttribute(this._propertyNameAttribute) }
+    let bnd: IBinding = { targetName: b.getAttribute(this._propertyNameAttribute), service: this }
     bnd.target = b.hasAttribute(this._isStyleNameAttribute) ? BindingTarget.css : BindingTarget.property;
     bnd.invert = b.hasAttribute('negative-logic');
     bnd.rawValue = b.outerHTML;

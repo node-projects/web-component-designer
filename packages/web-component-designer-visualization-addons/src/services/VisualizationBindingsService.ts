@@ -9,6 +9,8 @@ export class VisualizationBindingsService implements IBindingService {
 
   private _bindingsHelper: BindingsHelper;
 
+  public static type = 'visualization-binding';
+
   getBindings(designItem: IDesignItem): (IBinding & { converter: Record<string, any> })[] {
     const iobBindings = Array.from(this._bindingsHelper.getBindings(designItem.element));
     return iobBindings.map(x => ({
@@ -20,7 +22,9 @@ export class VisualizationBindingsService implements IBindingService {
       expression: x[1].expression,
       expressionTwoWay: x[1].expressionTwoWay,
       converter: x[1].converter,
-      type: x[1].type,
+      //type: x[1].type,
+      type: VisualizationBindingsService.type,
+      service: this,
       changedEvents: x[1].events,
       historic: x[1].historic,
       writeBackSignal: x[1].writeBackSignal,

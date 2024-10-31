@@ -1,3 +1,4 @@
+import { IBindingService } from '../services/bindingsService/IBindingService.js';
 import { BindingMode } from './BindingMode.js';
 import { BindingTarget } from './BindingTarget.js';
 
@@ -22,6 +23,7 @@ export interface IBinding {
   invert?: boolean;
   changedEvents?: string[];
   nullSafe?: boolean;
+  service: IBindingService;
 }
 
 export interface IBindableObject {   //e.g.   aa:$uservalue.0.name

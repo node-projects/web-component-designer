@@ -7,7 +7,7 @@ import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper
 
 export class BaseCustomWebcomponentBindingsService implements IBindingService {
 
-  public static type = 'base-custom-webcomponent-binding'
+  public static type = 'base-custom-webcomponent-binding';
 
   getBindings(designItem: IDesignItem): IBinding[] {
     let bindings: IBinding[] = null;
@@ -17,7 +17,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
       if ((value.startsWith('[[') || value.startsWith('{{')) && (value.endsWith('}}') || value.endsWith(']]'))) {
         if (!bindings)
           bindings = [];
-        let bnd: IBinding = { rawName: name, rawValue: value };
+        let bnd: IBinding = { rawName: name, rawValue: value, service: this };
         if (a[0] === 'bcw:visible') {
           bnd.targetName = 'visibility';
           bnd.target = BindingTarget.css;

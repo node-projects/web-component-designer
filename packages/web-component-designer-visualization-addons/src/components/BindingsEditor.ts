@@ -225,7 +225,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
     if (this._binding) {
       this.twoWay = this._binding.mode == BindingMode.twoWay;
       this.expression = this._binding.expression;
-      this.writeBackSignal = (<VisualizationBinding>this._binding).writeBackSignal;
+      this.writeBackSignal = (<VisualizationBinding><unknown>this._binding).writeBackSignal;
       this.expressionTwoWay = (<any>this._binding).expressionTwoWay;
       this.historic = (<any>this._binding).historic;
       this.invert = this._binding.invert;
