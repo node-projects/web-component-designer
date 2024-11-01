@@ -18,9 +18,9 @@ export class ScriptRefactorService implements IRefactorService {
                                     if (cp != null && typeof cp === 'object') {
                                         let mp = cp as IScriptMultiplexValue;
                                         if (mp.source === 'signal') {
-                                            refactorings.push({ name: mp.name, itemType: 'signal', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[property]', refactor: newValue => mp.name = newValue });
+                                            refactorings.push({ name: mp.name, itemType: 'signal', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[signal]', refactor: newValue => mp.name = newValue });
                                         } else if (mp.source === 'property') {
-                                            refactorings.push({ name: mp.name, itemType: 'property', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[signal]', refactor: newValue => mp.name = newValue });
+                                            refactorings.push({ name: mp.name, itemType: 'property', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[property]', refactor: newValue => mp.name = newValue });
                                         } else if (mp.source === 'complexString') {
                                             for (let m of mp.name.matchAll(/\{(.*?)\}/g)) {
                                                 let full = m[0];
