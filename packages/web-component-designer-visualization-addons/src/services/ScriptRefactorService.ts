@@ -71,11 +71,11 @@ export class ScriptRefactorService implements IRefactorService {
                                         break;
                                     case 'OpenScreen':
                                         if (c.screen && typeof c.screen === 'string')
-                                            refactorings.push({ name: c.screen, itemType: 'screenName', target: BindingTarget.event, targetName: a[0], display: c.type + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
+                                            refactorings.push({ name: c.screen, itemType: 'screen', target: BindingTarget.event, targetName: a[0], display: c.type + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
                                         break;
                                     case 'OpenDialog':
                                         if (c.screen && typeof c.screen === 'string')
-                                            refactorings.push({ name: c.screen, itemType: 'screenName', target: BindingTarget.event, targetName: a[0], display: c.type + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
+                                            refactorings.push({ name: c.screen, itemType: 'screen', target: BindingTarget.event, targetName: a[0], display: c.type + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
                                         break;
                                     case 'CalculateSignalValue':
                                         if (c.targetSignal && typeof c.targetSignal === 'string')
