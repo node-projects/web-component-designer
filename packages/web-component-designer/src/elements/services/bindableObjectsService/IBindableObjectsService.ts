@@ -1,7 +1,9 @@
+import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { IBindableObject } from './IBindableObject.js';
 
 export interface IBindableObjectsService {
   readonly name: string;
-  getBindableObject(fullName: string): Promise<IBindableObject<any>>;
-  getBindableObjects(parent?: IBindableObject<any>): Promise<IBindableObject<any>[]>;
+  hasObjectsForInstanceServiceContainer(instanceServiceContainer: InstanceServiceContainer);
+  getBindableObject(fullName: string, instanceServiceContainer?: InstanceServiceContainer): Promise<IBindableObject<any>>;
+  getBindableObjects(parent?: IBindableObject<any>, instanceServiceContainer?: InstanceServiceContainer): Promise<IBindableObject<any>[]>;
 }

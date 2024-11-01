@@ -1,7 +1,7 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
 import { Script } from "../scripting/Script.js";
 import { ScriptCommands } from "../scripting/ScriptCommands.js";
-import { ContextMenu, ServiceContainer } from "@node-projects/web-component-designer";
+import { ContextMenu, InstanceServiceContainer, ServiceContainer } from "@node-projects/web-component-designer";
 import { IProperty, typeInfoFromJsonSchema } from "@node-projects/propertygrid.webcomponent";
 import { defaultOptions } from "@node-projects/web-component-designer-widgets-wunderbaum";
 import { Wunderbaum } from 'wunderbaum';
@@ -64,6 +64,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
     static readonly is = 'node-projects-visualization-simple-script-editor';
 
     public serviceContainer: ServiceContainer;
+    public instanceServiceContainer: InstanceServiceContainer;
     public visualizationHandler: VisualizationHandler;
     public visualizationShell: VisualizationShell;
 
@@ -101,6 +102,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
             pg.visualizationHandler = this.visualizationHandler;
             pg.visualizationShell = this.visualizationShell;
             pg.serviceContainer = this.serviceContainer;
+            pg.instanceServiceContainer = this.instanceServiceContainer;
 
             pg.getTypeInfo = (obj, type) => typeInfoFromJsonSchema(this.propertiesTypeInfo, obj, type);
             pg.showHead = false;
@@ -120,6 +122,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
         this._propertygrid.visualizationHandler = this.visualizationHandler;
         this._propertygrid.visualizationShell = this.visualizationShell;
         this._propertygrid.serviceContainer = this.serviceContainer;
+        this._propertygrid.instanceServiceContainer = this.instanceServiceContainer;
 
         this._propertygrid.getTypeInfo = (obj, type) => typeInfoFromJsonSchema(this.scriptCommandsTypeInfo, obj, type);
         this._propertygrid.getSpecialEditorForType = async (property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any) => {

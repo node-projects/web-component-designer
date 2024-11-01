@@ -378,6 +378,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             }
             let sc = new SimpleScriptEditor();
             sc.serviceContainer = selectedItem.serviceContainer;
+            sc.instanceServiceContainer = selectedItem.instanceServiceContainer;
             sc.scriptCommandsTypeInfo = this._scriptCommandsTypeInfo;
             sc.propertiesTypeInfo = this._propertiesTypeInfo;
             sc.visualizationShell = this._visualizationShell;

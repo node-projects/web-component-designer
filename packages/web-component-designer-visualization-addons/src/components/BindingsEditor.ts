@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, html, css } from '@node-projects/base-custom-webcomponent';
-import { BindingMode, BindingTarget, IBinding, IProperty, ServiceContainer } from '@node-projects/web-component-designer';
+import { BindingMode, BindingTarget, IBinding, InstanceServiceContainer, IProperty, ServiceContainer } from '@node-projects/web-component-designer';
 import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
 import { BindableObjectsBrowser } from "@node-projects/web-component-designer-widgets-wunderbaum";
 import { VisualizationShell } from '../interfaces/VisualizationShell.js';
@@ -197,11 +197,12 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   private _binding: IBinding & { converter: Record<string, any> };
   private _bindingTarget: BindingTarget;
   private _serviceContainer: ServiceContainer;
+  private _instanceServiceContainer: InstanceServiceContainer;
   private _shell: VisualizationShell
   private _activeRow: number = -1;
   private _objNmInput: HTMLInputElement;
 
-  constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, serviceContainer: ServiceContainer, shell: VisualizationShell) {
+  constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, shell: VisualizationShell) {
     super();
     super._restoreCachedInititalValues();
 
@@ -211,6 +212,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
     this._binding = binding;
     this._bindingTarget = bindingTarget;
     this._serviceContainer = serviceContainer;
+    this._instanceServiceContainer = instanceServiceContainer;
     this._shell = shell;
   }
 
@@ -285,13 +287,18 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
 
   async _select() {
     let b = new BindableObjectsBrowser();
-    b.initialize(this._serviceContainer);
+    b.initialize(this._serviceContainer, this._instanceServiceContainer);
     b.title = 'select signal...';
     const abortController = new AbortController();
     b.objectDoubleclicked.on(() => {
       abortController.abort();
       if (this.objectNames != '')
         this.objectNames += ';'
+      if (b.selectedObject.specialType == 'signalProperty') {
+        this.objectNames += '?';
+      } else if (b.selectedObject.bindabletype === 'property') {
+        this.objectNames += '??';
+      }
       this.objectNames += b.selectedObject.fullName;
       this._bindingsRefresh();
     });

@@ -4,12 +4,17 @@ import { WbRenderEventType } from "types";
 import { VisualizationHandler } from '../interfaces/VisualizationHandler';
 import { VisualizationShell } from '../interfaces/VisualizationShell';
 import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
-import { ServiceContainer } from '@node-projects/web-component-designer';
+import { InstanceServiceContainer, ServiceContainer } from '@node-projects/web-component-designer';
 
 export class VisualizationPropertyGrid extends PropertyGrid {
     public serviceContainer: ServiceContainer;
+    public instanceServiceContainer: InstanceServiceContainer;
     public visualizationHandler: VisualizationHandler;
     public visualizationShell: VisualizationShell;
+
+    constructor() {
+        super();
+    }
 
     public override async getEditorForType(property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any): Promise<HTMLElement> {
         if (this.getSpecialEditorForType) {
@@ -51,7 +56,7 @@ export class VisualizationPropertyGrid extends PropertyGrid {
                 btn.textContent = '...';
                 btn.onclick = async () => {
                     let b = new BindableObjectsBrowser();
-                    b.initialize(this.serviceContainer);
+                    b.initialize(this.serviceContainer, this.instanceServiceContainer);
                     b.title = 'select signal...';
                     const abortController = new AbortController();
                     b.objectDoubleclicked.on(() => {
