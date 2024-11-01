@@ -55,6 +55,7 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
       font-size: 10px;
       display: flex;
       align-items: center;
+      white-space: nowrap;
     }
     
     ul {
