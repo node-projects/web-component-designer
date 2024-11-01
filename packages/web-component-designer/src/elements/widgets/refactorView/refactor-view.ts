@@ -19,7 +19,7 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
       <template repeat:item="[[this.refactorings]]">
         <details open>
           <summary>
-              name:<input value="[[item[1][0].name]]" @keydown="[[this._refactor(item, event)]]" style="flex-grow: 1; min-width: 0">
+              [[item[1][0].itemType]]-name:<input value="[[item[1][0].name]]" @keydown="[[this._refactor(item, event)]]" style="flex-grow: 1; min-width: 0">
           </summary>
           <ul>
             <template repeat:reft="[[item[1]]]">

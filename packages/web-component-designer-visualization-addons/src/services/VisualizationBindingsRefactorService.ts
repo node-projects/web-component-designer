@@ -9,7 +9,7 @@ export class VisualizationBindingsRefactorService implements IRefactorService {
             if (bindings) {
                 for (let b of bindings) {
                     for (let s of b.bindableObjectNames) {
-                        let itemType = 'bindableObject';
+                        let itemType = 'signal';
                         let prefix = ""
                         if (s.includes(':')) {
                             let nm = s.split(':')[0];
@@ -46,9 +46,9 @@ export class VisualizationBindingsRefactorService implements IRefactorService {
     refactor(refactoring: (IRefactoring & { shortName?: string, prefix?: string }), oldValue: string, newValue: string) {
         let binding = refactoring.sourceObject as IBinding;
         if (refactoring.shortName)
-            binding.bindableObjectNames = binding.bindableObjectNames.map(x => x == refactoring.shortName + ':' + oldValue ? refactoring.shortName + ':' + refactoring.prefix + newValue : x);
+            binding.bindableObjectNames = binding.bindableObjectNames.map(x => x == refactoring.shortName + ':' + refactoring.prefix + oldValue ? refactoring.shortName + ':' + refactoring.prefix + newValue : x);
         else
-            binding.bindableObjectNames = binding.bindableObjectNames.map(x => x == oldValue ? refactoring.prefix + newValue : x);
+            binding.bindableObjectNames = binding.bindableObjectNames.map(x => x == refactoring.prefix + oldValue ? refactoring.prefix + newValue : x);
         refactoring.designItem.serviceContainer.bindingService.setBinding(refactoring.designItem, binding);
     }
 }

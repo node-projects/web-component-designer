@@ -5,7 +5,7 @@ import { IRefactorService } from "./IRefactorService.js";
 export interface IRefactoring {
     service: IRefactorService;
     name: string; //wert der 
-    itemType: string; //for example: text, bindableObject, screen, ....
+    itemType: string; //for example: text, signal, property, screen, ....
     designItem: IDesignItem;
     type: 'binding' | 'script' | 'content' | 'attribute';
     display?: string;

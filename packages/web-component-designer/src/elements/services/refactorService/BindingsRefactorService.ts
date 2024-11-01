@@ -14,9 +14,9 @@ export class BindingsRefactorService implements IRefactorService {
                         if (s.includes(':')) {
                             let nm = s.split(':')[0];
                             let sng = s.substring(nm.length + 1);
-                            refactorings.push({ service: this, name: sng, itemType: 'bindableObject', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName + ' - ' + nm + ':', shortName: nm });
+                            refactorings.push({ service: this, name: sng, itemType: 'signal', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName + ' - ' + nm + ':', shortName: nm });
                         } else {
-                            refactorings.push({ service: this, name: s, itemType: 'bindableObject', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName });
+                            refactorings.push({ service: this, name: s, itemType: 'signal', designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName });
                         }
                     }
                 }
