@@ -25,6 +25,7 @@ export * from './scripting/ScriptSystem.js';
 
 export * from './services/BindableObjectDragDropService.js';
 export * from './services/VisualizationBindingsService.js';
+export * from './services/VisualizationBindingsRefactorService.js';
 export * from './services/PropertyGridDragDropService.js';
 export * from './services/ScriptRefactorService.js';
 export * from './services/SignalPropertyEditor.js';
