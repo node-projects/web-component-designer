@@ -112,6 +112,15 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
                 pg.selectedObject = data.value ?? {};
             else
                 pg.selectedObject = {};
+
+            pg.bindingDoubleClicked = (b) => {
+                if (b.bindabletype == 'property') {
+                    pg.setPropertyValue('source', 'property');
+                } else {
+                    pg.setPropertyValue('source', 'signal');
+                }
+                pg.refresh();
+            }
             let res = await this.visualizationShell.openConfirmation(pg, { x: 100, y: 100, width: 400, height: 400, parent: this });
             if (res) {
                 this._propertygrid.setPropertyValue(data.propertyPath, pg.selectedObject);

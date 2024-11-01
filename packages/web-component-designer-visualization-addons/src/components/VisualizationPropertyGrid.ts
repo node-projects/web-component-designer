@@ -4,7 +4,7 @@ import { WbRenderEventType } from "types";
 import { VisualizationHandler } from '../interfaces/VisualizationHandler';
 import { VisualizationShell } from '../interfaces/VisualizationShell';
 import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
-import { InstanceServiceContainer, ServiceContainer } from '@node-projects/web-component-designer';
+import { IBindableObject, InstanceServiceContainer, ServiceContainer } from '@node-projects/web-component-designer';
 
 export class VisualizationPropertyGrid extends PropertyGrid {
     public serviceContainer: ServiceContainer;
@@ -16,13 +16,15 @@ export class VisualizationPropertyGrid extends PropertyGrid {
         super();
     }
 
+    bindingDoubleClicked: (bindableObject: IBindableObject<any>) => void;
+
     public override async getEditorForType(property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any): Promise<HTMLElement> {
         if (this.getSpecialEditorForType) {
             let edt = await this.getSpecialEditorForType(property, currentValue, propertyPath, wbRender, additionalInfo);
             if (edt)
                 return edt;
         }
-        
+
         switch (property.format) {
             case 'screen': {
                 let editor = document.createElement('select');
@@ -60,6 +62,8 @@ export class VisualizationPropertyGrid extends PropertyGrid {
                     b.title = 'select signal...';
                     const abortController = new AbortController();
                     b.objectDoubleclicked.on(() => {
+                        if (this.bindingDoubleClicked)
+                            this.bindingDoubleClicked(b.selectedObject);
                         abortController.abort();
                         inp.value = b.selectedObject.fullName;
                         this.setPropertyValue(propertyPath, inp.value);
@@ -118,7 +122,7 @@ export class VisualizationPropertyGrid extends PropertyGrid {
                 return editor;
             }
         }
-        
+
         return super.getEditorForType(property, currentValue, propertyPath, wbRender, additionalInfo);
     }
 }
