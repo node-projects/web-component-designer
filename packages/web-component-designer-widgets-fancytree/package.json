@@ -13,8 +13,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@node-projects/base-custom-webcomponent": ">=0.19.0",
-    "@node-projects/web-component-designer": ">=0.1.150",
+    "@node-projects/base-custom-webcomponent": ">=0.27.8",
+    "@node-projects/web-component-designer": ">=0.1.224",
     "jquery": "^3.7.1",
     "jquery.fancytree": "^2.38.3"
   },

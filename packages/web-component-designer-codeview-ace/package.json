@@ -13,9 +13,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "ace-builds": "^1.29.0",
-    "@node-projects/base-custom-webcomponent": ">=0.19.0",
-    "@node-projects/web-component-designer": ">=0.1.8"    
+    "ace-builds": "^1.36.3",
+    "@node-projects/base-custom-webcomponent": ">=0.27.8",
+    "@node-projects/web-component-designer": ">=0.1.224"    
   },
   "repository": {
     "type": "git",

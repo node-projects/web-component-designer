@@ -13,8 +13,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "esprima-next": "^5.8.4",
-    "@node-projects/web-component-designer": ">=0.1.1"
+    "esprima-next": "^6.0.3",
+    "@node-projects/web-component-designer": ">=0.1.224"
   },
   "repository": {
     "type": "git",

@@ -13,8 +13,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "css-tree": "^2.3.1",
-    "@node-projects/web-component-designer": ">=0.1.1"    
+    "css-tree": "^3.0.0",
+    "@node-projects/web-component-designer": ">=0.1.224"    
   },
   "repository": {
     "type": "git",

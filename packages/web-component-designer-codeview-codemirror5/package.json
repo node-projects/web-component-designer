@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "codemirror5": "npm:codemirror@^5.0.0",
-    "@node-projects/base-custom-webcomponent": ">=0.19.0",
-    "@node-projects/web-component-designer": ">=0.1.8"    
+    "@node-projects/base-custom-webcomponent": ">=0.27.8",
+    "@node-projects/web-component-designer": ">=0.1.224"    
   },
   "repository": {
     "type": "git",

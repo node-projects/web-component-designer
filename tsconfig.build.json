@@ -16,5 +16,6 @@
         "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
         "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
         "experimentalDecorators": true, /* Enables experimental support for ES7 decorators. */
+        "skipLibCheck": true,
     }
 }
