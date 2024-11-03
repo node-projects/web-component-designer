@@ -65,7 +65,7 @@ export class ScriptSystem {
           }
         }
       } else
-        this.runScriptCommand(c, outerContext);
+        await this.runScriptCommand(c, outerContext);
     }
   }
 
@@ -196,11 +196,11 @@ export class ScriptSystem {
             (<HTMLElement>e).style[name] = value;
           } else if (target == 'class') {
             if (mode === 'toggle') {
-              (<HTMLElement>e).classList.toggle(value);
+              (<HTMLElement>e).classList.toggle(name ?? value);
             } else if (mode === 'remove') {
-              (<HTMLElement>e).classList.remove(value);
+              (<HTMLElement>e).classList.remove(name ?? value);
             } else {
-              (<HTMLElement>e).classList.add(value);
+              (<HTMLElement>e).classList.add(name ?? value);
             }
           }
         }
