@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, Disposable, css, html } from "@node-projects/base-custom-webcomponent"
-import { ContextMenu, IContextMenuItem, IDesignItem, IEvent, InstanceServiceContainer, PropertiesHelper } from "@node-projects/web-component-designer";
+import { ContextMenu, copyTextToClipboard, getTextFromClipboard, IContextMenuItem, IDesignItem, IEvent, InstanceServiceContainer, PropertiesHelper } from "@node-projects/web-component-designer";
 import { ParameterEditor } from "./ParameterEditor.js";
 import { VisualizationShell } from "../interfaces/VisualizationShell.js";
 import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
@@ -73,11 +73,11 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         super();
         this._restoreCachedInititalValues();
     }
-    
+
     ready() {
         this._bindingsParse();
     }
-    
+
     private _blocklyToolbox: any;
     private _instanceServiceContainer: InstanceServiceContainer;
     private _selectionChangedHandler: Disposable;
@@ -230,9 +230,22 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         const evtType = this._getScriptType(eventItem);
         if (evtType == 'empty')
             this._showContextMenuAssignScript(e, eventItem, true)
-        else if (evtType != 'none')
-            ContextMenu.show([{ title: 'remove', action: () => { this.selectedItems[0].removeAttribute('@' + eventItem.name); this._bindingsRefresh(); } }], e);
-        else
+        else if (evtType != 'none') {
+            let ctxMenu = [
+                {
+                    title: 'remove',
+                    action: () => { this.selectedItems[0].removeAttribute('@' + eventItem.name); this._bindingsRefresh(); }
+                }, {
+                    title: '-'
+                }, {
+                    title: 'copy',
+                    action: () => { copyTextToClipboard(this.selectedItems[0].getAttribute('@' + eventItem.name)); }
+                }, {
+                    title: 'paste',
+                    action: async () => { this.selectedItems[0].setAttribute('@' + eventItem.name, await getTextFromClipboard()); }
+                }];
+            ContextMenu.show(ctxMenu, e);
+        } else
             this._showContextMenuAssignScript(e, eventItem, true)
     }
 
@@ -281,6 +294,17 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             ctxMenu.push({
                 title: 'remove',
                 action: () => { this.selectedItems[0].removeAttribute('@' + eventItem.name); this._bindingsRefresh(); }
+            });
+        }
+        if (evtType != 'empty') {
+            ctxMenu.push({
+                title: '-'
+            }, {
+                title: 'copy',
+                action: () => { copyTextToClipboard(this.selectedItems[0].getAttribute('@' + eventItem.name)); }
+            }, {
+                title: 'paste',
+                action: async () => { this.selectedItems[0].setAttribute('@' + eventItem.name, await getTextFromClipboard()); }
             });
         }
         return ctxMenu;
