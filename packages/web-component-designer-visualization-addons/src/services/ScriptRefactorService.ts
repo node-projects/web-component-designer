@@ -18,9 +18,9 @@ export class ScriptRefactorService implements IRefactorService {
                                     if (cp != null && typeof cp === 'object') {
                                         let mp = cp as IScriptMultiplexValue;
                                         if (mp.source === 'signal') {
-                                            refactorings.push({ name: mp.name, itemType: 'signal', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[signal]', refactor: newValue => mp.name = newValue });
+                                            refactorings.push({ name: mp.name, itemType: 'signal', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + a[0].substring(1) + '/' + p + '[signal]', refactor: newValue => mp.name = newValue });
                                         } else if (mp.source === 'property') {
-                                            refactorings.push({ name: mp.name, itemType: 'property', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[property]', refactor: newValue => mp.name = newValue });
+                                            refactorings.push({ name: mp.name, itemType: 'property', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + a[0].substring(1) + '/' + p + '[property]', refactor: newValue => mp.name = newValue });
                                         } else if (mp.source === 'complexString') {
                                             for (let m of mp.name.matchAll(/\{(.*?)\}/g)) {
                                                 let full = m[0];
@@ -32,9 +32,9 @@ export class ScriptRefactorService implements IRefactorService {
                                                         prefix = '??';
                                                         nm = nm.substring(1);
                                                     }
-                                                    refactorings.push({ name: nm, itemType: 'property', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[complexString]->property', refactor: newValue => mp.name = mp.name.replace(full, '{' + prefix + newValue + '}') });
+                                                    refactorings.push({ name: nm, itemType: 'property', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + a[0].substring(1) + '/' + p + '[complexString]->property', refactor: newValue => mp.name = mp.name.replace(full, '{' + prefix + newValue + '}') });
                                                 } else {
-                                                    refactorings.push({ name: nm, itemType: 'signal', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + p + '[complexString]->signal', refactor: newValue => mp.name = mp.name.replace(full, '{' + newValue + '}') });
+                                                    refactorings.push({ name: nm, itemType: 'signal', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: c.type + '/' + a[0].substring(1) + '/' + p + '[complexString]->signal', refactor: newValue => mp.name = mp.name.replace(full, '{' + newValue + '}') });
                                                 }
                                             }
                                         }
@@ -43,55 +43,55 @@ export class ScriptRefactorService implements IRefactorService {
                                 switch (c.type) {
                                     case 'SetSignalValue':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'ToggleSignalValue':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'IncrementSignalValue':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'DecrementSignalValue':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'SetBitInSignal':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'ClearBitInSignal':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'ToggleBitInSignal':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'OpenScreen':
                                         if (c.screen && typeof c.screen === 'string')
-                                            refactorings.push({ name: c.screen, itemType: 'screen', target: BindingTarget.event, targetName: a[0], display: c.type + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
+                                            refactorings.push({ name: c.screen, itemType: 'screen', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
                                         break;
                                     case 'OpenDialog':
                                         if (c.screen && typeof c.screen === 'string')
-                                            refactorings.push({ name: c.screen, itemType: 'screen', target: BindingTarget.event, targetName: a[0], display: c.type + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
+                                            refactorings.push({ name: c.screen, itemType: 'screen', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/screen', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.screen = newValue });
                                         break;
                                     case 'CalculateSignalValue':
                                         if (c.targetSignal && typeof c.targetSignal === 'string')
-                                            refactorings.push({ name: c.targetSignal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/targetSignal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.targetSignal = newValue });
+                                            refactorings.push({ name: c.targetSignal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/targetSignal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.targetSignal = newValue });
                                         break;
                                     case 'SubscribeSignal':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'UnsubscribeSignal':
                                         if (c.signal && typeof c.signal === 'string')
-                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
+                                            refactorings.push({ name: c.signal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/signal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.signal = newValue });
                                         break;
                                     case 'ShowMessageBox':
                                         if (c.resultSignal && typeof c.resultSignal === 'string')
-                                            refactorings.push({ name: c.resultSignal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/resultSignal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.resultSignal = newValue });
+                                            refactorings.push({ name: c.resultSignal, itemType: 'signal', target: BindingTarget.event, targetName: a[0], display: c.type + '/' + a[0].substring(1) + '/resultSignal', service: this, designItem: d, type: 'script', sourceObject: script, refactor: newValue => c.resultSignal = newValue });
                                         break;
                                 }
                             }
@@ -101,7 +101,7 @@ export class ScriptRefactorService implements IRefactorService {
                         if ('parameters' in script) {
                             for (let p in script.parameters) {
                                 if (typeof script.parameters[p] === 'string') {
-                                    refactorings.push({ name: script.parameters[p], itemType: 'parameter', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: 'parameters/' + p, refactor: newValue => script.parameters[p] = newValue });
+                                    refactorings.push({ name: script.parameters[p], itemType: 'parameter', target: BindingTarget.event, targetName: a[0], service: this, designItem: d, type: 'script', sourceObject: script, display: a[0].substring(1) + '/parameters/' + p, refactor: newValue => script.parameters[p] = newValue });
                                 }
                             }
                         }
