@@ -309,6 +309,8 @@ export class ScriptSystem {
   }
 
   async getValue<T>(value: T, outerContext: contextType): Promise<T> {
+    if (value == null)
+      return null;
     if (typeof value === 'object') {
       switch ((<IScriptMultiplexValue><any>value).source) {
         case 'property': {
