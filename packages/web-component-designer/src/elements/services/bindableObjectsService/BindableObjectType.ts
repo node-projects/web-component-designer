@@ -6,4 +6,5 @@ export enum BindableObjectType {
     string = 'string',
     date = 'date',
     color = 'color',
+    object = 'object',
 }
