@@ -4,14 +4,15 @@ import { WbRenderEventType } from "types";
 import { VisualizationHandler } from '../interfaces/VisualizationHandler';
 import { VisualizationShell } from '../interfaces/VisualizationShell';
 import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
-import { IBindableObject, InstanceServiceContainer, ServiceContainer } from '@node-projects/web-component-designer';
+import { BindableObjectsTarget, IBindableObject, InstanceServiceContainer, ServiceContainer } from '@node-projects/web-component-designer';
 
 export class VisualizationPropertyGrid extends PropertyGrid {
     public serviceContainer: ServiceContainer;
     public instanceServiceContainer: InstanceServiceContainer;
     public visualizationHandler: VisualizationHandler;
     public visualizationShell: VisualizationShell;
-
+    public bindableObjectsTarget : BindableObjectsTarget = 'property';
+    
     constructor() {
         super();
     }
@@ -58,7 +59,7 @@ export class VisualizationPropertyGrid extends PropertyGrid {
                 btn.textContent = '...';
                 btn.onclick = async () => {
                     let b = new BindableObjectsBrowser();
-                    b.initialize(this.serviceContainer, this.instanceServiceContainer);
+                    b.initialize(this.serviceContainer, this.instanceServiceContainer, this.bindableObjectsTarget);
                     b.title = 'select signal...';
                     const abortController = new AbortController();
                     b.objectDoubleclicked.on(() => {

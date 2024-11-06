@@ -22,7 +22,7 @@ export class SignalPropertyEditor extends BasePropertyEditor<HTMLElement> {
     btn.textContent = '...';
     btn.onclick = async () => {
       let b = new BindableObjectsBrowser();
-      b.initialize(this.designItems[0].serviceContainer, this.designItems[0].instanceServiceContainer);
+      b.initialize(this.designItems[0].serviceContainer, this.designItems[0].instanceServiceContainer, 'property');
       b.title = 'select signal...';
       const abortController = new AbortController();
       b.objectDoubleclicked.on(() => {

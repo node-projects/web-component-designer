@@ -287,7 +287,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
 
   async _select() {
     let b = new BindableObjectsBrowser();
-    b.initialize(this._serviceContainer, this._instanceServiceContainer);
+    b.initialize(this._serviceContainer, this._instanceServiceContainer, 'binding');
     b.title = 'select signal...';
     const abortController = new AbortController();
     b.objectDoubleclicked.on(() => {

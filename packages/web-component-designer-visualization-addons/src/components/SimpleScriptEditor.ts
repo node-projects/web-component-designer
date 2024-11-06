@@ -133,6 +133,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
         this._propertygrid.visualizationShell = this.visualizationShell;
         this._propertygrid.serviceContainer = this.serviceContainer;
         this._propertygrid.instanceServiceContainer = this.instanceServiceContainer;
+        this._propertygrid.bindableObjectsTarget = 'script';
 
         this._propertygrid.getTypeInfo = (obj, type) => typeInfoFromJsonSchema(this.scriptCommandsTypeInfo, obj, type);
         this._propertygrid.getSpecialEditorForType = async (property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any) => {

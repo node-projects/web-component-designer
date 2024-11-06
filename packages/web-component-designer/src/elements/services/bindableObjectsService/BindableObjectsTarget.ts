@@ -1,0 +1,1 @@
+export type BindableObjectsTarget = 'binding' | 'script' | 'property';

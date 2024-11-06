@@ -32,6 +32,7 @@ export * from "./elements/item/BindingTarget.js";
 export * from "./elements/item/NodeType.js";
 
 export * from "./elements/services/bindableObjectsService/BindableObjectType.js";
+export * from "./elements/services/bindableObjectsService/BindableObjectsTarget.js";
 export type { IBindableObject } from "./elements/services/bindableObjectsService/IBindableObject.js";
 export type { IBindableObjectsService } from "./elements/services/bindableObjectsService/IBindableObjectsService.js";
 export type { IBindableObjectDragDropService } from "./elements/services/bindableObjectsService/IBindableObjectDragDropService.js";
