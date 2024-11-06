@@ -380,7 +380,9 @@ export class ScriptSystem {
     let results = await Promise.all(parsed.signals.map(x => this.getStateOrFieldOrParameter(this.getSignaName(x, context), context)));
     let nm = parsed.parts[0];
     for (let i = 0; i < parsed.parts.length - 1; i++) {
-      let v = results[i].val;
+      let v = results[i];
+      if (typeof v === 'object')
+        v = v.val;
       if (v == null)
         v = '';
       nm += v + parsed.parts[i + 1];
