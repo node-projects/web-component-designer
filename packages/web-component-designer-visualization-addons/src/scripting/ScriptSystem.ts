@@ -380,7 +380,9 @@ export class ScriptSystem {
     let results = await Promise.all(parsed.signals.map(x => this.getStateOrFieldOrParameter(this.getSignaName(x, context), context)));
     let nm = parsed.parts[0];
     for (let i = 0; i < parsed.parts.length - 1; i++) {
-      let v = results[i].val;
+      let v = results[i];
+      if (typeof v === 'object')
+        v = v.val;
       if (v == null)
         v = '';
       nm += v + parsed.parts[i + 1];
@@ -402,8 +404,13 @@ export class ScriptSystem {
     return retVal;
   }
 
-  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, visualizationHandler: VisualizationHandler, context?: any, assignExternalScript?: (element: Element, event: string, scriptData: any) => void): Promise<VisualisationElementScript> {
+  public createScriptContext(root: HTMLElement, event: Event, element: Element, parameters: Record<string, any>, relativeSignalsPath: string): any {
+    return { root, event, element, parameters, relativeSignalsPath };
+  }
+
+  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, visualizationHandler: VisualizationHandler, contextCreator?: (root: HTMLElement, event: Event, element: Element, parameters: Record<string, any>, relativeSignalsPath: string) => any, assignExternalScript?: (element: Element, event: string, scriptData: any) => void): Promise<VisualisationElementScript> {
     const allElements = shadowRoot.querySelectorAll('*');
+    contextCreator ??= this.createScriptContext;
     let jsObject: VisualisationElementScript = null;
     if (javascriptCode) {
       try {
@@ -425,13 +432,13 @@ export class ScriptSystem {
             if (script[0] == '{') {
               let scriptObj: Script = JSON.parse(script);
               if ('commands' in scriptObj) {
-                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, { event: evt, element: e, root: instance, parameters: scriptObj.parameters, relativeSignalsPath: scriptObj.relativeSignalsPath }));
+                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, contextCreator(instance, evt, e, scriptObj.parameters, scriptObj.relativeSignalsPath)));
               } else if ('blocks' in scriptObj) {
                 let compiledFunc: Awaited<ReturnType<typeof generateEventCodeFromBlockly>> = null;
                 e.addEventListener(evtName, async (evt) => {
                   if (!compiledFunc)
                     compiledFunc = await generateEventCodeFromBlockly(scriptObj);
-                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '', visualizationHandler, context);
+                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '', visualizationHandler, contextCreator(instance, evt, e, (<any>scriptObj).parameters, (<any>scriptObj).relativeSignalsPath));
                 });
               } else {
                 if (assignExternalScript)

@@ -1,0 +1,1 @@
+export type BindableObjectsTarget = 'itemsView' | 'binding' | 'script' | 'property';

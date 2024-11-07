@@ -5,6 +5,7 @@ import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
 //@ts-ignore
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
+import { BindableObjectsTarget } from '@node-projects/web-component-designer/src/elements/services/bindableObjectsService/BindableObjectsTarget.js';
 
 type serviceNode = { service: IBindableObjectsService, bindable: IBindableObject<any> }
 
@@ -79,13 +80,13 @@ export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorApp
 
   private _instanceServiceContainer;
 
-  public async initialize(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {
+  public async initialize(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, bindableObjectsTarget: BindableObjectsTarget) {
     this._instanceServiceContainer = instanceServiceContainer;
     let rootNode = this._tree.root;
     rootNode.removeChildren();
     const services = serviceContainer.bindableObjectsServices;
     for (const s of services) {
-      if (!s.hasObjectsForInstanceServiceContainer(this._instanceServiceContainer))
+      if (!s.hasObjectsForInstanceServiceContainer(this._instanceServiceContainer, bindableObjectsTarget))
         continue;
       this._tree.root.addChildren(<WbNodeData>{
         title: s.name,
