@@ -10,6 +10,7 @@ import { IContentChanged } from '../../../services/contentService/IContentChange
 import { DesignerCanvas } from '../designerCanvas.js';
 import { ISelectionRefreshEvent } from '../../../services/selectionService/ISelectionRefreshEvent.js';
 import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
+import { clearBoxQuadsCache, getBoxQuads } from '../../../helper/getBoxQuads.js';
 
 function wmGet<T extends Map<any, any>>(designItem: IDesignItem, weakMap: WeakMap<IDesignItem, T>) {
   let val = weakMap.get(designItem);
@@ -131,6 +132,7 @@ export class ExtensionManager implements IExtensionManager {
       let extensions: IDesignerExtension[] = [];
       if (extProv) {
         const cache = {};
+        clearBoxQuadsCache();
         for (let e of extProv) {
           let shouldAppE = wmGet(designItem, this._shouldAppliedDesignerExtensions).get(extensionType);
           if (!shouldAppE)
@@ -177,6 +179,7 @@ export class ExtensionManager implements IExtensionManager {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       if (extProv) {
         const cache = {};
+        clearBoxQuadsCache();
         for (let e of extProv) {
           for (let i of designItems) {
             let shouldAppE = wmGet(i, this._shouldAppliedDesignerExtensions).get(extensionType);
@@ -348,6 +351,7 @@ export class ExtensionManager implements IExtensionManager {
           let exts = wmGet(designItem, this._appliedDesignerExtensions).get(extensionType);
           if (exts) {
             const cache = {};
+            clearBoxQuadsCache();
             for (let e of exts) {
               try {
                 e.refresh(cache, event);
@@ -362,6 +366,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         const cache = {};
+        clearBoxQuadsCache();
         for (let appE of wmGet(designItem, this._appliedDesignerExtensions)) {
           for (let e of appE[1]) {
             try {
@@ -384,6 +389,7 @@ export class ExtensionManager implements IExtensionManager {
     if (designItems) {
       if (extensionType) {
         const cache = {};
+        clearBoxQuadsCache();
         outer1:
         for (let i of designItems) {
           if (!i.element.isConnected) {
@@ -412,6 +418,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         const cache = {};
+        clearBoxQuadsCache();
         outer2:
         for (let i of designItems) {
           for (let appE of wmGet(i, this._appliedDesignerExtensions)) {

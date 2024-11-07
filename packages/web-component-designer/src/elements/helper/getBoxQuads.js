@@ -112,12 +112,36 @@ function transformPointBox(point, box, style, operator) {
     return point;
 }
 
+export function clearBoxQuadsCache() {
+    boxQuadsCache.clear();
+    transformCache.clear();
+}
+
+/** @type { WeakMap<Node, number> } */
+const hash = new WeakMap();
+/** @type { Map<string, Node> } */
+const boxQuadsCache = new Map();
+/** @type { Map<string, DOMMatrix> } */
+const transformCache = new Map();
+let hashId = 0;
+
 /**
 * @param {Node} node
 * @param {{box?: 'margin'|'border'|'padding'|'content', relativeTo?: Element, iframes?: HTMLIFrameElement[]}=} options
 * @returns {DOMQuad[]}
 */
 export function getBoxQuads(node, options) {
+    let i1 = hash.get(node);
+    if (i1 === undefined)
+        hash.set(node, i1 = hashId++);
+    let i2 = hash.get(options?.relativeTo ?? document.body);
+    if (i2 === undefined)
+        hash.set(options?.relativeTo ?? document.body, i2 = hashId++);
+    const key = i1 + '_' + i2 + '_' + (options?.box ?? 'border');
+    const q = boxQuadsCache.get(key);
+    if (q)
+        return q;
+
     let { width, height } = getElementSize(node);
     /** @type {DOMMatrix} */
     let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options.iframes);
@@ -154,7 +178,9 @@ export function getBoxQuads(node, options) {
         points[i] = as2DPoint(points[i]);
     }
 
-    return [new DOMQuad(points[0], points[1], points[2], points[3])];
+    const quad = [new DOMQuad(points[0], points[1], points[2], points[3])];
+    boxQuadsCache.set(key, quad);
+    return quad;
 }
 
 
@@ -195,17 +221,17 @@ export function getElementSize(node) {
         width = node.width.baseVal.value
         height = node.height.baseVal.value
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).SVGGraphicsElement) {
-        let bbox = node.getBBox()
+        const bbox = node.getBBox()
         width = bbox.width;
         height = bbox.height;
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).MathMLElement) {
-        let bbox = node.getBoundingClientRect()
+        const bbox = node.getBoundingClientRect()
         width = bbox.width;
         height = bbox.height;
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Text) {
-        let range = document.createRange();
+        const range = document.createRange();
         range.selectNodeContents(node);
-        let targetRect = range.getBoundingClientRect();
+        const targetRect = range.getBoundingClientRect();
         width = targetRect.width;
         height = targetRect.height;
     }
@@ -220,9 +246,9 @@ function getElementOffsetsInContainer(node, iframes) {
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement) {
         return new DOMPoint(node.offsetLeft - node.scrollLeft, node.offsetTop - node.scrollTop);
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Text) {
-        let range = document.createRange();
+        const range = document.createRange();
         range.selectNodeContents(node);
-        let r1 = range.getBoundingClientRect();
+        const r1 = range.getBoundingClientRect();
         const r2 = getParentElementIncludingSlots(node, iframes).getBoundingClientRect();
         return new DOMPoint(r1.x - r2.x, r1.y - r2.y);
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Element) {
@@ -251,6 +277,17 @@ function getElementOffsetsInContainer(node, iframes) {
 * @param {HTMLIFrameElement[]} iframes
 */
 export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, iframes) {
+    let i1 = hash.get(node);
+    if (i1 === undefined)
+        hash.set(node, i1 = hashId++);
+    let i2 = hash.get(ancestor);
+    if (i2 === undefined)
+        hash.set(ancestor, i2 = hashId++);
+    const key = i1 + '_' + i2;
+    const q = transformCache.get(key);
+    if (q)
+        return q;
+
     /** @type {Element } */
     //@ts-ignore
     let actualElement = node;
@@ -301,6 +338,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
         actualElement = parentElement;
     }
 
+    transformCache.set(key, originalElementAndAllParentsMultipliedMatrix);
     return originalElementAndAllParentsMultipliedMatrix;
 }
 
