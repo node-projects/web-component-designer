@@ -9,6 +9,18 @@ import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
+import { NodeType } from '../../item/NodeType.js';
+
+export function filterNonElementItems(items: IDesignItem[]) {
+  const filterdPlaceItems: IDesignItem[] = [];
+  next:
+  for (let i of items) {
+    if (i.nodeType === NodeType.TextNode || i.nodeType === NodeType.Comment)
+      continue
+    filterdPlaceItems.push(i);
+  }
+  return filterdPlaceItems;
+}
 
 export class DefaultPlacementService implements IPlacementService {
 
@@ -113,7 +125,7 @@ export class DefaultPlacementService implements IPlacementService {
     if (event.shiftKey) {
       track = straightenLine({ x: 0, y: 0 }, track, true);
     }
-    let filteredItems = filterChildPlaceItems(items);
+    let filteredItems = filterChildPlaceItems(filterNonElementItems(items));
     for (const designItem of filteredItems) {
       const canvas = designItem.instanceServiceContainer.designerCanvas.canvas;
       const quad = designItem.parent.element.getBoxQuads({ relativeTo: canvas, iframes: designItem.instanceServiceContainer.designerCanvas.iframes })[0];

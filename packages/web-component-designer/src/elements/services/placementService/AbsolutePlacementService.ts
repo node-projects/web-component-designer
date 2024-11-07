@@ -9,6 +9,7 @@ import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionTy
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
+import { filterNonElementItems } from './DefaultPlacementService.js';
 
 export class AbsolutePlacementService implements IPlacementService {
 
@@ -113,7 +114,7 @@ export class AbsolutePlacementService implements IPlacementService {
     if (event.shiftKey) {
       track = straightenLine({ x: 0, y: 0 }, track, true);
     }
-    let filteredItems = filterChildPlaceItems(items);
+    let filteredItems = filterChildPlaceItems(filterNonElementItems(items));
     for (const designItem of filteredItems) {
       const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
       const transformedPoint: DOMPoint = designItem.parent.element.convertPointFromNode(new DOMPoint(track.x, track.y, 0, 0), <HTMLElement>canvas);
