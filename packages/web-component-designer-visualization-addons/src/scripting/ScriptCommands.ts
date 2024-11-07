@@ -1,14 +1,16 @@
-export declare type ScriptCommands = Comment | OpenScreen | OpenUrl | OpenDialog | CloseDialog |
+export declare type ScriptCommands = RunnableScriptCommands |
+  Comment | Condition | Exit | Label | Goto;
+
+export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog | CloseDialog |
   ToggleSignalValue | SetSignalValue | IncrementSignalValue | DecrementSignalValue |
   SetBitInSignal | ClearBitInSignal | ToggleBitInSignal | Console | CalculateSignalValue |
   Javascript | SetElementProperty | Delay | SwitchLanguage |
   Login | Logout |
   SubscribeSignal | UnsubscribeSignal |
   WriteSignalsInGroup | ClearSiganlsInGroup |
-  Condition | Exit | Label | RunScript | Goto |
+  RunScript |
   CopySignalValuesFromFolder | ShowMessageBox |
   ExportSignalValuesAsJson | ImportSignalValuesFromJson;
-
 
 /* 
 TODO:
