@@ -409,7 +409,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       title: item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
       ref: item
     });
-    //@ts-ignore
     item[wbNodeSymbol] = newNode;
 
     for (let i of item.children()) {
