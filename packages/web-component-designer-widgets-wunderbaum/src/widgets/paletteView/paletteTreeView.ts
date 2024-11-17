@@ -28,7 +28,7 @@ export class PaletteTreeView extends BaseCustomWebComponentConstructorAppend {
         </div>
       </div>`;
 
-  private serviceContainer: ServiceContainer;
+  public serviceContainer: ServiceContainer;
 
   constructor() {
     super();
