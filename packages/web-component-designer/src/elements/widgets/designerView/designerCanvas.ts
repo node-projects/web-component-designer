@@ -351,6 +351,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _useIframe = true;
   private _iframe: HTMLIFrameElement;
   private _window: Window;
+  private _resizeObserver: ResizeObserver;
 
   public readonly iframes: HTMLIFrameElement[];
 
@@ -399,6 +400,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this._searchRun();
     };
     this.clickOverlay.oncontextmenu = (e) => e.preventDefault();
+
+    this._resizeObserver = new ResizeObserver(() => {
+      this.extensionManager.refreshAllAppliedExtentions();
+    });
+    this._resizeObserver.observe(this);
   }
 
   get designerWidth(): string {
