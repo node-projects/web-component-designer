@@ -1,6 +1,9 @@
 //todo:
-//transform-box  https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box
+//transform-box (SVGs)  https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box
 
+/**
+* @param {globalThis} windowObj?
+*/
 export function addPolyfill(windowObj = window) {
     if (!windowObj.Node.prototype.getBoxQuads) {
         //@ts-ignore
@@ -54,14 +57,14 @@ export function convertQuadFromNode(node, quad, from, options) {
 
 /**
 * @param {Node} node
-* @param {DOMRectReadOnly} rect
+* @param {{x: number, y: number, width: number, height: number}} rect
 * @param {Element} from
 * @param {{fromBox?: 'margin'|'border'|'padding'|'content', toBox?: 'margin'|'border'|'padding'|'content', iframes?: HTMLIFrameElement[]}=} options
 * @returns {DOMQuad}
 */
 export function convertRectFromNode(node, rect, from, options) {
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body, options?.iframes);
-    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body, options?.iframes).inverse();
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, (node.ownerDocument.defaultView ?? window).document.body.parentElement, options?.iframes);
+    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, (node.ownerDocument.defaultView ?? window).document.body.parentElement, options?.iframes).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         const p = transformPointBox(new DOMPoint(rect.x, rect.y), options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), 1);
         rect = new DOMRect(p.x, p.y, rect.width, rect.height);
@@ -81,7 +84,7 @@ export function convertRectFromNode(node, rect, from, options) {
 * @returns {DOMPoint}
 */
 export function convertPointFromNode(node, point, from, options) {
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, document.body, options?.iframes);
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, (node.ownerDocument.defaultView ?? window).document.body.parentElement, options?.iframes);
     const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, document.body, options?.iframes).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         point = transformPointBox(point, options.fromBox, (node.ownerDocument.defaultView ?? window).getComputedStyle(from), 1);
@@ -112,18 +115,24 @@ function transformPointBox(point, box, style, operator) {
     return point;
 }
 
-export function clearBoxQuadsCache() {
+/** @type { WeakMap<Node, number> } */
+let hash;
+/** @type { Map<string, DOMQuad[]> } */
+let boxQuadsCache;
+/** @type { Map<string, DOMMatrix> } */
+let transformCache;
+let hashId = 0;
+
+export function clearCache() {
     boxQuadsCache.clear();
     transformCache.clear();
 }
 
-/** @type { WeakMap<Node, number> } */
-const hash = new WeakMap();
-/** @type { Map<string, Node> } */
-const boxQuadsCache = new Map();
-/** @type { Map<string, DOMMatrix> } */
-const transformCache = new Map();
-let hashId = 0;
+export function useCache() {
+    hash = new WeakMap();
+    boxQuadsCache = new Map();
+    transformCache = new Map();
+}
 
 /**
 * @param {Node} node
@@ -131,16 +140,19 @@ let hashId = 0;
 * @returns {DOMQuad[]}
 */
 export function getBoxQuads(node, options) {
-    let i1 = hash.get(node);
-    if (i1 === undefined)
-        hash.set(node, i1 = hashId++);
-    let i2 = hash.get(options?.relativeTo ?? document.body);
-    if (i2 === undefined)
-        hash.set(options?.relativeTo ?? document.body, i2 = hashId++);
-    const key = i1 + '_' + i2 + '_' + (options?.box ?? 'border');
-    const q = boxQuadsCache.get(key);
-    if (q)
-        return q;
+    let key;
+    if (boxQuadsCache) {
+        let i1 = hash.get(node);
+        if (i1 === undefined)
+            hash.set(node, i1 = hashId++);
+        let i2 = hash.get(options?.relativeTo ?? document.body);
+        if (i2 === undefined)
+            hash.set(options?.relativeTo ?? document.body, i2 = hashId++);
+        key = i1 + '_' + i2 + '_' + (options?.box ?? 'border');
+        const q = boxQuadsCache.get(key);
+        if (q)
+            return q;
+    }
 
     let { width, height } = getElementSize(node);
     /** @type {DOMMatrix} */
@@ -179,7 +191,8 @@ export function getBoxQuads(node, options) {
     }
 
     const quad = [new DOMQuad(points[0], points[1], points[2], points[3])];
-    boxQuadsCache.set(key, quad);
+    if (boxQuadsCache)
+        boxQuadsCache.set(key, quad);
     return quad;
 }
 
@@ -277,16 +290,19 @@ function getElementOffsetsInContainer(node, iframes) {
 * @param {HTMLIFrameElement[]} iframes
 */
 export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, iframes) {
-    let i1 = hash.get(node);
-    if (i1 === undefined)
-        hash.set(node, i1 = hashId++);
-    let i2 = hash.get(ancestor);
-    if (i2 === undefined)
-        hash.set(ancestor, i2 = hashId++);
-    const key = i1 + '_' + i2;
-    const q = transformCache.get(key);
-    if (q)
-        return q;
+    let key;
+    if (transformCache) {
+        let i1 = hash.get(node);
+        if (i1 === undefined)
+            hash.set(node, i1 = hashId++);
+        let i2 = hash.get(ancestor);
+        if (i2 === undefined)
+            hash.set(ancestor, i2 = hashId++);
+        key = i1 + '_' + i2;
+        const q = transformCache.get(key);
+        if (q)
+            return q;
+    }
 
     /** @type {Element } */
     //@ts-ignore
@@ -332,13 +348,18 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 }
             }
 
-            if (parentElement === ancestor)
+            if (parentElement === ancestor) {
+                if (parentElement.scrollTop || parentElement.scrollLeft)
+                    originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-parentElement.scrollLeft, -parentElement.scrollTop).multiply(originalElementAndAllParentsMultipliedMatrix);
                 return originalElementAndAllParentsMultipliedMatrix;
+            }
         }
         actualElement = parentElement;
     }
 
-    transformCache.set(key, originalElementAndAllParentsMultipliedMatrix);
+    if (transformCache) {
+        transformCache.set(key, originalElementAndAllParentsMultipliedMatrix);
+    }
     return originalElementAndAllParentsMultipliedMatrix;
 }
 
