@@ -10,7 +10,7 @@ import { IContentChanged } from '../../../services/contentService/IContentChange
 import { DesignerCanvas } from '../designerCanvas.js';
 import { ISelectionRefreshEvent } from '../../../services/selectionService/ISelectionRefreshEvent.js';
 import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
-import { clearCache as clearBoxQuadsCache } from '../../../helper/getBoxQuads.js';
+import { clearCache as clearBoxQuadsCache, useCache as useBoxQuadsCache} from '../../../helper/getBoxQuads.js';
 
 function wmGet<T extends Map<any, any>>(designItem: IDesignItem, weakMap: WeakMap<IDesignItem, T>) {
   let val = weakMap.get(designItem);
@@ -32,6 +32,8 @@ export class ExtensionManager implements IExtensionManager {
   _lastPrimarySelectionRefreshItem: WeakRef<IDesignItem>
 
   constructor(designerCanvas: IDesignerCanvas) {
+    useBoxQuadsCache();
+
     this.designerCanvas = designerCanvas;
 
     designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
