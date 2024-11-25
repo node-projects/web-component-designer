@@ -128,7 +128,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._splitDiv.style.height = '100%';
     this._splitDiv.title = 'Split';
     this._tabControl.appendChild(this._splitDiv);
-    if (new serviceContainer.config.demoViewWidget) {
+    if (serviceContainer.config.demoViewWidget) {
       this.demoView = new serviceContainer.config.demoViewWidget();
       this.demoView.title = 'Preview';
       this._tabControl.appendChild(this.demoView);
