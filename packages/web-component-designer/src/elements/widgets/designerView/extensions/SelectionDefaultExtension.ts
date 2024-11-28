@@ -26,14 +26,17 @@ export class SelectionDefaultExtension extends AbstractExtension {
       this.remove();
       return;
     }
-    this._line1 = this._drawLine(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, 'svg-selection', this._line1);
-    this._line2 = this._drawLine(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, 'svg-selection', this._line2);
-    this._line3 = this._drawLine(transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'svg-selection', this._line3);
-    this._line4 = this._drawLine(transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'svg-selection', this._line4);
-    this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-    this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-    this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
-    this._line4.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+
+    if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y)) {
+      this._line1 = this._drawLine(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, 'svg-selection', this._line1);
+      this._line2 = this._drawLine(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, 'svg-selection', this._line2);
+      this._line3 = this._drawLine(transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'svg-selection', this._line3);
+      this._line4 = this._drawLine(transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'svg-selection', this._line4);
+      this._line1.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._line2.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._line3.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+      this._line4.style.strokeWidth = (2 / this.designerCanvas.zoomFactor).toString();
+    }
   }
 
   override dispose() {
