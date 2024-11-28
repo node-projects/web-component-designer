@@ -154,9 +154,9 @@ export function getBoxQuads(node, options) {
             return q;
     }
 
-    let { width, height } = getElementSize(node);
-    /** @type {DOMMatrix} */
     let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options.iframes);
+    let { width, height } = getElementSize(node, originalElementAndAllParentsMultipliedMatrix);
+    /** @type {DOMMatrix} */
 
     let arr = [{ x: 0, y: 0 }, { x: width, y: 0 }, { x: width, y: height }, { x: 0, y: height }];
     /** @type { [DOMPoint, DOMPoint, DOMPoint, DOMPoint] } */
@@ -223,8 +223,9 @@ function as2DPoint(point) {
 
 /**
 * @param {Node} node
+* @param {DOMMatrix=} matrix
 */
-export function getElementSize(node) {
+export function getElementSize(node, matrix) {
     let width = 0;
     let height = 0;
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement) {
@@ -239,14 +240,14 @@ export function getElementSize(node) {
         height = bbox.height;
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).MathMLElement) {
         const bbox = node.getBoundingClientRect()
-        width = bbox.width;
-        height = bbox.height;
+        width = bbox.width / (matrix?.a ?? 1);
+        height = bbox.height / (matrix?.d ?? 1);
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Text) {
         const range = document.createRange();
         range.selectNodeContents(node);
         const targetRect = range.getBoundingClientRect();
-        width = targetRect.width;
-        height = targetRect.height;
+        width = targetRect.width / (matrix?.a ?? 1);
+        height = targetRect.height / (matrix?.d ?? 1);
     }
     return { width, height }
 }
@@ -262,8 +263,11 @@ function getElementOffsetsInContainer(node, iframes) {
         const range = document.createRange();
         range.selectNodeContents(node);
         const r1 = range.getBoundingClientRect();
-        const r2 = getParentElementIncludingSlots(node, iframes).getBoundingClientRect();
-        return new DOMPoint(r1.x - r2.x, r1.y - r2.y);
+        const parent = getParentElementIncludingSlots(node, iframes);
+        const r2 = parent.getBoundingClientRect();
+        const zX = parent.offsetWidth / r2.width ;
+        const zY = parent.offsetHeight / r2.height;
+        return new DOMPoint((r1.x - r2.x) * zX, (r1.y - r2.y) * zY);
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Element) {
         if (node instanceof (node.ownerDocument.defaultView ?? window).SVGGraphicsElement && !(node instanceof (node.ownerDocument.defaultView ?? window).SVGSVGElement)) {
             const bb = node.getBBox();
