@@ -154,9 +154,9 @@ export function getBoxQuads(node, options) {
             return q;
     }
 
+    /** @type {DOMMatrix} */
     let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options.iframes);
     let { width, height } = getElementSize(node, originalElementAndAllParentsMultipliedMatrix);
-    /** @type {DOMMatrix} */
 
     let arr = [{ x: 0, y: 0 }, { x: width, y: 0 }, { x: width, y: height }, { x: 0, y: height }];
     /** @type { [DOMPoint, DOMPoint, DOMPoint, DOMPoint] } */
@@ -263,6 +263,8 @@ function getElementOffsetsInContainer(node, iframes) {
         const range = document.createRange();
         range.selectNodeContents(node);
         const r1 = range.getBoundingClientRect();
+        /** @type {HTMLElement} */
+        //@ts-ignore
         const parent = getParentElementIncludingSlots(node, iframes);
         const r2 = parent.getBoundingClientRect();
         const zX = parent.offsetWidth / r2.width ;
@@ -479,14 +481,16 @@ function getElementPerspectiveTransform(element, iframes) {
             let p = parseFloat(s.perspective);
             m.m34 = -1.0 / p;
             //https://drafts.csswg.org/css-transforms-2/#PerspectiveDefined
-            const origin = s.perspectiveOrigin.split(' ');
-            const originX = parseFloat(origin[0]) - element.offsetLeft;
-            const originY = parseFloat(origin[1]) - element.offsetTop;
+            if (s.perspectiveOrigin) {
+                const origin = s.perspectiveOrigin.split(' ');
+                const originX = parseFloat(origin[0]) - element.offsetLeft;
+                const originY = parseFloat(origin[1]) - element.offsetTop;
 
-            const mOri = new DOMMatrix().translate(originX, originY);
-            const mOriInv = new DOMMatrix().translate(-originX, -originY);
+                const mOri = new DOMMatrix().translate(originX, originY);
+                const mOriInv = new DOMMatrix().translate(-originX, -originY);
 
-            return mOri.multiply(m.multiply(mOriInv));
+                return mOri.multiply(m.multiply(mOriInv));
+            }
         }
     }
     return null;
