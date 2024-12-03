@@ -280,10 +280,11 @@ function getElementOffsetsInContainer(node, iframes) {
             return new DOMPoint(parseFloat(cs.left), parseFloat(cs.top));
         }
 
-        const m = getResultingTransformationBetweenElementAndAllAncestors(node.parentNode, document.body, iframes);
+        const par = getParentElementIncludingSlots(node, iframes);
+        const m = getResultingTransformationBetweenElementAndAllAncestors(par, document.body, iframes);
         const r1 = node.getBoundingClientRect();
         const r1t = m.inverse().transformPoint(r1);
-        const r2 = getParentElementIncludingSlots(node, iframes).getBoundingClientRect();
+        const r2 = par.getBoundingClientRect();
         const r2t = m.inverse().transformPoint(r2);
 
         return new DOMPoint(r1t.x - r2t.x, r1t.y - r2t.y);
