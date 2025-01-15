@@ -682,8 +682,6 @@
             "justify",
             "justify-all",
             "match-parent",
-            "\".\"",
-            "\".\" center",
             "inherit",
             "initial",
             "revert",

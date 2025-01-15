@@ -179,7 +179,9 @@ export class ScriptSystem {
       case 'SetElementProperty': {
         //@ts-ignore
         command = ScriptUpgrades.upgradeSetElementProperty(command);
-        const name = await this.getValue(command.name, context);
+        let name = await this.getValue(command.name, context);
+        if (name === '')
+          name = null;
         const value = await this.getValue(command.value, context);
         const parentIndex = await this.getValue(command.parentIndex ?? 0, context);
         const target = await this.getValue(command.target ?? 'property', context);

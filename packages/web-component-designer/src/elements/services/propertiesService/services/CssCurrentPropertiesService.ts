@@ -9,6 +9,7 @@ import { NodeType } from '../../../item/NodeType.js';
 import cssProperties from "./CssProperties.json" with { type: 'json' };
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
+import { PropertiesHelper } from './PropertiesHelper.js';
 
 const localName = '&lt;local&gt;';
 
@@ -53,16 +54,19 @@ export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
 
     let arr = styles.map(x => ({
       name: (x.selector ?? localName) + (x.specificity ? ' (' + x.specificity.A + '-' + x.specificity.B + '-' + x.specificity.C + ')' : ''), description: x.stylesheetName ?? '', properties: [
-        ...x.declarations.map(y => ({
-          name: y.name,
-          renamable: true,
-          type: cssProperties[y.name]?.type ?? 'string',
-          values: cssProperties[y.name]?.values ? [...cssProperties[y.name]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
-          service: this,
-          propertyType: PropertyType.cssValue,
-          styleRule: x,
-          styleDeclaration: y
-        })),
+        ...x.declarations.map(y => {
+          const camelName = PropertiesHelper.dashToCamelCase(y.name);
+          return {
+            name: y.name,
+            renamable: true,
+            type: cssProperties[camelName]?.type ?? 'string',
+            values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
+            service: this,
+            propertyType: PropertyType.cssValue,
+            styleRule: x,
+            styleDeclaration: y
+          }
+        }),
         { name: '', type: 'addNew', service: this, propertyType: PropertyType.complex, styleRule: x }
       ]
     }));

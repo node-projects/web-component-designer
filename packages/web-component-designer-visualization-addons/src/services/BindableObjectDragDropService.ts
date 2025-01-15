@@ -9,8 +9,8 @@ export class BindableObjectDragDropService implements IBindableObjectDragDropSer
     this._visualizationHandler = visualizationHandler;
   }
 
-  private _bindingsHelper: BindingsHelper;
-  private _visualizationHandler: VisualizationHandler
+  protected _bindingsHelper: BindingsHelper;
+  protected _visualizationHandler: VisualizationHandler
 
   rectMap = new Map<Element, SVGRectElement>();
   rect: SVGRectElement;

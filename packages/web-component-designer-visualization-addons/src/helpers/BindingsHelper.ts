@@ -226,6 +226,7 @@ export class BindingsHelper {
 
   serializeBinding(element: Element, targetName: string, binding: VisualizationBinding): [name: string, value: string] {
     let bindingCopy = { ...binding };
+    delete bindingCopy.type;
     if (!binding.twoWay) {
       delete bindingCopy.events;
       delete bindingCopy.expressionTwoWay;
@@ -249,7 +250,7 @@ export class BindingsHelper {
     if (!needsJson && binding.target == BindingTarget.property &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       if (targetName == 'textContent')
@@ -264,7 +265,7 @@ export class BindingsHelper {
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       if (targetName == 'textContent')
@@ -277,7 +278,7 @@ export class BindingsHelper {
     if (!needsJson && binding.target == BindingTarget.attribute &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
@@ -288,7 +289,7 @@ export class BindingsHelper {
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
@@ -297,7 +298,7 @@ export class BindingsHelper {
     if (!needsJson && binding.target == BindingTarget.class &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
@@ -308,7 +309,7 @@ export class BindingsHelper {
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
@@ -317,7 +318,7 @@ export class BindingsHelper {
     if (!needsJson && binding.target == BindingTarget.css &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
@@ -329,7 +330,7 @@ export class BindingsHelper {
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
@@ -338,7 +339,7 @@ export class BindingsHelper {
     if (!needsJson && binding.target == BindingTarget.cssvar &&
       !binding.expression && !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
@@ -349,7 +350,7 @@ export class BindingsHelper {
       binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
       !binding.expressionTwoWay &&
       binding.converter == null &&
-      !binding.type &&
+      //!binding.type &&
       !binding.historic &&
       !binding.writeBackSignal) {
       return [bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
@@ -367,9 +368,9 @@ export class BindingsHelper {
     if (binding.twoWay === null || binding.twoWay === false) {
       delete bindingCopy.twoWay;
     }
-    if (binding.type === null || binding.type === '') {
+    /*if (binding.type === null || binding.type === '') {
       delete bindingCopy.type;
-    }
+    }*/
     delete bindingCopy.target;
 
     if (!binding.historic) {
