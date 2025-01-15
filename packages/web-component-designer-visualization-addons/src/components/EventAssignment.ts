@@ -242,7 +242,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                     action: () => { copyTextToClipboard(this.selectedItems[0].getAttribute('@' + eventItem.name)); }
                 }, {
                     title: 'paste',
-                    action: async () => { this.selectedItems[0].setAttribute('@' + eventItem.name, await getTextFromClipboard()); }
+                    action: async () => { this.selectedItems[0].setAttribute('@' + eventItem.name, await getTextFromClipboard()); this._bindingsRefresh(); }
                 }];
             ContextMenu.show(ctxMenu, e);
         } else
