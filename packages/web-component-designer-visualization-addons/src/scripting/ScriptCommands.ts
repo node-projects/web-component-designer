@@ -7,7 +7,7 @@ export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog |
   Javascript | SetElementProperty | Delay | SwitchLanguage |
   Login | Logout |
   SubscribeSignal | UnsubscribeSignal |
-  WriteSignalsInGroup | ClearSiganlsInGroup |
+  WriteSignalsInGroup | ClearSignalsInGroup |
   RunScript |
   CopySignalValuesFromFolder | ShowMessageBox |
   ExportSignalValuesAsJson | ImportSignalValuesFromJson;
@@ -359,8 +359,8 @@ export interface WriteSignalsInGroup {
   additionalData?: string;
 }
 
-export interface ClearSiganlsInGroup {
-  type: 'ClearSiganlsInGroup';
+export interface ClearSignalsInGroup {
+  type: 'ClearSignalsInGroup';
   /**
   * Name of the Group
   */

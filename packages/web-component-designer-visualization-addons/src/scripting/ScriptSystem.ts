@@ -235,7 +235,7 @@ export class ScriptSystem {
         break;
       }
 
-      case 'ClearSiganlsInGroup': {
+      case 'ClearSignalsInGroup': {
         const group = await this.getValue(command.group, context);
         this._visualizationHandler.clearSignalsInGroup(group);
         break;
