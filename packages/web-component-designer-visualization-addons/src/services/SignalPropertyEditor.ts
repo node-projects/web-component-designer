@@ -4,19 +4,20 @@ import { VisualizationShell } from "../interfaces/VisualizationShell.js";
 export class SignalPropertyEditor extends BasePropertyEditor<HTMLElement> {
 
   _ip: HTMLInputElement;
+  protected _container: HTMLDivElement;
 
   constructor(property: IProperty, shell: VisualizationShell) {
     super(property);
 
-    let cnt = document.createElement('div');
-    cnt.style.display = 'flex';
+    this._container = document.createElement('div');
+    this._container.style.display = 'flex';
     this._ip = document.createElement('input');
     this._ip.onchange = (e) => this._valueChanged(this._ip.value);
     this._ip.onfocus = (e) => {
       this._ip.selectionStart = 0;
       this._ip.selectionEnd = this._ip.value?.length;
     }
-    cnt.appendChild(this._ip);
+    this._container.appendChild(this._ip);
     let btn = document.createElement('button');
     btn.textContent = '...';
     btn.onclick = async () => {
@@ -35,8 +36,8 @@ export class SignalPropertyEditor extends BasePropertyEditor<HTMLElement> {
         this._valueChanged(this._ip.value);
       }
     }
-    cnt.appendChild(btn);
-    this.element = cnt;
+    this._container.appendChild(btn);
+    this.element = this._container;
   }
 
   refreshValue(valueType: ValueType, value: any) {

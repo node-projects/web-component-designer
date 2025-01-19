@@ -15,12 +15,12 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                         <div class="row">
                             <span style="cursor: pointer;" title="to use multiple objects, seprate them with semicolon (;). access signal objects in properties via ?propertyName, access the propertyValue via ??propertyName. Bind to signal configurations via $objectId. You could also use signals inside of a Signal Name via {name}">objects</span>
                         </div>
-                        <div style="display:flex;align-items: flex-end;">
-                            <input id="objnm" class="row" value="{{?this.objectNames::change}}" style="flex-grow: 1;">
+                        <div id="groupObjectName" style="display:flex;align-items: flex-end;">
+                            <input id="objectName" class="row" value="{{?this.objectNames::change}}" style="flex-grow: 1;">
                             <button @click="_clear" style="height: 22px">X</button>
                             <button @click="_select" style="height: 22px">...</button>
                         </div>
-                        <div class="row">
+                        <div id="groupObjectType" class="row">
                             <label style="white-space: nowrap; margin-right: 4px;" title="if set, the value is converted to the type before binding is applied">type :</label>
                             <select class="row" value="{{?this.objectValueType}}">
                                 <option selected value="">ignore</option>
@@ -29,13 +29,13 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                                 <option value="string">string</string>
                             </select>
                         </div>
-                        <div class="row">
+                        <div id="groupBindingMode" class="row">
                             <input type="checkbox" disabled="[[!this.twoWayPossible]]" checked="{{this.twoWay::change}}" @change="_refresh">
                             <span>two way binding</span>
                             <span css:display="[[this.twoWay ? 'inline' : 'none']]" style="margin-left: 15px">events:&nbsp;</span>
                             <input css:display="[[this.twoWay ? 'inline-block' : 'none']]" title="to use multiple events, seprate them with semicolon (;)" class="row" value="{{?this.events::change}}" style="flex-grow: 1;">
                         </div>
-                        <div class="row" style="position: relative">
+                        <div id="groupinvert" class="row" style="position: relative">
                             <input type="checkbox" checked="{{this.invert::change}}">
                             <span>invert logic</span>
                             <button css:border="[[this.historic ? 'solid lime 5px' : 'none']]" style="position: absolute; right: 1px; top: 5px; padding: 10px;" @click="showHistoric">historic</button>
@@ -192,20 +192,20 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   public converters: { key: string, value: any }[] = [];
   public objectValueType: string;
 
-  private _property: IProperty;
-  private _binding: IBinding & { converter: Record<string, any> };
-  private _bindingTarget: BindingTarget;
-  private _serviceContainer: ServiceContainer;
-  private _instanceServiceContainer: InstanceServiceContainer;
-  private _shell: VisualizationShell
-  private _activeRow: number = -1;
-  private _objNmInput: HTMLInputElement;
+  protected _property: IProperty;
+  protected _binding: IBinding & { converter: Record<string, any> };
+  protected _bindingTarget: BindingTarget;
+  protected _serviceContainer: ServiceContainer;
+  protected _instanceServiceContainer: InstanceServiceContainer;
+  protected _shell: VisualizationShell
+  protected _activeRow: number = -1;
+  protected _objNmInput: HTMLInputElement;
 
   constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, shell: VisualizationShell) {
     super();
     super._restoreCachedInititalValues();
 
-    this._objNmInput = this._getDomElement<HTMLInputElement>('objnm');
+    this._objNmInput = this._getDomElement<HTMLInputElement>('objectName');
 
     this._property = property;
     this._binding = binding;
