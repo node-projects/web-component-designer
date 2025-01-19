@@ -6,6 +6,8 @@ import { PropertiesHelper } from "@node-projects/web-component-designer/dist/ele
 
 //;,[ are not allowed in bindings, so they could be used for a short form...
 
+export type SpecialValueHandler = { valueProvider: (propertyName: string) => any, valueChangedCallbacks: Map<string, (() => void)[]> }
+
 export const bindingPrefixProperty = 'bind-prop:';
 export const bindingPrefixAttribute = 'bind-attr:';
 export const bindingPrefixClass = 'bind-class:';
@@ -447,7 +449,7 @@ export class BindingsHelper {
     }
   }
 
-  applyAllBindings(rootElement: ParentNode, relativeSignalPath: string, root: HTMLElement): (() => void)[] {
+  applyAllBindings(rootElement: ParentNode, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler): (() => void)[] {
     let retVal: (() => void)[] = [];
     const tw = document.createTreeWalker(rootElement, NodeFilter.SHOW_ELEMENT);
     let e: Element;
@@ -455,7 +457,7 @@ export class BindingsHelper {
       const bindings = this.getBindings(e);
       for (let b of bindings) {
         try {
-          let applied = this.applyBinding(e, b, relativeSignalPath, root);
+          let applied = this.applyBinding(e, b, relativeSignalPath, root, specialValueHandler);
           retVal.push(applied);
 
           if (b[1].maybeLitElement && e.localName.includes('-') && !customElements.get(e.localName)) {
@@ -465,7 +467,7 @@ export class BindingsHelper {
               if (isLit(el)) {
                 applied();
                 bnd[1].events = bnd[1].litEventNames;
-                retVal.push(this.applyBinding(el, bnd, relativeSignalPath, root));
+                retVal.push(this.applyBinding(el, bnd, relativeSignalPath, root, specialValueHandler));
               }
             })
           }
@@ -506,7 +508,7 @@ export class BindingsHelper {
     return [cssFromString(newStyle), unsub];
   }
 
-  parseCssBinding(value: string, element: Element, relativeSignalPath: string, root: HTMLElement): [name: string, unsub: (() => void)[]] {
+  parseCssBinding(value: string, element: Element, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler): [name: string, unsub: (() => void)[]] {
     value = value.trim();
     let res = '';
     let tmp = '';
@@ -531,7 +533,7 @@ export class BindingsHelper {
           if (binding.startsWith('{')) {
             bnd = JSON.parse(binding);
           }
-          unsub.push(this.applyBinding(element, bnd, relativeSignalPath, root));
+          unsub.push(this.applyBinding(element, bnd, relativeSignalPath, root, specialValueHandler));
           res += 'var(' + varName + ')';
           inBind = false;
           binding = '';
@@ -561,7 +563,18 @@ export class BindingsHelper {
     return [res + tmp, unsub];
   }
 
-  applyBinding(element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement): () => void {
+  /**
+   * ? = bind to signals in properties
+   * ?? = binding to a property
+   * $ = bind to a signal configuration
+   * § = bind to a special value 
+   * @param element 
+   * @param binding 
+   * @param relativeSignalPath 
+   * @param root 
+   * @returns 
+   */
+  applyBinding(element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler): () => void {
     let unsubscribeList: [id: string, ((id: string, value: any) => void), any][] = [];
     let cleanupCalls: (() => void)[];
     const cleanUp = () => {
@@ -599,7 +612,7 @@ export class BindingsHelper {
             }
             let evtCallback = () => {
               cleanUp();
-              this.applyBinding(element, binding, relativeSignalPath, root);
+              this.applyBinding(element, binding, relativeSignalPath, root, specialValueHandler);
             };
             const evtNm = getChangeEventName(element, PropertiesHelper.camelToDashCase(s));
             root.addEventListener(evtNm, evtCallback);
@@ -617,7 +630,7 @@ export class BindingsHelper {
     let valuesObject = new Array(signals.length);
     for (let i = 0; i < signals.length; i++) {
       const s = signals[i];
-      if (s[0] == '?') {
+      if (s[0] === '?') {
         if (root) {
           const nm = s.substring(1);
           let evtCallback = () => {
@@ -641,13 +654,28 @@ export class BindingsHelper {
             this.addTwoWayBinding(binding, element, v => root[nm] = v);
           }
         }
-      } else if (s[0] == '$') {
+      } else if (s[0] === '$') {
         let mS = s.substring(1);
         if (mS[0] === '.') {
           mS = this._visualizationHandler.getNormalizedSignalName(mS, relativeSignalPath, element);
         }
         this._visualizationHandler.getObject(mS).then(x => {
           this.handleValueChanged(element, binding, x, valuesObject, i, signalVars, true, relativeSignalPath);
+        });
+      } else if (s[0] === '§') {
+        const mS = s.substring(1);
+        const value = specialValueHandler.valueProvider(mS)
+        this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
+        if (!specialValueHandler.valueChangedCallbacks)
+          specialValueHandler.valueChangedCallbacks = new Map();
+        let changeList = specialValueHandler.valueChangedCallbacks.get(mS);
+        if (changeList == null) {
+          changeList = [];
+          specialValueHandler.valueChangedCallbacks.set(mS, changeList);
+        }
+        changeList.push(() => {
+          const value = specialValueHandler.valueProvider(mS)
+          this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
         });
       } else {
         if (s.includes('{')) {

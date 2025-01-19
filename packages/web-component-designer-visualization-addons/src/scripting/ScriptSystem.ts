@@ -410,7 +410,7 @@ export class ScriptSystem {
     return { root, event, element, parameters, relativeSignalsPath };
   }
 
-  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, visualizationHandler: VisualizationHandler, contextCreator?: (root: HTMLElement, event: Event, element: Element, parameters: Record<string, any>, relativeSignalsPath: string) => any, assignExternalScript?: (element: Element, event: string, scriptData: any) => void): Promise<VisualisationElementScript> {
+  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, visualizationHandler: VisualizationHandler, contextCreator?: (root: HTMLElement, event: Event, element: Element, parameters: Record<string, any>, relativeSignalsPath: string) => any, assignExternalScript?: (element: Element, event: string, scriptData: any) => void, runInitalization?: (jsObject: VisualisationElementScript) => void): Promise<VisualisationElementScript> {
     const allElements = shadowRoot.querySelectorAll('*');
     contextCreator ??= this.createScriptContext;
     let jsObject: VisualisationElementScript = null;
@@ -418,8 +418,12 @@ export class ScriptSystem {
       try {
         const scriptUrl = URL.createObjectURL(new Blob([javascriptCode], { type: 'application/javascript' }));
         jsObject = await import(scriptUrl);
-        if (jsObject.init) {
-          jsObject.init(instance);
+        if (runInitalization)
+          runInitalization(jsObject);
+        else {
+          if (jsObject.init) {
+            jsObject.init(instance, shadowRoot);
+          }
         }
       } catch (err) {
         console.error('error parsing javascript - ' + source, err)

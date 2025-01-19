@@ -167,7 +167,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
             border: 1px lightgray solid;
         }`;
 
-  static readonly is = 'node-projects-visualization-bindings-editor';
+  static readonly is: string = 'node-projects-visualization-bindings-editor';
 
   static readonly properties = {
     twoWayPossible: Boolean,
