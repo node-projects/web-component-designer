@@ -10,6 +10,7 @@ import cssProperties from "./CssProperties.json" with { type: 'json' };
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
+import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 
 const localName = '&lt;local&gt;';
 
@@ -51,6 +52,16 @@ export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
         return 0;
       return 1;
     });
+
+    const bindings = AbstractPropertiesService.getOrBuildCachedBindings(designItem);
+    let localStyles = styles.find(x => x.selector === null)
+    for (const b of bindings) {
+      if (b.target === BindingTarget.css) {
+        if (!localStyles.declarations.find(x => x.name == b.targetName)) {
+          localStyles.declarations.push({ name: b.targetName, value: null, important: false, parent: null });
+        }
+      }
+    }
 
     let arr = styles.map(x => ({
       name: (x.selector ?? localName) + (x.specificity ? ' (' + x.specificity.A + '-' + x.specificity.B + '-' + x.specificity.C + ')' : ''), description: x.stylesheetName ?? '', properties: [
