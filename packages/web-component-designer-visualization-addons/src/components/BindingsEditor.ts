@@ -1,7 +1,6 @@
 import { BaseCustomWebComponentConstructorAppend, html, css } from '@node-projects/base-custom-webcomponent';
 import { BindingMode, BindingTarget, IBinding, InstanceServiceContainer, IProperty, ServiceContainer } from '@node-projects/web-component-designer';
 import { CodeViewMonaco } from '@node-projects/web-component-designer-codeview-monaco';
-import { BindableObjectsBrowser } from "@node-projects/web-component-designer-widgets-wunderbaum";
 import { VisualizationShell } from '../interfaces/VisualizationShell.js';
 import { BindingsEditorHistoric } from './BindingsEditorHistoric.js';
 import { VisualizationBinding } from '../interfaces/VisualizationBinding.js';
@@ -286,7 +285,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   }
 
   async _select() {
-    let b = new BindableObjectsBrowser();
+    let b = this._shell.createBindableObjectBrowser();
     b.initialize(this._serviceContainer, this._instanceServiceContainer, 'binding');
     b.title = 'select signal...';
     const abortController = new AbortController();

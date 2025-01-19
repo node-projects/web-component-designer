@@ -1,5 +1,4 @@
 import { IProperty, PropertyGrid } from '@node-projects/propertygrid.webcomponent'
-import { BindableObjectsBrowser } from '@node-projects/web-component-designer-widgets-wunderbaum';
 import { WbRenderEventType } from "types";
 import { VisualizationHandler } from '../interfaces/VisualizationHandler';
 import { VisualizationShell } from '../interfaces/VisualizationShell';
@@ -58,7 +57,7 @@ export class VisualizationPropertyGrid extends PropertyGrid {
                 let btn = document.createElement('button');
                 btn.textContent = '...';
                 btn.onclick = async () => {
-                    let b = new BindableObjectsBrowser();
+                    let b = this.visualizationShell.createBindableObjectBrowser();
                     b.initialize(this.serviceContainer, this.instanceServiceContainer, this.bindableObjectsTarget);
                     b.title = 'select signal...';
                     const abortController = new AbortController();

@@ -1,5 +1,4 @@
 import { BasePropertyEditor, IProperty, ValueType } from "@node-projects/web-component-designer";
-import { BindableObjectsBrowser } from "@node-projects/web-component-designer-widgets-wunderbaum";
 import { VisualizationShell } from "../interfaces/VisualizationShell.js";
 
 export class SignalPropertyEditor extends BasePropertyEditor<HTMLElement> {
@@ -21,7 +20,7 @@ export class SignalPropertyEditor extends BasePropertyEditor<HTMLElement> {
     let btn = document.createElement('button');
     btn.textContent = '...';
     btn.onclick = async () => {
-      let b = new BindableObjectsBrowser();
+      let b = shell.createBindableObjectBrowser();
       b.initialize(this.designItems[0].serviceContainer, this.designItems[0].instanceServiceContainer, 'property');
       b.title = 'select signal...';
       const abortController = new AbortController();

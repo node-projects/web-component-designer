@@ -1,3 +1,5 @@
+import { IBindableObjectsBrowser } from "@node-projects/web-component-designer";
+
 export interface VisualizationShell {
   openConfirmation(element: HTMLElement, options:
     {
@@ -11,4 +13,6 @@ export interface VisualizationShell {
       confirmText?: string,
       cancelText?: string
     }): Promise<boolean>;
+
+  createBindableObjectBrowser: () => IBindableObjectsBrowser
 }

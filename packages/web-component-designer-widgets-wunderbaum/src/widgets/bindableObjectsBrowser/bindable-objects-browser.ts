@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, TypedEvent, css, cssFromString, html } from '@node-projects/base-custom-webcomponent';
-import { IBindableObject, IBindableObjectsService, InstanceServiceContainer, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
+import { IBindableObject, IBindableObjectsBrowser, IBindableObjectsService, InstanceServiceContainer, ServiceContainer, dragDropFormatNameBindingObject } from '@node-projects/web-component-designer';
 import { WbNodeData } from 'types';
 import { Wunderbaum } from 'wunderbaum';
 import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js';
@@ -9,7 +9,7 @@ import { BindableObjectsTarget } from '@node-projects/web-component-designer/src
 
 type serviceNode = { service: IBindableObjectsService, bindable: IBindableObject<any> }
 
-export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorAppend {
+export class BindableObjectsBrowser extends BaseCustomWebComponentConstructorAppend implements IBindableObjectsBrowser {
   private _treeDiv: HTMLDivElement;
   private _tree: Wunderbaum;
 

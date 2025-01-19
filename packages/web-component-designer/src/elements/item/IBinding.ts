@@ -14,7 +14,7 @@ export interface IBinding {
   expressionTwoWay?: string;  //a expression wich is used for write back
 
   bindableObjectNames?: string[];      //TODO: deprecate and remove
-  bindableObjects?: IBindableObject[]; //if a name is not enough, use this list
+  bindableObjects?: IBindableComplexName[]; //if a name is not enough, use this list
 
   converters?: any
 
@@ -26,7 +26,7 @@ export interface IBinding {
   service: IBindingService;
 }
 
-export interface IBindableObject {   //e.g.   aa:$uservalue.0.name
+export interface IBindableComplexName {   //e.g.   aa:$uservalue.0.name
   name?: string;                  //uservalue.0.name
   alias?: string;                 //aa
   modificator?: string;           //$
