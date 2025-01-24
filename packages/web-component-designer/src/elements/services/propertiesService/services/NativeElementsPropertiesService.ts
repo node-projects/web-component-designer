@@ -199,6 +199,41 @@ export class NativeElementsPropertiesService extends AbstractPropertiesService {
     }
   ];
 
+  private meterProperties: IProperty[] = [
+    {
+      name: "value",
+      type: "number",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
+    },
+    {
+      name: "min",
+      type: "number",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
+    }, {
+      name: "max",
+      type: "number",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
+    }, {
+      name: "low",
+      type: "number",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
+    }, {
+      name: "high",
+      type: "number",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
+    }, {
+      name: "optimum",
+      type: "number",
+      service: this,
+      propertyType: PropertyType.propertyAndAttribute
+    }
+  ];
+
   public name = "native"
 
   public override getRefreshMode(designItem: IDesignItem) {
@@ -217,6 +252,7 @@ export class NativeElementsPropertiesService extends AbstractPropertiesService {
       case 'br':
       case 'img':
       case 'iframe':
+      case 'meter':
       case 'h1':
       case 'h2':
       case 'h3':
@@ -253,6 +289,8 @@ export class NativeElementsPropertiesService extends AbstractPropertiesService {
         return this.imgProperties;
       case 'iframe':
         return this.iframeProperties;
+      case 'meter':
+        return this.meterProperties;
       case 'h1':
       case 'h2':
       case 'h3':
