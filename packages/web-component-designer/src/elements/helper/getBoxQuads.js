@@ -155,7 +155,7 @@ export function getBoxQuads(node, options) {
     }
 
     /** @type {DOMMatrix} */
-    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options.iframes);
+    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options?.iframes);
     let { width, height } = getElementSize(node, originalElementAndAllParentsMultipliedMatrix);
 
     let arr = [{ x: 0, y: 0 }, { x: width, y: 0 }, { x: width, y: height }, { x: 0, y: height }];
@@ -328,20 +328,18 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
     let lastOffsetParent = null;
     while (actualElement != ancestor && actualElement != null) {
         const parentElement = getParentElementIncludingSlots(actualElement, iframes);
-        if (!(parentElement instanceof HTMLSlotElement)) {
-            if (actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
-                if (lastOffsetParent !== actualElement.offsetParent && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement)) {
-                    const offsets = getElementOffsetsInContainer(actualElement, iframes);
-                    lastOffsetParent = actualElement.offsetParent;
-                    const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
-                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
-                }
-            } else {
+        if (actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
+            if (lastOffsetParent !== actualElement.offsetParent && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement)) {
                 const offsets = getElementOffsetsInContainer(actualElement, iframes);
-                lastOffsetParent = null;
+                lastOffsetParent = actualElement.offsetParent;
                 const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
                 originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
             }
+        } else {
+            const offsets = getElementOffsetsInContainer(actualElement, iframes);
+            lastOffsetParent = null;
+            const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
+            originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
         }
         if (parentElement) {
             parentElementMatrix = getElementCombinedTransform(parentElement, iframes);
