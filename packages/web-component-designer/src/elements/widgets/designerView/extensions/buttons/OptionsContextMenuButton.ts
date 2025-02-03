@@ -24,8 +24,8 @@ export class OptionsContextMenuButton implements IDesignViewConfigButtonsProvide
     return [btn];
   }
 
-  showCtxMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
-    ContextMenu.show([
+  protected prepareContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
+    const ctxMenu = [
       {
         title: 'simulate hover on hover', checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover, action: () => {
           designerCanvas.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover = !designerCanvas.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover;
@@ -40,7 +40,32 @@ export class OptionsContextMenuButton implements IDesignViewConfigButtonsProvide
         title: 'pause animations', checked: designerCanvas.pauseAnimations, action: () => {
           designerCanvas.pauseAnimations = !designerCanvas.pauseAnimations;
         }
-      }
-    ], event);
+      },
+      {
+        title: 'hide overflowing content', checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent, action: () => {
+          designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent = !designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent;
+          if (designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent) {
+            for (let c of designerCanvas.rootDesignItem.children(true)) {
+              if (c.element instanceof HTMLElement) {
+                c.element.style.overflow = 'hidden';
+                c.element.style.whiteSpace = 'nowrap';
+              }
+            }
+          } else {
+            for (let c of designerCanvas.rootDesignItem.children(true)) {
+              if (c.element instanceof HTMLElement) {
+                c.element.style.overflow = c.hasStyle('overflow') ? c.getStyle('overflow') : '';
+                c.element.style.whiteSpace = c.hasStyle('white-space') ? c.getStyle('white-space') : '';
+              }
+            }
+          }
+        }
+      },
+    ]
+    return ctxMenu;
+  }
+
+  showCtxMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
+    ContextMenu.show(this.prepareContextMenu(event, designerCanvas), event);
   }
 }
