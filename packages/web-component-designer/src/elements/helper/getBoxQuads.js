@@ -254,11 +254,12 @@ export function getElementSize(node, matrix) {
 
 /**
 * @param {Node} node
+* @param {boolean} includeScroll
 * @param {HTMLIFrameElement[]} iframes
 */
-function getElementOffsetsInContainer(node, iframes) {
+function getElementOffsetsInContainer(node, includeScroll, iframes) {
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement) {
-        return new DOMPoint(node.offsetLeft - node.scrollLeft, node.offsetTop - node.scrollTop);
+        return new DOMPoint(node.offsetLeft - (includeScroll ? node.scrollLeft : 0), node.offsetTop - (includeScroll ? node.scrollTop : 0));
     } else if (node instanceof (node.ownerDocument.defaultView ?? window).Text) {
         const range = document.createRange();
         range.selectNodeContents(node);
@@ -330,13 +331,13 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
         const parentElement = getParentElementIncludingSlots(actualElement, iframes);
         if (actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
             if (lastOffsetParent !== actualElement.offsetParent && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement)) {
-                const offsets = getElementOffsetsInContainer(actualElement, iframes);
+                const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                 lastOffsetParent = actualElement.offsetParent;
                 const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
                 originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
             }
         } else {
-            const offsets = getElementOffsetsInContainer(actualElement, iframes);
+            const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
             lastOffsetParent = null;
             const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
             originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
