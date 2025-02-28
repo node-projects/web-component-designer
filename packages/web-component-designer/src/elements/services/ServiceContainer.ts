@@ -47,6 +47,7 @@ import { IEventsService } from './eventsService/IEventsService.js';
 import { IPropertyGridDragDropService } from './dragDropService/IPropertyGridDragDropService.js';
 import { IConfigUiService } from './configUiService/IConfigUiService.js';
 import { IRefactorService } from './refactorService/IRefactorService.js';
+import { InstanceServiceContainer } from './InstanceServiceContainer.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -108,6 +109,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
       }
     }
   }
+
+  public readonly instanceServiceContainerCreatedCallbacks: ((instanceServiceContainer: InstanceServiceContainer) => void)[] = [];
 
   public readonly designViewConfigButtons: IDesignViewConfigButtonsProvider[] = [];
 
