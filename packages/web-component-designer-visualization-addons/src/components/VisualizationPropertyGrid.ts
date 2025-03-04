@@ -10,8 +10,8 @@ export class VisualizationPropertyGrid extends PropertyGrid {
     public instanceServiceContainer: InstanceServiceContainer;
     public visualizationHandler: VisualizationHandler;
     public visualizationShell: VisualizationShell;
-    public bindableObjectsTarget : BindableObjectsTarget = 'property';
-    
+    public bindableObjectsTarget: BindableObjectsTarget = 'property';
+
     constructor() {
         super();
     }
@@ -29,7 +29,15 @@ export class VisualizationPropertyGrid extends PropertyGrid {
             case 'screen': {
                 let editor = document.createElement('select');
                 editor.style.width = '100%';
+
+                const akop = document.createElement('option');
+                akop.value = currentValue ?? '';
+                akop.innerText = currentValue ?? '';
+                editor.appendChild(akop);
+
                 for (let v of await this.visualizationHandler.getAllNames('screen')) {
+                    if (v == currentValue)
+                        continue;
                     const op = document.createElement('option');
                     op.value = v;
                     op.innerText = v;

@@ -209,6 +209,16 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
         }
       },
       {
+        title: 'edit string',
+        action: async () => {
+          const v = prompt("enter value:");
+          if (v) {
+            this._propertygrid.setPropertyValue(data.propertyPath, v);
+            this._propertygrid.refresh();
+          }
+        }
+      },
+      {
         title: 'remove complex value',
         action: async () => {
           this._propertygrid.setPropertyValue(data.propertyPath, undefined);
