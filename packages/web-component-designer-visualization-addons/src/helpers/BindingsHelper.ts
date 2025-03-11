@@ -77,9 +77,16 @@ export class IndirectSignal {
       if (nm[0] === '?' && nm[1] === '?') {
         this.handleValueChanged(root[nm.substring(2)], i);
         continue;
+      }
+      else if (nm[0] === '#' && nm[1] === '#') {
+        this.handleValueChanged(element[nm.substring(2)], i);
+        continue;
       } else if (nm[0] === '?') {
         nm = root[nm.substring(1)];
+      } else if (nm[0] === '#') {
+        nm = element[nm.substring(1)];
       }
+
       let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
       this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(nm, cb)]);
     }
@@ -622,6 +629,27 @@ export class BindingsHelper {
           }
         }
       }
+      else if (sng[0] === '#') { //access object path in target element        
+        let s = sng.substring(1);
+        if (s[0] == '#') {
+          signals[i] = s;
+        } else {
+          signals[i] = root[s];
+          if (s[0] === '$') {
+            s = s.substring(1);
+            signals[i] = '$' + root[s];
+          }
+          let evtCallback = () => {
+            cleanUp();
+            this.applyBinding(element, binding, relativeSignalPath, root, specialValueHandler);
+          };
+          const evtNm = getChangeEventName(element, PropertiesHelper.camelToDashCase(s));
+          root.addEventListener(evtNm, evtCallback);
+          if (!cleanupCalls)
+            cleanupCalls = [];
+          cleanupCalls.push(() => root.removeEventListener(evtNm, evtCallback));
+        }
+      }
       if (sng[0] === '.') {
         signals[i] = this._visualizationHandler.getNormalizedSignalName(sng, relativeSignalPath, element);
       }
@@ -653,6 +681,28 @@ export class BindingsHelper {
           if (binding[1].twoWay && i == 0) {
             this.addTwoWayBinding(binding, element, v => root[nm] = v);
           }
+        }
+      } else if (s[0] === '#') { //Binding to element properties
+        const nm = s.substring(1);
+        let evtCallback = () => {
+          let disableValueChanged = false;
+          if (!disableValueChanged) {
+            disableValueChanged = true;
+            this.handleValueChanged(element, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
+            disableValueChanged = false;
+          }
+        };
+        element.addEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback);
+        if (!cleanupCalls)
+          cleanupCalls = [];
+        cleanupCalls.push(() => element.removeEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback));
+        try {
+          this.handleValueChanged(element, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
+        } catch (err) {
+          console.error(err);
+        }
+        if (binding[1].twoWay && i == 0) {
+          this.addTwoWayBinding(binding, element, v => element[nm] = v);
         }
       } else if (s[0] === '$') {
         let mS = s.substring(1);
