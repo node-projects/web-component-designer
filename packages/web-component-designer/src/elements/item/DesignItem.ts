@@ -18,9 +18,9 @@ import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
 import { TextContentChangeAction } from '../services/undoService/transactionItems/TextContentChangeAction.js';
 
-const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time';
-const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time';
-const lockAtDesignTimeAttributeName = 'node-projects-lock-at-design-time';
+export const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time';
+export const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time';
+export const lockAtDesignTimeAttributeName = 'node-projects-lock-at-design-time';
 
 export const forceHoverAttributeName = 'node-projects-force-hover';
 export const forceActiveAttributeName = 'node-projects-force-active';
@@ -118,36 +118,11 @@ export class DesignItem implements IDesignItem {
   }
   _withoutUndoSetAttribute(name: string, value: string) {
     this._attributes.set(name, value);
-    this._reparseSpecialAttributes(name);
+    this.serviceContainer.designItemService.handleSpecialAttributes(name, this);    
   }
   _withoutUndoRemoveAttribute(name: string) {
     this._attributes.delete(name);
-    this._reparseSpecialAttributes(name);
-  }
-
-  _reparseSpecialAttributes(name: string) {
-    if (name == hideAtDesignTimeAttributeName) {
-      if (this.element instanceof (this.node.ownerDocument.defaultView ?? window).HTMLElement || this.element instanceof (this.node.ownerDocument.defaultView ?? window).SVGElement) {
-        if (!this._attributes.has(hideAtDesignTimeAttributeName))
-          this.element.style.display = <any>this._styles.get('display') ?? "";
-        else
-          this.element.style.display = 'none';
-      }
-    } else if (name == hideAtRunTimeAttributeName) {
-      if (this.element instanceof (this.node.ownerDocument.defaultView ?? window).HTMLElement || this.element instanceof (this.node.ownerDocument.defaultView ?? window).SVGElement) {
-        if (!this._attributes.has(hideAtRunTimeAttributeName))
-          this.element.style.opacity = <any>this._styles.get('opacity') ?? "";
-        else
-          this.element.style.opacity = '0.3';
-      }
-    } else if (name == lockAtDesignTimeAttributeName) {
-      if (this.element instanceof (this.node.ownerDocument.defaultView ?? window).HTMLElement || this.element instanceof (this.node.ownerDocument.defaultView ?? window).SVGElement) {
-        if (!this._attributes.has(lockAtDesignTimeAttributeName))
-          this.element.style.pointerEvents = 'auto';
-        else
-          this.element.style.pointerEvents = 'none';
-      }
-    }
+    this.serviceContainer.designItemService.handleSpecialAttributes(name, this);
   }
 
   private _styles: Map<string, string>
@@ -362,7 +337,7 @@ export class DesignItem implements IDesignItem {
   }
 
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
-    let designItem = new DesignItem(node, node, serviceContainer, instanceServiceContainer);
+    let designItem = <DesignItem>serviceContainer.designItemService.createDesignItem(node, node, serviceContainer, instanceServiceContainer);
 
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLTemplateElement && node.getAttribute('shadowrootmode') == 'open') {
       try {
@@ -506,10 +481,7 @@ export class DesignItem implements IDesignItem {
     let designItem: IDesignItem = DesignItem._designItemMap.get(node);
     if (!designItem) {
       let dis = serviceContainer.designItemService;
-      if (dis)
-        designItem = dis.createDesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
-      else
-        designItem = new DesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
+      designItem = dis.createDesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
     }
     return designItem;
   }
