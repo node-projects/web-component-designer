@@ -2,10 +2,10 @@ import { DesignItem } from "../../item/DesignItem.js";
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { ServiceContainer } from "../ServiceContainer.js";
-import { IDesignItemService } from "./IDesignItemService.js";
+import { DesignItemService } from "./DesignItemService.js";
 
-export class BaseCustomWebcomponentDesignItemService implements IDesignItemService {
-  createDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
+export class BaseCustomWebcomponentDesignItemService extends DesignItemService {
+  override createDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
     const di = new DesignItem(node, parsedNode, serviceContainer, instanceServiceContainer);
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLTemplateElement) {
       requestAnimationFrame(() => {
