@@ -118,7 +118,7 @@ export class DesignItem implements IDesignItem {
   }
   _withoutUndoSetAttribute(name: string, value: string) {
     this._attributes.set(name, value);
-    this.serviceContainer.designItemService.handleSpecialAttributes(name, this);    
+    this.serviceContainer.designItemService.handleSpecialAttributes(name, this);
   }
   _withoutUndoRemoveAttribute(name: string) {
     this._attributes.delete(name);
@@ -364,10 +364,7 @@ export class DesignItem implements IDesignItem {
             designItem._styles.set(<string>e.name, e.value);
           }
         }
-        if (!designItem.lockAtDesignTime) {
-          requestAnimationFrame(() => node.style.pointerEvents = 'auto');
-        } else
-          node.style.pointerEvents = 'none';
+        serviceContainer.designItemService.handleSpecialAttributes(lockAtDesignTimeAttributeName, designItem);
       }
 
       (<HTMLElement>node).draggable = false; //even if it should be true, for better designer exp.
