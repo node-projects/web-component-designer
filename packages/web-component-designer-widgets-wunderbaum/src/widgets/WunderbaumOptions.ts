@@ -1,4 +1,5 @@
 import { css } from "@node-projects/base-custom-webcomponent";
+import { WunderbaumOptions } from "wb_options";
 
 export const defaultStyle = css`
 i.wb-icon > span.wb-badge {
@@ -19,10 +20,11 @@ div.wunderbaum span.wb-node i.wb-expander {
   background-position-y: 5px;
 }`;
 
-export const defaultOptions = {
+export const defaultOptions: WunderbaumOptions = {
   element: null,
   debugLevel: 0,
   scrollIntoViewOnExpandClick: false,
+  //@ts-ignore
   iconMap: {
     expanderCollapsed: new URL("../../assets/images/expander.svg", import.meta.url).toString(),
     expanderExpanded: new URL("../../assets/images/expanderClose.svg", import.meta.url).toString(),
@@ -36,6 +38,7 @@ export const defaultOptions = {
   source: [],
   header: false,
   iconBadge: (e) => {
+    //@ts-ignore
     const node = e.node;
     if (node.expanded || !node.children || !node.children.length) {
       return null;
