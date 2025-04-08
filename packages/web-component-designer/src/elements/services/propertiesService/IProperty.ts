@@ -19,5 +19,6 @@ export interface IProperty {
   value?: any;
   service: IPropertiesService;
   defaultValue?: any;
+  example?: string;
   propertyType: PropertyType // => needed for pg-grid. for example property only types can only be used for binding, css property types could never bind two way...
 }

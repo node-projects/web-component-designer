@@ -248,7 +248,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             let label = document.createElement("label");
             label.htmlFor = p.name;
             label.textContent = p.name;
-            label.title = p.name + ' (type: ' + p.type + (p.defaultValue ? ', default: ' + p.defaultValue : '') + ', propertytype: ' + p.propertyType + ')';
+            label.title = p.description ?? (p.name + ' (type: ' + p.type + (p.defaultValue ? ', default: ' + p.defaultValue : '') + ', propertytype: ' + p.propertyType + ')');
             label.ondragleave = (e) => this._onDragLeave(e, p, label);
             label.ondragover = (e) => this._onDragOver(e, p, label);
             label.ondrop = (e) => this._onDrop(e, p, label);
