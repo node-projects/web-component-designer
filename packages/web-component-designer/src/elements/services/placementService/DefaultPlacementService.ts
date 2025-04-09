@@ -1,7 +1,6 @@
 import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
-import { IPlacementView } from '../../widgets/designerView/IPlacementView.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { combineTransforms, extractTranslationFromDOMMatrix } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from '../../helper/LayoutHelper.js';
@@ -10,6 +9,7 @@ import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionTy
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 import { NodeType } from '../../item/NodeType.js';
+import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 export function filterNonElementItems(items: IDesignItem[]) {
   const filterdPlaceItems: IDesignItem[] = [];
@@ -57,7 +57,7 @@ export class DefaultPlacementService implements IPlacementService {
     return container.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(container.element);
   }
 
-  private calculateTrack(event: MouseEvent, placementView: IPlacementView, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, item: IDesignItem): IPoint {
+  private calculateTrack(event: MouseEvent, placementView: IDesignerCanvas, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, item: IDesignItem): IPoint {
     let trackX = newPoint.x - startPoint.x;
     let trackY = newPoint.y - startPoint.y;
 
@@ -87,7 +87,7 @@ export class DefaultPlacementService implements IPlacementService {
     return { x: trackX, y: trackY };
   }
 
-  placePoint(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
+  placePoint(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {
     let trackX = newPoint.x;
     let trackY = newPoint.y;
 
@@ -114,10 +114,10 @@ export class DefaultPlacementService implements IPlacementService {
     return { x: trackX, y: trackY };
   }
 
-  startPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  startPlace(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
   }
 
-  place(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  place(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     //TODO: this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
     let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
@@ -144,6 +144,7 @@ export class DefaultPlacementService implements IPlacementService {
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', false);
   }
 
   moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
@@ -157,11 +158,12 @@ export class DefaultPlacementService implements IPlacementService {
         d.setStyle('top', parseInt((<HTMLElement>d.element).style.top) - position.y + 'px');
     }
     designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshExtensions(designItems);
+    designItems[0].instanceServiceContainer.designerCanvas?.designItemsChanged(designItems, 'place', true);
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[], mode: 'normal' | 'drop') {
-    let filterdItems = filterChildPlaceItems(items);
-    for (let i of filterdItems) {
+    let filteredItems = filterChildPlaceItems(items);
+    for (let i of filteredItems) {
       if (mode == 'drop')
         i.setStyle('position', 'absolute');
       container.insertChild(i);
@@ -173,14 +175,17 @@ export class DefaultPlacementService implements IPlacementService {
           i.setStyle('height', i.lastContainerSize.height + 'px');
       }
     }
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
   }
 
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {
+    let filteredItems = filterChildPlaceItems(items);
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
   }
 
-  finishPlace(event: MouseEvent, placementView: IPlacementView, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    let filterdItems = filterChildPlaceItems(items);
-    for (const designItem of filterdItems) {
+  finishPlace(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    let filteredItems = filterChildPlaceItems(items);
+    for (const designItem of filteredItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
       const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.getStyle('transform') ?? ''));
       (<HTMLElement>designItem.element).style.transform = designItem.getStyle('transform') ?? '';
@@ -202,5 +207,6 @@ export class DefaultPlacementService implements IPlacementService {
     for (const item of items) {
       (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
     }
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
   }
 }

@@ -3,7 +3,6 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { Snaplines } from './Snaplines.js';
-import { IPlacementView } from './IPlacementView.js';
 import { IExtensionManager } from './extensions/IExtensionManger.js';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
 import { IPoint } from '../../../interfaces/IPoint.js';
@@ -13,7 +12,7 @@ import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 
-export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler, HTMLElement {
+export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
   readonly serviceContainer: ServiceContainer;
   readonly instanceServiceContainer: InstanceServiceContainer;
   readonly containerBoundingRect: DOMRect;
@@ -29,6 +28,9 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler, HTML
 
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;
+  readonly gridSize: number;
+ 
+  designItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
 
   readonly onContentChanged: TypedEvent<void>;
 
@@ -45,7 +47,7 @@ export interface IDesignerCanvas extends IPlacementView, IUiCommandHandler, HTML
   additionalStyles: CSSStyleSheet[];
 
   ignoreEvent(event: Event);
-  
+
   initialize(serviceContainer: ServiceContainer);
 
   getNormalizedEventCoordinates(event: MouseEvent): IPoint;

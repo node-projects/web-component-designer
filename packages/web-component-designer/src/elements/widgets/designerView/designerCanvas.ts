@@ -9,7 +9,6 @@ import { dragDropFormatNameBindingObject } from '../../../Constants.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
 import { Snaplines } from './Snaplines.js';
-import { IPlacementView } from './IPlacementView.js';
 import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction.js';
 import { CommandType } from '../../../commandHandling/CommandType.js';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
@@ -48,7 +47,7 @@ const disableAnimationsSheet = cssFromString`
     animation-play-state: paused !important;
   }`
 
-export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IPlacementView, IUiCommandHandler {
+export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements IDesignerCanvas, IUiCommandHandler {
   // Public Properties
   public serviceContainer: ServiceContainer;
   public instanceServiceContainer: InstanceServiceContainer;
@@ -143,6 +142,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     return { x: 0, y: 0 }
   }
+
+  designItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
 
   public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();

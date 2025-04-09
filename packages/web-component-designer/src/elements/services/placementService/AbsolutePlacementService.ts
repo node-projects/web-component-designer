@@ -121,6 +121,7 @@ export class AbsolutePlacementService implements IPlacementService {
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', false);
   }
 
   moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
@@ -134,11 +135,12 @@ export class AbsolutePlacementService implements IPlacementService {
         d.setStyle('top', parseInt((<HTMLElement>d.element).style.top) - position.y + 'px');
     }
     designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshExtensions(designItems);
+    designItems[0].instanceServiceContainer.designerCanvas?.designItemsChanged(designItems, 'place', true);
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[], mode: 'normal' | 'drop') {
-    let filterdItems = filterChildPlaceItems(items);
-    for (let i of filterdItems) {
+    let filteredItems = filterChildPlaceItems(items);
+    for (let i of filteredItems) {
       if (mode == 'drop')
         i.setStyle('position', 'absolute');
       container.insertChild(i);
@@ -150,14 +152,17 @@ export class AbsolutePlacementService implements IPlacementService {
           i.setStyle('height', i.lastContainerSize.height + 'px');
       }
     }
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
   }
 
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {
+    let filteredItems = filterChildPlaceItems(items);
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
   }
 
   finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
-    let filterdItems = filterChildPlaceItems(items);
-    for (const designItem of filterdItems) {
+    let filteredItems = filterChildPlaceItems(items);
+    for (const designItem of filteredItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
       const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.getStyle('transform') ?? ''));
       (<HTMLElement>designItem.element).style.transform = designItem.getStyle('transform') ?? '';
@@ -168,5 +173,6 @@ export class AbsolutePlacementService implements IPlacementService {
     for (const item of items) {
       (<DesignerCanvas>designerCanvas).extensionManager.removeExtension(item, ExtensionType.Placement);
     }
+    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
   }
 }
