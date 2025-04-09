@@ -16,6 +16,7 @@ import { enableStylesheetService } from '../widgets/designerView/extensions/butt
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
 import { TextContentChangeAction } from '../services/undoService/transactionItems/TextContentChangeAction.js';
+import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction.js';
 
 export const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time';
 export const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time';
@@ -657,6 +658,13 @@ export class DesignItem implements IDesignItem {
   }
   public removeAttribute(name: string) {
     const action = new AttributeChangeAction(this, name, null, this._attributes.get(name));
+    this.instanceServiceContainer.undoService.execute(action);
+  }
+
+  public setProperty(name: string, value?: any) {
+    if (this.isRootItem)
+      throw 'not allowed to set attribute on root item';
+    const action = new PropertyChangeAction(this, name, value, this.element[name]);
     this.instanceServiceContainer.undoService.execute(action);
   }
 
