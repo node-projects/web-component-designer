@@ -291,7 +291,7 @@ export class ResizeExtension extends AbstractExtension {
           if (this.resizeAllSelected)
             resizedElements.push(...this.designerCanvas.instanceServiceContainer.selectionService.selectedElements)
           this.extensionManager.refreshExtensions(resizedElements);
-          this.designerCanvas?.designItemsChanged(resizedElements, 'resize', false);
+          this.designerCanvas?.raiseDesignItemsChanged(resizedElements, 'resize', false);
         }
         break;
       case EventNames.PointerUp:
@@ -337,10 +337,10 @@ export class ResizeExtension extends AbstractExtension {
                 designItem.setStyle('top', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>designItem.element, 'top'))) + 'px');
               }
             }
-            this.designerCanvas?.designItemsChanged(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements, 'resize', true);
+            this.designerCanvas?.raiseDesignItemsChanged(this.designerCanvas.instanceServiceContainer.selectionService.selectedElements, 'resize', true);
           }
           else {
-            this.designerCanvas?.designItemsChanged([this.extendedItem], 'resize', true);
+            this.designerCanvas?.raiseDesignItemsChanged([this.extendedItem], 'resize', true);
           }
           cg.commit();
         }

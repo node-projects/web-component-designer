@@ -105,6 +105,7 @@ import { SimpleToolButtonProvider } from '../widgets/designerView/tools/toolBar/
 import { assetsPath } from '../../Constants.js';
 import { PaddingTool } from '../widgets/designerView/tools/PaddingTool.js';
 import { DesignItemService } from './designItemService/DesignItemService.js';
+import { DeletionService } from './deletionService/DeletionService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -135,6 +136,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("demoProviderService", new SimpleDemoProviderService());
   serviceContainer.register("eventsService", new EventsService());
   serviceContainer.register("designItemService", new DesignItemService());
+  serviceContainer.register("deletionService", new DeletionService());
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
   serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));

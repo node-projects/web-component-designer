@@ -30,7 +30,7 @@ export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
   readonly alignOnSnap: boolean;
   readonly gridSize: number;
  
-  designItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
+  raiseDesignItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
 
   readonly onContentChanged: TypedEvent<void>;
 

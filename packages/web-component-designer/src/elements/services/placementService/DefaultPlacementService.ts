@@ -144,7 +144,7 @@ export class DefaultPlacementService implements IPlacementService {
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
-    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', false);
+    items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', false);
   }
 
   moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
@@ -158,7 +158,7 @@ export class DefaultPlacementService implements IPlacementService {
         d.setStyle('top', parseInt((<HTMLElement>d.element).style.top) - position.y + 'px');
     }
     designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshExtensions(designItems);
-    designItems[0].instanceServiceContainer.designerCanvas?.designItemsChanged(designItems, 'place', true);
+    designItems[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(designItems, 'place', true);
   }
 
   enterContainer(container: IDesignItem, items: IDesignItem[], mode: 'normal' | 'drop') {
@@ -175,12 +175,12 @@ export class DefaultPlacementService implements IPlacementService {
           i.setStyle('height', i.lastContainerSize.height + 'px');
       }
     }
-    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
+    items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', true);
   }
 
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {
     let filteredItems = filterChildPlaceItems(items);
-    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
+    items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', true);
   }
 
   finishPlace(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
@@ -207,6 +207,6 @@ export class DefaultPlacementService implements IPlacementService {
     for (const item of items) {
       (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
     }
-    items[0].instanceServiceContainer.designerCanvas?.designItemsChanged(filteredItems, 'place', true);
+    items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', true);
   }
 }

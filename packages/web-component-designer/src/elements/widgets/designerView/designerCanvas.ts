@@ -142,7 +142,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return { x: 0, y: 0 }
   }
 
-  designItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
+  raiseDesignItemsChanged(designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) {
+    if (this.designItemsChanged)
+      this.designItemsChanged(designItems, action, operationFinished);
+  }
+
+  public designItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
 
   public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();
