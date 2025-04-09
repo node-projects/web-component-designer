@@ -48,6 +48,7 @@ import { IPropertyGridDragDropService } from './dragDropService/IPropertyGridDra
 import { IConfigUiService } from './configUiService/IConfigUiService.js';
 import { IRefactorService } from './refactorService/IRefactorService.js';
 import { InstanceServiceContainer } from './InstanceServiceContainer.js';
+import { IDeletionService } from './deletionService/IDeletionService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -76,6 +77,7 @@ interface ServiceNameMap {
   "propertyGridDragDropService": IPropertyGridDragDropService;
   "configUiService": IConfigUiService;
   "refactorService": IRefactorService;
+  "deletionService": IDeletionService;
 
 
   //Factories for Instance Service Containers
@@ -232,5 +234,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   get refactorServices(): IRefactorService[] {
     return this.getServices('refactorService');
+  }
+
+  get deletionService(): IDeletionService {
+    return this.getLastService('deletionService');
   }
 }

@@ -9,7 +9,6 @@ import { dragDropFormatNameBindingObject } from '../../../Constants.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
 import { Snaplines } from './Snaplines.js';
-import { DeleteAction } from '../../services/undoService/transactionItems/DeleteAction.js';
 import { CommandType } from '../../../commandHandling/CommandType.js';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
 import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
@@ -724,7 +723,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   handleDeleteCommand() {
     let items = this.instanceServiceContainer.selectionService.selectedElements;
-    this.instanceServiceContainer.undoService.execute(new DeleteAction(items));
+    this.serviceContainer.deletionService.removeItems(items);
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
   }
 

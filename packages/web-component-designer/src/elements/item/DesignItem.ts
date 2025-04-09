@@ -11,7 +11,6 @@ import { ISize } from '../../interfaces/ISize.js';
 import { PropertiesHelper } from '../services/propertiesService/services/PropertiesHelper.js';
 import { InsertChildAction } from '../services/undoService/transactionItems/InsertChildAction.js';
 import { DomConverter } from '../widgets/designerView/DomConverter.js';
-import { DeleteAction } from '../services/undoService/transactionItems/DeleteAction.js';
 import { IStyleRule } from '../services/stylesheetService/IStylesheetService.js';
 import { enableStylesheetService } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
@@ -242,12 +241,10 @@ export class DesignItem implements IDesignItem {
     this.instanceServiceContainer.undoService.execute(action);
   }
   public removeChild(designItem: IDesignItem) {
-    const action = new DeleteAction([designItem]);
-    this.instanceServiceContainer.undoService.execute(action);
+    this.serviceContainer.deletionService.removeItems([designItem]);
   }
   public remove() {
-    const action = new DeleteAction([this]);
-    this.instanceServiceContainer.undoService.execute(action);
+    this.serviceContainer.deletionService.removeItems([this]);
   }
   public clearChildren() {
     for (let i = this._childArray.length - 1; i >= 0; i--) {

@@ -1,7 +1,6 @@
 import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
 import { DesignItem } from '../../../../item/DesignItem.js';
 import { IDesignItem } from '../../../../item/IDesignItem.js';
-import { DeleteAction } from '../../../../services/undoService/transactionItems/DeleteAction.js';
 import { InsertAction } from '../../../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
@@ -32,7 +31,7 @@ export class RectContextMenu implements IContextMenuExtension {
           path.setAttribute("stroke-width", rect.getAttribute("stroke-width"));
           const di = DesignItem.createDesignItemFromInstance(path, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
           designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designItem.parent, designItem.childCount, di));
-          designerCanvas.instanceServiceContainer.undoService.execute(new DeleteAction([designItem]));
+          designerCanvas.serviceContainer.deletionService.removeItems([designItem]);
         }
       }
     ]
