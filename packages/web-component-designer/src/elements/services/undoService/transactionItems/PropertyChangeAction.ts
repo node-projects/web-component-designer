@@ -1,5 +1,6 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
+import { setDeepValue } from '../../../helper/Helper.js';
 
 export class PropertyChangeAction implements ITransactionItem {
 
@@ -19,11 +20,11 @@ export class PropertyChangeAction implements ITransactionItem {
   }
 
   undo() {
-    this.designItem.node[this.name] = this.oldValue;
+    setDeepValue(this.designItem.node, this.name, this.oldValue);
   }
 
   do() {
-    this.designItem.node[this.name] = this.newValue;
+    setDeepValue(this.designItem.node, this.name, this.newValue);
   }
 
   public designItem: IDesignItem;

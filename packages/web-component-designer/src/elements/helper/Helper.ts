@@ -62,3 +62,24 @@ export function arraysEqual<T>(a: T[], b: T[]) {
   }
   return true;
 }
+
+export function setDeepValue(obj, path: string, value) {
+  if (path === undefined || path === null) {
+      return;
+  }
+
+  const pathParts = path.split('.');
+  for (let i = 0; i < pathParts.length - 1; i++) {
+      if (obj != null) {
+          let newObj = obj[pathParts[i]];
+          if (newObj == null) {
+              newObj = {};
+              obj[pathParts[i]] = newObj;
+          }
+          obj = newObj;
+      }
+  }
+
+  if (obj != null)
+      obj[pathParts[pathParts.length - 1]] = value;
+}
