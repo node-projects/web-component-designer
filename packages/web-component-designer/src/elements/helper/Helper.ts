@@ -63,6 +63,23 @@ export function arraysEqual<T>(a: T[], b: T[]) {
   return true;
 }
 
+let nullObject: {};
+export function deepValue(obj, path: string, returnNullObject = false) {
+    if (path === undefined || path === null) {
+        return obj;
+    }
+
+    const pathParts = path.split('.');
+    for (let i = 0; i < pathParts.length; i++) {
+        if (obj != null) {
+            obj = obj[pathParts[i]];
+        } else {
+            return returnNullObject ? nullObject : null;
+        }
+    }
+    return obj;
+}
+
 export function setDeepValue(obj, path: string, value) {
   if (path === undefined || path === null) {
       return;

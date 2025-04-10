@@ -17,6 +17,7 @@ import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IPlacementService } from '../services/placementService/IPlacementService.js';
 import { TextContentChangeAction } from '../services/undoService/transactionItems/TextContentChangeAction.js';
 import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction.js';
+import { deepValue } from '../helper/Helper.js';
 
 export const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time';
 export const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time';
@@ -664,7 +665,8 @@ export class DesignItem implements IDesignItem {
   public setProperty(name: string, value?: any) {
     if (this.isRootItem)
       throw 'not allowed to set attribute on root item';
-    const action = new PropertyChangeAction(this, name, value, this.element[name]);
+    const oldValue = deepValue(this.node, name);
+    const action = new PropertyChangeAction(this, name, value, oldValue);
     this.instanceServiceContainer.undoService.execute(action);
   }
 
