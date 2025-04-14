@@ -6,7 +6,7 @@ import { PropertiesHelper } from "@node-projects/web-component-designer/dist/ele
 
 //;,[ are not allowed in bindings, so they could be used for a short form...
 
-export type SpecialValueHandler = { valueProvider: (propertyName: string) => any, valueChangedCallbacks: Map<string, (() => void)[]> }
+export type SpecialValueHandler = { valueProvider: (propertyName: string, context: { element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement, [key: string]: any }) => any, valueChangedCallbacks: Map<string, (() => void)[]> }
 
 export const bindingPrefixProperty = 'bind-prop:';
 export const bindingPrefixAttribute = 'bind-attr:';
@@ -714,7 +714,7 @@ export class BindingsHelper {
         });
       } else if (s[0] === '§') {
         const mS = s.substring(1);
-        const value = specialValueHandler.valueProvider(mS)
+        const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root })
         this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
         if (!specialValueHandler.valueChangedCallbacks)
           specialValueHandler.valueChangedCallbacks = new Map();
@@ -724,7 +724,7 @@ export class BindingsHelper {
           specialValueHandler.valueChangedCallbacks.set(mS, changeList);
         }
         changeList.push(() => {
-          const value = specialValueHandler.valueProvider(mS)
+          const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root })
           this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
         });
       } else {
