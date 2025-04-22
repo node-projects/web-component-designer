@@ -149,6 +149,7 @@ export * from "./elements/services/propertiesService/propertyEditors/special/Met
 export * from "./elements/services/propertiesService/propertyEditors/special/GridAssignedRowColumnPropertyEditor.js";
 
 export * from "./elements/services/propertiesService/services/PropertiesHelper.js";
+export * from "./elements/services/propertiesService/services/AbstractPolymerLikePropertiesService.js";
 export * from "./elements/services/propertiesService/services/AttachedPropertiesService.js";
 export * from "./elements/services/propertiesService/services/AbstractCssPropertiesService.js";
 export * from "./elements/services/propertiesService/services/BaseCustomWebComponentPropertiesService.js";
