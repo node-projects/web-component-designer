@@ -329,19 +329,31 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
     let lastOffsetParent = null;
     while (actualElement != ancestor && actualElement != null) {
         const parentElement = getParentElementIncludingSlots(actualElement, iframes);
-        if (actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
-            if (lastOffsetParent !== actualElement.offsetParent && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement)) {
+
+        if (actualElement.assignedSlot != null) {
+            const st = (perspectiveParentElement.ownerDocument.defaultView ?? window).getComputedStyle(actualElement);
+            if (st.position !== "static") {
+                const mvMat = new DOMMatrix().translate(parseFloat(st.left), parseFloat(st.top));
+                originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+            }
+        }
+        else {
+
+            if (actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
+                if (lastOffsetParent !== actualElement.offsetParent && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement)) {
+                    const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
+                    lastOffsetParent = actualElement.offsetParent;
+                    const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
+                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+                }
+            } else {
                 const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
-                lastOffsetParent = actualElement.offsetParent;
+                lastOffsetParent = null;
                 const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
                 originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
             }
-        } else {
-            const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
-            lastOffsetParent = null;
-            const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
-            originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
         }
+
         if (parentElement) {
             parentElementMatrix = getElementCombinedTransform(parentElement, iframes);
 
