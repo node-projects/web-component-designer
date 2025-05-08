@@ -56,8 +56,9 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   };
   public additionalStylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' | 'undo' }>;
 
-  public onContentChanged = new TypedEvent<void>();
+  public onContentChanged = new TypedEvent<{ source: 'designer' | 'code' }>();
 
+  private _contentChangeSource: 'designer' | 'code' = 'designer';
   private _serviceContainer: ServiceContainer;
   private _content: string = '';
   private _tabControl: DesignerTabControl;
@@ -185,7 +186,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   designerContentChanged() {
-    this.onContentChanged.emit();
+    //event wenn text geändert......
+    this.onContentChanged.emit({ source: this._contentChangeSource });
 
     if (!this._disableChangeNotificationEditor) {
       this._disableChangeNotificationDesigner = true;
@@ -317,9 +319,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       return this.designerView.parseDesignerHTML(this._content, this._firstLoad);
     else {
       const html = this.designerView.getDesignerHTML();
-      if (html != this._content)
-        return this.designerView.parseDesignerHTML(this._content, this._firstLoad);
-      else {
+      if (html != this._content) {
+        this._contentChangeSource = 'code';
+        await this.designerView.parseDesignerHTML(this._content, this._firstLoad);
+        this._contentChangeSource = 'designer';
+        return;
+      } else {
         this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
         this.designerView.designerCanvas.overlayLayer.removeAllOverlays();
         this.designerView.designerCanvas.extensionManager.reapplyAllAppliedExtentions(null, [ExtensionType.Permanent, ExtensionType.Selection, ExtensionType.PrimarySelection, ExtensionType.PrimarySelectionContainer, ExtensionType.OnlyOneItemSelected, ExtensionType.MultipleItemsSelected]);
