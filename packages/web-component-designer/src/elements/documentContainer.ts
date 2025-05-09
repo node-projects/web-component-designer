@@ -57,6 +57,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   public additionalStylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' | 'undo' }>;
 
   public onContentChanged = new TypedEvent<{ source: 'designer' | 'code' }>();
+  public onTabChanged = new TypedEvent<{ oldTab: 'designer' | 'code' | 'split' | 'preview', newTab: 'designer' | 'code' | 'split' | 'preview' }>();
 
   private _contentChangeSource: 'designer' | 'code' = 'designer';
   private _serviceContainer: ServiceContainer;
@@ -307,6 +308,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       if (this._content) {
         this._firstLoad = false;
       }
+
+      this.onTabChanged.emit({ oldTab: <any>tabIndex[i.oldIndex], newTab: <any>tabIndex[i.newIndex] });
     });
     if (this._content) {
       this.content = this._content;
