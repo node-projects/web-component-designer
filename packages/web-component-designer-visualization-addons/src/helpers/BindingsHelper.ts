@@ -75,11 +75,15 @@ export class IndirectSignal {
     for (let i = 0; i < this.signals.length; i++) {
       let nm = this.signals[i];
       if (nm[0] === '?' && nm[1] === '?') {
+        //todo: maybe react to prop changes
         this.handleValueChanged(root[nm.substring(2)], i);
+        this.unsubscribeList.push(null);
         continue;
       }
       else if (nm[0] === '#' && nm[1] === '#') {
+        //todo: maybe react to prop changes
         this.handleValueChanged(element[nm.substring(2)], i);
+        this.unsubscribeList.push(null);
         continue;
       } else if (nm[0] === '?') {
         nm = root[nm.substring(1)];
@@ -133,7 +137,9 @@ export class IndirectSignal {
       this.unsubscribeTargetValue = null;
     }
     for (let i = 0; i < this.signals.length; i++) {
-      this.visualizationHandler.unsubscribeState(this.signals[i], this.unsubscribeList[i][0], this.unsubscribeList[i][1]);
+      if (this.unsubscribeList[i] != null) {
+        this.visualizationHandler.unsubscribeState(this.signals[i], this.unsubscribeList[i][0], this.unsubscribeList[i][1]);
+      }
     }
   }
 
