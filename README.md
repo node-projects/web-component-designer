@@ -9,11 +9,11 @@ There is also a preview VSCode addon using the designer: https://github.com/node
 
 ## NPM Package
 
-[Comparison of Designer Frameworks](COMPARISON.md)
+https://www.npmjs.com/package/@node-projects/web-component-designer
 
 ## Comparison
 
-https://www.npmjs.com/package/@node-projects/web-component-designer
+[Comparison of Designer Frameworks](COMPARISON.md)
 
 ## Additional NPM Packages
 
@@ -25,7 +25,7 @@ So the designer now should work with bundlers.
 | web-component-designer-codeview-ace                                    |                                              |
 | web-component-designer-codeview-codemirror                             |                                              |
 | web-component-designer-codeview-codemirror5                            |                                              |
-| web-component-designer-codeview-monaco                                 |                                              |
+| web-component-designer-codeview-monaco                                 | atm. stuck at monaco 0.50.0 (webcomp supp)   |
 | web-component-designer-htmlparserservice-base-custom-webcomponent      |                                              |
 | web-component-designer-htmlparserservice-lit-element                   |                                              |
 | web-component-designer-htmlparserservice-nodehtmlparser                |                                              |
@@ -33,8 +33,8 @@ So the designer now should work with bundlers.
 | web-component-designer-stylesheetservice-css-tools                     |                                              |
 | web-component-designer-stylesheetservice-css-tree                      |                                              |
 | web-component-designer-visualization-addons                            |                                              |
-| web-component-designer-texteditextension-stylo                         | deprecated - stylo is deprecated             |
-| web-component-designer-widgets-fancytree                               | deprecated - replaced by widgets-wunderbaum  |
+| ~~web-component-designer-texteditextension-stylo~~                     | deprecated - stylo is deprecated             |
+| ~~web-component-designer-widgets-fancytree~~                           | deprecated - replaced by widgets-wunderbaum  |
 | web-component-designer-widgets-wunderbaum                              |                                              |
 
 ## Browser support
