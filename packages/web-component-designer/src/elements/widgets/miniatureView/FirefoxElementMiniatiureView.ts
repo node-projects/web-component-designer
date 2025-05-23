@@ -1,5 +1,6 @@
 import { BaseCustomWebComponentLazyAppend, html } from '@node-projects/base-custom-webcomponent';
-import { IDesignerCanvas, IMiniatureView } from '@node-projects/web-component-designer';
+import { IMiniatureView } from './IMiniatureView.js';
+import { IDesignerCanvas } from '../designerView/IDesignerCanvas.js';
 
 //TODO: does not work atm.
 //see: https://bugzilla.mozilla.org/show_bug.cgi?id=1966844
