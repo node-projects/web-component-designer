@@ -277,6 +277,8 @@ export class BindingsHelper {
     let needsJson = false;
     if (eventsString && binding.expression?.includes('::') || binding.expressionTwoWay?.includes('::'))
       needsJson = true;
+    if (binding.signal.trim()[0] == '{')
+      needsJson = true;
 
     if (!needsJson && binding.target == BindingTarget.property &&
       !binding.expression && !binding.expressionTwoWay &&
