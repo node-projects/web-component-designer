@@ -23,7 +23,10 @@ export interface VisualizationHandler {
   getState(id: string): Promise<State>;
   setState(id: string, val: State | StateValue, ack?: boolean): Promise<void>;
   subscribeState(id: string, cb: StateChangeHandler): any;
-  unsubscribeState(id: string, cb: StateChangeHandler, info: any): void;
+  /**
+   * @param {any} subscriptionResult - the result of the subscribe call
+   */
+  unsubscribeState(id: string, cb: StateChangeHandler, subscriptionResult: any): void;
   getHistoricData(id: string, config: any);
   getObject(id: string): Promise<Signal>;
 

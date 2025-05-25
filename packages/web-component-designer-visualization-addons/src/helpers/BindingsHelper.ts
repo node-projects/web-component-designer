@@ -27,12 +27,6 @@ export function isLit(element: Element) {
   return element.constructor?.elementProperties != null;
 }
 
-export function getChangeEventName(element: Element, propertyName: string) {
-  if (isLit(element))
-    return propertyName
-  return propertyName + '-changed';
-}
-
 export function parseBindingString(id: string) {
   let parts: string[] = [];
   let signals: string[] = [];
@@ -52,12 +46,12 @@ export function parseBindingString(id: string) {
   return { parts, signals };
 }
 
-export class IndirectSignal {
+class IndirectSignal {
   private parts: string[];
   private signals: string[];
   private values: string[];
-  private unsubscribeList: [((id: string, value: any) => void), any][] = [];
   private unsubscribeTargetValue: [((id: string, value: any) => void), any];
+  private cleanupCalls = [];
   private combinedName: string;
   private disposed: boolean;
   private valueChangedCb: (value: any) => void
@@ -65,7 +59,7 @@ export class IndirectSignal {
   private element: Element;
   private relativeSignalPath: string;
 
-  constructor(visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element, relativeSignalPath: string, root: HTMLElement) {
+  constructor(bindingsHelper: BindingsHelper, visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element, relativeSignalPath: string, root: HTMLElement) {
     this.visualizationHandler = visualizationHandler;
     this.valueChangedCb = valueChangedCb;
     this.element = element;
@@ -75,24 +69,35 @@ export class IndirectSignal {
     for (let i = 0; i < this.signals.length; i++) {
       let nm = this.signals[i];
       if (nm[0] === '?' && nm[1] === '?') {
-        //todo: maybe react to prop changes
-        this.handleValueChanged(root[nm.substring(2)], i);
-        this.unsubscribeList.push(null);
+        const propNm = nm.substring(2);
+        this.handleValueChanged(root[propNm], i);
+
+        const evtCallback = () => this.handleValueChanged(root[propNm], i);
+        const evtName = bindingsHelper.getChangedEventName(root, propNm);
+        root.addEventListener(evtName, (evtCallback));
+        this.cleanupCalls.push(() => root.removeEventListener(evtName, evtCallback));
         continue;
       }
       else if (nm[0] === '#' && nm[1] === '#') {
-        //todo: maybe react to prop changes
-        this.handleValueChanged(element[nm.substring(2)], i);
-        this.unsubscribeList.push(null);
+        const propNm = nm.substring(2);
+        this.handleValueChanged(element[propNm], i);
+
+        const evtCallback = () => this.handleValueChanged(element[propNm], i);
+        const evtName = bindingsHelper.getChangedEventName(element, propNm);
+        element.addEventListener(evtName, (evtCallback));
+        this.cleanupCalls.push(() => element.removeEventListener(evtName, evtCallback));
         continue;
       } else if (nm[0] === '?') {
+        //TODO: react to changes of signal name in prop
         nm = root[nm.substring(1)];
       } else if (nm[0] === '#') {
+        //TODO: react to changes of signal name in prop
         nm = element[nm.substring(1)];
       }
 
       let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
-      this.unsubscribeList.push([cb, this.visualizationHandler.subscribeState(nm, cb)]);
+      const subscr = this.visualizationHandler.subscribeState(nm, cb);
+      this.cleanupCalls.push(() => this.visualizationHandler.unsubscribeState(this.signals[i], cb, subscr));
     }
   }
 
@@ -137,9 +142,7 @@ export class IndirectSignal {
       this.unsubscribeTargetValue = null;
     }
     for (let i = 0; i < this.signals.length; i++) {
-      if (this.unsubscribeList[i] != null) {
-        this.visualizationHandler.unsubscribeState(this.signals[i], this.unsubscribeList[i][0], this.unsubscribeList[i][1]);
-      }
+      this.cleanupCalls[i]();
     }
   }
 
@@ -155,6 +158,19 @@ export class BindingsHelper {
 
   constructor(visualizationHandler: VisualizationHandler) {
     this._visualizationHandler = visualizationHandler;
+  }
+
+  getChangedEventName(element: Element, propertyName: string) {
+    const posColon = propertyName.indexOf('::');
+    if (posColon >= 0)
+      return propertyName.substring(posColon + 2);
+    if (element instanceof HTMLInputElement)
+      return 'change';
+    if (element instanceof HTMLSelectElement)
+      return 'change';
+    if (isLit(element))
+      return PropertiesHelper.camelToDashCase(propertyName);
+    return PropertiesHelper.camelToDashCase(propertyName) + '-changed';
   }
 
   //Not allowed chars in Var Names: |{}(),;:[]
@@ -186,17 +202,17 @@ export class BindingsHelper {
         binding.twoWay = true;
         if (!binding.events) {
           if (element instanceof HTMLInputElement)
-            binding.events = ['change'];
+            binding.events = [this.getChangedEventName(element, propname)];
           else if (element instanceof HTMLSelectElement)
-            binding.events = ['change'];
+            binding.events = [this.getChangedEventName(element, propname)];
           else {
             if (isLit(element)) {
-              binding.events = [propname];
+              binding.events = [this.getChangedEventName(element, propname)];
             } else {
-              binding.events = [propname + '-changed'];
+              binding.events = [this.getChangedEventName(element, propname)];
               //Binding could be a lit elemnt but not yet loaded
               binding.maybeLitElement = true;
-              binding.litEventNames = [propname];
+              binding.litEventNames = [this.getChangedEventName(element, propname)];
             }
           }
         }
@@ -229,7 +245,7 @@ export class BindingsHelper {
       else if (element instanceof HTMLSelectElement)
         binding.events = ['change'];
       else {
-        binding.events = [getChangeEventName(element, propname)];
+        binding.events = [this.getChangedEventName(element, propname)];
       }
     }
     if (bindingTarget === BindingTarget.cssvar || bindingTarget === BindingTarget.class)
@@ -627,7 +643,7 @@ export class BindingsHelper {
               cleanUp();
               this.applyBinding(element, binding, relativeSignalPath, root, specialValueHandler);
             };
-            const evtNm = getChangeEventName(element, PropertiesHelper.camelToDashCase(s));
+            const evtNm = this.getChangedEventName(root, s);
             root.addEventListener(evtNm, evtCallback);
             if (!cleanupCalls)
               cleanupCalls = [];
@@ -649,7 +665,7 @@ export class BindingsHelper {
             cleanUp();
             this.applyBinding(element, binding, relativeSignalPath, root, specialValueHandler);
           };
-          const evtNm = getChangeEventName(element, PropertiesHelper.camelToDashCase(s));
+          const evtNm = this.getChangedEventName(element, s);
           root.addEventListener(evtNm, evtCallback);
           if (!cleanupCalls)
             cleanupCalls = [];
@@ -735,7 +751,7 @@ export class BindingsHelper {
         });
       } else {
         if (s.includes('{')) {
-          let indirectSignal = new IndirectSignal(this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root);
+          let indirectSignal = new IndirectSignal(this, this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root);
           if (!cleanupCalls)
             cleanupCalls = [];
           cleanupCalls.push(() => indirectSignal.dispose());
