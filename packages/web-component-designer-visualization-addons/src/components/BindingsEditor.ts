@@ -61,8 +61,8 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
             </div>
             <div class="vertical-grid" style="margin-top: 10px;">
                 <div>
-                    <div class="input-headline">
-                        <span>converter</span>:
+                    <div class="input-headline" style="display: flex;align-items: center;">
+                        <span>converter</span>:<input id="namedConverterInput" style="width: 100%; margin-left: 15px;" value="{{?this.convertersString::change}}">
                     </div>
                 </div>
             </div>
@@ -190,10 +190,11 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   public events: string = '';
   public invert: boolean = false;
   public converters: { key: string, value: any }[] = [];
+  public convertersString: string;
   public objectValueType: string;
 
   protected _property: IProperty;
-  protected _binding: IBinding & { converter: Record<string, any> };
+  protected _binding: IBinding & { converter: Record<string, any> | string };
   protected _bindingTarget: BindingTarget;
   protected _serviceContainer: ServiceContainer;
   protected _instanceServiceContainer: InstanceServiceContainer;
@@ -201,7 +202,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
   protected _activeRow: number = -1;
   protected _objNmInput: HTMLInputElement;
 
-  constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, shell: VisualizationShell) {
+  constructor(property: IProperty, binding: IBinding & { converter: Record<string, any> }, bindingTarget: BindingTarget, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, shell: VisualizationShell, config = { namedConverters: true }) {
     super();
     super._restoreCachedInititalValues();
 
@@ -213,6 +214,10 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
     this._serviceContainer = serviceContainer;
     this._instanceServiceContainer = instanceServiceContainer;
     this._shell = shell;
+
+    if (!config?.namedConverters) {
+      this._getDomElement<HTMLInputElement>('namedConverterInput').style.display = 'none';
+    }
   }
 
   ready() {
@@ -234,8 +239,12 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
       if (this._binding.bindableObjectNames)
         this.objectNames = this._binding.bindableObjectNames.join(';');
       if (this._binding.converter) {
-        for (let c in this._binding.converter) {
-          this.converters.push({ key: c, value: this._binding.converter[c] });
+        if (typeof this._binding.converter === 'string') {
+          this.convertersString = this._binding.converter;
+        } else {
+          for (let c in this._binding.converter) {
+            this.converters.push({ key: c, value: this._binding.converter[c] });
+          }
         }
       }
       if (this._binding.changedEvents && this._binding.changedEvents.length)

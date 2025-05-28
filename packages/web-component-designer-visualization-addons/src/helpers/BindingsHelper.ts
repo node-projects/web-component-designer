@@ -872,7 +872,7 @@ export class BindingsHelper {
       valuesObject[signalVarNames.length - 1] = v;
     }
     if (binding[1].converter) {
-      if (binding[1].converter) {
+      if (typeof binding[1].converter ===  'string') {
         v = this.namedConverterCallback(<string><never>binding[1].converter, v, element, binding);
       } else {
       const stringValue = <string>(v != null ? v.toString() : v);
