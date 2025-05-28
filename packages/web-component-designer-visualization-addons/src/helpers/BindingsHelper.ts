@@ -155,6 +155,7 @@ class IndirectSignal {
 
 export class BindingsHelper {
   _visualizationHandler: VisualizationHandler;
+  namedConverterCallback: (converter: string, value: any, element: Element, binding: namedBinding) => any;
 
   constructor(visualizationHandler: VisualizationHandler) {
     this._visualizationHandler = visualizationHandler;
@@ -871,6 +872,9 @@ export class BindingsHelper {
       valuesObject[signalVarNames.length - 1] = v;
     }
     if (binding[1].converter) {
+      if (binding[1].converter) {
+        v = this.namedConverterCallback(<string><never>binding[1].converter, v, element, binding);
+      } else {
       const stringValue = <string>(v != null ? v.toString() : v);
       if (stringValue in binding[1].converter) {
         v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[stringValue] + '`')(...valuesObject);
@@ -908,6 +912,7 @@ export class BindingsHelper {
               if ((sp[0] === '' || nr >= parseFloat(sp[0])) && (sp[1] === '' || parseFloat(sp[1]) >= nr)) {
                 v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
                 break;
+                }
               }
             }
           }
