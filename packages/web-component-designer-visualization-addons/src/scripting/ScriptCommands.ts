@@ -377,7 +377,7 @@ export interface CopySignalValuesFromFolder {
   /**
    * name of destination folder
    */
-  destinationFolder?: number;
+  destinationFolder?: string;
   additionalData?: string;
 }
 

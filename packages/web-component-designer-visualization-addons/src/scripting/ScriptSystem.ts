@@ -106,25 +106,25 @@ export class ScriptSystem {
 
       case 'ToggleSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), !state?.val);
+        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), !state?.val);
         break;
       }
       case 'SetSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), await this.getValue(command.value, context));
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), await this.getValue(command.value, context));
         break;
       }
       case 'IncrementSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), (<number>state.val + await this.getValue(command.value, context)));
+        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), (<number>state.val + await this.getValue(command.value, context)));
         break;
       }
       case 'DecrementSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), <any>state.val - await this.getValue(command.value, context));
+        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), <any>state.val - await this.getValue(command.value, context));
         break;
       }
       case 'CalculateSignalValue': {
@@ -132,36 +132,36 @@ export class ScriptSystem {
         const targetSignal = await this.getValue(command.targetSignal, context);
         let nm = await this.parseStringWithValues(formula, context);
         let result = eval(nm);
-        await this._visualizationHandler.setState(this.getSignaName(targetSignal, context), result);
+        await this._visualizationHandler.setState(this.getSignalName(targetSignal, context), result);
         break;
       }
 
       case 'SetBitInSignal': {
         const signal = await this.getValue(command.signal, context);
         const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
-        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
+        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
         let mask = Long.fromNumber(1).shiftLeft(bitNumber);
         const newVal = Long.fromNumber(<number>state.val).or(mask).toNumber();
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), newVal);
         break;
       }
       case 'ClearBitInSignal': {
         const signal = await this.getValue(command.signal, context);
         const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
-        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
+        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
         let mask = Long.fromNumber(1).shiftLeft(bitNumber);
         mask.negate();
         const newVal = Long.fromNumber(<number>state.val).and(mask).toNumber();
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), newVal);
         break;
       }
       case 'ToggleBitInSignal': {
         const signal = await this.getValue(command.signal, context);
         const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
-        let state = await this._visualizationHandler.getState(this.getSignaName(signal, context));
+        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
         let mask = Long.fromNumber(1).shiftLeft(bitNumber);
         const newVal = Long.fromNumber(<number>state.val).xor(mask).toNumber();
-        await this._visualizationHandler.setState(this.getSignaName(signal, context), newVal);
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), newVal);
         break;
       }
 
@@ -319,7 +319,7 @@ export class ScriptSystem {
           return outerContext.root[(<IScriptMultiplexValue><any>value).name];
         }
         case 'signal': {
-          let sng = await this._visualizationHandler.getState(this.getSignaName((<IScriptMultiplexValue><any>value).name, outerContext));
+          let sng = await this._visualizationHandler.getState(this.getSignalName((<IScriptMultiplexValue><any>value).name, outerContext));
           return <T>sng.val;
         }
         case 'event': {
@@ -347,7 +347,7 @@ export class ScriptSystem {
           let text = (<IScriptMultiplexValue><any>value).name;
           if (text != null) {
             const signal = await this.parseStringWithValues(text, outerContext);
-            const state = await this._visualizationHandler.getState(this.getSignaName(signal, outerContext));
+            const state = await this._visualizationHandler.getState(this.getSignalName(signal, outerContext));
             return <T>state.val;
           }
           return null;
@@ -372,14 +372,14 @@ export class ScriptSystem {
     } else if (name[0] === '?' && name[1] === '??') {
       return context.root[name.substring(2)];
     } else if (name[0] === '?') {
-      return await this._visualizationHandler.getState(this.getSignaName(context.root[name.substring(2)], context));
+      return await this._visualizationHandler.getState(this.getSignalName(context.root[name.substring(2)], context));
     }
-    return await this._visualizationHandler.getState(this.getSignaName(name, context));
+    return await this._visualizationHandler.getState(this.getSignalName(name, context));
   }
 
   async parseStringWithValues(text: string, context: contextType) {
     const parsed = parseBindingString(text);
-    let results = await Promise.all(parsed.signals.map(x => this.getStateOrFieldOrParameter(this.getSignaName(x, context), context)));
+    let results = await Promise.all(parsed.signals.map(x => this.getStateOrFieldOrParameter(this.getSignalName(x, context), context)));
     let nm = parsed.parts[0];
     for (let i = 0; i < parsed.parts.length - 1; i++) {
       let v = results[i];
@@ -392,7 +392,7 @@ export class ScriptSystem {
     return nm;
   }
 
-  getSignaName(name: string, outerContext: contextType) {
+  getSignalName(name: string, outerContext: contextType) {
     if (name[0] === '.')
       return outerContext.relativeSignalsPath + name;
     return name;
