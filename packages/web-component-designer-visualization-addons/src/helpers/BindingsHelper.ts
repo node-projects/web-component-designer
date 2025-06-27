@@ -46,6 +46,18 @@ export function parseBindingString(id: string) {
   return { parts, signals };
 }
 
+export function getNestedProperty(obj, path) {
+  const parts = path.split('.');
+  let current = obj;
+
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') return undefined;
+    current = current[part];
+  }
+
+  return current;
+}
+
 class IndirectSignal {
   private parts: string[];
   private signals: string[];
@@ -70,29 +82,48 @@ class IndirectSignal {
       let nm = this.signals[i];
       if (nm[0] === '?' && nm[1] === '?') {
         const propNm = nm.substring(2);
+        if (!propNm.includes('.')) {
         this.handleValueChanged(root[propNm], i);
 
         const evtCallback = () => this.handleValueChanged(root[propNm], i);
         const evtName = bindingsHelper.getChangedEventName(root, propNm);
         root.addEventListener(evtName, (evtCallback));
         this.cleanupCalls.push(() => root.removeEventListener(evtName, evtCallback));
+        } else {
+          const val = getNestedProperty(root, propNm);
+          this.handleValueChanged(val, i);
+        }
         continue;
       }
       else if (nm[0] === '#' && nm[1] === '#') {
+      } else if (nm[0] === '#' && nm[1] === '#') {
         const propNm = nm.substring(2);
+        if (!propNm.includes('.')) {
         this.handleValueChanged(element[propNm], i);
 
         const evtCallback = () => this.handleValueChanged(element[propNm], i);
         const evtName = bindingsHelper.getChangedEventName(element, propNm);
         element.addEventListener(evtName, (evtCallback));
         this.cleanupCalls.push(() => element.removeEventListener(evtName, evtCallback));
+        } else {
+          const val = getNestedProperty(element, propNm);
+          this.handleValueChanged(val, i);
+        }
         continue;
       } else if (nm[0] === '?') {
         //TODO: react to changes of signal name in prop
+        if (!nm.includes('.')) {
         nm = root[nm.substring(1)];
+        } else {
+          nm = getNestedProperty(root, nm.substring(1));
+        }
       } else if (nm[0] === '#') {
         //TODO: react to changes of signal name in prop
-        nm = element[nm.substring(1)];
+        if (!nm.includes('.')) {
+          nm = root[nm.substring(1)];
+        } else {
+          nm = getNestedProperty(root, nm.substring(1));
+        }
       }
 
       let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
