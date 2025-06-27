@@ -94,8 +94,6 @@ class IndirectSignal {
           this.handleValueChanged(val, i);
         }
         continue;
-      }
-      else if (nm[0] === '#' && nm[1] === '#') {
       } else if (nm[0] === '#' && nm[1] === '#') {
         const propNm = nm.substring(2);
         if (!propNm.includes('.')) {
