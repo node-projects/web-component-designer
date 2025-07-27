@@ -33,7 +33,7 @@ export class ZplDemoView extends BaseCustomWebComponentConstructorAppend impleme
         const height = 6;
         const dpmm = '24dpmm';
 
-        const response = await fetch(`http://api.labelary.com/v1/printers/${dpmm}/labels/${width}x${height}/${0}`, {
+        const response = await fetch(`https://api.labelary.com/v1/printers/${dpmm}/labels/${width}x${height}/${0}`, {
             method: "POST",
             body: code,
             headers: {
