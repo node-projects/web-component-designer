@@ -4,7 +4,7 @@ import { IDemoView } from '@node-projects/web-component-designer/src/elements/wi
 
 export class ZplDemoView extends BaseCustomWebComponentConstructorAppend implements IDemoView {
 
-    static override readonly template = html`<iframe id="iframe"></iframe>`;
+    static override readonly template = html`<h2>Label generated via http://api.labelary.com/</h2><br><img id="image">`;
 
     static override readonly style = css`
         :host {
@@ -15,9 +15,8 @@ export class ZplDemoView extends BaseCustomWebComponentConstructorAppend impleme
             width: 100%;
             position: relative;
         }
-        iframe {
-            height: 100%;
-            width: 100%;
+        #image {
+            border: solid 1px black;
         }`;
 
     constructor() {
@@ -30,8 +29,19 @@ export class ZplDemoView extends BaseCustomWebComponentConstructorAppend impleme
     dispose(): void { }
 
     async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
-        const url = "https://labelary.com/viewer.html?zpl=" + encodeURIComponent(code);
-        (<HTMLIFrameElement>this._getDomElement('iframe')).src = url;
+        const width = 4;
+        const height = 6;
+        const dpmm = '24dpmm';
+
+        const response = await fetch(`http://api.labelary.com/v1/printers/${dpmm}/labels/${width}x${height}/${0}`, {
+            method: "POST",
+            body: code,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'image/png'
+            },
+        });
+        (<HTMLIFrameElement>this._getDomElement('image')).src = URL.createObjectURL(await response.blob());;
     }
 }
 
