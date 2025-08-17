@@ -5,7 +5,7 @@ import { IScriptMultiplexValue } from "../interfaces/IScriptMultiplexValue.js";
 import { VisualisationElementScript } from "../interfaces/VisualisationElementScript.js";
 import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { Script } from "./Script.js";
-import { ScriptCommands } from "./ScriptCommands.js";
+import { ScriptCommands, signalTarget } from "./ScriptCommands.js";
 import Long from 'long'
 import { ScriptUpgrades } from "./ScriptUpgrader.js";
 
@@ -69,6 +69,30 @@ export class ScriptSystem {
     }
   }
 
+  async getValueFromTarget(target: signalTarget, name: string, context: contextType) {
+    if (target === 'property') {
+      return (<any>context).instance[name];
+    } else if (target === 'elementProperty') {
+      return (<any>context).element[name];
+    } else if (target === 'rootProperty') {
+      return (<any>context).root[name];
+    } else {
+      return (await this._visualizationHandler.getState(this.getSignalName(name, context)))?.val;
+    }
+  }
+
+  async setValueOnTarget(target: signalTarget, name: string, context: contextType, value: any) {
+    if (target === 'property') {
+      (<any>context).instance[name] = value;
+    } else if (target === 'elementProperty') {
+      (<any>context).element[name] = value;
+    } else if (target === 'rootProperty') {
+      (<any>context).root[name] = value;
+    } else {
+      await this._visualizationHandler.setState(this.getSignalName(name, context), value);
+    }
+  }
+
   async runExternalScript(name: string, type: string) {
     //TODO...
   }
@@ -106,62 +130,72 @@ export class ScriptSystem {
 
       case 'ToggleSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
-        await this._visualizationHandler.setState(this.getSignalName(signal, context), !state?.val);
+        const target = await this.getValue(command.target, context);
+        let state = await this.getValueFromTarget(target, signal, context);
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), !state);
         break;
       }
       case 'SetSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        await this._visualizationHandler.setState(this.getSignalName(signal, context), await this.getValue(command.value, context));
+        const target = await this.getValue(command.target, context);
+        await this.setValueOnTarget(target, signal, context, await this.getValue(command.value, context));
         break;
       }
       case 'IncrementSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
-        await this._visualizationHandler.setState(this.getSignalName(signal, context), (<number>state.val + await this.getValue(command.value, context)));
+        const target = await this.getValue(command.target, context);
+        let state = <number>await this.getValueFromTarget(target, signal, context);
+        const val = <number>state + await this.getValue(command.value, context);
+        await this.setValueOnTarget(target, signal, context, val);
         break;
       }
       case 'DecrementSignalValue': {
         const signal = await this.getValue(command.signal, context);
-        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
-        await this._visualizationHandler.setState(this.getSignalName(signal, context), <any>state.val - await this.getValue(command.value, context));
+        const target = await this.getValue(command.target, context);
+        let state = <number>await this.getValueFromTarget(target, signal, context);
+        const val = <number>state - await this.getValue(command.value, context);
+        await this.setValueOnTarget(target, signal, context, val);
         break;
       }
       case 'CalculateSignalValue': {
         const formula = await this.getValue(command.formula, context);
+        const target = await this.getValue(command.target, context);
         const targetSignal = await this.getValue(command.targetSignal, context);
         let nm = await this.parseStringWithValues(formula, context);
         let result = eval(nm);
-        await this._visualizationHandler.setState(this.getSignalName(targetSignal, context), result);
+        await this.setValueOnTarget(target, targetSignal, context, result);
         break;
       }
 
       case 'SetBitInSignal': {
         const signal = await this.getValue(command.signal, context);
         const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
-        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
+        const target = await this.getValue(command.target, context);
+        let state = <number>await this.getValueFromTarget(target, signal, context);
         let mask = Long.fromNumber(1).shiftLeft(bitNumber);
-        const newVal = Long.fromNumber(<number>state.val).or(mask).toNumber();
-        await this._visualizationHandler.setState(this.getSignalName(signal, context), newVal);
+        const newVal = Long.fromNumber(<number>state).or(mask).toNumber();
+        await this.setValueOnTarget(target, signal, context, newVal);
         break;
       }
       case 'ClearBitInSignal': {
         const signal = await this.getValue(command.signal, context);
         const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
-        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
+        const target = await this.getValue(command.target, context);
+        let state = <number>await this.getValueFromTarget(target, signal, context);
         let mask = Long.fromNumber(1).shiftLeft(bitNumber);
         mask.negate();
-        const newVal = Long.fromNumber(<number>state.val).and(mask).toNumber();
-        await this._visualizationHandler.setState(this.getSignalName(signal, context), newVal);
+        const newVal = Long.fromNumber(<number>state).and(mask).toNumber();
+        await this.setValueOnTarget(target, signal, context, newVal);
         break;
       }
       case 'ToggleBitInSignal': {
         const signal = await this.getValue(command.signal, context);
         const bitNumber = await this.getValue(command.bitNumber ?? 0, context);
-        let state = await this._visualizationHandler.getState(this.getSignalName(signal, context));
+        const target = await this.getValue(command.target, context);
+        let state = <number>await this.getValueFromTarget(target, signal, context);
         let mask = Long.fromNumber(1).shiftLeft(bitNumber);
-        const newVal = Long.fromNumber(<number>state.val).xor(mask).toNumber();
-        await this._visualizationHandler.setState(this.getSignalName(signal, context), newVal);
+        const newVal = Long.fromNumber(<number>state).xor(mask).toNumber();
+        await this.setValueOnTarget(target, signal, context, newVal);
         break;
       }
 

@@ -12,6 +12,14 @@ export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog |
   CopySignalValuesFromFolder | ShowMessageBox |
   ExportSignalValuesAsJson | ImportSignalValuesFromJson;
 
+/**
+ * signal - a signal (the default)
+ * property - a property defined in the current screen/control
+ * elementProperty - a property defined on the elment raising the event
+ * rootProperty - a property defined on the root element
+ */
+export type signalTarget = 'signal' | 'property' | 'elementProperty' | 'rootProperty';
+
 /* 
 TODO:
 Indirect Values in Scripts:
@@ -126,6 +134,7 @@ export interface SetSignalValue {
    * @TJS-format signal
    */
   signal: string;
+  target: signalTarget;
   value: any;
   additionalData?: string;
 }
@@ -137,6 +146,7 @@ export interface ToggleSignalValue {
    * @TJS-format signal
    */
   signal: string;
+  target: signalTarget;
   additionalData?: string;
 }
 
@@ -161,6 +171,7 @@ export interface IncrementSignalValue {
    */
   signal: string;
   value: number;
+  target: signalTarget;
   additionalData?: string;
 }
 
@@ -176,6 +187,7 @@ export interface CalculateSignalValue {
    * Example: {adapter.0.level} * 100 + 30
    */
   formula: string;
+  target: signalTarget;
   additionalData?: string;
 }
 
@@ -187,6 +199,7 @@ export interface DecrementSignalValue {
    */
   signal: string;
   value: number;
+  target: signalTarget;
   additionalData?: string;
 }
 
@@ -200,6 +213,7 @@ export interface SetBitInSignal {
   /**
    * @default 0
    */
+  target: signalTarget;
   bitNumber: number;
   additionalData?: string;
 }
@@ -213,6 +227,7 @@ export interface ClearBitInSignal {
   /**
    * @default 0
    */
+  target: signalTarget;
   bitNumber: number;
   additionalData?: string;
 }
@@ -226,6 +241,7 @@ export interface ToggleBitInSignal {
   /**
    * @default 0
    */
+  target: signalTarget;
   bitNumber: number;
   additionalData?: string;
 }

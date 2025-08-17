@@ -1,0 +1,39 @@
+;,[ are not allowed in bindings, so they could be used for a short form...
+
+Infos about bindings:
+
+?  -> Signal in Property of Container
+?? -> Value of Property of Container
+?$ -> Value of Attribute of Container
+#  -> Signal in Property of Target
+## -> Value of Property of Target
+#$ -> Value of Attribute of Target
+$  -> Signal config
+§  -> access special context
+
+;  -> multiple signals
+
+{} -> indirect signal
+
+*/
+
+
+
+
+/*
+
+Infos about bindings:
+
+?  -> Access Container
+#  -> Access Target
+
+?
+
+$  -> Signal config
+§  -> access special context
+##  -> Signal in Property of Target
+??  -> Signal in Property of Container
+?$ -> Value of Attribute of Container
+#$ -> Value of Attribute of Target
+
+{} -> indirect signal
