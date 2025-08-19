@@ -71,11 +71,9 @@ export class ScriptSystem {
 
   async getValueFromTarget(target: signalTarget, name: string, context: contextType) {
     if (target === 'property') {
-      return (<any>context).instance[name];
+      return (<any>context).root[name];
     } else if (target === 'elementProperty') {
       return (<any>context).element[name];
-    } else if (target === 'rootProperty') {
-      return (<any>context).root[name];
     } else {
       return (await this._visualizationHandler.getState(this.getSignalName(name, context)))?.val;
     }
@@ -83,11 +81,9 @@ export class ScriptSystem {
 
   async setValueOnTarget(target: signalTarget, name: string, context: contextType, value: any) {
     if (target === 'property') {
-      (<any>context).instance[name] = value;
+      (<any>context).root[name] = value;
     } else if (target === 'elementProperty') {
       (<any>context).element[name] = value;
-    } else if (target === 'rootProperty') {
-      (<any>context).root[name] = value;
     } else {
       await this._visualizationHandler.setState(this.getSignalName(name, context), value);
     }
