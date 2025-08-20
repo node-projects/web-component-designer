@@ -64,12 +64,12 @@ export function arraysEqual<T>(a: T[], b: T[]) {
 }
 
 let nullObject: {};
-export function deepValue(obj, path: string, returnNullObject = false) {
+export function deepValue(obj, path: string, returnNullObject = false, splitter = '.') {
     if (path === undefined || path === null) {
         return obj;
     }
 
-    const pathParts = path.split('.');
+    const pathParts = path.split(splitter);
     for (let i = 0; i < pathParts.length; i++) {
         if (obj != null) {
             obj = obj[pathParts[i]];
@@ -80,12 +80,12 @@ export function deepValue(obj, path: string, returnNullObject = false) {
     return obj;
 }
 
-export function setDeepValue(obj, path: string, value) {
+export function setDeepValue(obj, path: string, value, splitter = '.') {
   if (path === undefined || path === null) {
       return;
   }
 
-  const pathParts = path.split('.');
+  const pathParts = path.split(splitter);
   for (let i = 0; i < pathParts.length - 1; i++) {
       if (obj != null) {
           let newObj = obj[pathParts[i]];
