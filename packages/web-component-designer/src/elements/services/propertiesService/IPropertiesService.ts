@@ -23,6 +23,8 @@ export interface IPropertiesService extends IService {
   getBinding(designItems: IDesignItem[], property: IProperty): IBinding
   getPropertyTarget(designItem: IDesignItem, property: IProperty): BindingTarget;
 
+  getPropertyNameSuggestions?(designItems: IDesignItem[]): string[];
+
   setValue(designItems: IDesignItem[], property: IProperty, value: any) : Promise<void>;
   clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value');
   isSet(designItems: IDesignItem[], property: IProperty): ValueType;

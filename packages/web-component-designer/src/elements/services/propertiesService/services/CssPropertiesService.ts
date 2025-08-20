@@ -28,6 +28,7 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
       "box-shadow",
       "opacity",
       "position",
+      "align-content",
     ],
     "font": [
       "font-family",
@@ -49,12 +50,13 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
     "position",
     "grid-template-columns",
     "grid-template-rows",
+    "gap",
     "column-gap",
     "row-gap",
     "align-content",
     "justify-content",
     "align-items",
-    "justify-items",
+    "justify-items"
   ];
 
   public gridChild = [
@@ -72,7 +74,8 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
     "flex-wrap",
     "align-content",
     "justify-content",
-    "align-items"
+    "align-items",
+    "gap"
   ];
 
   public flexChild = [
@@ -130,6 +133,7 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
       default:
         return {
           name,
+          //attributeName: PropertiesHelper.camelToDashCase(name),
           type: cssProperties[camelName]?.type ?? 'string',
           values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
           service: this,

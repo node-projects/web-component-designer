@@ -19,6 +19,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
   private _lastClassType: any;
+  private _addCounter: number = 0;
 
   public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
   public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
@@ -231,8 +232,11 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         if (p.type == 'addNew') {
           let input = <HTMLInputElement>editor.element;
           input.disabled = true;
+          input.id = "addNew_input_" + (++this._addCounter);
           let label = document.createElement("input");
           label.value = p.name;
+          label.type = "text";
+          label.id = "addNew_label_" + this._addCounter;
           label.onkeyup = e => {
             if (e.key == 'Enter' && label.value) {
               p.name = label.value;
@@ -241,8 +245,19 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
               input.focus();
             }
           }
+          if (p.service.getPropertyNameSuggestions) {
+            const sug = p.service.getPropertyNameSuggestions(null); //TODO: design items?
+            const dl = document.createElement("datalist");
+            dl.id = "addNew_" + this._addCounter + "_datalist";
+            for (let s of sug) {
+              const op = document.createElement("option");
+              op.value = s;
+              dl.append(op);
+            }
+            this._div.appendChild(dl);
+            label.setAttribute('list', dl.id);
+          }
           this._div.appendChild(label);
-
         } else {
           if (!p.renamable) {
             let label = document.createElement("label");
@@ -255,6 +270,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             this._div.appendChild(label);
           } else {
             let label = document.createElement("input");
+            label.id = 'label_' + p.name;
             let input = <HTMLInputElement>editor.element;
             label.value = p.name;
             label.onkeyup = async e => {
@@ -270,8 +286,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             this._div.appendChild(label);
           }
         }
-
-        editor.element.id = p.name;
+        if (p.name)
+          editor.element.id = p.name;
         this._div.appendChild(editor.element);
 
         this._propertyMap.set(p, { isSetElement: rect, editor: editor });

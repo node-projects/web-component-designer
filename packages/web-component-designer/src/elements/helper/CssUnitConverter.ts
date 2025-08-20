@@ -1,4 +1,4 @@
-//unsupported: ex, ch, svw, svh, vw, lvh, dvw, dvh
+//unsupported: ex, ch, svw, svh, vw, lvh, dvw, dvh, vi, ic, ric
 
 const units = ['px', 'cm', 'mm', 'q', 'in', 'pc', 'pt', 'rem', 'em', 'vw', 'vh', 'vmin', 'vmax', 'lh', 'rlh', '%', 'ms', 's', 'deg', 'rad', 'grad', 'turn', 'cqw', 'cqh', 'cqi', 'cqb', 'cqmin', 'cqmax', 'fr'];
 const pattern = new RegExp(`^([\-\+]?(?:\\d+(?:\\.\\d+)?))(${units.join('|')})$`, 'i');

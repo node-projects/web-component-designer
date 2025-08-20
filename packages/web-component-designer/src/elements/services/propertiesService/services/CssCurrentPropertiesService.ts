@@ -8,20 +8,20 @@ import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
 import cssProperties from "./CssProperties.json" with { type: 'json' };
 import { BindingTarget } from '../../../item/BindingTarget.js';
-import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 import { AbstractPropertiesService } from './AbstractPropertiesService.js';
+import { CssPropertiesService } from './CssPropertiesService.js';
 
 const localName = '&lt;local&gt;';
 
-export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
+export class CssCurrentPropertiesService extends CssPropertiesService {
 
   public override getRefreshMode(designItem: IDesignItem) {
     return RefreshMode.fullOnValueChange;
   }
 
   constructor() {
-    super();
+    super(null);
     this.name = 'styles';
   }
 
@@ -31,6 +31,10 @@ export class CssCurrentPropertiesService extends AbstractCssPropertiesService {
 
   override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
+  }
+
+  getPropertyNameSuggestions(designItems: IDesignItem[]): string[] {
+    return Object.keys(cssProperties).map(x => PropertiesHelper.camelToDashCase(x));
   }
 
   override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
