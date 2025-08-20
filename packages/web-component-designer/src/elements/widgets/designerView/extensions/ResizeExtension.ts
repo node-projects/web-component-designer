@@ -55,7 +55,6 @@ export class ResizeExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    //#region Resizer circles
     let transformedCornerPoints = this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
     if (!transformedCornerPoints)
       return;
@@ -77,7 +76,6 @@ export class ResizeExtension extends AbstractExtension {
 
       this._circle7 = this._drawResizerOverlay(transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'se-resize', this._circle7);
     }
-    //#endregion Circles
   }
 
   _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
@@ -96,6 +94,9 @@ export class ResizeExtension extends AbstractExtension {
     event.stopPropagation();
     const currentPoint = this.designerCanvas.getNormalizedEventCoordinates(event);
 
+    //TODO: calculate new position and size in the extension
+    //aply the values with the position service
+    //don't switch from left positioning to right and so on...
     switch (event.type) {
       case EventNames.PointerDown:
         const cx = parseFloat(circle.getAttribute('cx'));
@@ -108,13 +109,11 @@ export class ResizeExtension extends AbstractExtension {
         this._initialComputedTransformOrigins = [];
         this._initialTransformOrigins = [];
 
-        //#region Calc elements' dimension
         const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
         (<HTMLElement>this.extendedItem.element).style.transform = '';
         let rect = this.extendedItem.element.getBoundingClientRect();
         (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
-        //#endregion Calc element's dimension
-
+       
         let contentBoxOffset: IPoint = { x: 0, y: 0 };
         if (getComputedStyle(<HTMLElement>this.extendedItem.element).boxSizing == 'content-box') {
           contentBoxOffset = getContentBoxContentOffsets(<HTMLElement>this.extendedItem.element);
@@ -159,6 +158,7 @@ export class ResizeExtension extends AbstractExtension {
 
           let deltaX = transformedTrack.x;
           let deltaY = transformedTrack.y;
+
           if (event.shiftKey) {
             deltaX = deltaX < deltaY ? deltaX : deltaY;
             deltaY = deltaX;

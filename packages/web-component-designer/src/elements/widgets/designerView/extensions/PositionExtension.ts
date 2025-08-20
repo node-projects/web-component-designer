@@ -21,6 +21,9 @@ export class PositionExtension extends AbstractExtension {
 
   _oldValues = [];
   override refresh() {
+
+    //TODO: show wich position is docked (no dashed line, but full). klick on value disables or enables docking? Disabling enables parent side, enabling both removes width or height.
+    
     const itemRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.element);
     const itemParentRect = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.parent.element);
 
