@@ -66,7 +66,7 @@
             "safe",
             "unsafe"
         ]
-    },    
+    },
     "alignmentBaseline": {},
     "all": {},
     "animation": {},
@@ -320,15 +320,15 @@
     },
     "fieldSizing": {},
     "float": {
-      "type": "list",
-      "values": [
-          "none",
-          "left",
-          "right",
-          "inline-start",
-          "inline-end"
-      ]
-  },
+        "type": "list",
+        "values": [
+            "none",
+            "left",
+            "right",
+            "inline-start",
+            "inline-end"
+        ]
+    },
     "floodColor": {
         "type": "color"
     },
@@ -343,6 +343,7 @@
     "fontOpticalSizing": {},
     "fontPalette": {},
     "fontSize": {},
+    "fontSizeAdjust": {},
     "fontStretch": {},
     "fontStyle": {},
     "fontSynthesis": {},
@@ -421,7 +422,7 @@
             "safe",
             "unsafe"
         ]
-    },    
+    },
     "justifyItems": {
         "type": "list",
         "values": [
@@ -441,7 +442,7 @@
             "safe",
             "unsafe"
         ]
-    },    
+    },
     "justifySelf": {
         "type": "list",
         "values": [
@@ -450,7 +451,7 @@
             "flex-start",
             "flex-end",
             "self-start",
-            "self-end",            
+            "self-end",
             "center",
             "normal",
             "baseline",
@@ -463,7 +464,7 @@
             "safe",
             "unsafe"
         ]
-    },    
+    },
     "left": {},
     "letterSpacing": {},
     "lightingColor": {
@@ -623,12 +624,21 @@
     "rowGap": {
         "type": "length"
     },
+    "rubyAlign": {},
     "rubyPosition": {},
     "rx": {},
     "ry": {},
     "scale": {},
-    "scrollbarWidth": {},
     "scrollbarColor": {},
+    "scrollbarGutter": {
+        "type": "list",
+        "values": [
+            "auto",
+            "stable",
+            "stable both-edges"
+        ]
+    },
+    "scrollbarWidth": {},
     "scrollBehavior": {},
     "scrollMargin": {},
     "scrollMarginBlock": {},
@@ -655,11 +665,18 @@
     "scrollSnapAlign": {},
     "scrollSnapStop": {},
     "scrollSnapType": {},
-    "scrollbarGutter": {},
     "shapeImageThreshold": {},
     "shapeMargin": {},
     "shapeOutside": {},
-    "shapeRendering": {},
+    "shapeRendering": {
+        "type": "list",
+        "values": [
+            "auto",
+            "optimizeSpeed",
+            "crispEdges",
+            "geometricPrecision"
+        ]
+    },
     "size": {},
     "sizeAdjust": {},
     "speak": {},
@@ -697,12 +714,7 @@
             "center",
             "justify",
             "justify-all",
-            "match-parent",
-            "inherit",
-            "initial",
-            "revert",
-            "revert-layer",
-            "unset"
+            "match-parent"
         ]
     },
     "textAlignLast": {},
@@ -732,6 +744,22 @@
     "textUnderlineOffset": {},
     "textUnderlinePosition": {},
     "textWrap": {},
+    "textWrapMode": {
+        "type": "list",
+        "values": [
+            "wrap",
+            "nowrap"
+        ]
+    },
+    "textWrapStyle": {
+        "type": "list",
+        "values": [
+            "auto",
+            "balance",
+            "pretty",
+            "stable"
+        ]
+    },
     "top": {},
     "touchAction": {},
     "transform": {},
@@ -740,6 +768,7 @@
     "transformStyle": {},
     "transition": {},
     "transitionDelay": {},
+    "transitionBehavior": {},
     "transitionDuration": {},
     "transitionProperty": {},
     "transitionTimingFunction": {},
