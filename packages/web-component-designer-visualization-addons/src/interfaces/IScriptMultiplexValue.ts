@@ -8,8 +8,9 @@ export class IScriptMultiplexValue {
      * complexString - a string with signals (contained in {})
      * complexSignal - read the value from a signal wich name is build here (it can contain other signals in {})
      * expression - js expression, 'ctx' is context object
+     * elementProperty - a property defined on the element raising the event
      */
-    source: 'signal' | 'property' | 'event' | 'parameter' | 'complexString' | 'complexSignal' | 'expression' | 'context';
+    source: 'signal' | 'property' | 'event' | 'parameter' | 'complexString' | 'complexSignal' | 'expression' | 'context' | 'elementProperty';
     /**
      * Name of the signal, the property of the component or the parameter of the script
      * or for example in a event : srcElement.value to get the value of a input wich raises the event

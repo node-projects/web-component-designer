@@ -231,7 +231,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
   //Converter from TypscriptJsonSchema to our Property list...
 
   private async addPossibleCommands() {
-    let commands = Object.keys(this.scriptCommandsTypeInfo.definitions);
+    let commands = Object.keys(this.scriptCommandsTypeInfo.definitions).filter(x => this.scriptCommandsTypeInfo.definitions[x].type == 'object');
 
     for (let c of commands) {
       if (c == 'ScriptCommands')

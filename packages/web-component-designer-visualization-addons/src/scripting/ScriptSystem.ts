@@ -1,4 +1,4 @@
-import { sleep } from "@node-projects/web-component-designer/dist/elements/helper/Helper.js";
+import { deepValue, setDeepValue, sleep } from "@node-projects/web-component-designer/dist/elements/helper/Helper.js";
 import { generateEventCodeFromBlockly } from "../blockly/BlocklyJavascriptHelper.js";
 import { parseBindingString } from "../helpers/BindingsHelper.js";
 import { IScriptMultiplexValue } from "../interfaces/IScriptMultiplexValue.js";
@@ -71,9 +71,9 @@ export class ScriptSystem {
 
   async getValueFromTarget(target: signalTarget, name: string, context: contextType) {
     if (target === 'property') {
-      return (<any>context).root[name];
+      return deepValue((<any>context).root, name);
     } else if (target === 'elementProperty') {
-      return (<any>context).element[name];
+      return deepValue((<any>context).element, name);
     } else {
       return (await this._visualizationHandler.getState(this.getSignalName(name, context)))?.val;
     }
@@ -81,9 +81,9 @@ export class ScriptSystem {
 
   async setValueOnTarget(target: signalTarget, name: string, context: contextType, value: any) {
     if (target === 'property') {
-      (<any>context).root[name] = value;
+      setDeepValue((<any>context).root, name, value);
     } else if (target === 'elementProperty') {
-      (<any>context).element[name] = value;
+      setDeepValue((<any>context).element, name, value);
     } else {
       await this._visualizationHandler.setState(this.getSignalName(name, context), value);
     }
@@ -346,7 +346,10 @@ export class ScriptSystem {
     if (typeof value === 'object') {
       switch ((<IScriptMultiplexValue><any>value).source) {
         case 'property': {
-          return outerContext.root[(<IScriptMultiplexValue><any>value).name];
+          return deepValue(outerContext.root, (<IScriptMultiplexValue><any>value).name);
+        }
+        case 'elementProperty': {
+          return deepValue(outerContext.element, (<IScriptMultiplexValue><any>value).name);
         }
         case 'signal': {
           let sng = await this._visualizationHandler.getState(this.getSignalName((<IScriptMultiplexValue><any>value).name, outerContext));
@@ -355,15 +358,14 @@ export class ScriptSystem {
         case 'event': {
           let obj = outerContext.event;
           if ((<IScriptMultiplexValue><any>value).name)
-            obj = ScriptSystem.extractPart(obj, (<IScriptMultiplexValue><any>value).name);
+            obj = deepValue(obj, (<IScriptMultiplexValue><any>value).name);
           return <T>obj;
         }
         case 'parameter': {
           return outerContext.parameters[(<IScriptMultiplexValue><any>value).name];
         }
         case 'context': {
-          const obj = ScriptSystem.extractPart(outerContext, (<IScriptMultiplexValue><any>value).name);
-          return obj;
+          return deepValue(outerContext, (<IScriptMultiplexValue><any>value).name);
         }
         case 'complexString': {
           let text = (<IScriptMultiplexValue><any>value).name;
@@ -426,14 +428,6 @@ export class ScriptSystem {
     if (name[0] === '.')
       return outerContext.relativeSignalsPath + name;
     return name;
-  }
-
-  static extractPart(obj: any, propertyPath: string) {
-    let retVal = obj;
-    for (let p of propertyPath.split('.')) {
-      retVal = retVal?.[p];
-    }
-    return retVal;
   }
 
   public createScriptContext(root: HTMLElement, event: Event, element: Element, parameters: Record<string, any>, relativeSignalsPath: string): any {

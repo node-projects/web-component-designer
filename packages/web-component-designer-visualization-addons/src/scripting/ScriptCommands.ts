@@ -17,7 +17,7 @@ export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog |
  * property - a property defined in the current screen/control
  * elementProperty - a property defined on the element raising the event
  */
-export type signalTarget = 'signal' | 'property' | 'elementProperty';
+export declare type signalTarget = 'signal' | 'property' | 'elementProperty';
 
 /* 
 TODO:
