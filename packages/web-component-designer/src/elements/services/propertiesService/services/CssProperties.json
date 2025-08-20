@@ -223,7 +223,9 @@
     "colorScheme": {},
     "columnCount": {},
     "columnFill": {},
-    "columnGap": {},
+    "columnGap": {
+        "type": "length"
+    },
     "columnRule": {},
     "columnRuleColor": {
         "type": "color"
@@ -316,6 +318,7 @@
             "wrap-reverse"
         ]
     },
+    "fieldSizing": {},
     "float": {
       "type": "list",
       "values": [
@@ -354,7 +357,9 @@
     "fontVariationSettings": {},
     "fontWeight": {},
     "forcedColorAdjust": {},
-    "gap": {},
+    "gap": {
+        "type": "length"
+    },
     "grid": {},
     "gridArea": {},
     "gridAutoColumns": {},
@@ -362,12 +367,18 @@
     "gridAutoRows": {},
     "gridColumn": {},
     "gridColumnEnd": {},
-    "gridColumnGap": {},
+    "gridColumnGap": {
+        "type": "length"
+    },
     "gridColumnStart": {},
-    "gridGap": {},
+    "gridGap": {
+        "type": "length"
+    },
     "gridRow": {},
     "gridRowEnd": {},
-    "gridRowGap": {},
+    "gridRowGap": {
+        "type": "length"
+    },
     "gridRowStart": {},
     "gridTemplate": {},
     "gridTemplateAreas": {},
@@ -598,7 +609,8 @@
             "static",
             "relative",
             "absolute",
-            "fixed"
+            "fixed",
+            "anchor"
         ]
     },
     "prefix": {},
@@ -608,11 +620,15 @@
     "resize": {},
     "right": {},
     "rotate": {},
-    "rowGap": {},
+    "rowGap": {
+        "type": "length"
+    },
     "rubyPosition": {},
     "rx": {},
     "ry": {},
     "scale": {},
+    "scrollbarWidth": {},
+    "scrollbarColor": {},
     "scrollBehavior": {},
     "scrollMargin": {},
     "scrollMarginBlock": {},
@@ -715,6 +731,7 @@
     "textTransform": {},
     "textUnderlineOffset": {},
     "textUnderlinePosition": {},
+    "textWrap": {},
     "top": {},
     "touchAction": {},
     "transform": {},
