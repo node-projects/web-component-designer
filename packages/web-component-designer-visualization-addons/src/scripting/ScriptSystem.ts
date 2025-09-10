@@ -46,6 +46,8 @@ export class ScriptSystem {
           case '<': res = value1 < value2; break;
           case '>=': res = value1 >= value2; break;
           case '<=': res = value1 <= value2; break;
+          case '&&': res = value1 && value2; break;
+          case '||': res = value1 || value2; break;
         }
         if (res) {
           await this.runExternalScript(await this.getValue(c.trueScriptName, outerContext), await this.getValue(c.trueScriptType, outerContext));
@@ -374,7 +376,6 @@ export class ScriptSystem {
           }
           return null;
         }
-
         case 'complexSignal': {
           let text = (<IScriptMultiplexValue><any>value).name;
           if (text != null) {
@@ -384,7 +385,6 @@ export class ScriptSystem {
           }
           return null;
         }
-
         case 'expression': {
           //@ts-ignore
           var ctx = outerContext;

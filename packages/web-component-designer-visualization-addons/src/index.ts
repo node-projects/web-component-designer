@@ -13,11 +13,11 @@ export * from './components/EventAssignment.js';
 
 export * from './helpers/BindingsHelper.js';
 
-export * from './interfaces/IScriptMultiplexValue.js';
-export * from './interfaces/VisualisationElementScript.js';
-export * from './interfaces/VisualizationBinding.js';
-export * from './interfaces/VisualizationHandler.js';
-export * from './interfaces/VisualizationShell.js';
+export type * from './interfaces/IScriptMultiplexValue.js';
+export type * from './interfaces/VisualisationElementScript.js';
+export type * from './interfaces/VisualizationBinding.js';
+export type * from './interfaces/VisualizationHandler.js';
+export type * from './interfaces/VisualizationShell.js';
 
 export * from './scripting/Script.js';
 export * from './scripting/ScriptCommands.js';

@@ -1,4 +1,4 @@
-export class IScriptMultiplexValue {
+export interface IScriptMultiplexValue {
      /**
      * signal - read the value from a Signal
      * property - read the value from a property of the customControl (not usable in screens)

@@ -13,7 +13,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                 <div style="grid-column: 1/3">
                     <div style="display: flex; flex-direction: column;">
                         <div class="row">
-                            <span style="cursor: pointer;" title="to use multiple objects, seprate them with semicolon (;).&#010;Access signal objects in properties via ?propertyName, access the propertyValue via ??propertyName.&#010;Access signal objects in properties of the target via #propertyName, access a propertyValue of the target via ##propertyName.&#010;Bind to signal configurations via $objectId.&#010;You could also use signals inside of a Signal Name via {name}">objects</span>
+                            <span style="cursor: pointer;" title="to use multiple objects, seprate them with semicolon (;).&#010;Access signal objects in properties via ?propertyName, access the propertyValue via ??propertyName.&#010;Access signal objects in properties of the target via #propertyName, access a propertyValue of the target via ##propertyName.&#010;Bind to signal configurations via $objectId.&#010;Bind to special values via §name (if supported by your framework).&#010;You could also use signals inside of a Signal Name via {name}">objects</span>
                         </div>
                         <div id="groupObjectName" style="display:flex;align-items: flex-end;">
                             <input id="objectName" class="row" value="{{?this.objectNames::change}}" style="flex-grow: 1;">

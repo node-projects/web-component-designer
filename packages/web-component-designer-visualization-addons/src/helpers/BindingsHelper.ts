@@ -6,7 +6,7 @@ import { PropertiesHelper } from "@node-projects/web-component-designer/dist/ele
 
 //;,[ are not allowed in bindings, so they could be used for a short form...
 
-export type SpecialValueHandler = { valueProvider: (propertyName: string, context: { element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement, [key: string]: any }) => any, valueChangedCallbacks: Map<string, (() => void)[]> }
+export type SpecialValueHandler = { valueProvider: (propertyName: string, context: { element: Element, binding?: namedBinding, relativeSignalPath: string, root: HTMLElement, [key: string]: any }) => Promise<any> | any, valueChangedCallbacks: Map<string, (() => void)[]> }
 
 export const bindingPrefixProperty = 'bind-prop:';
 export const bindingPrefixAttribute = 'bind-attr:';
@@ -71,7 +71,7 @@ class IndirectSignal {
   private element: Element;
   private relativeSignalPath: string;
 
-  constructor(bindingsHelper: BindingsHelper, visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element, relativeSignalPath: string, root: HTMLElement) {
+  constructor(bindingsHelper: BindingsHelper, visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler) {
     this.visualizationHandler = visualizationHandler;
     this.valueChangedCb = valueChangedCb;
     this.element = element;
@@ -83,12 +83,12 @@ class IndirectSignal {
       if (nm[0] === '?' && nm[1] === '?') {
         const propNm = nm.substring(2);
         if (!propNm.includes('.')) {
-        this.handleValueChanged(root[propNm], i);
+          this.handleValueChanged(root[propNm], i);
 
-        const evtCallback = () => this.handleValueChanged(root[propNm], i);
-        const evtName = bindingsHelper.getChangedEventName(root, propNm);
-        root.addEventListener(evtName, (evtCallback));
-        this.cleanupCalls.push(() => root.removeEventListener(evtName, evtCallback));
+          const evtCallback = () => this.handleValueChanged(root[propNm], i);
+          const evtName = bindingsHelper.getChangedEventName(root, propNm);
+          root.addEventListener(evtName, (evtCallback));
+          this.cleanupCalls.push(() => root.removeEventListener(evtName, evtCallback));
         } else {
           const val = getNestedProperty(root, propNm);
           this.handleValueChanged(val, i);
@@ -97,21 +97,42 @@ class IndirectSignal {
       } else if (nm[0] === '#' && nm[1] === '#') {
         const propNm = nm.substring(2);
         if (!propNm.includes('.')) {
-        this.handleValueChanged(element[propNm], i);
+          this.handleValueChanged(element[propNm], i);
 
-        const evtCallback = () => this.handleValueChanged(element[propNm], i);
-        const evtName = bindingsHelper.getChangedEventName(element, propNm);
-        element.addEventListener(evtName, (evtCallback));
-        this.cleanupCalls.push(() => element.removeEventListener(evtName, evtCallback));
+          const evtCallback = () => this.handleValueChanged(element[propNm], i);
+          const evtName = bindingsHelper.getChangedEventName(element, propNm);
+          element.addEventListener(evtName, (evtCallback));
+          this.cleanupCalls.push(() => element.removeEventListener(evtName, evtCallback));
         } else {
           const val = getNestedProperty(element, propNm);
           this.handleValueChanged(val, i);
         }
         continue;
+      } else if (nm[0] === '§') {
+        const mS = nm.substring(1);
+        const value = specialValueHandler.valueProvider(mS, { element, relativeSignalPath, root });
+        if (value instanceof Promise)
+          value.then(v => this.handleValueChanged(v, i));
+        else
+          this.handleValueChanged(value, i);
+        if (!specialValueHandler.valueChangedCallbacks)
+          specialValueHandler.valueChangedCallbacks = new Map();
+        let changeList = specialValueHandler.valueChangedCallbacks.get(mS);
+        if (changeList == null) {
+          changeList = [];
+          specialValueHandler.valueChangedCallbacks.set(mS, changeList);
+        }
+        changeList.push(() => {
+          const value = specialValueHandler.valueProvider(mS, { element, relativeSignalPath, root })
+          if (value instanceof Promise)
+            value.then(v => this.handleValueChanged(v, i));
+          else
+            this.handleValueChanged(value, i);
+        });
       } else if (nm[0] === '?') {
         //TODO: react to changes of signal name in prop
         if (!nm.includes('.')) {
-        nm = root[nm.substring(1)];
+          nm = root[nm.substring(1)];
         } else {
           nm = getNestedProperty(root, nm.substring(1));
         }
@@ -122,7 +143,7 @@ class IndirectSignal {
         } else {
           nm = getNestedProperty(root, nm.substring(1));
         }
-      }
+      } 
 
       let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
       const subscr = this.visualizationHandler.subscribeState(nm, cb);
@@ -768,8 +789,11 @@ export class BindingsHelper {
         });
       } else if (s[0] === '§') {
         const mS = s.substring(1);
-        const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root })
-        this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
+        const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root });
+        if (value instanceof Promise)
+          value.then(v => this.handleValueChanged(element, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
+        else
+          this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
         if (!specialValueHandler.valueChangedCallbacks)
           specialValueHandler.valueChangedCallbacks = new Map();
         let changeList = specialValueHandler.valueChangedCallbacks.get(mS);
@@ -779,11 +803,14 @@ export class BindingsHelper {
         }
         changeList.push(() => {
           const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root })
-          this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
+          if (value instanceof Promise)
+            value.then(v => this.handleValueChanged(element, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
+          else
+            this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
         });
       } else {
         if (s.includes('{')) {
-          let indirectSignal = new IndirectSignal(this, this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root);
+          let indirectSignal = new IndirectSignal(this, this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root, specialValueHandler);
           if (!cleanupCalls)
             cleanupCalls = [];
           cleanupCalls.push(() => indirectSignal.dispose());
@@ -904,43 +931,43 @@ export class BindingsHelper {
       if (typeof binding[1].converter === 'string') {
         v = this.namedConverterCallback(<string><never>binding[1].converter, v, element, binding);
       } else {
-      const stringValue = <string>(v != null ? v.toString() : v);
-      if (stringValue in binding[1].converter) {
-        v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[stringValue] + '`')(...valuesObject);
-      } else {
-        //@ts-ignore
-        const nr = parseFloat(v);
-        for (let c in binding[1].converter) {
-          if (c.length > 2 && c[0] === '>' && c[1] === '=') {
-            const wr = parseFloat(c.substring(2));
-            if (nr >= wr) {
-              v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-              break;
-            }
-          } else if (c.length > 2 && c[0] === '<' && c[1] === '=') {
-            const wr = parseFloat(c.substring(2));
-            if (nr <= wr) {
-              v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-              break;
-            }
-          } else if (c.length > 1 && c[0] === '>') {
-            const wr = parseFloat(c.substring(1));
-            if (nr > wr) {
-              v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-              break;
-            }
-          } else if (c.length > 1 && c[0] === '<') {
-            const wr = parseFloat(c.substring(1));
-            if (nr < wr) {
-              v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-              break;
-            }
-          } else {
-            const sp = c.split('-');
-            if (sp.length > 1) {
-              if ((sp[0] === '' || nr >= parseFloat(sp[0])) && (sp[1] === '' || parseFloat(sp[1]) >= nr)) {
+        const stringValue = <string>(v != null ? v.toString() : v);
+        if (stringValue in binding[1].converter) {
+          v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[stringValue] + '`')(...valuesObject);
+        } else {
+          //@ts-ignore
+          const nr = parseFloat(v);
+          for (let c in binding[1].converter) {
+            if (c.length > 2 && c[0] === '>' && c[1] === '=') {
+              const wr = parseFloat(c.substring(2));
+              if (nr >= wr) {
                 v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
                 break;
+              }
+            } else if (c.length > 2 && c[0] === '<' && c[1] === '=') {
+              const wr = parseFloat(c.substring(2));
+              if (nr <= wr) {
+                v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                break;
+              }
+            } else if (c.length > 1 && c[0] === '>') {
+              const wr = parseFloat(c.substring(1));
+              if (nr > wr) {
+                v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                break;
+              }
+            } else if (c.length > 1 && c[0] === '<') {
+              const wr = parseFloat(c.substring(1));
+              if (nr < wr) {
+                v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                break;
+              }
+            } else {
+              const sp = c.split('-');
+              if (sp.length > 1) {
+                if ((sp[0] === '' || nr >= parseFloat(sp[0])) && (sp[1] === '' || parseFloat(sp[1]) >= nr)) {
+                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                  break;
                 }
               }
             }
