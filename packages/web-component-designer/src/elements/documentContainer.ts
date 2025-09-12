@@ -44,11 +44,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _additionalStylesheets: IStylesheet[];
   public set additionalStylesheets(stylesheets: IStylesheet[]) {
     this._additionalStylesheets = stylesheets;
-    if (this.designerView.instanceServiceContainer.stylesheetService)
+    if (this.designerView.instanceServiceContainer.stylesheetService) {
       this.designerView.instanceServiceContainer.stylesheetService.setStylesheets(stylesheets);
-    if (!this._stylesheetChangedEventRegistered) {
-      this._stylesheetChangedEventRegistered = true;
-      this.designerView.instanceServiceContainer.stylesheetService.stylesheetChanged.on(e => this.additionalStylesheetChanged.emit({ name: e.name, newStyle: e.newStyle, oldStyle: e.oldStyle, changeSource: e.changeSource }));
+      if (!this._stylesheetChangedEventRegistered) {
+        this._stylesheetChangedEventRegistered = true;
+        this.designerView.instanceServiceContainer.stylesheetService.stylesheetChanged.on(e => this.additionalStylesheetChanged.emit({ name: e.name, newStyle: e.newStyle, oldStyle: e.oldStyle, changeSource: e.changeSource }));
+      }
     }
   };
   public get additionalStylesheets() {
