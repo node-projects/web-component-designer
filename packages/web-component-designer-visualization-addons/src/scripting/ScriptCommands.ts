@@ -2,7 +2,7 @@ export declare type ScriptCommands = RunnableScriptCommands |
   Comment | Condition | Exit | Label | Goto;
 
 export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog | CloseDialog |
-  ToggleSignalValue | SetSignalValue | IncrementSignalValue | DecrementSignalValue |
+  ToggleSignalValue | ToggleSignalValueFromList | SetSignalValue | IncrementSignalValue | DecrementSignalValue |
   SetBitInSignal | ClearBitInSignal | ToggleBitInSignal | Console | CalculateSignalValue |
   Javascript | SetElementProperty | Delay | SwitchLanguage |
   Login | Logout |
@@ -140,6 +140,18 @@ export interface SetSignalValue {
 
 export interface ToggleSignalValue {
   type: 'ToggleSignalValue';
+  /**
+   * Name of the signal
+   * @TJS-format signal
+   */
+  signal: string;
+  target: signalTarget;
+  additionalData?: string;
+}
+
+export interface ToggleSignalValueFromList {
+  type: 'ToggleSignalValueThroughList';
+  valueList: (string | number | boolean)[]
   /**
    * Name of the signal
    * @TJS-format signal

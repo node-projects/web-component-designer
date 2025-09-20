@@ -133,6 +133,18 @@ export class ScriptSystem {
         await this._visualizationHandler.setState(this.getSignalName(signal, context), !state);
         break;
       }
+      case 'ToggleSignalValueThroughList': {
+        const valueList = await this.getValue(command.valueList, context);
+        const signal = await this.getValue(command.signal, context);
+        const target = await this.getValue(command.target, context);
+        let state = await this.getValueFromTarget(target, signal, context);
+        let nextIdx = valueList.indexOf(state) + 1;
+        if (nextIdx >= valueList.length)
+          nextIdx = 0;
+        const newState = valueList[nextIdx];
+        await this._visualizationHandler.setState(this.getSignalName(signal, context), newState);
+        break;
+      }
       case 'SetSignalValue': {
         const signal = await this.getValue(command.signal, context);
         const target = await this.getValue(command.target, context);
@@ -357,6 +369,11 @@ export class ScriptSystem {
           let sng = await this._visualizationHandler.getState(this.getSignalName((<IScriptMultiplexValue><any>value).name, outerContext));
           return <T>sng.val;
         }
+        case 'signalInProperty': {
+          const sngName = deepValue(outerContext.root, (<IScriptMultiplexValue><any>value).name)
+          let sng = await this._visualizationHandler.getState(this.getSignalName(sngName, outerContext));
+          return <T>sng.val;
+        }
         case 'event': {
           let obj = outerContext.event;
           if ((<IScriptMultiplexValue><any>value).name)
@@ -401,10 +418,10 @@ export class ScriptSystem {
       //@ts-ignore
       var ctx = context;
       return eval('ctx.' + name.substring(1));
-    } else if (name[0] === '?' && name[1] === '??') {
+    } else if (name[0] === '?' && name[1] === '?') {
       return context.root[name.substring(2)];
     } else if (name[0] === '?') {
-      return await this._visualizationHandler.getState(this.getSignalName(context.root[name.substring(2)], context));
+      return await this._visualizationHandler.getState(this.getSignalName(context.root[name.substring(1)], context));
     }
     return await this._visualizationHandler.getState(this.getSignalName(name, context));
   }
