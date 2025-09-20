@@ -2,7 +2,7 @@ export declare type ScriptCommands = RunnableScriptCommands |
   Comment | Condition | Exit | Label | Goto;
 
 export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog | CloseDialog |
-  ToggleSignalValue | ToggleSignalValueFromList | SetSignalValue | IncrementSignalValue | DecrementSignalValue |
+  ToggleSignalValue | ToggleSignalValueThroughList | SetSignalValue | IncrementSignalValue | DecrementSignalValue |
   SetBitInSignal | ClearBitInSignal | ToggleBitInSignal | Console | CalculateSignalValue |
   Javascript | SetElementProperty | Delay | SwitchLanguage |
   Login | Logout |
@@ -149,7 +149,7 @@ export interface ToggleSignalValue {
   additionalData?: string;
 }
 
-export interface ToggleSignalValueFromList {
+export interface ToggleSignalValueThroughList {
   type: 'ToggleSignalValueThroughList';
   valueList: (string | number | boolean)[]
   /**
