@@ -367,12 +367,12 @@ export class ScriptSystem {
         }
         case 'signal': {
           let sng = await this._visualizationHandler.getState(this.getSignalName((<IScriptMultiplexValue><any>value).name, outerContext));
-          return <T>sng.val;
+          return <T>sng?.val;
         }
         case 'signalInProperty': {
           const sngName = deepValue(outerContext.root, (<IScriptMultiplexValue><any>value).name)
           let sng = await this._visualizationHandler.getState(this.getSignalName(sngName, outerContext));
-          return <T>sng.val;
+          return <T>sng?.val;
         }
         case 'event': {
           let obj = outerContext.event;
@@ -398,7 +398,7 @@ export class ScriptSystem {
           if (text != null) {
             const signal = await this.parseStringWithValues(text, outerContext);
             const state = await this._visualizationHandler.getState(this.getSignalName(signal, outerContext));
-            return <T>state.val;
+            return <T>state?.val;
           }
           return null;
         }
