@@ -1,3 +1,4 @@
+import { IPoint } from '../../../interfaces/IPoint.js';
 import { IBinding } from '../../item/IBinding.js';
 
 export interface IElementDefinition {
@@ -27,4 +28,9 @@ export interface IElementDefinition {
    */
   tool?: string;
   defaultBinding?: IBinding;
+
+  /**
+   * Offset of mouse pointer when dragged
+   */
+  mouseOffset?: IPoint
 }

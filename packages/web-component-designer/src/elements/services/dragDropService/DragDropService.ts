@@ -60,8 +60,12 @@ export class DragDropService implements IDragDropService {
     const containerPos = designerCanvas.getNormalizedElementCoordinates(newContainer.element);
     const evCoord = designerCanvas.getNormalizedEventCoordinates(event);
     const pos = { x: evCoord.x - containerPos.x, y: evCoord.y - containerPos.y };
-    containerService.place(event, designerCanvas, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
-    containerService.finishPlace(event, designerCanvas, newContainer, { x: 0, y: 0 }, { x: 0, y: 0 }, pos, [di]);
+
+    let offset = { x: 0, y: 0 };
+    if (elementDefinition.mouseOffset)
+      offset = elementDefinition.mouseOffset;
+    containerService.place(event, designerCanvas, newContainer, offset, { x: 0, y: 0 }, pos, [di]);
+    containerService.finishPlace(event, designerCanvas, newContainer, offset, { x: 0, y: 0 }, pos, [di]);
     requestAnimationFrame(() => {
       designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di], event);
       grp.commit();
