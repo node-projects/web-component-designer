@@ -143,7 +143,7 @@ class IndirectSignal {
         } else {
           nm = getNestedProperty(root, nm.substring(1));
         }
-      } 
+      }
 
       let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
       const subscr = this.visualizationHandler.subscribeState(nm, cb);
@@ -933,45 +933,78 @@ export class BindingsHelper {
       } else {
         const stringValue = <string>(v != null ? v.toString() : v);
         if (stringValue in binding[1].converter) {
-          v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[stringValue] + '`')(...valuesObject);
+          const cvVal = binding[1].converter[stringValue];
+          if (typeof cvVal === 'string')
+            v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[stringValue] + '`')(...valuesObject);
+          else
+            v = cvVal;
         } else {
+          let endedWithBreak = false;
           //@ts-ignore
           const nr = parseFloat(v);
           for (let c in binding[1].converter) {
             if (c.length > 2 && c[0] === '>' && c[1] === '=') {
               const wr = parseFloat(c.substring(2));
               if (nr >= wr) {
-                v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                const cvVal = binding[1].converter[c];
+                if (typeof cvVal === 'string')
+                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                else
+                  v = cvVal;
+                endedWithBreak = true;
                 break;
               }
             } else if (c.length > 2 && c[0] === '<' && c[1] === '=') {
               const wr = parseFloat(c.substring(2));
               if (nr <= wr) {
-                v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                const cvVal = binding[1].converter[c];
+                if (typeof cvVal === 'string')
+                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                else
+                  v = cvVal;
+                endedWithBreak = true;
                 break;
               }
             } else if (c.length > 1 && c[0] === '>') {
               const wr = parseFloat(c.substring(1));
               if (nr > wr) {
-                v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                const cvVal = binding[1].converter[c];
+                if (typeof cvVal === 'string')
+                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                else
+                  v = cvVal;
+                endedWithBreak = true;
                 break;
               }
             } else if (c.length > 1 && c[0] === '<') {
               const wr = parseFloat(c.substring(1));
               if (nr < wr) {
-                v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                const cvVal = binding[1].converter[c];
+                if (typeof cvVal === 'string')
+                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                else
+                  v = cvVal;
+                endedWithBreak = true;
                 break;
               }
             } else {
               const sp = c.split('-');
               if (sp.length > 1) {
                 if ((sp[0] === '' || nr >= parseFloat(sp[0])) && (sp[1] === '' || parseFloat(sp[1]) >= nr)) {
-                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                  const cvVal = binding[1].converter[c];
+                  if (typeof cvVal === 'string')
+                    v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
+                  else
+                    v = cvVal;
+                  endedWithBreak = true;
                   break;
                 }
               }
             }
           }
+
+          if (!endedWithBreak && binding[1].converterDefault !== undefined)
+            v = binding[1].converterDefault;
         }
       }
     }

@@ -151,6 +151,10 @@ export interface ToggleSignalValue {
 
 export interface ToggleSignalValueThroughList {
   type: 'ToggleSignalValueThroughList';
+  /**
+  * List of values wich can be toggled through
+  * @TJS-format collection
+  */
   valueList: (string | number | boolean)[]
   /**
    * Name of the signal

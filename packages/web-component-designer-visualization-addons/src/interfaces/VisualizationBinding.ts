@@ -12,6 +12,7 @@ export interface VisualizationBinding {
     events?: string[];
     target: BindingTarget;
     converter?: Record<string, any>;
+    converterDefault?: any;
     expression?: string; // could also be blockly ora complete javascript
     expressionTwoWay?: string;
     compiledExpression?: Function;

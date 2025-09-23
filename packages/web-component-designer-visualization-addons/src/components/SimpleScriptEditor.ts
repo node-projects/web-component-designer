@@ -143,8 +143,10 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
       //@ts-ignore
       if (!property.specialAllreadyAdded) {
         //@ts-ignore
-        property.specialAllreadyAdded = true
-        if ((typeof currentValue === 'object' && currentValue !== null) || property.format === 'complex') {
+        property.specialAllreadyAdded = true;
+        if (property.format === 'collection') {
+          //TODO: create a collection edt. in property grid control used
+        } else if ((typeof currentValue === 'object' && currentValue !== null) || property.format === 'complex') {
           let rB = document.createElement('button');
           rB.style.height = 'calc(100% - 6px)';
           rB.style.position = 'relative';
