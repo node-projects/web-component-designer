@@ -1,7 +1,7 @@
 {
   "description": "A WYSIWYG designer webcomponent for html components",
   "name": "@node-projects/web-component-designer",
-  "version": "0.1.266",
+  "version": "0.1.268",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
@@ -13,7 +13,7 @@
     "link": "npm link",
     "watch": "pm2 start tsc --watch",
     "prepublishOnly": "npm run build && npm run bundle",
-    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@node-projects/base-custom-webcomponent --platform=neutral --bundle --outfile=./dist/index-min.js"
+    "bundle": "esbuild ./dist/index-all.js --format=esm --minify --external:@node-projects/base-custom-webcomponent --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
     "@node-projects/base-custom-webcomponent": ">=0.27.8"
