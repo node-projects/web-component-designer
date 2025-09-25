@@ -16,7 +16,7 @@ export interface IBinding {
   bindableObjectNames?: string[];      //TODO: deprecate and remove
   bindableObjects?: IBindableComplexName[]; //if a name is not enough, use this list
 
-  converters?: any
+  converters?: any;
 
   mode?: BindingMode;
 
