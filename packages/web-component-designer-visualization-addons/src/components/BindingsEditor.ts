@@ -206,6 +206,12 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
     super();
     super._restoreCachedInititalValues();
 
+
+    //TODOS:
+    //typed values for converters
+    //default value for converter
+
+
     this._objNmInput = this._getDomElement<HTMLInputElement>('objectName');
 
     this._property = property;
