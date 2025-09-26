@@ -1305,6 +1305,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return currentElement;
   }
 
+  public getDesignItemById(id: string) {
+    return DesignItem.GetDesignItem(this._canvasShadowRoot.getElementById(id));
+  }
+
+  public querySelectorDesignItem(selector: string) {
+    return DesignItem.GetDesignItem(this._canvasShadowRoot.querySelector(selector));
+  }
+
+  public querySelectorAllDesignItems(selector: string) {
+    return [...this._canvasShadowRoot.querySelectorAll(selector)].map(x => DesignItem.GetDesignItem(x));
+  }
+
   private _hoverElement: Element;
   public showHoverExtension(element: Element, event: Event) {
     const currentDesignItem = DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer);

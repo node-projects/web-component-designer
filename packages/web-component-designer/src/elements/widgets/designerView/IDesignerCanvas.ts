@@ -29,7 +29,7 @@ export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
   readonly alignOnGrid: boolean;
   readonly alignOnSnap: boolean;
   readonly gridSize: number;
- 
+
   raiseDesignItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
 
   readonly onContentChanged: TypedEvent<void>;
@@ -70,6 +70,10 @@ export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
 
   setDesignItems(designItems: IDesignItem[]);
   _internalSetDesignItems(designItems: IDesignItem[]);
+
+  getDesignItemById(id: string): IDesignItem;
+  querySelectorDesignItem(selector: string): IDesignItem;
+  querySelectorAllDesignItems(selector: string): IDesignItem[];
 
   zoomTowardsPoint(point: IPoint, scalechange: number): void;
   zoomPoint(canvasPoint: IPoint, newZoom: number): void;
