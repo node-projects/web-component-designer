@@ -51,7 +51,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         continue;
 
       if (property.propertyType == PropertyType.cssValue) {
-         //TODO: use async version here, but then everything needs to be async
+        //TODO: use async version here, but then everything needs to be async
         await d.updateStyleInSheetOrLocalAsync(property.name, value);
         //unkown css property names do not trigger the mutation observer of property grid, 
         //fixed by assinging style again to the attribute
@@ -109,10 +109,15 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         if (property.propertyType == PropertyType.cssValue) {
           d.removeStyle(property.name);
         } else {
-          let attributeName = property.attributeName
-          if (!attributeName)
-            attributeName = PropertiesHelper.camelToDashCase(property.name);
-          d.removeAttribute(attributeName);
+          if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute) {
+            d.element[property.name] = null;
+          }
+          if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute) {
+            let attributeName = property.attributeName
+            if (!attributeName)
+              attributeName = PropertiesHelper.camelToDashCase(property.name);
+            d.removeAttribute(attributeName);
+          }
         }
       }
       if (clearType != 'value') {
