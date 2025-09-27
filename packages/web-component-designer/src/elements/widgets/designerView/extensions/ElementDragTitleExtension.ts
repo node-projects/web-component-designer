@@ -13,8 +13,9 @@ export class ElementDragTitleExtension extends AbstractExtension {
   private _clickRect: SVGRectElement;
   private _text: SVGForeignObjectElement;
   private _width: number;
+  private _createTitleText: (designItem: IDesignItem) => string;
 
-  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
+  constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem, createTitleText?: (designItem: IDesignItem) => string) {
     super(extensionManager, designerView, extendedItem);
   }
 
@@ -30,6 +31,8 @@ export class ElementDragTitleExtension extends AbstractExtension {
       let text = this.extendedItem.name;
       if (this.extendedItem.id)
         text = '#' + this.extendedItem.id;
+      if (this._createTitleText)
+        text = this._createTitleText(this.extendedItem);
       this._width = Math.max(Math.min(elementWidth, w), extensionWidth);
       this._rect = this._drawRect(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, this._width, 15, 'svg-primary-selection-move', this._rect);
       this._clickRect = this._drawRect(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, this._width, 18, 'svg-invisible', this._clickRect);
