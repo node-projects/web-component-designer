@@ -17,6 +17,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem, createTitleText?: (designItem: IDesignItem) => string) {
     super(extensionManager, designerView, extendedItem);
+    this._createTitleText = createTitleText;
   }
 
   override extend(cache: Record<string | symbol, any>, event?: Event) {
