@@ -662,6 +662,9 @@ export class DesignItem implements IDesignItem {
     this.instanceServiceContainer.undoService.execute(action);
   }
 
+  // todo : public setPropertyAndAttrbute()
+  //getProperty ...
+
   public setProperty(name: string, value?: any) {
     if (this.isRootItem)
       throw 'not allowed to set attribute on root item';
