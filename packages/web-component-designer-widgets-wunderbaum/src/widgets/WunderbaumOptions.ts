@@ -1,5 +1,6 @@
 import { css } from "@node-projects/base-custom-webcomponent";
 import { WunderbaumOptions } from "wb_options";
+import { assetsPath } from "../Constants.js";
 
 export const defaultStyle = css`
 i.wb-icon > span.wb-badge {
@@ -26,12 +27,12 @@ export const defaultOptions: WunderbaumOptions = {
   scrollIntoViewOnExpandClick: false,
   //@ts-ignore
   iconMap: {
-    expanderCollapsed: new URL("../../assets/images/expander.svg", import.meta.url).toString(),
-    expanderExpanded: new URL("../../assets/images/expanderClose.svg", import.meta.url).toString(),
-    folder: new URL("../../assets/images/folder.svg", import.meta.url).toString(),
-    folderLazy: new URL("../../assets/images/folder.svg", import.meta.url).toString(),
-    folderOpen: new URL("../../assets/images/folder.svg", import.meta.url).toString(),
-    doc: new URL("../../assets/images/file.svg", import.meta.url).toString(),
+    expanderCollapsed: assetsPath + 'images/expander.svg',
+    expanderExpanded: assetsPath + 'images/expanderClose.svg',
+    folder: assetsPath + 'images/folder.svg',
+    folderLazy: assetsPath + 'images/folder.svg',
+    folderOpen: assetsPath + 'images/folder.svg',
+    doc: assetsPath + 'images/file.svg',
   },
   quicksearch: true,
   checkbox: false,
@@ -44,5 +45,5 @@ export const defaultOptions: WunderbaumOptions = {
       return null;
     }
     return { badge: node.children.length };
-  }  
+  }
 }

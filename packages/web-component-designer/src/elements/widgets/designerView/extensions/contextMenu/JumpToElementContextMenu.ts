@@ -1,8 +1,8 @@
+import { assetsPath } from '../../../../../Constants.js';
 import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
-import basePath from '../../../../../basepath.js';
 
 export class JumpToElementContextMenu implements IContextMenuExtension {
 
@@ -13,10 +13,10 @@ export class JumpToElementContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
       {
-        title: 'jump to', icon: `<img src="${new URL('../assets/icons/jump.svg', basePath)}">`, action: () => {          
+        title: 'jump to', icon: `<img src="${assetsPath + 'icons/jump.svg'}">`, action: () => {
           const coord = designerCanvas.getNormalizedElementCoordinates(designItem.element);
-          
-          designerCanvas.zoomPoint({x: coord.x + coord.width / 2, y: coord.y + coord.height / 2 }, designerCanvas.zoomFactor);
+
+          designerCanvas.zoomPoint({ x: coord.x + coord.width / 2, y: coord.y + coord.height / 2 }, designerCanvas.zoomFactor);
         }
       },
     ]

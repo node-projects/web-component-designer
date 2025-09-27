@@ -1,5 +1,6 @@
 import { ContextmenuInitiator, IContextMenuExtension, IContextMenuItem, IDesignItem, IDesignerCanvas } from "@node-projects/web-component-designer";
 import { TreeViewExtended } from "./treeViewExtended.js";
+import { assetsPath } from "../../Constants.js";
 
 export class ExpandCollapseContextMenu implements IContextMenuExtension {
 
@@ -13,12 +14,12 @@ export class ExpandCollapseContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator, provider: TreeViewExtended): IContextMenuItem[] {
     return [
       {
-        title: 'collapse children', icon: `<img src="${new URL('../../../assets/icons/collapse.svg', import.meta.url)}">`, action: () => {
+        title: 'collapse children', icon: `<img src="${assetsPath + 'icons/collapse.svg'}">`, action: () => {
           provider.collapseChildren(designItem)
         }
       },
       {
-        title: 'expand children', icon: `<img src="${new URL('../../../assets/icons/expand.svg', import.meta.url)}">`, action: () => {
+        title: 'expand children', icon: `<img src="${assetsPath + 'icons/expand.svg'}">`, action: () => {
           provider.expandChildren(designItem)
         }
       },

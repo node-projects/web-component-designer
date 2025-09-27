@@ -4,7 +4,7 @@ import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { NodeType } from '../../../../item/NodeType.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { ContextmenuInitiator, IContextMenuExtension } from './IContextMenuExtension.js';
-import basePath from '../../../../../basepath.js';
+import { assetsPath } from '../../../../../Constants.js';
 
 export class RotateLeftAndRight implements IContextMenuExtension {
 
@@ -14,8 +14,8 @@ export class RotateLeftAndRight implements IContextMenuExtension {
 
   public provideContextMenuItems(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
-      { title: 'rotate right', icon: `<img src="${new URL('../assets/icons/rotateRight.svg', basePath)}">`, action: () => { designerView.executeCommand({ type: CommandType.rotateClockwise }); }, shortCut: 'Ctrl + R' },
-      { title: 'rotate left', icon: `<img src="${new URL('../assets/icons/rotateLeft.svg', basePath)}">`, action: () => { designerView.executeCommand({ type: CommandType.rotateCounterClockwise }); }, shortCut: 'Ctrl + Shift + R' }
+      { title: 'rotate right', icon: `<img src="${assetsPath + 'icons/rotateRight.svg'}">`, action: () => { designerView.executeCommand({ type: CommandType.rotateClockwise }); }, shortCut: 'Ctrl + R' },
+      { title: 'rotate left', icon: `<img src="${assetsPath + 'icons/rotateLeft.svg'}">`, action: () => { designerView.executeCommand({ type: CommandType.rotateCounterClockwise }); }, shortCut: 'Ctrl + Shift + R' }
     ]
   }
 }

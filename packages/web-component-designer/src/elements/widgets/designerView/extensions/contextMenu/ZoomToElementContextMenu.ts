@@ -1,3 +1,4 @@
+import { assetsPath } from "../../../../../Constants.js";
 import { IRect } from "../../../../../interfaces/IRect.js";
 import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuItem.js';
 import { IDesignItem } from '../../../../item/IDesignItem.js';
@@ -15,7 +16,7 @@ export class ZoomToElementContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
       {
-        title: 'zoom to', icon: `<img src="${new URL('../../../../../../assets/icons/zoomIn.svg', import.meta.url)}">`, action: () => {
+        title: 'zoom to', icon: `<img src="${assetsPath + 'icons/zoomIn.svg'}">`, action: () => {
           const coord = designerCanvas.getNormalizedElementCoordinates(designItem.element);
           const startPoint = { x: coord.x - offset, y: coord.y - offset };
           const endPoint = { x: coord.x + coord.width + offset, y: coord.y + coord.height + offset };
