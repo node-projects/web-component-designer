@@ -122,6 +122,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   public designerContextMenuExtensions: IContextMenuExtension[];
 
+  public readonly overlayLayerViewAdditionalStyles: CSSStyleSheet[] = [];
+
   public readonly globalContext: GlobalContext = new GlobalContext(this);
 
   public readonly options = {

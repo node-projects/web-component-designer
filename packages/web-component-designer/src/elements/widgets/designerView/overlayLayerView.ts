@@ -165,6 +165,15 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
       }
     }
 
+    if (this._serviceContainer.overlayLayerViewAdditionalStyles) {
+      for (const style of this._serviceContainer.overlayLayerViewAdditionalStyles) {
+        if (!alreadyApplied.has(style)) {
+          alreadyApplied.add(style);
+          styles.push(style);
+        }
+      }
+    }
+
     this.shadowRoot.adoptedStyleSheets = styles;
   }
 
