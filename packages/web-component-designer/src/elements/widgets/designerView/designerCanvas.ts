@@ -4,7 +4,7 @@ import { InstanceServiceContainer } from '../../services/InstanceServiceContaine
 import { SelectionService } from '../../services/selectionService/SelectionService.js';
 import { DesignItem, forceHoverAttributeName } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
-import { BaseCustomWebComponentLazyAppend, css, cssFromString, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, cssFromString, DomHelper, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameBindingObject } from '../../../Constants.js';
 import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
@@ -20,7 +20,6 @@ import { NamedTools } from './tools/NamedTools.js';
 import { Screenshot } from '../../helper/Screenshot.js';
 import { dataURItoBlob, exportData, sleep } from '../../helper/Helper.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
 import { IPoint } from '../../../interfaces/IPoint.js';
 import { OverlayLayerView } from './overlayLayerView.js';
 import { IDesignerPointerExtension } from './extensions/pointerExtensions/IDesignerPointerExtension.js';

@@ -1,6 +1,6 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
-import { DomHelper } from '@node-projects/base-custom-webcomponent/dist/DomHelper.js';
+import { DomHelper } from '@node-projects/base-custom-webcomponent';
 
 export class DeleteAction implements ITransactionItem {
 
