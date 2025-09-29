@@ -238,12 +238,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     return false;
   }
 
-  set content(value: string) {
+  async setContentAsync(value: string) {
     this._content = value;
 
     if (this._tabControl) {
       if (this._tabControl.selectedIndex === tabIndex.designer)
-        this.updateDesignerHtml();
+        await this.updateDesignerHtml();
       else if (this._tabControl.selectedIndex === tabIndex.code)
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
       else if (this._tabControl.selectedIndex === tabIndex.split) {
@@ -252,6 +252,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       else if (this._tabControl.selectedIndex === tabIndex.preview)
         this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
     }
+  }
+
+  set content(value: string) {
+    this.setContentAsync(value);
   }
   get content() {
     if (this._tabControl) {
