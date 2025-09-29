@@ -6,9 +6,11 @@ import { defaultOptions, defaultStyle } from '../WunderbaumOptions.js'
 import wunderbaumStyle from 'wunderbaum/dist/wunderbaum.css' with { type: 'css' };
 
 type WunderbaumNode = {
-  getColElem(n:number);
-  addChildren({}: any);
+  getColElem(n: number);
+  addChildren({ }: any);
 }
+type treeNode = { title: string, ref: IDesignItem, children?: treeNode[] };
+
 const wbNodeSymbol = Symbol.for('wunderbaumnode');
 
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
@@ -389,8 +391,11 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   private async _recomputeTree(rootItem: IDesignItem) {
     try {
       this._tree.root.removeChildren();
-
-      this._getChildren(rootItem, null);
+      const newTree = this._getChildren(rootItem);
+      this._tree.root.addChildren(newTree);
+      this._tree.root.visit(node => {
+        node.data.ref[wbNodeSymbol] = node;
+      });
       await this._tree.expandAll();
       this._filterNodes();
     }
@@ -399,23 +404,19 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     }
   }
 
-
-  private _getChildren(item: IDesignItem, currentNode: WunderbaumNode): any {
-    if (currentNode == null) {
-      currentNode = this._tree.root;
-    }
-
-    const newNode = currentNode.addChildren({
+  private _getChildren(item: IDesignItem): treeNode {
+    const nd: treeNode = {
       title: item.isRootItem ? '-root-' : item.nodeType === NodeType.Element ? item.name + " " + (item.id ? ('#' + item.id) : '') : '<small><small><small>#' + (item.nodeType === NodeType.TextNode ? 'text' : 'comment') + '&nbsp;</small></small></small> ' + DomConverter.normalizeContentValue(item.content),
       ref: item
-    });
-    item[wbNodeSymbol] = newNode;
-
+    }
     for (let i of item.children()) {
       if (!i.isEmptyTextNode) {
-        this._getChildren(i, newNode);
+        if (!nd.children)
+          nd.children = []
+        nd.children.push(this._getChildren(i));
       }
     }
+    return nd;
   }
 
   private _highlight(activeElements: IDesignItem[]) {
