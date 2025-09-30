@@ -41,6 +41,15 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     return this._additionalStyle;
   };
 
+  private _additionalStyles: CSSStyleSheet[];
+  public set additionalStyles(value: CSSStyleSheet[]) {
+    this._additionalStyles = value;
+    this.designerView.additionalStyles = this._additionalStyles;
+  };
+  public get additionalStyles() {
+    return this._additionalStyles;
+  };
+
   private _additionalStylesheets: IStylesheet[];
   public set additionalStylesheets(stylesheets: IStylesheet[]) {
     this._additionalStylesheets = stylesheets;
