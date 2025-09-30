@@ -107,6 +107,8 @@ export class NodeHtmlParserService implements IHtmlParserService {
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
     }
+    if (serviceContainer.designItemService.finishedDesignItem)
+      serviceContainer.designItemService.finishedDesignItem(designItem);
     return designItem;
   }
 }
