@@ -4,5 +4,6 @@ import { ServiceContainer } from "../ServiceContainer.js";
 
 export interface IDesignItemService {
     createDesignItem(node: Node, parsedNode: any, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem; 
+    finishedDesignItem?(designItem: IDesignItem); 
     handleSpecialAttributes(attributeName: string, designItem: IDesignItem): void;
 }
