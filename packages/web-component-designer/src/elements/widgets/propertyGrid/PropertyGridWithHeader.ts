@@ -155,54 +155,68 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   public set instanceServiceContainer(value: InstanceServiceContainer) {
     this._instanceServiceContainer = value;
     this._selectionChangedHandler?.dispose()
-    this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(async e => {
-      this.propertyGrid.instanceServiceContainer = value;
-      await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
+    if (this.instanceServiceContainer) {
+      this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(async e => {
+        this.propertyGrid.instanceServiceContainer = value;
+        await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
 
-      if (this._instanceServiceContainer.selectionService?.primarySelection?.isRootItem) {
-        this._configButton.style.display = 'none';
-
-        this._id.value = '';
-        this._content.value = '';
-        this._id.disabled = true;
-        this._content.disabled = true;
-
-        this._idRect.style.background = '';
-        this._contentRect.style.background = '';
-        this._innerRect.style.background = '';
-        this._type.value = ":host";
-      } else {
-        this._id.disabled = false;
-        this._content.disabled = false;
-
-        const srv = await this.serviceContainer?.getLastServiceWhereAsync('configUiService', x => x.hasConfigUi(this._instanceServiceContainer.selectionService.primarySelection));
-        if (srv) {
-          this._configButton.style.display = 'block';
-        } else {
+        if (this._instanceServiceContainer.selectionService?.primarySelection?.isRootItem) {
           this._configButton.style.display = 'none';
-        }
 
-        if (this._instanceServiceContainer.selectionService.primarySelection?.nodeType == NodeType.Element) {
-          this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
+          this._id.value = '';
+          this._content.value = '';
+          this._id.disabled = true;
+          this._content.disabled = true;
+
+          this._idRect.style.background = '';
+          this._contentRect.style.background = '';
+          this._innerRect.style.background = '';
+          this._type.value = ":host";
         } else {
-          this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
-        }
-        this._type.title = this._type.value;
-        this._id.blur();
-        this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
-        if (this._instanceServiceContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
-          this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
-        } else if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
-          this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
-        else
-          this._content.value = ''
-        this._content.title = this._content.value;
+          this._id.disabled = false;
+          this._content.disabled = false;
 
-        PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
-        PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
-        PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
-      }
-    });
+          const srv = await this.serviceContainer?.getLastServiceWhereAsync('configUiService', x => x.hasConfigUi(this._instanceServiceContainer.selectionService.primarySelection));
+          if (srv) {
+            this._configButton.style.display = 'block';
+          } else {
+            this._configButton.style.display = 'none';
+          }
+
+          if (this._instanceServiceContainer.selectionService.primarySelection?.nodeType == NodeType.Element) {
+            this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
+          } else {
+            this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
+          }
+          this._type.title = this._type.value;
+          this._id.blur();
+          this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
+          if (this._instanceServiceContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
+            this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
+          } else if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
+            this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
+          else
+            this._content.value = ''
+          this._content.title = this._content.value;
+
+          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
+          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
+          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
+        }
+      });
+    } else {
+      this._configButton.style.display = 'none';
+      
+      this._id.value = '';
+      this._content.value = '';
+      this._id.disabled = true;
+      this._content.disabled = true;
+
+      this._idRect.style.background = '';
+      this._contentRect.style.background = '';
+      this._innerRect.style.background = '';
+      this._type.value = ":host";
+    }
     this.propertyGrid.instanceServiceContainer = value;
   }
 
