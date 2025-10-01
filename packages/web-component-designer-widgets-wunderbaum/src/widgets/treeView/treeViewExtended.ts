@@ -365,23 +365,27 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   public set instanceServiceContainer(value: InstanceServiceContainer) {
     this._instanceServiceContainer = value;
     this._selectionChangedHandler?.dispose()
-    this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
-      this.selectionChanged(e);
-    });
-    this._contentChangedHandler?.dispose()
-    this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
-      if (e.changeType === 'changed') {
-        for (const d of e.designItems) {
-          this.refreshNode(d[wbNodeSymbol], d);
+    if (this._instanceServiceContainer) {
+      this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
+        this.selectionChanged(e);
+      });
+      this._contentChangedHandler?.dispose()
+      this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
+        if (e.changeType === 'changed') {
+          for (const d of e.designItems) {
+            this.refreshNode(d[wbNodeSymbol], d);
+          }
+        } else {
+          this.createTree(value.contentService.rootDesignItem);
+          setTimeout(() => {
+            this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
+          }, 20);
         }
-      } else {
-        this.createTree(value.contentService.rootDesignItem);
-        setTimeout(() => {
-          this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
-        }, 20);
-      }
-    });
-    this.createTree(value.contentService.rootDesignItem);
+      });
+      this.createTree(value.contentService.rootDesignItem);
+    } else {
+      this._tree.root.removeChildren();
+    }
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {
