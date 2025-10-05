@@ -806,7 +806,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       if (this.children.length == 1 && this.children[0] instanceof HTMLSlotElement) {
         children = <any>this.children[0].assignedElements();
       }
-      if (children.length > 0) {
+      if (children?.length > 0) {
         const parser = this.serviceContainer.getLastServiceWhere('htmlParserService', x => x.constructor == DefaultHtmlParserService) as DefaultHtmlParserService;
         this.addDesignItems(parser.createDesignItems(children, this.serviceContainer, this.instanceServiceContainer));
       }
