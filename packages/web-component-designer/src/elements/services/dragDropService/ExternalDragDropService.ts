@@ -16,9 +16,9 @@ export class ExternalDragDropService implements IExternalDragDropService {
       let di = await DesignItem.createDesignItemFromImageBlob(designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer, event.dataTransfer.files[0]);
       let grp = di.openGroup("Insert of &lt;img&gt;");
       di.setStyle('position', 'absolute')
-      const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-      di.setStyle('top', event.offsetY + targetRect.top - designerCanvas.containerBoundingRect.y + 'px')
-      di.setStyle('left', event.offsetX + targetRect.left - designerCanvas.containerBoundingRect.x + 'px')
+      const coord = designerCanvas.getNormalizedEventCoordinates(event);
+      di.setStyle('top', coord.y + 'px')
+      di.setStyle('left', coord.x + 'px')
       designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
       grp.commit();
       requestAnimationFrame(() => designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di]));

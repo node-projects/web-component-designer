@@ -206,6 +206,9 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
     new EditTextExtensionProvider()
   ]);
+  serviceContainer.designerPointerExtensions.push(
+    //new CursorLinePointerExtensionProvider()
+  );
 
   serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());
   serviceContainer.designerTools.set(NamedTools.DrawSelection, new RectangleSelectorTool());
@@ -222,10 +225,6 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerTools.set(NamedTools.DrawElementTool, DrawElementTool);
   serviceContainer.designerTools.set(NamedTools.Margin, new MarginTool());
   serviceContainer.designerTools.set(NamedTools.Padding, new PaddingTool());
-
-  serviceContainer.designerPointerExtensions.push(
-    //new CursorLinePointerExtensionProvider()
-  );
 
   serviceContainer.designViewConfigButtons.push(
     new ButtonSeperatorProvider(20),
