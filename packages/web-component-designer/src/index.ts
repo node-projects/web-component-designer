@@ -216,6 +216,7 @@ export * from "./elements/widgets/propertyGrid/PropertyGridWithHeader.js";
 
 export type { IDesignerCanvas } from "./elements/widgets/designerView/IDesignerCanvas.js";
 export * from "./elements/widgets/designerView/designerView.js";
+export * from "./elements/widgets/designerView/designerCanvas.js";
 export * from "./elements/widgets/designerView/overlayLayerView.js";
 export * from "./elements/widgets/designerView/defaultConfiguredDesignerView.js";
 export * from "./elements/widgets/designerView/DomConverter.js";
