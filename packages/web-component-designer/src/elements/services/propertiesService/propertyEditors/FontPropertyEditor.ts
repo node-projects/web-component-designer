@@ -9,6 +9,8 @@ export class FontPropertyEditor extends BasePropertyEditor<HTMLSelectElement> {
     super(property);
 
     let element = document.createElement("select");
+    if (property.readonly)
+      element.disabled = true;
     this.element = element;
 
     FontPropertyEditor.addFontsToSelect(element);

@@ -8,7 +8,9 @@ export class DatePropertyEditor extends BasePropertyEditor<HTMLInputElement> {
     super(property);
    
     let element = document.createElement('input');
-    element.type = "datetime-local"
+    element.type = "datetime-local";
+    if (property.readonly)
+      element.readOnly = true;
     element.onchange = (e) => this._valueChanged(element.value);
     this.element = element;
   }

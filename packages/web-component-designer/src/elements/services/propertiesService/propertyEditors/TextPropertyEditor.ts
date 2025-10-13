@@ -9,6 +9,8 @@ export class TextPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
 
     let element = document.createElement('input');
     element.type = "text";
+    if (property.readonly)
+      element.readOnly = true;
     element.onchange = (e) => this._valueChanged(element.value);
     element.onfocus = (e) => {
       element.selectionStart = 0;

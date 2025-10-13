@@ -19,6 +19,8 @@ export class JsonPropertyEditor extends BasePropertyEditor<HTMLDivElement> {
 
     let el = <HTMLDivElement>JsonPropertyEditor.template.content.cloneNode(true);
     this._input = <HTMLInputElement>(<DocumentFragment><any>el).getElementById('input')
+    if (property.readonly)
+      this._input.readOnly = true;
     this._input.onchange = (e) => this._valueChanged(this._input.value);
     this.element = el;
   }

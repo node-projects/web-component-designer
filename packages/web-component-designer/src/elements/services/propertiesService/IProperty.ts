@@ -13,6 +13,7 @@ export interface IProperty {
   min?: number;
   max?: number;
   step?: number;
+  readonly?: boolean;
   values?: string[]; // list selectable values
   enumValues?: [name: string, value: string | number][]; // list selectable enum values
   createEditor?: (property: IProperty) => IPropertyEditor;
@@ -20,5 +21,5 @@ export interface IProperty {
   service: IPropertiesService;
   defaultValue?: any;
   example?: string;
-  propertyType: PropertyType // => needed for pg-grid. for example property only types can only be used for binding, css property types could never bind two way...
+  propertyType: PropertyType; // => needed for pg-grid. for example property only types can only be used for binding, css property types could never bind two way...
 }

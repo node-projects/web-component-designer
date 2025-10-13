@@ -9,6 +9,8 @@ export class ColorPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
 
     let element = document.createElement('input');
     element.type = 'color'
+    if (property.readonly)
+      element.readOnly = true;
     element.onchange = (e) => {
       let w3Col = w3color.toColorObject(element.value);
       this._valueChanged(w3Col.toNameOrHexString())

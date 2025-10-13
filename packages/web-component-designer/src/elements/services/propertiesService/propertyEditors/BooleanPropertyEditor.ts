@@ -9,6 +9,8 @@ export class BooleanPropertyEditor extends BasePropertyEditor<HTMLInputElement> 
 
     let element = document.createElement('input');
     element.type = "checkbox";
+    if (property.readonly)
+      element.readOnly = true;
     element.onchange = (e) => this._valueChanged(element.checked);
     this.element = element;
   }

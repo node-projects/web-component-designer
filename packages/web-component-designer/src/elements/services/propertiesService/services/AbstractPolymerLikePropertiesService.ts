@@ -11,7 +11,7 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
   public override getRefreshMode(designItem: IDesignItem) {
     return RefreshMode.fullOnClassChange;
   }
-  
+
   public override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     if (!this.isHandledElement(designItem))
       return null;
@@ -25,32 +25,34 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
       let type = polymerProperty;
       let description = null;
       let example = null;
+      let readonly = false;
       if (polymerProperty.type) {
         type = polymerProperty.type;
         description = polymerProperty.description;
         example = polymerProperty.example;
+        readonly = polymerProperty.readonly;
       }
 
       if (type === String) {
-        let property: IProperty = { name: name, type: "string", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example };
+        let property: IProperty = { name: name, type: "string", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example, readonly };
         properties.push(property);
       } else if (type === Object) {
-        let property: IProperty = { name: name, type: "object", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example };
+        let property: IProperty = { name: name, type: "object", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example, readonly };
         properties.push(property);
       } else if (type === Number) {
-        let property: IProperty = { name: name, type: "number", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example };
+        let property: IProperty = { name: name, type: "number", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example, readonly };
         properties.push(property);
       } else if (type === Date) {
-        let property: IProperty = { name: name, type: "date", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example };
+        let property: IProperty = { name: name, type: "date", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example, readonly };
         properties.push(property);
       } else if (type === Boolean) {
-        let property: IProperty = { name: name, type: "boolean", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example };
+        let property: IProperty = { name: name, type: "boolean", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example, readonly };
         properties.push(property);
       } else if (PropertiesHelper.isTypescriptEnum(type)) {
-        let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(type), service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example };
+        let property: IProperty = { name: name, type: "enum", enumValues: PropertiesHelper.getTypescriptEnumEntries(type), service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example, readonly };
         properties.push(property);
       } else {
-        let property: IProperty = { name: name, type: "string", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example };
+        let property: IProperty = { name: name, type: "string", service: this, propertyType: PropertyType.propertyAndAttribute, description: description, example: example, readonly };
         properties.push(property);
       }
     }

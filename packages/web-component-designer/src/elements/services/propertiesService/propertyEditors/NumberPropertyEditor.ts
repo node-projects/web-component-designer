@@ -9,6 +9,8 @@ export class NumberPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
    
     let element = document.createElement('input');
     element.type = "number";
+    if (property.readonly)
+      element.readOnly = true;
     element.min = <string><any>property.min;
     element.max = <string><any>property.max;
     element.step = <string><any>property.step;

@@ -28,6 +28,8 @@ export class SelectPropertyEditor extends BasePropertyEditor<HTMLDivElement> {
         elementSel.appendChild(option);
       }
     }
+    if (property.readonly)
+      elementSel.disabled = true;
     elementSel.onchange = (e) => this._valueChanged(elementSel.value);
 
     let elementInput = document.createElement("input");

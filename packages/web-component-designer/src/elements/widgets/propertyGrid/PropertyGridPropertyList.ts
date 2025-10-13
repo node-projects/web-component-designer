@@ -221,13 +221,15 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         if (p.propertyType != PropertyType.complex)
           rectContainer.appendChild(rect);
         this._div.appendChild(rectContainer);
-        rect.oncontextmenu = (event) => {
-          event.preventDefault();
-          this.openContextMenu(event, p);
-        }
-        rect.onclick = (event) => {
-          event.preventDefault();
-          this.openContextMenu(event, p);
+        if (p.readonly === true) {
+          rect.oncontextmenu = (event) => {
+            event.preventDefault();
+            this.openContextMenu(event, p);
+          }
+          rect.onclick = (event) => {
+            event.preventDefault();
+            this.openContextMenu(event, p);
+          }
         }
         if (p.type == 'addNew') {
           let input = <HTMLInputElement>editor.element;
