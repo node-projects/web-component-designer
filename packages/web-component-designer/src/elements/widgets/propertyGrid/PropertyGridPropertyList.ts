@@ -221,7 +221,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         if (p.propertyType != PropertyType.complex)
           rectContainer.appendChild(rect);
         this._div.appendChild(rectContainer);
-        if (p.readonly === true) {
+        if (p.readonly !== true) {
           rect.oncontextmenu = (event) => {
             event.preventDefault();
             this.openContextMenu(event, p);
