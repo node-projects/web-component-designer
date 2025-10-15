@@ -68,6 +68,20 @@ export class BaseServiceContainer<NameMap> {
     return null;
   }
 
+  getLastServiceResult<K extends keyof NameMap, Y>(service: K, callback: (service: NameMap[K]) => Y): Y {
+    let services = this.getServices<K>(<any>service);
+    if (services == null) {
+      return null;
+    }
+    for (let index = services.length - 1; index >= 0; index--) {
+      const currentService = services[index];
+      let result = callback(currentService);
+      if (result)
+        return result;
+    }
+    return null;
+  }
+
   async getLastServiceWhereAsync<K extends keyof NameMap, Y>(service: K, callback: (service: NameMap[K]) => Promise<Y>): Promise<NameMap[K]> {
     let services = this.getServices<K>(<any>service);
     if (services == null) {
