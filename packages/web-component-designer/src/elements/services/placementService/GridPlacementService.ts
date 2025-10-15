@@ -6,7 +6,7 @@ import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { DefaultPlacementService } from './DefaultPlacementService.js';
-import { getBoundingClientRectAlsoForDisplayContents } from '../../../index.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/ElementHelper.js';
 
 
 export class GridPlacementService implements IPlacementService {
