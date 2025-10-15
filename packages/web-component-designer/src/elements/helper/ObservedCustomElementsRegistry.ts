@@ -2,25 +2,24 @@ import { IDisposable } from "../../interfaces/IDisposable.js";
 
 export class ObservedCustomElementsRegistry implements IDisposable {
 
-    //@ts-ignore
-    #originalCustomElementsRegistry: CustomElementRegistry
-    #newElements: string[] = [];
+    private _originalCustomElementsRegistry: CustomElementRegistry
+    private _newElements: string[] = [];
 
     constructor() {
-        this.#originalCustomElementsRegistry = window.customElements;
+        this._originalCustomElementsRegistry = window.customElements;
         const registry: any = {};
         registry.define = function (name, constructor, options) {
-            this.#newElements.push(name);
-            this.#originalCustomElementsRegistry.define(name, constructor, options);
+            this._newElements.push(name);
+            this._originalCustomElementsRegistry.define(name, constructor, options);
         }
         registry.get = function (name) {
-            return this.#originalCustomElementsRegistry.get(name);
+            return this._originalCustomElementsRegistry.get(name);
         }
         registry.upgrade = function (node) {
-            return this.#originalCustomElementsRegistry.upgrade(node);
+            return this._originalCustomElementsRegistry.upgrade(node);
         }
         registry.whenDefined = function (name) {
-            return this.#originalCustomElementsRegistry.whenDefined(name);
+            return this._originalCustomElementsRegistry.whenDefined(name);
         }
 
         Object.defineProperty(window, "customElements", {
@@ -31,16 +30,17 @@ export class ObservedCustomElementsRegistry implements IDisposable {
     }
 
     dispose(): void {
+        const orgReg = this._originalCustomElementsRegistry;
         Object.defineProperty(window, "customElements", {
             get() {
-                return this.#originalCustomElementsRegistry;
+                return orgReg;
             }
         });
     }
 
     getNewElements(): string[] {
-        const newElements = this.#newElements;
-        this.#newElements = [];
+        const newElements = this._newElements;
+        this._newElements = [];
         return newElements;
     }
 }
