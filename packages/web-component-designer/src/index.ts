@@ -6,6 +6,7 @@ export * from "./elements/services/DefaultServiceBootstrap.js";
 export * from "./elements/helper/CssAttributeParser.js";
 export * from "./elements/helper/KeyboardHelper.js";
 export * from "./elements/helper/CssCombiner.js";
+export * from "./elements/helper/ObservedCustomElementsRegistry.js";
 export * from "./elements/helper/ElementHelper.js";
 export * from "./elements/helper/IndentedTextWriter.js";
 export * from "./elements/helper/PathDataPolyfill.js";

@@ -6,6 +6,7 @@ import { WebcomponentManifestPropertiesService } from "../services/propertiesSer
 import { ServiceContainer } from "../services/ServiceContainer.js";
 import { removeLeading, removeTrailing } from "./Helper.js";
 import packageHacks from "./NpmPackageHacks.json" with { type: 'json' };
+import { ObservedCustomElementsRegistry } from "./ObservedCustomElementsRegistry.js";
 
 export class NpmPackageLoader {
 
@@ -152,29 +153,8 @@ export class NpmPackageLoader {
         } else {
             console.warn('npm package: ' + pkg + ' - no custom-elements.json found, only loading javascript module');
 
-            let originalCustomElementsRegistry = window.customElements;
-            const registry: any = {};
-            const newElements: string[] = [];
-            registry.define = function (name, constructor, options) {
-                newElements.push(name);
-                originalCustomElementsRegistry.define(name, constructor, options);
-            }
-            registry.get = function (name) {
-                return originalCustomElementsRegistry.get(name);
-            }
-            registry.upgrade = function (node) {
-                return originalCustomElementsRegistry.upgrade(node);
-            }
-            registry.whenDefined = function (name) {
-                return originalCustomElementsRegistry.whenDefined(name);
-            }
-
-            Object.defineProperty(window, "customElements", {
-                get() {
-                    return registry
-                }
-            });
-
+            const observedCustomElementsRegistry = new ObservedCustomElementsRegistry();
+           
             if (packageJsonObj.module) {
                 //@ts-ignore
                 await importShim(baseUrl + removeLeading(packageJsonObj.module, '/'))
@@ -197,6 +177,7 @@ export class NpmPackageLoader {
                 await import(scriptUrl);
             }
 
+            const newElements = observedCustomElementsRegistry.getNewElements();
             if (newElements.length > 0 && serviceContainer && paletteTree) {
                 const elementsCfg: IElementsJson = {
                     elements: newElements
@@ -205,12 +186,8 @@ export class NpmPackageLoader {
                 serviceContainer.register('elementsService', elService);
                 paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
             }
-
-            Object.defineProperty(window, "customElements", {
-                get() {
-                    return originalCustomElementsRegistry;
-                }
-            });
+            
+            observedCustomElementsRegistry.dispose();
         }
         if (reportState)
             reportState(pkg + ": done");
