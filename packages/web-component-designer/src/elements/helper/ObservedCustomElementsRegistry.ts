@@ -7,19 +7,23 @@ export class ObservedCustomElementsRegistry implements IDisposable {
 
     constructor() {
         this._originalCustomElementsRegistry = window.customElements;
+        
         const registry: any = {};
+        const originalCustomElementsRegistry = this._originalCustomElementsRegistry
+        const newElements = this._newElements
+        
         registry.define = function (name, constructor, options) {
-            this._newElements.push(name);
-            this._originalCustomElementsRegistry.define(name, constructor, options);
+            newElements.push(name);
+            originalCustomElementsRegistry.define(name, constructor, options);
         }
         registry.get = function (name) {
-            return this._originalCustomElementsRegistry.get(name);
+            return originalCustomElementsRegistry.get(name);
         }
         registry.upgrade = function (node) {
-            return this._originalCustomElementsRegistry.upgrade(node);
+            return originalCustomElementsRegistry.upgrade(node);
         }
         registry.whenDefined = function (name) {
-            return this._originalCustomElementsRegistry.whenDefined(name);
+            return originalCustomElementsRegistry.whenDefined(name);
         }
 
         Object.defineProperty(window, "customElements", {
