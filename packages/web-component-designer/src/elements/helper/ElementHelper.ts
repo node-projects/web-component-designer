@@ -107,12 +107,43 @@ export function getElementOffsetsInContainer(element: Element) {
     return { x: element.offsetLeft, y: element.offsetTop };
   } else {
     //const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
-   
+
     //todo: this will not work correctly with transformed SVGs or MathML Elements 
-    const r1 = element.getBoundingClientRect();
-    const r2 = element.parentElement.getBoundingClientRect();
+    const r1 = getBoundingClientRectAlsoForDisplayContents(element);
+    const r2 = getBoundingClientRectAlsoForDisplayContents(element.parentElement);
     return { x: r1.x - r2.x, y: r1.y - r2.y }
   }
+}
+
+export function getBoundingClientRectAlsoForDisplayContents(element: Element): DOMRect {
+  let r = element.getBoundingClientRect();
+  if (r.width == 0 && r.height == 0) {
+    const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+    if (cs.display == 'contents') {
+      if (element.shadowRoot) {
+        for (let c of element.shadowRoot.children) {
+          const rc = getBoundingClientRectAlsoForDisplayContents(c);
+          r = new DOMRect(
+            Math.min(r.x, rc.x),
+            Math.min(r.y, rc.y),
+            Math.max(r.width, rc.width),
+            Math.max(r.height, rc.height)
+          );
+        }
+      } else {
+        for (let c of element.children) {
+          const rc = getBoundingClientRectAlsoForDisplayContents(c);
+          r = new DOMRect(
+            Math.min(r.x, rc.x),
+            Math.min(r.y, rc.y),
+            Math.max(r.width, rc.width),
+            Math.max(r.height, rc.height)
+          );
+        }
+      }
+    }
+  }
+  return r;
 }
 
 const windowOffsetsCacheKey = Symbol('windowOffsetsCacheKey');

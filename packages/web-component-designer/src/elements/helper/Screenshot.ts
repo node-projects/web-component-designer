@@ -1,3 +1,5 @@
+import { getBoundingClientRectAlsoForDisplayContents } from "./ElementHelper.js";
+
 // for screenshots to be genrated properly, you need to select the current tab only in media source selector
 export class Screenshot {
   private static _canvas: HTMLCanvasElement;
@@ -50,7 +52,7 @@ export class Screenshot {
 
   static async takeScreenshot(element: Element, width: number = 100, height: number = 100, elementHostForVideo: Element = document.body): Promise<string> {
     await Screenshot.enableScreenshots(elementHostForVideo);
-    const rect = element.getBoundingClientRect();
+    const rect = getBoundingClientRectAlsoForDisplayContents(element);
     Screenshot._canvas.width = width;
     Screenshot._canvas.height = height;
     Screenshot._context.drawImage(Screenshot._video, 0, 0, 1, 1, 0, 0, width, height);

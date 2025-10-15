@@ -4,6 +4,7 @@
 
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignItem } from "../item/IDesignItem.js";
+import { getBoundingClientRectAlsoForDisplayContents } from "./ElementHelper.js";
 
 /**
  * This function filters a items list, so only the outer elments are used for example in a move
@@ -71,8 +72,8 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
       hasPositionedLayout = true;
     } else {
       if (positionedContainerElement !== container.element) {
-        let posContainerRect = positionedContainerElement.getBoundingClientRect();
-        let elementRect = designItem.element.getBoundingClientRect();
+        let posContainerRect = getBoundingClientRectAlsoForDisplayContents(positionedContainerElement);
+        let elementRect = getBoundingClientRectAlsoForDisplayContents(designItem.element);
         containerLeft = elementRect.left - posContainerRect.left;
         containerRight = elementRect.right - posContainerRect.right;
         containerTop = elementRect.top - posContainerRect.top;

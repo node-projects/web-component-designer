@@ -1,5 +1,6 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { convertCssUnit, convertCssUnitToPixel, getCssUnit, getExpandedCssGridColumnSizes } from "../../../../helper/CssUnitConverter.js";
+import { getBoundingClientRectAlsoForDisplayContents } from "../../../../helper/ElementHelper.js";
 import { calculateGridInformation } from "../../../../helper/GridHelper.js";
 import { getElementCombinedTransform } from "../../../../helper/getBoxQuads.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
@@ -103,7 +104,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
 
   private _convertCssUnits(pixelSizes: number[], targetUnits: string[], target: HTMLElement, percentTarget: 'width' | 'height'): string[] {
     let cp = getComputedStyle(target);
-    let bounding = target.getBoundingClientRect();
+    let bounding = getBoundingClientRectAlsoForDisplayContents(target);
     let containerSize = bounding[percentTarget];
     let amountGaps = percentTarget == "height" ? this.gridInformation.cells.length - 1 : this.gridInformation.cells[0].length - 1;
     let gapValue = percentTarget == "width" ? cp.columnGap : cp.rowGap;

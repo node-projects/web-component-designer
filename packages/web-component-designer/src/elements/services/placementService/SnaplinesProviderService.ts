@@ -1,4 +1,5 @@
 import { IRect } from '../../../interfaces/IRect.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/ElementHelper.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { ISnaplinesProviderService } from './ISnaplinesProviderService.js';
 
@@ -10,7 +11,7 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
     {
       const canvas = containerItem.instanceServiceContainer.designerCanvas;
       const ignMap = new Map<Element, IDesignItem>(ignoredItems.map(i => [i.element, i]));
-      const outerRect = containerItem.element.getBoundingClientRect();
+      const outerRect = getBoundingClientRectAlsoForDisplayContents(containerItem.element);
 
       const provideWithDist = canvas.instanceServiceContainer.designContext.extensionOptions[provideSnaplinesWithDistance] !== false;
       const provideWithDistDist = canvas.instanceServiceContainer.designContext.extensionOptions[provideSnaplinesWithDistanceDistance] ?? 5;
@@ -26,7 +27,7 @@ export class SnaplinesProviderService implements ISnaplinesProviderService {
         if (ignMap.has(<Element>n)) {
           n = <Element>tw.nextSibling();
         } else {
-          const p = (<Element>n).getBoundingClientRect();
+          const p = getBoundingClientRectAlsoForDisplayContents((<Element>n));
           const pLeft = (p.x - outerRect.x) / canvas.scaleFactor;
           const pMidH = (p.x - outerRect.x + p.width / 2) / canvas.scaleFactor;
           const pRight = (p.x - outerRect.x + p.width) / canvas.scaleFactor;

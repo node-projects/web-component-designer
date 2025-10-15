@@ -1,3 +1,4 @@
+import { getBoundingClientRectAlsoForDisplayContents } from '../../../helper/ElementHelper.js';
 import { getTextWidth } from '../../../helper/TextHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -26,7 +27,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
       return;
 
     if (!isNaN(transformedCornerPoints.p1.x)) {
-      const boundRect = this.extendedItem.element.getBoundingClientRect();
+      const boundRect = getBoundingClientRectAlsoForDisplayContents(this.extendedItem.element);
       let w = getTextWidth(this.extendedItem.name, '10px monospace');
       let elementWidth = Math.sqrt(Math.pow(transformedCornerPoints.p2.x - transformedCornerPoints.p1.x, 2) + Math.pow(transformedCornerPoints.p2.y - transformedCornerPoints.p1.y, 2));
       let text = this.extendedItem.name;

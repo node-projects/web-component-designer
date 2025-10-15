@@ -6,6 +6,7 @@ import { pointInRect } from '../../helper/Helper.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { DefaultPlacementService } from './DefaultPlacementService.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../../index.js';
 
 
 export class GridPlacementService implements IPlacementService {
@@ -33,7 +34,7 @@ export class GridPlacementService implements IPlacementService {
   leaveContainer(container: IDesignItem, items: IDesignItem[]) {
     for (let i of items) {
       if (!i.lastContainerSize) {
-        const rect = i.element.getBoundingClientRect();
+        const rect = getBoundingClientRectAlsoForDisplayContents(i.element);
         i.lastContainerSize = { width: rect.width, height: rect.height };
       }
     }
@@ -61,7 +62,7 @@ export class GridPlacementService implements IPlacementService {
   }
 
   getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint {
-    return container.element.getBoundingClientRect();
+    return getBoundingClientRectAlsoForDisplayContents(container.element);
   }
 
   placePoint(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]): IPoint {

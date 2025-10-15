@@ -5,6 +5,7 @@ import { IDesignerExtension } from './IDesignerExtension.js';
 import { TransformOriginExtension } from './TransformOriginExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
+import { getBoundingClientRectAlsoForDisplayContents } from '../../../helper/ElementHelper.js';
 
 export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {
   showOnlyWhenSet: boolean;
@@ -21,7 +22,7 @@ export class TransformOriginExtensionProvider implements IDesignerExtensionProvi
         return true;
       const cs = getComputedStyle(designItem.element);
       if (cs.display != 'inline' && designItem.element.getBoundingClientRect) {
-        const r = designItem.element.getBoundingClientRect();
+        const r = getBoundingClientRectAlsoForDisplayContents(designItem.element);
         const pr = cs.transformOrigin.split(' ');
         const x = parseFloat(pr[0]) - r.width / 2;
         const y = parseFloat(pr[1]) - r.height / 2;

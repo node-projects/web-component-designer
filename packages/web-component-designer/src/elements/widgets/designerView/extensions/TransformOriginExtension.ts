@@ -1,6 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { convertCssUnit, getCssUnit } from '../../../helper/CssUnitConverter.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../../helper/ElementHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -66,7 +67,7 @@ export class TransformOriginExtension extends AbstractExtension {
     switch (event.type) {
       case EventNames.PointerDown:
         (<Element>event.target).setPointerCapture(event.pointerId);
-        const rect = (<HTMLElement>event.target).getBoundingClientRect();
+        const rect = getBoundingClientRectAlsoForDisplayContents((<HTMLElement>event.target));
         this._offsetInControl = { x: rect.width / 2 + (rect.x - event.x), y: rect.height / 2 + (rect.y - event.y) };
         this._startPos = { x: normalized.x, y: normalized.y };
         break;

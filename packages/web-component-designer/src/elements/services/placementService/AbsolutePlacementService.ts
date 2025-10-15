@@ -10,6 +10,7 @@ import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 import { filterNonElementItems } from './DefaultPlacementService.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/ElementHelper.js';
 
 export class AbsolutePlacementService implements IPlacementService {
 
@@ -59,7 +60,7 @@ export class AbsolutePlacementService implements IPlacementService {
         trackY = Math.round(trackY / designerCanvas.gridSize) * designerCanvas.gridSize - p.y;
       }
       else if (designerCanvas.alignOnSnap) {
-        let rect = item.element.getBoundingClientRect();
+        let rect = getBoundingClientRectAlsoForDisplayContents(item.element);
         let newPos = designerCanvas.snapLines.snapToPosition({ x: (newPoint.x - offsetInControl.x), y: (newPoint.y - offsetInControl.y) }, { width: rect.width / designerCanvas.scaleFactor, height: rect.height / designerCanvas.scaleFactor }, { x: trackX > 0 ? 1 : -1, y: trackY > 0 ? 1 : -1 })
         if (newPos.x !== null) {
           trackX = newPos.x - Math.round(startPoint.x) + Math.round(offsetInControl.x);

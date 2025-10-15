@@ -39,6 +39,7 @@ import { stylesheetFromString } from '../../helper/StylesheetHelper.js';
 import { AbstractStylesheetService } from '../../services/stylesheetService/AbstractStylesheetService.js';
 import { addPolyfill as addBoxQuadsPolyfill } from '../../helper/getBoxQuads.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/ElementHelper.js';
 
 const disableAnimationsSheet = cssFromString`
   * {
@@ -628,7 +629,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     for (let n of this.rootDesignItem.querySelectorAll('*')) {
       if (n instanceof (n.ownerDocument.defaultView ?? window).Element) {
-        const rect = n.getBoundingClientRect();
+        const rect = getBoundingClientRectAlsoForDisplayContents(n);
         minX = minX < rect.x ? minX : rect.x;
         minY = minY < rect.y ? minY : rect.y;
         maxX = maxX > rect.x + rect.width + autoZomOffset ? maxX : rect.x + rect.width + autoZomOffset;
@@ -1238,7 +1239,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (element.nodeType == NodeType.TextNode) {
       return this.getNormalizedTextNodeCoordinates(<Text><any>element, ignoreScalefactor)
     }
-    const targetRect = element.getBoundingClientRect();
+    const targetRect = getBoundingClientRectAlsoForDisplayContents(element);
     const offset = this.containerOffset;
     return { x: offset.x + (targetRect.x - this.containerBoundingRect.x) / (ignoreScalefactor ? 1 : this.scaleFactor), y: offset.y + (targetRect.y - this.containerBoundingRect.y) / (ignoreScalefactor ? 1 : this.scaleFactor), width: targetRect.width / (ignoreScalefactor ? 1 : this.scaleFactor), height: targetRect.height / (ignoreScalefactor ? 1 : this.scaleFactor) };
   }

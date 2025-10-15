@@ -1,7 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
-import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
+import { getBoundingClientRectAlsoForDisplayContents, getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
 import { transformPointByInverseMatrix } from "../../../helper/TransformHelper.js";
 import { getElementCombinedTransform } from '../../../helper/getBoxQuads.js';
@@ -111,7 +111,7 @@ export class ResizeExtension extends AbstractExtension {
 
         const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
         (<HTMLElement>this.extendedItem.element).style.transform = '';
-        let rect = this.extendedItem.element.getBoundingClientRect();
+        let rect = getBoundingClientRectAlsoForDisplayContents(this.extendedItem.element);
         (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
        
         let contentBoxOffset: IPoint = { x: 0, y: 0 };
@@ -127,7 +127,7 @@ export class ResizeExtension extends AbstractExtension {
 
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-            rect = designItem.element.getBoundingClientRect();
+            rect = getBoundingClientRectAlsoForDisplayContents(designItem.element);
             this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
           }
         }

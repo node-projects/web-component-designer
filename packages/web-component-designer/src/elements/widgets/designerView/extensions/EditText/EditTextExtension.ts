@@ -6,6 +6,7 @@ import { IExtensionManager } from '../IExtensionManger.js';
 import { OverlayLayer } from "../OverlayLayer.js";
 import { shadowrootGetSelection, wrapSelectionInSpans } from "../../../../helper/SelectionHelper.js";
 import { FontPropertyEditor } from "../../../../services/propertiesService/propertyEditors/FontPropertyEditor.js";
+import { getBoundingClientRectAlsoForDisplayContents } from "../../../../helper/ElementHelper.js";
 
 export type handlesPointerEvent = { handlesPointerEvent(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element): boolean }
 
@@ -64,7 +65,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
     (<HTMLElement>this.extendedItem.element).focus();
 
-    let itemRect = this.extendedItem.element.getBoundingClientRect();
+    let itemRect = getBoundingClientRectAlsoForDisplayContents(this.extendedItem.element);
 
     this._toolbar = this.createToolbar(EditTextExtension.template, 300, 24);
     this._toolbar.updatePosition({ x: (itemRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, y: ((itemRect.y - this.designerCanvas.containerBoundingRect.y) / this.designerCanvas.scaleFactor - 36) });
