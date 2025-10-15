@@ -459,7 +459,17 @@ export function getElementCombinedTransform(element, iframes) {
     const mOri = new DOMMatrix().translate(originX, originY, originZ);
 
     if (s.translate != 'none' && s.translate) {
-        m = m.multiply(new DOMMatrix('translate(' + s.translate.replace(' ', ',') + ')'));
+        let tr = s.translate;
+        if (tr.includes('%')) {
+            const v = tr.split(' ');
+            const r = element.getBoundingClientRect();
+            if (v[0].endsWith('%'))
+                v[0] = (parseFloat(v[0]) * r.width / 100) + 'px';
+            if (v[1]?.endsWith('%'))
+                v[1] = (parseFloat(v[1]) * r.height / 100) + 'px';
+            tr = v.join(',');
+        }
+        m = m.multiply(new DOMMatrix('translate(' + tr.replace(' ', ',') + ')'));
     }
     if (s.rotate != 'none' && s.rotate) {
         m = m.multiply(new DOMMatrix('rotate(' + s.rotate.replace(' ', ',') + ')'));
