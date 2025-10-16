@@ -118,10 +118,10 @@ export class DefaultPlacementService implements IPlacementService {
   startPlace(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
   }
 
-  place(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  place(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     //TODO: this should revert all undo actions while active
     //maybe a undo actions returns itself or an id so it could be changed?
-    let track = this.calculateTrack(event, placementView, startPoint, offsetInControl, newPoint, items[0]);
+    let track = this.calculateTrack(event, designerCanvas, startPoint, offsetInControl, newPoint, items[0]);
 
     if (event.shiftKey) {
       track = straightenLine({ x: 0, y: 0 }, track, true);
@@ -184,7 +184,7 @@ export class DefaultPlacementService implements IPlacementService {
     items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', true);
   }
 
-  finishPlace(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+  finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
@@ -206,7 +206,7 @@ export class DefaultPlacementService implements IPlacementService {
     }
 
     for (const item of items) {
-      (<DesignerCanvas>placementView).extensionManager.removeExtension(item, ExtensionType.Placement);
+      (<DesignerCanvas>designerCanvas).extensionManager.removeExtension(item, ExtensionType.Placement);
     }
     items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', true);
   }

@@ -117,12 +117,24 @@ export class AbsolutePlacementService implements IPlacementService {
     }
     let filteredItems = filterChildPlaceItems(filterNonElementItems(items));
     for (const designItem of filteredItems) {
-      const canvas = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element;
-      const transformedPoint: DOMPoint = designItem.parent.element.convertPointFromNode(new DOMPoint(track.x, track.y, 0, 0), <HTMLElement>canvas);
+      const canvas = designItem.instanceServiceContainer.designerCanvas.canvas;
+      const quad = designItem.parent.element.getBoxQuads({ relativeTo: canvas, iframes: designItem.instanceServiceContainer.designerCanvas.iframes })[0];
+      let transformedPoint: DOMPoint = designItem.parent.element.convertPointFromNode(new DOMPoint(track.x + quad.p1.x, track.y + quad.p1.y), <HTMLElement>canvas, { iframes: designItem.instanceServiceContainer.designerCanvas.iframes });
+
+      const cs = getComputedStyle(designItem.element);
+      let m = new DOMMatrix();
+      if (cs.rotate != 'none' && cs.rotate) {
+        m = m.multiply(new DOMMatrix('rotate(' + cs.rotate.replace(' ', ',') + ')'));
+      }
+      if (cs.scale != 'none' && cs.scale) {
+        m = m.multiply(new DOMMatrix('scale(' + cs.scale.replace(' ', ',') + ')'));
+      }
+      transformedPoint = m.inverse().transformPoint(transformedPoint);
+
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
     }
-    designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', false);
+    items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', false);
   }
 
   moveElements(designItems: IDesignItem[], position: IPoint, absolute: boolean) {
@@ -161,13 +173,24 @@ export class AbsolutePlacementService implements IPlacementService {
     items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', true);
   }
 
-  finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+   finishPlace(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
       const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.getStyle('transform') ?? ''));
       (<HTMLElement>designItem.element).style.transform = designItem.getStyle('transform') ?? '';
       let track = { x: translation.x, y: translation.y };
+
+      const cs = getComputedStyle(designItem.element);
+      let m = new DOMMatrix();
+      if (cs.rotate != 'none' && cs.rotate) {
+        m = m.multiply(new DOMMatrix('rotate(' + cs.rotate.replace(' ', ',') + ')'));
+      }
+      if (cs.scale != 'none' && cs.scale) {
+        m = m.multiply(new DOMMatrix('scale(' + cs.scale.replace(' ', ',') + ')'));
+      }
+      track = m.transformPoint(track);
+
       placeDesignItem(container, designItem, { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y }, 'position');
     }
 
