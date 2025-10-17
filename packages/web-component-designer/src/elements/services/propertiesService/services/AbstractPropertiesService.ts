@@ -220,6 +220,11 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           }
         }
         return lastValue;
+      } else if (property.propertyType == PropertyType.property) {
+        let propertyName = property.propertyName
+        if (!propertyName)
+          propertyName = PropertiesHelper.dashToCamelCase(property.name);
+        return designItems[0].element[propertyName];
       } else {
         let attributeName = property.attributeName
         if (!attributeName)
