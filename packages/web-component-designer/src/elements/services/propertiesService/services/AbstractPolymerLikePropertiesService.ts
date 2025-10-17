@@ -32,7 +32,7 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
         description = polymerProperty.description;
         example = polymerProperty.example;
         readonly = polymerProperty.readonly;
-        propertyType = polymerProperty.readonly ? PropertyType.propertyAndAttribute : PropertyType.property;
+        propertyType = polymerProperty.readonly ? PropertyType.property : PropertyType.propertyAndAttribute;
       }
 
       if (type === String) {
