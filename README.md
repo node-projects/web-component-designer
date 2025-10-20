@@ -51,6 +51,9 @@ A ZPL-Label Designer:
 A material flow layout editor in a comercial application:
 ![image](https://github.com/node-projects/web-component-designer/assets/364896/0062562a-4224-4b11-aaa4-03e31494fcfa)
 
+A flow chart editor
+![image](https://github.com/user-attachments/assets/bcefa433-27fd-4be6-b3b7-a8264d66bef5)
+
 ## Demo
 
 look at: https://node-projects.github.io/web-component-designer-demo/index.html
@@ -106,3 +109,4 @@ The Library uses Images from the Chrome Dev Tools, see
 https://github.com/ChromeDevTools/devtools-frontend/tree/main/front_end/Images/src
 and
 https://github.com/ChromeDevTools/devtools-frontend/blob/main/LICENSE
+
