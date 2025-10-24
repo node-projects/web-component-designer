@@ -14,6 +14,8 @@ import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/Elemen
 
 export class AbsolutePlacementService implements IPlacementService {
 
+  //TODO: change move of elements to allow switch between transform and real move
+
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration, item?: IDesignItem) {
     if (item != null && item.getComputedStyle()?.position == 'absolute')
       return true;
