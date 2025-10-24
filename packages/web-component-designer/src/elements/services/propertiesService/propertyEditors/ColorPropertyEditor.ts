@@ -11,9 +11,14 @@ export class ColorPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
     element.type = 'color'
     if (property.readonly)
       element.readOnly = true;
-    element.onchange = (e) => {
+    element.onchange = async (e) => {
       let w3Col = w3color.toColorObject(element.value);
-      this._valueChanged(w3Col.toNameOrHexString())
+      await this.property.service.removePreviewValue?.(this.designItems, this.property);
+      this._valueChanged(w3Col.toNameOrHexString());
+    };
+    element.oninput = async (e) => {
+      let w3Col = w3color.toColorObject(element.value);
+      await this.property.service.previewValue?.(this.designItems, this.property, w3Col.toNameOrHexString());
     };
     this.element = element;
   }
