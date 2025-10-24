@@ -19,12 +19,10 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
     if (!this.disableChangeNotification) {
       if (this.designItems && this.designItems.length) {
         const cg = this.designItems[0].openGroup("set property: " + this.property.name);
-        for (let d of this.designItems) {
-          if (newValue == null)
-            this.property.service.clearValue([d], this.property, 'value');
-          else
-            await this.property.service.setValue([d], this.property, newValue);
-        }
+        if (newValue == null)
+          this.property.service.clearValue(this.designItems, this.property, 'value');
+        else
+          await this.property.service.setValue(this.designItems, this.property, newValue);
         cg.commit();
       }
     }
