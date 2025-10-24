@@ -665,7 +665,7 @@ export class DesignItem implements IDesignItem {
   // todo : public setPropertyAndAttrbute()
   //getProperty ...
 
-  public setProperty(name: string, value?: any) {
+  public setProperty(name: string, value?: any) {   //the prop change action should use the prop service. We need th setPropAndattribute. So undo works!
     if (this.isRootItem)
       throw 'not allowed to set attribute on root item';
     const oldValue = deepValue(this.node, name);
@@ -674,46 +674,63 @@ export class DesignItem implements IDesignItem {
   }
 
   // Internal implementations wich don't use undo/redo
-
   public _insertChildInternal(designItem: DesignItem, index?: number) {
-    if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
-    }
-    if (designItem.parent) {
-      designItem.parent._removeChildInternal(designItem);
+    this._insertChildsInternal([designItem], index);
+  }
+  public _insertChildsInternal(designItems: DesignItem[], index?: number) {
+    const frag = this.document.createDocumentFragment();
+    const orgIndex = index;
+    for (let designItem of designItems) {
+      if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
+        designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+        designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
+      }
+      if (designItem.parent) {
+        designItem.parent._removeChildInternal(designItem);
+      }
+
+      frag.appendChild(designItem.view);
+      (<DesignItem>designItem)._parent = this;
+
+      if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
+        this._childArray.push(designItem);
+      } else {
+        this._childArray.splice(index, 0, designItem);
+        index++;
+      }
+
     }
 
-    if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
-      this._childArray.push(designItem);
+    if (orgIndex == null || this._childArray.length == 0 || orgIndex >= this._childArray.length) {
       if (this.isRootItem) {
         if (this.usableContainer?.children[0] instanceof this.window.HTMLHtmlElement)
           this.usableContainer.children[0].remove();
-        this.usableContainer.appendChild(designItem.view);
+        this.usableContainer.appendChild(frag);
       } else if (this.view instanceof (this.node.ownerDocument.defaultView ?? window).HTMLTemplateElement) {
-        this.view.content.appendChild(designItem.view);
+        this.view.content.appendChild(frag);
       } else
-        this.view.appendChild(designItem.view);
+        this.view.appendChild(frag);
     } else {
-      let el = this._childArray[index];
+      let el = this._childArray[orgIndex];
       if (this.isRootItem) {
         if (this.usableContainer?.children[0] instanceof this.window.HTMLHtmlElement)
           this.usableContainer.children[0].remove();
-        this.usableContainer.insertBefore(designItem.view, el.element);
+        this.usableContainer.insertBefore(frag, el.element);
       } else if (this.view instanceof (this.node.ownerDocument.defaultView ?? window).HTMLTemplateElement) {
-        this.view.content.insertBefore(designItem.view, el.element)
+        this.view.content.insertBefore(frag, el.element)
       } else
-        this.view.insertBefore(designItem.view, el.element)
-      this._childArray.splice(index, 0, designItem);
+        this.view.insertBefore(frag, el.element)
     }
-    (<DesignItem>designItem)._parent = this;
 
     //TODO: is this still needed???
+    /*
     if (this.instanceServiceContainer.selectionService.primarySelection == designItem) {
       designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
       if (designItem.getPlacementService().isEnterableContainer(this))
         designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
     }
+    */
+
     this._refreshIfStyleSheet();
   }
   public _removeChildInternal(designItem: IDesignItem) {

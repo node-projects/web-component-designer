@@ -38,6 +38,7 @@ export interface IDesignItem {
   readonly firstChild: IDesignItem;
   readonly parent: IDesignItem;
 
+  _insertChildsInternal(designItems: IDesignItem[], index?: number);
   _insertChildInternal(designItem: IDesignItem, index?: number);
   _removeChildInternal(designItem: IDesignItem);
   _withoutUndoSetStyle(name: string, value: string);
