@@ -236,7 +236,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
           input.disabled = true;
           input.id = "addNew_input_" + (++this._addCounter);
           let label = document.createElement("input");
-          label.value = p.displayName ?? p.name;
+          label.value = p.name;
           label.type = "text";
           label.id = "addNew_label_" + this._addCounter;
           label.onkeyup = e => {
@@ -264,7 +264,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
           if (!p.renamable) {
             let label = document.createElement("label");
             label.htmlFor = p.name;
-            label.textContent = p.name;
+            label.textContent = p.displayName ?? p.name;
             label.title = p.description ?? ((p.displayName ?? p.name) + ' (type: ' + p.type + (p.defaultValue ? ', default: ' + p.defaultValue : '') + ', propertytype: ' + p.propertyType + ')');
             label.ondragleave = (e) => this._onDragLeave(e, p, label);
             label.ondragover = (e) => this._onDragOver(e, p, label);
@@ -274,7 +274,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             let label = document.createElement("input");
             label.id = 'label_' + p.name;
             let input = <HTMLInputElement>editor.element;
-            label.value = p.displayName ?? p.name;
+            label.value = p.name;
             label.onkeyup = async e => {
               if (e.key == 'Enter' && label.value) {
                 const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
