@@ -679,7 +679,7 @@ export class DesignItem implements IDesignItem {
   }
   public _insertChildsInternal(designItems: DesignItem[], index?: number) {
     const frag = this.document.createDocumentFragment();
-    const orgIndex = index;
+    let beforeDs: IDesignItem = null;
     for (let designItem of designItems) {
       if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
         designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
@@ -695,13 +695,12 @@ export class DesignItem implements IDesignItem {
       if (index == null || this._childArray.length == 0 || index >= this._childArray.length) {
         this._childArray.push(designItem);
       } else {
+        beforeDs = this._childArray[index];
         this._childArray.splice(index, 0, designItem);
         index++;
       }
-
     }
-
-    if (orgIndex == null || this._childArray.length == 0 || orgIndex >= this._childArray.length) {
+    if (beforeDs == null) {
       if (this.isRootItem) {
         if (this.usableContainer?.children[0] instanceof this.window.HTMLHtmlElement)
           this.usableContainer.children[0].remove();
@@ -711,15 +710,14 @@ export class DesignItem implements IDesignItem {
       } else
         this.view.appendChild(frag);
     } else {
-      let el = this._childArray[orgIndex];
       if (this.isRootItem) {
         if (this.usableContainer?.children[0] instanceof this.window.HTMLHtmlElement)
           this.usableContainer.children[0].remove();
-        this.usableContainer.insertBefore(frag, el.element);
+        this.usableContainer.insertBefore(frag, beforeDs.element);
       } else if (this.view instanceof (this.node.ownerDocument.defaultView ?? window).HTMLTemplateElement) {
-        this.view.content.insertBefore(frag, el.element)
+        this.view.content.insertBefore(frag, beforeDs.element)
       } else
-        this.view.insertBefore(frag, el.element)
+        this.view.insertBefore(frag, beforeDs.element)
     }
 
     //TODO: is this still needed???
