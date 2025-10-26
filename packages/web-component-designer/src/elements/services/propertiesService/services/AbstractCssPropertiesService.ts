@@ -11,7 +11,7 @@ export abstract class AbstractCssPropertiesService extends CommonPropertiesServi
   }
 
   async previewValue?(designItems: IDesignItem[], property: IProperty, value: any): Promise<void> {
-    let nm = property.name;
+    let nm = property.propertyName ?? property.name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(nm);
     for (let d of designItems) {
@@ -20,7 +20,7 @@ export abstract class AbstractCssPropertiesService extends CommonPropertiesServi
   }
 
   async removePreviewValue?(designItems: IDesignItem[], property: IProperty): Promise<void> {
-    let nm = property.name;
+    let nm = property.propertyName ?? property.name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(nm);
     for (let d of designItems) {

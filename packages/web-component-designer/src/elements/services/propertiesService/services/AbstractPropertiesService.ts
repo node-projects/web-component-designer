@@ -51,7 +51,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         continue;
 
       if (property.propertyType == PropertyType.cssValue) {
-        await d.updateStyleInSheetOrLocalAsync(property.name, value);
+        await d.updateStyleInSheetOrLocalAsync(property.propertyName ?? property.name, value);
         //TODO: fix this hack somehow
         //unkown css property names do not trigger the mutation observer of property grid, 
         //fixed by assinging style again to the attribute
@@ -107,10 +107,10 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     for (let d of designItems) {
       if (clearType != 'binding') {
         if (property.propertyType == PropertyType.cssValue) {
-          d.removeStyle(property.name);
+          d.removeStyle(property.propertyName ?? property.name);
         } else {
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute) {
-            d.element[property.name] = null;
+            d.element[property.propertyName ?? property.name] = null;
           }
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute) {
             let attributeName = property.attributeName
@@ -177,7 +177,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           this._cssCacheClearTimer = setTimeout(() => AbstractPropertiesService._stylesCache.clear(), 30);
         }
 
-        let cssValue = styles.has(property.name);
+        let cssValue = styles.has(property.propertyName ?? property.name);
         if (cssValue)
           return ValueType.fromStylesheet;
       }
@@ -211,7 +211,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   getValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems != null && designItems.length !== 0) {
       if (property.propertyType == PropertyType.cssValue) {
-        let lastValue = designItems[0].getStyle(property.name);
+        let lastValue = designItems[0].getStyle(property.propertyName ?? property.name);
         for (const d of designItems) {
           let value = d.getStyle(property.name);
           if (value != lastValue) {
@@ -277,7 +277,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
     if (property.propertyType == PropertyType.cssValue) {
       if (designItems != null && designItems.length !== 0) {
         if (designItems[0].nodeType == NodeType.Element) {
-          let v = window.getComputedStyle(designItems[0].element)[property.name];
+          let v = window.getComputedStyle(designItems[0].element)[property.propertyName ?? property.name];
           return v;
         }
       }

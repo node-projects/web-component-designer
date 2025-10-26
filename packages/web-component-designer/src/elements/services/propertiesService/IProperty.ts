@@ -5,7 +5,8 @@ import { PropertyType } from './PropertyType.js';
 export interface IProperty {
   name: string;
   renamable?: boolean;
-  propertyName?: string; // normaly camelCased name of property
+  displayName?: string; // nused in property grid
+  propertyName?: string; // normaly camelCased name of property (also used for css properties)
   attributeName?: string; // normaly dash seperated name of property
   description?: string;
   type?: 'addNew' | 'json' | 'color' | 'date' | 'number' | 'list' | 'enum' | 'boolean' | 'img-lis' | 'thickness' | 'css-length' | 'string' | string; // -> string, number, list, color, thickness, css-length

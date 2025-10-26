@@ -937,7 +937,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public addDesignItems(designItems: IDesignItem[]) {
     if (designItems) {
-      this.rootDesignItem._insertChildsInternal(designItems);
+        this.rootDesignItem._insertChildsInternal(designItems);
     }
 
     const intializationService = this.serviceContainer.intializationService;
