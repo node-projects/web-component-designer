@@ -25,6 +25,8 @@ export class ZoomTool implements ITool {
 
     switch (event.type) {
       case EventNames.PointerDown:
+        (<Element>event.target).setPointerCapture(event.pointerId);
+        designerCanvas.captureActiveTool(this);
         this._startPoint = eventPoint;
         if (!this._rect)
           this._rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -60,6 +62,8 @@ export class ZoomTool implements ITool {
         }
         break;
       case EventNames.PointerUp:
+        (<Element>event.target).releasePointerCapture(event.pointerId);
+        designerCanvas.releaseActiveTool();
         this._endPoint = eventPoint;
         let isLeftClick: boolean = event.button == 0;
         switch (event.button) {
