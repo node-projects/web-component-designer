@@ -64,27 +64,31 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
 
         if (property.type === 'object') {
           const json = JSON.stringify(value);
-          if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
+          if (property.propertyType == PropertyType.propertyAndAttribute)
+            d.setPropertyAndAttribute(property.name, json);
+          else if (property.propertyType == PropertyType.attribute)
             d.setAttribute(attributeName, json);
-          if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
-            d.element[property.name] = value;
+          else if (property.propertyType == PropertyType.property)
+            d.setProperty(property.name, value);
         } else if (property.type == 'boolean' && (value === false || value == null)) {
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
             d.removeAttribute(attributeName);
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
-            d.element[property.name] = false;
+            d.setProperty(property.name, false);
         }
         else if (property.type == 'boolean' && value === true) {
           if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
             d.setAttribute(attributeName, "");
           if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
-            d.element[property.name] = true;
+            d.setProperty(property.name, true);
         }
         else {
-          if (property.propertyType == PropertyType.attribute || property.propertyType == PropertyType.propertyAndAttribute)
+          if (property.propertyType == PropertyType.propertyAndAttribute)
+            d.setPropertyAndAttribute(property.name, value);
+          else if (property.propertyType == PropertyType.attribute)
             d.setAttribute(attributeName, value.toString());
-          if (property.propertyType == PropertyType.property || property.propertyType == PropertyType.propertyAndAttribute)
-            d.element[property.name] = value;
+          else if (property.propertyType == PropertyType.property)
+            d.setProperty(property.name, value);
         }
       }
       this._notifyChangedProperty(d, property, value);
