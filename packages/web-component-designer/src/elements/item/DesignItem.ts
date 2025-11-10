@@ -18,6 +18,7 @@ import { IPlacementService } from '../services/placementService/IPlacementServic
 import { TextContentChangeAction } from '../services/undoService/transactionItems/TextContentChangeAction.js';
 import { PropertyChangeAction } from '../services/undoService/transactionItems/PropertyChangeAction.js';
 import { deepValue } from '../helper/Helper.js';
+import { AttributeAndPropertyChangeAction } from '../services/undoService/transactionItems/AttributeAndPropertyChangeAction.js';
 
 export const hideAtDesignTimeAttributeName = 'node-projects-hide-at-design-time';
 export const hideAtRunTimeAttributeName = 'node-projects-hide-at-run-time';
@@ -118,10 +119,12 @@ export class DesignItem implements IDesignItem {
     }
   }
   _withoutUndoSetAttribute(name: string, value: string) {
+    this.element.setAttribute(name, value);
     this._attributes.set(name, value);
     this.serviceContainer.designItemService.handleSpecialAttributes(name, this);
   }
   _withoutUndoRemoveAttribute(name: string) {
+    this.element.removeAttribute(name);
     this._attributes.delete(name);
     this.serviceContainer.designItemService.handleSpecialAttributes(name, this);
   }
@@ -662,8 +665,20 @@ export class DesignItem implements IDesignItem {
     this.instanceServiceContainer.undoService.execute(action);
   }
 
-  // todo : public setPropertyAndAttrbute()
-  //getProperty ...
+  public setPropertyAndAttribute(name: string, value?: string | null) {
+    const attributeName = PropertiesHelper.camelToDashCase(name);
+    const propertyName = PropertiesHelper.dashToCamelCase(name);
+    if (this.isRootItem)
+      throw 'not allowed to set attribute on root item';
+    const action = new AttributeAndPropertyChangeAction(this, attributeName, propertyName, value, this.element[propertyName]);
+    this.instanceServiceContainer.undoService.execute(action);
+  }
+  public removePropertyAndAttribute(name: string) {
+    const attributeName = PropertiesHelper.camelToDashCase(name);
+    const propertyName = PropertiesHelper.dashToCamelCase(name);
+    const action = new AttributeAndPropertyChangeAction(this, attributeName, propertyName, null, this.element[propertyName]);
+    this.instanceServiceContainer.undoService.execute(action);
+  }
 
   public setProperty(name: string, value?: any) {   //the prop change action should use the prop service. We need th setPropAndattribute. So undo works!
     if (this.isRootItem)

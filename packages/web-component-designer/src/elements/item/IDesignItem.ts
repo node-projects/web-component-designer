@@ -102,6 +102,8 @@ export interface IDesignItem {
   removeAttribute(name: string);
 
   setProperty(name: string, value?: any);
+  setPropertyAndAttribute(name: string, value?: string | null);
+  removePropertyAndAttribute(name: string);
 
   hideAtDesignTime: boolean;
   hideAtRunTime: boolean;
