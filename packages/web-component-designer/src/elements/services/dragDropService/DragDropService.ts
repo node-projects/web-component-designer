@@ -11,6 +11,23 @@ export class DragDropService implements IDragDropService {
   private _dragOverExtensionItem: IDesignItem;
   private _oldX: number;
   private _oldY: number;
+  private _currentDragDropFormatNameElementDefinition: string;
+  
+  constructor() {
+    window.addEventListener("dragstart", (e) => {
+      const dt = e.dataTransfer;
+      if (!dt) return;
+      const origSetData = dt.setData.bind(dt);
+      dt.setData = (type, value) => {
+        if (type == dragDropFormatNameElementDefinition)
+          this._currentDragDropFormatNameElementDefinition = value;
+        return origSetData(type, value);
+      };
+    }, true); // <-- use capture phase!
+    window.addEventListener("dragend", (e) => {
+      this._currentDragDropFormatNameElementDefinition = null;
+    }, true); // <-- use capture phase!
+  }
 
   public dragEnter(designerCanvas: IDesignerCanvas, event: DragEvent) {
   }
@@ -22,8 +39,20 @@ export class DragDropService implements IDragDropService {
     }
   }
 
-  public dragOver(designerCanvas: IDesignerCanvas, event: DragEvent) {
-    let [newContainer] = this.getPossibleContainerForDragDrop(designerCanvas, event);
+  public async dragOver(designerCanvas: IDesignerCanvas, event: DragEvent) {
+    let di: IDesignItem = null;
+    let transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
+    if (!transferData) {
+      transferData = this._currentDragDropFormatNameElementDefinition;
+    }
+    if (transferData) {
+      const elementDefinition = <IElementDefinition>JSON.parse(transferData);
+      if (elementDefinition) {
+        di = await designerCanvas.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer));
+      }
+    }
+
+    let [newContainer] = this.getPossibleContainerForDragDrop(designerCanvas, event, di ? [di] : null);
     if (!newContainer)
       newContainer = designerCanvas.rootDesignItem;
 
@@ -46,13 +75,14 @@ export class DragDropService implements IDragDropService {
       this._dragOverExtensionItem = null;
     }
 
-    let [newContainer] = this.getPossibleContainerForDragDrop(designerCanvas, event);
-    if (!newContainer)
-      newContainer = designerCanvas.rootDesignItem;
-
     const transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
     const elementDefinition = <IElementDefinition>JSON.parse(transferData);
     const di = await designerCanvas.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(elementDefinition, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer));
+
+    let [newContainer] = this.getPossibleContainerForDragDrop(designerCanvas, event, [di]);
+    if (!newContainer)
+      newContainer = designerCanvas.rootDesignItem;
+
     const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
     const containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, newContainer.getComputedStyle(), di))
     containerService.enterContainer(newContainer, [di], 'drop');
@@ -72,7 +102,7 @@ export class DragDropService implements IDragDropService {
     });
   }
 
-  public getPossibleContainerForDragDrop(designerCanvas: IDesignerCanvas, event: DragEvent): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService] {
+  public getPossibleContainerForDragDrop(designerCanvas: IDesignerCanvas, event: DragEvent, designItems?: IDesignItem[]): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService] {
     let newContainerElementDesignItem: IDesignItem = null;
     let newContainerService: IPlacementService = null;
 
@@ -91,7 +121,9 @@ export class DragDropService implements IDragDropService {
         newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle));
         if (newContainerService) {
           //TODO: Maybe the check for SVG Element should be in "canEnterByDrop"?
-          if (newContainerService.isEnterableContainer(newContainerElementDesignItem) && !(newContainerElementDesignItem.element instanceof newContainerElementDesignItem.window.SVGElement)) {
+          if (designItems && newContainerService.canEnter(newContainerElementDesignItem, designItems) && !(newContainerElementDesignItem.element instanceof newContainerElementDesignItem.window.SVGElement)) {
+            break;
+          } else if (!designItems && newContainerService.isEnterableContainer(newContainerElementDesignItem) && !(newContainerElementDesignItem.element instanceof newContainerElementDesignItem.window.SVGElement)) {
             break;
           } else {
             newContainerElementDesignItem = null;

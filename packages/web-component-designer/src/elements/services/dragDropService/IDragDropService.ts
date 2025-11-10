@@ -7,5 +7,5 @@ export interface IDragDropService {
   dragLeave(designerCanvas: IDesignerCanvas, event: DragEvent);
   dragOver(designerCanvas: IDesignerCanvas, event: DragEvent);
   drop(designerCanvas: IDesignerCanvas, event: DragEvent);
-  getPossibleContainerForDragDrop(designerCanvas: IDesignerCanvas, event: DragEvent): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService]
+  getPossibleContainerForDragDrop(designerCanvas: IDesignerCanvas, event: DragEvent, designItems?: IDesignItem[]): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService]
 }
