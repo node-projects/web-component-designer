@@ -14,7 +14,7 @@ import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   private _div: HTMLDivElement;
-  private _propertyMap: Map<IProperty, { isSetElement: HTMLElement, editor: IPropertyEditor }> = new Map();
+  private _propertyMap: Map<IProperty, { isSetElement: HTMLElement, labelElement: HTMLElement, editor: IPropertyEditor }> = new Map();
   private _serviceContainer: ServiceContainer;
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
@@ -106,6 +106,14 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       color: orange;
       text-decoration: underline;
     }
+    .group-header::after{
+      content: " ▾";
+      font-size: 14px;
+    }
+    .group-header.expanded::after{
+      content: " ▴";
+      font-size: 14px;
+    }
     .group-desc {
       display: inline-flex;
       flex-direction: row-reverse;
@@ -166,6 +174,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private createPropertyGroups(groups: IPropertyGroup[]) {
     for (const g of groups) {
       let header = document.createElement('span');
+      header.addEventListener('click', () => { this.expandOrCollapsePropertyGroups(g); header.classList.toggle('expanded') });
       header.innerHTML = g.name.replaceAll("\n", "<br>");
       header.className = 'group-header';
       this._div.appendChild(header);
@@ -199,9 +208,23 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
   }
 
+  private expandOrCollapsePropertyGroups(propertyGroup: IPropertyGroup) {
+    for (let p of propertyGroup.properties) {
+      const property = this._propertyMap.get(p);
+      const displayStyle = property.labelElement.style.display == 'none' ? 'flex' : 'none';
+      if (property.editor.element)
+        (<HTMLElement>property.editor.element).style.display = displayStyle;
+      if (property.labelElement)
+        property.labelElement.style.display = displayStyle;
+      if (property.isSetElement.parentElement)
+        property.isSetElement.parentElement.style.display = displayStyle;
+    }
+  }
+
   private createPropertyEditors(properties: IProperty[]) {
     for (const p of properties) {
       let editor: IPropertyEditor;
+      let labelHolder: HTMLElement;
       if (p.createEditor)
         editor = p.createEditor(p);
       else {
@@ -236,6 +259,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
           input.disabled = true;
           input.id = "addNew_input_" + (++this._addCounter);
           let label = document.createElement("input");
+          labelHolder = label;
           label.value = p.name;
           label.type = "text";
           label.id = "addNew_label_" + this._addCounter;
@@ -263,6 +287,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         } else {
           if (!p.renamable) {
             let label = document.createElement("label");
+            labelHolder = label;
             label.htmlFor = p.name;
             label.textContent = p.displayName ?? p.name;
             label.title = p.description ?? ((p.displayName ?? p.name) + ' (type: ' + p.type + (p.defaultValue ? ', default: ' + p.defaultValue : '') + ', propertytype: ' + p.propertyType + ')');
@@ -272,6 +297,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             this._div.appendChild(label);
           } else {
             let label = document.createElement("input");
+            labelHolder = label;
             label.id = 'label_' + p.name;
             let input = <HTMLInputElement>editor.element;
             label.value = p.name;
@@ -292,7 +318,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
           editor.element.id = p.name;
         this._div.appendChild(editor.element);
 
-        this._propertyMap.set(p, { isSetElement: rect, editor: editor });
+        this._propertyMap.set(p, { isSetElement: rect, labelElement: labelHolder, editor: editor });
       }
     }
   }
