@@ -159,10 +159,12 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       if (this._propertiesService) {
         let properties = await this._propertiesService.getProperties(designItem);
         if (properties?.length) {
-          if ('properties' in properties[0])
-            this.createPropertyGroups(<IPropertyGroup[]>properties);
-          else
-            this.createPropertyEditors(<IProperty[]>properties);
+          for (let p of properties) {
+            if ('properties' in p)
+              this.createPropertyGroups(<IPropertyGroup>p);
+            else
+              this.createPropertyEditors(<IProperty>p);
+          }
           return true;
         }
       }
@@ -171,41 +173,40 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     return true;
   }
 
-  private createPropertyGroups(groups: IPropertyGroup[]) {
-    for (const g of groups) {
-      let header = document.createElement('span');
-      header.addEventListener('click', () => { this.expandOrCollapsePropertyGroups(g); header.classList.toggle('expanded') });
-      header.innerHTML = g.name.replaceAll("\n", "<br>");
-      header.className = 'group-header';
-      this._div.appendChild(header);
-      let desc = document.createElement('span');
-      desc.innerHTML = g.description ?? '';
-      desc.className = 'group-desc';
-      if (this.propertyGroupHover) {
-        header.onmouseenter = () => {
-          if (this.propertyGroupHover(g, 'name'))
-            header.setAttribute('clickable', '')
-          else
-            header.removeAttribute('clickable')
-        }
-        header.onclick = () => {
-          if (this.propertyGroupClick)
-            this.propertyGroupClick(g, 'name');
-        }
-        desc.onmouseenter = () => {
-          if (this.propertyGroupHover(g, 'desc'))
-            desc.setAttribute('clickable', '')
-          else
-            desc.removeAttribute('clickable')
-        }
-        desc.onclick = () => {
-          if (this.propertyGroupClick)
-            this.propertyGroupClick(g, 'desc');
-        }
+  private createPropertyGroups(group: IPropertyGroup) {
+    let header = document.createElement('span');
+    header.addEventListener('click', () => { this.expandOrCollapsePropertyGroups(group); header.classList.toggle('expanded') });
+    header.innerHTML = group.name.replaceAll("\n", "<br>");
+    header.className = 'group-header';
+    this._div.appendChild(header);
+    let desc = document.createElement('span');
+    desc.innerHTML = group.description ?? '';
+    desc.className = 'group-desc';
+    if (this.propertyGroupHover) {
+      header.onmouseenter = () => {
+        if (this.propertyGroupHover(group, 'name'))
+          header.setAttribute('clickable', '')
+        else
+          header.removeAttribute('clickable')
       }
-      this._div.appendChild(desc);
-      this.createPropertyEditors(g.properties);
+      header.onclick = () => {
+        if (this.propertyGroupClick)
+          this.propertyGroupClick(group, 'name');
+      }
+      desc.onmouseenter = () => {
+        if (this.propertyGroupHover(group, 'desc'))
+          desc.setAttribute('clickable', '')
+        else
+          desc.removeAttribute('clickable')
+      }
+      desc.onclick = () => {
+        if (this.propertyGroupClick)
+          this.propertyGroupClick(group, 'desc');
+      }
     }
+    this._div.appendChild(desc);
+    for (const p of group.properties)
+      this.createPropertyEditors(p, true);
   }
 
   private expandOrCollapsePropertyGroups(propertyGroup: IPropertyGroup) {
@@ -221,105 +222,115 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
   }
 
-  private createPropertyEditors(properties: IProperty[]) {
-    for (const p of properties) {
-      let editor: IPropertyEditor;
-      let labelHolder: HTMLElement;
-      if (p.createEditor)
-        editor = p.createEditor(p);
-      else {
-        editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(p));
+  private createPropertyEditors(property: IProperty, isInGroup?: boolean) {
+    let editor: IPropertyEditor;
+    let labelHolder: HTMLElement;
+    if (property.createEditor)
+      editor = property.createEditor(property);
+    else {
+      editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(property));
+    }
+    if (editor) {
+      let rectContainer = document.createElement("div")
+      if (isInGroup)
+        rectContainer.style.marginLeft = '10px';
+      rectContainer.style.width = '20px';
+      rectContainer.style.height = '20px';
+      rectContainer.style.display = 'flex';
+      rectContainer.style.alignItems = 'center';
+      let rect = document.createElement("div")
+      rect.style.width = '7px';
+      rect.style.height = '7px';
+      rect.style.border = '1px white solid';
+      rect.style.cursor = 'pointer';
+      if (property.propertyType != PropertyType.complex)
+        rectContainer.appendChild(rect);
+      this._div.appendChild(rectContainer);
+      if (property.readonly !== true) {
+        rect.oncontextmenu = (event) => {
+          event.preventDefault();
+          this.openContextMenu(event, property);
+        }
+        rect.onclick = (event) => {
+          event.preventDefault();
+          this.openContextMenu(event, property);
+        }
       }
-      if (editor) {
-        let rectContainer = document.createElement("div")
-        rectContainer.style.width = '20px';
-        rectContainer.style.height = '20px';
-        rectContainer.style.display = 'flex';
-        rectContainer.style.alignItems = 'center';
-        let rect = document.createElement("div")
-        rect.style.width = '7px';
-        rect.style.height = '7px';
-        rect.style.border = '1px white solid';
-        rect.style.cursor = 'pointer';
-        if (p.propertyType != PropertyType.complex)
-          rectContainer.appendChild(rect);
-        this._div.appendChild(rectContainer);
-        if (p.readonly !== true) {
-          rect.oncontextmenu = (event) => {
-            event.preventDefault();
-            this.openContextMenu(event, p);
-          }
-          rect.onclick = (event) => {
-            event.preventDefault();
-            this.openContextMenu(event, p);
+      if (property.type == 'addNew') {
+        let input = <HTMLInputElement>editor.element;
+        input.disabled = true;
+        input.id = "addNew_input_" + (++this._addCounter);
+        let label = document.createElement("input");
+        labelHolder = label;
+        if (isInGroup) {
+          label.style.marginLeft = '10px';
+          label.style.width = 'calc(100% - 10px)';
+        }
+        label.value = property.name;
+        label.type = "text";
+        label.id = "addNew_label_" + this._addCounter;
+        label.onkeyup = e => {
+          if (e.key == 'Enter' && label.value) {
+            property.name = label.value;
+            label.disabled = true;
+            input.disabled = false;
+            input.focus();
           }
         }
-        if (p.type == 'addNew') {
-          let input = <HTMLInputElement>editor.element;
-          input.disabled = true;
-          input.id = "addNew_input_" + (++this._addCounter);
-          let label = document.createElement("input");
+        if (property.service.getPropertyNameSuggestions) {
+          const sug = property.service.getPropertyNameSuggestions(null); //TODO: design items?
+          const dl = document.createElement("datalist");
+          dl.id = "addNew_" + this._addCounter + "_datalist";
+          for (let s of sug) {
+            const op = document.createElement("option");
+            op.value = s;
+            dl.append(op);
+          }
+          this._div.appendChild(dl);
+          label.setAttribute('list', dl.id);
+        }
+        this._div.appendChild(label);
+      } else {
+        if (!property.renamable) {
+          let label = document.createElement("label");
           labelHolder = label;
-          label.value = p.name;
-          label.type = "text";
-          label.id = "addNew_label_" + this._addCounter;
-          label.onkeyup = e => {
-            if (e.key == 'Enter' && label.value) {
-              p.name = label.value;
-              label.disabled = true;
-              input.disabled = false;
-              input.focus();
-            }
-          }
-          if (p.service.getPropertyNameSuggestions) {
-            const sug = p.service.getPropertyNameSuggestions(null); //TODO: design items?
-            const dl = document.createElement("datalist");
-            dl.id = "addNew_" + this._addCounter + "_datalist";
-            for (let s of sug) {
-              const op = document.createElement("option");
-              op.value = s;
-              dl.append(op);
-            }
-            this._div.appendChild(dl);
-            label.setAttribute('list', dl.id);
-          }
+          if (isInGroup)
+            label.style.marginLeft = '10px';
+          label.htmlFor = property.name;
+          label.textContent = property.displayName ?? property.name;
+          label.title = property.description ?? ((property.displayName ?? property.name) + ' (type: ' + property.type + (property.defaultValue ? ', default: ' + property.defaultValue : '') + ', propertytype: ' + property.propertyType + ')');
+          label.ondragleave = (e) => this._onDragLeave(e, property, label);
+          label.ondragover = (e) => this._onDragOver(e, property, label);
+          label.ondrop = (e) => this._onDrop(e, property, label);
           this._div.appendChild(label);
         } else {
-          if (!p.renamable) {
-            let label = document.createElement("label");
-            labelHolder = label;
-            label.htmlFor = p.name;
-            label.textContent = p.displayName ?? p.name;
-            label.title = p.description ?? ((p.displayName ?? p.name) + ' (type: ' + p.type + (p.defaultValue ? ', default: ' + p.defaultValue : '') + ', propertytype: ' + p.propertyType + ')');
-            label.ondragleave = (e) => this._onDragLeave(e, p, label);
-            label.ondragover = (e) => this._onDragOver(e, p, label);
-            label.ondrop = (e) => this._onDrop(e, p, label);
-            this._div.appendChild(label);
-          } else {
-            let label = document.createElement("input");
-            labelHolder = label;
-            label.id = 'label_' + p.name;
-            let input = <HTMLInputElement>editor.element;
-            label.value = p.name;
-            label.onkeyup = async e => {
-              if (e.key == 'Enter' && label.value) {
-                const pg = this._designItems[0].openGroup("rename property name from '" + p.name + "' to '" + label.value + "'");
-                p.service.clearValue(this._designItems, p, 'all');
-                p.name = label.value;
-                await p.service.setValue(this._designItems, p, input.value);
-                pg.commit();
-                this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
-              }
-            }
-            this._div.appendChild(label);
+          let label = document.createElement("input");
+          labelHolder = label;
+          if (isInGroup) {
+            label.style.marginLeft = '10px';
+            label.style.width = 'calc(100% - 10px)';
           }
+          label.id = 'label_' + property.name;
+          let input = <HTMLInputElement>editor.element;
+          label.value = property.name;
+          label.onkeyup = async e => {
+            if (e.key == 'Enter' && label.value) {
+              const pg = this._designItems[0].openGroup("rename property name from '" + property.name + "' to '" + label.value + "'");
+              property.service.clearValue(this._designItems, property, 'all');
+              property.name = label.value;
+              await property.service.setValue(this._designItems, property, input.value);
+              pg.commit();
+              this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
+            }
+          }
+          this._div.appendChild(label);
         }
-        if (p.name)
-          editor.element.id = p.name;
-        this._div.appendChild(editor.element);
-
-        this._propertyMap.set(p, { isSetElement: rect, labelElement: labelHolder, editor: editor });
       }
+      if (property.name)
+        editor.element.id = property.name;
+      this._div.appendChild(editor.element);
+
+      this._propertyMap.set(property, { isSetElement: rect, labelElement: labelHolder, editor: editor });
     }
   }
 
