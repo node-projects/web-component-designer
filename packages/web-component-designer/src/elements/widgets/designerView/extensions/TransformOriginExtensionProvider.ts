@@ -38,6 +38,6 @@ export class TransformOriginExtensionProvider implements IDesignerExtensionProvi
   }
 
   static readonly style = css`
-    .svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: all }
+    .svg-transform-origin { stroke: #3899ec; fill: black; pointer-events: auto; }
   `;
 }

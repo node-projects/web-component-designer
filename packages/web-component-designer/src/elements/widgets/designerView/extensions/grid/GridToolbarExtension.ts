@@ -10,7 +10,7 @@ export class GridToolbarExtension extends BasicStackedToolbarExtension {
   protected static template = html`
     <div style="height: 100%; width: 100%;">
       ${BasicStackedToolbarExtension.basicTemplate}
-      <select title="display" id="gridType" style="pointer-events: all; height: 24px; width: 60px; padding: 0; margin-right: 10px">
+      <select title="display" id="gridType" style="pointer-events: auto; height: 24px; width: 60px; padding: 0; margin-right: 10px">
         <option>1x1</option>
         <option>1x16</option>
         <option>2x8</option>

@@ -11,11 +11,11 @@ export class GridChildToolbarExtension extends BasicStackedToolbarExtension {
     <div style="height: 100%; width: 100%;">
       <div style="display: flex; flex-direction: column;">
         <span style="font-size: 10px; color: #00aff0;">column:</span>
-        <input type="text" title="column" id="gridColumn" style="pointer-events: all; height: 12px; width: 45px; padding: 0; margin-right: 5px">
+        <input type="text" title="column" id="gridColumn" style="pointer-events: auto; height: 12px; width: 45px; padding: 0; margin-right: 5px">
       </div>
        <div style="display: flex; flex-direction: column;">
         <span style="font-size: 10px; color: #00aff0;">row:</span>
-        <input type="text" title="column" id="gridRow" style="pointer-events: all; height: 12px; width: 45px; padding: 0; margin-right: 10px">
+        <input type="text" title="column" id="gridRow" style="pointer-events: auto; height: 12px; width: 45px; padding: 0; margin-right: 10px">
       </div>
       <node-projects-image-button-list-selector property="align-self" no-value-in-header id="align-self">
         <img title="start" data-value="start" src="${assetsPath}images/chromeDevtools/align-items-start-icon.svg">

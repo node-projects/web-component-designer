@@ -14,12 +14,12 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
   private static template = html`
     <div style="height: 100%; display: flex; gap: 2px; width: 100%;">
-      <button data-command="font-weight" data-command-parameter="800" style="pointer-events: all; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
-      <button data-command="font-style" data-command-parameter="italic" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
-      <button data-command="text-decoration" data-command-parameter="underline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
-      <button data-command="text-decoration" data-command-parameter="line-through" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
-      <button data-command="text-decoration" data-command-parameter="overline" style="pointer-events: all; height: 24px; width: 24px; padding: 0;"><span style="text-decoration: overline">o</span></button>
-      <select data-command="fontSize" style="pointer-events: all; height: 24px; width: 60px; padding: 0;">
+      <button data-command="font-weight" data-command-parameter="800" style="pointer-events: auto; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
+      <button data-command="font-style" data-command-parameter="italic" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
+      <button data-command="text-decoration" data-command-parameter="underline" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
+      <button data-command="text-decoration" data-command-parameter="line-through" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
+      <button data-command="text-decoration" data-command-parameter="overline" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><span style="text-decoration: overline">o</span></button>
+      <select data-command="fontSize" style="pointer-events: auto; height: 24px; width: 60px; padding: 0;">
         <option>8px</option>
         <option>9px</option>
         <option>10px</option>
@@ -34,7 +34,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
         <option>32px</option>
         <option>36px</option>
       </select>
-      <select id="fontFamily" data-command="font-family" style="pointer-events: all; height: 24px; width: 90px; padding: 0;">
+      <select id="fontFamily" data-command="font-family" style="pointer-events: auto; height: 24px; width: 90px; padding: 0;">
         
       </select>
     </div>

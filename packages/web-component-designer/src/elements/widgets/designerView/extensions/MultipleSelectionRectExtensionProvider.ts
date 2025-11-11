@@ -16,6 +16,6 @@ export class MultipleSelectionRectExtensionProvider implements IDesignerExtensio
   }
 
   static readonly style = css`
-    .svg-multiple-rect-selection { stroke: #909090; stroke-dasharray: 3; fill: transparent; stroke-width: 2; /*pointer-events: all;*/ }
+    .svg-multiple-rect-selection { stroke: #909090; stroke-dasharray: 3; fill: transparent; stroke-width: 2; }
   `;
 }

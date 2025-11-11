@@ -134,7 +134,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
     outerDiv.appendChild(this._moreContainer);
     this._moreDiv.onclick = () => {
       if (this._moreContainer.children.length && this._moreContainer.style.visibility == "hidden")
-        this._moreContainer.style.visibility = 'visible';
+        this._moreContainer.style.visibility = '';
       else
         this._moreContainer.style.visibility = "hidden";
     }

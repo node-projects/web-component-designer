@@ -19,6 +19,6 @@ export class GridChildResizeExtensionProvider implements IDesignerExtensionProvi
   }
 
   static readonly style = css`
-    .svg-grid-resizer { stroke: #3899ec; fill: white; pointer-events: all }
+    .svg-grid-resizer { stroke: #3899ec; fill: white; pointer-events: auto; }
   `;
 }

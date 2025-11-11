@@ -21,9 +21,9 @@ export class EditGridColumnRowSizesExtensionProvider implements IDesignerExtensi
   }
 
   static readonly style = css`
-    .svg-grid-resizer-v { fill: transparent; cursor: ew-resize; pointer-events: all; }
+    .svg-grid-resizer-v { fill: transparent; cursor: ew-resize; pointer-events: auto; }
     .svg-grid-resizer-v:hover { fill: #ff7f5052; }
-    .svg-grid-resizer-h { fill: transparent; cursor: ns-resize; pointer-events: all; }
+    .svg-grid-resizer-h { fill: transparent; cursor: ns-resize; pointer-events: auto; }
     .svg-grid-resizer-h:hover { fill: #ff7f5052; }
   `;
 }

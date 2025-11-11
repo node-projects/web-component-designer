@@ -25,6 +25,6 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
   }
 
   static readonly style = css`
-    .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: all }
+    .svg-primary-resizer { stroke: #3899ec; fill: white; pointer-events: auto; }
   `;
 }

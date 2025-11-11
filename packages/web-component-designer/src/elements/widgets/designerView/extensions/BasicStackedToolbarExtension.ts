@@ -10,7 +10,7 @@ export const basicStackedToolbarExtensionOverlayOptionName = 'basicStackedToolba
 export class BasicStackedToolbarExtension extends AbstractExtension {
 
   protected static basicTemplate = `
-      <select title="position" id="position" style="pointer-events: all; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
+      <select title="position" id="position" style="pointer-events: auto; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
         <option>static</option>
         <option>relative</option>
         <option>absolute</option>
@@ -20,7 +20,7 @@ export class BasicStackedToolbarExtension extends AbstractExtension {
         <img data-value="block" title="block" src="${assetsPath}images/display/block.svg">
         <img data-value="inline" title="inline" src="${assetsPath}images/display/inline.svg">
       </node-projects-image-button-list-selector>
-      <select title="display" id="displayType" style="pointer-events: all; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
+      <select title="display" id="displayType" style="pointer-events: auto; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
         <option>block</option>
         <option>flex</option>
         <option>grid</option>
