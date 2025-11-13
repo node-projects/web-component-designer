@@ -24,26 +24,11 @@ export class AttributeAndPropertyChangeAction implements ITransactionItem {
     this.designItem.element[this.propertyName] = this.oldValue;
     if (this.oldValue == null) {
       this.designItem._withoutUndoRemoveAttribute(this.attributeName);
-      try {
-        this.designItem.element.removeAttribute(this.attributeName);
-      }
-      catch (e) {
-        if (e?.code !== 5)
-          console.warn(e)
-      }
-    }
-    else {
-      this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.oldValue);
-      if (this.attributeName != "draggable") {
-        try {
-          if (typeof this.oldValue === 'string')
-            this.designItem.element.setAttribute(this.attributeName, this.oldValue);
-        }
-        catch (e) {
-          if (e?.code !== 5)
-            console.warn(e)
-        }
-      }
+    } else {
+      if (typeof this.oldValue === 'string')
+        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.oldValue);
+      else
+        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.oldValue.toString());
     }
   }
 
@@ -51,26 +36,11 @@ export class AttributeAndPropertyChangeAction implements ITransactionItem {
     this.designItem.element[this.propertyName] = this.newValue;
     if (this.newValue == null) {
       this.designItem._withoutUndoRemoveAttribute(<string>this.attributeName);
-      try {
-        this.designItem.element.removeAttribute(this.attributeName);
-      }
-      catch (e) {
-        if (e?.code !== 5)
-          console.warn(e)
-      }
-    }
-    else {
-      this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.newValue);
-      if (this.attributeName != "draggable") {
-        try {
-          if (typeof this.newValue === 'string')
-            this.designItem.element.setAttribute(this.attributeName, this.newValue);
-        }
-        catch (e) {
-          if (e?.code !== 5)
-            console.warn(e)
-        }
-      }
+    } else {
+      if (typeof this.oldValue === 'string')
+        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.newValue);
+      else
+        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.newValue.toString());
     }
   }
 

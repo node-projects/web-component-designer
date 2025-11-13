@@ -22,52 +22,22 @@ export class AttributeChangeAction implements ITransactionItem {
   undo() {
     if (this.oldValue == null) {
       this.designItem._withoutUndoRemoveAttribute(this.name);
-      try {
-        this.designItem.element.removeAttribute(this.name);
-      }
-      catch (e) {
-        if (e?.code !== 5)
-          console.warn(e)
-      }
-    }
-    else {
-      this.designItem._withoutUndoSetAttribute(<string>this.name, this.oldValue);
-      if (this.name != "draggable") {
-        try {
-          if (typeof this.oldValue === 'string')
-            this.designItem.element.setAttribute(this.name, this.oldValue);
-        }
-        catch (e) {
-          if (e?.code !== 5)
-            console.warn(e)
-        }
-      }
+    } else {
+      if (typeof this.oldValue === 'string')
+        this.designItem._withoutUndoSetAttribute(<string>this.name, this.oldValue);
+      else
+        this.designItem._withoutUndoSetAttribute(<string>this.name, this.oldValue.toString());
     }
   }
 
   do() {
     if (this.newValue == null) {
       this.designItem._withoutUndoRemoveAttribute(<string>this.name);
-      try {
-        this.designItem.element.removeAttribute(this.name);
-      }
-      catch (e) {
-        if (e?.code !== 5)
-          console.warn(e)
-      }
-    }
-    else {
-      this.designItem._withoutUndoSetAttribute(<string>this.name, this.newValue);
-      if (this.name != "draggable") {
-        try {
-          if (typeof this.newValue === 'string')
-            this.designItem.element.setAttribute(this.name, this.newValue);
-        }
-        catch (e) {
-          if (e?.code !== 5)
-            console.warn(e)
-        }
-      }
+    } else {
+      if (typeof this.oldValue === 'string')
+        this.designItem._withoutUndoSetAttribute(<string>this.name, this.newValue);
+      else
+        this.designItem._withoutUndoSetAttribute(<string>this.name, this.newValue.toString());
     }
   }
 

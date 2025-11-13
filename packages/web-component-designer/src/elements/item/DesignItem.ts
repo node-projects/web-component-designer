@@ -119,12 +119,24 @@ export class DesignItem implements IDesignItem {
     }
   }
   _withoutUndoSetAttribute(name: string, value: string) {
-    this.element.setAttribute(name, value);
+    try {
+      this.element.setAttribute(name, value);
+    }
+    catch (e) {
+      if (e?.code !== 5)
+        console.warn(e)
+    }
     this._attributes.set(name, value);
     this.serviceContainer.designItemService.handleSpecialAttributes(name, this);
   }
   _withoutUndoRemoveAttribute(name: string) {
-    this.element.removeAttribute(name);
+    try {
+      this.element.removeAttribute(name);
+    }
+    catch (e) {
+      if (e?.code !== 5)
+        console.warn(e)
+    }
     this._attributes.delete(name);
     this.serviceContainer.designItemService.handleSpecialAttributes(name, this);
   }
