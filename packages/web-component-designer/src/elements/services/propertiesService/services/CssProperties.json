@@ -611,7 +611,7 @@
             "relative",
             "absolute",
             "fixed",
-            "anchor"
+            "sticky"
         ]
     },
     "prefix": {},
