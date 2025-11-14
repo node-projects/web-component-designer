@@ -74,10 +74,6 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
         //@ts-ignore
         groups.push(pg);
     }
-
-    if (groups.length == 1)
-      //@ts-ignore
-      return groups[0].properties;
     return groups;
   }
 
