@@ -87,9 +87,9 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
       designItem.setStyle('left', roundValue(designItem, offset.x + (oldLeft ?? 0) + containerLeft) + "px");
     if (oldTop || oldBottom == null)
       designItem.setStyle('top', roundValue(designItem, offset.y + (oldTop ?? 0) + containerTop) + "px");
-    if (oldRight)
+    if (oldRight != null)
       designItem.setStyle('right', roundValue(designItem, (oldRight ?? 0) - offset.x + containerRight) + "px");
-    if (oldBottom)
+    if (oldBottom != null)
       designItem.setStyle('bottom', roundValue(designItem, (oldBottom ?? 0) - offset.y + containerBottom) + "px");
   }
 }

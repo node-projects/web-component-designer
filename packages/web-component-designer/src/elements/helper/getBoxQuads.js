@@ -292,7 +292,12 @@ export function getElementSize(node, matrix) {
 */
 function getElementOffsetsInContainer(node, includeScroll, iframes) {
     if ((node instanceof HTMLElement || node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement)) {
-        return new DOMPoint(node.offsetLeft - (includeScroll ? node.scrollLeft : 0), node.offsetTop - (includeScroll ? node.scrollTop : 0));
+        if (includeScroll) {
+            const cs = (node.ownerDocument.defaultView ?? window).getComputedStyle(node);
+            return new DOMPoint(node.offsetLeft - (includeScroll ? node.scrollLeft - parseFloat(cs.borderLeftWidth) : 0), node.offsetTop - (includeScroll ? node.scrollTop - parseFloat(cs.borderTopWidth) : 0));
+        } else {
+            return new DOMPoint(node.offsetLeft, node.offsetTop);
+        }
     } else if ((node instanceof Text || node instanceof (node.ownerDocument.defaultView ?? window).Text)) {
         const range = document.createRange();
         range.selectNodeContents(node);
