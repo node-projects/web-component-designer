@@ -47,6 +47,13 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
+    this._keyDown = this._keyDown.bind(this);
+  }
+
+  private _keyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      this.dispose();
+    }
   }
 
   override extend() {
@@ -54,7 +61,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
     //maybe use a html edit framework
     this.extendedItem.instanceServiceContainer.selectionService.clearSelectedElements();
     this.extendedItem.removeDesignerAttributesAndStylesFromChildren();
-    this.extendedItem.element.setAttribute('contenteditable', '');
+    window.addEventListener('keydown', this._keyDown, true);
     //@ts-ignore
     this.extendedItem.editContent();
 
@@ -104,6 +111,7 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
   }
 
   override dispose() {
+    window.removeEventListener('keydown', this._keyDown, true);
     this._selectionChangedListener.dispose();
     this._removeAllOverlays();
     this.extendedItem.editContentFinish();
