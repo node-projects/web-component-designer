@@ -41,10 +41,10 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                             <button css:border="[[this.historic ? 'solid lime 5px' : 'none']]" style="position: absolute; right: 1px; top: 5px; padding: 10px;" @click="showHistoric">historic</button>
                         </div>
                         <div class="row">
-                            <span style="cursor: pointer;" title="javascript expression. access objects with __0, __1, ...">formula</span>
+                            <span style="cursor: pointer;" title="javascript expression. access context with __ctx, result with __res, objects with __0, __1, ...">formula</span>
                         </div>
                         <div class="row">
-                            <node-projects-code-view-monaco id="expression" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expression}}" @code-changed="_refresh"></iobroker-webui-monaco-editor>
+                            <node-projects-code-view-monaco id="expression" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expression}}" @code-changed="_refresh"></node-projects-code-view-monaco>
                         </div>
                         <div class="row">
                           <span style="text-wrap: nowrap" style="cursor: pointer;" title="write back the value build by a formula to a signal. maybe only usefull when a formula is used.">write back signal :</span>
@@ -54,7 +54,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                             <span style="cursor: pointer;" title="javascript expression. access property with 'value'">formula write back (two way)</span>
                         </div>
                         <div class="row">
-                            <node-projects-code-view-monaco id="expression2way" .read-only="[[!this.twoWay]]" $readonly="[[!this.twoWay]]" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expressionTwoWay}}"></iobroker-webui-monaco-editor>
+                            <node-projects-code-view-monaco id="expression2way" .read-only="[[!this.twoWay]]" $readonly="[[!this.twoWay]]" single-row language="javascript" style="width: 100%; min-height: 17px; height: 17px; position: relative; overflow: hidden; resize: vertical;" .code="{{?this.expressionTwoWay}}"></node-projects-code-view-monaco>
                         </div>
                     </div>
                 </div>

@@ -740,7 +740,7 @@ export class BindingsHelper {
             let disableValueChanged = false;
             if (!disableValueChanged) {
               disableValueChanged = true;
-              this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
+              this.handleValueChanged(element, root, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
               disableValueChanged = false;
             }
           };
@@ -749,7 +749,7 @@ export class BindingsHelper {
             cleanupCalls = [];
           cleanupCalls.push(() => root.removeEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback));
           try {
-            this.handleValueChanged(element, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
+            this.handleValueChanged(element, root, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
           } catch (err) {
             console.error(err);
           }
@@ -763,7 +763,7 @@ export class BindingsHelper {
           let disableValueChanged = false;
           if (!disableValueChanged) {
             disableValueChanged = true;
-            this.handleValueChanged(element, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
+            this.handleValueChanged(element, root, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
             disableValueChanged = false;
           }
         };
@@ -772,7 +772,7 @@ export class BindingsHelper {
           cleanupCalls = [];
         cleanupCalls.push(() => element.removeEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback));
         try {
-          this.handleValueChanged(element, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
+          this.handleValueChanged(element, root, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
         } catch (err) {
           console.error(err);
         }
@@ -785,15 +785,15 @@ export class BindingsHelper {
           mS = this._visualizationHandler.getNormalizedSignalName(mS, relativeSignalPath, element);
         }
         this._visualizationHandler.getObject(mS).then(x => {
-          this.handleValueChanged(element, binding, x, valuesObject, i, signalVars, true, relativeSignalPath);
+          this.handleValueChanged(element, root, binding, x, valuesObject, i, signalVars, true, relativeSignalPath);
         });
       } else if (s[0] === '§') {
         const mS = s.substring(1);
         const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root });
         if (value instanceof Promise)
-          value.then(v => this.handleValueChanged(element, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
+          value.then(v => this.handleValueChanged(element, root, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
         else
-          this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
+          this.handleValueChanged(element, root, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
         if (!specialValueHandler.valueChangedCallbacks)
           specialValueHandler.valueChangedCallbacks = new Map();
         let changeList = specialValueHandler.valueChangedCallbacks.get(mS);
@@ -804,13 +804,13 @@ export class BindingsHelper {
         changeList.push(() => {
           const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root })
           if (value instanceof Promise)
-            value.then(v => this.handleValueChanged(element, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
+            value.then(v => this.handleValueChanged(element, root, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
           else
-            this.handleValueChanged(element, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
+            this.handleValueChanged(element, root, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
         });
       } else {
         if (s.includes('{')) {
-          let indirectSignal = new IndirectSignal(this, this._visualizationHandler, s, (value) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root, specialValueHandler);
+          let indirectSignal = new IndirectSignal(this, this._visualizationHandler, s, (value) => this.handleValueChanged(element, root, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root, specialValueHandler);
           if (!cleanupCalls)
             cleanupCalls = [];
           cleanupCalls.push(() => indirectSignal.dispose());
@@ -823,7 +823,7 @@ export class BindingsHelper {
               let myTimer = { timerId: <any>-1 };
               const loadHistoric = async () => {
                 const res = await this._visualizationHandler.getHistoricData(s, binding[1].historic);
-                this.handleValueChanged(element, binding, res?.values, valuesObject, i, signalVars, true, relativeSignalPath);
+                this.handleValueChanged(element, root, binding, res?.values, valuesObject, i, signalVars, true, relativeSignalPath);
                 if (myTimer.timerId !== null)
                   myTimer.timerId = setTimeout(loadHistoric, binding[1].historic.reloadInterval);
               }
@@ -836,11 +836,11 @@ export class BindingsHelper {
                 myTimer.timerId = null;
               });
             } else
-              this._visualizationHandler.getHistoricData(s, binding[1].historic).then(x => this.handleValueChanged(element, binding, x?.values, valuesObject, i, signalVars, true, relativeSignalPath))
+              this._visualizationHandler.getHistoricData(s, binding[1].historic).then(x => this.handleValueChanged(element, root, binding, x?.values, valuesObject, i, signalVars, true, relativeSignalPath))
           } else {
-            const cb = (id: string, value: State) => this.handleValueChanged(element, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath);
+            const cb = (id: string, value: State) => this.handleValueChanged(element, root, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath);
             unsubscribeList.push([s, cb, this._visualizationHandler.subscribeState(s, cb)]);
-            this._visualizationHandler.getState(s).then(x => this.handleValueChanged(element, binding, x?.val, valuesObject, i, signalVars, false, relativeSignalPath));
+            this._visualizationHandler.getState(s).then(x => this.handleValueChanged(element, root, binding, x?.val, valuesObject, i, signalVars, false, relativeSignalPath));
             if (binding[1].twoWay && i == 0) {
               this.addTwoWayBinding(binding, element, v => this._visualizationHandler.setState(s, v));
             }
@@ -910,7 +910,7 @@ export class BindingsHelper {
     return value;
   }
 
-  handleValueChanged(element: Element, binding: namedBinding, value: any, valuesObject: any[], index: number, signalVarNames: string[], noParse: boolean, relativeSignalPath: string) {
+  handleValueChanged(element: Element, root: Element, binding: namedBinding, value: any, valuesObject: any[], index: number, signalVarNames: string[], noParse: boolean, relativeSignalPath: string) {
     let v: (number | boolean | string) = value;
     //should this be done??
     if (!noParse && index == 0)
@@ -919,11 +919,13 @@ export class BindingsHelper {
     if (binding[1].expression) {
       if (!binding[1].compiledExpression) {
         signalVarNames.push('__res')
+        signalVarNames.push('__ctx')
         if (binding[1].expression.includes('return '))
           binding[1].compiledExpression = new Function(<any>signalVarNames, binding[1].expression);
         else
           binding[1].compiledExpression = new Function(<any>signalVarNames, 'return ' + binding[1].expression);
       }
+      valuesObject[signalVarNames.length - 1] = { element, root };
       v = binding[1].compiledExpression(...valuesObject);
       valuesObject[signalVarNames.length - 1] = v;
     }
