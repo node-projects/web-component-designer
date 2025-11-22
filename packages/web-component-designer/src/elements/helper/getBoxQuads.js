@@ -463,6 +463,10 @@ export function getElementCombinedTransform(element, iframes) {
 
     const mOri = new DOMMatrix().translate(originX, originY, originZ);
 
+    if (s.offsetPath && s.offsetPath !== 'none') {
+        m = m.multiply(computeOffsetTransformMatrix(element));
+    }
+
     if (s.translate != 'none' && s.translate) {
         let tr = s.translate;
         if (tr.includes('%')) {
@@ -556,4 +560,315 @@ function getElementPerspectiveTransform(element, iframes) {
         }
     }
     return null;
+}
+
+function computeOffsetTransformMatrix(elem) {
+    const cs = (elem.ownerDocument.defaultView ?? window).getComputedStyle(elem);
+
+    const offsetPath = cs.offsetPath;          // e.g. "path('M0,0 ...')"
+    const offsetDistance = cs.offsetDistance;  // e.g. "50%"
+    const offsetRotate = cs.offsetRotate;      // e.g. "auto", "45deg", "auto 30deg"
+    const offsetAnchor = cs.offsetAnchor;
+
+    // Parse offset-distance (px or %)
+    let distance = parseOffsetDistance(offsetDistance);
+
+    // Compute position & tangent on path
+    let { x, y, angle } = computeOffsetPathPoint(elem, offsetPath, distance);
+
+    // Handle offset-rotate
+    let rotateFinal = 0;
+    if (offsetRotate.startsWith("auto")) {
+        let parts = offsetRotate.split(/\s+/);
+        let extra = parts.length === 2 ? parseFloat(parts[1]) : 0;
+        rotateFinal = angle + extra;
+    } else {
+        rotateFinal = parseFloat(offsetRotate);
+    }
+
+    let anchor = parseOffsetAnchor(offsetAnchor, elem);
+
+    const anchorMatrix = new DOMMatrix()
+        .translateSelf(-anchor.x, -anchor.y);
+
+    let m = anchorMatrix.translateSelf(x, y);
+    m = m.rotateSelf(rotateFinal);
+    return m;
+}
+
+function parseOffsetAnchor(str, elem) {
+    let width = elem.offsetWidth;
+    let height = elem.offsetHeight;
+    //if (!(elem instanceof HTMLElement)) {
+    //    const rect = elem.getBoundingClientRect();
+    //}
+
+    if (!str || str === "auto") {
+        return { x: width / 2, y: height / 2 };
+    }
+
+    const parts = str.split(/\s+/);
+    if (parts.length === 1) {
+        // 1-value syntax = x only, y = center
+        const x = parsePosition(parts[0], width);
+        return { x, y: height / 2 };
+    }
+
+    const x = parsePosition(parts[0], width);
+    const y = parsePosition(parts[1], height);
+    return { x, y };
+}
+
+function parsePosition(part, size) {
+    part = part.trim();
+    if (part.endsWith("%")) {
+        return parseFloat(part) / 100 * size;
+    }
+    if (part.endsWith("px")) {
+        return parseFloat(part);
+    }
+    // keywords
+    switch (part) {
+        case "left": return 0;
+        case "top": return 0;
+        case "center": return size / 2;
+        case "right": return size;
+        case "bottom": return size;
+    }
+    return parseFloat(part);
+}
+
+function parseOffsetDistance(str) {
+    str = str.trim();
+    if (str.endsWith("%")) {
+        return parseFloat(str) / 100; // normalized (0..1)
+    }
+    return parseFloat(str); // px value if pathLength = 1
+}
+
+function parseAngle(str) {
+    if (!str) return 0;
+    str = str.trim();
+    if (str.endsWith("deg")) return parseFloat(str);
+    if (str.endsWith("rad")) return parseFloat(str) * (180 / Math.PI);
+    if (str.endsWith("grad")) return parseFloat(str) * 0.9;
+    return parseFloat(str);
+}
+
+function computeOffsetPathPoint(elem, offsetPath, distNorm) {
+    if (!offsetPath || offsetPath === "none") {
+        return { x: 0, y: 0, angle: 0 };
+    }
+
+    const value = offsetPath.trim();
+
+    let m = value.match(/path\(["'](.+)["']\)/);
+    if (m) return computePathType(m[1], distNorm);
+
+    if (value.startsWith("circle("))
+        return computeCircle(value, distNorm);
+    if (value.startsWith("ellipse("))
+        return computeEllipse(value, distNorm);
+    if (value.startsWith("inset("))
+        return computeInset(value, distNorm);
+    if (value.startsWith("rect("))
+        return computeRect(value, distNorm);
+    if (value.startsWith("xywh("))
+        return computeXYWH(value, distNorm);
+    if (value.startsWith("ray("))
+        return computeRay(value, distNorm);
+    if (value.startsWith("polygon("))
+        return computePolygon(value, distNorm);
+
+    console.warn("Unsupported offset-path:", offsetPath);
+    return { x: 0, y: 0, angle: 0 };
+}
+
+
+function computePathType(pathData, distNorm) {
+    let svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    svgPath.setAttribute("d", pathData);
+
+    const total = svgPath.getTotalLength();
+    const dist = distNorm <= 1 ? distNorm * total : distNorm;
+
+    const p1 = svgPath.getPointAtLength(dist);
+    const p2 = svgPath.getPointAtLength(Math.min(total, dist + 0.01));
+
+    let angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+
+    return { x: p1.x, y: p1.y, angle };
+}
+
+function computeRay(str, t) {
+    let m = str.match(/ray\(([^)]+)\)/);
+    let inside = m[1].trim();
+
+    // Split on "at" (optional)
+    let [beforeAt, atPart] = inside.split("at").map(s => s && s.trim());
+
+    // angle
+    let parts = beforeAt.split(/\s+/);
+    let angleDeg = parseAngle(parts[0]);
+    let angleRad = angleDeg * Math.PI / 180;
+
+    // point of origin
+    let ox = 0, oy = 0;
+    if (atPart) {
+        const pos = atPart.split(/\s+/);
+        ox = parseFloat(pos[0]);
+        oy = parseFloat(pos[1]);
+    }
+
+    // Ray: infinite line; offset-distance is distance along ray
+    let dist = (t <= 1 ? t : t); // percentage normalized already
+
+    let x = ox + Math.cos(angleRad) * dist;
+    let y = oy + Math.sin(angleRad) * dist;
+
+    // tangent is ray direction
+    return { x, y, angle: angleDeg };
+}
+
+function computeCircle(str, t) {
+    let m = str.match(/circle\(([^)]+)\)/);
+    let inner = m[1];
+
+    let [radiusPart, atPart] = inner.split("at").map(s => s.trim());
+    let r = parseFloat(radiusPart);
+    let [cx, cy] = atPart.split(/\s+/).map(parseFloat);
+
+    let angleRad = t * 2 * Math.PI;
+    let x = cx + Math.cos(angleRad) * r;
+    let y = cy + Math.sin(angleRad) * r;
+
+    let tangentAngleDeg = angleRad * 180 / Math.PI + 90;
+
+    return { x, y, angle: tangentAngleDeg };
+}
+
+function computeEllipse(str, t) {
+    let m = str.match(/ellipse\(([^)]+)\)/);
+    let parts = m[1].split("at");
+    let radii = parts[0].trim().split(/\s+/).map(parseFloat);
+    let center = parts[1].trim().split(/\s+/).map(parseFloat);
+
+    let rx = radii[0];
+    let ry = radii[1];
+    let cx = center[0];
+    let cy = center[1];
+
+    let angleRad = t * 2 * Math.PI;
+
+    let x = cx + Math.cos(angleRad) * rx;
+    let y = cy + Math.sin(angleRad) * ry;
+
+    // tangent direction derivative
+    let dx = -Math.sin(angleRad) * rx;
+    let dy = Math.cos(angleRad) * ry;
+    let tangentAngleDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+
+    return { x, y, angle: tangentAngleDeg };
+}
+
+function computeInset(str, t) {
+    let m = str.match(/inset\(([^)]+)\)/);
+    let nums = m[1].split(/\s+/).map(s => parseFloat(s));
+    let top = nums[0], right = nums[1], bottom = nums[2], left = nums[3];
+    return rectPath(top, left, right, bottom, t);
+}
+
+function computeRect(str, t) {
+    let m = str.match(/rect\(([^)]+)\)/);
+    let nums = m[1].split(/\s+/).map(s => parseFloat(s));
+    let top = nums[0], right = nums[1], bottom = nums[2], left = nums[3];
+    return rectPath(top, left, right, bottom, t);
+}
+
+function computeXYWH(str, t) {
+    let m = str.match(/xywh\(([^)]+)\)/);
+    let nums = m[1].split(/\s+/).map(parseFloat);
+
+    let left = nums[0];
+    let top = nums[1];
+    let width = nums[2];
+    let height = nums[3];
+
+    return rectPath(top, left, left + width, top + height, t);
+}
+
+function computePolygon(str, t) {
+    let m = str.match(/polygon\(([^)]+)\)/);
+    let pairs = m[1].split(",").map(p => p.trim().split(/\s+/).map(parseFloat));
+
+    // Build cumulative lengths
+    let pts = pairs;
+    let lengths = [0];
+
+    for (let i = 1; i < pts.length; i++) {
+        let dx = pts[i][0] - pts[i - 1][0];
+        let dy = pts[i][1] - pts[i - 1][1];
+        lengths.push(Math.hypot(dx, dy) + lengths[i - 1]);
+    }
+
+    // close polygon
+    let dx = pts[0][0] - pts[pts.length - 1][0];
+    let dy = pts[0][1] - pts[pts.length - 1][1];
+    lengths.push(Math.hypot(dx, dy) + lengths[lengths.length - 1]);
+
+    let total = lengths[lengths.length - 1];
+    let target = t * total;
+
+    // find segment
+    let i = lengths.findIndex(len => len >= target);
+    if (i <= 0) i = 1;
+
+    let prevLen = lengths[i - 1];
+    let nextLen = lengths[i];
+    let segT = (target - prevLen) / (nextLen - prevLen);
+
+    // segment points
+    let a = pts[(i - 1) % pts.length];
+    let b = pts[i % pts.length];
+
+    let x = a[0] + (b[0] - a[0]) * segT;
+    let y = a[1] + (b[1] - a[1]) * segT;
+
+    let angle = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
+
+    return { x, y, angle };
+}
+
+function rectPath(top, left, right, bottom, t) {
+    let w = right - left;
+    let h = bottom - top;
+
+    let perimeter = 2 * (w + h);
+    let dist = t * perimeter;
+
+    // go around edges
+    if (dist < w) {
+        // top edge
+        let x = left + dist;
+        return { x, y: top, angle: 0 };
+    }
+    dist -= w;
+
+    if (dist < h) {
+        // right edge
+        let y = top + dist;
+        return { x: right, y, angle: 90 };
+    }
+    dist -= h;
+
+    if (dist < w) {
+        // bottom edge
+        let x = right - dist;
+        return { x, y: bottom, angle: 180 };
+    }
+    dist -= w;
+
+    // left edge
+    let y = bottom - dist;
+    return { x: left, y, angle: 270 };
 }
