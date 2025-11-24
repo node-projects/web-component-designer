@@ -901,7 +901,8 @@ const willChangeValues = ['transform', 'translate', 'scale', 'rotate', 'perspect
 const containValues = ['paint', 'layout', 'strict', 'content'];
 
 function isElement(value) {
-    return value instanceof Element || value instanceof value?.ownerDocument?.defaultView?.Element;
+    const elType = value?.ownerDocument?.defaultView?.Element;
+    return value instanceof Element || (elType != null && value instanceof elType);
 }
 
 /**
