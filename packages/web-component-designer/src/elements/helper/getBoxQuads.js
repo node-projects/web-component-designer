@@ -161,13 +161,14 @@ let hashId = 0;
 export function clearCache() {
     boxQuadsCache.clear();
     transformCache.clear();
+    computedStyleCache = new WeakMap();
 }
 
 export function useCache() {
     hash = new WeakMap();
     boxQuadsCache = new Map();
     transformCache = new Map();
-    computedStyleCache = new WeakMap
+    computedStyleCache = new WeakMap();
 }
 
 /**
@@ -392,25 +393,23 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
         const parentElement = getParentElementIncludingSlots(actualElement, iframes);
 
         if (actualElement.assignedSlot != null) {
-            const st = getCachedComputedStyle(actualElement);
-            if (st.position !== "static") {
-                const mvMat = new DOMMatrix().translate(parseFloat(st.left), parseFloat(st.top));
-                originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
-            }
-        }
-        else {
+            const l = offsetTopLeftPolyfill(actualElement, 'offsetLeft');
+            const t = offsetTopLeftPolyfill(actualElement, 'offsetTop');
+            const mvMat = new DOMMatrix().translateSelf(l, t);
+            originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+        } else {
             if ((actualElement instanceof HTMLElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement)) {
                 if (lastOffsetParent !== actualElement.offsetParent && !((actualElement instanceof HTMLSlotElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement))) {
                     const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                     lastOffsetParent = actualElement.offsetParent;
-                    const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
-                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+                    const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
+                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
                 }
             } else {
                 const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                 lastOffsetParent = null;
-                const mvMat = new DOMMatrix().translate(offsets.x, offsets.y);
-                originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+                const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
+                originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
             }
         }
 
@@ -893,4 +892,100 @@ function rectPath(top, left, right, bottom, t) {
     // left edge
     let y = bottom - dist;
     return { x: left, y, angle: 270 };
+}
+
+//Code from: https://github.com/floating-ui/floating-ui/blob/master/packages/utils/src/dom.ts
+
+const transformProperties = ['transform', 'translate', 'scale', 'rotate', 'perspective'];
+const willChangeValues = ['transform', 'translate', 'scale', 'rotate', 'perspective', 'filter'];
+const containValues = ['paint', 'layout', 'strict', 'content'];
+
+function isElement(value) {
+    return value instanceof Element || value instanceof value?.ownerDocument?.defaultView?.Element;
+}
+
+/**
+ * 
+ * @param {Element | CSSStyleDeclaration} elementOrCss 
+ * @returns {boolean}
+ */
+function isContainingBlock(elementOrCss) {
+    /** @type {CSSStyleDeclaration } */
+    //@ts-ignore
+    const css = isElement(elementOrCss) ? getComputedStyle(elementOrCss) : elementOrCss;
+
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+    // https://drafts.csswg.org/css-transforms-2/#individual-transforms
+    return (
+        transformProperties.some((value) => css[value] ? css[value] !== 'none' : false) ||
+        (css.containerType ? css.containerType !== 'normal' : false) ||
+        (css.backdropFilter ? css.backdropFilter !== 'none' : false) ||
+        (css.filter ? css.filter !== 'none' : false) ||
+        willChangeValues.some((value) => (css.willChange || '').includes(value)) ||
+        containValues.some((value) => (css.contain || '').includes(value))
+    );
+}
+
+//Code from: https://github.com/jcfranco/composed-offset-position/blob/main/src/index.ts
+function flatTreeParent(element) {
+    if (element.assignedSlot)
+        return element.assignedSlot;
+    if (element.parentNode instanceof ShadowRoot)
+        return element.parentNode.host;
+    return element.parentNode;
+}
+
+function ancestorTreeScopes(element) {
+    const scopes = new Set();
+    let currentScope = element.getRootNode();
+    while (currentScope) {
+        scopes.add(currentScope);
+        currentScope = currentScope.parentNode
+            ? currentScope.parentNode.getRootNode()
+            : null;
+    }
+
+    return scopes;
+}
+
+function offsetParentPolyfill(element) {
+    // Do an initial walk to check for display:none ancestors.
+    for (let ancestor = element; ancestor; ancestor = flatTreeParent(ancestor)) {
+        if (!(ancestor instanceof Element))
+            continue;
+        if (getCachedComputedStyle(ancestor).display === 'none')
+            return null;
+    }
+
+    for (let ancestor = flatTreeParent(element); ancestor; ancestor = flatTreeParent(ancestor)) {
+        if (!(ancestor instanceof Element))
+            continue;
+        const style = getCachedComputedStyle(ancestor);
+        if (style.display === 'contents')
+            continue;
+        if (style.position !== 'static' || isContainingBlock(style))
+            return ancestor;
+        if (ancestor.tagName === 'BODY')
+            return ancestor;
+    }
+    return null;
+}
+
+/**
+ * 
+ * @param {*} element 
+ * @param {'offsetTop' | 'offsetLeft'} offsetTopOrLeft 
+ * @returns 
+ */
+function offsetTopLeftPolyfill(element, offsetTopOrLeft) {
+    let value = element[offsetTopOrLeft];
+    let nextOffsetParent = offsetParentPolyfill(element);
+    const scopes = ancestorTreeScopes(element);
+
+    while (nextOffsetParent && !scopes.has(nextOffsetParent.getRootNode())) {
+        value -= nextOffsetParent[offsetTopOrLeft];
+        nextOffsetParent = offsetParentPolyfill(nextOffsetParent);
+    }
+
+    return value;
 }
