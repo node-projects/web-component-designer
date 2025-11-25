@@ -4,6 +4,7 @@ import { IPoint } from '../../../interfaces/IPoint.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 
 export interface IPlacementService extends IService {
+  startPlacementAllowed?(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, items: IDesignItem[]): boolean;
   serviceForContainer(container: IDesignItem, containerStyle: CSSStyleDeclaration, item?: IDesignItem): boolean;
   isEnterableContainer(container: IDesignItem): boolean;
   canEnter(container: IDesignItem, items: IDesignItem[]): boolean;

@@ -353,15 +353,17 @@ export class PointerTool implements ITool {
               } else {
                 const cp: IPoint = { x: currentPoint.x - this._moveItemsOffset.x, y: currentPoint.y - this._moveItemsOffset.y };
                 if (!this._started) {
-                  for (const item of this._actionStartedDesignItems) {
-                    designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
-                    designerCanvas.extensionManager.removeExtension(item, ExtensionType.MouseOver);
-                    designerCanvas.extensionManager.applyExtension(item, ExtensionType.Placement, event);
+                  if (!currentContainerService.startPlacementAllowed || currentContainerService.startPlacementAllowed(event, designerCanvas, this._actionStartedDesignItem.parent, this._actionStartedDesignItems)) {
+                    for (const item of this._actionStartedDesignItems) {
+                      designerCanvas.extensionManager.removeExtension(item, ExtensionType.Placement);
+                      designerCanvas.extensionManager.removeExtension(item, ExtensionType.MouseOver);
+                      designerCanvas.extensionManager.applyExtension(item, ExtensionType.Placement, event);
+                    }
+                    currentContainerService.startPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
+                    this._started = true;
                   }
-                  currentContainerService.startPlace(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
-                  this._started = true;
-                }
-                currentContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
+                } else
+                  currentContainerService.place(event, designerCanvas, this._actionStartedDesignItem.parent, this._initialPoint, this._initialOffset, cp, this._actionStartedDesignItems);
               }
               designerCanvas.extensionManager.refreshExtensions(this._actionStartedDesignItems, null, event, null, 20);
             }
