@@ -299,7 +299,8 @@ export class DesignItem implements IDesignItem {
   }
 
   public get innerHTML(): string {
-    return this.element.innerHTML;
+    const innerHTML = DomConverter.ConvertToString([...this.children()], false);
+    return innerHTML;
   }
   public set innerHTML(value: string) {
     if (this.nodeType != NodeType.TextNode) {
