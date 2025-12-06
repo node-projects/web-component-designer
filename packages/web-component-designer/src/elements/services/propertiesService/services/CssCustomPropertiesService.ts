@@ -32,12 +32,23 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
   }
 
   override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
-    if (!designItem?.element?.computedStyleMap)
-      return null;
+    if (designItem?.element?.computedStyleMap) {
+      let rootMap = Array.from((<DesignerCanvas>designItem.instanceServiceContainer.designerCanvas).computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
+      let props = Array.from(designItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"))
 
-    let rootMap = Array.from((<DesignerCanvas>designItem.instanceServiceContainer.designerCanvas).computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
+      if (this.removeInheritedCustomProperties)
+        props = props.filter(x => !rootMap.includes(x));
 
-    let props = Array.from(designItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"))
+      let arr: IProperty[] = props.map(x => ({
+        name: x,
+        service: this,
+        propertyType: PropertyType.cssValue
+      }));
+      return arr;
+    }
+
+    let rootMap = Array.from(getComputedStyle(<DesignerCanvas>designItem.instanceServiceContainer.designerCanvas)).map(x => x[0]).filter(key => key.startsWith("--"));
+    let props = Array.from(getComputedStyle(designItem.element)).map(x => x[0]).filter(key => key.startsWith("--"))
 
     if (this.removeInheritedCustomProperties)
       props = props.filter(x => !rootMap.includes(x));
@@ -64,8 +75,9 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
   override getUnsetValue(designItems: IDesignItem[], property: IProperty) {
     if (designItems?.[0].element?.computedStyleMap) {
       return designItems[0].element.computedStyleMap().get(property.name)?.[0];
+    } else {
+      return getComputedStyle(designItems[0].element).getPropertyValue(property.name);
     }
-    return null;
   }
 
   override isSet(designItems: IDesignItem[], property: IProperty): ValueType {

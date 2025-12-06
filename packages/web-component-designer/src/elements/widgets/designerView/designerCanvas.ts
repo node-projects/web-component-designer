@@ -510,7 +510,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       return this.instanceServiceContainer.selectionService.primarySelection != null && !this.instanceServiceContainer.selectionService.primarySelection.isRootItem;
     }
 
-    return true;
+    return false;
   }
 
   async executeCommand(command: IUiCommand) {

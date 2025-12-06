@@ -41,8 +41,17 @@ export class PositionExtension extends AbstractExtension {
       this._line3.style.strokeDasharray = '' + (4 / this.designerCanvas.scaleFactor);
       this._line4.style.strokeDasharray = '' + (4 / this.designerCanvas.scaleFactor);
 
-      const cm = this.extendedItem.element.computedStyleMap();
-      if (!(cm.get('right') instanceof CSSUnitValue)) {
+      let rightIsUnit, bottomIsUnit;
+      if (this.extendedItem.element.computedStyleMap) {
+        const cm = this.extendedItem.element.computedStyleMap();
+        rightIsUnit = cm.get('right') instanceof CSSUnitValue;
+        bottomIsUnit = cm.get('bottom') instanceof CSSUnitValue;
+      } else {
+        rightIsUnit = !!(<HTMLElement>this.extendedItem.element)?.style?.right;
+        bottomIsUnit = !!(<HTMLElement>this.extendedItem.element)?.style?.bottom;
+      }
+
+      if (!rightIsUnit) {
         let x = Math.round(itemRect.x - itemParentRect.x);
         this._textX = this._drawTextWithBackground('' + x, itemParentRect.x + x / 2, itemRect.y + itemRect.height / 2, 'white', 'svg-position-text', this._textX);
         this._textX[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
@@ -54,7 +63,7 @@ export class PositionExtension extends AbstractExtension {
         this._textX[3].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';
       }
 
-      if (!(cm.get('bottom') instanceof CSSUnitValue)) {
+      if (!bottomIsUnit) {
         let y = Math.round(itemRect.y - itemParentRect.y);
         this._textY = this._drawTextWithBackground('' + y, itemRect.x + itemRect.width / 2, itemParentRect.y + y / 2, 'white', 'svg-position-text', this._textY);
         this._textY[2].style.fontSize = (12 / this.designerCanvas.scaleFactor) + 'px';

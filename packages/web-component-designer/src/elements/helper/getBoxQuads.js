@@ -390,7 +390,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
     }
     let lastOffsetParent = null;
     while (actualElement != ancestor && actualElement != null) {
-        const parentElement = getParentElementIncludingSlots(actualElement, iframes);
+        let parentElement = getParentElementIncludingSlots(actualElement, iframes);
 
         if (actualElement.assignedSlot != null) {
             const l = offsetTopLeftPolyfill(actualElement, 'offsetLeft');
@@ -398,7 +398,15 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
             const mvMat = new DOMMatrix().translateSelf(l, t);
             originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
         } else {
-            if ((actualElement instanceof HTMLElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement)) {
+            if (!(actualElement instanceof SVGSVGElement) && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).SVGSVGElement) &&
+                (actualElement instanceof SVGGraphicsElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).SVGGraphicsElement)) {
+                const ctm = actualElement.getCTM();
+                const bb = actualElement.getBBox();
+                const mvMat = new DOMMatrix().translateSelf(bb.x, bb.y);
+                originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                originalElementAndAllParentsMultipliedMatrix = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f]).multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                parentElement = actualElement.ownerSVGElement;
+            } else if ((actualElement instanceof HTMLElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement)) {
                 if (lastOffsetParent !== actualElement.offsetParent && !((actualElement instanceof HTMLSlotElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement))) {
                     const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                     lastOffsetParent = actualElement.offsetParent;
@@ -442,6 +450,131 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
     return originalElementAndAllParentsMultipliedMatrix;
 }
 
+/*
+getResultingTransformationBetweenElementAndAllAncestors -> but with extra layout matrix (does not work yet....)
+
+export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, iframes) {
+    let key;
+    if (transformCache) {
+        let i1 = hash.get(node);
+        if (i1 === undefined)
+            hash.set(node, i1 = hashId++);
+        let i2 = hash.get(ancestor);
+        if (i2 === undefined)
+            hash.set(ancestor, i2 = hashId++);
+        key = i1 + '_' + i2;
+        const q = transformCache.get(key);
+        if (q)
+            return q;
+    }
+
+    // NEW — two matrices instead of one
+    let layoutMatrix = new DOMMatrix();
+
+    let actualElement = node;
+
+    let transformMatrix = getElementCombinedTransform(actualElement, iframes); //.multiplySelf(transformMatrix);
+
+
+    const perspectiveParent = getParentElementIncludingSlots(actualElement, iframes);
+    if (perspectiveParent) {
+        const s = getCachedComputedStyle(perspectiveParent);
+        if (s.transformStyle !== "preserve-3d")
+            projectTo2D(transformMatrix);
+    }
+
+
+    let lastOffsetParent = null;
+
+    while (actualElement !== ancestor && actualElement != null) {
+
+        const parentElement = getParentElementIncludingSlots(actualElement, iframes);
+
+        // ------------------------
+        //  LAYOUT MATRIX (offsets)
+        // ------------------------
+
+        if (actualElement.assignedSlot != null) {
+
+            const l = offsetTopLeftPolyfill(actualElement, "offsetLeft");
+            const t = offsetTopLeftPolyfill(actualElement, "offsetTop");
+            layoutMatrix = new DOMMatrix().translateSelf(l, t).multiplySelf(layoutMatrix);
+
+        } else {
+
+            if (actualElement instanceof HTMLElement ||
+                actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement) {
+
+                if (lastOffsetParent !== actualElement.offsetParent &&
+                    !(actualElement instanceof HTMLSlotElement)) {
+
+                    const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
+                    lastOffsetParent = actualElement.offsetParent;
+
+                    layoutMatrix = new DOMMatrix().translateSelf(offsets.x, offsets.y).multiplySelf(layoutMatrix);
+                }
+
+            } else {
+
+                const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
+                lastOffsetParent = null;
+
+                layoutMatrix = new DOMMatrix().translateSelf(offsets.x, offsets.y).multiplySelf(layoutMatrix);
+            }
+        }
+
+        // ------------------------
+        //  TRANSFORM MATRIX (CSS)
+        // ------------------------
+
+        if (parentElement) {
+
+            // NEW — only affects transform pipeline
+            const parentTransform = getElementCombinedTransform(parentElement, iframes);
+            transformMatrix = parentTransform.multiply(transformMatrix);
+
+            // flattening boundary
+            const perspectiveParent = getParentElementIncludingSlots(parentElement, iframes);
+            if (perspectiveParent) {
+                const s = getCachedComputedStyle(perspectiveParent);
+                if (s.transformStyle !== "preserve-3d")
+                    projectTo2D(transformMatrix);
+            }
+
+            // ------------------------
+            //  EXIT CONDITION
+            // ------------------------
+
+            if (parentElement === ancestor) {
+
+                // NEW — scroll offsets belong to layout
+                if (parentElement.scrollTop || parentElement.scrollLeft) {
+                    layoutMatrix = new DOMMatrix()
+                        .translate(-parentElement.scrollLeft, -parentElement.scrollTop)
+                        .multiply(layoutMatrix);
+                }
+
+                const result = layoutMatrix.multiply(transformMatrix);
+
+                if (transformCache)
+                    transformCache.set(key, result);
+
+                return result;
+            }
+        }
+
+        actualElement = parentElement;
+    }
+
+    const result = layoutMatrix.multiply(transformMatrix);
+
+    if (transformCache)
+        transformCache.set(key, result);
+
+    return result;
+}
+*/
+
 /**
 * @param {Node} node
 * @param {HTMLIFrameElement[]} iframes
@@ -482,7 +615,7 @@ export function getElementCombinedTransform(element, iframes) {
     const originY = parseFloat(origin[1]);
     const originZ = origin[2] ? parseFloat(origin[2]) : 0;
 
-    const mOri = new DOMMatrix().translate(originX, originY, originZ);
+    const mOri = new DOMMatrix().translateSelf(originX, originY, originZ);
 
     if (s.translate != 'none' && s.translate) {
         let tr = s.translate;
@@ -503,20 +636,21 @@ export function getElementCombinedTransform(element, iframes) {
     if (s.scale != 'none' && s.scale) {
         m.multiplySelf(new DOMMatrix('scale(' + s.scale.replaceAll(' ', ',') + ')'));
     }
-    if (s.transform != 'none' && s.transform) {
-        m.multiplySelf(new DOMMatrix(s.transform));
-    }
-
-    m = mOri.multiply(m.multiply(mOri.inverse()));
 
     if (s.offsetPath && s.offsetPath !== 'none') {
         m.multiplySelf(computeOffsetTransformMatrix(element));
     }
 
+    if (s.transform != 'none' && s.transform) {
+        m.multiplySelf(new DOMMatrix(s.transform));
+    }
+
+    m = mOri.multiply(m.multiplySelf(mOri.inverse()));
+
     //@ts-ignore
     const pt = getElementPerspectiveTransform(element, iframes);
     if (pt != null) {
-        m = pt.multiply(m);
+        m = pt.multiplySelf(m);
     }
     return m;
 }
@@ -573,10 +707,10 @@ function getElementPerspectiveTransform(element, iframes) {
                 const originX = parseFloat(origin[0]) - element.offsetLeft;
                 const originY = parseFloat(origin[1]) - element.offsetTop;
 
-                const mOri = new DOMMatrix().translate(originX, originY);
-                const mOriInv = new DOMMatrix().translate(-originX, -originY);
+                const mOri = new DOMMatrix().translateSelf(originX, originY);
+                const mOriInv = new DOMMatrix().translateSelf(-originX, -originY);
 
-                return mOri.multiply(m.multiply(mOriInv));
+                return mOri.multiplySelf(m.multiplySelf(mOriInv));
             }
         }
     }
@@ -691,7 +825,7 @@ function computeOffsetPathPoint(elem, offsetPath, distNorm) {
     if (value.startsWith("ellipse("))
         return computeEllipse(value, distNorm);
     if (value.startsWith("inset("))
-        return computeInset(value, distNorm);
+        return computeInset(value, elem, distNorm);
     if (value.startsWith("rect("))
         return computeRect(value, distNorm);
     if (value.startsWith("xywh("))
@@ -792,13 +926,6 @@ function computeEllipse(str, t) {
     return { x, y, angle: tangentAngleDeg };
 }
 
-function computeInset(str, t) {
-    let m = str.match(/inset\(([^)]+)\)/);
-    let nums = m[1].split(/\s+/).map(s => parseFloat(s));
-    let top = nums[0], right = nums[1], bottom = nums[2], left = nums[3];
-    return rectPath(top, left, right, bottom, t);
-}
-
 function computeRect(str, t) {
     let m = str.match(/rect\(([^)]+)\)/);
     let nums = m[1].split(/\s+/).map(s => parseFloat(s));
@@ -893,6 +1020,274 @@ function rectPath(top, left, right, bottom, t) {
     let y = bottom - dist;
     return { x: left, y, angle: 270 };
 }
+
+// normalized inset uses calc
+function tokenizeCalc(input) {
+    let tokens = [];
+    let i = 0;
+
+    while (i < input.length) {
+        let ch = input[i];
+
+        if (/\s/.test(ch)) {
+            i++;
+            continue;
+        }
+
+        // operators & parentheses
+        if ("+-*/()".includes(ch)) {
+            tokens.push({ type: ch, value: ch });
+            i++;
+            continue;
+        }
+
+        // numbers or dimensions or %
+        if (/[0-9.]/.test(ch)) {
+            let start = i;
+            while (/[0-9.]/.test(input[i])) i++;
+            let num = input.slice(start, i);
+
+            if (input[i] === "%") {
+                i++;
+                tokens.push({ type: "percentage", value: parseFloat(num) });
+                continue;
+            }
+
+            // only px supported
+            if (input.slice(i, i+2) === "px") {
+                i += 2;
+                tokens.push({ type: "dimension", value: parseFloat(num), unit: "px" });
+                continue;
+            }
+
+            // plain number
+            tokens.push({ type: "number", value: parseFloat(num) });
+            continue;
+        }
+
+        // function name (calc)
+        if (/[a-zA-Z]/.test(ch)) {
+            let start = i;
+            while (/[a-zA-Z]/.test(input[i])) i++;
+            let name = input.slice(start, i);
+
+            if (name === "calc" && input[i] === "(") {
+                tokens.push({ type: "func", value: "calc" });
+                continue;
+            }
+
+            throw new Error("Unsupported function: " + name);
+        }
+
+        throw new Error("Unexpected character in calc(): " + ch);
+    }
+
+    return tokens;
+}
+
+// normalized inset uses calc
+function parseCalc(tokens) {
+    let i = 0;
+
+    function peek() { return tokens[i]; }
+    function consume() { return tokens[i++]; }
+
+    function parseExpression() {
+        let node = parseTerm();
+        while (peek() && (peek().type === "+" || peek().type === "-")) {
+            let op = consume().type;
+            let right = parseTerm();
+            node = { type: "binary", op, left: node, right };
+        }
+        return node;
+    }
+
+    function parseTerm() {
+        let node = parseFactor();
+        while (peek() && (peek().type === "*" || peek().type === "/")) {
+            let op = consume().type;
+            let right = parseFactor();
+            node = { type: "binary", op, left: node, right };
+        }
+        return node;
+    }
+
+    function parseFactor() {
+        let t = peek();
+        if (!t) throw "Unexpected end in calc()";
+
+        if (t.type === "number") {
+            consume();
+            return { type: "number", value: t.value };
+        }
+
+        if (t.type === "dimension") {
+            consume();
+            return { type: "dimension", value: t.value, unit: t.unit };
+        }
+
+        if (t.type === "percentage") {
+            consume();
+            return { type: "percentage", value: t.value };
+        }
+
+        if (t.type === "func") {
+            consume(); // "calc"
+            if (peek().type !== "(") throw "Expected '(' after calc";
+            consume();
+            let node = parseExpression();
+            if (!peek() || peek().type !== ")") throw "Expected ')'";
+            consume();
+            return node;
+        }
+
+        if (t.type === "(") {
+            consume();
+            let node = parseExpression();
+            if (!peek() || peek().type !== ")") throw "Expected ')'";
+            consume();
+            return node;
+        }
+
+        throw new Error("Unexpected calc token " + JSON.stringify(t));
+    }
+
+    let ast = parseExpression();
+    if (i !== tokens.length) throw "Extra tokens after calc";
+    return ast;
+}
+
+// normalized inset uses calc
+function evalCalc(ast, env) {
+    switch (ast.type) {
+        case "number":
+            return ast.value;
+
+        case "dimension":
+            return ast.value;   // px only → already a number
+
+        case "percentage":
+            return env.percentBase * (ast.value / 100);
+
+        case "binary": {
+            let l = evalCalc(ast.left, env);
+            let r = evalCalc(ast.right, env);
+
+            switch (ast.op) {
+                case "+": return l + r;
+                case "-": return l - r;
+                case "*": return l * r;
+                case "/": return l / r;
+            }
+        }
+    }
+    throw "Invalid AST node " + ast.type;
+}
+
+function resolveLength(expr, element) {
+    expr = expr.trim();
+
+    // Fast path: pure px
+    if (/^[0-9.]+px$/.test(expr))
+        return parseFloat(expr);
+
+    // Pure %
+    if (/^[0-9.]+%$/.test(expr)) {
+        let p = parseFloat(expr);
+        let base = element.offsetWidth;            // <- width reference
+        return base * (p / 100);
+    }
+
+    // calc(...) or mixed values
+    const ast = parseCalc(tokenizeCalc(expr));
+    return evalCalc(ast, {
+        percentBase: element.offsetWidth
+    });
+}
+
+function parseInsetArgs(str) {
+    let inside = str.trim()
+        .replace(/^inset\s*\(/, "")
+        .replace(/\)\s*$/, "");
+
+    let args = [];
+    let current = "";
+    let depth = 0;
+
+    for (let i = 0; i < inside.length; i++) {
+        let ch = inside[i];
+
+        if (ch === "(") {
+            depth++;
+            current += ch;
+        } else if (ch === ")") {
+            depth--;
+            current += ch;
+        } else if (/\s/.test(ch) && depth === 0) {
+            if (current.trim() !== "") {
+                args.push(current.trim());
+                current = "";
+            }
+        } else {
+            current += ch;
+        }
+    }
+
+    if (current.trim() !== "") {
+        args.push(current.trim());
+    }
+
+    return args;
+}
+/**
+ * 
+ * @param {string} str 
+ * @param {HTMLElement} element 
+ * @param {number} progress 
+ * @returns 
+ */
+function computeInset(str, element, progress) {
+    const args = parseInsetArgs(str);
+    if (args.length !== 4)
+        throw new Error("inset() must have 4 arguments");
+
+    const [topPx, rightPx, bottomPx, leftPx] =
+        args.map(a => resolveLength(a, element));
+
+    const w = element.offsetWidth;
+    const h = element.offsetHeight;
+
+    // Actual rectangle coordinates
+    const x1 = leftPx;
+    const y1 = topPx;
+    const x2 = w - rightPx;
+    const y2 = h - bottomPx;
+
+    // Rectangle perimeter
+    const P = 2 * ((x2 - x1) + (y2 - y1));
+
+    let d = P * progress;
+
+    // Walk the rectangle clockwise, return point
+    // Top edge: (x1 → x2, y1)
+    let len = x2 - x1;
+    if (d <= len) return { x: x1 + d, y: y1 };
+    d -= len;
+
+    // Right edge: (x2, y1 → y2)
+    len = y2 - y1;
+    if (d <= len) return { x: x2, y: y1 + d };
+    d -= len;
+
+    // Bottom edge: (x2 → x1, y2)
+    len = x2 - x1;
+    if (d <= len) return { x: x2 - d, y: y2 };
+    d -= len;
+
+    // Left edge: (x1, y2 → y1)
+    return { x: x1, y: y2 - d };
+}
+
 
 //Code from: https://github.com/floating-ui/floating-ui/blob/master/packages/utils/src/dom.ts
 
