@@ -925,7 +925,7 @@ export class BindingsHelper {
         else
           binding[1].compiledExpression = new Function(<any>signalVarNames, 'return ' + binding[1].expression);
       }
-      valuesObject[signalVarNames.length - 1] = { element, root };
+      valuesObject[signalVarNames.length - 1] = { element, root, boundNames: binding[1].signal, boundTargetName: binding[0], boundTargetType: binding[1].target };
       v = binding[1].compiledExpression(...valuesObject);
       valuesObject[signalVarNames.length - 1] = v;
     }

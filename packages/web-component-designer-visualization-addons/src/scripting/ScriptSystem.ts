@@ -295,19 +295,30 @@ export class ScriptSystem {
       case 'ShowMessageBox': {
         let res = null;
         const buttons = await this.getValue(command.buttons, context);
-        if (buttons == 'ok') {
-          const message = await this.getValue(command.message, context);
-          alert(message);
-          res = 1;
-        } else if (buttons == 'yesNo') {
+        if (buttons == 'yesNo') {
           const message = await this.getValue(command.message, context);
           if (confirm(message))
             res = 1;
           else res = 2;
+        } else {
+          const message = await this.getValue(command.message, context);
+          alert(message);
+          res = 1;
         }
         const resultSignal = await this.getValue(command.resultSignal, context);
         if (resultSignal) {
           this._visualizationHandler.setState(resultSignal, res);
+        }
+        break;
+      }
+
+      case 'ShowPrompt': {
+        const message = await this.getValue(command.message, context);
+        const defaultValue = await this.getValue(command.default, context);
+        const result = prompt(message, defaultValue);
+        const resultSignal = await this.getValue(command.resultSignal, context);
+        if (resultSignal && result) {
+          this._visualizationHandler.setState(resultSignal, result);
         }
         break;
       }

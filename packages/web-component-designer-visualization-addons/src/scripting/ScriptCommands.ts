@@ -9,7 +9,7 @@ export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog |
   SubscribeSignal | UnsubscribeSignal |
   WriteSignalsInGroup | ClearSignalsInGroup |
   RunScript |
-  CopySignalValuesFromFolder | ShowMessageBox |
+  CopySignalValuesFromFolder | ShowMessageBox | ShowPrompt |
   ExportSignalValuesAsJson | ImportSignalValuesFromJson;
 
 /**
@@ -93,6 +93,31 @@ export interface ShowMessageBox {
    * @default ok
    */
   buttons: 'ok' | 'okCancel' | 'yesNo' | 'retryCancel' | 'yesNoCancel' | 'abortRetryIgnore' | 'cancelTryContinue';
+  /**
+   * number of the clicked button, starting with 1
+   * @TJS-format signal
+   */
+  resultSignal: string;
+
+  width?: string;
+  height?: string;
+  additionalData?: string;
+}
+
+export interface ShowPrompt {
+  type: 'ShowPrompt';
+  /**
+   * title text
+   */
+  title: string;
+  /**
+   * message text
+   */
+  message: string;
+  /**
+   * default value
+   */
+  default?: string;
   /**
    * number of the clicked button, starting with 1
    * @TJS-format signal
