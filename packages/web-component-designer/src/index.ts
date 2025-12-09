@@ -180,6 +180,8 @@ export * from "./elements/services/refactorService/TextRefactorService.js";
 export type { IRefactorService } from "./elements/services/refactorService/IRefactorService.js";
 export type { IRefactoring } from "./elements/services/refactorService/IRefactoring.js";
 
+export type { IReferencesChangedService } from "./elements/services/referencesChangedService/IReferencesChangedService.js";
+
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionRefreshEvent } from "./elements/services/selectionService/ISelectionRefreshEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";

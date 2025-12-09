@@ -49,6 +49,7 @@ import { IConfigUiService } from './configUiService/IConfigUiService.js';
 import { IRefactorService } from './refactorService/IRefactorService.js';
 import { InstanceServiceContainer } from './InstanceServiceContainer.js';
 import { IDeletionService } from './deletionService/IDeletionService.js';
+import { IReferencesChangedService } from './referencesChangedService/IReferencesChangedService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -78,6 +79,7 @@ interface ServiceNameMap {
   "configUiService": IConfigUiService;
   "refactorService": IRefactorService;
   "deletionService": IDeletionService;
+  "referencesChangedService": IReferencesChangedService;
 
 
   //Factories for Instance Service Containers
@@ -240,5 +242,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   get deletionService(): IDeletionService {
     return this.getLastService('deletionService');
+  }
+
+  get referencesChangedService(): IReferencesChangedService {
+    return this.getLastService('referencesChangedService');
   }
 }

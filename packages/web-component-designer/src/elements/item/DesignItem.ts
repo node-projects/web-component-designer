@@ -189,11 +189,13 @@ export class DesignItem implements IDesignItem {
     return this.element.id;
   }
   public set id(value: string) {
+    const oldValue = this.element.id;
     this.element.id = value;
     if (this.id)
       this.setAttribute("id", value);
     else
-      this.removeAttribute("id")
+      this.removeAttribute("id");
+    this.serviceContainer.referencesChangedService.notifyReferencesChanged([{ designItem: this, oldValue, type: 'idChanged' }]);
   }
 
   public get isRootItem(): boolean {
