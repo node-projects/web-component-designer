@@ -113,5 +113,5 @@ export interface IDesignItem {
 
   getComputedStyleProperty(name: string, fallback: string): string;
   getComputedStyle(): CSSStyleDeclaration;
-  querySelectorAll(selectors: string): NodeListOf<HTMLElement>;
+  querySelectorAll<T extends HTMLElement>(selectors: string): NodeListOf<T>;
 }

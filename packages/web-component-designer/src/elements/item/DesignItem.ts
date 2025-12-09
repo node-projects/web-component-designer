@@ -395,7 +395,7 @@ export class DesignItem implements IDesignItem {
     return designItem;
   }
 
-  querySelectorAll(selectors: string): NodeListOf<HTMLElement> {
+  querySelectorAll<T extends HTMLElement>(selectors: string): NodeListOf<T> {
     return this.usableContainer.querySelectorAll(selectors);
   }
 
