@@ -39,6 +39,16 @@ export class PropertyGroupsService implements IPropertyGroupsService {
         { name: 'svg', propertiesService: new CssPropertiesService("svg") },
     ];
 
+    protected _svgChildPgList: { name: string; propertiesService: IPropertiesService; }[] = [
+        { name: 'properties', propertiesService: null },
+        { name: 'attached', propertiesService: this._attachedPropertiesService },
+        { name: 'attributes', propertiesService: new AttributesPropertiesService() },
+        { name: 'common', propertiesService: new CommonPropertiesService() },
+        { name: 'styles', propertiesService: new CssCurrentPropertiesService() },
+        { name: 'css vars', propertiesService: new CssCustomPropertiesService() },
+        { name: 'layout', propertiesService: new CssPropertiesService("layoutSvgChild") },
+    ];
+
     protected _gridChild: { name: string; propertiesService: IPropertiesService; }[] = [
         { name: 'gridChild', propertiesService: new CssPropertiesService("gridChild") },
     ];
@@ -74,8 +84,13 @@ export class PropertyGroupsService implements IPropertyGroupsService {
         this._svgPgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
 
         let lst = this._pgList;
-        if (designItems[0].element instanceof designItems[0].window.SVGElement)
-            lst = this._svgPgList;
+        if (designItems[0].element instanceof designItems[0].window.SVGElement) {
+            if (designItems[0].element instanceof designItems[0].window.SVGSVGElement) {
+                lst = this._svgPgList;
+            } else {
+                lst = this._svgChildPgList;
+            }
+        }
 
         const style = designItems[0].getComputedStyle();
         if (style.display.includes('grid'))

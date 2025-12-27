@@ -94,8 +94,21 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
     "stroke-opacity"
   ];
 
+  public layoutSvgChild = {
+    "common": [
+      "display",
+      "fill",
+      "fill-rule",
+      "fill-opacity",
+      "stroke",
+      "stroke-width",
+      "stroke-dasharray",
+      "stroke-dashoffset",
+      "stroke-opacity"
+    ],
+  }
 
-  constructor(name: 'layout' | 'grid' | 'gridChild' | 'flex' | 'flexChild' | 'svg') {
+  constructor(name: 'layout' | 'layoutSvgChild' | 'grid' | 'gridChild' | 'flex' | 'flexChild' | 'svg') {
     super();
     this.name = name;
   }
