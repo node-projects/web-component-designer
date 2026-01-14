@@ -69,7 +69,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       }
       div.isforced {
         background: orange;
-        pointer-events: all;
+        pointer-events: auto;
       }`;
 
   static override readonly template = html`
@@ -363,13 +363,13 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   public set instanceServiceContainer(value: InstanceServiceContainer) {
+    this._selectionChangedHandler?.dispose();
+    this._contentChangedHandler?.dispose();
     this._instanceServiceContainer = value;
-    this._selectionChangedHandler?.dispose()
     if (this._instanceServiceContainer) {
       this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
         this.selectionChanged(e);
       });
-      this._contentChangedHandler?.dispose()
       this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
         if (e.changeType === 'changed') {
           for (const d of e.designItems) {
