@@ -313,9 +313,9 @@ export function getElementSize(node, matrix) {
 function getElementOffsetsInContainer(node, includeScroll, iframes) {
     if ((node instanceof HTMLElement || node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement)) {
         let cs = getCachedComputedStyle(node);
-        if (cs.offsetPath && cs.offsetPath !== 'none') {
+        /*if (cs.offsetPath && cs.offsetPath !== 'none') {
             return new DOMPoint(0, 0);
-        }
+        }*/
         if (includeScroll) {
             const cs = getCachedComputedStyle(node);
             return new DOMPoint(node.offsetLeft - (includeScroll ? node.scrollLeft - parseFloat(cs.borderLeftWidth) : 0), node.offsetTop - (includeScroll ? node.scrollTop - parseFloat(cs.borderTopWidth) : 0));
@@ -393,10 +393,37 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
         let parentElement = getParentElementIncludingSlots(actualElement, iframes);
 
         if (actualElement.assignedSlot != null) {
+            const st = getCachedComputedStyle(actualElement);
+            if (st.position !== "static") {
+                const mvMat = new DOMMatrix().translate(parseFloat(st.left), parseFloat(st.top));
+                originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+            }
+            /*
+            
+            following code should be used instead of above to fix:
+            
+            
+            
+            but it does not work with:
+
+                <div>
+                    <visu-tag-root-canvas id="outer-tag-root-canvas" tag-root="SRM.RBG01">
+                        <template shadowrootmode="open">
+                            <div id="rootObj" style="height:100%;width:100%;position:absolute;top:400px;">
+                                <slot></slot>
+                            </div>
+                        </template>
+                        <div class="wrapper" id="aaaaabb" style="height:50px;width:50px;"></div>
+                    </visu-tag-root-canvas>
+                </div>
+
+            */
+            /*
             const l = offsetTopLeftPolyfill(actualElement, 'offsetLeft');
             const t = offsetTopLeftPolyfill(actualElement, 'offsetTop');
             const mvMat = new DOMMatrix().translateSelf(l, t);
             originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+            */
         } else {
             if (!(actualElement instanceof SVGSVGElement) && !(actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).SVGSVGElement) &&
                 (actualElement instanceof SVGGraphicsElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).SVGGraphicsElement)) {
@@ -1302,14 +1329,10 @@ function isElement(value) {
 
 /**
  * 
- * @param {Element | CSSStyleDeclaration} elementOrCss 
+ * @param {CSSStyleDeclaration} css 
  * @returns {boolean}
  */
-function isContainingBlock(elementOrCss) {
-    /** @type {CSSStyleDeclaration } */
-    //@ts-ignore
-    const css = isElement(elementOrCss) ? getComputedStyle(elementOrCss) : elementOrCss;
-
+function isContainingBlock(css) {
     // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
     // https://drafts.csswg.org/css-transforms-2/#individual-transforms
     return (
