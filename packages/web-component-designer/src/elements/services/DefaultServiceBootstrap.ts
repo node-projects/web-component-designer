@@ -85,6 +85,8 @@ import { DrawElementTool } from '../widgets/designerView/tools/DrawElementTool.j
 import { RoundPixelsDesignViewConfigButton } from '../widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js';
 import { MathMLElementsPropertiesService } from './propertiesService/services/MathMLElementsPropertiesService.js';
 import { SvgElementExtensionProvider } from '../widgets/designerView/extensions/svg/SvgElementExtensionProvider.js';
+import { PathExtensionProvider } from '../widgets/designerView/extensions/svg/PathExtensionProvider.js';
+import { EllipsisExtensionProvider } from '../widgets/designerView/extensions/svg/EllipsisExtensionProvider.js';
 import { ConditionExtensionProvider } from '../widgets/designerView/extensions/logic/ConditionExtensionProvider.js';
 import { GridToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridToolbarExtensionProvider.js';
 import { FlexToolbarExtensionProvider } from '../widgets/designerView/extensions/flex/FlexToolbarExtensionProvider.js';
@@ -159,6 +161,8 @@ export function createDefaultServiceContainer() {
     new ConditionExtensionProvider(new PaddingExtensionProvider, (_, c) => c.activeTool instanceof MarginTool || c.activeTool instanceof PaddingTool, true),
     new PositionExtensionProvider(),
     new SvgElementExtensionProvider(),
+    new PathExtensionProvider(),
+    new EllipsisExtensionProvider(),
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),

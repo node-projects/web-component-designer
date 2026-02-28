@@ -11,6 +11,8 @@ export class SvgElementExtensionProvider implements IDesignerExtensionProvider {
     if (designItem.node instanceof SVGRectElement ||
       designItem.node instanceof SVGLineElement ||
       designItem.node instanceof SVGCircleElement ||
+      designItem.node instanceof SVGPolygonElement ||
+      designItem.node instanceof SVGPolylineElement ||
       designItem.node instanceof SVGPathElement) {
       return isVisualSvgElement(designItem.node);
     }
