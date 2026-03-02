@@ -5,6 +5,7 @@ import { IDeletionService } from "./IDeletionService.js";
 export class DeletionService implements IDeletionService {
   public removeItems(items: IDesignItem[]) {
     items[0].instanceServiceContainer.undoService.execute(new DeleteAction(items));
-    items[0].serviceContainer.referencesChangedService.notifyReferencesChanged(items.map(item => ({ designItem: item, type: 'deleted' })));
+    if (items[0].serviceContainer.referencesChangedService)
+      items[0].serviceContainer.referencesChangedService.notifyReferencesChanged(items.map(item => ({ designItem: item, type: 'deleted' })));
   }
 }

@@ -195,7 +195,8 @@ export class DesignItem implements IDesignItem {
       this.setAttribute("id", value);
     else
       this.removeAttribute("id");
-    this.serviceContainer.referencesChangedService.notifyReferencesChanged([{ designItem: this, oldValue, type: 'idChanged' }]);
+    if (this.serviceContainer.referencesChangedService)
+      this.serviceContainer.referencesChangedService.notifyReferencesChanged([{ designItem: this, oldValue, type: 'idChanged' }]);
   }
 
   public get isRootItem(): boolean {
