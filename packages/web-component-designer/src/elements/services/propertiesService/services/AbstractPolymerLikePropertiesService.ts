@@ -15,7 +15,9 @@ export abstract class AbstractPolymerLikePropertiesService extends AbstractPrope
   public override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
     if (!this.isHandledElement(designItem))
       return null;
-    return this.parseProperties((<any>designItem.element.constructor).properties);
+    if ((<any>designItem.element?.constructor)?.properties)
+      return this.parseProperties((<any>designItem.element.constructor).properties);
+    return null;
   }
 
   protected parseProperties(list: any): IPropertyGroup[] | IProperty[] {

@@ -153,14 +153,15 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   }
 
   public set instanceServiceContainer(value: InstanceServiceContainer) {
-    this._instanceServiceContainer = value;
+    const currentContainer = value;
+    this._instanceServiceContainer = currentContainer;
     this._selectionChangedHandler?.dispose()
-    if (this._instanceServiceContainer) {
-      this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(async e => {
-        this.propertyGrid.instanceServiceContainer = value;
+    if (currentContainer) {
+      this._selectionChangedHandler = currentContainer.selectionService.onSelectionChanged.on(async e => {
+        this.propertyGrid.instanceServiceContainer = currentContainer;
         await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
 
-        if (this._instanceServiceContainer.selectionService?.primarySelection?.isRootItem) {
+        if (currentContainer.selectionService?.primarySelection?.isRootItem) {
           this._configButton.style.display = 'none';
 
           this._id.value = '';
@@ -183,25 +184,25 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
             this._configButton.style.display = 'none';
           }
 
-          if (this._instanceServiceContainer.selectionService.primarySelection?.nodeType == NodeType.Element) {
-            this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.name ?? '';
+          if (currentContainer.selectionService.primarySelection?.nodeType == NodeType.Element) {
+            this._type.value = currentContainer.selectionService.primarySelection?.name ?? '';
           } else {
-            this._type.value = this._instanceServiceContainer.selectionService.primarySelection?.node?.nodeName ?? '';
+            this._type.value = currentContainer.selectionService.primarySelection?.node?.nodeName ?? '';
           }
           this._type.title = this._type.value;
           this._id.blur();
-          this._id.value = this._instanceServiceContainer.selectionService.primarySelection?.id ?? '';
-          if (this._instanceServiceContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
-            this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
-          } else if (this._instanceServiceContainer.selectionService.primarySelection?.element?.children?.length <= 0)
-            this._content.value = this._instanceServiceContainer.selectionService.primarySelection?.content ?? '';
+          this._id.value = currentContainer.selectionService.primarySelection?.id ?? '';
+          if (currentContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
+            this._content.value = currentContainer.selectionService.primarySelection?.content ?? '';
+          } else if (currentContainer.selectionService.primarySelection?.element?.children?.length <= 0)
+            this._content.value = currentContainer.selectionService.primarySelection?.content ?? '';
           else
             this._content.value = ''
           this._content.title = this._content.value;
 
-          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
-          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
-          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, this._instanceServiceContainer.selectionService.selectedElements, this._propertiesService);
+          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
+          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
+          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
         }
       });
     } else {
@@ -217,7 +218,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       this._innerRect.style.background = '';
       this._type.value = ":host";
     }
-    this.propertyGrid.instanceServiceContainer = value;
+    this.propertyGrid.instanceServiceContainer = currentContainer;
   }
 
   private _openContextMenu(event: MouseEvent, designItems: IDesignItem[], property: IProperty) {
