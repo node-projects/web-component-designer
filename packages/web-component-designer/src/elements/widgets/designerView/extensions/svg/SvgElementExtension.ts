@@ -19,6 +19,23 @@ function getSvgElementPoints(element: SVGElement): IPoint[] {
             { x: element.x1.baseVal.value, y: element.y1.baseVal.value },
             { x: element.x2.baseVal.value, y: element.y2.baseVal.value }
         ]
+    } else if (element instanceof SVGCircleElement) {
+        const cx = element.cx.baseVal.value;
+        const cy = element.cy.baseVal.value;
+        const r = element.r.baseVal.value;
+        return [
+            { x: cx, y: cy - r },
+            { x: cx + r, y: cy },
+            { x: cx, y: cy + r },
+            { x: cx - r, y: cy },
+        ];
+    } else if (element instanceof SVGPolygonElement || element instanceof SVGPolylineElement) {
+        const points: IPoint[] = [];
+        for (let i = 0; i < element.points.numberOfItems; i++) {
+            const p = element.points.getItem(i);
+            points.push({ x: p.x, y: p.y });
+        }
+        return points;
     }
 
     return null;
@@ -117,16 +134,7 @@ export class SvgElementExtension extends AbstractExtension {
             case EventNames.PointerUp:
                 (<Element>event.target).releasePointerCapture(event.pointerId);
                 this._startPos = null;
-
-                /*if (getComputedStyle(this._rectElement.parentElement).position == "absolute") {
-                    let group = this.extendedItem.openGroup('rearrangeSvg');
-                    let newRectCoordinates = this.designerCanvas.getNormalizedElementCoordinates(this._rectElement);
-                    let newRectCoordinatesCloud = this._getPointsFromRect(newRectCoordinates);
-                    let newRectExtrema = this._getMinMaxValues(newRectCoordinatesCloud);
-                    this._rearrangeSvgParent(newRectExtrema);
-                    this._rearrangePointsFromElement(this._parentCoordinates);
-                    group.commit();
-                }*/
+                this._commitElementChange(this._svgElement);
                 break;
         }
     }
@@ -149,6 +157,39 @@ export class SvgElementExtension extends AbstractExtension {
             element.y1.baseVal.value = this._points[0].y;
             element.x2.baseVal.value = this._points[1].x;
             element.y2.baseVal.value = this._points[1].y;
+        } else if (element instanceof SVGCircleElement) {
+            const cx = element.cx.baseVal.value;
+            const cy = element.cy.baseVal.value;
+            let newR = element.r.baseVal.value;
+            switch (index) {
+                case 0: newR = cy - newPoint.y; break;
+                case 1: newR = newPoint.x - cx; break;
+                case 2: newR = newPoint.y - cy; break;
+                case 3: newR = cx - newPoint.x; break;
+            }
+            const r = Math.max(0, newR);
+            element.r.baseVal.value = r;
+            this._points[0] = { x: cx, y: cy - r };
+            this._points[1] = { x: cx + r, y: cy };
+            this._points[2] = { x: cx, y: cy + r };
+            this._points[3] = { x: cx - r, y: cy };
+        } else if (element instanceof SVGPolygonElement || element instanceof SVGPolylineElement) {
+            const p = element.points.getItem(index);
+            p.x = newPoint.x;
+            p.y = newPoint.y;
+        }
+    }
+
+    _commitElementChange(element: SVGElement) {
+        if (element instanceof SVGCircleElement) {
+            this.extendedItem.setAttribute('r', element.r.baseVal.value.toString());
+        } else if (element instanceof SVGPolygonElement || element instanceof SVGPolylineElement) {
+            const parts: string[] = [];
+            for (let i = 0; i < element.points.numberOfItems; i++) {
+                const p = element.points.getItem(i);
+                parts.push(p.x + ',' + p.y);
+            }
+            this.extendedItem.setAttribute('points', parts.join(' '));
         }
     }
 
