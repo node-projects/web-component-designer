@@ -466,6 +466,15 @@ export class PointerTool implements ITool {
         newContainerElementDesignItem = designerCanvas.rootDesignItem;
         const containerStyle = getComputedStyle(newContainerElementDesignItem.element);
         newContainerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainerElementDesignItem, containerStyle, designItem));
+        if (newContainerService) {
+          if (newContainerService.canEnter(newContainerElementDesignItem, designItems)) {
+            break;
+          } else {
+            newContainerElementDesignItem = null;
+            newContainerService = null;
+            break;
+          }
+        }
         break;
       } else if (false) {
         //check we don't try to move a item over one of its children..
