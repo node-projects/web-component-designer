@@ -66,8 +66,12 @@ export class ScriptSystem {
               break;
           }
         }
-      } else
-        await this.runScriptCommand(c, outerContext);
+      } else {
+        const continueScript = await this.runScriptCommand(c, outerContext);
+        if (!continueScript) {
+          break;
+        }
+      }
     }
   }
 
@@ -95,7 +99,7 @@ export class ScriptSystem {
     //TODO...
   }
 
-  async runScriptCommand<T extends ScriptCommands>(command: T, context: contextType) {
+  async runScriptCommand<T extends ScriptCommands>(command: T, context: contextType): Promise<boolean> {
     switch (command.type) {
 
       case 'Comment':
@@ -336,6 +340,7 @@ export class ScriptSystem {
         break;
       }
     }
+    return true;
   }
 
   getTarget(context: contextType, targetSelectorTarget: 'element' | 'container', parentLevel: number) {
