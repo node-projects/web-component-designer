@@ -1,4 +1,5 @@
 import { IDesignItem } from '../item/IDesignItem.js';
+import { NodeType } from '../item/NodeType.js';
 
 export function switchContainer(items: IDesignItem[], newContainer: IDesignItem, resizeNewContainer: boolean = false, newContainerOffset: number = 0) {
     //TODO: switch to other containers like grid, flexbox, ...
@@ -10,7 +11,7 @@ export function switchContainer(items: IDesignItem[], newContainer: IDesignItem,
             return;
         }
     }
-    
+
     const firstItem = items[0];
     const grp = firstItem.openGroup('switchContainerHelper');
 
@@ -37,12 +38,15 @@ export function switchContainer(items: IDesignItem[], newContainer: IDesignItem,
     for (let e of items) {
         let rect = designerCanvas.getNormalizedElementCoordinates(e.element);
         e.remove();
-        if (resizeNewContainer) {
-            e.setStyle('left', (rect.x - minX + newContainerOffset).toString() + 'px');
-            e.setStyle('top', (rect.y - minY + newContainerOffset).toString() + 'px');
-        } else {
-            e.setStyle('left', (rect.x - rectNewContainer.x).toString() + 'px');
-            e.setStyle('top', (rect.y - rectNewContainer.y).toString() + 'px');
+        if (e.nodeType == NodeType.Element)  {
+            //TODO: use positioning service, not fixed left and top.
+            if (resizeNewContainer) {
+                e.setStyle('left', (rect.x - minX + newContainerOffset).toString() + 'px');
+                e.setStyle('top', (rect.y - minY + newContainerOffset).toString() + 'px');
+            } else {
+                e.setStyle('left', (rect.x - rectNewContainer.x).toString() + 'px');
+                e.setStyle('top', (rect.y - rectNewContainer.y).toString() + 'px');
+            }
         }
         newContainer.insertChild(e);
     }
