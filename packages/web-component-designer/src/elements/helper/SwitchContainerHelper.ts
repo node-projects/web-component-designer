@@ -37,7 +37,6 @@ export function switchContainer(items: IDesignItem[], newContainer: IDesignItem,
 
     for (let e of items) {
         let rect = designerCanvas.getNormalizedElementCoordinates(e.element);
-        e.remove();
         if (e.nodeType == NodeType.Element)  {
             //TODO: use positioning service, not fixed left and top.
             if (resizeNewContainer) {
