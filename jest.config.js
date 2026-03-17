@@ -1,5 +1,4 @@
 export default {
-  roots: ['<rootDir>/tests'],
   testMatch: ['**/?(*.)+(spec|test).+(mts|ts|tsx|mjs|js)'],
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
