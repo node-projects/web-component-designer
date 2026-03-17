@@ -15,10 +15,12 @@ function parseSelectorList(input: string, start: number, spec: Specificity): num
         temp.A = temp.B = temp.C = 0;
         i = parseSelector(input, i, temp);
 
-        // Max specificity for selector list
-        spec.A = Math.max(spec.A, temp.A);
-        spec.B = Math.max(spec.B, temp.B);
-        spec.C = Math.max(spec.C, temp.C);
+        // Keep the most specific selector (lexicographic comparison)
+        if (temp.A > spec.A || (temp.A === spec.A && (temp.B > spec.B || (temp.B === spec.B && temp.C > spec.C)))) {
+            spec.A = temp.A;
+            spec.B = temp.B;
+            spec.C = temp.C;
+        }
 
         if (input[i] === ',') i++;
         else break;
@@ -81,24 +83,41 @@ function parseSelector(input: string, start: number, spec: Specificity): number 
                     }
 
                     case 'has': {
+                        const innerSpec: Specificity = { A: 0, B: 0, C: 0 };
                         let j = innerStart;
                         while (j < innerEnd - 1) {
                             const tempSpec: Specificity = { A: 0, B: 0, C: 0 };
                             j = parseSelectorList(input, j, tempSpec);
 
-                            // Sum specificity of all inner selectors
-                            spec.A += tempSpec.A;
-                            spec.B += tempSpec.B;
-                            spec.C += tempSpec.C;
+                            // Max specificity among inner selectors
+                            if (tempSpec.A > innerSpec.A || (tempSpec.A === innerSpec.A && (tempSpec.B > innerSpec.B || (tempSpec.B === innerSpec.B && tempSpec.C > innerSpec.C)))) {
+                                innerSpec.A = tempSpec.A;
+                                innerSpec.B = tempSpec.B;
+                                innerSpec.C = tempSpec.C;
+                            }
 
                             if (input[j] === ',') j++;
                             else break;
                         }
+
+                        spec.A += innerSpec.A;
+                        spec.B += innerSpec.B;
+                        spec.C += innerSpec.C;
+
                         i = innerEnd;
                         continue;
                     }
 
-                    case 'slotted':
+                    case 'slotted': {
+                        const innerSpec: Specificity = { A: 0, B: 0, C: 0 };
+                        parseSelector(input, innerStart, innerSpec);
+                        spec.A += innerSpec.A;
+                        spec.B += innerSpec.B;
+                        spec.C += innerSpec.C;
+                        i = innerEnd;
+                        continue;
+                    }
+
                     case 'host':
                     case 'host-context': {
                         spec.B++;

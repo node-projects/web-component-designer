@@ -214,7 +214,7 @@ test('test 30 - multiple pseudo-elements', () => {
 test('test 31 - multiple pseudo-classes', () => {
     const res = calculateSpecificity('div.class1.class2:hover:focus');
     expect(res.A).toBe(0); // no ID
-    expect(res.B).toBe(3); // 2 classes + :hover + :focus
+    expect(res.B).toBe(4); // 2 classes + :hover + :focus
     expect(res.C).toBe(1); // div type selector
 });
 
@@ -262,9 +262,9 @@ test('test 37 - universal selector with class', () => {
 
 test('test 38 - nested :has()', () => {
     const res = calculateSpecificity('div:has(> span.highlight, a#link)');
-    expect(res.A).toBe(1); // #link
-    expect(res.B).toBe(1); // .highlight
-    expect(res.C).toBe(1); // div
+    expect(res.A).toBe(1); // #link (most specific argument: a#link)
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(2); // div + a
 });
 
 test('test 39 - :where() does not increase specificity', () => {
@@ -304,22 +304,22 @@ test('test 43 - escaping in identifiers', () => {
 
 test('test 44 - nested functional pseudo-classes', () => {
     const res = calculateSpecificity(':is(:not(.a), :has(#b))');
-    expect(res.A).toBe(1); // #b
-    expect(res.B).toBe(1); // .a
+    expect(res.A).toBe(1); // #b (most specific :is arg: :has(#b) = (1,0,0))
+    expect(res.B).toBe(0);
     expect(res.C).toBe(0);
 });
 
 test('test 45 - complex all together', () => {
     const res = calculateSpecificity('body > header.navbar :is(ul li:first-child, a#link.active):hover');
-    expect(res.A).toBe(1); // #link
+    expect(res.A).toBe(1); // #link (most specific :is arg: a#link.active)
     expect(res.B).toBe(3); // .navbar + .active + :hover
-    expect(res.C).toBe(5); // body + header + ul + li + first-child
+    expect(res.C).toBe(3); // body + header + a
 });
 
 test('test 46 - deeply nested :is() and :not()', () => {
     const res = calculateSpecificity(':is(:not(.a, #b), .c)');
-    expect(res.A).toBe(1); // #b
-    expect(res.B).toBe(2); // .a + .c
+    expect(res.A).toBe(1); // #b (most specific :is arg: :not(.a, #b) = (1,0,0))
+    expect(res.B).toBe(0);
     expect(res.C).toBe(0);
 });
 
@@ -340,14 +340,14 @@ test('test 48 - :slotted pseudo-class', () => {
 test('test 49 - :host() pseudo-class', () => {
     const res = calculateSpecificity(':host(.container)');
     expect(res.A).toBe(0);
-    expect(res.B).toBe(1); // .container
+    expect(res.B).toBe(2); // :host pseudo-class + .container
     expect(res.C).toBe(0);
 });
 
 test('test 50 - :host-context() pseudo-class', () => {
     const res = calculateSpecificity(':host-context(#parent) .child');
     expect(res.A).toBe(1); // #parent
-    expect(res.B).toBe(1); // .child
+    expect(res.B).toBe(2); // :host-context pseudo-class + .child
     expect(res.C).toBe(0);
 });
 
@@ -374,9 +374,9 @@ test('test 53 - type + class + attribute', () => {
 
 test('test 54 - deeply nested :has()', () => {
     const res = calculateSpecificity('div:has(ul li:first-child, a#link)');
-    expect(res.A).toBe(1); // #link
-    expect(res.B).toBe(1); // :first-child counts as pseudo-class
-    expect(res.C).toBe(1); // div
+    expect(res.A).toBe(1); // #link (most specific argument: a#link)
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(2); // div + a
 });
 
 test('test 55 - multiple :where()', () => {
@@ -390,7 +390,7 @@ test('test 56 - type selector + namespace', () => {
     const res = calculateSpecificity('html|body main|article.section');
     expect(res.A).toBe(0);
     expect(res.B).toBe(1); // .section
-    expect(res.C).toBe(3); // body + article + main
+    expect(res.C).toBe(2); // body + article (namespaced type selectors)
 });
 
 test('test 57 - multiple descendant combinators', () => {
@@ -409,14 +409,14 @@ test('test 58 - :not() with type + class', () => {
 
 test('test 59 - :is() inside :has()', () => {
     const res = calculateSpecificity('section:has(:is(.a, #b))');
-    expect(res.A).toBe(1); // #b
-    expect(res.B).toBe(1); // .a
+    expect(res.A).toBe(1); // #b (most specific :is arg: #b = (1,0,0))
+    expect(res.B).toBe(0);
     expect(res.C).toBe(1); // section
 });
 
 test('test 60 - multiple functional pseudo-classes', () => {
     const res = calculateSpecificity(':not(:is(.a, #b)):has(.c)');
-    expect(res.A).toBe(1); // #b
-    expect(res.B).toBe(2); // .a + .c
+    expect(res.A).toBe(1); // #b (most specific :is arg: #b = (1,0,0))
+    expect(res.B).toBe(1); // .c from :has()
     expect(res.C).toBe(0);
 });
