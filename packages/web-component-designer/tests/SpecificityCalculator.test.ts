@@ -420,3 +420,65 @@ test('test 60 - multiple functional pseudo-classes', () => {
     expect(res.B).toBe(1); // .c from :has()
     expect(res.C).toBe(0);
 });
+
+// --- Legacy single-colon pseudo-elements ---
+
+test('test 61 - legacy :before pseudo-element', () => {
+    const res = calculateSpecificity('p:before');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(2); // p + :before (pseudo-element)
+});
+
+test('test 62 - legacy :after pseudo-element', () => {
+    const res = calculateSpecificity('div.item:after');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(1); // .item
+    expect(res.C).toBe(2); // div + :after
+});
+
+test('test 63 - legacy :first-line pseudo-element', () => {
+    const res = calculateSpecificity('p:first-line');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(2); // p + :first-line
+});
+
+test('test 64 - legacy :first-letter pseudo-element', () => {
+    const res = calculateSpecificity('p:first-letter');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(2); // p + :first-letter
+});
+
+// --- :matches() and vendor-prefixed :any() ---
+
+test('test 65 - :matches() behaves like :is()', () => {
+    const res = calculateSpecificity(':matches(.a, #b)');
+    expect(res.A).toBe(1); // most specific arg: #b
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(0);
+});
+
+test('test 66 - :-webkit-any() behaves like :is()', () => {
+    const res = calculateSpecificity(':-webkit-any(.a, #b)');
+    expect(res.A).toBe(1);
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(0);
+});
+
+test('test 67 - :-moz-any() behaves like :is()', () => {
+    const res = calculateSpecificity(':-moz-any(.a, #b)');
+    expect(res.A).toBe(1);
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(0);
+});
+
+// --- Column combinator || ---
+
+test('test 68 - column combinator ||', () => {
+    const res = calculateSpecificity('col.selected || td');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(1); // .selected
+    expect(res.C).toBe(2); // col + td
+});
