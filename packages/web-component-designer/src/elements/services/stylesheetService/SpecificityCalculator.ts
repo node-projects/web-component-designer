@@ -1,161 +1,224 @@
 export type Level = "A" | "B" | "C";
 export type Specificity = { A: number; B: number; C: number };
 
+// Char codes used throughout
+const CH_HASH = 35;        // #
+const CH_DOT = 46;         // .
+const CH_COLON = 58;       // :
+const CH_LBRACKET = 91;    // [
+const CH_RBRACKET = 93;    // ]
+const CH_LPAREN = 40;      // (
+const CH_RPAREN = 41;      // )
+const CH_COMMA = 44;       // ,
+const CH_BACKSLASH = 92;   // \
+const CH_STAR = 42;        // *
+const CH_PIPE = 124;       // |
+const CH_SPACE = 32;       // ' '
+const CH_GT = 62;          // >
+const CH_PLUS = 43;        // +
+const CH_TILDE = 126;      // ~
+const CH_SQUOTE = 39;      // '
+const CH_DQUOTE = 34;      // "
+const CH_UNDERSCORE = 95;  // _
+const CH_DASH = 45;        // -
+
 export function calculateSpecificity(selector: string): Specificity {
     const spec: Specificity = { A: 0, B: 0, C: 0 };
+
+    // Fast path: simple selectors without pseudo-classes, attributes, functions, commas, or escapes
+    if (!needsFullParse(selector)) {
+        calcSimple(selector, spec);
+        return spec;
+    }
+
     parseSelectorList(selector, 0, spec);
     return spec;
 }
 
+function needsFullParse(selector: string): boolean {
+    for (let i = 0; i < selector.length; i++) {
+        const c = selector.charCodeAt(i);
+        if (c === CH_COLON || c === CH_LBRACKET || c === CH_LPAREN || c === CH_COMMA || c === CH_BACKSLASH)
+            return true;
+    }
+    return false;
+}
+
+function calcSimple(selector: string, spec: Specificity): void {
+    const len = selector.length;
+    let i = 0;
+    while (i < len) {
+        const c = selector.charCodeAt(i);
+        if (c === CH_SPACE || c === CH_GT || c === CH_PLUS || c === CH_TILDE) { i++; continue; }
+        if (c === CH_HASH) {
+            spec.A++;
+            i++;
+            while (i < len && isIdentCC(selector.charCodeAt(i))) i++;
+            continue;
+        }
+        if (c === CH_DOT) {
+            spec.B++;
+            i++;
+            while (i < len && isIdentCC(selector.charCodeAt(i))) i++;
+            continue;
+        }
+        if (c === CH_STAR) { i++; continue; }
+        if (isIdentStartCC(c) || c === CH_PIPE) {
+            while (i < len) {
+                const cc = selector.charCodeAt(i);
+                if (isIdentCC(cc) || cc === CH_PIPE) i++;
+                else break;
+            }
+            spec.C++;
+            continue;
+        }
+        i++;
+    }
+}
+
+/* ---- Full parser (used when selector contains :, [, (, \, or ,) ---- */
+
 function parseSelectorList(input: string, start: number, spec: Specificity): number {
     let i = start;
-    let temp: Specificity = { A: 0, B: 0, C: 0 };
+    let tA = 0, tB = 0, tC = 0;
 
     while (i < input.length) {
-        temp.A = temp.B = temp.C = 0;
-        i = parseSelector(input, i, temp);
+        tA = tB = tC = 0;
+        i = parseSelector(input, i, spec, true);
+        // parseSelector wrote into spec; grab those values as temp then reset
+        tA = spec.A; tB = spec.B; tC = spec.C;
 
-        // Keep the most specific selector (lexicographic comparison)
-        if (temp.A > spec.A || (temp.A === spec.A && (temp.B > spec.B || (temp.B === spec.B && temp.C > spec.C)))) {
-            spec.A = temp.A;
-            spec.B = temp.B;
-            spec.C = temp.C;
+        // On the very first iteration we just keep the values.
+        // On subsequent iterations we pick the most specific (lexicographic).
+        // To avoid extra bookkeeping we always overwrite spec and compare below.
+        if (input.charCodeAt(i) === CH_COMMA) {
+            i++;
+            // Need to parse more selectors — save best so far
+            let bestA = tA, bestB = tB, bestC = tC;
+            while (i < input.length) {
+                spec.A = spec.B = spec.C = 0;
+                i = parseSelector(input, i, spec, true);
+                if (spec.A > bestA || (spec.A === bestA && (spec.B > bestB || (spec.B === bestB && spec.C > bestC)))) {
+                    bestA = spec.A; bestB = spec.B; bestC = spec.C;
+                }
+                if (input.charCodeAt(i) === CH_COMMA) { i++; continue; }
+                break;
+            }
+            spec.A = bestA; spec.B = bestB; spec.C = bestC;
         }
-
-        if (input[i] === ',') i++;
-        else break;
+        break;
     }
 
     return i;
 }
 
-function parseSelector(input: string, start: number, spec: Specificity): number {
+// When called from parseSelectorList with direct=true, writes directly into spec (avoids temp object).
+// When called recursively (direct=false), the caller manages its own temp.
+function parseSelector(input: string, start: number, spec: Specificity, direct: boolean): number {
     let i = start;
+    if (direct) { spec.A = spec.B = spec.C = 0; }
 
     while (i < input.length) {
-        const c = input[i];
-        if (c === ',' || c === ')') break;
+        const c = input.charCodeAt(i);
+        if (c === CH_COMMA || c === CH_RPAREN) break;
 
-        if (c === ' ' || c === '>' || c === '+' || c === '~') { i++; continue; }
-        if (c === '#') { i = readIdent(input, i + 1); spec.A++; continue; }
-        if (c === '.') { i = readIdent(input, i + 1); spec.B++; continue; }
-        if (c === '[') { i = readBalanced(input, i, '[', ']'); spec.B++; continue; }
+        if (c === CH_SPACE || c === CH_GT || c === CH_PLUS || c === CH_TILDE) { i++; continue; }
+        if (c === CH_HASH) { i = readIdent(input, i + 1); spec.A++; continue; }
+        if (c === CH_DOT) { i = readIdent(input, i + 1); spec.B++; continue; }
+        if (c === CH_LBRACKET) { i = readBalanced(input, i, CH_LBRACKET, CH_RBRACKET); spec.B++; continue; }
 
-        if (c === ':') {
-            if (input[i + 1] === ':') { i += 2; i = readIdent(input, i); if (input[i] === '(') i = readBalanced(input, i, '(', ')'); spec.C++; continue; }
+        if (c === CH_COLON) {
+            if (input.charCodeAt(i + 1) === CH_COLON) {
+                i += 2;
+                i = readIdent(input, i);
+                if (input.charCodeAt(i) === CH_LPAREN) i = readBalanced(input, i, CH_LPAREN, CH_RPAREN);
+                spec.C++;
+                continue;
+            }
 
             const nameStart = i + 1;
             const nameEnd = readIdent(input, nameStart);
-            const name = input.substring(nameStart, nameEnd);
             i = nameEnd;
 
-            if (input[i] === '(') {
+            if (input.charCodeAt(i) === CH_LPAREN) {
                 const innerStart = i + 1;
-                const innerEnd = readBalanced(input, i, '(', ')');
+                const innerEnd = readBalanced(input, i, CH_LPAREN, CH_RPAREN);
 
-                switch (name) {
-                    case 'where':
+                // Identify the pseudo-class by comparing chars directly (avoids substring allocation)
+                const nameLen = nameEnd - nameStart;
+                const pcKind = classifyPseudo(input, nameStart, nameLen);
+
+                switch (pcKind) {
+                    case PC_WHERE:
                         i = innerEnd; continue;
 
-                    case 'is':
-                    case 'not': {
-                        const innerSpec: Specificity = { A: 0, B: 0, C: 0 };
+                    case PC_IS:
+                    case PC_NOT:
+                    case PC_HAS: {
+                        let bestA = 0, bestB = 0, bestC = 0;
                         let j = innerStart;
-                        while (j < innerEnd - 1) {
-                            const tempSpec: Specificity = { A: 0, B: 0, C: 0 };
-                            j = parseSelectorList(input, j, tempSpec);
-
-                            // Max specificity among inner selectors
-                            innerSpec.A = Math.max(innerSpec.A, tempSpec.A);
-                            innerSpec.B = Math.max(innerSpec.B, tempSpec.B);
-                            innerSpec.C = Math.max(innerSpec.C, tempSpec.C);
-
-                            if (input[j] === ',') j++;
-                            else break;
-                        }
-
-                        spec.A += innerSpec.A;
-                        spec.B += innerSpec.B;
-                        spec.C += innerSpec.C;
-
-                        i = innerEnd;
-                        continue;
-                    }
-
-                    case 'has': {
-                        const innerSpec: Specificity = { A: 0, B: 0, C: 0 };
-                        let j = innerStart;
-                        while (j < innerEnd - 1) {
-                            const tempSpec: Specificity = { A: 0, B: 0, C: 0 };
-                            j = parseSelectorList(input, j, tempSpec);
-
-                            // Max specificity among inner selectors
-                            if (tempSpec.A > innerSpec.A || (tempSpec.A === innerSpec.A && (tempSpec.B > innerSpec.B || (tempSpec.B === innerSpec.B && tempSpec.C > innerSpec.C)))) {
-                                innerSpec.A = tempSpec.A;
-                                innerSpec.B = tempSpec.B;
-                                innerSpec.C = tempSpec.C;
+                        const limit = innerEnd - 1;
+                        while (j < limit) {
+                            const saved = { A: 0, B: 0, C: 0 };
+                            j = parseSelectorInner(input, j, saved);
+                            if (saved.A > bestA || (saved.A === bestA && (saved.B > bestB || (saved.B === bestB && saved.C > bestC)))) {
+                                bestA = saved.A; bestB = saved.B; bestC = saved.C;
                             }
-
-                            if (input[j] === ',') j++;
+                            if (input.charCodeAt(j) === CH_COMMA) j++;
                             else break;
                         }
-
-                        spec.A += innerSpec.A;
-                        spec.B += innerSpec.B;
-                        spec.C += innerSpec.C;
-
+                        spec.A += bestA;
+                        spec.B += bestB;
+                        spec.C += bestC;
                         i = innerEnd;
                         continue;
                     }
 
-                    case 'slotted': {
-                        const innerSpec: Specificity = { A: 0, B: 0, C: 0 };
-                        parseSelector(input, innerStart, innerSpec);
-                        spec.A += innerSpec.A;
-                        spec.B += innerSpec.B;
-                        spec.C += innerSpec.C;
+                    case PC_SLOTTED: {
+                        const inner: Specificity = { A: 0, B: 0, C: 0 };
+                        parseSelector(input, innerStart, inner, false);
+                        spec.A += inner.A;
+                        spec.B += inner.B;
+                        spec.C += inner.C;
                         i = innerEnd;
                         continue;
                     }
 
-                    case 'host':
-                    case 'host-context': {
+                    case PC_HOST:
+                    case PC_HOST_CTX: {
                         spec.B++;
-                        const innerSpec: Specificity = { A: 0, B: 0, C: 0 };
-                        parseSelector(input, innerStart, innerSpec);
-                        spec.A += innerSpec.A;
-                        spec.B += innerSpec.B;
-                        spec.C += innerSpec.C;
+                        const inner: Specificity = { A: 0, B: 0, C: 0 };
+                        parseSelector(input, innerStart, inner, false);
+                        spec.A += inner.A;
+                        spec.B += inner.B;
+                        spec.C += inner.C;
                         i = innerEnd;
                         continue;
                     }
 
-                    case 'nth-child':
-                    case 'nth-last-child': {
+                    case PC_NTH_CHILD:
+                    case PC_NTH_LAST: {
                         spec.B++;
-                        const ofIndex = findOfKeyword(input, innerStart, innerEnd - 1);
+                        const limit = innerEnd - 1;
+                        const ofIndex = findOfKeyword(input, innerStart, limit);
                         if (ofIndex !== -1) {
                             let afterOf = ofIndex + 2;
-                            while (afterOf < innerEnd - 1 && /\s/.test(input[afterOf])) afterOf++;
+                            while (afterOf < limit && isWhitespaceCC(input.charCodeAt(afterOf))) afterOf++;
 
-                            let maxSpec: Specificity = { A: 0, B: 0, C: 0 };
+                            let bestA = 0, bestB = 0, bestC = 0;
                             let j = afterOf;
-                            while (j < innerEnd - 1) {
-                                const tempSpec: Specificity = { A: 0, B: 0, C: 0 };
-                                j = parseSelector(input, j, tempSpec);
-
-                                if (tempSpec.A > maxSpec.A ||
-                                    (tempSpec.A === maxSpec.A && tempSpec.B > maxSpec.B) ||
-                                    (tempSpec.A === maxSpec.A && tempSpec.B === maxSpec.B && tempSpec.C > maxSpec.C))
-                                    maxSpec = tempSpec;
-
-                                if (input[j] === ',') j++;
+                            while (j < limit) {
+                                const ts: Specificity = { A: 0, B: 0, C: 0 };
+                                j = parseSelector(input, j, ts, false);
+                                if (ts.A > bestA || (ts.A === bestA && (ts.B > bestB || (ts.B === bestB && ts.C > bestC)))) {
+                                    bestA = ts.A; bestB = ts.B; bestC = ts.C;
+                                }
+                                if (input.charCodeAt(j) === CH_COMMA) j++;
                                 else break;
                             }
-
-                            spec.A += maxSpec.A;
-                            spec.B += maxSpec.B;
-                            spec.C += maxSpec.C;
+                            spec.A += bestA;
+                            spec.B += bestB;
+                            spec.C += bestC;
                         }
                         i = innerEnd;
                         continue;
@@ -172,8 +235,12 @@ function parseSelector(input: string, start: number, spec: Specificity): number 
             }
         }
 
-        if (c === '*') { i++; continue; }
-        if (isIdentStart(c) || c === '|') { while (i < input.length && (isIdentChar(input[i]) || input[i] === '|')) i++; spec.C++; continue; }
+        if (c === CH_STAR) { i++; continue; }
+        if (isIdentStartCC(c) || c === CH_PIPE) {
+            while (i < input.length && (isIdentCC(input.charCodeAt(i)) || input.charCodeAt(i) === CH_PIPE)) i++;
+            spec.C++;
+            continue;
+        }
 
         i++;
     }
@@ -181,41 +248,111 @@ function parseSelector(input: string, start: number, spec: Specificity): number 
     return i;
 }
 
-/* Helpers */
-function isIdentStart(c: string): boolean {
-    const code = c.charCodeAt(0);
-    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || c === '_' || c === '-' || c === '\\';
+// Parse a single selector within a functional pseudo-class argument (handles commas at the caller level)
+function parseSelectorInner(input: string, start: number, spec: Specificity): number {
+    return parseSelector(input, start, spec, false);
 }
-function isIdentChar(c: string) {
-    const code = c.charCodeAt(0);
-    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57) || c === '_' || c === '-' || c === '\\';
+
+/* ---- Pseudo-class classification (avoids substring + switch on string) ---- */
+
+const PC_OTHER = 0;
+const PC_WHERE = 1;
+const PC_IS = 2;
+const PC_NOT = 3;
+const PC_HAS = 4;
+const PC_SLOTTED = 5;
+const PC_HOST = 6;
+const PC_HOST_CTX = 7;
+const PC_NTH_CHILD = 8;
+const PC_NTH_LAST = 9;
+
+function classifyPseudo(input: string, start: number, len: number): number {
+    // Most common first
+    if (len === 5 && input.charCodeAt(start) === 119) { // 'w'here
+        if (input.charCodeAt(start + 1) === 104 && input.charCodeAt(start + 2) === 101 &&
+            input.charCodeAt(start + 3) === 114 && input.charCodeAt(start + 4) === 101) return PC_WHERE;
+    }
+    if (len === 3 && input.charCodeAt(start) === 110) { // 'n'ot
+        if (input.charCodeAt(start + 1) === 111 && input.charCodeAt(start + 2) === 116) return PC_NOT;
+    }
+    if (len === 2 && input.charCodeAt(start) === 105) { // 'i's
+        if (input.charCodeAt(start + 1) === 115) return PC_IS;
+    }
+    if (len === 3 && input.charCodeAt(start) === 104) { // 'h'as / 'h'ost
+        if (input.charCodeAt(start + 1) === 97 && input.charCodeAt(start + 2) === 115) return PC_HAS;
+    }
+    if (len === 4 && input.charCodeAt(start) === 104) { // 'h'ost
+        if (input.charCodeAt(start + 1) === 111 && input.charCodeAt(start + 2) === 115 &&
+            input.charCodeAt(start + 3) === 116) return PC_HOST;
+    }
+    if (len === 12 && input.charCodeAt(start) === 104) { // host-context
+        if (input.charCodeAt(start + 4) === CH_DASH && input.charCodeAt(start + 5) === 99) {
+            // Quick check first+last chars, then full
+            if (input.substring(start, start + len) === 'host-context') return PC_HOST_CTX;
+        }
+    }
+    if (len === 7 && input.charCodeAt(start) === 115) { // slotted
+        if (input.substring(start, start + 7) === 'slotted') return PC_SLOTTED;
+    }
+    if (len === 9 && input.charCodeAt(start) === 110) { // nth-child
+        if (input.substring(start, start + 9) === 'nth-child') return PC_NTH_CHILD;
+    }
+    if (len === 14 && input.charCodeAt(start) === 110) { // nth-last-child
+        if (input.substring(start, start + 14) === 'nth-last-child') return PC_NTH_LAST;
+    }
+    return PC_OTHER;
 }
+
+/* ---- Character classification (charCode-based, no string allocation) ---- */
+
+function isIdentStartCC(code: number): boolean {
+    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || code === CH_UNDERSCORE || code === CH_DASH || code === CH_BACKSLASH;
+}
+
+function isIdentCC(code: number): boolean {
+    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57) || code === CH_UNDERSCORE || code === CH_DASH || code === CH_BACKSLASH;
+}
+
+function isWhitespaceCC(code: number): boolean {
+    return code === 32 || code === 9 || code === 10 || code === 13 || code === 12;
+}
+
 function readIdent(input: string, start: number): number {
     let i = start;
     while (i < input.length) {
-        if (input[i] === '\\') { i += 2; continue; }
-        if (!isIdentChar(input[i])) break;
+        const cc = input.charCodeAt(i);
+        if (cc === CH_BACKSLASH) { i += 2; continue; }
+        if (!isIdentCC(cc)) break;
         i++;
     }
     return i;
 }
-function readBalanced(input: string, start: number, open: string, close: string): number {
-    let depth = 0, quote: string | null = null, i = start;
+
+function readBalanced(input: string, start: number, open: number, close: number): number {
+    let depth = 0, inQuote = 0, i = start;
     while (i < input.length) {
-        const c = input[i];
-        if (quote) { if (c === '\\') { i += 2; continue; } if (c === quote) quote = null; i++; continue; }
-        if (c === '"' || c === "'") { quote = c; i++; continue; }
+        const c = input.charCodeAt(i);
+        if (inQuote) {
+            if (c === CH_BACKSLASH) { i += 2; continue; }
+            if (c === inQuote) inQuote = 0;
+            i++;
+            continue;
+        }
+        if (c === CH_DQUOTE || c === CH_SQUOTE) { inQuote = c; i++; continue; }
         if (c === open) depth++;
         else if (c === close) { depth--; if (depth === 0) return i + 1; }
         i++;
     }
     return i;
 }
+
 function findOfKeyword(input: string, start: number, end: number): number {
     let i = start;
     while (i <= end - 1) {
-        while (i <= end - 1 && /\s/.test(input[i])) i++;
-        if (input[i] === 'o' && input[i + 1] === 'f' && (i + 2 > end - 1 || /\s|\(/.test(input[i + 2]))) return i;
+        while (i <= end - 1 && isWhitespaceCC(input.charCodeAt(i))) i++;
+        if (input.charCodeAt(i) === 111 && input.charCodeAt(i + 1) === 102 && // 'o','f'
+            (i + 2 > end - 1 || isWhitespaceCC(input.charCodeAt(i + 2)) || input.charCodeAt(i + 2) === CH_LPAREN))
+            return i;
         i++;
     }
     return -1;
