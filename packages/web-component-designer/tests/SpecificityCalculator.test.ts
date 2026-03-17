@@ -482,3 +482,107 @@ test('test 68 - column combinator ||', () => {
     expect(res.B).toBe(1); // .selected
     expect(res.C).toBe(2); // col + td
 });
+
+// --- Performance test ---
+
+test('performance - 100k iterations across selector categories', () => {
+    const selectors = {
+        simple: [
+            'div',
+            '.btn',
+            '#main',
+            'div.container',
+            'ul li a.link',
+            'body > header nav ul li',
+            '#app .sidebar .nav-item',
+            'main > section article p span',
+        ],
+        withAttributes: [
+            '[data-id]',
+            'input[type="text"]',
+            'a[href^="https"][target="_blank"].external',
+            'div[class~="active"][role="button"]',
+        ],
+        withPseudoClasses: [
+            'a:hover',
+            'div:first-child',
+            'li:nth-child(2n+1)',
+            'input:focus:not(:disabled)',
+            'tr:nth-child(odd):hover',
+        ],
+        withPseudoElements: [
+            'p::before',
+            'div::after',
+            'p:before',
+            'h1::first-line',
+            'blockquote::first-letter',
+        ],
+        withIsNotHas: [
+            ':is(.a, .b, .c)',
+            ':not(#main)',
+            ':has(> .child)',
+            ':is(.nav, #sidebar):not(.hidden)',
+            'div:has(> span.highlight, a#link)',
+            ':is(:not(.a, #b), .c)',
+        ],
+        withWhere: [
+            ':where(.a, #b)',
+            ':where(div, span):is(.active)',
+        ],
+        withHostSlotted: [
+            ':host(.container)',
+            ':host-context(#parent) .child',
+            ':slotted(.item#id)',
+        ],
+        complex: [
+            'body > header.navbar :is(ul li:first-child, a#link.active):hover',
+            ':not(:is(.a, #b)):has(.c)',
+            'section:has(:is(.a, #b))',
+            'div > ul li:first-child.active + a:hover',
+            'col.selected || td',
+        ],
+    };
+
+    const allSelectors = Object.values(selectors).flat();
+    const iterations = 100_000;
+
+    // Warmup
+    for (let i = 0; i < 1000; i++) {
+        for (const sel of allSelectors) calculateSpecificity(sel);
+    }
+
+    const categoryResults: Record<string, { ops: number; nsPerOp: number }> = {};
+
+    // Benchmark per category
+    for (const [category, sels] of Object.entries(selectors)) {
+        const start = performance.now();
+        for (let i = 0; i < iterations; i++) {
+            for (const sel of sels) calculateSpecificity(sel);
+        }
+        const elapsed = performance.now() - start;
+        const totalOps = iterations * sels.length;
+        categoryResults[category] = {
+            ops: totalOps,
+            nsPerOp: (elapsed * 1_000_000) / totalOps,
+        };
+    }
+
+    // Overall benchmark
+    const overallStart = performance.now();
+    for (let i = 0; i < iterations; i++) {
+        for (const sel of allSelectors) calculateSpecificity(sel);
+    }
+    const overallElapsed = performance.now() - overallStart;
+    const totalOps = iterations * allSelectors.length;
+
+    // Print results
+    console.log('\n── Specificity Calculator Performance ──');
+    console.log(`Total: ${totalOps.toLocaleString()} ops in ${overallElapsed.toFixed(1)}ms (${((overallElapsed * 1_000_000) / totalOps).toFixed(0)}ns/op)\n`);
+    for (const [category, result] of Object.entries(categoryResults)) {
+        console.log(`  ${category.padEnd(22)} ${result.nsPerOp.toFixed(0).padStart(5)}ns/op  (${result.ops.toLocaleString()} ops)`);
+    }
+    console.log('');
+
+    // Sanity check: should complete in reasonable time (< 5 seconds total)
+    expect(overallElapsed).toBeLessThan(5000);
+});
