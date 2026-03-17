@@ -167,11 +167,11 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
             try {
                 if (designItem && selector === ':host' && designItem.isRootItem) {
                     let spec = calculateSpecificity(selector);
-                    if (s === null || spec.A > s.A || spec.B > s.B || spec.C > s.C)
+                    if (s === null || spec.A > s.A || (spec.A === s.A && (spec.B > s.B || (spec.B === s.B && spec.C > s.C))))
                         s = spec;
                 } else if (!designItem || designItem.element.matches(AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector))) {
                     let spec = calculateSpecificity(selector);
-                    if (s === null || spec.A > s.A || spec.B > s.B || spec.C > s.C)
+                    if (s === null || spec.A > s.A || (spec.A === s.A && (spec.B > s.B || (spec.B === s.B && spec.C > s.C))))
                         s = spec;
                 }
             }

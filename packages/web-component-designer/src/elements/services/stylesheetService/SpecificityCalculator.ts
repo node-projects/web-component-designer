@@ -49,6 +49,8 @@ function calcSimple(selector: string, spec: Specificity): void {
     let i = 0;
     while (i < len) {
         const c = selector.charCodeAt(i);
+        // Column combinator ||
+        if (c === CH_PIPE && i + 1 < len && selector.charCodeAt(i + 1) === CH_PIPE) { i += 2; continue; }
         if (c === CH_SPACE || c === CH_GT || c === CH_PLUS || c === CH_TILDE) { i++; continue; }
         if (c === CH_HASH) {
             spec.A++;
@@ -122,6 +124,9 @@ function parseSelector(input: string, start: number, spec: Specificity, direct: 
         const c = input.charCodeAt(i);
         if (c === CH_COMMA || c === CH_RPAREN) break;
 
+        // Column combinator ||
+        if (c === CH_PIPE && input.charCodeAt(i + 1) === CH_PIPE) { i += 2; continue; }
+
         if (c === CH_SPACE || c === CH_GT || c === CH_PLUS || c === CH_TILDE) { i++; continue; }
         if (c === CH_HASH) { i = readIdent(input, i + 1); spec.A++; continue; }
         if (c === CH_DOT) { i = readIdent(input, i + 1); spec.B++; continue; }
@@ -140,6 +145,12 @@ function parseSelector(input: string, start: number, spec: Specificity, direct: 
             const nameEnd = readIdent(input, nameStart);
             i = nameEnd;
 
+            // Legacy single-colon pseudo-elements — count as C (pseudo-element), not B
+            if (isLegacyPseudoElement(input, nameStart, nameEnd - nameStart)) {
+                spec.C++;
+                continue;
+            }
+
             if (input.charCodeAt(i) === CH_LPAREN) {
                 const innerStart = i + 1;
                 const innerEnd = readBalanced(input, i, CH_LPAREN, CH_RPAREN);
@@ -154,7 +165,10 @@ function parseSelector(input: string, start: number, spec: Specificity, direct: 
 
                     case PC_IS:
                     case PC_NOT:
-                    case PC_HAS: {
+                    case PC_HAS:
+                    case PC_MATCHES:
+                    case PC_WEBKIT_ANY:
+                    case PC_MOZ_ANY: {
                         let bestA = 0, bestB = 0, bestC = 0;
                         let j = innerStart;
                         const limit = innerEnd - 1;
@@ -265,6 +279,9 @@ const PC_HOST = 6;
 const PC_HOST_CTX = 7;
 const PC_NTH_CHILD = 8;
 const PC_NTH_LAST = 9;
+const PC_MATCHES = 10;
+const PC_WEBKIT_ANY = 11;
+const PC_MOZ_ANY = 12;
 
 function classifyPseudo(input: string, start: number, len: number): number {
     // Most common first
@@ -300,7 +317,35 @@ function classifyPseudo(input: string, start: number, len: number): number {
     if (len === 14 && input.charCodeAt(start) === 110) { // nth-last-child
         if (input.substring(start, start + 14) === 'nth-last-child') return PC_NTH_LAST;
     }
+    if (len === 7 && input.charCodeAt(start) === 109) { // matches
+        if (input.substring(start, start + 7) === 'matches') return PC_MATCHES;
+    }
+    if (len === 11 && input.charCodeAt(start) === CH_DASH) { // -webkit-any
+        if (input.substring(start, start + 11) === '-webkit-any') return PC_WEBKIT_ANY;
+    }
+    if (len === 8 && input.charCodeAt(start) === CH_DASH) { // -moz-any
+        if (input.substring(start, start + 8) === '-moz-any') return PC_MOZ_ANY;
+    }
     return PC_OTHER;
+}
+
+// Legacy single-colon pseudo-elements that should count as C, not B
+function isLegacyPseudoElement(input: string, start: number, len: number): boolean {
+    if (len === 6) { // before / after
+        const c0 = input.charCodeAt(start);
+        if (c0 === 98) return input.substring(start, start + 6) === 'before'; // 'b'efore
+        if (c0 === 97) return input.substring(start, start + 6) === 'after';  // 'a'fter (5 chars, won't match — handled below)
+    }
+    if (len === 5 && input.charCodeAt(start) === 97) { // after
+        return input.substring(start, start + 5) === 'after';
+    }
+    if (len === 10 && input.charCodeAt(start) === 102) { // first-line
+        return input.substring(start, start + 10) === 'first-line';
+    }
+    if (len === 12 && input.charCodeAt(start) === 102) { // first-letter
+        return input.substring(start, start + 12) === 'first-letter';
+    }
+    return false;
 }
 
 /* ---- Character classification (charCode-based, no string allocation) ---- */
