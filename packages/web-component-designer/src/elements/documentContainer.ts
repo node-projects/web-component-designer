@@ -111,7 +111,6 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this.designerView.slot = 'top';
     this._designerDiv = document.createElement("div");
     this._tabControl.appendChild(this._designerDiv);
-    this._designerDiv.title = 'Designer';
     this._designerDiv.appendChild(this.designerView);
     this.designerView.initialize(this._serviceContainer);
     this.designerView.instanceServiceContainer.documentContainer = this;
@@ -123,7 +122,6 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this.codeView.style.position = 'relative';
     this._codeDiv = document.createElement("div");
     this._tabControl.appendChild(this._codeDiv);
-    this._codeDiv.title = 'Code';
     this._codeDiv.style.position = 'relative';
     this._codeDiv.appendChild(this.codeView);
     this.codeView.onTextChanged.on(text => {
@@ -138,11 +136,9 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
     this._splitDiv = new SimpleSplitView();
     this._splitDiv.style.height = '100%';
-    this._splitDiv.title = 'Split';
     this._tabControl.appendChild(this._splitDiv);
     if (serviceContainer.config.demoViewWidget) {
       this.demoView = new serviceContainer.config.demoViewWidget();
-      this.demoView.title = 'Preview';
       this._tabControl.appendChild(this.demoView);
     }
     queueMicrotask(() => {
