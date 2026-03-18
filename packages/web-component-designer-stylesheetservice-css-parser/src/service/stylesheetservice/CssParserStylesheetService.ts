@@ -17,7 +17,7 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 export class CssParserStylesheetService extends AbstractStylesheetService {
     public keepFormatting: boolean;
 
-    constructor(designerCanvas: IDesignerCanvas, keepFormatting: boolean = false) {
+    constructor(designerCanvas: IDesignerCanvas, keepFormatting: boolean = true) {
         super(designerCanvas);
         this.keepFormatting = keepFormatting;
     }

@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Stylesheet Parser Service using @node-projects/css-parser",
   "name": "@node-projects/web-component-designer-stylesheetservice-css-parser",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "main": "./dist/service/stylesheetservice/CssParserStylesheetService.js",
   "author": "jochen.kuehner@gmx.de",
