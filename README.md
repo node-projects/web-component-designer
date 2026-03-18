@@ -31,7 +31,7 @@ So the designer now should work with bundlers.
 | web-component-designer-htmlparserservice-nodehtmlparser                |                                              |
 | web-component-designer-miniatureview-html2canvas                       |                                              |
 | web-component-designer-stylesheetservice-css-tools                     |                                              |
-| web-component-designer-stylesheetservice-css-tree                      |                                              |
+| ~~web-component-designer-stylesheetservice-css-tree~~                  | deprecated - did never work very well        |
 | web-component-designer-visualization-addons                            |                                              |
 | ~~web-component-designer-texteditextension-stylo~~                     | deprecated - stylo is deprecated             |
 | ~~web-component-designer-widgets-fancytree~~                           | deprecated - replaced by widgets-wunderbaum  |
