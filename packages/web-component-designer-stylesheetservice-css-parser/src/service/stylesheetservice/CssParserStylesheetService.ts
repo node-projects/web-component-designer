@@ -1,4 +1,4 @@
-import { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST, parse, stringify } from "@adobe/css-tools";
+import { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST, CssWhitespaceAST, parse, stringify } from "@node-projects/css-parser";
 import { AbstractStylesheetService, IDocumentStylesheet, IStyleRule, IStylesheet, IStyleDeclaration, IDesignerCanvas, IDesignItem } from "@node-projects/web-component-designer";
 import { Specificity } from "@node-projects/web-component-designer";
 
@@ -14,7 +14,7 @@ interface IDeclarationWithAST extends IStyleDeclaration {
     ast: CssDeclarationAST
 }
 
-export class CssToolsStylesheetService extends AbstractStylesheetService {
+export class CssParserStylesheetService extends AbstractStylesheetService {
 
     constructor(designerCanvas: IDesignerCanvas) {
         super(designerCanvas)
@@ -61,7 +61,7 @@ export class CssToolsStylesheetService extends AbstractStylesheetService {
         return rules[rules.length - 1];
     }
 
-    private *getRulesFromAst(cssAtRuleAst: CssAtRuleAST[], stylesheet: IStylesheet, designItem: IDesignItem): IterableIterator<[CssRuleAST, Specificity]> {
+    private *getRulesFromAst(cssAtRuleAst: (CssDeclarationAST | CssAtRuleAST | CssWhitespaceAST)[], stylesheet: IStylesheet, designItem: IDesignItem): IterableIterator<[CssRuleAST, Specificity]> {
         for (const atRule of cssAtRuleAst) {
             if (atRule.type == 'media') {
                 yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem);

@@ -1,6 +1,6 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { IUiCommand, InstanceServiceContainer, ServiceContainer } from '@node-projects/web-component-designer';
-import { IDemoView } from '@node-projects/web-component-designer/src/elements/widgets/demoView/IDemoView';
+import { IDemoView } from '@node-projects/web-component-designer/src/elements/widgets/demoView/IDemoView.js';
 
 export class ZplDemoView extends BaseCustomWebComponentConstructorAppend implements IDemoView {
 

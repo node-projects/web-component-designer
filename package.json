@@ -14,9 +14,9 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@adobe/css-tools": "4.4.0",
     "@blockly/zoom-to-fit": "^6.0.9",
     "@node-projects/base-custom-webcomponent": ">=0.27.8",
+    "@node-projects/css-parser": "^5.0.0",
     "@node-projects/lean-he-esm": "^3.3.0",
     "@node-projects/node-html-parser-esm": "^6.2.0",
     "@node-projects/propertygrid.webcomponent": "^1.2.3",

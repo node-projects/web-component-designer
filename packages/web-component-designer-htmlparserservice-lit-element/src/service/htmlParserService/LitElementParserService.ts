@@ -1,5 +1,5 @@
 import { CssAttributeParser, DesignItem, IDesignItem, IHtmlParserService, InstanceServiceContainer, ServiceContainer, newElementFromString } from "@node-projects/web-component-designer";
-import { BlockStatement, ClassDeclaration, FunctionExpression, Identifier, MethodDefinition, ReturnStatement, TaggedTemplateExpression } from "esprima-next/dist/esm/esprima";
+import { BlockStatement, ClassDeclaration, FunctionExpression, Identifier, MethodDefinition, ReturnStatement, TaggedTemplateExpression } from "esprima-next";
 import * as esprima from "esprima-next";
 
 export class LitElementParserService implements IHtmlParserService {
