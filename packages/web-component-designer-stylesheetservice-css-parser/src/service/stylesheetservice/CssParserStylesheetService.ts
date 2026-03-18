@@ -66,7 +66,7 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
     private resolveNestedSelectors(parentSelectors: string[], nestedSelectors: string[]): string[] {
         const parentRef = parentSelectors.length === 1
             ? parentSelectors[0]
-            : ':is(' + parentSelectors.join(', ') + ')';
+            : `:is(${parentSelectors.join(', ')})`;
         const resolved: string[] = [];
         for (const nested of nestedSelectors) {
             if (nested.includes('&')) {
