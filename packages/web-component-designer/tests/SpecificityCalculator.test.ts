@@ -483,6 +483,43 @@ test('test 68 - column combinator ||', () => {
     expect(res.C).toBe(2); // col + td
 });
 
+// --- Nesting selector & ---
+
+test('test 69 - bare nesting selector & has zero specificity', () => {
+    const res = calculateSpecificity('&');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(0);
+});
+
+test('test 70 - & with class', () => {
+    const res = calculateSpecificity('&.active');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(1); // .active
+    expect(res.C).toBe(0); // & has zero specificity on its own
+});
+
+test('test 71 - & as descendant', () => {
+    const res = calculateSpecificity('& .child');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(1); // .child
+    expect(res.C).toBe(0); // & has zero specificity on its own
+});
+
+test('test 72 - & with pseudo-class', () => {
+    const res = calculateSpecificity('&:hover');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(1); // :hover
+    expect(res.C).toBe(0); // & has zero specificity on its own
+});
+
+test('test 73 - & with pseudo-element', () => {
+    const res = calculateSpecificity('&::before');
+    expect(res.A).toBe(0);
+    expect(res.B).toBe(0);
+    expect(res.C).toBe(1); // ::before
+});
+
 // --- Performance test ---
 
 test('performance - 100k iterations across selector categories', () => {

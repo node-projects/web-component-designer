@@ -15,13 +15,15 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 }
 
 export class CssParserStylesheetService extends AbstractStylesheetService {
+    public keepFormatting: boolean;
 
-    constructor(designerCanvas: IDesignerCanvas) {
-        super(designerCanvas)
+    constructor(designerCanvas: IDesignerCanvas, keepFormatting: boolean = false) {
+        super(designerCanvas);
+        this.keepFormatting = keepFormatting;
     }
 
     async internalParse(style: string) {
-        return parse(style);
+        return parse(style, this.keepFormatting ? { preserveFormatting: true } : undefined);
     }
 
     public getAppliedRules(designItem: IDesignItem): IRuleWithAST[] {
@@ -30,7 +32,7 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
             if (!item[1].ast?.stylesheet?.rules) continue;
             let rs = Array.from(this.getRulesFromAst(item[1].ast?.stylesheet?.rules, item[1].stylesheet, designItem))
                 .map(x => (<IRuleWithAST>{
-                    selector: x[0].selectors.join(', '),
+                    selector: x[2].join(', '),
                     declarations: x[0].declarations.filter(y => y.type == 'declaration').map(y => ({
                         name: (<CssDeclarationAST>y).property,
                         value: (<CssDeclarationAST>y).value.endsWith('!important') ? (<CssDeclarationAST>y).value.substring(0, (<CssDeclarationAST>y).value.length - 10).trimEnd() : (<CssDeclarationAST>y).value,
@@ -61,16 +63,35 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
         return rules[rules.length - 1];
     }
 
-    private *getRulesFromAst(cssAtRuleAst: (CssDeclarationAST | CssAtRuleAST | CssWhitespaceAST)[], stylesheet: IStylesheet, designItem: IDesignItem): IterableIterator<[CssRuleAST, Specificity]> {
+    private resolveNestedSelectors(parentSelectors: string[], nestedSelectors: string[]): string[] {
+        const parentRef = parentSelectors.length === 1
+            ? parentSelectors[0]
+            : `:is(${parentSelectors.join(', ')})`;
+        const resolved: string[] = [];
+        for (const nested of nestedSelectors) {
+            if (nested.includes('&')) {
+                resolved.push(nested.replace(/&/g, parentRef));
+            } else {
+                resolved.push(parentRef + ' ' + nested);
+            }
+        }
+        return resolved;
+    }
+
+    private *getRulesFromAst(cssAtRuleAst: (CssDeclarationAST | CssAtRuleAST | CssWhitespaceAST)[], stylesheet: IStylesheet, designItem: IDesignItem, parentSelectors?: string[]): IterableIterator<[CssRuleAST, Specificity, string[]]> {
         for (const atRule of cssAtRuleAst) {
             if (atRule.type == 'media') {
-                yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem);
+                yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem, parentSelectors);
             } else if (atRule.type == 'supports') {
-                yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem);
+                yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem, parentSelectors);
             } else if (atRule.type == 'rule') {
-                let spec = this.elementMatchesASelector(designItem, atRule.selectors)
+                const resolvedSelectors = parentSelectors
+                    ? this.resolveNestedSelectors(parentSelectors, atRule.selectors)
+                    : atRule.selectors;
+                let spec = this.elementMatchesASelector(designItem, resolvedSelectors);
                 if (spec)
-                    yield [atRule, spec];
+                    yield [atRule, spec, resolvedSelectors];
+                yield* this.getRulesFromAst(atRule.declarations, stylesheet, designItem, resolvedSelectors);
             }
         }
         return null;
@@ -115,7 +136,9 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
 
     private updateStylesheet(ss: { stylesheet: IStylesheet, ast: CssStylesheetAST }) {
         const old = ss.stylesheet.content;
-        ss.stylesheet.content = stringify(ss.ast, { indent: '    ', compress: false });
+        ss.stylesheet.content = this.keepFormatting
+            ? stringify(ss.ast, { identity: true })
+            : stringify(ss.ast, { indent: '    ', compress: false });
         if ((<IDocumentStylesheet>ss.stylesheet).designItem) {
             (<IDocumentStylesheet>ss.stylesheet).designItem.content = ss.stylesheet.content;
         } else
