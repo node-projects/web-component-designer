@@ -21,6 +21,4 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
     const item = DesignItem.GetOrCreateDesignItem(element, element, designerView.serviceContainer, designerView.instanceServiceContainer);
     designerView.instanceServiceContainer.selectionService.setSelectedElements([item]);
   }
-
-
 }

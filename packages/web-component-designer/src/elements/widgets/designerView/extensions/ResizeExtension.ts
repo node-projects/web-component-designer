@@ -113,7 +113,7 @@ export class ResizeExtension extends AbstractExtension {
         (<HTMLElement>this.extendedItem.element).style.transform = '';
         let rect = getBoundingClientRectAlsoForDisplayContents(this.extendedItem.element);
         (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
-       
+
         let contentBoxOffset: IPoint = { x: 0, y: 0 };
         if (getComputedStyle(<HTMLElement>this.extendedItem.element).boxSizing == 'content-box') {
           contentBoxOffset = getContentBoxContentOffsets(<HTMLElement>this.extendedItem.element);
@@ -296,6 +296,9 @@ export class ResizeExtension extends AbstractExtension {
         break;
       case EventNames.PointerUp:
         (<Element>event.target).releasePointerCapture(event.pointerId);
+        if (!this._initialPoint) {
+          return;
+        }
 
         let cg = this.extendedItem.openGroup((this.resizeAllSelected && this.designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 1) ? "Resize Elements" : "Resize &lt;" + this.extendedItem.name + "&gt;");
         try {
