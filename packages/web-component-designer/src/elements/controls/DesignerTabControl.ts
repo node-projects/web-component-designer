@@ -206,8 +206,8 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
       if ((<HTMLElement>item).style.display != 'none') {
         let htmlItem = item as HTMLElement;
         let tabHeaderDiv = document.createElement("div")
-        tabHeaderDiv.innerText = htmlItem.title;
-        tabHeaderDiv.title = htmlItem.title;
+        tabHeaderDiv.innerText = htmlItem.dataset.title || htmlItem.title;
+        tabHeaderDiv.title = htmlItem.dataset.title || htmlItem.title;
         tabHeaderDiv.className = 'tab-header';
         let j = i;
         tabHeaderDiv.onpointerdown = () => {

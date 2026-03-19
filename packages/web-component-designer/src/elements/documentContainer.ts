@@ -112,6 +112,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._designerDiv = document.createElement("div");
     this._tabControl.appendChild(this._designerDiv);
     this._designerDiv.appendChild(this.designerView);
+    this._designerDiv.dataset.title = 'Designer';
     this.designerView.initialize(this._serviceContainer);
     this.designerView.instanceServiceContainer.documentContainer = this;
     this.designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e))
@@ -124,6 +125,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._tabControl.appendChild(this._codeDiv);
     this._codeDiv.style.position = 'relative';
     this._codeDiv.appendChild(this.codeView);
+    this._codeDiv.dataset.title = 'Code';
     this.codeView.onTextChanged.on(text => {
       if (!this._disableChangeNotificationDesigner) {
         if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
@@ -136,9 +138,11 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
     this._splitDiv = new SimpleSplitView();
     this._splitDiv.style.height = '100%';
+    this._splitDiv.dataset.title = 'Split';
     this._tabControl.appendChild(this._splitDiv);
     if (serviceContainer.config.demoViewWidget) {
       this.demoView = new serviceContainer.config.demoViewWidget();
+      this.demoView.dataset.title = 'Demo';
       this._tabControl.appendChild(this.demoView);
     }
     queueMicrotask(() => {
