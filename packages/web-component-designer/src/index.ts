@@ -117,6 +117,9 @@ export type { IInstanceService } from "./elements/services/instanceService/IInst
 
 export * from "./elements/services/manifestParsers/WebcomponentManifestParserService.js";
 
+export type { IMinatureViewService } from "./elements/services/miniatureViewService/IMinatureViewService.js";
+export * from "./elements/services/miniatureViewService/MinatureViewService.js";
+
 export type { IModelCommandService } from "./elements/services/modelCommandService/IModelCommandService.js";
 export * from "./elements/services/modelCommandService/DefaultModelCommandService.js";
 
@@ -367,6 +370,7 @@ export * from "./elements/widgets/designerView/extensions/pointerExtensions/Curs
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js";
 
 export type { IMiniatureView } from "./elements/widgets/miniatureView/IMiniatureView.js";
+export * from "./elements/widgets/miniatureView/miniatureView.js";
 
 export * from "./elements/widgets/debugView/debug-view.js";
 
