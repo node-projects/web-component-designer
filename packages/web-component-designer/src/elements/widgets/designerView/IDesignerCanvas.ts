@@ -39,6 +39,8 @@ export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
   zoomFactor: number;
   designerOffsetWidth: number;
   designerOffsetHeight: number;
+  readonly designerPixelSize: { width: number, height: number };
+
   readonly scaleFactor: number;
   canvasOffset: IPoint;
   readonly containerOffset: IPoint;

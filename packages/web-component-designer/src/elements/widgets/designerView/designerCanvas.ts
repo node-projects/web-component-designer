@@ -419,13 +419,17 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._canvasContainer.style.width = value;
     this._zoomFactorChanged();
   }
+
   get designerHeight(): string {
     return this._canvasContainer.style.height;
   }
-
   set designerHeight(value: string) {
     this._canvasContainer.style.height = value;
     this._zoomFactorChanged();
+  }
+
+  get designerPixelSize(): { width: number, height: number } {
+    return { width: this._canvasContainer.offsetWidth, height: this._canvasContainer.offsetHeight };
   }
 
   getDesignSurfaceDimensions(): ISize {
