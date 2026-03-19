@@ -142,7 +142,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._tabControl.appendChild(this._splitDiv);
     if (serviceContainer.config.demoViewWidget) {
       this.demoView = new serviceContainer.config.demoViewWidget();
-      this.demoView.dataset.title = 'Demo';
+      this.demoView.dataset.title = 'Preview';
       this._tabControl.appendChild(this.demoView);
     }
     queueMicrotask(() => {
