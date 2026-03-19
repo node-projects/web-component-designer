@@ -1,7 +1,7 @@
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
-import { IMinatureViewService } from "./IMinatureViewService.js";
+import { IMiniatureViewService } from "./IMiniatureViewService.js";
 
-export class MinatureViewService implements IMinatureViewService {
+export class MiniatureViewService implements IMiniatureViewService {
     public async provideMiniatureView(designerCanvas: IDesignerCanvas): Promise<Node> {
         let el = document.createDocumentFragment();
         for (const e of designerCanvas.rootDesignItem.children()) {

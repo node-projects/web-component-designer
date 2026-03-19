@@ -50,7 +50,7 @@ import { IRefactorService } from './refactorService/IRefactorService.js';
 import { InstanceServiceContainer } from './InstanceServiceContainer.js';
 import { IDeletionService } from './deletionService/IDeletionService.js';
 import { IReferencesChangedService } from './referencesChangedService/IReferencesChangedService.js';
-import { IMinatureViewService } from './miniatureViewService/IMinatureViewService.js';
+import { IMiniatureViewService } from './miniatureViewService/IMiniatureViewService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -81,7 +81,7 @@ interface ServiceNameMap {
   "refactorService": IRefactorService;
   "deletionService": IDeletionService;
   "referencesChangedService": IReferencesChangedService;
-  "miniatureViewService": IMinatureViewService;
+  "miniatureViewService": IMiniatureViewService;
 
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
@@ -249,7 +249,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
     return this.getLastService('referencesChangedService');
   }
 
-  get miniatureViewService(): IMinatureViewService {
+  get miniatureViewService(): IMiniatureViewService {
     return this.getLastService('miniatureViewService');
   }
 }

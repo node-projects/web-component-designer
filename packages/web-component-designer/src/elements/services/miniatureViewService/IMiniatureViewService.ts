@@ -1,5 +1,5 @@
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 
-export interface IMinatureViewService {
+export interface IMiniatureViewService {
     provideMiniatureView(designerCanvas: IDesignerCanvas): Promise<Node>;
 }
