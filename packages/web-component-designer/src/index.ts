@@ -117,7 +117,7 @@ export type { IInstanceService } from "./elements/services/instanceService/IInst
 
 export * from "./elements/services/manifestParsers/WebcomponentManifestParserService.js";
 
-export type { IMiniatureViewService as IMinatureViewService } from "./elements/services/miniatureViewService/IMiniatureViewService.js";
+export type { IMiniatureViewService } from "./elements/services/miniatureViewService/IMiniatureViewService.js";
 export * from "./elements/services/miniatureViewService/MiniatureViewService.js";
 
 export type { IModelCommandService } from "./elements/services/modelCommandService/IModelCommandService.js";
