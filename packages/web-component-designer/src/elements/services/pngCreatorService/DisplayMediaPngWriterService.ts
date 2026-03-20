@@ -5,7 +5,7 @@ import { IPngCreatorService } from "./IPngCreatorService.js";
 import { DesignerCanvas } from "../../widgets/designerView/designerCanvas.js";
 
 export class DisplayMediaPngWriterService implements IPngCreatorService {
-    async takePng(designItems: IDesignItem[], margin: number): Promise<Uint8Array> {
+    async takePng(designItems: IDesignItem[], options?: { margin?: number, removeSelection?: boolean }): Promise<Uint8Array> {
         if (!designItems || designItems.length === 0) {
             return null;
         }
@@ -21,7 +21,9 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
 
             (<DesignerCanvas>designerCanvas).disableBackgroud();
             designerCanvas.zoomFactor = 1;
-            selectionService.setSelectedElements([]);
+            if (options?.removeSelection) {
+                selectionService.setSelectedElements([]);
+            }
             designerCanvas.canvasOffset = { x: 0, y: 0 };
             await requestAnimationFramePromise();
 
@@ -34,6 +36,7 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
                 maxY = Math.max(maxY, rect.y + rect.height);
             }
 
+            const margin = options?.margin ?? 0;
             minX -= margin;
             minY -= margin;
             maxX += margin;
@@ -105,7 +108,9 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
             designerCanvas.zoomFactor = oldZoomFactor;
             designerCanvas.canvasOffset = oldPos;
             (<DesignerCanvas>designerCanvas).enableBackground();
-            selectionService.setSelectedElements(oldSelected);
+            if (options?.removeSelection) {
+                selectionService.setSelectedElements(oldSelected);
+            }
         }
     }
 
