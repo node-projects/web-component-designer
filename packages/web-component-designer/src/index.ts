@@ -50,6 +50,9 @@ export type { IPlacementService } from "./elements/services/placementService/IPl
 export * from "./elements/services/placementService/SnaplinesProviderService.js";
 export type { ISnaplinesProviderService } from "./elements/services/placementService/ISnaplinesProviderService.js";
 
+export * from "./elements/services/pngCreatorService/DisplayMediaPngWriterService.js";
+export type { IPngCreatorService } from "./elements/services/pngCreatorService/IPngCreatorService.js";
+
 export * from "./elements/services/elementAtPointService/ElementAtPointService.js";
 export type { IElementAtPointService } from "./elements/services/elementAtPointService/IElementAtPointService.js";
 
