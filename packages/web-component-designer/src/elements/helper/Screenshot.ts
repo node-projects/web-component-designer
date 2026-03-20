@@ -51,7 +51,7 @@ export class Screenshot {
       }
       Screenshot._video.srcObject = Screenshot._captureStream;
       Screenshot._video.play();
-      await Screenshot._sleep(500);
+      await Screenshot._sleep(2000);
     }
   }
 

@@ -17,6 +17,8 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
         const oldSelected = selectionService.selectedElements;
 
         try {
+            await Screenshot.enableScreenshots();
+
             (<DesignerCanvas>designerCanvas).disableBackgroud();
             designerCanvas.zoomFactor = 1;
             selectionService.setSelectedElements([]);
@@ -63,11 +65,11 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
             finalCanvas.height = Math.ceil(totalHeight * dpr);
             const finalCtx = finalCanvas.getContext('2d');
 
-            await Screenshot.enableScreenshots();
-
             // Use the outer viewport element for screenshots so that the crop
             // coordinates are not affected by the canvasOffset CSS transform
             const viewportElement = (<DesignerCanvas>designerCanvas).outercanvas2;
+
+            let sleepTime = 1000;
 
             for (let iy = 0; iy < numTilesY; iy++) {
                 for (let ix = 0; ix < numTilesX; ix++) {
@@ -77,7 +79,8 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
                     // Shift by borderInset so the 1px border falls outside the effective region
                     designerCanvas.canvasOffset = { x: -(tileX - borderInset), y: -(tileY - borderInset) };
                     // Wait for CSS transform to apply and video stream to capture the updated frame
-                    await sleep(300);
+                    await sleep(sleepTime);
+                    sleepTime = 300;
 
                     const dataUrl = await Screenshot.takeScreenshot(
                         viewportElement,
