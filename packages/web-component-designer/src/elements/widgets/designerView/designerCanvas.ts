@@ -18,7 +18,7 @@ import { IExtensionManager } from './extensions/IExtensionManger.js';
 import { ExtensionManager } from './extensions/ExtensionManager.js';
 import { NamedTools } from './tools/NamedTools.js';
 import { Screenshot } from '../../helper/Screenshot.js';
-import { dataURItoBlob, exportData, sleep } from '../../helper/Helper.js';
+import { exportData } from '../../helper/Helper.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { IPoint } from '../../../interfaces/IPoint.js';
 import { OverlayLayerView } from './overlayLayerView.js';
@@ -501,6 +501,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         return handeled;
     }
 
+    if (command.type === CommandType.screenshot) {
+      return true;
+    }
+
     if (command.type === CommandType.undo) {
       return this.instanceServiceContainer.undoService.canUndo();
     }
@@ -533,37 +537,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         if (!Screenshot.screenshotsEnabled) {
           alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
         }
-        if (!this.instanceServiceContainer.selectionService.primarySelection) {
-          this.zoomToFit();
-          this.disableBackgroud();
-          try {
-            const el = this.rootDesignItem.element;
-            const sel = this.instanceServiceContainer.selectionService.selectedElements;
-            this.instanceServiceContainer.selectionService.setSelectedElements(null);
-            await sleep(100);
-            const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
-            await exportData(dataURItoBlob(screenshot), "screenshot.png");
-            this.instanceServiceContainer.selectionService.setSelectedElements(sel);
-          } catch (err) {
-            console.error(err);
-          }
-          this.enableBackground();
+        let items = this.instanceServiceContainer.selectionService.selectedElements;
+        if (!items?.length) {
+          items = [...this.rootDesignItem.children(true)];
         }
-        else {
-          this.disableBackgroud();
-          try {
-            const el = this.instanceServiceContainer.selectionService.primarySelection.element;
-            const sel = this.instanceServiceContainer.selectionService.selectedElements;
-            this.instanceServiceContainer.selectionService.setSelectedElements(null);
-            await sleep(100);
-            const screenshot = await Screenshot.takeScreenshot(el, el.clientWidth, el.clientHeight);
-            await exportData(dataURItoBlob(screenshot), "screenshot.png");
-            this.instanceServiceContainer.selectionService.setSelectedElements(sel);
-          } catch (err) {
-            console.error(err);
-          }
-          this.enableBackground();
-        }
+        let data = await this.serviceContainer.pngCreatorService.takePng(items, { removeSelection: true });
+        await exportData(new Blob([new Uint8Array(data)], { type: 'image/png' }), "screenshot.png");
       }
         break;
       case CommandType.setTool: {
@@ -945,7 +924,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public addDesignItems(designItems: IDesignItem[]) {
     if (designItems) {
-        this.rootDesignItem._insertChildsInternal(designItems);
+      this.rootDesignItem._insertChildsInternal(designItems);
     }
 
     const intializationService = this.serviceContainer.intializationService;
