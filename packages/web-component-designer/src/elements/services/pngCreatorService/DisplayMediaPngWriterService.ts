@@ -17,9 +17,12 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
         const oldSelected = selectionService.selectedElements;
 
         try {
+            await Screenshot.enableScreenshots();
+
             (<DesignerCanvas>designerCanvas).disableBackgroud();
             designerCanvas.zoomFactor = 1;
             selectionService.setSelectedElements([]);
+            designerCanvas.canvasOffset = { x: 0, y: 0 };
             await requestAnimationFramePromise();
 
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -42,33 +45,56 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
             const viewportW = designerCanvas.canvas.offsetWidth;
             const viewportH = designerCanvas.canvas.offsetHeight;
 
-            const numTilesX = Math.ceil(totalWidth / viewportW);
-            const numTilesY = Math.ceil(totalHeight / viewportH);
+            // Inset by 1 CSS pixel on each edge to avoid border artifacts when stitching tiles
+            const borderInset = 1;
+            const effectiveW = viewportW - 2 * borderInset;
+            const effectiveH = viewportH - 2 * borderInset;
+
+            const numTilesX = Math.ceil(totalWidth / effectiveW);
+            const numTilesY = Math.ceil(totalHeight / effectiveH);
+
+            const dpr = window.devicePixelRatio || 1;
+            const captureW = Math.ceil(viewportW * dpr);
+            const captureH = Math.ceil(viewportH * dpr);
+            const insetPx = Math.ceil(borderInset * dpr);
+            const effectiveCaptureW = captureW - 2 * insetPx;
+            const effectiveCaptureH = captureH - 2 * insetPx;
 
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = totalWidth;
-            finalCanvas.height = totalHeight;
+            finalCanvas.width = Math.ceil(totalWidth * dpr);
+            finalCanvas.height = Math.ceil(totalHeight * dpr);
             const finalCtx = finalCanvas.getContext('2d');
 
-            await Screenshot.enableScreenshots();
+            // Use the outer viewport element for screenshots so that the crop
+            // coordinates are not affected by the canvasOffset CSS transform
+            const viewportElement = (<DesignerCanvas>designerCanvas).outercanvas2;
+
+            let sleepTime = 1000;
 
             for (let iy = 0; iy < numTilesY; iy++) {
                 for (let ix = 0; ix < numTilesX; ix++) {
-                    const tileX = minX + ix * viewportW;
-                    const tileY = minY + iy * viewportH;
+                    const tileX = minX + ix * effectiveW;
+                    const tileY = minY + iy * effectiveH;
 
-                    designerCanvas.canvasOffset = { x: -tileX, y: -tileY };
+                    // Shift by borderInset so the 1px border falls outside the effective region
+                    designerCanvas.canvasOffset = { x: -(tileX - borderInset), y: -(tileY - borderInset) };
                     // Wait for CSS transform to apply and video stream to capture the updated frame
-                    await sleep(150);
+                    await sleep(sleepTime);
+                    sleepTime = 300;
 
                     const dataUrl = await Screenshot.takeScreenshot(
-                        designerCanvas.canvas,
-                        viewportW,
-                        viewportH
+                        viewportElement,
+                        captureW,
+                        captureH
                     );
 
                     const img = await this._loadImage(dataUrl);
-                    finalCtx.drawImage(img, ix * viewportW, iy * viewportH);
+                    // Draw only the inner region, skipping the 1px border on all sides
+                    finalCtx.drawImage(
+                        img,
+                        insetPx, insetPx, effectiveCaptureW, effectiveCaptureH,
+                        ix * effectiveCaptureW, iy * effectiveCaptureH, effectiveCaptureW, effectiveCaptureH
+                    );
                 }
             }
 
