@@ -156,6 +156,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     return this._canvas;
   }
 
+  public get outercanvas2(): HTMLDivElement {
+    return this._outercanvas2;
+  }
+
   // Private Variables
   private _canvas: HTMLDivElement;
   private _canvasShadowRoot: Document | ShadowRoot;

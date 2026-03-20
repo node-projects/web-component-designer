@@ -45,12 +45,20 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
             const numTilesX = Math.ceil(totalWidth / viewportW);
             const numTilesY = Math.ceil(totalHeight / viewportH);
 
+            const dpr = window.devicePixelRatio || 1;
+            const captureW = Math.ceil(viewportW * dpr);
+            const captureH = Math.ceil(viewportH * dpr);
+
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = totalWidth;
-            finalCanvas.height = totalHeight;
+            finalCanvas.width = Math.ceil(totalWidth * dpr);
+            finalCanvas.height = Math.ceil(totalHeight * dpr);
             const finalCtx = finalCanvas.getContext('2d');
 
             await Screenshot.enableScreenshots();
+
+            // Use the outer viewport element for screenshots so that the crop
+            // coordinates are not affected by the canvasOffset CSS transform
+            const viewportElement = (<DesignerCanvas>designerCanvas).outercanvas2;
 
             for (let iy = 0; iy < numTilesY; iy++) {
                 for (let ix = 0; ix < numTilesX; ix++) {
@@ -62,13 +70,13 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
                     await sleep(150);
 
                     const dataUrl = await Screenshot.takeScreenshot(
-                        designerCanvas.canvas,
-                        viewportW,
-                        viewportH
+                        viewportElement,
+                        captureW,
+                        captureH
                     );
 
                     const img = await this._loadImage(dataUrl);
-                    finalCtx.drawImage(img, ix * viewportW, iy * viewportH);
+                    finalCtx.drawImage(img, ix * captureW, iy * captureH);
                 }
             }
 
