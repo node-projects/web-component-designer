@@ -35,8 +35,13 @@ export class Screenshot {
       }
       Screenshot._video.style.display = "none";
       elementHostForVideo.appendChild(Screenshot._video);
-      //@ts-ignore
-      Screenshot._captureStream = await navigator.mediaDevices.getDisplayMedia(gdmOptions);
+      try {
+        //@ts-ignore
+        Screenshot._captureStream = await navigator.mediaDevices.getDisplayMedia(gdmOptions);
+      } catch (e) {
+        Screenshot._canvas = null;
+        throw e;
+      }
       //@ts-ignore
       const captureType = Screenshot._captureStream.getVideoTracks()[0].getSettings().displaySurface
       if (captureType != 'browser') {
@@ -46,7 +51,7 @@ export class Screenshot {
       }
       Screenshot._video.srcObject = Screenshot._captureStream;
       Screenshot._video.play();
-      await Screenshot._sleep(150);
+      await Screenshot._sleep(500);
     }
   }
 
