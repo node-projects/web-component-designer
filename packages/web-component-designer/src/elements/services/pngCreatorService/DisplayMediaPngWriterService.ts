@@ -1,29 +1,86 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
+import { Screenshot } from "../../helper/Screenshot.js";
+import { sleep } from "../../helper/Helper.js";
 import { IPngCreatorService } from "./IPngCreatorService.js";
 
-//TODO: implement this service using the screenshot class.
-//It should calculate the bounding rect of all design items, add the margin and then use the screenshot class to take a screenshot of that area. 
-//If not all design items are in the viewport, it should scroll to the area where the design items are and then take the screenshot. 
-//Also if not all designitems fit into the viewport, it should take multiple screenshots and stitch them together to create the final png.
-
-//
 export class DisplayMediaPngWriterService implements IPngCreatorService {
     async takePng(designItems: IDesignItem[], margin: number): Promise<Uint8Array> {
-        // Implementation goes here
+        if (!designItems || designItems.length === 0) {
+            return null;
+        }
 
         const designerCanvas = designItems[0].instanceServiceContainer.designerCanvas;
         const oldZoomFactor = designerCanvas.zoomFactor;
         const oldPos = designerCanvas.canvasOffset;
 
+        try {
+            designerCanvas.zoomFactor = 1;
 
-        designerCanvas.zoomFactor = 1;
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const item of designItems) {
+                const rect = designerCanvas.getNormalizedElementCoordinates(item.element);
+                minX = Math.min(minX, rect.x);
+                minY = Math.min(minY, rect.y);
+                maxX = Math.max(maxX, rect.x + rect.width);
+                maxY = Math.max(maxY, rect.y + rect.height);
+            }
 
-        //use this for the element coordinates:
-        designerCanvas.getNormalizedElementCoordinates(designItems[0].element);
+            minX -= margin;
+            minY -= margin;
+            maxX += margin;
+            maxY += margin;
 
-        //use designerCanvas.canvasOffset to move the canvas to the correct position.
-//use designerCanvas.canvas.offsetWidth and designerCanvas.canvas.offsetHeight to get the size of the canvas and then use that to calculate how many screenshots we need to take and where to scroll to.
+            const totalWidth = Math.ceil(maxX - minX);
+            const totalHeight = Math.ceil(maxY - minY);
 
-        return null;
+            const viewportW = designerCanvas.canvas.offsetWidth;
+            const viewportH = designerCanvas.canvas.offsetHeight;
+
+            const numTilesX = Math.ceil(totalWidth / viewportW);
+            const numTilesY = Math.ceil(totalHeight / viewportH);
+
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = totalWidth;
+            finalCanvas.height = totalHeight;
+            const finalCtx = finalCanvas.getContext('2d');
+
+            await Screenshot.enableScreenshots();
+
+            for (let iy = 0; iy < numTilesY; iy++) {
+                for (let ix = 0; ix < numTilesX; ix++) {
+                    const tileX = minX + ix * viewportW;
+                    const tileY = minY + iy * viewportH;
+
+                    designerCanvas.canvasOffset = { x: -tileX, y: -tileY };
+                    // Wait for CSS transform to apply and video stream to capture the updated frame
+                    await sleep(150);
+
+                    const dataUrl = await Screenshot.takeScreenshot(
+                        designerCanvas.canvas,
+                        viewportW,
+                        viewportH
+                    );
+
+                    const img = await this._loadImage(dataUrl);
+                    finalCtx.drawImage(img, ix * viewportW, iy * viewportH);
+                }
+            }
+
+            const blob = await new Promise<Blob>(resolve => finalCanvas.toBlob(resolve, 'image/png'));
+            const arrayBuffer = await blob.arrayBuffer();
+            return new Uint8Array(arrayBuffer);
+        } finally {
+            designerCanvas.zoomFactor = oldZoomFactor;
+            designerCanvas.canvasOffset = oldPos;
+        }
+    }
+
+    private _loadImage(dataUrl: string): Promise<HTMLImageElement> {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = dataUrl;
+        });
     }
 }
