@@ -75,8 +75,13 @@ export class ElectronPngWriterService implements IPngCreatorService {
             const totalWidth = Math.ceil(maxX - minX);
             const totalHeight = Math.ceil(maxY - minY);
 
-            const viewportW = designerCanvas.canvas.offsetWidth;
-            const viewportH = designerCanvas.canvas.offsetHeight;
+            // Use the outer viewport element to determine the capture rectangle
+            // so that coordinates are not affected by the canvasOffset CSS transform.
+            // Its dimensions reflect the actual visible capture area, which may
+            // differ from canvas.offsetWidth when designerWidth/Height != 100%.
+            const viewportElement = (<DesignerCanvas>designerCanvas).outercanvas2;
+            const viewportW = viewportElement.offsetWidth;
+            const viewportH = viewportElement.offsetHeight;
 
             // Inset by 1 CSS pixel on each edge to avoid border artifacts when stitching tiles
             const borderInset = 1;
@@ -97,10 +102,6 @@ export class ElectronPngWriterService implements IPngCreatorService {
             finalCanvas.width = Math.ceil(totalWidth * dpr);
             finalCanvas.height = Math.ceil(totalHeight * dpr);
             const finalCtx = finalCanvas.getContext('2d');
-
-            // Use the outer viewport element to determine the capture rectangle
-            // so that coordinates are not affected by the canvasOffset CSS transform
-            const viewportElement = (<DesignerCanvas>designerCanvas).outercanvas2;
 
             for (let iy = 0; iy < numTilesY; iy++) {
                 for (let ix = 0; ix < numTilesX; ix++) {
