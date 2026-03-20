@@ -20,6 +20,7 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
             (<DesignerCanvas>designerCanvas).disableBackgroud();
             designerCanvas.zoomFactor = 1;
             selectionService.setSelectedElements([]);
+             designerCanvas.canvasOffset = { x: 0, y: 0 };
             await requestAnimationFramePromise();
 
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -67,7 +68,7 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
 
                     designerCanvas.canvasOffset = { x: -tileX, y: -tileY };
                     // Wait for CSS transform to apply and video stream to capture the updated frame
-                    await sleep(150);
+                    await sleep(300);
 
                     const dataUrl = await Screenshot.takeScreenshot(
                         viewportElement,
