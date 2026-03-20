@@ -51,6 +51,7 @@ import { InstanceServiceContainer } from './InstanceServiceContainer.js';
 import { IDeletionService } from './deletionService/IDeletionService.js';
 import { IReferencesChangedService } from './referencesChangedService/IReferencesChangedService.js';
 import { IMiniatureViewService } from './miniatureViewService/IMiniatureViewService.js';
+import { IPngCreatorService } from './pngCreatorService/IPngCreatorService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -82,6 +83,7 @@ interface ServiceNameMap {
   "deletionService": IDeletionService;
   "referencesChangedService": IReferencesChangedService;
   "miniatureViewService": IMiniatureViewService;
+  "pngCreatorService": IPngCreatorService;
 
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
@@ -251,5 +253,9 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   get miniatureViewService(): IMiniatureViewService {
     return this.getLastService('miniatureViewService');
+  }
+
+  get pngCreatorService(): IPngCreatorService {
+    return this.getLastService('pngCreatorService');
   }
 }

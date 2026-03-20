@@ -107,6 +107,7 @@ import { PaddingTool } from '../widgets/designerView/tools/PaddingTool.js';
 import { DesignItemService } from './designItemService/DesignItemService.js';
 import { DeletionService } from './deletionService/DeletionService.js';
 import { MiniatureViewService } from './miniatureViewService/MiniatureViewService.js';
+import { DisplayMediaPngWriterService } from './pngCreatorService/DisplayMediaPngWriterService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -139,6 +140,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("designItemService", new DesignItemService());
   serviceContainer.register("deletionService", new DeletionService());
   serviceContainer.register("miniatureViewService", new MiniatureViewService());
+  serviceContainer.register("pngCreatorService", new DisplayMediaPngWriterService());
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
   serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
