@@ -1,7 +1,8 @@
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { Screenshot } from "../../helper/Screenshot.js";
-import { sleep } from "../../helper/Helper.js";
+import { requestAnimationFramePromise, sleep } from "../../helper/Helper.js";
 import { IPngCreatorService } from "./IPngCreatorService.js";
+import { DesignerCanvas } from "../../widgets/designerView/designerCanvas.js";
 
 export class DisplayMediaPngWriterService implements IPngCreatorService {
     async takePng(designItems: IDesignItem[], margin: number): Promise<Uint8Array> {
@@ -10,11 +11,16 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
         }
 
         const designerCanvas = designItems[0].instanceServiceContainer.designerCanvas;
+        const selectionService = designItems[0].instanceServiceContainer.selectionService;
         const oldZoomFactor = designerCanvas.zoomFactor;
         const oldPos = designerCanvas.canvasOffset;
+        const oldSelected = selectionService.selectedElements;
 
         try {
+            (<DesignerCanvas>designerCanvas).disableBackgroud();
             designerCanvas.zoomFactor = 1;
+            selectionService.setSelectedElements([]);
+            await requestAnimationFramePromise();
 
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             for (const item of designItems) {
@@ -72,6 +78,8 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
         } finally {
             designerCanvas.zoomFactor = oldZoomFactor;
             designerCanvas.canvasOffset = oldPos;
+            (<DesignerCanvas>designerCanvas).enableBackground();
+            selectionService.setSelectedElements(oldSelected);
         }
     }
 
