@@ -997,7 +997,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (event.dataTransfer.types.length > 0 && event.dataTransfer.types[0] == 'Files') {
       const ddService = this.serviceContainer.externalDragDropService;
       if (ddService) {
-        const effect = ddService.dragOver(event);
+        const effect = ddService.dragOver(this, event);
         event.dataTransfer.dropEffect = effect;
         if (effect !== 'none')
           this._canvas.classList.add('dragFileActive');

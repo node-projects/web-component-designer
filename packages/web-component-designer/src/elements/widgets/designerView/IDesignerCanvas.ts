@@ -13,6 +13,8 @@ import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 
 export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
+  readOnly: boolean;
+  
   readonly serviceContainer: ServiceContainer;
   readonly instanceServiceContainer: InstanceServiceContainer;
   readonly containerBoundingRect: DOMRect;

@@ -12,7 +12,7 @@ export class DragDropService implements IDragDropService {
   private _oldX: number;
   private _oldY: number;
   private _currentDragDropFormatNameElementDefinition: string;
-  
+
   constructor() {
     window.addEventListener("dragstart", (e) => {
       const dt = e.dataTransfer;
@@ -40,6 +40,10 @@ export class DragDropService implements IDragDropService {
   }
 
   public async dragOver(designerCanvas: IDesignerCanvas, event: DragEvent) {
+    if (designerCanvas.readOnly) {
+      event.dataTransfer.dropEffect = 'none';
+      return;
+    }
     let di: IDesignItem = null;
     let transferData = event.dataTransfer.getData(dragDropFormatNameElementDefinition);
     if (!transferData) {

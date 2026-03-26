@@ -34,6 +34,8 @@ export class AbsolutePlacementService implements IPlacementService {
   }
 
   canEnter(container: IDesignItem, items: IDesignItem[]) {
+    if (container.instanceServiceContainer.designerCanvas.readOnly)
+      return false;
     if (!this.isEnterableContainer(container))
       return false;
     if (!items.every(x => !x.element.contains(container.element) && x !== container))

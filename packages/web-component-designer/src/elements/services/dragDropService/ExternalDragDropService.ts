@@ -5,7 +5,9 @@ import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
 
 export class ExternalDragDropService implements IExternalDragDropService {
 
-  public dragOver(event: DragEvent): 'none' | 'copy' | 'link' | 'move' {
+  public dragOver(designerCanvas: IDesignerCanvas, event: DragEvent): 'none' | 'copy' | 'link' | 'move' {
+    if (designerCanvas.readOnly)
+          return 'none';
     if (event.dataTransfer.items[0].type.startsWith('image/'))
       return 'copy';
     return 'none';

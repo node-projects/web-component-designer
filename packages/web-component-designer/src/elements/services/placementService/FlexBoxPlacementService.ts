@@ -50,6 +50,8 @@ export class FlexBoxPlacementService implements IPlacementService {
   }
 
   canEnter(container: IDesignItem, items: IDesignItem[]) {
+    if (container.instanceServiceContainer.designerCanvas.readOnly)
+      return false;
     return this._basePlacementService.canEnter(container, items);
   }
 
