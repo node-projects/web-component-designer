@@ -36,6 +36,13 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     return this._designerCanvas;
   }
 
+  get readOnly() {
+    return this._designerCanvas.readOnly;
+  }
+  set readOnly(v) {
+    this._designerCanvas.readOnly = v;
+  }
+
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
   private _toolbar: DesignerToolbar;

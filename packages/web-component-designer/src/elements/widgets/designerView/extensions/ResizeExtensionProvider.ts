@@ -14,14 +14,16 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
     this.resizeAllSelected = resizeAllSelected;
   }
 
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
+    if (designerCanvas.readOnly)
+      return false;
     if (designItem.element instanceof SVGElement || designItem.element instanceof HTMLTemplateElement)
       return false;
     return !designItem.isRootItem && designItem.nodeType == NodeType.Element;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new ResizeExtension(extensionManager, designerView, designItem, this.resizeAllSelected);
+  getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
+    return new ResizeExtension(extensionManager, designerCanvas, designItem, this.resizeAllSelected);
   }
 
   static readonly style = css`

@@ -364,6 +364,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public readonly iframes: HTMLIFrameElement[];
 
+  #readOnly = false;
+  get readOnly() {
+    return this.#readOnly;
+  }
+  set readOnly(v) {
+    this.#readOnly = v;
+  }
+
   constructor(useIframe: boolean = false) {
     super();
     this._restoreCachedInititalValues();
@@ -496,9 +504,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   canExecuteCommand(command: IUiCommand) {
     const modelCommandService = this.serviceContainer.modelCommandService;
     if (modelCommandService) {
-      let handeled = modelCommandService.canExecuteCommand(this, command)
-      if (handeled !== null)
+      const selection = this.instanceServiceContainer.selectionService.selectedElements;
+      let handeled = modelCommandService.canExecuteCommand(this, command, selection);
+      if (handeled !== null) {
         return handeled;
+      }
     }
 
     if (command.type === CommandType.screenshot) {
@@ -528,9 +538,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   async executeCommand(command: IUiCommand) {
     const modelCommandService = this.serviceContainer.modelCommandService;
     if (modelCommandService) {
-      let handeled = await modelCommandService.executeCommand(this, command)
-      if (handeled != null)
+      const selection = this.instanceServiceContainer.selectionService.selectedElements;
+      let handeled = await modelCommandService.executeCommand(this, command, selection)
+      if (handeled != null) {
+        this.instanceServiceContainer.selectionService.setSelectedElements(null);
+        this.instanceServiceContainer.selectionService.setSelectedElements(selection);
         return;
+      }
     }
     switch (command.type) {
       case CommandType.screenshot: {

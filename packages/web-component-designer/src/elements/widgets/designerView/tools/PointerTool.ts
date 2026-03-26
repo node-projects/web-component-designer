@@ -244,6 +244,10 @@ export class PointerTool implements ITool {
             }
           }
 
+          if (designerCanvas.readOnly) {
+            return;
+          }
+
           // *** Copy Items via Ctrl Drag ***
 
           if (!this._clonedItems) {

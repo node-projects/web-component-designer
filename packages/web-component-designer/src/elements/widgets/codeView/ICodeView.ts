@@ -10,4 +10,5 @@ export interface ICodeView extends IUiCommandHandler, IDisposable, HTMLElement {
   setSelection(position: IStringPosition);
   focusEditor();
   onTextChanged: TypedEvent<string>;
+  readOnly?: boolean;
 }

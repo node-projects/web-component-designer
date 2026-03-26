@@ -4,10 +4,10 @@ import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { IModelCommandService } from "./IModelCommandService.js";
 import { ArrangeHelper } from "../../helper/ArrangeHelper.js";
 import { Orientation } from "../../../enums/Orientation.js";
-
+import { IDesignItem } from "../../item/IDesignItem.js";
 
 export class DefaultModelCommandService implements IModelCommandService {
-  canExecuteCommand(designerCanvas: IDesignerCanvas, command: IUiCommand): boolean {
+  canExecuteCommand(designerCanvas: IDesignerCanvas, command: IUiCommand, designItems?: IDesignItem[]): boolean {
     if (command.type == CommandType.moveBackward ||
       command.type == CommandType.moveForward ||
       command.type == CommandType.moveToBack ||
@@ -30,50 +30,51 @@ export class DefaultModelCommandService implements IModelCommandService {
     return null;
   }
 
-  async executeCommand(designerCanvas: IDesignerCanvas, command: IUiCommand) {
-    let sel = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
-    const selection = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
+  async executeCommand(designerCanvas: IDesignerCanvas, command: IUiCommand, designItems?: IDesignItem[]) {
+    designItems = designItems ?? [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
+    const primary = designItems[0]  ;
+    
     if (command.type == CommandType.moveBackward) {
-      let idx = sel.parent.indexOf(sel) - 1;
+      let idx = primary.parent.indexOf(primary) - 1;
       if (idx >= 0)
-        sel.parent.insertChild(sel, idx);
+        primary.parent.insertChild(primary, idx);
     } else if (command.type == CommandType.moveForward) {
-      let idx = sel.parent.indexOf(sel) + 1;
-      if (idx < sel.parent.childCount)
-        sel.parent.insertChild(sel, idx);
+      let idx = primary.parent.indexOf(primary) + 1;
+      if (idx < primary.parent.childCount)
+        primary.parent.insertChild(primary, idx);
     } else if (command.type == CommandType.moveToBack) {
-      sel.parent.insertChild(sel, 0);
+      primary.parent.insertChild(primary, 0);
     } else if (command.type == CommandType.moveToFront) {
-      sel.parent.insertChild(sel);
+      primary.parent.insertChild(primary);
     } else if (command.type == CommandType.arrangeTop) {
-      ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+      ArrangeHelper.arrangeElements(Orientation.TOP, designerCanvas, designItems);
     } else if (command.type == CommandType.arrangeRight) {
-      ArrangeHelper.arrangeElements(Orientation.RIGHT, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+      ArrangeHelper.arrangeElements(Orientation.RIGHT, designerCanvas, designItems);
     } else if (command.type == CommandType.arrangeLeft) {
-      ArrangeHelper.arrangeElements(Orientation.LEFT, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+      ArrangeHelper.arrangeElements(Orientation.LEFT, designerCanvas, designItems);
     } else if (command.type == CommandType.arrangeBottom) {
-      ArrangeHelper.arrangeElements(Orientation.BOTTOM, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+      ArrangeHelper.arrangeElements(Orientation.BOTTOM, designerCanvas, designItems);
     } else if (command.type == CommandType.arrangeCenter) {
-      ArrangeHelper.arrangeElements(Orientation.HORIZONTAL_CENTER, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+      ArrangeHelper.arrangeElements(Orientation.HORIZONTAL_CENTER, designerCanvas, designItems);
     } else if (command.type == CommandType.arrangeMiddle) {
-      ArrangeHelper.arrangeElements(Orientation.VERTICAL_CENTER, designerCanvas, designerCanvas.instanceServiceContainer.selectionService.selectedElements);
+      ArrangeHelper.arrangeElements(Orientation.VERTICAL_CENTER, designerCanvas, designItems);
     } else if (command.type == CommandType.unifyHeight) {
-      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('unifyHeight');
-      const height = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('height');
-      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+      const grp = primary.openGroup('unifyHeight');
+      const height = primary.getStyle('height');
+      for (let s of designItems) {
         s.setStyle('height', height);
       }
       grp.commit();
     } else if (command.type == CommandType.unifyWidth) {
-      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('unifyWidth');
-      const width = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('width');
-      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+      const grp = primary.openGroup('unifyWidth');
+      const width = primary.getStyle('width');
+      for (let s of designItems) {
         s.setStyle('width', width);
       }
       grp.commit();
     } else if (command.type == CommandType.rotateCounterClockwise) {
-      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateCounterClockwise');
-      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('transform');
+      const grp = primary.openGroup('rotateCounterClockwise');
+      var trf = primary.getStyle('transform');
       let degree = 0;
       let rotation = "";
       if (trf != null) {
@@ -92,13 +93,13 @@ export class DefaultModelCommandService implements IModelCommandService {
       else {
         rotation = "rotate(-90deg)";
       }
-      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+      for (let s of designItems) {
         s.setStyle('transform', rotation);
       }
       grp.commit();
     } else if (command.type == CommandType.rotateClockwise) {
-      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('rotateClockwise');
-      var trf = designerCanvas.instanceServiceContainer.selectionService.primarySelection.getStyle('transform');
+      const grp = primary.openGroup('rotateClockwise');
+      var trf = primary.getStyle('transform');
       let degree = 0;
       let rotation = "";
       if (trf != null) {
@@ -117,27 +118,25 @@ export class DefaultModelCommandService implements IModelCommandService {
       else {
         rotation = "rotate(90deg)";
       }
-      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+      for (let s of designItems) {
         s.setStyle('transform', rotation);
       }
       grp.commit();
     } else if (command.type == CommandType.mirrorHorizontal) {
-      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('mirrorHorizontal');
-      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+      const grp = primary.openGroup('mirrorHorizontal');
+      for (let s of designItems) {
         s.setStyle('transform', 'scaleX(-1)');
       }
       grp.commit();
     } else if (command.type == CommandType.mirrorVertical) {
-      const grp = designerCanvas.instanceServiceContainer.selectionService.primarySelection.openGroup('mirrorHorizontal');
-      for (let s of designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
+      const grp = primary.openGroup('mirrorVertical');
+      for (let s of designItems) {
         s.setStyle('transform', 'scaleY(-1)');
       }
       grp.commit();
     } else
       return null;
 
-    designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(null);
-    designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(selection);
     return true;
   }
 }

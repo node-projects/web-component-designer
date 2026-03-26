@@ -13,15 +13,17 @@ export class RotateExtensionProvider implements IDesignerExtensionProvider {
     this.type = type;
   }
 
-  shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
+  shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
+    if (designerCanvas.readOnly)
+      return false;
     if (designItem.element instanceof SVGElement || designItem.element instanceof HTMLTemplateElement) {
       return false;
     }
     return !designItem.isRootItem;
   }
 
-  getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new RotateExtension(extensionManager, designerView, designItem);
+  getExtension(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
+    return new RotateExtension(extensionManager, designerCanvas, designItem);
   }
 
   static readonly style = css`

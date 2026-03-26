@@ -66,6 +66,16 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   };
   public additionalStylesheetChanged = new TypedEvent<{ name: string, newStyle: string, oldStyle: string, changeSource: 'extern' | 'styleupdate' | 'undo' }>;
 
+  get readOnly() {
+    return this.designerView?.readOnly;
+  }
+  set readOnly(v) {
+    if (this.designerView)
+      this.designerView.readOnly = v;
+    if (this.codeView)
+      this.codeView.readOnly = v;
+  }
+
   public onContentChanged = new TypedEvent<{ source: 'designer' | 'code' }>();
   public onTabChanged = new TypedEvent<{ oldTab: 'designer' | 'code' | 'split' | 'preview', newTab: 'designer' | 'code' | 'split' | 'preview' }>();
 
