@@ -9,13 +9,61 @@ export abstract class ArrangeHelper {
             case Orientation.TOP: {
                 const grp = this.formGroup(ArrangeDirection.TOP, designerCanvas);
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
+                const targetY = primaryCoordinates.y;
 
-                for (let elem of arrangeElements) {        
+                for (let elem of arrangeElements) {
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primaryCoordinates.y != selectedCoordinates.y) {
+                    if (targetY != selectedCoordinates.y) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
-                        let top = primaryCoordinates.y - parent.y;
-                        this.arrange(elem, 'top', top + "px" );
+                        if (elem.hasStyle('bottom') && !elem.hasStyle('top')) {
+                            let bottom = parent.y + parent.height - targetY - selectedCoordinates.height;
+                            this.arrange(elem, 'bottom', bottom + "px");
+                        } else {
+                            let top = targetY - parent.y;
+                            this.arrange(elem, 'top', top + "px");
+                        }
+                    }
+                }
+                grp.commit();
+                break;
+            }
+            case Orientation.BOTTOM: {
+                const grp = this.formGroup(ArrangeDirection.BOTTOM, designerCanvas);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
+                const targetBottom = primaryCoordinates.y + primaryCoordinates.height;
+
+                for (let elem of arrangeElements) {
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    if (targetBottom != selectedCoordinates.y + selectedCoordinates.height) {
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        if (elem.hasStyle('bottom') && !elem.hasStyle('top')) {
+                            let bottom = parent.y + parent.height - targetBottom;
+                            this.arrange(elem, 'bottom', bottom + "px");
+                        } else {
+                            let top = targetBottom - selectedCoordinates.height - parent.y;
+                            this.arrange(elem, 'top', top + "px");
+                        }
+                    }
+                }
+                grp.commit();
+                break;
+            }
+            case Orientation.LEFT: {
+                const grp = this.formGroup(ArrangeDirection.LEFT, designerCanvas);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
+                const targetX = primaryCoordinates.x;
+
+                for (let elem of arrangeElements) {
+                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
+                    if (targetX != selectedCoordinates.x) {
+                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
+                        if (elem.hasStyle('right') && !elem.hasStyle('left')) {
+                            let right = parent.x + parent.width - targetX - selectedCoordinates.width;
+                            this.arrange(elem, 'right', right + "px");
+                        } else {
+                            let left = targetX - parent.x;
+                            this.arrange(elem, 'left', left + "px");
+                        }
                     }
                 }
                 grp.commit();
@@ -24,43 +72,19 @@ export abstract class ArrangeHelper {
             case Orientation.RIGHT: {
                 const grp = this.formGroup(ArrangeDirection.RIGHT, designerCanvas);
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
+                const targetRight = primaryCoordinates.x + primaryCoordinates.width;
 
-                for (let elem of arrangeElements) {        
+                for (let elem of arrangeElements) {
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primaryCoordinates.x != selectedCoordinates.x) {
+                    if (targetRight != selectedCoordinates.x + selectedCoordinates.width) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
-                        let right = primaryCoordinates.x - parent.x;
-                        this.arrange(elem, 'left', right + "px" );
-                    }
-                }
-                grp.commit();
-                break;
-            }
-            case Orientation.BOTTOM:
-                const grp = this.formGroup(ArrangeDirection.BOTTOM, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
-
-                for (let elem of arrangeElements) {        
-                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primaryCoordinates.y != selectedCoordinates.y) {
-                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
-                        let bottom = primaryCoordinates.y - parent.y;
-                        this.arrange(elem, 'top', bottom + "px" );
-                    }
-                }
-                grp.commit();
-                break;
-
-            case Orientation.LEFT: {
-                const grp = this.formGroup(ArrangeDirection.LEFT, designerCanvas);
-                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
-
-                for (let elem of arrangeElements) {        
-                    let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primaryCoordinates.x != selectedCoordinates.x){
-                        let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
-                        let left = primaryCoordinates.x - parent.x;
-                        this.arrange(elem, 'left', left + "px" );
+                        if (elem.hasStyle('right') && !elem.hasStyle('left')) {
+                            let right = parent.x + parent.width - targetRight;
+                            this.arrange(elem, 'right', right + "px");
+                        } else {
+                            let left = targetRight - selectedCoordinates.width - parent.x;
+                            this.arrange(elem, 'left', left + "px");
+                        }
                     }
                 }
                 grp.commit();
@@ -68,14 +92,20 @@ export abstract class ArrangeHelper {
             }
             case Orientation.VERTICAL_CENTER: {
                 const grp = this.formGroup(ArrangeDirection.VERTICAL_CENTER, designerCanvas);
-                const primaryCoordinates =  designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
+                const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
+                const targetCenterY = primaryCoordinates.y + primaryCoordinates.height / 2;
 
-                for (let elem of arrangeElements) {        
+                for (let elem of arrangeElements) {
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primaryCoordinates.y != selectedCoordinates.y) {
+                    if (targetCenterY != selectedCoordinates.y + selectedCoordinates.height / 2) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
-                        let center = primaryCoordinates.y - parent.y + (primaryCoordinates.height / 2) - (selectedCoordinates.height / 2);
-                        this.arrange(elem, 'top', center + "px" );
+                        if (elem.hasStyle('bottom') && !elem.hasStyle('top')) {
+                            let bottom = parent.y + parent.height - targetCenterY - selectedCoordinates.height / 2;
+                            this.arrange(elem, 'bottom', bottom + "px");
+                        } else {
+                            let top = targetCenterY - selectedCoordinates.height / 2 - parent.y;
+                            this.arrange(elem, 'top', top + "px");
+                        }
                     }
                 }
                 grp.commit();
@@ -85,13 +115,19 @@ export abstract class ArrangeHelper {
             case Orientation.HORIZONTAL_CENTER: {
                 const grp = this.formGroup(ArrangeDirection.HORIZONTAL_CENTER, designerCanvas);
                 const primaryCoordinates = designerCanvas.getNormalizedElementCoordinates(arrangeElements[0].element);
+                const targetCenterX = primaryCoordinates.x + primaryCoordinates.width / 2;
 
-                for (let elem of arrangeElements) {        
+                for (let elem of arrangeElements) {
                     let selectedCoordinates = designerCanvas.getNormalizedElementCoordinates(elem.element);
-                    if(primaryCoordinates.x != selectedCoordinates.x) {
+                    if (targetCenterX != selectedCoordinates.x + selectedCoordinates.width / 2) {
                         let parent = designerCanvas.getNormalizedElementCoordinates(elem.parent.element);
-                        let center = primaryCoordinates.x - parent.x + (primaryCoordinates.width / 2) - (selectedCoordinates.width / 2);
-                        this.arrange(elem, 'left', center + "px" );
+                        if (elem.hasStyle('right') && !elem.hasStyle('left')) {
+                            let right = parent.x + parent.width - targetCenterX - selectedCoordinates.width / 2;
+                            this.arrange(elem, 'right', right + "px");
+                        } else {
+                            let left = targetCenterX - selectedCoordinates.width / 2 - parent.x;
+                            this.arrange(elem, 'left', left + "px");
+                        }
                     }
                 }
                 grp.commit();
