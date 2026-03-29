@@ -109,7 +109,6 @@ export type { IStringPosition } from "./elements/services/htmlWriterService/IStr
 export * from "./elements/services/htmlWriterService/AbstractHtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/FormatingHtmlWriterService.js";
 export * from "./elements/services/htmlWriterService/HtmlWriterService.js";
-export * from "./elements/services/htmlWriterService/LitTsElementWriterService.js";
 
 export * from "./elements/services/htmlParserService/DefaultHtmlParserService.js";
 export type { IHtmlParserService } from "./elements/services/htmlParserService/IHtmlParserService.js";
@@ -308,6 +307,8 @@ export * from "./elements/widgets/designerView/extensions/ResizeExtension.js";
 export * from "./elements/widgets/designerView/extensions/ResizeExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/RotateExtension.js";
 export * from "./elements/widgets/designerView/extensions/RotateExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/RotateGroupExtension.js";
+export * from "./elements/widgets/designerView/extensions/RotateGroupExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtension.js";
 export * from "./elements/widgets/designerView/extensions/SelectionDefaultExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/TransformOriginExtension.js";

@@ -21,6 +21,7 @@ import { DrawPathTool } from '../widgets/designerView/tools/DrawPathTool.js';
 import { SelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/SelectionDefaultExtensionProvider.js';
 import { ResizeExtensionProvider } from '../widgets/designerView/extensions/ResizeExtensionProvider.js';
 import { RotateExtensionProvider } from '../widgets/designerView/extensions/RotateExtensionProvider.js';
+import { RotateGroupExtensionProvider } from '../widgets/designerView/extensions/RotateGroupExtensionProvider.js';
 import { ZoomTool } from '../widgets/designerView/tools/ZoomTool.js';
 import { PanTool } from '../widgets/designerView/tools/PanTool.js';
 import { CopyPasteContextMenu } from '../widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js';
@@ -166,6 +167,9 @@ export function createDefaultServiceContainer() {
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),
+  ]);
+  serviceContainer.designerExtensions.set(ExtensionType.MultipleItemsSelected, [
+    new RotateGroupExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionRefreshed, [
     new GridChildToolbarExtensionProvider(),

@@ -6,6 +6,7 @@ import { IExtensionManager } from './IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 import { NodeType } from '../../../item/NodeType.js';
 import { PaddingExtension } from './PaddingExtension.js';
+import { svgAsString } from '../../../helper/SvgHelper.js';
 
 export class PaddingExtensionProvider implements IDesignerExtensionProvider {
 
@@ -28,7 +29,7 @@ export class PaddingExtensionProvider implements IDesignerExtensionProvider {
     .svg-padding { fill: #32cd32FF; fill-rule: evenodd; mask: url(#mask-stripe-padding); }
   `;
 
-  static readonly svgDefs = `
+  static readonly svgDefs = svgAsString`
     <pattern id="pattern-stripe-padding" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)" class="pattern">
       <line x1="0" y="0" x2="0" y2="10" stroke="color(display-p3 1 0 1 / 80%)" stroke-width="1"></line>
     </pattern>

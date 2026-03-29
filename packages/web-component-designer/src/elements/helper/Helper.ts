@@ -1,6 +1,10 @@
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IRect } from "../../interfaces/IRect.js";
 
+export function htmlAsString(strings: TemplateStringsArray, ...values: any[]) {
+    return strings[0];
+}
+
 export function isAppleDevice() {
   return window.navigator.platform?.startsWith("Mac") || window.navigator.platform === "iPhone" || window.navigator.platform === "iPad" || window.navigator.platform === "iPod";
 }

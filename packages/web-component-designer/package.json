@@ -13,15 +13,16 @@
     "link": "npm link",
     "watch": "pm2 start tsc --watch",
     "prepublishOnly": "npm run build && npm run bundle",
-    "bundle": "esbuild ./dist/index-all.js --format=esm --minify --sourcemap --external:@node-projects/base-custom-webcomponent --platform=neutral --bundle --outfile=./dist/index-min.js"
+    "bundle": "node _esbuild.js"
   },
   "dependencies": {
     "@node-projects/base-custom-webcomponent": ">=0.27.8"
   },
   "devDependencies": {
     "@types/node": "^22.8.6",
-    "mdn-data": "^2.4.2",
-    "esbuild": "^0.25.10"
+    "esbuild": "^0.25.10",
+    "esbuild-plugin-minify-html-literals": "^3.0.0",
+    "mdn-data": "^2.4.2"
   },
   "repository": {
     "type": "git",

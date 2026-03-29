@@ -6,6 +6,7 @@ import { MarginExtension } from './MarginExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 import { NodeType } from '../../../item/NodeType.js';
+import { svgAsString } from '../../../helper/SvgHelper.js';
 
 export class MarginExtensionProvider implements IDesignerExtensionProvider {
 
@@ -24,7 +25,7 @@ export class MarginExtensionProvider implements IDesignerExtensionProvider {
     .svg-margin { fill: color(display-p3 1 0 1 / 80%); fill-rule: evenodd; mask: url(#mask-stripe-margin); }
   `;
 
-  static readonly svgDefs = `
+  static readonly svgDefs = svgAsString`
     <pattern id="pattern-stripe-margin" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)" class="pattern">
       <line x1="0" y="0" x2="0" y2="10" stroke="color(display-p3 1 0 1 / 80%)" stroke-width="1"></line>
     </pattern>

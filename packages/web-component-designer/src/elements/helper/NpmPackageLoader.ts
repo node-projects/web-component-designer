@@ -5,12 +5,13 @@ import { WebcomponentManifestElementsService } from "../services/elementsService
 import { WebcomponentManifestPropertiesService } from "../services/propertiesService/services/WebcomponentManifestPropertiesService.js";
 import { ServiceContainer } from "../services/ServiceContainer.js";
 import { removeLeading, removeTrailing } from "./Helper.js";
-import packageHacks from "./NpmPackageHacks.json" with { type: 'json' };
 import { ObservedCustomElementsRegistry } from "./ObservedCustomElementsRegistry.js";
 
 export class NpmPackageLoader {
 
     private static registryPatchedTohandleErrors: boolean;
+
+    private static packageHacks;
 
     //packageSource = '//unpkg.com/';
     private _packageSource: string;
@@ -54,6 +55,10 @@ export class NpmPackageLoader {
 
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
     async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: any, loadAllImports?: boolean, reportState?: (state: string) => void): Promise<{ html: string, style: string }> {
+        if (!NpmPackageLoader.packageHacks) {
+            NpmPackageLoader.packageHacks = (await import("./NpmPackageHacks.json", { assert: { type: 'json' } })).default;
+        }
+
         const baseUrl = window.location.protocol + this._packageSource + pkg + '/';
 
         const packageJsonUrl = baseUrl + 'package.json';
@@ -143,18 +148,18 @@ export class NpmPackageLoader {
             }
 
             /* Package Hacks */
-            if (packageHacks[pkg]?.import) {
-                import(packageHacks[pkg]?.import);
+            if (NpmPackageLoader.packageHacks[pkg]?.import) {
+                import(NpmPackageLoader.packageHacks[pkg]?.import);
             }
-            if (packageHacks[pkg]?.script) {
-                const scriptUrl = URL.createObjectURL(new Blob([packageHacks[pkg]?.script], { type: 'application/javascript' }));
+            if (NpmPackageLoader.packageHacks[pkg]?.script) {
+                const scriptUrl = URL.createObjectURL(new Blob([NpmPackageLoader.packageHacks[pkg]?.script], { type: 'application/javascript' }));
                 import(scriptUrl);
             }
         } else {
             console.warn('npm package: ' + pkg + ' - no custom-elements.json found, only loading javascript module');
 
             const observedCustomElementsRegistry = new ObservedCustomElementsRegistry();
-           
+
             if (packageJsonObj.module) {
                 //@ts-ignore
                 await importShim(baseUrl + removeLeading(packageJsonObj.module, '/'))
@@ -169,11 +174,11 @@ export class NpmPackageLoader {
             }
 
             /* Package Hacks */
-            if (packageHacks[pkg]?.import) {
-                await import(packageHacks[pkg]?.import);
+            if (NpmPackageLoader.packageHacks[pkg]?.import) {
+                await import(NpmPackageLoader.packageHacks[pkg]?.import);
             }
-            if (packageHacks[pkg]?.script) {
-                const scriptUrl = URL.createObjectURL(new Blob([packageHacks[pkg]?.script], { type: 'application/javascript' }));
+            if (NpmPackageLoader.packageHacks[pkg]?.script) {
+                const scriptUrl = URL.createObjectURL(new Blob([NpmPackageLoader.packageHacks[pkg]?.script], { type: 'application/javascript' }));
                 await import(scriptUrl);
             }
 
@@ -186,7 +191,7 @@ export class NpmPackageLoader {
                 serviceContainer.register('elementsService', elService);
                 paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
             }
-            
+
             observedCustomElementsRegistry.dispose();
         }
         if (reportState)
@@ -194,11 +199,11 @@ export class NpmPackageLoader {
 
         let retVal: any = {};
 
-        if (packageHacks[pkg]?.html) {
-            retVal.html = (<string>packageHacks[pkg]?.html).replaceAll("${baseUrl}", baseUrl);
+        if (NpmPackageLoader.packageHacks[pkg]?.html) {
+            retVal.html = (<string>NpmPackageLoader.packageHacks[pkg]?.html).replaceAll("${baseUrl}", baseUrl);
         }
-        if (packageHacks[pkg]?.style) {
-            retVal.style = (<string>packageHacks[pkg]?.style).replaceAll("${baseUrl}", baseUrl);
+        if (NpmPackageLoader.packageHacks[pkg]?.style) {
+            retVal.style = (<string>NpmPackageLoader.packageHacks[pkg]?.style).replaceAll("${baseUrl}", baseUrl);
         }
         return retVal;
     }
@@ -350,9 +355,9 @@ export class NpmPackageLoader {
 
             importMap.imports[packageJsonObj.name + '/'] = baseUrl;
 
-            if (packageHacks[packageJsonObj.name]?.map) {
-                for (let h in packageHacks[packageJsonObj.name]?.map) [
-                    importMap.imports[h] = baseUrl + packageHacks[packageJsonObj.name].map[h]
+            if (NpmPackageLoader.packageHacks[packageJsonObj.name]?.map) {
+                for (let h in NpmPackageLoader.packageHacks[packageJsonObj.name]?.map) [
+                    importMap.imports[h] = baseUrl + NpmPackageLoader.packageHacks[packageJsonObj.name].map[h]
                 ]
             }
 

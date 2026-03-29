@@ -1,5 +1,7 @@
 //included from: https://github.com/chdh/plain-scrollbar
 
+import { css, html } from "@node-projects/base-custom-webcomponent";
+
 class Widget {
 
   private host: PlainScrollbar;
@@ -34,7 +36,8 @@ class Widget {
     this.host = host;
     host.attachShadow({ mode: "open" });
     const shadowRoot = host.shadowRoot!;
-    shadowRoot.innerHTML = scrollbarHtmlTemplate;
+    shadowRoot.appendChild(scrollbarHtmlTemplate.content.cloneNode(true));
+    shadowRoot.adoptedStyleSheets = [scrollbarStyle];
     this.root = <HTMLElement>shadowRoot.querySelector("#root")!;
     this.trough = <HTMLElement>shadowRoot.querySelector("#trough")!;
     this.button1 = <HTMLElement>shadowRoot.querySelector("#button1")!;
@@ -401,7 +404,7 @@ const EPS = 1E-9;
 const buttonSize = "var(--plain-scrollbar-button-size, 13px)";
 const buttonPath = '<path d="M -60 30 h 120 L 0 -30 z" stroke-width="0"/>';
 
-const scrollbarStyle = `
+const scrollbarStyle = css`
     :host {
        display: block;
        contain: content;
@@ -502,8 +505,7 @@ const scrollbarStyle = `
     }
     `;
 
-const scrollbarHtmlTemplate = `
-    <style>${scrollbarStyle}</style>
+const scrollbarHtmlTemplate = html`
     <div id="root" part="root">
      <div id="button1" part="button button1">
       <svg id="upArrow" part="arrow upArrow" viewBox="-100 -100 200 200">${buttonPath}</svg>

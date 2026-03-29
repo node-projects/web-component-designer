@@ -4,12 +4,13 @@ import { IExtensionManager } from "./IExtensionManger.js";
 import { IDesignerCanvas } from "../IDesignerCanvas.js";
 import { IDesignItem } from "../../../item/IDesignItem.js";
 import { ImageButtonListSelector } from "../../../controls/ImageButtonListSelector.js";
+import { htmlAsString } from "../../../helper/Helper.js";
 
 export const basicStackedToolbarExtensionOverlayOptionName = 'basicStackedToolbarExtensionShowOverlay';
 
 export class BasicStackedToolbarExtension extends AbstractExtension {
 
-  protected static basicTemplate = `
+  protected static basicTemplate = htmlAsString`
       <select title="position" id="position" style="pointer-events: auto; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
         <option>static</option>
         <option>relative</option>

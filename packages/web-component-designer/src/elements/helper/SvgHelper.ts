@@ -11,3 +11,7 @@ export function isVisualSvgElement(element: SVGElement) {
     }
     return true;
 }
+
+export function svgAsString(strings: TemplateStringsArray, ...values: any[]) {
+    return strings[0];
+}

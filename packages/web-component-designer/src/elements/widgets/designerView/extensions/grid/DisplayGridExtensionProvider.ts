@@ -5,6 +5,7 @@ import { IDesignerExtension } from '../IDesignerExtension.js';
 import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 import { DisplayGridExtension } from './DisplayGridExtension.js';
+import { svgAsString } from '../../../../helper/SvgHelper.js';
 
 export const gridExtensionShowOverlayOptionName = 'gridExtensionShowOverlay';
 
@@ -38,7 +39,7 @@ export class DisplayGridExtensionProvider implements IDesignerExtensionProvider 
     .svg-grid-plus-sign { stroke: black; }
   `;
 
-  static readonly svgDefs = `
+  static readonly svgDefs = svgAsString`
     <pattern id="pattern-stripe-grid" 
       width="4" height="4" 
       patternUnits="userSpaceOnUse"
