@@ -1097,11 +1097,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     divElement.style.display = 'none';
   }
 
-  private _searchRun() {
+  private async _searchRun() {
     let input = this._getDomElement<HTMLInputElement>('node-projects-designer-search-input');
     this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = "0 selected";
     if (input.value != "") {
-      const result = this.serviceContainer.searchService.search(this, input.value);
+      const result = await this.serviceContainer.searchService.search(this, input.value);
       if (result?.length > 0) {
         this.instanceServiceContainer.selectionService.setSelectedElements(result.map(r => r.designItem));
         this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = result.length.toString() + " selected";
