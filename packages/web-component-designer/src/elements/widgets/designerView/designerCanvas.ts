@@ -1086,9 +1086,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _searchShowOverlay() {
-    let divElement = this._getDomElement('node-projects-designer-search-container') as HTMLDivElement;
-    divElement.style.display = '';
-    this._getDomElement<HTMLInputElement>('node-projects-designer-search-input').focus();
+    if (this.serviceContainer.searchService) {
+      let divElement = this._getDomElement('node-projects-designer-search-container') as HTMLDivElement;
+      divElement.style.display = '';
+      this._getDomElement<HTMLInputElement>('node-projects-designer-search-input').focus();
+    }
   }
   private _searchHideOverlay() {
     let divElement = this._getDomElement('node-projects-designer-search-container') as HTMLDivElement;
@@ -1099,15 +1101,10 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     let input = this._getDomElement<HTMLInputElement>('node-projects-designer-search-input');
     this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = "0 selected";
     if (input.value != "") {
-      let selectedElements = this._canvasShadowRoot.querySelectorAll(input.value);
-      let designItems = [];
-      for (let i = 0; i <= selectedElements.length; i++) {
-        if (this._canvasShadowRoot.contains(selectedElements[i]))
-          designItems.push(DesignItem.GetDesignItem(selectedElements[i]));
-      }
-      if (designItems.length > 0) {
-        this.instanceServiceContainer.selectionService.setSelectedElements(designItems);
-        this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = designItems.length.toString() + " selected";
+      const result = this.serviceContainer.searchService.search(this, input.value);
+      if (result.length > 0) {
+        this.instanceServiceContainer.selectionService.setSelectedElements(result.map(r => r.designItem));
+        this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = result.length.toString() + " selected";
       }
     }
   }

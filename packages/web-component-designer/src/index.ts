@@ -188,6 +188,10 @@ export type { IRefactoring } from "./elements/services/refactorService/IRefactor
 
 export type { IReferencesChangedService } from "./elements/services/referencesChangedService/IReferencesChangedService.js";
 
+export * from "./elements/services/searchService/SearchService.js";
+export type { ISearchService } from "./elements/services/searchService/ISearchService.js";
+export type { ISearchResult } from "./elements/services/searchService/ISearchResult.js";
+
 export type { ISelectionChangedEvent } from "./elements/services/selectionService/ISelectionChangedEvent.js";
 export type { ISelectionRefreshEvent } from "./elements/services/selectionService/ISelectionRefreshEvent.js";
 export type { ISelectionService } from "./elements/services/selectionService/ISelectionService.js";

@@ -109,6 +109,7 @@ import { DesignItemService } from './designItemService/DesignItemService.js';
 import { DeletionService } from './deletionService/DeletionService.js';
 import { MiniatureViewService } from './miniatureViewService/MiniatureViewService.js';
 import { DisplayMediaPngWriterService } from './pngCreatorService/DisplayMediaPngWriterService.js';
+import { SearchService } from './searchService/SearchService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -142,6 +143,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("deletionService", new DeletionService());
   serviceContainer.register("miniatureViewService", new MiniatureViewService());
   serviceContainer.register("pngCreatorService", new DisplayMediaPngWriterService());
+  serviceContainer.register("searchService", new SearchService());
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
   serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
