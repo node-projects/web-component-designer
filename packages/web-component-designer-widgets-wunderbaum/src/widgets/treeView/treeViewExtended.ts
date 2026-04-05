@@ -84,6 +84,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         </div>
       </div>`;
 
+  public static properties = {
+    instanceServiceContainer: Object,
+  }
+
   constructor() {
     super();
     this._restoreCachedInititalValues();
