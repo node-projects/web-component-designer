@@ -188,7 +188,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   selectedFromTree = false;
 
-  async initWunderbaum() {
+  private _initWunderbaum() {
     this._tree = new Wunderbaum({
       ...defaultOptions,
       element: this._treeDiv,
@@ -372,7 +372,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._instanceServiceContainer = value;
     if (this._instanceServiceContainer) {
       if (!this._tree)
-        this.initWunderbaum();
+        this._initWunderbaum();
       this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
         this.selectionChanged(e);
       });
