@@ -188,6 +188,13 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   selectedFromTree = false;
 
+  async ready() {
+    this._initWunderbaum();
+    if (this._instanceServiceContainer) {
+      this.createTree(this._instanceServiceContainer.contentService.rootDesignItem);
+    }
+  }
+
   private _initWunderbaum() {
     this._tree = new Wunderbaum({
       ...defaultOptions,
@@ -371,8 +378,6 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     this._contentChangedHandler?.dispose();
     this._instanceServiceContainer = value;
     if (this._instanceServiceContainer) {
-      if (!this._tree)
-        this._initWunderbaum();
       this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
         this.selectionChanged(e);
       });
@@ -388,7 +393,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           }, 20);
         }
       });
-      this.createTree(value.contentService.rootDesignItem);
+      if (this._tree)
+        this.createTree(value.contentService.rootDesignItem);
     } else {
       this._tree.root.removeChildren();
     }
