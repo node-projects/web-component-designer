@@ -6,7 +6,7 @@ import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 export class SimpleDemoProviderService implements IDemoProviderService {
   async provideDemo(container: HTMLElement, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string) {
     const contentDiv = document.createElement('div');
-    let shadowRoot = contentDiv.attachShadow({ mode: 'open' });
+    let shadowRoot = contentDiv.attachShadow({ mode: 'open', serializable: true });
     contentDiv.style.width = '100%';
     contentDiv.style.height = '100%';
     contentDiv.style.border = 'none';
