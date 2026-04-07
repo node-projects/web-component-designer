@@ -403,10 +403,12 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
         let parentElement = getParentElementIncludingSlots(actualElement, iframes);
 
         if (actualElement.assignedSlot != null) {
-            const st = getCachedComputedStyle(actualElement);
-            if (st.position !== "static") {
-                const mvMat = new DOMMatrix().translate(parseFloat(st.left), parseFloat(st.top));
-                originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+            if (actualElement.nodeType === Node.ELEMENT_NODE) {
+                const st = getCachedComputedStyle(actualElement);
+                if (st.position !== "static") {
+                    const mvMat = new DOMMatrix().translate(parseFloat(st.left), parseFloat(st.top));
+                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+                }
             }
             /*
             
