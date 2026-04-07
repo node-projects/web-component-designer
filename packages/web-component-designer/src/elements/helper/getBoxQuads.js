@@ -409,6 +409,10 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                     const mvMat = new DOMMatrix().translate(parseFloat(st.left), parseFloat(st.top));
                     originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
                 }
+            } else if (actualElement.nodeType === Node.TEXT_NODE) {
+                const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
+                const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
+                originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
             }
             /*
             
