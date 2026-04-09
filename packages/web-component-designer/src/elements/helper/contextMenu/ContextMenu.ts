@@ -224,7 +224,16 @@ export class ContextMenu implements IContextMenu {
         if (item.disabled) {
           li.setAttribute("disabled", "");
         } else {
-          if (item.action)
+          if (item.checkable) {
+            li.addEventListener('click', (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              item.checked = !item.checked;
+              icon_span.innerHTML = item.checked ? '✔' : (item.icon ?? this.options?.defaultIcon ?? '');
+              if (item.action)
+                item.action(e, item, this.context, this);
+            });
+          } else if (item.action)
             li.addEventListener('click', (e) => {
               e.stopPropagation();
               e.preventDefault();

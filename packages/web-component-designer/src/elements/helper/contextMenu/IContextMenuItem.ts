@@ -9,7 +9,8 @@ export interface IContextMenuItem {
 	readonly children?: IContextMenuItem[],
 	readonly disabled?: boolean,
 	readonly shortCut?: string;
-  readonly checked?: boolean;
+	readonly checkable?: boolean;
+	checked?: boolean;
 
 	action?: (event: MouseEvent, item: IContextMenuItem, context?: any, menu?: IContextMenu) => void
 };
