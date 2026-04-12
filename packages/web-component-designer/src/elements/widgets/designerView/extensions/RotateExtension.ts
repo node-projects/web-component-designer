@@ -6,13 +6,14 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
+import { getEdgeOffsetPoint, getQuadCenter } from '../../../helper/QuadEdgeHandleHelper.js';
 
 export class RotateExtension extends AbstractExtension {
 
-  private _rotateLine: SVGLineElement;
-  private _rotateCircle: SVGCircleElement;
-  private _startPoint: IPoint;
-  private _rotateCirclePosition: IPoint;
+  private _rotateLine?: SVGLineElement;
+  private _rotateCircle?: SVGCircleElement;
+  private _startPoint: IPoint | null = null;
+  private _rotateCirclePosition: IPoint = { x: 0, y: 0 };
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem) {
     super(extensionManager, designerView, extendedItem);
@@ -24,27 +25,36 @@ export class RotateExtension extends AbstractExtension {
 
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    const size = getElementSize(this.extendedItem.element);
+    const quad = this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+    if (!quad) {
+      return;
+    }
 
-    let p1 = { x: size.width / 2, y: -30 / this.designerCanvas.zoomFactor };
+    const points = [quad.p1, quad.p2, quad.p3, quad.p4];
+    if (points.some(point => !Number.isFinite(point.x) || !Number.isFinite(point.y))) {
+      this.remove();
+      return;
+    }
 
-    let l1 = { x: size.width / 2, y: -22 / this.designerCanvas.zoomFactor };
-    let l2 = { x: size.width / 2, y: -6 / this.designerCanvas.zoomFactor };
+    if (!this._valuesHaveChanges(this.designerCanvas.zoomFactor, ...points.flatMap(point => [point.x, point.y]))) {
+      return;
+    }
 
-    this._rotateCirclePosition = p1;
+    const quadCenter = getQuadCenter(quad);
+    const handlePoint = getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 30 / this.designerCanvas.zoomFactor, { x: 0, y: -1 });
+    const lineStart = getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 22 / this.designerCanvas.zoomFactor, { x: 0, y: -1 });
+    const lineEnd = getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 6 / this.designerCanvas.zoomFactor, { x: 0, y: -1 });
 
-    let p1t = this.designerCanvas.canvas.convertPointFromNode(p1, this.extendedItem.element);
-    let l1t = this.designerCanvas.canvas.convertPointFromNode(l1, this.extendedItem.element);
-    let l2t = this.designerCanvas.canvas.convertPointFromNode(l2, this.extendedItem.element);
-    this._rotateLine = this._drawLine(l1t.x, l1t.y, l2t.x, l2t.y, 'svg-primary-rotate-line', this._rotateLine);
+    this._rotateLine = this._drawLine(lineStart.x, lineStart.y, lineEnd.x, lineEnd.y, 'svg-primary-rotate-line', this._rotateLine);
     this._rotateLine.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
 
     if (!this._rotateCircle) {
-      this._rotateCircle = this._drawCircle(p1t.x, p1t.y, 5 / this.designerCanvas.zoomFactor, 'svg-primary-rotate', this._rotateCircle);
+      this._rotateCircle = this._drawCircle(handlePoint.x, handlePoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-primary-rotate', this._rotateCircle);
       this._rotateCircle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
 
       this._rotateCircle.addEventListener("pointerdown", e => {
         e.stopPropagation();
+        this._rotateCirclePosition = this._getRotateReferencePoint();
         (<Element>e.target).setPointerCapture(e.pointerId);
         let mp = this.designerCanvas.getNormalizedEventCoordinates(e);
         this._startPoint = this.extendedItem.element.convertPointFromNode({ x: mp.x, y: mp.y }, this.designerCanvas.canvas);
@@ -68,8 +78,33 @@ export class RotateExtension extends AbstractExtension {
         this.extendedItem.setStyle('rotate', this.getAngle(e) + 'deg')
       });
     } else {
-      this._rotateCircle = this._drawCircle(p1t.x, p1t.y, 5 / this.designerCanvas.zoomFactor, 'svg-primary-rotate', this._rotateCircle);
+      this._rotateCircle = this._drawCircle(handlePoint.x, handlePoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-primary-rotate', this._rotateCircle);
       this._rotateCircle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+    }
+  }
+
+  private _getRotateReferencePoint() {
+    const element = this.extendedItem.element as HTMLElement;
+    const size = getElementSize(this.extendedItem.element);
+    const fallback = { x: size.width / 2, y: -30 / this.designerCanvas.zoomFactor };
+    const inlineRotate = element.style.rotate;
+
+    try {
+      element.style.rotate = 'none';
+      const quad = element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+      if (!quad) {
+        return fallback;
+      }
+
+      const quadCenter = getQuadCenter(quad);
+      const handlePoint = getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 30 / this.designerCanvas.zoomFactor, { x: 0, y: -1 });
+      const localPoint = element.convertPointFromNode(handlePoint, this.designerCanvas.canvas);
+      if (!Number.isFinite(localPoint.x) || !Number.isFinite(localPoint.y)) {
+        return fallback;
+      }
+      return { x: localPoint.x, y: localPoint.y };
+    } finally {
+      element.style.rotate = inlineRotate;
     }
   }
 

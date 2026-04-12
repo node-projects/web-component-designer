@@ -6,16 +6,17 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
+import { getEdgeOffsetPoint, getQuadCenter } from '../../../helper/QuadEdgeHandleHelper.js';
 
 type SkewAxis = 'x' | 'y';
 
 export class SkewExtension extends AbstractExtension {
-  private _skewXLine: SVGLineElement;
-  private _skewYLine: SVGLineElement;
-  private _skewXCircle: SVGCircleElement;
-  private _skewYCircle: SVGCircleElement;
-  private _skewXReferencePoint: IPoint;
-  private _skewYReferencePoint: IPoint;
+  private _skewXLine?: SVGLineElement;
+  private _skewYLine?: SVGLineElement;
+  private _skewXCircle?: SVGCircleElement;
+  private _skewYCircle?: SVGCircleElement;
+  private _skewXReferencePoint: IPoint = { x: 0, y: 0 };
+  private _skewYReferencePoint: IPoint = { x: 0, y: 0 };
   private _activeAxis: SkewAxis | null = null;
   private _baseTransform = '';
   private _skewX = 0;
@@ -30,27 +31,31 @@ export class SkewExtension extends AbstractExtension {
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
-    const size = getElementSize(this.extendedItem.element);
+    const quad = this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+    if (!quad) {
+      return;
+    }
+
+    const points = [quad.p1, quad.p2, quad.p3, quad.p4];
+    if (points.some(point => !Number.isFinite(point.x) || !Number.isFinite(point.y))) {
+      this.remove();
+      return;
+    }
+
     const zoomFactor = this.designerCanvas.zoomFactor;
 
-    const skewXHandle = { x: size.width / 2, y: -56 / zoomFactor };
-    const skewXLineStart = { x: size.width / 2, y: -48 / zoomFactor };
-    const skewXLineEnd = { x: size.width / 2, y: -38 / zoomFactor };
+    if (!this._valuesHaveChanges(zoomFactor, ...points.flatMap(point => [point.x, point.y]))) {
+      return;
+    }
 
-    const skewYHandle = { x: size.width + 30 / zoomFactor, y: size.height / 2 };
-    const skewYLineStart = { x: size.width + 22 / zoomFactor, y: size.height / 2 };
-    const skewYLineEnd = { x: size.width + 6 / zoomFactor, y: size.height / 2 };
+    const quadCenter = getQuadCenter(quad);
+    const skewXHandleCanvas = getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 56 / zoomFactor, { x: 0, y: -1 });
+    const skewXLineStartCanvas = getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 48 / zoomFactor, { x: 0, y: -1 });
+    const skewXLineEndCanvas = getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 38 / zoomFactor, { x: 0, y: -1 });
 
-    this._skewXReferencePoint = skewXHandle;
-    this._skewYReferencePoint = skewYHandle;
-
-    const skewXHandleCanvas = this.designerCanvas.canvas.convertPointFromNode(skewXHandle, this.extendedItem.element);
-    const skewXLineStartCanvas = this.designerCanvas.canvas.convertPointFromNode(skewXLineStart, this.extendedItem.element);
-    const skewXLineEndCanvas = this.designerCanvas.canvas.convertPointFromNode(skewXLineEnd, this.extendedItem.element);
-
-    const skewYHandleCanvas = this.designerCanvas.canvas.convertPointFromNode(skewYHandle, this.extendedItem.element);
-    const skewYLineStartCanvas = this.designerCanvas.canvas.convertPointFromNode(skewYLineStart, this.extendedItem.element);
-    const skewYLineEndCanvas = this.designerCanvas.canvas.convertPointFromNode(skewYLineEnd, this.extendedItem.element);
+    const skewYHandleCanvas = getEdgeOffsetPoint(quad.p2, quad.p3, quadCenter, 30 / zoomFactor, { x: 1, y: 0 });
+    const skewYLineStartCanvas = getEdgeOffsetPoint(quad.p2, quad.p3, quadCenter, 22 / zoomFactor, { x: 1, y: 0 });
+    const skewYLineEndCanvas = getEdgeOffsetPoint(quad.p2, quad.p3, quadCenter, 6 / zoomFactor, { x: 1, y: 0 });
 
     this._skewXLine = this._drawLine(skewXLineStartCanvas.x, skewXLineStartCanvas.y, skewXLineEndCanvas.x, skewXLineEndCanvas.y, 'svg-primary-skew-line', this._skewXLine);
     this._skewYLine = this._drawLine(skewYLineStartCanvas.x, skewYLineStartCanvas.y, skewYLineEndCanvas.x, skewYLineEndCanvas.y, 'svg-primary-skew-line', this._skewYLine);
@@ -89,6 +94,11 @@ export class SkewExtension extends AbstractExtension {
       case 'pointerdown':
         target.setPointerCapture(event.pointerId);
         this._readPersistedTransform();
+        if (axis === 'x') {
+          this._skewXReferencePoint = this._getSkewReferencePoint('x');
+        } else {
+          this._skewYReferencePoint = this._getSkewReferencePoint('y');
+        }
         this._activeAxis = axis;
         break;
       case 'pointermove':
@@ -123,6 +133,36 @@ export class SkewExtension extends AbstractExtension {
     this._baseTransform = baseTransform;
     this._skewX = skewX;
     this._skewY = skewY;
+  }
+
+  private _getSkewReferencePoint(axis: SkewAxis) {
+    const element = this.extendedItem.element as HTMLElement;
+    const size = getElementSize(this.extendedItem.element);
+    const zoomFactor = this.designerCanvas.zoomFactor;
+    const fallback = axis === 'x'
+      ? { x: size.width / 2, y: -56 / zoomFactor }
+      : { x: size.width + 30 / zoomFactor, y: size.height / 2 };
+    const inlineTransform = element.style.transform;
+
+    try {
+      element.style.transform = this._buildTransform(this._baseTransform, axis === 'x' ? 0 : this._skewX, axis === 'y' ? 0 : this._skewY);
+      const quad = element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas })[0];
+      if (!quad) {
+        return fallback;
+      }
+
+      const quadCenter = getQuadCenter(quad);
+      const handlePoint = axis === 'x'
+        ? getEdgeOffsetPoint(quad.p1, quad.p2, quadCenter, 56 / zoomFactor, { x: 0, y: -1 })
+        : getEdgeOffsetPoint(quad.p2, quad.p3, quadCenter, 30 / zoomFactor, { x: 1, y: 0 });
+      const localPoint = element.convertPointFromNode(handlePoint, this.designerCanvas.canvas);
+      if (!Number.isFinite(localPoint.x) || !Number.isFinite(localPoint.y)) {
+        return fallback;
+      }
+      return { x: localPoint.x, y: localPoint.y };
+    } finally {
+      element.style.transform = inlineTransform;
+    }
   }
 
   private _setPreviewTransform() {

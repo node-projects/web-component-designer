@@ -24,6 +24,7 @@ export * from "./elements/helper/SwitchContainerHelper.js";
 export * from "./elements/helper/NpmPackageLoader.js";
 export * from "./elements/helper/LayoutHelper.js";
 export * from "./elements/helper/SelectionHelper.js";
+export * from "./elements/helper/QuadEdgeHandleHelper.js";
 export type { IContextMenuItem, IContextMenu } from "./elements/helper/contextMenu/IContextMenuItem.js";
 
 export * from "./elements/item/DesignItem.js";
@@ -287,6 +288,8 @@ export * from "./elements/widgets/designerView/extensions/MarginExtension.js";
 export * from "./elements/widgets/designerView/extensions/MarginExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/PaddingExtension.js";
 export * from "./elements/widgets/designerView/extensions/PaddingExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/ProjectiveTransformExtension.js";
+export * from "./elements/widgets/designerView/extensions/ProjectiveTransformExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/logic/ConditionExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/ExtensionManager.js";
 export * from "./elements/widgets/designerView/extensions/FlexboxExtension.js";
