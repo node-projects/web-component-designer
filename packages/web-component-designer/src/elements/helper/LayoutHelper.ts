@@ -5,6 +5,7 @@
 import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 import { getBoundingClientRectAlsoForDisplayContents } from "./ElementHelper.js";
+import { getGeometryReader } from "../widgets/designerView/extensions/svg/geometry/GeometryReaderFactory.js";
 
 /**
  * This function filters a items list, so only the outer elments are used for example in a move
@@ -28,11 +29,11 @@ export function filterChildPlaceItems(items: IDesignItem[]) {
 export function getDesignItemCurrentPos(designItem: IDesignItem, mode: 'position' | 'transform' | 'margin' | 'padding'): IPoint {
   if (mode === 'position') {
     const computedStyleMovedElement = getComputedStyle(designItem.element);
-    let oldLeft = parseFloat(computedStyleMovedElement.left);
+    let oldLeft: number | null = parseFloat(computedStyleMovedElement.left);
     oldLeft = Number.isNaN(oldLeft) ? null : oldLeft;
-    let oldTop = parseFloat(computedStyleMovedElement.top);
+    let oldTop: number | null = parseFloat(computedStyleMovedElement.top);
     oldTop = Number.isNaN(oldTop) ? null : oldTop;
-    return { x: oldLeft, y: oldTop }
+    return { x: oldLeft ?? 0, y: oldTop ?? 0 }
   }
   return { x: 0, y: 0 }
 }
@@ -42,11 +43,16 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
   const computedStyleMovedElement = getComputedStyle(movedElement);
 
   if (mode === 'position') {
-    let positionedContainerElement = container.element;
+    if (_placeSvgDesignItem(designItem, offset)) {
+      return;
+    }
+
+    let positionedContainerElement: Element | null = container.element;
     let computedStylePositionedContainer = container.getComputedStyle();
-    if (computedStylePositionedContainer.position !== 'relative' && computedStylePositionedContainer.position !== 'absolute' && (<HTMLElement>positionedContainerElement).offsetParent) {
+    if (computedStylePositionedContainer.position !== 'relative' && computedStylePositionedContainer.position !== 'absolute' && positionedContainerElement && (<HTMLElement>positionedContainerElement).offsetParent) {
       positionedContainerElement = (<HTMLElement>positionedContainerElement).offsetParent;
-      computedStylePositionedContainer = container.window.getComputedStyle(positionedContainerElement);
+      if (positionedContainerElement)
+        computedStylePositionedContainer = container.window.getComputedStyle(positionedContainerElement);
     }
 
     let oldLeft = null;
@@ -71,7 +77,7 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
       oldBottom = Number.isNaN(oldBottom) ? null : oldBottom;
       hasPositionedLayout = true;
     } else {
-      if (positionedContainerElement !== container.element) {
+      if (positionedContainerElement && positionedContainerElement !== container.element) {
         let posContainerRect = getBoundingClientRectAlsoForDisplayContents(positionedContainerElement);
         let elementRect = getBoundingClientRectAlsoForDisplayContents(designItem.element);
         containerLeft = elementRect.left - posContainerRect.left;
@@ -92,6 +98,47 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
     if (oldBottom != null)
       designItem.setStyle('bottom', roundValue(designItem, (oldBottom ?? 0) - offset.y + containerBottom) + "px");
   }
+}
+
+function _placeSvgDesignItem(designItem: IDesignItem, offset: IPoint): boolean {
+  const element = designItem.element;
+  if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {
+    return false;
+  }
+
+  const reader = getGeometryReader(element);
+  if (!reader) {
+    return false;
+  }
+
+  const geometry = reader.read(element);
+  for (const segment of geometry.segments) {
+    if (segment.point) {
+      segment.point.x += offset.x;
+      segment.point.y += offset.y;
+    }
+    if (segment.cp1) {
+      segment.cp1.x += offset.x;
+      segment.cp1.y += offset.y;
+    }
+    if (segment.cp2) {
+      segment.cp2.x += offset.x;
+      segment.cp2.y += offset.y;
+    }
+  }
+
+  const attrs = reader.serialize(geometry);
+  if (!attrs.length) {
+    return false;
+  }
+
+  const group = designItem.openGroup('place svg geometry');
+  for (const attr of attrs) {
+    designItem.setAttribute(attr.attribute, attr.value);
+  }
+  group.commit();
+
+  return true;
 }
 
 export function roundValue(designItem: IDesignItem, value: number) {
