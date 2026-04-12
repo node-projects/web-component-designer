@@ -1,21 +1,15 @@
 export class CssCombiner {
   private static _helperElement = document.createElement('div');
 
-  //todo: inset, flex flow, place content...
-  //flex => flex-grow, flex-shrink, flex-basis
-
   static combine(styles: Map<string, string>, globalStyles?: Map<string, string>) {
-    let e = CssCombiner._helperElement;
-    e.setAttribute('style', '');
-    for (let s of styles) {
-      e.style[s[0]] = s[1];
-    }
+    CssCombiner.applyStylesToHelper(styles);
     CssCombiner.combineBorder(styles);
     CssCombiner.combineMargin(styles);
     CssCombiner.combinePadding(styles);
     CssCombiner.combineInset(styles);
     CssCombiner.combineBackground(styles);
     CssCombiner.combineFont(styles);
+    styles = CssCombiner.combineBrowserSupportedShorthands(styles);
 
     if (globalStyles) {
       for (let g of globalStyles) {
@@ -26,6 +20,186 @@ export class CssCombiner {
       }
     }
     return styles;
+  }
+
+  private static applyStylesToHelper(styles: Map<string, string>) {
+    let e = CssCombiner._helperElement;
+    e.setAttribute('style', '');
+    for (let s of styles) {
+      if (s[0].startsWith('--') || s[0].includes('-'))
+        e.style.setProperty(s[0], s[1]);
+      else
+        (<any>e.style)[s[0]] = s[1];
+    }
+    return e;
+  }
+
+  private static combineBrowserSupportedShorthands(styles: Map<string, string>) {
+    const originalNormalizedValues = CssCombiner.getNormalizedStyleValues(styles);
+    let combinedStyles = new Map(styles);
+
+    while (true) {
+      const candidateStyles = CssCombiner.parseStyleDeclarationList(CssCombiner.applyStylesToHelper(combinedStyles).style.cssText);
+      let bestCandidate: Map<string, string> | null = null;
+      let bestSavings = 0;
+
+      for (let candidate of candidateStyles) {
+        const coverage = CssCombiner.getCandidateCoverage(combinedStyles, originalNormalizedValues, candidate[0], candidate[1]);
+        if (coverage.length === 0)
+          continue;
+
+        let tentativeStyles = new Map(combinedStyles);
+        for (let coveredStyle of coverage)
+          tentativeStyles.delete(coveredStyle);
+        tentativeStyles.set(candidate[0], candidate[1]);
+
+        const savings = CssCombiner.getSerializedSize(combinedStyles) - CssCombiner.getSerializedSize(tentativeStyles);
+        if (savings <= 0)
+          continue;
+
+        if (!CssCombiner.matchesNormalizedStyleValues(tentativeStyles, originalNormalizedValues))
+          continue;
+
+        if (savings > bestSavings) {
+          bestSavings = savings;
+          bestCandidate = tentativeStyles;
+        }
+      }
+
+      if (!bestCandidate)
+        return combinedStyles;
+
+      combinedStyles = bestCandidate;
+    }
+  }
+
+  private static getNormalizedStyleValues(styles: Map<string, string>) {
+    const element = CssCombiner.applyStylesToHelper(styles);
+    const normalizedValues = new Map<string, string>();
+
+    for (let style of styles)
+      normalizedValues.set(style[0], CssCombiner.readStyleValue(element.style, style[0]));
+
+    return normalizedValues;
+  }
+
+  private static getCandidateCoverage(styles: Map<string, string>, originalNormalizedValues: Map<string, string>, candidateName: string, candidateValue: string) {
+    const element = CssCombiner.applyStylesToHelper(new Map([[candidateName, candidateValue]]));
+    const coverage: string[] = [];
+
+    for (let style of styles) {
+      const originalValue = originalNormalizedValues.get(style[0]);
+      if (!originalValue)
+        continue;
+
+      if (CssCombiner.readStyleValue(element.style, style[0]) === originalValue)
+        coverage.push(style[0]);
+    }
+
+    return coverage;
+  }
+
+  private static matchesNormalizedStyleValues(styles: Map<string, string>, originalNormalizedValues: Map<string, string>) {
+    const element = CssCombiner.applyStylesToHelper(styles);
+
+    for (let normalizedValue of originalNormalizedValues) {
+      if (CssCombiner.readStyleValue(element.style, normalizedValue[0]) !== normalizedValue[1])
+        return false;
+    }
+
+    return true;
+  }
+
+  private static readStyleValue(style: CSSStyleDeclaration, name: string) {
+    if (name.startsWith('--') || name.includes('-'))
+      return style.getPropertyValue(name).trim();
+
+    return String((<any>style)[name] ?? '').trim();
+  }
+
+  private static getSerializedSize(styles: Map<string, string>) {
+    let size = 0;
+    for (let style of styles)
+      size += style[0].length + style[1].length + 2;
+    return size;
+  }
+
+  private static parseStyleDeclarationList(cssText: string) {
+    let styles = new Map<string, string>();
+    let start = 0;
+    let quote: string | null = null;
+    let parenthesisDepth = 0;
+
+    for (let i = 0; i < cssText.length; i++) {
+      const c = cssText[i];
+      if (quote) {
+        if (c === quote && cssText[i - 1] !== '\\')
+          quote = null;
+        continue;
+      }
+
+      if (c === '"' || c === '\'') {
+        quote = c;
+        continue;
+      }
+
+      if (c === '(') {
+        parenthesisDepth++;
+        continue;
+      }
+      if (c === ')' && parenthesisDepth > 0) {
+        parenthesisDepth--;
+        continue;
+      }
+
+      if (c === ';' && parenthesisDepth === 0) {
+        CssCombiner.addStyleDeclaration(styles, cssText.substring(start, i));
+        start = i + 1;
+      }
+    }
+
+    CssCombiner.addStyleDeclaration(styles, cssText.substring(start));
+    return styles;
+  }
+
+  private static addStyleDeclaration(styles: Map<string, string>, declaration: string) {
+    const trimmedDeclaration = declaration.trim();
+    if (!trimmedDeclaration)
+      return;
+
+    let quote: string | null = null;
+    let parenthesisDepth = 0;
+
+    for (let i = 0; i < trimmedDeclaration.length; i++) {
+      const c = trimmedDeclaration[i];
+      if (quote) {
+        if (c === quote && trimmedDeclaration[i - 1] !== '\\')
+          quote = null;
+        continue;
+      }
+
+      if (c === '"' || c === '\'') {
+        quote = c;
+        continue;
+      }
+
+      if (c === '(') {
+        parenthesisDepth++;
+        continue;
+      }
+      if (c === ')' && parenthesisDepth > 0) {
+        parenthesisDepth--;
+        continue;
+      }
+
+      if (c === ':' && parenthesisDepth === 0) {
+        const name = trimmedDeclaration.substring(0, i).trim();
+        const value = trimmedDeclaration.substring(i + 1).trim();
+        if (name)
+          styles.set(name, value);
+        return;
+      }
+    }
   }
 
   private static combineBorder(styles: Map<string, string>) {
