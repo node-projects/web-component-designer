@@ -19,6 +19,11 @@ interface DragState {
   startScrollOffset: IPoint;
 }
 
+interface SvgOverlayTransform {
+  bbox: DOMRect;
+  quad: DOMQuad;
+}
+
 export interface UnifiedGeometryExtensionOptions {
   allowShapeDrag?: boolean;
 }
@@ -127,11 +132,25 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   }
 
   private _getRefreshValues(geometry: IGeometry): (number | string)[] {
+    const transformedBoxQuad = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.canvas })[0];
     const values: (number | string)[] = [
       this.designerCanvas.zoomFactor,
       this.designerCanvas.scaleFactor,
       this._overlayStructureSignature ?? ''
     ];
+
+    if (transformedBoxQuad) {
+      values.push(
+        transformedBoxQuad.p1.x,
+        transformedBoxQuad.p1.y,
+        transformedBoxQuad.p2.x,
+        transformedBoxQuad.p2.y,
+        transformedBoxQuad.p3.x,
+        transformedBoxQuad.p3.y,
+        transformedBoxQuad.p4.x,
+        transformedBoxQuad.p4.y
+      );
+    }
 
     for (const segment of geometry.segments) {
       values.push(segment.type, segment.point.x, segment.point.y);
@@ -153,28 +172,86 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   /** Convert an SVG-element-local coordinate to overlay (canvas) coordinate
    *  using the getBoxQuads polyfill convertPointFromNode */
   private _toOverlay(p: IPoint): IPoint {
-    const normalizedPoint = this._normalizeGeometryPointForSvgTransform(p);
-    const tp = this.designerCanvas.canvas.convertPointFromNode(normalizedPoint, this.extendedItem.element);
+    const transform = this._getSvgOverlayTransform();
+    if (transform && transform.bbox.width !== 0 && transform.bbox.height !== 0) {
+      return this._mapSvgPointToOverlay(p, transform);
+    }
+
+    const fallbackLocalPoint = this._toElementReferenceBoxPoint(p);
+    const tp = this.designerCanvas.canvas.convertPointFromNode(fallbackLocalPoint, this.extendedItem.element);
     return { x: tp.x, y: tp.y };
   }
 
   /** Convert overlay (canvas) coordinate back to SVG-element-local coordinate */
   private _fromOverlay(p: IPoint): IPoint {
+    const transform = this._getSvgOverlayTransform();
+    if (transform && transform.bbox.width !== 0 && transform.bbox.height !== 0) {
+      return this._mapOverlayPointToSvg(p, transform);
+    }
+
     const tp = this.extendedItem.element.convertPointFromNode({ x: p.x, y: p.y }, this.designerCanvas.canvas);
-    return this._denormalizeGeometryPointFromSvgTransform({ x: tp.x, y: tp.y });
+    return this._fromElementReferenceBoxPoint({ x: tp.x, y: tp.y });
   }
 
-  private _normalizeGeometryPointForSvgTransform(p: IPoint): IPoint {
-    const offset = this._getSvgGeometryOffset();
-    return { x: p.x - offset.x, y: p.y - offset.y };
+  private _getSvgOverlayTransform(): SvgOverlayTransform | null {
+    const element = this.extendedItem.element;
+    if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {
+      return null;
+    }
+
+    const quad = element.getBoxQuads({ relativeTo: this.designerCanvas.canvas })[0];
+    if (!quad) {
+      return null;
+    }
+
+    return { bbox: element.getBBox(), quad };
   }
 
-  private _denormalizeGeometryPointFromSvgTransform(p: IPoint): IPoint {
-    const offset = this._getSvgGeometryOffset();
-    return { x: p.x + offset.x, y: p.y + offset.y };
+  private _mapSvgPointToOverlay(p: IPoint, transform: SvgOverlayTransform): IPoint {
+    const { bbox, quad } = transform;
+    const u = (p.x - bbox.x) / bbox.width;
+    const v = (p.y - bbox.y) / bbox.height;
+
+    return {
+      x: quad.p1.x + (quad.p2.x - quad.p1.x) * u + (quad.p4.x - quad.p1.x) * v,
+      y: quad.p1.y + (quad.p2.y - quad.p1.y) * u + (quad.p4.y - quad.p1.y) * v,
+    };
   }
 
-  private _getSvgGeometryOffset(): IPoint {
+  private _mapOverlayPointToSvg(p: IPoint, transform: SvgOverlayTransform): IPoint {
+    const { bbox, quad } = transform;
+    const basisX = { x: quad.p2.x - quad.p1.x, y: quad.p2.y - quad.p1.y };
+    const basisY = { x: quad.p4.x - quad.p1.x, y: quad.p4.y - quad.p1.y };
+    const dx = p.x - quad.p1.x;
+    const dy = p.y - quad.p1.y;
+    const determinant = basisX.x * basisY.y - basisX.y * basisY.x;
+
+    if (Math.abs(determinant) < 1e-10) {
+      return this._fromElementReferenceBoxPoint(
+        this.extendedItem.element.convertPointFromNode({ x: p.x, y: p.y }, this.designerCanvas.canvas)
+      );
+    }
+
+    const u = (dx * basisY.y - dy * basisY.x) / determinant;
+    const v = (dy * basisX.x - dx * basisX.y) / determinant;
+
+    return {
+      x: bbox.x + u * bbox.width,
+      y: bbox.y + v * bbox.height,
+    };
+  }
+
+  private _toElementReferenceBoxPoint(p: IPoint): IPoint {
+    const bbox = this._getSvgGeometryBBoxOffset();
+    return { x: p.x - bbox.x, y: p.y - bbox.y };
+  }
+
+  private _fromElementReferenceBoxPoint(p: IPoint): IPoint {
+    const bbox = this._getSvgGeometryBBoxOffset();
+    return { x: p.x + bbox.x, y: p.y + bbox.y };
+  }
+
+  private _getSvgGeometryBBoxOffset(): IPoint {
     const element = this.extendedItem.element;
     if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {
       return { x: 0, y: 0 };
