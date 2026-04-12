@@ -65,6 +65,7 @@ export type { IContentService } from "./elements/services/contentService/IConten
 export * from "./elements/services/copyPasteService/CopyPasteService.js";
 export * from "./elements/services/copyPasteService/CopyPasteAsJsonService.js";
 export type { ICopyPasteService } from "./elements/services/copyPasteService/ICopyPasteService.js";
+export * from "./elements/services/copyPasteService/PasteFormatSnapshot.js";
 
 export * from "./elements/services/deletionService/DeletionService.js";
 export type { IDeletionService } from "./elements/services/deletionService/IDeletionService.js";
@@ -384,6 +385,7 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/ZoomToElem
 export * from "./elements/widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ForceCssContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/PasteFormatContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
 export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";

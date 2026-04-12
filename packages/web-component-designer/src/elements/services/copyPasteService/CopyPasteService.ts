@@ -19,7 +19,7 @@ export class CopyPasteService implements ICopyPasteService {
 
   async getPasteItems(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<[designItems: IDesignItem[], positions?: IRect[]]> {
     let html = '';
-    let positions: IRect[] = null;
+    let positions: IRect[] | null = null;
     const items = await getFromClipboard();
     if (items != null) {
       try {
@@ -35,6 +35,6 @@ export class CopyPasteService implements ICopyPasteService {
       html = await getTextFromClipboard();
     }
     const parserService = serviceContainer.htmlParserService;
-    return [await parserService.parse(html, serviceContainer, instanceServiceContainer, true), positions];
+    return [await parserService.parse(html, serviceContainer, instanceServiceContainer, true), positions ?? undefined];
   }
 }
