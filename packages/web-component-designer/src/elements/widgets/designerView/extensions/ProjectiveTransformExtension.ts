@@ -9,8 +9,10 @@ import { IExtensionManager } from './IExtensionManger.js';
 type QuadCornerIndex = 0 | 1 | 2 | 3;
 
 export class ProjectiveTransformExtension extends AbstractExtension {
-  private _outline: SVGPathElement;
+  private _outline?: SVGPathElement;
   private _handles: SVGCircleElement[] = [];
+  private _handleCrossHorizontalLines: SVGLineElement[] = [];
+  private _handleCrossVerticalLines: SVGLineElement[] = [];
   private _activeHandleIndex: QuadCornerIndex | null = null;
   private _baseTransform = '';
   private _projectiveTransform = '';
@@ -42,6 +44,7 @@ export class ProjectiveTransformExtension extends AbstractExtension {
       this._outline.style.pointerEvents = 'none';
 
       const radius = 5 / this.designerCanvas.zoomFactor;
+      const crossRadius = radius * 0.55;
       for (let index = 0; index < points.length; index++) {
         const cornerIndex = index as QuadCornerIndex;
         const point = points[index];
@@ -58,6 +61,18 @@ export class ProjectiveTransformExtension extends AbstractExtension {
         }
         handle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
         handle.style.cursor = 'move';
+
+        let horizontalLine = this._handleCrossHorizontalLines[index];
+        horizontalLine = this._drawLine(point.x - crossRadius, point.y, point.x + crossRadius, point.y, 'svg-primary-projective-handle-cross', horizontalLine);
+        horizontalLine.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+        horizontalLine.style.pointerEvents = 'none';
+        this._handleCrossHorizontalLines[index] = horizontalLine;
+
+        let verticalLine = this._handleCrossVerticalLines[index];
+        verticalLine = this._drawLine(point.x, point.y - crossRadius, point.x, point.y + crossRadius, 'svg-primary-projective-handle-cross', verticalLine);
+        verticalLine.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
+        verticalLine.style.pointerEvents = 'none';
+        this._handleCrossVerticalLines[index] = verticalLine;
       }
     }
   }
