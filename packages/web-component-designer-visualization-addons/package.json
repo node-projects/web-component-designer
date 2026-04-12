@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon for visualizations",
   "name": "@node-projects/web-component-designer-visualization-addons",
-  "version": "0.1.137",
+  "version": "0.1.138",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
@@ -11,12 +11,12 @@
     "build": "tsc",
     "link": "npm link",
     "prepublishOnly": "npm run build && npm run bundle",
-    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@adobe/* --external:@blockly/* --external:blockly --external:long --external:wunderbaum --external:@node-projects/* --platform=neutral --bundle --outfile=./dist/index-min.js"
+    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@node-projects/css-parser --external:@blockly/* --external:blockly --external:long --external:wunderbaum --external:@node-projects/* --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
-    "@adobe/css-tools": ">=4.4.0",
     "@blockly/zoom-to-fit": ">=6.0.9",
     "@node-projects/base-custom-webcomponent": ">=0.27.8",
+    "@node-projects/css-parser": "^5.2.0",
     "@node-projects/propertygrid.webcomponent": ">=1.2.3",
     "@node-projects/splitview.webcomponent": ">=1.0.1",
     "@node-projects/web-component-designer": ">=0.1.224",
@@ -25,7 +25,7 @@
     "blockly": ">=11.1.1",
     "long": ">=5.2.3"
   },
-   "devDependencies": {
+  "devDependencies": {
     "esbuild": "^0.25.10"
   },
   "repository": {

@@ -4,7 +4,8 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "noEmit": false
+    "noEmit": false,
+    "moduleResolution": "bundler"
   },
   "include": [
     "src/**/*.ts",

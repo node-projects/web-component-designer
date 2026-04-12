@@ -564,7 +564,7 @@ export class BindingsHelper {
   static #cssBindingsVarId = 0;
 
   async parseCssBindings(sheet: string, element: Element, relativeSignalPath: string, root: HTMLElement): Promise<[stylesheet: CSSStyleSheet, unsub: (() => void)[]]> {
-    const parser = (await import("@adobe/css-tools"));
+    const parser = (await import("@node-projects/css-parser"));
     const ast = parser.parse(sheet);
 
     let unsub: (() => void)[];
