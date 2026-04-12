@@ -770,6 +770,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       const instance = stylesheetService(this);
       this.instanceServiceContainer.register("stylesheetService", instance);
       this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
+        if (this.instanceServiceContainer.collaborationService?.isApplyingRemoteChanges) {
+          this.applyAllStyles();
+          return;
+        }
+
         if (ss.changeSource != 'undo') {
           const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
           this.instanceServiceContainer.undoService.execute(ssca);
@@ -781,6 +786,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
         this.applyAllStyles();
       });
+    }
+
+    const collaborationService = this.serviceContainer.getLastService('collaborationService' as never) as ((designerCanvas: IDesignerCanvas) => any) | null
+    if (collaborationService) {
+      const instance = collaborationService(this);
+      this.instanceServiceContainer.collaborationService = instance;
+      (this.instanceServiceContainer as any).register("collaborationService", instance);
     }
 
     if (serviceContainer.instanceServiceContainerCreatedCallbacks?.length)

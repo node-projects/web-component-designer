@@ -26,6 +26,7 @@ So the designer now should work with bundlers.
 | web-component-designer-codeview-codemirror                             |                                              |
 | web-component-designer-codeview-codemirror5                            |                                              |
 | web-component-designer-codeview-monaco                                 | atm. stuck at monaco 0.50.0 (webcomp supp)   |
+| web-component-designer-collaboration-service                           |                                              |
 | web-component-designer-htmlparserservice-base-custom-webcomponent      |                                              |
 | web-component-designer-htmlparserservice-lit-element                   |                                              |
 | web-component-designer-htmlparserservice-nodehtmlparser                |                                              |

@@ -53,6 +53,7 @@ import { IReferencesChangedService } from './referencesChangedService/IReference
 import { IMiniatureViewService } from './miniatureViewService/IMiniatureViewService.js';
 import { IPngCreatorService } from './pngCreatorService/IPngCreatorService.js';
 import { ISearchService } from './searchService/ISearchService.js';
+import { ICollaborationService } from './collaborationService/ICollaborationService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -92,6 +93,7 @@ interface ServiceNameMap {
   "selectionService": (designerCanvas: IDesignerCanvas) => ISelectionService;
   "contentService": (designerCanvas: IDesignerCanvas) => IContentService;
   "stylesheetService": (designerCanvas: IDesignerCanvas) => IStylesheetService;
+  "collaborationService": (designerCanvas: IDesignerCanvas) => ICollaborationService;
   "designItemDocumentPositionService": (designerCanvas: IDesignerCanvas) => IDesignItemDocumentPositionService;
 }
 

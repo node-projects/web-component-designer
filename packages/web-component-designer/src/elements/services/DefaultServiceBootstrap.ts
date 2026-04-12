@@ -111,6 +111,8 @@ import { DeletionService } from './deletionService/DeletionService.js';
 import { MiniatureViewService } from './miniatureViewService/MiniatureViewService.js';
 import { DisplayMediaPngWriterService } from './pngCreatorService/DisplayMediaPngWriterService.js';
 import { SearchService } from './searchService/SearchService.js';
+//import { SkewExtensionProvider } from '../widgets/designerView/extensions/SkewExtensionProvider.js';
+//import { ProjectiveTransformExtensionProvider } from '../widgets/designerView/extensions/ProjectiveTransformExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -170,6 +172,8 @@ export function createDefaultServiceContainer() {
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),
+    //new SkewExtensionProvider(),
+    //new ProjectiveTransformExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MultipleItemsSelected, [
     new RotateGroupExtensionProvider(),

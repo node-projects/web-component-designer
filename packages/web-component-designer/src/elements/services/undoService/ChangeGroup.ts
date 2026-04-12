@@ -1,9 +1,11 @@
 import { ITransactionItem } from './ITransactionItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
+import { UndoChangeSource } from './IUndoChangeEvent.js';
 
 export class ChangeGroup implements ITransactionItem {
 
   redoBranches?: ITransactionItem[][];
+  source: UndoChangeSource;
   
   title: string;
   get affectedItems(): IDesignItem[] {
@@ -19,10 +21,11 @@ export class ChangeGroup implements ITransactionItem {
   private commitHandler: (transactionItem: ITransactionItem) => void;
   private abortHandler: (transactionItem: ITransactionItem) => void;
 
-  constructor(title: string, commitHandler: (transactionItem: ITransactionItem) => void, abortHandler: (transactionItem: ITransactionItem) => void) {
+  constructor(title: string, commitHandler: (transactionItem: ITransactionItem) => void, abortHandler: (transactionItem: ITransactionItem) => void, source: UndoChangeSource = 'local') {
     this.title = title;
     this.commitHandler = commitHandler;
     this.abortHandler = abortHandler;
+    this.source = source;
   }
 
   do() {

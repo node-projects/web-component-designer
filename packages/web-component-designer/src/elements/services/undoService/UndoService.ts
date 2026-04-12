@@ -2,6 +2,8 @@ import { ITransactionItem } from './ITransactionItem.js';
 import { ChangeGroup } from "./ChangeGroup.js";
 import { IUndoService } from './IUndoService.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
+import { TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { IUndoChangeEvent, UndoChangeKind, UndoChangeSource } from './IUndoChangeEvent.js';
 
 /*
  * Manages a stack of available undo/redo actions
@@ -18,8 +20,8 @@ export class UndoService implements IUndoService {
     this._storeRedoBranches = storeRedoBranches;
   }
 
-  openGroup(title: string): ChangeGroup {
-    let t = new ChangeGroup(title, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t));
+  openGroup(title: string, source: UndoChangeSource = 'local'): ChangeGroup {
+    let t = new ChangeGroup(title, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t), source);
     this._transactionStack.push(t);
     return t;
   }
@@ -46,6 +48,7 @@ export class UndoService implements IUndoService {
     if (this._transactionStack.length == 0) {
       this._designerCanvas.extensionManager.refreshAllExtensions(transactionItem.affectedItems);
       this._designerCanvas.onContentChanged.emit();
+      this.emitTransaction(transactionItem, 'execute', (<ChangeGroup>transactionItem).source ?? 'local');
     }
   }
 
@@ -60,7 +63,7 @@ export class UndoService implements IUndoService {
     }
   }
 
-  execute(item: ITransactionItem) {
+  execute(item: ITransactionItem, source: UndoChangeSource = 'local') {
     if (this._transactionStack.length == 0) {
       item.do();
       if (this._storeRedoBranches && this._redoStack.length) {
@@ -76,6 +79,7 @@ export class UndoService implements IUndoService {
     if (this._transactionStack.length == 0) {
       this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
       this._designerCanvas.onContentChanged.emit();
+      this.emitTransaction(item, 'execute', source);
     }
   }
 
@@ -92,7 +96,7 @@ export class UndoService implements IUndoService {
     }
   }
 
-  undo() {
+  undo(source: UndoChangeSource = 'local') {
     if (!this.canUndo())
       return;
     if (this._transactionStack.length != 0)
@@ -108,9 +112,10 @@ export class UndoService implements IUndoService {
     }
     this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
     this._designerCanvas.onContentChanged.emit();
+    this.emitTransaction(item, 'undo', source);
   }
 
-  redo() {
+  redo(source: UndoChangeSource = 'local') {
     if (!this.canRedo())
       return;
     if (this._transactionStack.length != 0)
@@ -126,6 +131,7 @@ export class UndoService implements IUndoService {
     }
     this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
     this._designerCanvas.onContentChanged.emit();
+    this.emitTransaction(item, 'redo', source);
   }
 
   redoTo(transactionItems: ITransactionItem[]) {
@@ -168,5 +174,11 @@ export class UndoService implements IUndoService {
   *getRedoEntries(count: number = 999): Generator<ITransactionItem, void, unknown> {
     for (let i = Math.min(this._redoStack.length, count) - 1; i >= 0; i--)
       yield this._redoStack[i];
+  }
+
+  readonly onTransaction = new TypedEvent<IUndoChangeEvent>();
+
+  private emitTransaction(item: ITransactionItem, kind: UndoChangeKind, source: UndoChangeSource) {
+    this.onTransaction.emit({ item, kind, source });
   }
 }

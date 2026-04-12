@@ -8,6 +8,7 @@ import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 import { IDesignItemDocumentPositionService } from './designItemDocumentPositionService/IDesignItemDocumentPositionService.js';
 import { DocumentContainer } from '../documentContainer.js';
+import { ICollaborationService } from './collaborationService/ICollaborationService.js';
 
 interface InstanceServiceNameMap {
   "undoService": IUndoService;
@@ -20,6 +21,7 @@ interface InstanceServiceNameMap {
 export class InstanceServiceContainer extends BaseServiceContainer<InstanceServiceNameMap> {
   public designContext: IDesignContext = new DesignContext();
   public readonly designerCanvas: IDesignerCanvas;
+  public collaborationService?: ICollaborationService;
 
   public designer: any; //usable to assign designer from outside
   public documentContainer: DocumentContainer; //usable to assign designer from outside

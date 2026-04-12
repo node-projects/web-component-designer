@@ -230,6 +230,10 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   dispose(): void {
+    if (this.designerView?.instanceServiceContainer?.collaborationService) {
+      this.designerView.instanceServiceContainer.collaborationService.disconnect();
+      this.designerView.instanceServiceContainer.collaborationService.detachTransport();
+    }
     this.codeView.dispose();
     this.demoView.dispose();
   }

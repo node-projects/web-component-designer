@@ -47,6 +47,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   connected() {
+    this.ensurePermanentRootExtensionsApplied();
     if (!this._timeout)
       this._timeout = setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
   }
@@ -64,6 +65,17 @@ export class ExtensionManager implements IExtensionManager {
     this._timeout = setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
   }
 
+  private ensurePermanentRootExtensionsApplied() {
+    const rootDesignItem = this.designerCanvas.rootDesignItem;
+    if (!rootDesignItem)
+      return;
+
+    if (wmGet(rootDesignItem, this._appliedDesignerExtensions).get(ExtensionType.Permanent)?.length)
+      return;
+
+    this.applyExtension(rootDesignItem, ExtensionType.Permanent);
+  }
+
   private _contentChanged(contentChanged: IContentChanged) {
     requestAnimationFrame(() => {
       switch (contentChanged.changeType) {
@@ -74,6 +86,7 @@ export class ExtensionManager implements IExtensionManager {
           this.refreshExtensions(contentChanged.designItems, ExtensionType.Permanent);
           break;
         case 'parsed':
+          this.ensurePermanentRootExtensionsApplied();
           this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, null, true);
           break;
         case 'removed':

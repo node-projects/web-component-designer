@@ -191,6 +191,22 @@ export type { IRefactoring } from "./elements/services/refactorService/IRefactor
 
 export type { IReferencesChangedService } from "./elements/services/referencesChangedService/IReferencesChangedService.js";
 
+export * from "./elements/services/collaborationService/CollaborationNodeIndex.js";
+export type {
+	CollaborationConnectionState,
+	ICollaborationComment,
+	ICollaborationCommentsChangedEvent,
+	ICollaborationDocumentSnapshot,
+	ICollaborationPeerPresence,
+	ICollaborationPeersChangedEvent,
+	ICollaborationRemoteChange,
+	ICollaborationSelectionEvent,
+	ICollaborationService,
+	ICollaborationSession,
+	ICollaborationStateChangedEvent,
+	ICollaborationTransport
+} from "./elements/services/collaborationService/ICollaborationService.js";
+
 export * from "./elements/services/searchService/SearchService.js";
 export type { ISearchService } from "./elements/services/searchService/ISearchService.js";
 export type { ISearchResult } from "./elements/services/searchService/ISearchResult.js";
@@ -205,6 +221,7 @@ export * from "./elements/services/stylesheetService/AbstractStylesheetService.j
 export * from "./elements/services/stylesheetService/SpecificityCalculator.js";
 
 export * from "./elements/services/undoService/ChangeGroup.js";
+export type { IUndoChangeEvent, UndoChangeKind, UndoChangeSource } from "./elements/services/undoService/IUndoChangeEvent.js";
 export type { ITransactionItem } from "./elements/services/undoService/ITransactionItem.js";
 export type { IUndoService } from "./elements/services/undoService/IUndoService.js";
 export * from "./elements/services/undoService/UndoService.js";
