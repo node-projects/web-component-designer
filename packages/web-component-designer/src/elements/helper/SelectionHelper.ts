@@ -1,9 +1,9 @@
 export function shadowrootGetSelection(shadowRoot: ShadowRoot) {
     let selection = document.getSelection();
-    if ((<any>selection).getComposedRanges)
+    if ((<any>shadowRoot).getSelection)
+        selection = (<any>shadowRoot).getSelection()
+    else if ((<any>selection).getComposedRanges)
         selection = (<any>selection).getComposedRanges(shadowRoot);
-    else if ((<any>shadowRoot).getSelection)
-        selection = (<any>shadowRoot).getSelection();
     return selection;
 }
 
