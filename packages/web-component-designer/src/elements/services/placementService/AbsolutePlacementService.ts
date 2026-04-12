@@ -117,7 +117,7 @@ export class AbsolutePlacementService implements IPlacementService {
     let track = this.calculateTrack(event, designerCanvas, startPoint, offsetInControl, newPoint, items[0]);
 
     if (event.shiftKey) {
-      track = straightenLine({ x: 0, y: 0 }, track, true);
+      track = straightenLine({ x: 0, y: 0 }, track, 90);
     }
     let filteredItems = filterChildPlaceItems(filterNonElementItems(items));
     for (const designItem of filteredItems) {

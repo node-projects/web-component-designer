@@ -11,6 +11,10 @@ import { DesignerCanvas } from '../designerCanvas.js';
 
 const offset = 10;
 
+type optionsType = {
+  angleStep?: number; // if true, lines will be straightened to the nearest angle defined by angleStep
+}
+
 export class DrawPathTool implements ITool {
 
   readonly cursor = 'crosshair';
@@ -26,8 +30,12 @@ export class DrawPathTool implements ITool {
   private _startPoint?: IPoint;
   private _captureElement?: Element;
   private _pointerId?: number;
+  private _angleStep?: number;
 
-  constructor() {
+  constructor(options?: optionsType) {
+    if (options?.angleStep !== undefined) {
+      this._angleStep = options.angleStep;
+    }
   }
 
   activated(serviceContainer: ServiceContainer) {
@@ -82,8 +90,7 @@ export class DrawPathTool implements ITool {
             this._pathD += "L " + currentPoint.x + " " + currentPoint.y + " ";
             this._path.setAttribute("d", this._pathD!);
           }
-        }
-        else {  // shows line preview
+        } else {  // shows line preview
           if (this._path) {
             let straightLine = currentPoint;
             if (event.shiftKey) {
@@ -101,8 +108,8 @@ export class DrawPathTool implements ITool {
         }
         if (this._p2pMode && !this._samePoint && this._startPoint!.x != currentPoint.x && this._startPoint!.y != currentPoint.y) {
           if (this._path) {
-            if (event.shiftKey) {
-              let straightLine = straightenLine(this._lastPoint!, currentPoint);
+            if (event.shiftKey || this._angleStep) {
+              let straightLine = straightenLine(this._lastPoint!, currentPoint, this._angleStep ?? 45);
               this._pathD += "L " + straightLine.x + " " + straightLine.y + " ";
               this._path.setAttribute("d", this._pathD!);
               this._lastPoint = straightLine;
