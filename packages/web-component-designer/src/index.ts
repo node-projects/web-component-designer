@@ -301,8 +301,6 @@ export * from "./elements/widgets/designerView/extensions/MultipleSelectionRectE
 export * from "./elements/widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/SvgElementExtension.js";
 export * from "./elements/widgets/designerView/extensions/svg/SvgElementExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/svg/PathExtension.js";
-export * from "./elements/widgets/designerView/extensions/svg/PathExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/UnifiedGeometryExtension.js";
 export * from "./elements/widgets/designerView/extensions/svg/UnifiedGeometryExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/geometry/IGeometry.js";
