@@ -1122,7 +1122,7 @@ export function straightenLine(p1: IPoint, p2: IPoint, stepDeg = 45): IPoint {
   const length = Math.sqrt(dx * dx + dy * dy);
 
   const newX = p1.x + Math.cos(rad) * length;
-  const newY = p1.y + Math.sin(rad) * length;
+  const newY = p1.y - Math.sin(rad) * length;
 
   return { x: newX, y: newY };
 }
