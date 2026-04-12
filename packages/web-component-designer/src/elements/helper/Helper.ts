@@ -2,7 +2,9 @@ import { IPoint } from "../../interfaces/IPoint.js";
 import { IRect } from "../../interfaces/IRect.js";
 
 export function htmlAsString(strings: TemplateStringsArray, ...values: any[]) {
-    return strings[0];
+  return strings.reduce((result, str, i) => {
+    return result + str + (values[i] ?? '');
+  }, '');
 }
 
 export function isAppleDevice() {
@@ -69,38 +71,38 @@ export function arraysEqual<T>(a: T[], b: T[]) {
 
 let nullObject: {};
 export function deepValue(obj, path: string, returnNullObject = false, splitter = '.') {
-    if (path === undefined || path === null) {
-        return obj;
-    }
-
-    const pathParts = path.split(splitter);
-    for (let i = 0; i < pathParts.length; i++) {
-        if (obj != null) {
-            obj = obj[pathParts[i]];
-        } else {
-            return returnNullObject ? nullObject : null;
-        }
-    }
+  if (path === undefined || path === null) {
     return obj;
+  }
+
+  const pathParts = path.split(splitter);
+  for (let i = 0; i < pathParts.length; i++) {
+    if (obj != null) {
+      obj = obj[pathParts[i]];
+    } else {
+      return returnNullObject ? nullObject : null;
+    }
+  }
+  return obj;
 }
 
 export function setDeepValue(obj, path: string, value, splitter = '.') {
   if (path === undefined || path === null) {
-      return;
+    return;
   }
 
   const pathParts = path.split(splitter);
   for (let i = 0; i < pathParts.length - 1; i++) {
-      if (obj != null) {
-          let newObj = obj[pathParts[i]];
-          if (newObj == null) {
-              newObj = {};
-              obj[pathParts[i]] = newObj;
-          }
-          obj = newObj;
+    if (obj != null) {
+      let newObj = obj[pathParts[i]];
+      if (newObj == null) {
+        newObj = {};
+        obj[pathParts[i]] = newObj;
       }
+      obj = newObj;
+    }
   }
 
   if (obj != null)
-      obj[pathParts[pathParts.length - 1]] = value;
+    obj[pathParts[pathParts.length - 1]] = value;
 }
