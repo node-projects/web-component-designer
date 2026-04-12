@@ -10,6 +10,7 @@ import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper
 import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
 
 enum ElementContainerType {
+  inline,
   block,
   complex
 }
@@ -71,10 +72,25 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
 
   private _writeTextNode(writeContext: IWriteContext, designItem: IDesignItem) {
     writeContext.lastElementDisplayType = ElementDisplayType.inline;
-    let content = DomConverter.normalizeContentValue(designItem.content).trim();
+    let content = DomConverter.normalizeContentValue(designItem.content);
+    if (writeContext.containerDisplayType === ElementContainerType.inline)
+      content = this._normalizeInlineTextContent(content);
+    else
+      content = content.trim();
     if (content) {
       writeContext.indentedTextWriter.write(content);
     }
+  }
+
+  private _normalizeInlineTextContent(content: string) {
+    if (!content?.trim())
+      return '';
+
+    const hasLeadingWhitespace = /^\s/.test(content);
+    const hasTrailingWhitespace = /\s$/.test(content);
+    const normalized = content.replaceAll(/[\t\r\n ]+/g, ' ').trim();
+
+    return `${hasLeadingWhitespace ? ' ' : ''}${normalized}${hasTrailingWhitespace ? ' ' : ''}`;
   }
 
   private _writeCommentNode(writeContext: IWriteContext, designItem: IDesignItem) {
@@ -98,18 +114,20 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
     if (designItem.hasChildren) {
       const children = designItem.children();
       contentSingleTextNode = designItem.childCount === 1 && designItem.firstChild.nodeType === NodeType.TextNode;
+      let previousContainerDisplayType = writeContext.containerDisplayType;
+      writeContext.containerDisplayType = this.getContainerType(<HTMLElement>designItem.element);
       if (contentSingleTextNode) {
         this._writeInternal(writeContext, designItem.firstChild);
       } else {
-        let previousContainerDisplayType = writeContext.containerDisplayType;
-        writeContext.containerDisplayType = this.getContainerType(<HTMLElement>designItem.element);
-        writeContext.indentedTextWriter.levelRaise();
+        if (writeContext.containerDisplayType !== ElementContainerType.inline)
+          writeContext.indentedTextWriter.levelRaise();
 
         this._writeDesignItemList(currentElementDisplayType, writeContext, children)
 
-        writeContext.indentedTextWriter.levelShrink();
-        writeContext.containerDisplayType = previousContainerDisplayType;
+        if (writeContext.containerDisplayType !== ElementContainerType.inline)
+          writeContext.indentedTextWriter.levelShrink();
       }
+      writeContext.containerDisplayType = previousContainerDisplayType;
     } else if (designItem.hasContent) {
       writeContext.indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content));
     }
@@ -130,6 +148,9 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
     for (const c of children) {
       if (writeContext.lastElementDisplayType == null) {
         //first entry, do nothing
+      }
+      else if (writeContext.containerDisplayType === ElementContainerType.inline) {
+        // Inline containers are whitespace-sensitive. Do not add beautification whitespace.
       }
       else if (writeContext.containerDisplayType === ElementContainerType.complex)
         this._writeNewlineAndIntend(writeContext);
@@ -160,7 +181,9 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
   }
 
   getContainerType(element: HTMLElement): ElementContainerType {
-    const display = window.getComputedStyle(element).display;
+    const display = (element.ownerDocument.defaultView ?? window).getComputedStyle(element).display;
+    if (display === 'inline')
+      return ElementContainerType.inline;
     if (display === 'block' || display === "inline-block" || display == '')
       return ElementContainerType.block;
     return ElementContainerType.complex;
