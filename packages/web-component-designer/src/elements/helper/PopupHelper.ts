@@ -41,6 +41,7 @@ export function showPopup(content: Element, anchorEl: HTMLElement, closedCallbac
         }
     }, { once: true });
 
+    //@ts-ignore
     // 🚀 Open via Popup API
     popupEl.showPopover({ source: anchorEl });
 
