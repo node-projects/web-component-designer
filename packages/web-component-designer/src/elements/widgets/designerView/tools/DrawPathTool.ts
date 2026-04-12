@@ -7,20 +7,25 @@ import { DesignItem } from '../../../item/DesignItem.js';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { DesignerCanvas } from '../designerCanvas.js';
+
+const offset = 10;
 
 export class DrawPathTool implements ITool {
 
   readonly cursor = 'crosshair';
 
-  private _pathD: string;
-  private _path: SVGPathElement;
+  private _pathD?: string;
+  private _path?: SVGPathElement;
   private _samePoint = false;
   private _p2pMode = false;
   private _dragMode = false;
   private _pointerMoved = false;
   private _eventStarted = false;
-  private _lastPoint: IPoint;
-  private _startPoint: IPoint;
+  private _lastPoint?: IPoint;
+  private _startPoint?: IPoint;
+  private _captureElement?: Element;
+  private _pointerId?: number;
 
   constructor() {
   }
@@ -33,15 +38,16 @@ export class DrawPathTool implements ITool {
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
     const currentPoint = designerCanvas.getNormalizedEventCoordinates(event);
-    const offset = 10;
-
 
     switch (event.type) {
       case EventNames.PointerDown:
+        (<DesignerCanvas>designerCanvas).clickOverlay.focus();
         this._eventStarted = true;
 
         if (!this._p2pMode) {
-          (<Element>event.target).setPointerCapture(event.pointerId);
+          this._captureElement = event.target as Element;
+          this._pointerId = event.pointerId;
+          this._captureElement.setPointerCapture(this._pointerId);
           designerCanvas.captureActiveTool(this);
 
           this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -74,14 +80,14 @@ export class DrawPathTool implements ITool {
           this._dragMode = true;
           if (this._path) {
             this._pathD += "L " + currentPoint.x + " " + currentPoint.y + " ";
-            this._path.setAttribute("d", this._pathD);
+            this._path.setAttribute("d", this._pathD!);
           }
         }
         else {  // shows line preview
           if (this._path) {
             let straightLine = currentPoint;
             if (event.shiftKey) {
-              straightLine = straightenLine(this._lastPoint, currentPoint);
+              straightLine = straightenLine(this._lastPoint!, currentPoint);
             }
             this._path.setAttribute("d", this._pathD + "L " + straightLine.x + " " + straightLine.y) + " ";
           }
@@ -93,60 +99,24 @@ export class DrawPathTool implements ITool {
         if (this._eventStarted && !this._pointerMoved) {
           this._p2pMode = true;
         }
-        if (this._p2pMode && !this._samePoint && this._startPoint.x != currentPoint.x && this._startPoint.y != currentPoint.y) {
+        if (this._p2pMode && !this._samePoint && this._startPoint!.x != currentPoint.x && this._startPoint!.y != currentPoint.y) {
           if (this._path) {
             if (event.shiftKey) {
-              let straightLine = straightenLine(this._lastPoint, currentPoint);
+              let straightLine = straightenLine(this._lastPoint!, currentPoint);
               this._pathD += "L " + straightLine.x + " " + straightLine.y + " ";
-              this._path.setAttribute("d", this._pathD);
+              this._path.setAttribute("d", this._pathD!);
               this._lastPoint = straightLine;
             }
             else {
               this._pathD += "L " + currentPoint.x + " " + currentPoint.y + " ";
-              this._path.setAttribute("d", this._pathD);
+              this._path.setAttribute("d", this._pathD!);
               this._lastPoint = currentPoint;
             }
           }
         }
 
         if (this._samePoint && this._p2pMode || this._dragMode && !this._p2pMode) {
-          (<Element>event.target).releasePointerCapture(event.pointerId);
-          designerCanvas.releaseActiveTool();
-
-          this._eventStarted = false;
-          this._p2pMode = false;
-          this._pointerMoved = false;
-          this._samePoint = false;
-          this._dragMode = false;
-
-          let coords = designerCanvas.getNormalizedElementCoordinates(this._path);
-          designerCanvas.overlayLayer.removeOverlay(this._path);
-          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          const mvX = coords.x - offset;
-          const mvY = coords.y - offset;
-          
-          const d = moveSVGPath(this._path, mvX, mvY);
-          this._path.setAttribute("d", d);
-          this._path.removeAttribute("stroke");
-          this._path.removeAttribute("stroke-width");
-          this._path.removeAttribute("overlay-source");
-          svg.appendChild(this._path);
-          svg.style.left = (mvX) + 'px';
-          svg.style.top = (mvY) + 'px';
-          svg.style.position = 'absolute';
-          svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
-          svg.style.height = Math.round(coords.height + 2 * offset) + 'px';
-          svg.style.overflow = 'visible';
-          svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
-          svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
-          //designerView.rootDesignItem.element.appendChild(svg);
-          this._path = null;
-          this._pathD = null;
-          this._lastPoint = null;
-
-          const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-          designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
-          designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
+          this._finalizePath(designerCanvas);
         }
         //TODO: Better Path drawing (like in SVGEDIT & Adding via Undo Framework. And adding to correct container)
         break;
@@ -155,5 +125,52 @@ export class DrawPathTool implements ITool {
     event.stopPropagation();
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement?: Element) {
+    if (event.key === "Escape") {
+      this._finalizePath(designerCanvas);
+    }
+  }
+
+  private _finalizePath(designerCanvas: IDesignerCanvas) {
+    this._captureElement?.releasePointerCapture(this._pointerId!);
+    this._captureElement = undefined;
+    designerCanvas.releaseActiveTool();
+
+    this._eventStarted = false;
+    this._p2pMode = false;
+    this._pointerMoved = false;
+    this._samePoint = false;
+    this._dragMode = false;
+
+    let coords = designerCanvas.getNormalizedElementCoordinates(this._path!);
+    designerCanvas.overlayLayer.removeOverlay(this._path!);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const mvX = coords.x - offset;
+    const mvY = coords.y - offset;
+
+    this._path!.setAttribute("d", this._pathD!);
+    const d = moveSVGPath(this._path!, mvX, mvY);
+    this._path!.setAttribute("d", d);
+    this._path!.removeAttribute("stroke");
+    this._path!.removeAttribute("stroke-width");
+    this._path!.removeAttribute("overlay-source");
+    svg.appendChild(this._path!);
+    svg.style.left = (mvX) + 'px';
+    svg.style.top = (mvY) + 'px';
+    svg.style.position = 'absolute';
+    svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
+    svg.style.height = Math.round(coords.height + 2 * offset) + 'px';
+    svg.style.overflow = 'visible';
+    svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
+    svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
+    //designerView.rootDesignItem.element.appendChild(svg);
+    this._path = undefined;
+    this._pathD = undefined;
+    this._lastPoint = undefined;
+
+    const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
+    designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
+    designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
+  }
+
 }
