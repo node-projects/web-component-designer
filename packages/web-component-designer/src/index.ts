@@ -323,6 +323,8 @@ export * from "./elements/widgets/designerView/extensions/ElementDragTitleExtens
 export * from "./elements/widgets/designerView/extensions/ElementDragTitleExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/ResizeExtension.js";
 export * from "./elements/widgets/designerView/extensions/ResizeExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/SkewExtension.js";
+export * from "./elements/widgets/designerView/extensions/SkewExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/RotateExtension.js";
 export * from "./elements/widgets/designerView/extensions/RotateExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/RotateGroupExtension.js";
