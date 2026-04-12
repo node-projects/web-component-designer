@@ -85,7 +85,7 @@ import { SimpleDemoProviderService } from './demoProviderService/SimpleDemoProvi
 import { DrawElementTool } from '../widgets/designerView/tools/DrawElementTool.js';
 import { RoundPixelsDesignViewConfigButton } from '../widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js';
 import { MathMLElementsPropertiesService } from './propertiesService/services/MathMLElementsPropertiesService.js';
-import { SvgElementExtensionProvider } from '../widgets/designerView/extensions/svg/SvgElementExtensionProvider.js';
+import { UnifiedGeometryExtensionProvider } from '../widgets/designerView/extensions/svg/UnifiedGeometryExtensionProvider.js';
 import { ConditionExtensionProvider } from '../widgets/designerView/extensions/logic/ConditionExtensionProvider.js';
 import { GridToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridToolbarExtensionProvider.js';
 import { FlexToolbarExtensionProvider } from '../widgets/designerView/extensions/flex/FlexToolbarExtensionProvider.js';
@@ -165,7 +165,7 @@ export function createDefaultServiceContainer() {
     new ConditionExtensionProvider(new MarginExtensionProvider, (_, c) => c.activeTool instanceof MarginTool || c.activeTool instanceof PaddingTool, true),
     new ConditionExtensionProvider(new PaddingExtensionProvider, (_, c) => c.activeTool instanceof MarginTool || c.activeTool instanceof PaddingTool, true),
     new PositionExtensionProvider(),
-    new SvgElementExtensionProvider(),
+    new UnifiedGeometryExtensionProvider(),
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),
