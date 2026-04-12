@@ -11,7 +11,7 @@ export class GlobalContext {
   private _tool: ITool;
   private _strokeColor: string = 'black';
   private _strokeThickness: string = '3';
-  private _fillBrush: string = 'transparent';
+  private _fillBrush: string = 'none';
 
   constructor(serviceContainer: ServiceContainer) {
     this._serviceContainer = serviceContainer;
