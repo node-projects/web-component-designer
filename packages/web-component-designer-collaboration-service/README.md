@@ -39,7 +39,10 @@ After that, each `DocumentContainer` gets a collaboration service instance on it
 const collaborationService = documentContainer.instanceServiceContainer.collaborationService;
 
 collaborationService.attachTransport(new WebRtcTabCollaborationTransport({
-     enabledSignalingChannels: ['broadcast-channel', 'manual']
+     enabledSignalingChannels: ['broadcast-channel', 'manual'],
+     rtcConfiguration: {
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+     }
 }));
 
 collaborationService.connect(
@@ -87,8 +90,15 @@ const transport = new WebRtcTabCollaborationTransport({
 
 The manual signaling API is useful for connecting different browsers without a backend signaling server.
 
+For same-browser tabs you usually do not need extra RTC configuration. For different machines, browsers, subnets, VPNs, or internet connections, configure `rtcConfiguration` with suitable STUN or TURN servers. Without that, the browser only has local host candidates available, which often works on one computer but is unreliable across machines.
+
 ```ts
-const transport = new WebRtcTabCollaborationTransport();
+const transport = new WebRtcTabCollaborationTransport({
+     enabledSignalingChannels: ['manual'],
+     rtcConfiguration: {
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+     }
+});
 
 const bundle = transport.exportManualSignalingData();
 await transport.importManualSignalingData(bundleFromOtherClient);

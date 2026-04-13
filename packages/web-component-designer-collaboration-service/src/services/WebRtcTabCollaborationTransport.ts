@@ -4,6 +4,7 @@ export type WebRtcTabCollaborationSignalingChannelKind = 'broadcast-channel' | '
 
 export interface WebRtcTabCollaborationTransportOptions {
   enabledSignalingChannels?: readonly WebRtcTabCollaborationSignalingChannelKind[];
+  rtcConfiguration?: RTCConfiguration;
 }
 
 export interface IWebRtcManualSignalingBundle {
@@ -54,6 +55,19 @@ function createEnabledSignalingChannels(channels?: readonly WebRtcTabCollaborati
   const validChannels = channels.filter((channel): channel is WebRtcTabCollaborationSignalingChannelKind =>
     channel === 'broadcast-channel' || channel === 'manual');
   return new Set<WebRtcTabCollaborationSignalingChannelKind>(validChannels);
+}
+
+function cloneRtcConfiguration(configuration?: RTCConfiguration) {
+  if (!configuration)
+    return undefined;
+
+  return {
+    ...configuration,
+    iceServers: configuration.iceServers?.map(server => ({
+      ...server,
+      urls: Array.isArray(server.urls) ? [...server.urls] : server.urls,
+    })),
+  } satisfies RTCConfiguration;
 }
 
 function areSetsEqual<T>(first: Set<T>, second: Set<T>) {
@@ -152,6 +166,7 @@ export class WebRtcTabCollaborationTransport implements ICollaborationTransport 
   private _session: ICollaborationSession | null = null;
   private _broadcastSignalingChannel: BroadcastChannel | null = null;
   private _enabledSignalingChannels = createEnabledSignalingChannels();
+  private _rtcConfiguration: RTCConfiguration | undefined;
   private _manualSignalingMessages: SignalingMessage[] = [];
   private _peerConnections = new Map<string, RTCPeerConnection>();
   private _dataChannels = new Map<string, RTCDataChannel>();
@@ -164,6 +179,7 @@ export class WebRtcTabCollaborationTransport implements ICollaborationTransport 
 
   constructor(options?: WebRtcTabCollaborationTransportOptions) {
     this._enabledSignalingChannels = createEnabledSignalingChannels(options?.enabledSignalingChannels);
+    this._rtcConfiguration = cloneRtcConfiguration(options?.rtcConfiguration);
   }
 
   get enabledSignalingChannels(): readonly WebRtcTabCollaborationSignalingChannelKind[] {
@@ -462,7 +478,7 @@ export class WebRtcTabCollaborationTransport implements ICollaborationTransport 
     if (peerConnection)
       return peerConnection;
 
-    peerConnection = new RTCPeerConnection();
+    peerConnection = this._rtcConfiguration ? new RTCPeerConnection(this._rtcConfiguration) : new RTCPeerConnection();
     peerConnection.onicecandidate = event => {
       if (event.candidate && this._session) {
         this.sendSignal({
