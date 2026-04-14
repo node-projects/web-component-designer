@@ -41,7 +41,10 @@ const collaborationService = documentContainer.instanceServiceContainer.collabor
 collaborationService.attachTransport(new WebRtcTabCollaborationTransport({
      enabledSignalingChannels: ['broadcast-channel', 'manual'],
      rtcConfiguration: {
-          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+          iceServers: [
+               { urls: 'stun:stun.l.google.com:19302' },
+               { urls: 'turns:turn.example.com:5349?transport=tcp', username: 'demo', credential: 'secret' }
+          ]
      }
 }));
 
@@ -92,12 +95,24 @@ The manual signaling API is useful for connecting different browsers without a b
 
 For same-browser tabs you usually do not need extra RTC configuration. For different machines, browsers, subnets, VPNs, or internet connections, configure `rtcConfiguration` with suitable STUN or TURN servers. Without that, the browser only has local host candidates available, which often works on one computer but is unreliable across machines.
 
+If your TURN credentials rotate, update them before reconnecting. `WebRtcTabCollaborationTransport` also exposes `setRtcConfiguration()` for that use case.
+
 ```ts
 const transport = new WebRtcTabCollaborationTransport({
      enabledSignalingChannels: ['manual'],
      rtcConfiguration: {
-          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+          iceServers: [
+               { urls: 'stun:stun.l.google.com:19302' },
+               { urls: ['turn:turn.example.com:3478?transport=udp', 'turns:turn.example.com:5349?transport=tcp'], username: 'demo', credential: 'secret' }
+          ]
      }
+});
+
+transport.setRtcConfiguration({
+     iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'turns:turn.example.com:5349?transport=tcp', username: 'demo', credential: 'next-secret' }
+     ]
 });
 
 const bundle = transport.exportManualSignalingData();

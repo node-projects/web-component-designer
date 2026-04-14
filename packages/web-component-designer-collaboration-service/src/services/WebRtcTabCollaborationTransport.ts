@@ -186,6 +186,10 @@ export class WebRtcTabCollaborationTransport implements ICollaborationTransport 
     return [...this._enabledSignalingChannels];
   }
 
+  get rtcConfiguration(): RTCConfiguration | undefined {
+    return cloneRtcConfiguration(this._rtcConfiguration);
+  }
+
   setEnabledSignalingChannels(channels: readonly WebRtcTabCollaborationSignalingChannelKind[]) {
     const nextChannels = createEnabledSignalingChannels(channels);
     if (areSetsEqual(this._enabledSignalingChannels, nextChannels))
@@ -202,6 +206,10 @@ export class WebRtcTabCollaborationTransport implements ICollaborationTransport 
         requestInitialSnapshot: this.shouldRequestInitialSnapshot()
       });
     }
+  }
+
+  setRtcConfiguration(configuration?: RTCConfiguration) {
+    this._rtcConfiguration = cloneRtcConfiguration(configuration);
   }
 
   getManualSignalingBundle(): IWebRtcManualSignalingBundle | null {
