@@ -799,6 +799,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       serviceContainer.instanceServiceContainerCreatedCallbacks.forEach(x => x(this.instanceServiceContainer));
 
     this.extensionManager = new ExtensionManager(this);
+    if (this.instanceServiceContainer.collaborationService) {
+      this.instanceServiceContainer.collaborationService.onPeersChanged.on(event => {
+        if (event.source === 'remote')
+          this.extensionManager.refreshAllAppliedExtentions();
+      });
+      this.instanceServiceContainer.collaborationService.onCommentsChanged.on(() => {
+        this.extensionManager.refreshAllAppliedExtentions();
+      });
+    }
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
     this.overlayLayer.style.setProperty('margin', '0', 'important');

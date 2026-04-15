@@ -11,7 +11,7 @@ import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserS
 import { Lit2PropertiesService } from './propertiesService/services/Lit2PropertiesService.js';
 import { ExtensionType } from '../widgets/designerView/extensions/ExtensionType.js';
 import { ElementDragTitleExtensionProvider } from '../widgets/designerView/extensions/ElementDragTitleExtensionProvider.js';
-import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/TransformOriginExtensionProvider.js';
+import { TransformOriginExtensionProvider } from '../widgets/designerView/extensions/transforms/TransformOriginExtensionProvider.js';
 import { MarginExtensionProvider } from '../widgets/designerView/extensions/MarginExtensionProvider.js';
 import { PositionExtensionProvider } from '../widgets/designerView/extensions/PositionExtensionProvider.js';
 import { HighlightElementExtensionProvider } from '../widgets/designerView/extensions/HighlightElementExtensionProvider.js';
@@ -20,8 +20,8 @@ import { PointerTool } from '../widgets/designerView/tools/PointerTool.js';
 import { DrawPathTool } from '../widgets/designerView/tools/DrawPathTool.js';
 import { SelectionDefaultExtensionProvider } from '../widgets/designerView/extensions/SelectionDefaultExtensionProvider.js';
 import { ResizeExtensionProvider } from '../widgets/designerView/extensions/ResizeExtensionProvider.js';
-import { RotateExtensionProvider } from '../widgets/designerView/extensions/RotateExtensionProvider.js';
-import { RotateGroupExtensionProvider } from '../widgets/designerView/extensions/RotateGroupExtensionProvider.js';
+import { RotateExtensionProvider } from '../widgets/designerView/extensions/transforms/RotateExtensionProvider.js';
+import { RotateGroupExtensionProvider } from '../widgets/designerView/extensions/transforms/RotateGroupExtensionProvider.js';
 import { ZoomTool } from '../widgets/designerView/tools/ZoomTool.js';
 import { PanTool } from '../widgets/designerView/tools/PanTool.js';
 import { CopyPasteContextMenu } from '../widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js';
@@ -65,7 +65,7 @@ import { SelectorToolButtonProvider } from '../widgets/designerView/tools/toolBa
 import { GrayOutDragOverContainerExtensionProvider } from '../widgets/designerView/extensions/GrayOutDragOverContainerExtensionProvider.js';
 import { PropertyGroupsService } from './propertiesService/PropertyGroupsService.js';
 import { PlacementExtensionProvider } from '../widgets/designerView/extensions/PlacementExtensionProvider.js';
-import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/FlexboxExtensionProvider.js';
+import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/flex/FlexboxExtensionProvider.js';
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/FlexboxExtensionDesignViewConfigButtons.js';
 import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/InvisibleElementExtensionDesignViewConfigButtons.js';
 import { UndoService } from './undoService/UndoService.js';

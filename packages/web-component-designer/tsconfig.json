@@ -6,7 +6,11 @@
     "rootDir": "./src",
     "noEmit": false,
     "sourceMap": true,
-    "allowJs": true
+    "allowJs": true,
+    "noImplicitAny": false,
+    "noUncheckedSideEffectImports": true,
+    "moduleResolution": "bundler",
+    "strictNullChecks": false
   },
   "include": [
     "./src/**/*.ts",

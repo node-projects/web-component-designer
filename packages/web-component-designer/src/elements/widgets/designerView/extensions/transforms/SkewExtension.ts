@@ -1,12 +1,12 @@
-import { IPoint } from '../../../../interfaces/IPoint.js';
-import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
-import { roundValue } from '../../../helper/LayoutHelper.js';
-import { getElementSize } from '../../../helper/getBoxQuads.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { AbstractExtension } from './AbstractExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
-import { getEdgeOffsetPoint, getQuadCenter } from '../../../helper/QuadEdgeHandleHelper.js';
+import { IPoint } from '../../../../../interfaces/IPoint.js';
+import { hasCommandKey } from '../../../../helper/KeyboardHelper.js';
+import { roundValue } from '../../../../helper/LayoutHelper.js';
+import { getElementSize } from '../../../../helper/getBoxQuads.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
+import { getEdgeOffsetPoint, getQuadCenter } from '../../../../helper/QuadEdgeHandleHelper.js';
 
 type SkewAxis = 'x' | 'y';
 

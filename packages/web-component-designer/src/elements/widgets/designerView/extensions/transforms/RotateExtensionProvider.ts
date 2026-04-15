@@ -1,9 +1,9 @@
-import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignerExtension } from './IDesignerExtension.js';
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
 import { RotateExtension } from './RotateExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 
 export class RotateExtensionProvider implements IDesignerExtensionProvider {

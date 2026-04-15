@@ -1,9 +1,9 @@
 import { css } from '@node-projects/base-custom-webcomponent';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignerExtension } from './IDesignerExtension.js';
-import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 import { ProjectiveTransformExtension } from './ProjectiveTransformExtension.js';
 
 export class ProjectiveTransformExtensionProvider implements IDesignerExtensionProvider {

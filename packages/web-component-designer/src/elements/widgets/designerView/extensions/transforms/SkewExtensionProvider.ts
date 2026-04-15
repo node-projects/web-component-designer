@@ -1,9 +1,9 @@
-import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignerExtension } from './IDesignerExtension.js';
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
 import { SkewExtension } from './SkewExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from '@node-projects/base-custom-webcomponent';
 
 export class SkewExtensionProvider implements IDesignerExtensionProvider {

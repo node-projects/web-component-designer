@@ -1,10 +1,10 @@
-import { EventNames } from '../../../../enums/EventNames.js';
-import { IPoint } from '../../../../interfaces/IPoint.js';
-import { getElementSize } from '../../../helper/getBoxQuads.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { AbstractExtension } from './AbstractExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { EventNames } from '../../../../../enums/EventNames.js';
+import { IPoint } from '../../../../../interfaces/IPoint.js';
+import { getElementSize } from '../../../../helper/getBoxQuads.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 
 type QuadCornerIndex = 0 | 1 | 2 | 3;
 

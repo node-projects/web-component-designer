@@ -1,12 +1,12 @@
-import { EventNames } from '../../../../enums/EventNames.js';
-import { IPoint } from '../../../../interfaces/IPoint.js';
-import { convertCssUnit, getCssUnit } from '../../../helper/CssUnitConverter.js';
-import { getBoundingClientRectAlsoForDisplayContents } from '../../../helper/ElementHelper.js';
-import { roundValue } from '../../../helper/LayoutHelper.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { AbstractExtension } from './AbstractExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { EventNames } from '../../../../../enums/EventNames.js';
+import { IPoint } from '../../../../../interfaces/IPoint.js';
+import { convertCssUnit, getCssUnit } from '../../../../helper/CssUnitConverter.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../../../helper/ElementHelper.js';
+import { roundValue } from '../../../../helper/LayoutHelper.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 
 export class TransformOriginExtension extends AbstractExtension {
   private _startPos: IPoint;

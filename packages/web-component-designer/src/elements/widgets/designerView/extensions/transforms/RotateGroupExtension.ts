@@ -1,11 +1,11 @@
-import { IPoint } from '../../../../interfaces/IPoint.js';
-import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
-import { filterChildPlaceItems, roundValue } from '../../../helper/LayoutHelper.js';
-import { calculateOuterRect } from '../../../helper/ElementHelper.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { AbstractExtension } from './AbstractExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { IPoint } from '../../../../../interfaces/IPoint.js';
+import { hasCommandKey } from '../../../../helper/KeyboardHelper.js';
+import { filterChildPlaceItems, roundValue } from '../../../../helper/LayoutHelper.js';
+import { calculateOuterRect } from '../../../../helper/ElementHelper.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 
 interface ElementStartState {
   item: IDesignItem;

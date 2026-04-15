@@ -1,8 +1,8 @@
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { AbstractExtension } from './AbstractExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
-import { OverlayLayer } from './OverlayLayer.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { AbstractExtension } from '../AbstractExtension.js';
+import { IExtensionManager } from '../IExtensionManger.js';
+import { OverlayLayer } from '../OverlayLayer.js';
 
 export class FlexboxExtension extends AbstractExtension {
   private _path: SVGPathElement;

@@ -1,11 +1,11 @@
-import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
-import { IDesignItem } from '../../../item/IDesignItem.js';
-import { IDesignerCanvas } from '../IDesignerCanvas.js';
-import { IDesignerExtension } from './IDesignerExtension.js';
+import { IDesignerExtensionProvider } from '../IDesignerExtensionProvider.js';
+import { IDesignItem } from '../../../../item/IDesignItem.js';
+import { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { IDesignerExtension } from '../IDesignerExtension.js';
 import { TransformOriginExtension } from './TransformOriginExtension.js';
-import { IExtensionManager } from './IExtensionManger.js';
+import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
-import { getBoundingClientRectAlsoForDisplayContents } from '../../../helper/ElementHelper.js';
+import { getBoundingClientRectAlsoForDisplayContents } from '../../../../helper/ElementHelper.js';
 
 export class TransformOriginExtensionProvider implements IDesignerExtensionProvider {
   showOnlyWhenSet: boolean;
