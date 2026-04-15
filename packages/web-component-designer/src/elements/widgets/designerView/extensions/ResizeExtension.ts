@@ -1,10 +1,9 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
-import { getBoundingClientRectAlsoForDisplayContents, getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
+import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
-import { transformPointByInverseMatrix } from "../../../helper/TransformHelper.js";
-import { getElementCombinedTransform } from '../../../helper/getBoxQuads.js';
+import { getElementSize } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
@@ -30,20 +29,20 @@ export function normalizeToAbsolutePosition(element: HTMLElement, normalizePrope
 export class ResizeExtension extends AbstractExtension {
 
   private resizeAllSelected: boolean;
-  private _initialSizes: ISize[];
-  private _actionModeStarted: string;
-  private _initialPoint: IPoint;
-  private _offsetPoint: IPoint;
-  private _circle1: SVGCircleElement;
-  private _circle2: SVGCircleElement;
-  private _circle3: SVGCircleElement;
-  private _circle4: SVGCircleElement;
-  private _circle5: SVGCircleElement;
-  private _circle6: SVGCircleElement;
-  private _circle7: SVGCircleElement;
-  private _circle8: SVGCircleElement;
-  private _initialComputedTransformOrigins: DOMPoint[];
-  private _initialTransformOrigins: string[];
+  private _initialSizes: ISize[] | null = null;
+  private _actionModeStarted!: string;
+  private _initialPoint: IPoint | null = null;
+  private _offsetPoint!: IPoint;
+  private _circle1?: SVGCircleElement;
+  private _circle2?: SVGCircleElement;
+  private _circle3?: SVGCircleElement;
+  private _circle4?: SVGCircleElement;
+  private _circle5?: SVGCircleElement;
+  private _circle6?: SVGCircleElement;
+  private _circle7?: SVGCircleElement;
+  private _circle8?: SVGCircleElement;
+  private _initialHandleLocalPoint: DOMPoint | null = null;
+  private _initialFixedResizeAnchor: DOMPoint | null = null;
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
     super(extensionManager, designerCanvas, extendedItem);
@@ -99,36 +98,21 @@ export class ResizeExtension extends AbstractExtension {
     //don't switch from left positioning to right and so on...
     switch (event.type) {
       case EventNames.PointerDown:
-        const cx = parseFloat(circle.getAttribute('cx'));
-        const cy = parseFloat(circle.getAttribute('cy'));
+        const cx = parseFloat(circle.getAttribute('cx') ?? '0');
+        const cy = parseFloat(circle.getAttribute('cy') ?? '0');
         this._offsetPoint = { x: cx - currentPoint.x, y: cy - currentPoint.y };
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._initialPoint = currentPoint;
+        this._initialHandleLocalPoint = this.extendedItem.element.convertPointFromNode(new DOMPoint(cx, cy), this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
+        this._initialFixedResizeAnchor = this._getFixedResizeAnchor(this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas, iframes: this.designerCanvas.iframes })[0], actionMode);
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
-        this._initialComputedTransformOrigins = [];
-        this._initialTransformOrigins = [];
 
-        const transformBackup = (<HTMLElement>this.extendedItem.element).style.transform;
-        (<HTMLElement>this.extendedItem.element).style.transform = '';
-        let rect = getBoundingClientRectAlsoForDisplayContents(this.extendedItem.element);
-        (<HTMLElement>this.extendedItem.element).style.transform = transformBackup;
-
-        let contentBoxOffset: IPoint = { x: 0, y: 0 };
-        if (getComputedStyle(<HTMLElement>this.extendedItem.element).boxSizing == 'content-box') {
-          contentBoxOffset = getContentBoxContentOffsets(<HTMLElement>this.extendedItem.element);
-        }
-        this._initialSizes.push({ width: (rect.width - contentBoxOffset.x * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor, height: (rect.height - contentBoxOffset.y * this.designerCanvas.scaleFactor) / this.designerCanvas.scaleFactor });
-
-        const toArr = getComputedStyle(this.extendedItem.element).transformOrigin.split(' ').map(x => parseFloat(x.replace('px', '')));
-        const transformOrigin: DOMPoint = new DOMPoint(toArr[0], toArr[1]);
-        this._initialComputedTransformOrigins.push(transformOrigin);
-        this._initialTransformOrigins.push((<HTMLElement>this.extendedItem.element).style.transformOrigin);
+        this._initialSizes.push(this._getInitialSize(this.extendedItem.element));
 
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
-            rect = getBoundingClientRectAlsoForDisplayContents(designItem.element);
-            this._initialSizes.push({ width: rect.width / this.designerCanvas.scaleFactor, height: rect.height / this.designerCanvas.scaleFactor });
+            this._initialSizes.push(this._getInitialSize(designItem.element));
           }
         }
         if (this.designerCanvas.alignOnSnap)
@@ -147,17 +131,18 @@ export class ResizeExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
+          if (!this._initialSizes || !this._initialHandleLocalPoint) {
+            return;
+          }
+
           const containerStyle = getComputedStyle(this.extendedItem.parent.element);
           const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
           const diff = containerService.placePoint(event, this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-          let trackX = Math.round(diff.x - this._initialPoint.x - this._offsetPoint.x);
-          let trackY = Math.round(diff.y - this._initialPoint.y - this._offsetPoint.y);
-          let matrix = getElementCombinedTransform((<HTMLElement>this.extendedItem.element));
-          let transformedTrack = transformPointByInverseMatrix(new DOMPoint(trackX, trackY, 0, 0), matrix);
+          const currentHandleLocalPoint = this.extendedItem.element.convertPointFromNode(new DOMPoint(diff.x + this._offsetPoint.x, diff.y + this._offsetPoint.y), this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
 
-          let deltaX = transformedTrack.x;
-          let deltaY = transformedTrack.y;
+          let deltaX = currentHandleLocalPoint.x - this._initialHandleLocalPoint.x;
+          let deltaY = currentHandleLocalPoint.y - this._initialHandleLocalPoint.y;
 
           if (event.shiftKey) {
             deltaX = deltaX < deltaY ? deltaX : deltaY;
@@ -287,6 +272,8 @@ export class ResizeExtension extends AbstractExtension {
               break;
           }
 
+          this._applyAnchorCorrection();
+
           const resizedElements = [this.extendedItem, this.extendedItem.parent];
           if (this.resizeAllSelected)
             resizedElements.push(...this.designerCanvas.instanceServiceContainer.selectionService.selectedElements)
@@ -302,34 +289,23 @@ export class ResizeExtension extends AbstractExtension {
 
         let cg = this.extendedItem.openGroup((this.resizeAllSelected && this.designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 1) ? "Resize Elements" : "Resize &lt;" + this.extendedItem.name + "&gt;");
         try {
+          const element = <HTMLElement>this.extendedItem.element;
           this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
           this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
 
-          this.extendedItem.setStyle('left', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'left'))) + 'px');
-          this.extendedItem.setStyle('top', roundValue(this.extendedItem, parseFloat(normalizeToAbsolutePosition(<HTMLElement>this.extendedItem.element, 'top'))) + 'px');
-
-          let p3Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
-          (<HTMLElement>this.extendedItem.element).style.transformOrigin = this._initialTransformOrigins[0];
-
-          let p1Abs = new DOMPoint((<HTMLElement>this.extendedItem.element).offsetLeft + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[0].replace('px', '')), (<HTMLElement>this.extendedItem.element).offsetTop + parseFloat(getComputedStyle((<HTMLElement>this.extendedItem.element)).transformOrigin.split(' ')[1].replace('px', '')));
-          let p1 = new DOMPoint(p1Abs.x - p3Abs.x, -(p1Abs.y - p3Abs.y));
-          let matrix = new DOMMatrix(getComputedStyle((<HTMLElement>this.extendedItem.element)).transform);
-          let deltaX = 0;
-          let deltaY = 0;
-
-          let p1transformed = transformPointByInverseMatrix(p1, matrix);
-          let p2Abs = new DOMPoint(p3Abs.x + p1transformed.x, p3Abs.y - p1transformed.y);
-          let p1p2 = new DOMPoint(p2Abs.x - p1Abs.x, -(p2Abs.y - p1Abs.y));
-          let p1p2transformed = p1p2.matrixTransform(matrix);
-          let p4Abs = new DOMPoint(p1Abs.x + p1p2transformed.x, p1Abs.y - p1p2transformed.y);
-          deltaX = p4Abs.x - p1Abs.x;
-          deltaY = p4Abs.y - p1Abs.y;
-
-          (<HTMLElement>this.extendedItem.element).style.transform = matrix.translate(deltaX, deltaY).toString();
-          if (matrix.isIdentity) {
-            (<HTMLElement>this.extendedItem.element).style.transform = '';
+          let left = parseFloat(normalizeToAbsolutePosition(element, 'left'));
+          let top = parseFloat(normalizeToAbsolutePosition(element, 'top'));
+          const anchorCorrection = this._getAnchorCorrectionInParent();
+          if (anchorCorrection) {
+            left += anchorCorrection.x;
+            top += anchorCorrection.y;
+            element.style.left = roundValue(this.extendedItem, left) + 'px';
+            element.style.top = roundValue(this.extendedItem, top) + 'px';
           }
-          this.extendedItem.setStyle('transform', (<HTMLElement>this.extendedItem.element).style.transform);
+
+          this.extendedItem.setStyle('left', roundValue(this.extendedItem, left) + 'px');
+          this.extendedItem.setStyle('top', roundValue(this.extendedItem, top) + 'px');
+
           if (this.resizeAllSelected) {
             for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
               if (designItem !== this.extendedItem) {
@@ -353,15 +329,85 @@ export class ResizeExtension extends AbstractExtension {
         }
         this._initialSizes = null;
         this._initialPoint = null;
+        this._initialHandleLocalPoint = null;
+        this._initialFixedResizeAnchor = null;
         break;
     }
   }
 
+  private _getInitialSize(element: Element): ISize {
+    const size = getElementSize(element);
+    let contentBoxOffset: IPoint = { x: 0, y: 0 };
+    if (getComputedStyle(<HTMLElement>element).boxSizing == 'content-box') {
+      contentBoxOffset = getContentBoxContentOffsets(<HTMLElement>element);
+    }
+    return { width: size.width - contentBoxOffset.x, height: size.height - contentBoxOffset.y };
+  }
+
+  private _getFixedResizeAnchor(quad: DOMQuad, mode: string): DOMPoint | null {
+    if (!quad) {
+      return null;
+    }
+
+    switch (mode) {
+      case 'e-resize':
+        return new DOMPoint((quad.p1.x + quad.p4.x) / 2, (quad.p1.y + quad.p4.y) / 2);
+      case 'se-resize':
+        return new DOMPoint(quad.p1.x, quad.p1.y);
+      case 's-resize':
+        return new DOMPoint((quad.p1.x + quad.p2.x) / 2, (quad.p1.y + quad.p2.y) / 2);
+      case 'sw-resize':
+        return new DOMPoint(quad.p2.x, quad.p2.y);
+      case 'w-resize':
+        return new DOMPoint((quad.p2.x + quad.p3.x) / 2, (quad.p2.y + quad.p3.y) / 2);
+      case 'nw-resize':
+        return new DOMPoint(quad.p3.x, quad.p3.y);
+      case 'n-resize':
+        return new DOMPoint((quad.p4.x + quad.p3.x) / 2, (quad.p4.y + quad.p3.y) / 2);
+      case 'ne-resize':
+        return new DOMPoint(quad.p4.x, quad.p4.y);
+      default:
+        return null;
+    }
+  }
+
+  private _getAnchorCorrectionInParent(): IPoint | null {
+    if (!this._initialFixedResizeAnchor) {
+      return null;
+    }
+
+    const currentAnchor = this._getFixedResizeAnchor(this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas, iframes: this.designerCanvas.iframes })[0], this._actionModeStarted);
+    if (!currentAnchor) {
+      return null;
+    }
+
+    const initialAnchorInParent = this.extendedItem.parent.element.convertPointFromNode(this._initialFixedResizeAnchor, this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
+    const currentAnchorInParent = this.extendedItem.parent.element.convertPointFromNode(currentAnchor, this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
+
+    return {
+      x: initialAnchorInParent.x - currentAnchorInParent.x,
+      y: initialAnchorInParent.y - currentAnchorInParent.y
+    };
+  }
+
+  private _applyAnchorCorrection() {
+    const anchorCorrection = this._getAnchorCorrectionInParent();
+    if (!anchorCorrection) {
+      return;
+    }
+
+    const element = <HTMLElement>this.extendedItem.element;
+    const left = parseFloat(normalizeToAbsolutePosition(element, 'left')) + anchorCorrection.x;
+    const top = parseFloat(normalizeToAbsolutePosition(element, 'top')) + anchorCorrection.y;
+    element.style.left = roundValue(this.extendedItem, left) + 'px';
+    element.style.top = roundValue(this.extendedItem, top) + 'px';
+  }
+
   private prepareResize(designItem: IDesignItem, mode: string) {
-    let top: string = null;
-    let bottom: string = null;
-    let left: string = null;
-    let right: string = null;
+    let top: string | null = null;
+    let bottom: string | null = null;
+    let left: string | null = null;
+    let right: string | null = null;
 
     switch (this._actionModeStarted) {
       case 'e-resize':

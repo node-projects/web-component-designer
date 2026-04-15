@@ -1,8 +1,7 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { convertCssUnit, convertCssUnitToPixel, getCssUnit, getExpandedCssGridColumnSizes } from "../../../../helper/CssUnitConverter.js";
 import { getBoundingClientRectAlsoForDisplayContents } from "../../../../helper/ElementHelper.js";
-import { calculateGridInformation } from "../../../../helper/GridHelper.js";
-import { getElementCombinedTransform } from "../../../../helper/getBoxQuads.js";
+import { calculateGridInformation, getElementLocalToCanvasMatrix, getGridLocalPoint } from "../../../../helper/GridHelper.js";
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
 import { AbstractExtension } from '../AbstractExtension.js';
@@ -25,19 +24,18 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
 
   override extend(cache: Record<string | symbol, any>, event?: Event) {
     this._group = this._drawGroup(null, this._group, OverlayLayer.Background);
-    this._group.style.transform = getElementCombinedTransform(<HTMLElement>this.extendedItem.element).toString();
     this._group.style.transformOrigin = '0 0';
-    this._group.style.transformBox = 'fill-box';
 
     this.refresh(event);
   }
 
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     this.gridInformation = calculateGridInformation(this.extendedItem);
+    this._group.style.transform = getElementLocalToCanvasMatrix(this.extendedItem).toString();
     this.gridInformation.gaps.forEach((gap, i) => {
-      if (gap.width < 3) { gap.width = 3; gap.x--; }
-      if (gap.height < 3) { gap.height = 3; gap.y--; }
-      let rect = this._drawRect(gap.x, gap.y, gap.width, gap.height, 'svg-grid-resizer-' + gap.type, this._resizers[i], OverlayLayer.Normal);
+      if (gap.width < 3) { gap.width = 3; gap.x--; gap.localX--; }
+      if (gap.height < 3) { gap.height = 3; gap.y--; gap.localY--; }
+      let rect = this._drawRect(gap.localX, gap.localY, gap.width, gap.height, 'svg-grid-resizer-' + gap.type, this._resizers[i], OverlayLayer.Normal);
       if (!this._resizers[i]) {
         this._resizers[i] = rect;
         rect.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(event, rect, gap));
@@ -52,10 +50,9 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
     event.stopPropagation();
 
     const templatePropertyName = gap.type == 'h' ? 'gridTemplateRows' : 'gridTemplateColumns';
-    const axisPropertyName = gap.type == 'h' ? 'Y' : 'X';
     const index = (gap.type == 'h' ? gap.row : gap.column) - 1;
     const sizeType = gap.type == 'h' ? 'height' : 'width';
-    const pos = event['client' + axisPropertyName];
+    const pos = this._getAxisLocalPosition(event, gap.type);
     switch (event.type) {
       case EventNames.PointerDown:
         rect.setPointerCapture(event.pointerId);
@@ -64,12 +61,12 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
         break;
       case EventNames.PointerMove:
         if (this._initialSizes) {
-          const diff = this._initalPos - pos;
+          const diff = pos - this._initalPos;
           if (Math.abs(diff) > 5 || this._hasChanged) {
             this._hasChanged = true;
             let parts = this._initialSizes.split(' ');
-            parts[index] = (parseFloat(parts[index]) - diff) + 'px';
-            parts[index + 1] = (parseFloat(parts[index + 1]) + diff) + 'px';
+            parts[index] = (parseFloat(parts[index]) + diff) + 'px';
+            parts[index + 1] = (parseFloat(parts[index + 1]) - diff) + 'px';
             (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = parts.join(' ');
             this.extensionManager.refreshExtensions([this.extendedItem], null, event);
           }
@@ -77,7 +74,7 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
         break;
       case EventNames.PointerUp:
         rect.releasePointerCapture(event.pointerId);
-        const diff = this._initalPos - pos;
+        const diff = pos - this._initalPos;
         if (this._hasChanged) {
           this._hasChanged = false;
           const realStyle = this.extendedItem.getStyleFromSheetOrLocalOrComputed(templatePropertyName);
@@ -89,8 +86,8 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
           (<HTMLElement>this.extendedItem.element).style[templatePropertyName] = '';
 
           const targetPixelSizes = initialParts.map(x => parseFloat(x));
-          targetPixelSizes[index] -= diff;
-          targetPixelSizes[index + 1] += diff;
+          targetPixelSizes[index] += diff;
+          targetPixelSizes[index + 1] -= diff;
           const newSizes = this._convertCssUnits(targetPixelSizes, units, <HTMLElement>this.extendedItem.element, sizeType);
 
           this.extendedItem.updateStyleInSheetOrLocal(templatePropertyName, newSizes.join(' '), null, true);
@@ -100,6 +97,11 @@ export class EditGridColumnRowSizesExtension extends AbstractExtension {
         this.extensionManager.refreshExtensions([this.extendedItem]);
         break;
     }
+  }
+
+  private _getAxisLocalPosition(event: PointerEvent, gapType: 'h' | 'v'): number {
+    const localPoint = getGridLocalPoint(this.extendedItem, this.designerCanvas.getNormalizedEventCoordinates(event));
+    return gapType == 'h' ? localPoint.y : localPoint.x;
   }
 
   private _convertCssUnits(pixelSizes: number[], targetUnits: string[], target: HTMLElement, percentTarget: 'width' | 'height'): string[] {

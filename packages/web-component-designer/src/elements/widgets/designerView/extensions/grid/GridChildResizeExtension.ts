@@ -1,6 +1,6 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { IPoint } from "../../../../../interfaces/IPoint.js";
-import { calculateGridInformation } from "../../../../helper/GridHelper.js";
+import { calculateGridInformation, getGridColumnIndexFromLocalX, getGridLocalPoint, getGridRowIndexFromLocalY } from "../../../../helper/GridHelper.js";
 import { IDesignItem } from "../../../../item/IDesignItem.js";
 import { IDesignerCanvas } from "../../IDesignerCanvas.js";
 import { AbstractExtension } from "../AbstractExtension.js";
@@ -87,14 +87,11 @@ export class GridChildResizeExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          let posX = 0;
-          let posY = 0;
           let cellX = 0;
           let cellY = 0;
 
           const gridInformation = calculateGridInformation(this.extendedItem.parent);
-          const gridPos = this.designerCanvas.getNormalizedElementCoordinates(this.extendedItem.parent.element);
-          const evPos = this.designerCanvas.getNormalizedEventCoordinates(event);
+          const localPoint = getGridLocalPoint(this.extendedItem.parent, this.designerCanvas.getNormalizedEventCoordinates(event));
           const cs = getComputedStyle(this.extendedItem.element);
           (<HTMLElement>this.extendedItem.element).style.gridColumnStart = cs.gridColumnStart;
           (<HTMLElement>this.extendedItem.element).style.gridColumnEnd = cs.gridColumnEnd === 'auto' ? '' + (parseInt(cs.gridColumnStart) + 1) : cs.gridColumnEnd;
@@ -102,47 +99,19 @@ export class GridChildResizeExtension extends AbstractExtension {
           (<HTMLElement>this.extendedItem.element).style.gridRowEnd = cs.gridRowEnd === 'auto' ? '' + (parseInt(cs.gridRowStart) + 1) : cs.gridRowEnd;
 
           if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'w-resize' || this._actionModeStarted == 'sw-resize') {
-            for (let i = 0; i < gridInformation.cells.length; i++) {
-              const cell = gridInformation.cells[i][0];
-              const cellMiddlePos = posX + (cell.width / 2);
-              if (evPos.x > gridPos.x + cellMiddlePos) {
-                cellX = i;
-              }
-              posX += cell.width + gridInformation.xGap;
-            }
+            cellX = getGridColumnIndexFromLocalX(gridInformation, localPoint.x);
             (<HTMLElement>this.extendedItem.element).style.gridColumnStart = '' + (cellX + 2);
           }
           if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'n-resize' || this._actionModeStarted == 'ne-resize') {
-            for (let i = 0; i < gridInformation.cells.length; i++) {
-              const cell = gridInformation.cells[i][0];
-              const cellMiddlePos = posY + (cell.height / 2);
-              if (evPos.y > gridPos.y + cellMiddlePos) {
-                cellY = i;
-              }
-              posY += cell.height + gridInformation.yGap;
-            }
+            cellY = getGridRowIndexFromLocalY(gridInformation, localPoint.y);
             (<HTMLElement>this.extendedItem.element).style.gridRowStart = '' + (cellY + 2);
           }
           if (this._actionModeStarted == 'se-resize' || this._actionModeStarted == 'e-resize' || this._actionModeStarted == 'ne-resize') {
-            for (let i = 0; i < gridInformation.cells.length; i++) {
-              const cell = gridInformation.cells[i][0];
-              const cellMiddlePos = posX + (cell.width / 2);
-              if (evPos.x > gridPos.x + cellMiddlePos) {
-                cellX = i;
-              }
-              posX += cell.width + gridInformation.xGap;
-            }
+            cellX = getGridColumnIndexFromLocalX(gridInformation, localPoint.x);
             (<HTMLElement>this.extendedItem.element).style.gridColumnEnd = '' + (cellX + 2);
           }
           if (this._actionModeStarted == 'sw-resize' || this._actionModeStarted == 's-resize' || this._actionModeStarted == 'se-resize') {
-            for (let i = 0; i < gridInformation.cells[0].length; i++) {
-              const cell = gridInformation.cells[0][i];
-              const cellMiddlePos = posY + (cell.height / 2);
-              if (evPos.y > gridPos.y + cellMiddlePos) {
-                cellY = i;
-              }
-              posY += cell.height + gridInformation.yGap;
-            }
+            cellY = getGridRowIndexFromLocalY(gridInformation, localPoint.y);
             (<HTMLElement>this.extendedItem.element).style.gridRowEnd = '' + (cellY + 2);
           }
 

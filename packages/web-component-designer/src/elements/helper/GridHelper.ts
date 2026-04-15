@@ -1,5 +1,42 @@
+import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignItem } from "../item/IDesignItem.js";
-import { DesignerCanvas } from "../widgets/designerView/designerCanvas.js";
+import { getElementSize } from "./getBoxQuads.js";
+
+export interface IGridCellInformation {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  name: string;
+  localX: number;
+  localY: number;
+}
+
+export interface IGridGapInformation {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  localX: number;
+  localY: number;
+  column?: number;
+  row?: number;
+  type: 'h' | 'v';
+}
+
+export interface IGridInformation {
+  cells: IGridCellInformation[][];
+  gaps: IGridGapInformation[];
+  xGap: number;
+  yGap: number;
+}
+
+export interface IGridCellHitResult {
+  row: number;
+  column: number;
+  cell: IGridCellInformation;
+  localPoint: IPoint;
+}
 
 export function getElementGridInformation(element: HTMLElement) {
   let cs = getComputedStyle(element);
@@ -21,12 +58,81 @@ export function getElementGridInformation(element: HTMLElement) {
   return { colSpan, rowSpan };
 }
 
-export function calculateGridInformation(designItem: IDesignItem) {
+export function getGridLocalPoint(designItem: IDesignItem, point: IPoint): IPoint {
+  const designerCanvas = designItem.instanceServiceContainer.designerCanvas;
+  const localPoint = designItem.element.convertPointFromNode(new DOMPoint(point.x, point.y), designerCanvas.canvas, { iframes: designerCanvas.iframes });
+  return { x: localPoint.x, y: localPoint.y };
+}
+
+export function getElementLocalToCanvasMatrix(designItem: IDesignItem): DOMMatrix {
+  const designerCanvas = designItem.instanceServiceContainer.designerCanvas;
+  const origin = designerCanvas.canvas.convertPointFromNode(new DOMPoint(0, 0), designItem.element, { iframes: designerCanvas.iframes });
+  const xAxis = designerCanvas.canvas.convertPointFromNode(new DOMPoint(1, 0), designItem.element, { iframes: designerCanvas.iframes });
+  const yAxis = designerCanvas.canvas.convertPointFromNode(new DOMPoint(0, 1), designItem.element, { iframes: designerCanvas.iframes });
+
+  return new DOMMatrix([
+    xAxis.x - origin.x,
+    xAxis.y - origin.y,
+    yAxis.x - origin.x,
+    yAxis.y - origin.y,
+    origin.x,
+    origin.y,
+  ]);
+}
+
+export function getGridColumnIndexFromLocalX(gridInformation: IGridInformation, localX: number): number {
+  const columns = gridInformation.cells[0];
+  if (!columns?.length || !Number.isFinite(localX))
+    return 0;
+
+  let column = 0;
+  for (let i = 0; i < columns.length; i++) {
+    const cell = columns[i];
+    if (localX > cell.localX + cell.width / 2) {
+      column = i;
+    }
+  }
+  return column;
+}
+
+export function getGridRowIndexFromLocalY(gridInformation: IGridInformation, localY: number): number {
+  if (!gridInformation.cells.length || !Number.isFinite(localY))
+    return 0;
+
+  let row = 0;
+  for (let i = 0; i < gridInformation.cells.length; i++) {
+    const cell = gridInformation.cells[i][0];
+    if (localY > cell.localY + cell.height / 2) {
+      row = i;
+    }
+  }
+  return row;
+}
+
+export function getGridCellFromPoint(designItem: IDesignItem, point: IPoint, gridInformation: IGridInformation = calculateGridInformation(designItem)): IGridCellHitResult {
+  const localPoint = getGridLocalPoint(designItem, point);
+  if (!Number.isFinite(localPoint.x) || !Number.isFinite(localPoint.y))
+    return null;
+
+  for (let row = 0; row < gridInformation.cells.length; row++) {
+    for (let column = 0; column < gridInformation.cells[row].length; column++) {
+      const cell = gridInformation.cells[row][column];
+      if (localPoint.x >= cell.localX && localPoint.x <= cell.localX + cell.width && localPoint.y >= cell.localY && localPoint.y <= cell.localY + cell.height) {
+        return { row, column, cell, localPoint };
+      }
+    }
+  }
+
+  return null;
+}
+
+export function calculateGridInformation(designItem: IDesignItem): IGridInformation {
 
   //TODO: same name should combine columns/rows
 
-  let itemRect = designItem.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(designItem.element);
-  let transformedCornerPoints: DOMQuad = designItem.element.getBoxQuads({ relativeTo: <DesignerCanvas>designItem.instanceServiceContainer.designerCanvas.canvas })[0];
+  const designerCanvas = designItem.instanceServiceContainer.designerCanvas;
+  const transformedCornerPoints: DOMQuad = designItem.element.getBoxQuads({ relativeTo: designerCanvas.canvas, iframes: designerCanvas.iframes })[0];
+  const itemSize = getElementSize(designItem.element);
 
   const computedStyle = getComputedStyle(designItem.element);
   const rows = computedStyle.gridTemplateRows.split(' ');
@@ -34,16 +140,18 @@ export function calculateGridInformation(designItem: IDesignItem) {
 
   const paddingLeft = Number.parseFloat(computedStyle.paddingLeft);
   const paddingTop = Number.parseFloat(computedStyle.paddingTop);
+  const borderLeft = Number.parseFloat(computedStyle.borderLeftWidth);
+  const borderTop = Number.parseFloat(computedStyle.borderTopWidth);
 
 
   let y = 0;
   let xGap = 0;
   let yGap = 0;
   let rw = 0;
-  let xOffset = transformedCornerPoints.p1.x;
-  let yOffset = transformedCornerPoints.p1.y;
-  xOffset += parseFloat(computedStyle.borderLeftWidth);
-  yOffset += parseFloat(computedStyle.borderTopWidth);
+  let xOffset = transformedCornerPoints.p1.x + borderLeft;
+  let yOffset = transformedCornerPoints.p1.y + borderTop;
+  let localXOffset = borderLeft;
+  let localYOffset = borderTop;
 
   let gridA: string[] = null;
   if (computedStyle.gridTemplateAreas && computedStyle.gridTemplateAreas !== 'none')
@@ -67,43 +175,50 @@ export function calculateGridInformation(designItem: IDesignItem) {
   gesY -= yGap;
 
   if (computedStyle.justifyContent == 'center') {
-    xOffset += (itemRect.width - gesX) / 2;
+    const diff = (itemSize.width - gesX) / 2;
+    xOffset += diff;
+    localXOffset += diff;
   } else if (computedStyle.justifyContent == 'end') {
-    xOffset += itemRect.width - gesX;
+    const diff = itemSize.width - gesX;
+    xOffset += diff;
+    localXOffset += diff;
   } else if (computedStyle.justifyContent == 'space-between') {
-    xGap += (itemRect.width - gesX) / (columns.length - 1);
+    xGap += (itemSize.width - gesX) / (columns.length - 1);
   } else if (computedStyle.justifyContent == 'space-around') {
-    let gp = (itemRect.width - gesX) / (columns.length * 2);
+    let gp = (itemSize.width - gesX) / (columns.length * 2);
     xGap += gp * 2;
     xOffset += gp;
+    localXOffset += gp;
   } else if (computedStyle.justifyContent == 'space-evenly') {
-    let gp = (itemRect.width - gesX) / (columns.length + 1);
+    let gp = (itemSize.width - gesX) / (columns.length + 1);
     xGap += gp;
     xOffset += gp;
+    localXOffset += gp;
   }
 
   if (computedStyle.alignContent == 'center') {
-    xOffset += (itemRect.height - gesY) / 2;
+    const diff = (itemSize.height - gesY) / 2;
+    yOffset += diff;
+    localYOffset += diff;
   } else if (computedStyle.alignContent == 'end') {
-    xOffset += itemRect.height - gesY;
+    const diff = itemSize.height - gesY;
+    yOffset += diff;
+    localYOffset += diff;
   } else if (computedStyle.alignContent == 'space-between') {
-    yGap += (itemRect.height - gesY) / (rows.length - 1);
+    yGap += (itemSize.height - gesY) / (rows.length - 1);
   } else if (computedStyle.alignContent == 'space-around') {
-    let gp = (itemRect.height - gesY) / (rows.length * 2);
+    let gp = (itemSize.height - gesY) / (rows.length * 2);
     yGap += gp * 2;
     yOffset += gp;
+    localYOffset += gp;
   } else if (computedStyle.alignContent == 'space-evenly') {
-    let gp = (itemRect.height - gesY) / (rows.length + 1);
+    let gp = (itemSize.height - gesY) / (rows.length + 1);
     yGap += gp;
     yOffset += gp;
+    localYOffset += gp;
   }
 
-  const retVal: {
-    cells?: { x: number, y: number, width: number, height: number, name: string }[][],
-    gaps?: { x: number, y: number, width: number, height: number, column?: number, row?: number, type: 'h' | 'v' }[],
-    xGap: number
-    yGap: number
-  } = { cells: [], gaps: [], xGap, yGap };
+  const retVal: IGridInformation = { cells: [], gaps: [], xGap, yGap };
 
   for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
     const r = rows[rowIdx];
@@ -114,17 +229,17 @@ export function calculateGridInformation(designItem: IDesignItem) {
     let x = 0;
     let cl = 0;
     const currY = Number.parseFloat(r.replace('px', ''));
-    let cellList: { x: number, y: number, width: number, height: number, name: string }[] = [];
+    let cellList: IGridCellInformation[] = [];
     retVal.cells.push(cellList);
     for (let colIdx = 0; colIdx < columns.length; colIdx++) {
       const c = columns[colIdx];
       if (colIdx > 0) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY, column: colIdx, row: rowIdx, type: 'v' });
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: xGap, height: currY, localX: x + localXOffset + paddingLeft, localY: y + localYOffset + paddingTop, column: colIdx, row: rowIdx, type: 'v' });
         x += xGap
       }
       const currX = Number.parseFloat(c.replace('px', ''));
       if (rowIdx > 0) {
-        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, column: colIdx, row: rowIdx, type: 'h' });
+        retVal.gaps.push({ x: x + xOffset + paddingLeft, y: y + yOffset - yGap + paddingTop, width: currX, height: yGap, localX: x + localXOffset + paddingLeft, localY: y + localYOffset - yGap + paddingTop, column: colIdx, row: rowIdx, type: 'h' });
       }
       let name = null;
       if (areas && areas[cl]) {
@@ -133,7 +248,7 @@ export function calculateGridInformation(designItem: IDesignItem) {
           name = nm;
         }
       }
-      const cell = { x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: currX, height: currY, name: name };
+      const cell = { x: x + xOffset + paddingLeft, y: y + yOffset + paddingTop, width: currX, height: currY, name: name, localX: x + localXOffset + paddingLeft, localY: y + localYOffset + paddingTop };
       cellList.push(cell);
       x += currX;
       cl++;
