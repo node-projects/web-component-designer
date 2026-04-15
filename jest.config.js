@@ -4,11 +4,17 @@ export default {
   testEnvironment: "node",
   extensionsToTreatAsEsm: ['.ts', '.mts'],
   transform: {
-    '^.+\\.(mts|ts|tsx)$': [
+    '^.+\\.(mts|ts|tsx|mjs|js)$': [
       "ts-jest",
       {
-        "useESM": true
+        "useESM": true,
+        "tsconfig": {
+          "allowJs": true
+        }
       }
     ]
-  }
+  },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(?:@node-projects/base-custom-webcomponent)(?:/|$))'
+  ]
 }

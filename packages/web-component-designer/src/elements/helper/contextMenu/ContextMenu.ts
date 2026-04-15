@@ -1,5 +1,6 @@
-import { css } from "@node-projects/base-custom-webcomponent";
+import { css } from '@node-projects/base-custom-webcomponent';
 import { IContextMenu, IContextMenuItem } from './IContextMenuItem.js';
+
 
 export interface IContextMenuOptions {
   defaultIcon?: string,
@@ -14,6 +15,11 @@ export class ContextMenu implements IContextMenu {
   private static _contextMenuCss = css`
 	  .context_menu {
 		position: fixed;
+    inset: auto;
+    margin: 0;
+    border: none;
+    background: transparent;
+    overflow: visible;
 		opacity: 0;
 		transform: scale(0);
 		transition: transform 0.1s;
@@ -41,9 +47,21 @@ export class ContextMenu implements IContextMenu {
 		list-style-type: none;
 		padding: 3px;
 		margin: 0;
+    border: none;
 		background-color: #f5f7f7;
 		box-shadow: 0 0 5px #333;
+    max-inline-size: calc(100vw - 8px);
+    max-block-size: calc(100vh - 8px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    isolation: isolate;
 	  }
+
+    .context_menu ul[popover] {
+    inset: auto;
+    margin: 0;
+    border: none;
+    }
 	  
 	  .context_menu li {
 		padding: 0;
@@ -86,14 +104,19 @@ export class ContextMenu implements IContextMenu {
 	  
 	  .context_menu li>ul {
 		position: absolute;
+    inset: auto;
 		top: 0;
 		left: 100%;
 		opacity: 0;
 		transition: opacity 0.2s;
 		visibility: hidden;
 	  }
+
+    .context_menu li>ul.context_menu_submenu_popover {
+    position: fixed;
+    }
 	  
-	  .context_menu li:hover>ul {
+    .context_menu li>ul:popover-open {
 		opacity: 1;
 		visibility: visible;
 	  }
@@ -107,16 +130,6 @@ export class ContextMenu implements IContextMenu {
 	  
 	  .context_menu li.context_menu_divider:hover {
 		background-color: inherit;
-	  }
-	  
-	  .context_menu.context_menu_border_right>ul ul {
-		left: unset;
-		right: 100%;
-	  }
-	  
-	  .context_menu.context_menu_border_bottom>ul ul {
-		top: unset;
-		bottom: 0;
 	  }
 	  
 	  .context_menu li[disabled=""] {
@@ -137,10 +150,10 @@ export class ContextMenu implements IContextMenu {
   private static _openedContextMenus = new Set<ContextMenu>();
 
   menu: IContextMenuItem[];
-  public options: IContextMenuOptions;
+  public options?: IContextMenuOptions;
   public context: any
   private num: number;
-  private _menuElement: HTMLDivElement;
+  private _menuElement!: HTMLDivElement;
 
   constructor(menu: IContextMenuItem[], options?: IContextMenuOptions, context?: any) {
     this.num = ContextMenu.count++;
@@ -162,6 +175,7 @@ export class ContextMenu implements IContextMenu {
       this._menuElement = document.createElement("div");
       this._menuElement.className = "context_menu";
       this._menuElement.id = "context_menu_" + this.num;
+      this._menuElement.setAttribute('popover', 'manual');
 
       if (shadowRoot === document)
         document.body.appendChild(this._menuElement);
@@ -198,7 +212,7 @@ export class ContextMenu implements IContextMenu {
         if (item.checked === true) {
           icon_span.innerHTML = '✔';
         } else if ((item.icon ?? '') != '') {
-          icon_span.innerHTML = item.icon;
+          icon_span.innerHTML = item.icon ?? '';
         } else {
           icon_span.innerHTML = this.options?.defaultIcon ?? '';
         }
@@ -208,7 +222,7 @@ export class ContextMenu implements IContextMenu {
         let text_span = document.createElement("span");
         text_span.className = 'context_menu_text';
 
-        text_span.innerHTML = item.title;
+        text_span.innerHTML = item.title ?? '';
 
         let sub_span = document.createElement("span");
         sub_span.className = 'context_menu_sub_span';
@@ -237,51 +251,31 @@ export class ContextMenu implements IContextMenu {
             li.addEventListener('click', (e) => {
               e.stopPropagation();
               e.preventDefault();
-              item.action(e, item, this.context, this);
+              item.action?.(e, item, this.context, this);
               this.close();
             });
           if (this.options?.mode == 'undo') {
             li.addEventListener('mouseup', (e) => {
               e.stopPropagation();
-              item.action(e, item, this.context, this);
+              item.action?.(e, item, this.context, this);
               this.close();
             });
           }
+
+          li.addEventListener('mouseenter', () => {
+            this.closeSiblingSubmenus(li);
+            if (this.options?.mode == 'undo') {
+              this.markUndoItems(li);
+            }
+          });
+
           if (item.children != null) {
             let childmenu = this.renderLevel(item.children);
+            this.configurePopoverSubmenu(childmenu);
             li.appendChild(childmenu);
             li.addEventListener('mouseenter', () => {
-              const childRect = childmenu.getBoundingClientRect();
-              if (childRect.top + childRect.height > window.innerHeight) {
-                childmenu.style.top = 'unset';
-                childmenu.style.bottom = '0';
-              }
-              if (this.options?.mode == 'undo') {
-                let select = true;
-                for (let node of li.parentElement.children) {
-                  if (select)
-                    (<HTMLElement>node).classList.add('context_menu_marked')
-                  else
-                    (<HTMLElement>node).classList.remove('context_menu_marked')
-                  if (node == li)
-                    select = false
-                }
-              }
+              this.openPopoverSubmenu(li, childmenu);
             });
-          } else {
-            if (this.options?.mode == 'undo') {
-              li.addEventListener('mouseenter', () => {
-                let select = true;
-                for (let node of li.parentElement.children) {
-                  if (select)
-                    (<HTMLElement>node).classList.add('context_menu_marked')
-                  else
-                    (<HTMLElement>node).classList.remove('context_menu_marked')
-                  if (node == li)
-                    select = false
-                }
-              });
-            }
           }
         }
         ul_outer.appendChild(li);
@@ -296,54 +290,26 @@ export class ContextMenu implements IContextMenu {
   public display(event: MouseEvent) {
     let menu = this._menuElement;
 
-    let clickCoords = { x: event.clientX, y: event.clientY };
-    let clickCoordsX = clickCoords.x;
-    let clickCoordsY = clickCoords.y;
-
-    let menuWidth = menu.offsetWidth + 4;
-    let menuHeight = menu.offsetHeight + 4;
-
-    let windowWidth = window.innerWidth;
-    let windowHeight = window.innerHeight;
-
     let mouseOffset = this.options?.mouseOffset != null ? this.options.mouseOffset : 2;
 
-    if ((windowWidth - clickCoordsX) < menuWidth) {
-      menu.style.left = windowWidth - menuWidth + "px";
-    } else {
-      menu.style.left = (clickCoordsX + mouseOffset) + "px";
-    }
-
-    if ((windowHeight - clickCoordsY) < menuHeight) {
-      menu.style.top = windowHeight - menuHeight + "px";
-    } else {
-      menu.style.top = (clickCoordsY + mouseOffset) + "px";
-    }
-
-    let sizes = ContextUtil.getSizes(menu);
-
-    if ((windowWidth - clickCoordsX) < sizes.width) {
-      menu.classList.add("context_menu_border_right");
-    } else {
-      menu.classList.remove("context_menu_border_right");
-    }
-
-    if ((windowHeight - clickCoordsY) < sizes.height) {
-      menu.classList.add("context_menu_border_bottom");
-    } else {
-      menu.classList.remove("context_menu_border_bottom");
-    }
+    this.showPopover(menu);
+    this.positionMenu(menu, event.clientX, event.clientY, mouseOffset);
 
     menu.classList.add("context_menu_display");
 
     event.preventDefault();
 
-    window.addEventListener("keyup", this._windowKeyUp);
-    window.addEventListener("mousedown", this._windowDown);
-    window.addEventListener("resize", this._windowResize);
-    setTimeout(() => window.addEventListener("contextmenu", this._windowDown), 100);
-
     ContextMenu._openedContextMenus.add(this);
+
+    window.addEventListener("keyup", this._windowKeyUp);
+    window.addEventListener("resize", this._windowResize);
+    setTimeout(() => {
+      if (!ContextMenu._openedContextMenus.has(this))
+        return;
+
+      window.addEventListener("mousedown", this._windowDown);
+      window.addEventListener("contextmenu", this._windowDown);
+    }, 0);
   }
 
   _windowResize() {
@@ -352,8 +318,7 @@ export class ContextMenu implements IContextMenu {
 
   _windowDown(e: MouseEvent) {
     e.preventDefault();
-    const p = e.composedPath();
-    if (p.indexOf(this._menuElement) < 0)
+    if (!(e.target instanceof Node) || !this._menuElement.contains(e.target))
       this.close();
     return false;
   }
@@ -371,6 +336,8 @@ export class ContextMenu implements IContextMenu {
   }
 
   close() {
+    this.hideDescendantSubmenus(this._menuElement);
+    this.hidePopover(this._menuElement);
     this._menuElement.remove();
     window.removeEventListener("keyup", this._windowKeyUp);
     window.removeEventListener("mousedown", this._windowDown);
@@ -383,50 +350,114 @@ export class ContextMenu implements IContextMenu {
     for (const c of ContextMenu._openedContextMenus.values())
       c.close();
   }
-}
 
-class ContextUtil {
-  static getSizes(obj) {
-    let lis = obj.getElementsByTagName('li');
+  private configurePopoverSubmenu(childmenu: HTMLUListElement) {
+    childmenu.classList.add('context_menu_submenu_popover');
+    childmenu.setAttribute('popover', 'manual');
+  }
 
-    let width_def = 0;
-    let height_def = 0;
+  private markUndoItems(li: HTMLLIElement) {
+    if (li.parentElement == null)
+      return;
 
-    for (let i = 0; i < lis.length; i++) {
-      let li = lis[i];
+    let select = true;
+    for (let node of li.parentElement.children) {
+      if (select)
+        (<HTMLElement>node).classList.add('context_menu_marked')
+      else
+        (<HTMLElement>node).classList.remove('context_menu_marked')
+      if (node == li)
+        select = false
+    }
+  }
 
-      if (li.offsetWidth > width_def) {
-        width_def = li.offsetWidth;
-      }
+  private closeSiblingSubmenus(li: HTMLLIElement) {
+    if (li.parentElement == null)
+      return;
 
-      if (li.offsetHeight > height_def) {
-        height_def = li.offsetHeight;
+    for (const node of li.parentElement.children) {
+      if (node !== li) {
+        this.hideDescendantSubmenus(node as HTMLElement);
       }
     }
+  }
 
-    let width = width_def;
-    let height = height_def;
+  private hideDescendantSubmenus(element: HTMLElement) {
+    const submenus = element.querySelectorAll('ul[popover]');
+    for (const submenu of submenus) {
+      this.hidePopover(submenu as HTMLElement);
+    }
+  }
 
-    for (let i = 0; i < lis.length; i++) {
-      let li = lis[i];
+  private openPopoverSubmenu(li: HTMLLIElement, childmenu: HTMLUListElement) {
+    this.showPopover(childmenu);
+    this.positionSubmenuPopover(li, childmenu);
+  }
 
-      let ul = li.getElementsByTagName('ul');
-      if (typeof ul[0] !== "undefined") {
-        let ul_size = ContextUtil.getSizes(ul[0]);
+  private showPopover(element: HTMLElement) {
+    if (this.isPopoverOpen(element))
+      return;
 
-        if (width_def + ul_size.width > width) {
-          width = width_def + ul_size.width;
-        }
+    element.showPopover();
+  }
 
-        if (height_def + ul_size.height > height) {
-          height = height_def + ul_size.height;
-        }
-      }
+  private hidePopover(element?: HTMLElement) {
+    if (element == null || !this.isPopoverOpen(element))
+      return;
+
+    element.hidePopover();
+  }
+
+  private isPopoverOpen(element: HTMLElement) {
+    return element.matches(':popover-open');
+  }
+
+  private positionMenu(menu: HTMLDivElement, clickCoordsX: number, clickCoordsY: number, mouseOffset: number) {
+    const menuWidth = menu.offsetWidth + 4;
+    const menuHeight = menu.offsetHeight + 4;
+
+    const spaceRight = window.innerWidth - clickCoordsX;
+    const spaceLeft = clickCoordsX;
+    const spaceBelow = window.innerHeight - clickCoordsY;
+    const spaceAbove = clickCoordsY;
+
+    let left = clickCoordsX + mouseOffset;
+    if (spaceRight < menuWidth && spaceLeft > spaceRight) {
+      left = clickCoordsX - menuWidth - mouseOffset;
     }
 
-    return {
-      "width": width,
-      "height": height
-    };
+    let top = clickCoordsY + mouseOffset;
+    if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+      top = clickCoordsY - menuHeight - mouseOffset;
+    }
+
+    menu.style.left = `${Math.max(0, Math.min(left, window.innerWidth - menuWidth))}px`;
+    menu.style.top = `${Math.max(0, Math.min(top, window.innerHeight - menuHeight))}px`;
+  }
+
+  private positionSubmenuPopover(li: HTMLLIElement, childmenu: HTMLUListElement) {
+    const parentRect = li.getBoundingClientRect();
+    const childRect = childmenu.getBoundingClientRect();
+    const menuWidth = childmenu.offsetWidth || childRect.width;
+    const menuHeight = childmenu.offsetHeight || childRect.height;
+
+    const spaceRight = window.innerWidth - parentRect.right;
+    const spaceLeft = parentRect.left;
+    let left = parentRect.right;
+    if (spaceRight < menuWidth && spaceLeft > spaceRight) {
+      left = parentRect.left - menuWidth;
+    }
+
+    const spaceBelow = window.innerHeight - parentRect.top;
+    const spaceAbove = parentRect.bottom;
+    let top = parentRect.top;
+    if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+      top = parentRect.bottom - menuHeight;
+    }
+
+    childmenu.style.left = `${Math.max(0, Math.min(left, window.innerWidth - menuWidth))}px`;
+    childmenu.style.top = `${Math.max(0, Math.min(top, window.innerHeight - menuHeight))}px`;
+    childmenu.style.right = 'auto';
+    childmenu.style.bottom = 'auto';
   }
 }

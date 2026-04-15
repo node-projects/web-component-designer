@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "node node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "develop": "npm i && npm run link && npm run build",
     "link": "npm run link --workspaces",
     "watch": "npm run watch --workspaces",
@@ -34,6 +34,7 @@
     "esprima-next": "^6.0.3",
     "html2canvas": "*",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^30.3.0",
     "jquery": "^3.7.1",
     "jquery.fancytree": "^2.38.3",
     "jsbarcode": "^3.11.6",
