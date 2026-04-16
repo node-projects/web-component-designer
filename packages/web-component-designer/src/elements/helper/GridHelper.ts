@@ -95,6 +95,21 @@ export function getGridColumnIndexFromLocalX(gridInformation: IGridInformation, 
   return column;
 }
 
+export function getGridColumnStartLineFromLocalX(gridInformation: IGridInformation, localX: number): number {
+  const columns = gridInformation.cells[0];
+  if (!columns?.length || !Number.isFinite(localX))
+    return 1;
+
+  let line = 1;
+  for (let i = 0; i < columns.length; i++) {
+    const cell = columns[i];
+    if (localX > cell.localX + cell.width / 2) {
+      line = i + 2;
+    }
+  }
+  return line;
+}
+
 export function getGridRowIndexFromLocalY(gridInformation: IGridInformation, localY: number): number {
   if (!gridInformation.cells.length || !Number.isFinite(localY))
     return 0;
@@ -107,6 +122,20 @@ export function getGridRowIndexFromLocalY(gridInformation: IGridInformation, loc
     }
   }
   return row;
+}
+
+export function getGridRowStartLineFromLocalY(gridInformation: IGridInformation, localY: number): number {
+  if (!gridInformation.cells.length || !Number.isFinite(localY))
+    return 1;
+
+  let line = 1;
+  for (let i = 0; i < gridInformation.cells.length; i++) {
+    const cell = gridInformation.cells[i][0];
+    if (localY > cell.localY + cell.height / 2) {
+      line = i + 2;
+    }
+  }
+  return line;
 }
 
 export function getGridCellFromPoint(designItem: IDesignItem, point: IPoint, gridInformation: IGridInformation = calculateGridInformation(designItem)): IGridCellHitResult {

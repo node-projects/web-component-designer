@@ -1,6 +1,6 @@
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { IPoint } from "../../../../../interfaces/IPoint.js";
-import { calculateGridInformation, getGridColumnIndexFromLocalX, getGridLocalPoint, getGridRowIndexFromLocalY } from "../../../../helper/GridHelper.js";
+import { calculateGridInformation, getGridColumnIndexFromLocalX, getGridColumnStartLineFromLocalX, getGridLocalPoint, getGridRowIndexFromLocalY, getGridRowStartLineFromLocalY } from "../../../../helper/GridHelper.js";
 import { IDesignItem } from "../../../../item/IDesignItem.js";
 import { IDesignerCanvas } from "../../IDesignerCanvas.js";
 import { AbstractExtension } from "../AbstractExtension.js";
@@ -99,12 +99,10 @@ export class GridChildResizeExtension extends AbstractExtension {
           (<HTMLElement>this.extendedItem.element).style.gridRowEnd = cs.gridRowEnd === 'auto' ? '' + (parseInt(cs.gridRowStart) + 1) : cs.gridRowEnd;
 
           if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'w-resize' || this._actionModeStarted == 'sw-resize') {
-            cellX = getGridColumnIndexFromLocalX(gridInformation, localPoint.x);
-            (<HTMLElement>this.extendedItem.element).style.gridColumnStart = '' + (cellX + 2);
+            (<HTMLElement>this.extendedItem.element).style.gridColumnStart = '' + getGridColumnStartLineFromLocalX(gridInformation, localPoint.x);
           }
           if (this._actionModeStarted == 'nw-resize' || this._actionModeStarted == 'n-resize' || this._actionModeStarted == 'ne-resize') {
-            cellY = getGridRowIndexFromLocalY(gridInformation, localPoint.y);
-            (<HTMLElement>this.extendedItem.element).style.gridRowStart = '' + (cellY + 2);
+            (<HTMLElement>this.extendedItem.element).style.gridRowStart = '' + getGridRowStartLineFromLocalY(gridInformation, localPoint.y);
           }
           if (this._actionModeStarted == 'se-resize' || this._actionModeStarted == 'e-resize' || this._actionModeStarted == 'ne-resize') {
             cellX = getGridColumnIndexFromLocalX(gridInformation, localPoint.x);

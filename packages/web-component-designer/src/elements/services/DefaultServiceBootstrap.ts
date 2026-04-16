@@ -191,7 +191,6 @@ export function createDefaultServiceContainer() {
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainerAndCanBeEntered, [
     new DisplayGridExtensionProvider('lightgray', '#8080802b'),
-    new EditGridColumnRowSizesExtensionProvider(),
     new FlexboxExtensionProvider()
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
