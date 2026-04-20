@@ -1,4 +1,4 @@
-import { flexboxExtensionShowOverlayOptionName } from "../FlexboxExtensionProvider.js";
+import { flexboxExtensionShowOverlayOptionName } from "../flex/FlexboxExtensionProvider.js";
 import { AbstractDesignViewConfigButton } from "./AbstractDesignViewConfigButton.js";
 
 export class FlexboxExtensionDesignViewConfigButtons extends AbstractDesignViewConfigButton {
