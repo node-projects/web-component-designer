@@ -30,7 +30,7 @@ So the designer now should work with bundlers.
 | web-component-designer-htmlparserservice-base-custom-webcomponent      |                                              |
 | web-component-designer-htmlparserservice-lit-element                   |                                              |
 | web-component-designer-htmlparserservice-nodehtmlparser                |                                              |
-| web-component-designer-miniatureview-html2canvas                       |                                              |
+| ~~web-component-designer-miniatureview-html2canvas~~                   | never worked correctly                       |
 | web-component-designer-stylesheetservice-css-parser                    |                                              |
 | ~~web-component-designer-stylesheetservice-css-tools~~                 | deprecated - switched to css-parser          |
 | ~~web-component-designer-stylesheetservice-css-tree~~                  | deprecated - did never work very well        |
