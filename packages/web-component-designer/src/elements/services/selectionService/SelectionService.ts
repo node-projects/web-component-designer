@@ -68,7 +68,7 @@ export class SelectionService implements ISelectionService {
     } else {
       let newSelection: IDesignItem[] = []
       for (let d of designItems) {
-        if (d && (designItems.length == 1 || d !== d.instanceServiceContainer.contentService.rootDesignItem))
+        if (d && (designItems.length == 1 || d !== d.instanceServiceContainer.designerCanvas.rootDesignItem))
           newSelection.push(d)
       }
       this.selectedElements = newSelection;

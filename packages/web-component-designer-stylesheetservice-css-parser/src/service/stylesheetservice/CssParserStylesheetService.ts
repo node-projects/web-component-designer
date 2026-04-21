@@ -103,17 +103,10 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
 
     public updateDeclarationValueWithoutUndo(declaration: IDeclarationWithAST, value: string, important: boolean) {
         declaration.ast.value = important ? value + ' !important' : value;
+        if (declaration.ast.rawValue)
+            delete declaration.ast.rawValue
         let ss = this._allStylesheets.get(declaration.parent.stylesheetName);
         this.updateStylesheet(ss);
-        /*
-        declaration.ast.value = important ? value + ' !important' : value;
-        let ss = declaration.ast;
-        while (ss?.parent)
-            ss = ss?.parent;
-        let obj = { ast: ss, stylesheet: declaration.stylesheet };
-        this._allStylesheets.set(declaration.parent.stylesheetName, obj)
-        this.updateStylesheet(obj);
-        */
     }
 
     public insertDeclarationIntoRule(rule: IRuleWithAST, property: string, value: string, important: boolean): boolean {

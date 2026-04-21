@@ -4,6 +4,7 @@ import { IUndoService } from './IUndoService.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { IUndoChangeEvent, UndoChangeKind, UndoChangeSource } from './IUndoChangeEvent.js';
+import { IContentChanged } from '../InstanceServiceContainer.js';
 
 /*
  * Manages a stack of available undo/redo actions
@@ -26,7 +27,7 @@ export class UndoService implements IUndoService {
     return t;
   }
 
-  private commitTransactionItem(transactionItem: ITransactionItem) {
+  private commitTransactionItem(transactionItem: ChangeGroup) {
     let itm = this._transactionStack.pop();
     if (itm !== transactionItem) {
       this.clear();
@@ -47,12 +48,13 @@ export class UndoService implements IUndoService {
     }
     if (this._transactionStack.length == 0) {
       this._designerCanvas.extensionManager.refreshAllExtensions(transactionItem.affectedItems);
-      this._designerCanvas.onContentChanged.emit();
       this.emitTransaction(transactionItem, 'execute', (<ChangeGroup>transactionItem).source ?? 'local');
+      if (transactionItem.contentChanges)
+        this._designerCanvas.instanceServiceContainer.onContentChanged.emit(transactionItem.contentChanges);
     }
   }
 
-  private abortTransactionItem(transactionItem: ITransactionItem) {
+  private abortTransactionItem(transactionItem: ChangeGroup) {
     if (this._transactionStack.length > 0) {
       let itm = this._transactionStack.pop();
       if (itm !== transactionItem) {
@@ -64,8 +66,9 @@ export class UndoService implements IUndoService {
   }
 
   execute(item: ITransactionItem, source: UndoChangeSource = 'local') {
+    let changeItems: IContentChanged[] | null = null;
     if (this._transactionStack.length == 0) {
-      item.do();
+      changeItems = item.do();
       if (this._storeRedoBranches && this._redoStack.length) {
         if (item.redoBranches == null)
           item.redoBranches = [];
@@ -74,12 +77,13 @@ export class UndoService implements IUndoService {
       this._redoStack = [];
       this._undoStack.push(item);
     } else {
-      this._transactionStack[this._transactionStack.length - 1].execute(item);
+      changeItems = this._transactionStack[this._transactionStack.length - 1].execute(item);
     }
     if (this._transactionStack.length == 0) {
       this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
-      this._designerCanvas.onContentChanged.emit();
       this.emitTransaction(item, 'execute', source);
+      if (changeItems)
+        this._designerCanvas.instanceServiceContainer.onContentChanged.emit(changeItems);
     }
   }
 
@@ -103,16 +107,18 @@ export class UndoService implements IUndoService {
       throw "Cannot Undo while transaction is running";
 
     let item = this._undoStack.pop();
+    let changeItems: IContentChanged[] | null = null;
     try {
-      item.undo();
+      changeItems = item.undo();
       this._redoStack.push(item);
     } catch (err) {
       this.clear();
       throw err;
     }
     this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
-    this._designerCanvas.onContentChanged.emit();
     this.emitTransaction(item, 'undo', source);
+    if (changeItems)
+      this._designerCanvas.instanceServiceContainer.onContentChanged.emit(changeItems);
   }
 
   redo(source: UndoChangeSource = 'local') {
@@ -122,16 +128,18 @@ export class UndoService implements IUndoService {
       throw "Cannot Redo while transaction is running";
 
     let item = this._redoStack.pop();
+    let changeItems: IContentChanged[] | null = null;
     try {
-      item.do();
+      changeItems = item.do();
       this._undoStack.push(item);
     } catch (err) {
       this.clear();
       throw err;
     }
     this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
-    this._designerCanvas.onContentChanged.emit();
     this.emitTransaction(item, 'redo', source);
+    if (changeItems)
+      this._designerCanvas.instanceServiceContainer.onContentChanged.emit(changeItems);
   }
 
   redoTo(transactionItems: ITransactionItem[]) {

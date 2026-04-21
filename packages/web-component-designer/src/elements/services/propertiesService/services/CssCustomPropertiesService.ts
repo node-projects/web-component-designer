@@ -28,7 +28,7 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
   }
 
   override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
-    return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
+    return this._enrichCssProperty({ name: name, type: 'string', service: this, propertyType: PropertyType.cssValue });
   }
 
   override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
@@ -43,7 +43,7 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
         name: x,
         service: this,
         propertyType: PropertyType.cssValue
-      }));
+      })).map(x => this._enrichCssProperty(x));
       return arr;
     }
 
@@ -57,7 +57,7 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
       name: x,
       service: this,
       propertyType: PropertyType.cssValue
-    }));
+    })).map(x => this._enrichCssProperty(x));
     return arr;
   }
 

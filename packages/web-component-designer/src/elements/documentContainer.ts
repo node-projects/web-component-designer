@@ -126,7 +126,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this.designerView.initialize(this._serviceContainer);
     this.designerView.instanceServiceContainer.documentContainer = this;
     this.designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e))
-    this.designerView.designerCanvas.onContentChanged.on(() => this.designerContentChanged())
+    this.designerView.instanceServiceContainer.onContentChanged.on(() => this.designerContentChanged())
 
     this.codeView = new serviceContainer.config.codeViewWidget();
     this.codeView.slot = 'bottom';

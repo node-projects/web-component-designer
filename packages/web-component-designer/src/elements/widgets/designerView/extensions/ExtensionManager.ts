@@ -6,11 +6,11 @@ import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { ExtensionType } from './ExtensionType.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { IDesignerExtension } from './IDesignerExtension.js';
-import { IContentChanged } from '../../../services/contentService/IContentChanged.js';
 import { DesignerCanvas } from '../designerCanvas.js';
 import { ISelectionRefreshEvent } from '../../../services/selectionService/ISelectionRefreshEvent.js';
 import { IDesignerExtensionProvider } from './IDesignerExtensionProvider.js';
-import { clearCache as clearBoxQuadsCache, useCache as useBoxQuadsCache} from '../../../helper/getBoxQuads.js';
+import { clearCache as clearBoxQuadsCache, useCache as useBoxQuadsCache } from '../../../helper/getBoxQuads.js';
+import { IContentChanged } from '../../../services/InstanceServiceContainer.js';
 
 function wmGet<T extends Map<any, any>>(designItem: IDesignItem, weakMap: WeakMap<IDesignItem, T>) {
   let val = weakMap.get(designItem);
@@ -38,7 +38,7 @@ export class ExtensionManager implements IExtensionManager {
 
     designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
     designerCanvas.instanceServiceContainer.selectionService.onSelectionRefresh.on(this._selectedElementsRefresh.bind(this));
-    designerCanvas.instanceServiceContainer.contentService.onContentChanged.on(this._contentChanged.bind(this));
+    designerCanvas.instanceServiceContainer.onContentChanged.on(this._contentChanged.bind(this));
 
     designerCanvas.serviceContainer.globalContext.onToolChanged.on(() => {
       this.removeExtension(designerCanvas.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
@@ -76,22 +76,24 @@ export class ExtensionManager implements IExtensionManager {
     this.applyExtension(rootDesignItem, ExtensionType.Permanent);
   }
 
-  private _contentChanged(contentChanged: IContentChanged) {
+  private _contentChanged(contentChanges: IContentChanged[]) {
     requestAnimationFrame(() => {
-      switch (contentChanged.changeType) {
-        case 'added':
-          this.applyExtensions(contentChanged.designItems, ExtensionType.Permanent, null, true);
-          break;
-        case 'moved':
-          this.refreshExtensions(contentChanged.designItems, ExtensionType.Permanent);
-          break;
-        case 'parsed':
-          this.ensurePermanentRootExtensionsApplied();
-          this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, null, true);
-          break;
-        case 'removed':
-          this.removeExtensions(contentChanged.designItems, true, ExtensionType.Permanent);
-          break;
+      for (let contentChanged of contentChanges) {
+        switch (contentChanged.changeType) {
+          case 'added':
+            this.applyExtensions(contentChanged.designItems, ExtensionType.Permanent, null, true);
+            break;
+          case 'moved':
+            this.refreshExtensions(contentChanged.designItems, ExtensionType.Permanent);
+            break;
+          case 'parsed':
+            this.ensurePermanentRootExtensionsApplied();
+            this.applyExtensions(Array.from(this.designerCanvas.rootDesignItem.children()), ExtensionType.Permanent, null, true);
+            break;
+          case 'removed':
+            this.removeExtensions(contentChanged.designItems, true, ExtensionType.Permanent);
+            break;
+        }
       }
     });
   }

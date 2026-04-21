@@ -40,7 +40,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     .content-wrapper {
       padding: .5em;
       display: grid;
-      grid-template-columns: 11px minmax(80px, auto) minmax(80px, auto);
+      grid-template-columns: 11px minmax(80px, auto) minmax(120px, 1fr);
       align-items: center;
       grid-auto-rows: minmax(24px, auto);
       align-items: center;
@@ -64,21 +64,32 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       margin-right: 2px;
     }
     input, select {
-      height: 24px;
+      padding:0;
+      padding-left: 3px;
+    }
+    input, select {
+      border: none;
+    }
+    .editor-control, .content-wrapper > input, .content-wrapper > select {
       border: 1px solid var(--input-border-color, #596c7a);
       border-radius: 0;
-      /*-webkit-appearance: none;*/
+    }
+    .editor-control, input, select {
+      height: 24px;
       box-sizing: border-box;
       font-size: 11px;
       width: 100%;
-      padding:0;
-      padding-left: 3px;
-      margin:0;
+      margin: 0;
+      /*min-width: 0;*/
+    }
+    .editor-control:focus, input:focus, select:focus {
+      outline: none;
+      box-shadow: none;
     }
     /*input {
       margin-left: 4px;
     }*/
-    input[disabled] {
+    .editor-control[disabled], input[disabled], select[disabled] {
       color: #BDBDBD;
     }
     select {
@@ -152,25 +163,39 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   public async createElements(designItem: IDesignItem): Promise<boolean> {
-    if (this._propertiesService && (this._propertiesService.getRefreshMode(designItem) !== RefreshMode.none && (this._propertiesService.getRefreshMode(designItem) !== RefreshMode.fullOnClassChange || this._lastClassType !== designItem.element.constructor)) || this._propertyMap.size == 0) {
-      this._lastClassType = designItem.element.constructor;
-      DomHelper.removeAllChildnodes(this._div);
-      this._propertyMap.clear();
-      if (this._propertiesService) {
-        let properties = await this._propertiesService.getProperties(designItem);
-        if (properties?.length) {
-          for (let p of properties) {
-            if ('properties' in p)
-              this.createPropertyGroups(<IPropertyGroup>p);
-            else
-              this.createPropertyEditors(<IProperty>p);
-          }
-          return true;
-        }
-      }
+    if (!this._shouldCreateElements(designItem))
+      return true;
+
+    const properties = await this._propertiesService?.getProperties(designItem);
+    return this._rebuildElements(designItem, properties);
+  }
+
+  private _shouldCreateElements(designItem: IDesignItem): boolean {
+    if (!this._propertiesService)
       return false;
+    if (this._propertyMap.size == 0)
+      return true;
+
+    const refreshMode = this._propertiesService.getRefreshMode(designItem);
+    return refreshMode !== RefreshMode.none && (refreshMode !== RefreshMode.fullOnClassChange || this._lastClassType !== designItem.element.constructor);
+  }
+
+  private _rebuildElements(designItem: IDesignItem, properties: IProperty[] | IPropertyGroup[]): boolean {
+    this._lastClassType = designItem.element.constructor;
+    DomHelper.removeAllChildnodes(this._div);
+    this._propertyMap.clear();
+
+    if (properties?.length) {
+      for (let p of properties) {
+        if ('properties' in p)
+          this.createPropertyGroups(<IPropertyGroup>p);
+        else
+          this.createPropertyEditors(<IProperty>p);
+      }
+      return true;
     }
-    return true;
+
+    return false;
   }
 
   private createPropertyGroups(group: IPropertyGroup) {
@@ -328,6 +353,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       }
       if (property.name)
         editor.element.id = property.name;
+      if (editor.element instanceof HTMLElement)
+        editor.element.classList.add('editor-control');
       this._div.appendChild(editor.element);
 
       this._propertyMap.set(property, { isSetElement: rect, labelElement: labelHolder, editor: editor });

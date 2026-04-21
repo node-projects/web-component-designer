@@ -1,5 +1,6 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class SetDesignItemsAction implements ITransactionItem {
 
@@ -16,12 +17,14 @@ export class SetDesignItemsAction implements ITransactionItem {
     return this.newDesignItems;
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     this.newDesignItems[0].instanceServiceContainer.designerCanvas._internalSetDesignItems(this.oldDesignItems);
+    return null;
   }
 
-  do() {
+  do(): IContentChanged[] | null {
     this.newDesignItems[0].instanceServiceContainer.designerCanvas._internalSetDesignItems(this.newDesignItems);
+    return null;
   }
 
   public newDesignItems: IDesignItem[];

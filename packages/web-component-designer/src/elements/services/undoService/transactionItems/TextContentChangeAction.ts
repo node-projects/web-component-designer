@@ -1,6 +1,7 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IBinding } from '../../../item/IBinding.js';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class TextContentChangeAction implements ITransactionItem {
 
@@ -18,12 +19,14 @@ export class TextContentChangeAction implements ITransactionItem {
     return [this.designItem];
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     this.designItem.element.textContent = this.oldValue;
+    return [{ changeType: 'changed', designItems: this.affectedItems, type: 'property', name: 'textContent', oldValue: this.newValue, newValue: this.oldValue }];
   }
 
-  do() {
+  do(): IContentChanged[] | null {
     this.designItem.element.textContent = this.newValue;
+    return [{ changeType: 'changed', designItems: this.affectedItems, type: 'property', name: 'textContent', oldValue: this.oldValue, newValue: this.newValue }];
   }
 
   public designItem: IDesignItem;

@@ -3,8 +3,13 @@ import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IProperty } from '../IProperty.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
+import { applyCssNumericPropertyDefaults } from '../propertyEditors/CssNumericPropertyEditorConfig.js';
 
 export abstract class AbstractCssPropertiesService extends CommonPropertiesService {
+
+  protected _enrichCssProperty(property: IProperty): IProperty {
+    return applyCssNumericPropertyDefaults(property);
+  }
 
   public override getRefreshMode(designItem: IDesignItem) {
     return RefreshMode.none;

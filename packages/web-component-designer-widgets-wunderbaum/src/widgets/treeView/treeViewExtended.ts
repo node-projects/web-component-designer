@@ -191,7 +191,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   async ready() {
     this._initWunderbaum();
     if (this._instanceServiceContainer) {
-      this.createTree(this._instanceServiceContainer.contentService.rootDesignItem);
+      this.createTree(this._instanceServiceContainer.rootDesignItem);
     }
   }
 
@@ -298,7 +298,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           sp.style.display = "inline-block";
           sp.style.width = "42px";
           e.nodeElem.appendChild(sp);
-          if (item && item.nodeType === NodeType.Element && item !== item.instanceServiceContainer.contentService.rootDesignItem) {
+          if (item && item.nodeType === NodeType.Element && item !== item.instanceServiceContainer.rootDesignItem) {
             const d = document.createElement("div");
             d.className = "cmd";
 
@@ -381,20 +381,22 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
       this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
         this.selectionChanged(e);
       });
-      this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
-        if (e.changeType === 'changed') {
-          for (const d of e.designItems) {
-            this.refreshNode(d[wbNodeSymbol], d);
+      this._contentChangedHandler = this._instanceServiceContainer.onContentChanged.on(changes => {
+        for (let e of changes) {
+          if (e.changeType === 'changed') {
+            for (const d of e.designItems) {
+              this.refreshNode(d[wbNodeSymbol], d);
+            }
+          } else {
+            this.createTree(value.rootDesignItem);
+            setTimeout(() => {
+              this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
+            }, 20);
           }
-        } else {
-          this.createTree(value.contentService.rootDesignItem);
-          setTimeout(() => {
-            this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
-          }, 20);
         }
       });
       if (this._tree)
-        this.createTree(value.contentService.rootDesignItem);
+        this.createTree(value.rootDesignItem);
     } else {
       this._tree.root.removeChildren();
     }

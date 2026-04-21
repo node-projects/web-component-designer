@@ -1,3 +1,4 @@
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 import { IStylesheetService } from '../../stylesheetService/IStylesheetService.js';
 import { ITransactionItem } from '../ITransactionItem.js';
 
@@ -20,12 +21,14 @@ export class StylesheetChangedAction implements ITransactionItem {
     return [];
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     this.stylesheetService.updateCompleteStylesheetWithoutUndo(this.name, this.oldValue);
+    return null;
   }
 
-  do() {
+  do(): IContentChanged[] | null {
     this.stylesheetService.updateCompleteStylesheetWithoutUndo(this.name, this.newValue);
+    return null;
   }
 
   public name: string;

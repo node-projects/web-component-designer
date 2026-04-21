@@ -2,6 +2,7 @@ import { EventNames } from '../../../../../enums/EventNames.js';
 import { IPoint } from '../../../../../interfaces/IPoint.js';
 import { convertCssUnit, getCssUnit } from '../../../../helper/CssUnitConverter.js';
 import { getBoundingClientRectAlsoForDisplayContents } from '../../../../helper/ElementHelper.js';
+import { clearCache } from '../../../../helper/getBoxQuads.js';
 import { roundValue } from '../../../../helper/LayoutHelper.js';
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
@@ -103,6 +104,7 @@ export class TransformOriginExtension extends AbstractExtension {
           }
           else
             this.extendedItem.updateStyleInSheetOrLocal('transform-origin', roundValue(this.extendedItem, evPoint.x) + 'px' + ' ' + roundValue(this.extendedItem, evPoint.y) + 'px');
+          clearCache(); //clear box quads cache to make sure we get the new quads with the updated transform origin
           const quadsNew = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.rootDesignItem.element })[0];
           const translateP = { x: quadsOld.p1.x - quadsNew.p1.x, y: quadsOld.p1.y - quadsNew.p1.y };
           if (computed.translate && computed.translate !== 'none') {

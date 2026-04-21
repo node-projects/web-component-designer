@@ -27,7 +27,7 @@ export class SpecialTagsBindingService implements IBindingService {
     }
 
     if (designItem.id) {
-      const nameBindings = designItem.instanceServiceContainer.contentService.rootDesignItem.element.querySelectorAll(this._bindingTagName + "[" + this._elementIdAttribute + "='" + designItem.id + "]");
+      const nameBindings = designItem.instanceServiceContainer.designerCanvas.rootDesignItem.element.querySelectorAll(this._bindingTagName + "[" + this._elementIdAttribute + "='" + designItem.id + "]");
       for (let b of nameBindings) {
         const bnd = this._parseBindingElement(b);
         (<any>bnd).targetId = designItem.id

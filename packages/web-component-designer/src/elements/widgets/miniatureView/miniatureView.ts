@@ -178,7 +178,7 @@ export class MiniatureView extends BaseCustomWebComponentConstructorAppend imple
       this._zoomFactorChangedHandler = (<DesignerCanvas>this._instanceServiceContainer.designerCanvas).onZoomFactorChanged.on(() => {
         this._reDrawRect();
       });
-      this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
+      this._contentChangedHandler = this._instanceServiceContainer.onContentChanged.on(e => {
         if (this._reRenderFlag === false) {
           this._reRenderFlag = true;
           setTimeout(() => this._reRender(), 50);

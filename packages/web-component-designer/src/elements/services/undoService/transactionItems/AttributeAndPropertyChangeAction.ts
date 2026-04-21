@@ -1,6 +1,7 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IBinding } from '../../../item/IBinding.js';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class AttributeAndPropertyChangeAction implements ITransactionItem {
 
@@ -20,27 +21,31 @@ export class AttributeAndPropertyChangeAction implements ITransactionItem {
     return [this.designItem];
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     this.designItem.element[this.propertyName] = this.oldValue;
     if (this.oldValue == null) {
       this.designItem._withoutUndoRemoveAttribute(this.attributeName);
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'attribute', name: this.attributeName, oldValue: this.newValue, newValue: null }];
     } else {
-      if (typeof this.oldValue === 'string')
-        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.oldValue);
-      else
-        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.oldValue.toString());
+      let val = this.oldValue;
+      if (typeof this.oldValue !== 'string')
+        val = this.oldValue.toString();
+      this.designItem._withoutUndoSetAttribute(<string>this.attributeName, val);
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'attribute', name: this.attributeName, oldValue: this.newValue, newValue: val }];
     }
   }
 
-  do() {
+  do(): IContentChanged[] | null {
     this.designItem.element[this.propertyName] = this.newValue;
     if (this.newValue == null) {
       this.designItem._withoutUndoRemoveAttribute(<string>this.attributeName);
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'attribute', name: this.attributeName, oldValue: this.newValue, newValue: null }];
     } else {
-      if (typeof this.oldValue === 'string')
-        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.newValue);
-      else
-        this.designItem._withoutUndoSetAttribute(<string>this.attributeName, this.newValue.toString());
+      let val = this.newValue;
+      if (typeof this.newValue !== 'string')
+        val = this.newValue.toString();
+      this.designItem._withoutUndoSetAttribute(<string>this.attributeName, val);
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'attribute', name: this.attributeName, oldValue: this.oldValue, newValue: val }];
     }
   }
 

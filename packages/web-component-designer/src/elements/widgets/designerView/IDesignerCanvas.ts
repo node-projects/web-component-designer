@@ -8,7 +8,6 @@ import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js
 import { IPoint } from '../../../interfaces/IPoint.js';
 import { OverlayLayerView } from './overlayLayerView.js';
 import { IRect } from "../../../interfaces/IRect.js";
-import { TypedEvent } from "@node-projects/base-custom-webcomponent";
 import { ISize } from "../../../interfaces/ISize.js";
 import { ITool } from "./tools/ITool.js";
 
@@ -33,8 +32,6 @@ export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
   readonly gridSize: number;
 
   raiseDesignItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
-
-  readonly onContentChanged: TypedEvent<void>;
 
   readonly iframes: HTMLIFrameElement[];
 

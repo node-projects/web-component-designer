@@ -2,6 +2,7 @@ import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { ISelectionService } from '../../selectionService/ISelectionService.js';
 import { SelectionService } from '../../selectionService/SelectionService.js';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class SelectionChangedAction implements ITransactionItem {
 
@@ -23,12 +24,14 @@ export class SelectionChangedAction implements ITransactionItem {
         return [...this.newSelection];
     }
 
-    undo() {
+    undo(): IContentChanged[] | null {
         (<SelectionService>this.selectionService)._withoutUndoSetSelectedElements(this.oldSelection);
+        return null;
     }
 
-    do() {
+    do(): IContentChanged[] | null {
         (<SelectionService>this.selectionService)._withoutUndoSetSelectedElements(this.newSelection);
+        return null;
     }
 
     public oldSelection: IDesignItem[];

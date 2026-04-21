@@ -1,5 +1,6 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class CssStyleChangeAction implements ITransactionItem {
 
@@ -18,14 +19,15 @@ export class CssStyleChangeAction implements ITransactionItem {
     return [this.designItem];
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     if (this.oldValue === '' || this.oldValue == null) {
       this.designItem._withoutUndoRemoveStyle(<string>this.name);
       if ((<string>this.name).startsWith('--')) {
         (<ElementCSSInlineStyle><unknown>this.designItem.element).style.removeProperty(<string>this.name);
       } else {
         (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = '';
-      };
+      }
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'css', name: this.name, oldValue: this.newValue, newValue: null }];
     } else {
       this.designItem._withoutUndoSetStyle(<string>this.name, this.oldValue);
       if ((<string>this.name).startsWith('--')) {
@@ -33,16 +35,18 @@ export class CssStyleChangeAction implements ITransactionItem {
       } else {
         (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.oldValue;
       }
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'css', name: this.name, oldValue: this.newValue, newValue: this.oldValue }];
     }
   }
-  do() {
+  do(): IContentChanged[] | null {
     if (this.newValue === '' || this.newValue == null) {
       this.designItem._withoutUndoRemoveStyle(<string>this.name);
       if ((<string>this.name).startsWith('--')) {
         (<ElementCSSInlineStyle><unknown>this.designItem.element).style.removeProperty(<string>this.name);
       } else {
         (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = '';
-      };
+      }
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'css', name: this.name, oldValue: this.oldValue, newValue: null }];
     } else {
       this.designItem._withoutUndoSetStyle(<string>this.name, this.newValue);
       if ((<string>this.name).startsWith('--')) {
@@ -50,6 +54,7 @@ export class CssStyleChangeAction implements ITransactionItem {
       } else {
         (<ElementCSSInlineStyle><unknown>this.designItem.element).style[<string>this.name] = this.newValue;
       }
+      return [{ changeType: 'changed', designItems: this.affectedItems, type: 'css', name: this.name, oldValue: this.oldValue, newValue: this.newValue }];
     }
   }
 

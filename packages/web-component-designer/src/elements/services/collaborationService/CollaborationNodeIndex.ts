@@ -47,7 +47,7 @@ export function getCollaborationNodeIndex(designItem: IDesignItem, cache?: Recor
   if (!designItem || designItem.isRootItem)
     return null;
 
-  const rootDesignItem = designItem.instanceServiceContainer.contentService.rootDesignItem;
+  const rootDesignItem = designItem.instanceServiceContainer.designerCanvas.rootDesignItem;
   return getCache(rootDesignItem, cache).byItem.get(designItem) ?? null;
 }
 

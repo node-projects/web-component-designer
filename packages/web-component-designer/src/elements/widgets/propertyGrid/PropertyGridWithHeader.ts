@@ -10,6 +10,7 @@ import { ContentAndIdPropertiesService } from '../../services/propertiesService/
 import { IProperty } from '../../services/propertiesService/IProperty.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+//import { doesContentChangeAffectDesignItems } from '../../services/contentService/IContentChanged.js';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
@@ -77,6 +78,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   private _innerRect: HTMLDivElement;
   private _propertiesService: ContentAndIdPropertiesService;
   private _configButton: HTMLButtonElement;
+  //private _contentChangedHandler: Disposable;
 
   constructor() {
     super();
@@ -156,55 +158,18 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     const currentContainer = value;
     this._instanceServiceContainer = currentContainer;
     this._selectionChangedHandler?.dispose()
+    //this._contentChangedHandler?.dispose();
     if (currentContainer) {
       this._selectionChangedHandler = currentContainer.selectionService.onSelectionChanged.on(async e => {
         this.propertyGrid.instanceServiceContainer = currentContainer;
         await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
-
-        if (currentContainer.selectionService?.primarySelection?.isRootItem) {
-          this._configButton.style.display = 'none';
-
-          this._id.value = '';
-          this._content.value = '';
-          this._id.disabled = true;
-          this._content.disabled = true;
-
-          this._idRect.style.background = '';
-          this._contentRect.style.background = '';
-          this._innerRect.style.background = '';
-          this._type.value = ":host";
-        } else {
-          this._id.disabled = false;
-          this._content.disabled = false;
-
-          const srv = await this.serviceContainer?.getLastServiceWhereAsync('configUiService', x => x.hasConfigUi(this._instanceServiceContainer.selectionService.primarySelection));
-          if (srv) {
-            this._configButton.style.display = 'block';
-          } else {
-            this._configButton.style.display = 'none';
-          }
-
-          if (currentContainer.selectionService.primarySelection?.nodeType == NodeType.Element) {
-            this._type.value = currentContainer.selectionService.primarySelection?.name ?? '';
-          } else {
-            this._type.value = currentContainer.selectionService.primarySelection?.node?.nodeName ?? '';
-          }
-          this._type.title = this._type.value;
-          this._id.blur();
-          this._id.value = currentContainer.selectionService.primarySelection?.id ?? '';
-          if (currentContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
-            this._content.value = currentContainer.selectionService.primarySelection?.content ?? '';
-          } else if (currentContainer.selectionService.primarySelection?.element?.children?.length <= 0)
-            this._content.value = currentContainer.selectionService.primarySelection?.content ?? '';
-          else
-            this._content.value = ''
-          this._content.title = this._content.value;
-
-          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
-          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
-          PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
-        }
+        //await this._refreshHeaderForCurrentSelection(currentContainer);
       });
+      /*this._contentChangedHandler = currentContainer.onContentChanged.on(async e => {
+        if (doesContentChangeAffectDesignItems(e, currentContainer.selectionService.selectedElements))
+          await this._refreshHeaderForCurrentSelection(currentContainer);
+      });*/
+      void this._refreshHeaderForCurrentSelection(currentContainer);
     } else {
       this._configButton.style.display = 'none';
       
@@ -219,6 +184,53 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       this._type.value = ":host";
     }
     this.propertyGrid.instanceServiceContainer = currentContainer;
+  }
+
+  private async _refreshHeaderForCurrentSelection(currentContainer: InstanceServiceContainer) {
+    if (!currentContainer?.selectionService?.primarySelection || currentContainer.selectionService.primarySelection?.isRootItem) {
+      this._configButton.style.display = 'none';
+
+      this._id.value = '';
+      this._content.value = '';
+      this._id.disabled = true;
+      this._content.disabled = true;
+
+      this._idRect.style.background = '';
+      this._contentRect.style.background = '';
+      this._innerRect.style.background = '';
+      this._type.value = ":host";
+      this._type.title = this._type.value;
+      return;
+    }
+
+    this._id.disabled = false;
+    this._content.disabled = false;
+
+    const srv = await this.serviceContainer?.getLastServiceWhereAsync('configUiService', x => x.hasConfigUi(currentContainer.selectionService.primarySelection));
+    if (srv) {
+      this._configButton.style.display = 'block';
+    } else {
+      this._configButton.style.display = 'none';
+    }
+
+    if (currentContainer.selectionService.primarySelection?.nodeType == NodeType.Element) {
+      this._type.value = currentContainer.selectionService.primarySelection?.name ?? '';
+    } else {
+      this._type.value = currentContainer.selectionService.primarySelection?.node?.nodeName ?? '';
+    }
+    this._type.title = this._type.value;
+    this._id.value = currentContainer.selectionService.primarySelection?.id ?? '';
+    if (currentContainer.selectionService.primarySelection?.element?.nodeType != NodeType.Element) {
+      this._content.value = currentContainer.selectionService.primarySelection?.content ?? '';
+    } else if (currentContainer.selectionService.primarySelection?.element?.children?.length <= 0)
+      this._content.value = currentContainer.selectionService.primarySelection?.content ?? '';
+    else
+      this._content.value = ''
+    this._content.title = this._content.value;
+
+    PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._idRect, this._propertiesService.idProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
+    PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._contentRect, this._propertiesService.contentProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
+    PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(this._innerRect, this._propertiesService.innerHtmlProperty, currentContainer.selectionService.selectedElements, this._propertiesService);
   }
 
   private _openContextMenu(event: MouseEvent, designItems: IDesignItem[], property: IProperty) {

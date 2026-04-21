@@ -3,7 +3,7 @@ import { PropertyGridPropertyList } from './PropertyGridPropertyList.js';
 import { DesignerTabControl } from '../../controls/DesignerTabControl.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, Disposable } from '@node-projects/base-custom-webcomponent';
-import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
+import { IContentChanged, InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
 import { IPropertyGroup } from '../../services/propertiesService/IPropertyGroup.js';
 import { IProperty } from '../../services/propertiesService/IProperty.js';
@@ -16,10 +16,10 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _selectedItems: IDesignItem[];
   private _propertyGridPropertyLists: PropertyGridPropertyList[];
   private _propertyGridPropertyListsDict: Record<string, PropertyGridPropertyList>;
-  private _itemsObserver: MutationObserver;
   private _nodeReplacedCb: Disposable;
   private _instanceServiceContainer: InstanceServiceContainer;
   private _selectionChangedHandler: Disposable;
+  private _contentChangedHandler: Disposable;
 
   public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
   public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
@@ -58,8 +58,6 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
       if ((<HTMLElement>e.composedPath()[0]).localName != 'input')
         e.preventDefault()
     });
-
-    this._itemsObserver = new MutationObserver((m) => this._mutationOccured());
   }
 
   public set serviceContainer(value: ServiceContainer) {
@@ -74,9 +72,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   public set instanceServiceContainer(value: InstanceServiceContainer) {
     this._instanceServiceContainer = value;
     this._selectionChangedHandler?.dispose()
+    this._contentChangedHandler?.dispose()
     if (this._instanceServiceContainer) {
       this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
         this.selectedItems = e.selectedElements;
+      });
+      this._contentChangedHandler = this._instanceServiceContainer.onContentChanged.on(e => {
+        this._changeOccured(null, false);
       });
       this.selectedItems = this._instanceServiceContainer.selectionService.selectedElements;
     } else {
@@ -152,14 +154,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
         this._observePrimarySelectionForChanges();
       }
     } else {
-      this._itemsObserver.disconnect();
       this._nodeReplacedCb?.dispose();
       this._nodeReplacedCb = null;
     }
   }
 
   _blockDoubleRun = false;
-  async _mutationOccured() {
+  async _changeOccured(change: IContentChanged, forceRecreate = false) {
     if (!this._blockDoubleRun) {
       this._blockDoubleRun = true;
       for (const a of this._propertyGridPropertyLists) {
@@ -175,11 +176,9 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
   private _observePrimarySelectionForChanges() {
     this._nodeReplacedCb?.dispose();
-    this._itemsObserver.disconnect();
-    this._itemsObserver.observe(this._selectedItems[0].element, { attributes: true, childList: false, characterData: false });
     this._nodeReplacedCb = this._selectedItems[0].nodeReplaced.on(() => {
       this._observePrimarySelectionForChanges();
-      this._mutationOccured();
+      this._changeOccured(null, true);
     });
   }
 }

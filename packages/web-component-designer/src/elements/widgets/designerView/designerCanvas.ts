@@ -149,7 +149,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public designItemsChanged: (designItems: IDesignItem[], action: 'resize' | 'place', operationFinished: boolean) => void
 
-  public onContentChanged = new TypedEvent<void>();
   public onZoomFactorChanged = new TypedEvent<number>();
 
   public get canvas(): HTMLElement {
@@ -760,10 +759,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     } else {
       this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this._canvas, this.serviceContainer, this.instanceServiceContainer);
     }
-    const contentService = this.serviceContainer.getLastService('contentService')
-    if (contentService) {
-      this.instanceServiceContainer.register("contentService", contentService(this));
-    }
 
     const stylesheetService = this.serviceContainer.getLastService('stylesheetService')
     if (stylesheetService) {
@@ -860,9 +855,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp);
       this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, true);
       this.clickOverlay.addEventListener(EventNames.Wheel, this._onWheel);
+      //@ts-ignore
       this.clickOverlay.addEventListener('zoom', (e: CustomEvent) => {
         this.zoomFactor = this.zoomFactor + (e.detail.diff / 10);
       });
+      //@ts-ignore
       this.clickOverlay.addEventListener('pan', (e: CustomEvent) => {
         const newCanvasOffset = {
           x: (this.canvasOffset.x) - e.detail.deltaX,
@@ -871,8 +868,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         this.canvasOffset = newCanvasOffset
       });
     }
-    if (this.extensionManager)
+    if (this.extensionManager) {
       this.extensionManager.connected();
+    }
   }
 
   disconnectedCallback() {
@@ -932,7 +930,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     this.lazyTriggerReparseDocumentStylesheets();
 
-    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'parsed' });
+    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'parsed' }]);
     (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
     setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 50);
   }

@@ -15,6 +15,20 @@ export abstract class BasePropertyEditor<T extends HTMLElement> implements IProp
     this.property = property;
   }
 
+  protected async _previewValueChanged(newValue) {
+    if (!this.disableChangeNotification) {
+      if (this.designItems && this.designItems.length)
+        await this.property.service.previewValue?.(this.designItems, this.property, newValue);
+    }
+  }
+
+  protected async _removePreviewValue() {
+    if (!this.disableChangeNotification) {
+      if (this.designItems && this.designItems.length)
+        await this.property.service.removePreviewValue?.(this.designItems, this.property);
+    }
+  }
+
   protected async _valueChanged(newValue) {
     if (!this.disableChangeNotification) {
       if (this.designItems && this.designItems.length) {

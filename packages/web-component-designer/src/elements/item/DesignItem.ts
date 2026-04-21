@@ -121,8 +121,7 @@ export class DesignItem implements IDesignItem {
   _withoutUndoSetAttribute(name: string, value: string) {
     try {
       this.element.setAttribute(name, value);
-    }
-    catch (e) {
+    } catch (e: any) {
       if (e?.code !== 5)
         console.warn(e)
     }
@@ -132,8 +131,7 @@ export class DesignItem implements IDesignItem {
   _withoutUndoRemoveAttribute(name: string) {
     try {
       this.element.removeAttribute(name);
-    }
-    catch (e) {
+    } catch (e: any) {
       if (e?.code !== 5)
         console.warn(e)
     }
@@ -175,6 +173,46 @@ export class DesignItem implements IDesignItem {
     this._styles.delete(nm);
   }
 
+  /*
+  // this could maybe usefull to have such function, but naaa atm.
+  public refreshAttributesAndStylesFromElement() {
+    if (this.nodeType != NodeType.Element)
+      return;
+
+    const specialAttributeNames = [hideAtDesignTimeAttributeName, hideAtRunTimeAttributeName, lockAtDesignTimeAttributeName];
+    const specialAttributesToRefresh = new Set<string>();
+    for (const attributeName of specialAttributeNames) {
+      if (this._attributes.has(attributeName))
+        specialAttributesToRefresh.add(attributeName);
+    }
+
+    this._attributes.clear();
+    for (const attribute of this.element.attributes) {
+      if (attribute.name === 'style')
+        continue;
+      this._attributes.set(attribute.name, attribute.value);
+      if (specialAttributeNames.includes(attribute.name))
+        specialAttributesToRefresh.add(attribute.name);
+    }
+
+    this._styles.clear();
+    if (this.element instanceof (this.node.ownerDocument.defaultView ?? window).HTMLElement || this.element instanceof (this.node.ownerDocument.defaultView ?? window).SVGElement) {
+      const cssParser = new CssAttributeParser();
+      const styleText = this.element.getAttribute('style');
+      if (styleText) {
+        cssParser.parse(styleText);
+        for (const entry of cssParser.entries) {
+          this._styles.set(entry.name, entry.value);
+        }
+      }
+    }
+    this._stylesCache = null;
+
+    for (const attributeName of specialAttributesToRefresh)
+      this.serviceContainer.designItemService.handleSpecialAttributes(attributeName, this);
+  }
+  */
+
   private static _designItemMap = new WeakMap<Node, IDesignItem>();
 
   public get element(): Element {
@@ -200,7 +238,7 @@ export class DesignItem implements IDesignItem {
   }
 
   public get isRootItem(): boolean {
-    return this.instanceServiceContainer.contentService.rootDesignItem === this;
+    return this.instanceServiceContainer.designerCanvas.rootDesignItem === this;
   }
 
   *childrenRect(selectors: string) {
@@ -826,7 +864,7 @@ export class DesignItem implements IDesignItem {
       this.element.setAttribute(forceHoverAttributeName, '');
     else
       this.element.removeAttribute(forceHoverAttributeName);
-    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'changed', type: 'attribute', name: forceHoverAttributeName, designItems: [this] }]);
   }
 
   get cssForceActive() {
@@ -837,7 +875,7 @@ export class DesignItem implements IDesignItem {
       this.element.setAttribute(forceActiveAttributeName, '');
     else
       this.element.removeAttribute(forceActiveAttributeName);
-    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'changed', type: 'attribute', name: forceActiveAttributeName, designItems: [this] }]);
   }
 
   get cssForceVisited() {
@@ -848,7 +886,7 @@ export class DesignItem implements IDesignItem {
       this.element.setAttribute(forceVisitedAttributeName, '');
     else
       this.element.removeAttribute(forceVisitedAttributeName);
-    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'changed', type: 'attribute', name: forceVisitedAttributeName, designItems: [this] }]);
   }
 
   get cssForceFocus() {
@@ -859,7 +897,7 @@ export class DesignItem implements IDesignItem {
       this.element.setAttribute(forceFocusAttributeName, '');
     else
       this.element.removeAttribute(forceFocusAttributeName);
-    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'changed', type: 'attribute', name: forceFocusAttributeName, designItems: [this] }]);
   }
 
   get cssForceFocusWithin() {
@@ -870,7 +908,7 @@ export class DesignItem implements IDesignItem {
       this.element.setAttribute(forceFocusWithinAttributeName, '');
     else
       this.element.removeAttribute(forceFocusWithinAttributeName);
-    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'changed', type: 'attribute', name: forceFocusWithinAttributeName, designItems: [this] }]);
   }
 
   get cssForceFocusVisible() {
@@ -881,6 +919,6 @@ export class DesignItem implements IDesignItem {
       this.element.setAttribute(forceFocusVisibleAttributeName, '');
     else
       this.element.removeAttribute(forceFocusVisibleAttributeName);
-    this.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'changed', designItems: [this] });
+    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'changed', type: 'attribute', name: forceFocusVisibleAttributeName, designItems: [this] }]);
   }
 }

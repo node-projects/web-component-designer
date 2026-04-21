@@ -1,6 +1,7 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { DomHelper } from '@node-projects/base-custom-webcomponent';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class DeleteAction implements ITransactionItem {
 
@@ -15,14 +16,14 @@ export class DeleteAction implements ITransactionItem {
     return this.deletedItems;
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     for (let n = 0; n < this.deletedItems.length; n++) {
       this._parentItems[n]._insertChildInternal(this.deletedItems[n], this._parentIndexes[n]);
     }
-    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'added', designItems: this.deletedItems});
+    return [{ changeType: 'added', designItems: this.deletedItems }];
   }
 
-  do() {
+  do(): IContentChanged[] | null {
     this._parentItems = [];
     this._parentIndexes = [];
     for (let n = 0; n < this.deletedItems.length; n++) {
@@ -32,7 +33,7 @@ export class DeleteAction implements ITransactionItem {
     for (let n = 0; n < this.deletedItems.length; n++) {
       this.deletedItems[n].parent._removeChildInternal(this.deletedItems[n]);
     }
-    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({changeType: 'removed', designItems: this.deletedItems});
+    return [{ changeType: 'removed', designItems: this.deletedItems }];
   }
 
   public deletedItems: IDesignItem[];

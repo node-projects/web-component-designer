@@ -144,14 +144,14 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
       case 'metrics':
         return { name, service: this, propertyType: PropertyType.complex, createEditor: (p) => new MetricsPropertyEditor(p) };
       default:
-        return {
+        return this._enrichCssProperty({
           name,
           //attributeName: PropertiesHelper.camelToDashCase(name),
           type: cssProperties[camelName]?.type ?? 'string',
-          values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
+          values: cssProperties[camelName]?.values,
           service: this,
           propertyType: PropertyType.cssValue
-        }
+        })
     }
   }
 

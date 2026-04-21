@@ -1,6 +1,7 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { setDeepValue } from '../../../helper/Helper.js';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class PropertyChangeAction implements ITransactionItem {
 
@@ -19,12 +20,14 @@ export class PropertyChangeAction implements ITransactionItem {
     return [this.designItem];
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     setDeepValue(this.designItem.node, this.name, this.oldValue);
+    return [{ changeType: 'changed', type: 'property', name: this.name, designItems: [this.designItem] }];
   }
 
-  do() {
+  do(): IContentChanged[] | null {
     setDeepValue(this.designItem.node, this.name, this.newValue);
+    return [{ changeType: 'changed', type: 'property', name: this.name, designItems: [this.designItem] }];
   }
 
   public designItem: IDesignItem;

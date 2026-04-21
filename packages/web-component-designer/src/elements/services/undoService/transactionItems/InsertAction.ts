@@ -1,5 +1,6 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
+import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class InsertAction implements ITransactionItem {
 
@@ -17,14 +18,14 @@ export class InsertAction implements ITransactionItem {
     return [this.containerItem, this.newItem];
   }
 
-  undo() {
+  undo(): IContentChanged[] | null {
     this.newItem.parent._removeChildInternal(this.newItem);
-    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'removed', designItems: [this.newItem] });
+    return [{ changeType: 'removed', designItems: [this.newItem] }];
   }
 
-  do() {
+  do(): IContentChanged[] | null {
     this.containerItem._insertChildInternal(this.newItem, this.index);
-    this.affectedItems[0].instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'added', designItems: [this.newItem] });
+    return [{ changeType: 'added', designItems: [this.newItem] }];
   }
 
   public containerItem: IDesignItem;

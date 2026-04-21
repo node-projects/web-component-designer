@@ -273,14 +273,14 @@ export class PointerTool implements ITool {
             for (let i = 0; i < this._clonedItems.length; i++) {
               this._actionStartedDesignItems[i].insertAdjacentElement(this._clonedItems[i], 'beforebegin');
             }
-            designerCanvas.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'added', designItems: this._clonedItems });
+            //TODO: check if this is needed? designerCanvas.instanceServiceContainer.onContentChanged.emit({ changeType: 'added', designItems: this._clonedItems });
           } else if (!hasCommandKey(event) && this._copiedItemsInserted) {
             this._changeGroup.title = "Move Elements";
             for (let d of this._clonedItems) {
               d.remove();
             }
             this._copiedItemsInserted = false;
-            designerCanvas.instanceServiceContainer.contentService.onContentChanged.emit({ changeType: 'removed', designItems: this._clonedItems });
+            //TODO: check if this is needed? designerCanvas.instanceServiceContainer.onContentChanged.emit({ changeType: 'removed', designItems: this._clonedItems });
           }
 
           // *** End Copy Items Part ***

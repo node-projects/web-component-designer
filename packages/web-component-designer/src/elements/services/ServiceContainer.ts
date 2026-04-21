@@ -37,7 +37,6 @@ import { IPropertyGroupsService } from './propertiesService/IPropertyGroupsServi
 import { CodeViewSimple } from '../widgets/codeView/code-view-simple.js';
 import { IUndoService } from './undoService/IUndoService.js';
 import { ISelectionService } from './selectionService/ISelectionService.js';
-import { IContentService } from './contentService/IContentService.js';
 import { IStylesheetService } from './stylesheetService/IStylesheetService.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { IDesignItemDocumentPositionService } from './designItemDocumentPositionService/IDesignItemDocumentPositionService.js';
@@ -91,7 +90,6 @@ interface ServiceNameMap {
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
   "selectionService": (designerCanvas: IDesignerCanvas) => ISelectionService;
-  "contentService": (designerCanvas: IDesignerCanvas) => IContentService;
   "stylesheetService": (designerCanvas: IDesignerCanvas) => IStylesheetService;
   "collaborationService": (designerCanvas: IDesignerCanvas) => ICollaborationService;
   "designItemDocumentPositionService": (designerCanvas: IDesignerCanvas) => IDesignItemDocumentPositionService;

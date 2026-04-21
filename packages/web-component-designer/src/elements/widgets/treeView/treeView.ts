@@ -142,10 +142,10 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
       this.selectionChanged(e);
     });
     this._contentChangedHandler?.dispose()
-    this._contentChangedHandler = this._instanceServiceContainer.contentService.onContentChanged.on(e => {
-      this.createTree(value.contentService.rootDesignItem);
+    this._contentChangedHandler = this._instanceServiceContainer.onContentChanged.on(e => {
+      this.createTree(value.designerCanvas.rootDesignItem);
     });
-    this.createTree(value.contentService.rootDesignItem);
+    this.createTree(value.designerCanvas.rootDesignItem);
   }
 
   public selectionChanged(event: ISelectionChangedEvent) {

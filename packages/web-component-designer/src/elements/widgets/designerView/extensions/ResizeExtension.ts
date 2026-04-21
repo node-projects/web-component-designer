@@ -2,6 +2,7 @@ import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
 import { getContentBoxContentOffsets } from '../../../helper/ElementHelper.js';
+import { getElementLocalToCanvasMatrix } from '../../../helper/GridHelper.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
 import { getElementSize } from '../../../helper/getBoxQuads.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
@@ -41,7 +42,9 @@ export class ResizeExtension extends AbstractExtension {
   private _circle6?: SVGCircleElement;
   private _circle7?: SVGCircleElement;
   private _circle8?: SVGCircleElement;
-  private _initialHandleLocalPoint: DOMPoint | null = null;
+  private _initialHandleCanvasPoint: DOMPoint | null = null;
+  private _initialLocalToCanvasMatrix: DOMMatrix | null = null;
+  private _initialBorderBoxSize: ISize | null = null;
   private _initialFixedResizeAnchor: DOMPoint | null = null;
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
@@ -103,7 +106,9 @@ export class ResizeExtension extends AbstractExtension {
         this._offsetPoint = { x: cx - currentPoint.x, y: cy - currentPoint.y };
         (<Element>event.target).setPointerCapture(event.pointerId);
         this._initialPoint = currentPoint;
-        this._initialHandleLocalPoint = this.extendedItem.element.convertPointFromNode(new DOMPoint(cx, cy), this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
+        this._initialHandleCanvasPoint = new DOMPoint(cx, cy);
+        this._initialLocalToCanvasMatrix = getElementLocalToCanvasMatrix(this.extendedItem);
+        this._initialBorderBoxSize = getElementSize(this.extendedItem.element);
         this._initialFixedResizeAnchor = this._getFixedResizeAnchor(this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas, iframes: this.designerCanvas.iframes })[0], actionMode);
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
@@ -131,7 +136,7 @@ export class ResizeExtension extends AbstractExtension {
 
       case EventNames.PointerMove:
         if (this._initialPoint) {
-          if (!this._initialSizes || !this._initialHandleLocalPoint) {
+          if (!this._initialSizes || !this._initialHandleCanvasPoint || !this._initialLocalToCanvasMatrix || !this._initialBorderBoxSize) {
             return;
           }
 
@@ -139,10 +144,14 @@ export class ResizeExtension extends AbstractExtension {
           const containerService = this.designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(this.extendedItem.parent, containerStyle))
 
           const diff = containerService.placePoint(event, this.designerCanvas, this.extendedItem.parent, this._initialPoint, { x: 0, y: 0 }, currentPoint, this.designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-          const currentHandleLocalPoint = this.extendedItem.element.convertPointFromNode(new DOMPoint(diff.x + this._offsetPoint.x, diff.y + this._offsetPoint.y), this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
+          const currentHandleCanvasPoint = new DOMPoint(diff.x + this._offsetPoint.x, diff.y + this._offsetPoint.y);
+          const localHandleDelta = this._getLocalHandleDelta(currentHandleCanvasPoint);
+          if (!localHandleDelta) {
+            return;
+          }
 
-          let deltaX = currentHandleLocalPoint.x - this._initialHandleLocalPoint.x;
-          let deltaY = currentHandleLocalPoint.y - this._initialHandleLocalPoint.y;
+          let deltaX = localHandleDelta.x;
+          let deltaY = localHandleDelta.y;
 
           if (event.shiftKey) {
             deltaX = deltaX < deltaY ? deltaX : deltaY;
@@ -272,7 +281,12 @@ export class ResizeExtension extends AbstractExtension {
               break;
           }
 
-          this._applyAnchorCorrection();
+          const currentBorderBoxSize = this._getCurrentBorderBoxSize(deltaX, deltaY);
+          if (!currentBorderBoxSize) {
+            return;
+          }
+
+          this._applyAnchorCorrection(currentBorderBoxSize);
 
           const resizedElements = [this.extendedItem, this.extendedItem.parent];
           if (this.resizeAllSelected)
@@ -295,7 +309,7 @@ export class ResizeExtension extends AbstractExtension {
 
           let left = parseFloat(normalizeToAbsolutePosition(element, 'left'));
           let top = parseFloat(normalizeToAbsolutePosition(element, 'top'));
-          const anchorCorrection = this._getAnchorCorrectionInParent();
+          const anchorCorrection = this._getAnchorCorrectionInParent(getElementSize(this.extendedItem.element));
           if (anchorCorrection) {
             left += anchorCorrection.x;
             top += anchorCorrection.y;
@@ -329,10 +343,75 @@ export class ResizeExtension extends AbstractExtension {
         }
         this._initialSizes = null;
         this._initialPoint = null;
-        this._initialHandleLocalPoint = null;
+        this._initialHandleCanvasPoint = null;
+        this._initialLocalToCanvasMatrix = null;
+        this._initialBorderBoxSize = null;
         this._initialFixedResizeAnchor = null;
         break;
     }
+  }
+
+  private _getLocalHandleDelta(currentHandleCanvasPoint: DOMPoint): DOMPoint | null {
+    if (!this._initialHandleCanvasPoint || !this._initialLocalToCanvasMatrix) {
+      return null;
+    }
+
+    const localToCanvasMatrix = new DOMMatrix([
+      this._initialLocalToCanvasMatrix.a,
+      this._initialLocalToCanvasMatrix.b,
+      this._initialLocalToCanvasMatrix.c,
+      this._initialLocalToCanvasMatrix.d,
+      0,
+      0,
+    ]);
+
+    if (!localToCanvasMatrix.is2D) {
+      return null;
+    }
+
+    const canvasDelta = new DOMPoint(
+      currentHandleCanvasPoint.x - this._initialHandleCanvasPoint.x,
+      currentHandleCanvasPoint.y - this._initialHandleCanvasPoint.y,
+    );
+
+    return localToCanvasMatrix.inverse().transformPoint(canvasDelta);
+  }
+
+  private _getCurrentBorderBoxSize(deltaX: number, deltaY: number): ISize | null {
+    if (!this._initialBorderBoxSize) {
+      return null;
+    }
+
+    let width = this._initialBorderBoxSize.width;
+    let height = this._initialBorderBoxSize.height;
+
+    switch (this._actionModeStarted) {
+      case 'e-resize':
+      case 'se-resize':
+      case 'ne-resize':
+        width += deltaX;
+        break;
+      case 'w-resize':
+      case 'sw-resize':
+      case 'nw-resize':
+        width -= deltaX;
+        break;
+    }
+
+    switch (this._actionModeStarted) {
+      case 's-resize':
+      case 'se-resize':
+      case 'sw-resize':
+        height += deltaY;
+        break;
+      case 'n-resize':
+      case 'ne-resize':
+      case 'nw-resize':
+        height -= deltaY;
+        break;
+    }
+
+    return { width, height };
   }
 
   private _getInitialSize(element: Element): ISize {
@@ -371,17 +450,41 @@ export class ResizeExtension extends AbstractExtension {
     }
   }
 
-  private _getAnchorCorrectionInParent(): IPoint | null {
+  private _getFixedResizeAnchorLocal(size: ISize, mode: string): DOMPoint | null {
+    switch (mode) {
+      case 'e-resize':
+        return new DOMPoint(0, size.height / 2);
+      case 'se-resize':
+        return new DOMPoint(0, 0);
+      case 's-resize':
+        return new DOMPoint(size.width / 2, 0);
+      case 'sw-resize':
+        return new DOMPoint(size.width, 0);
+      case 'w-resize':
+        return new DOMPoint(size.width, size.height / 2);
+      case 'nw-resize':
+        return new DOMPoint(size.width, size.height);
+      case 'n-resize':
+        return new DOMPoint(size.width / 2, size.height);
+      case 'ne-resize':
+        return new DOMPoint(0, size.height);
+      default:
+        return null;
+    }
+  }
+
+  private _getAnchorCorrectionInParent(currentBorderBoxSize: ISize): IPoint | null {
     if (!this._initialFixedResizeAnchor) {
       return null;
     }
 
-    const currentAnchor = this._getFixedResizeAnchor(this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas, iframes: this.designerCanvas.iframes })[0], this._actionModeStarted);
-    if (!currentAnchor) {
+    const currentAnchorLocal = this._getFixedResizeAnchorLocal(currentBorderBoxSize, this._actionModeStarted);
+    if (!currentAnchorLocal) {
       return null;
     }
 
     const initialAnchorInParent = this.extendedItem.parent.element.convertPointFromNode(this._initialFixedResizeAnchor, this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
+    const currentAnchor = this.designerCanvas.canvas.convertPointFromNode(currentAnchorLocal, this.extendedItem.element, { iframes: this.designerCanvas.iframes });
     const currentAnchorInParent = this.extendedItem.parent.element.convertPointFromNode(currentAnchor, this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
 
     return {
@@ -390,8 +493,8 @@ export class ResizeExtension extends AbstractExtension {
     };
   }
 
-  private _applyAnchorCorrection() {
-    const anchorCorrection = this._getAnchorCorrectionInParent();
+  private _applyAnchorCorrection(currentBorderBoxSize: ISize) {
+    const anchorCorrection = this._getAnchorCorrectionInParent(currentBorderBoxSize);
     if (!anchorCorrection) {
       return;
     }

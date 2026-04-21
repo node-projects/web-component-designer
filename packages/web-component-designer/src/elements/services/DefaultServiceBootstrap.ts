@@ -71,7 +71,6 @@ import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/des
 import { UndoService } from './undoService/UndoService.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { SelectionService } from './selectionService/SelectionService.js';
-import { ContentService } from './contentService/ContentService.js';
 import { StylesheetServiceDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { JumpToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js';
 import { EditGridColumnRowSizesExtensionProvider } from '../widgets/designerView/extensions/grid/EditGridColumnRowSizesExtensionProvider.js';
@@ -150,7 +149,6 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
   serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
-  serviceContainer.register("contentService", (designerCanvas: IDesignerCanvas) => new ContentService(designerCanvas.rootDesignItem));
   serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [

@@ -60,10 +60,6 @@ export type { IPngCreatorService } from "./elements/services/pngCreatorService/I
 export * from "./elements/services/elementAtPointService/ElementAtPointService.js";
 export type { IElementAtPointService } from "./elements/services/elementAtPointService/IElementAtPointService.js";
 
-export * from "./elements/services/contentService/ContentService.js";
-export type { IContentChanged } from "./elements/services/contentService/IContentChanged.js";
-export type { IContentService } from "./elements/services/contentService/IContentService.js";
-
 export * from "./elements/services/copyPasteService/CopyPasteService.js";
 export * from "./elements/services/copyPasteService/CopyPasteAsJsonService.js";
 export type { ICopyPasteService } from "./elements/services/copyPasteService/ICopyPasteService.js";
@@ -148,6 +144,8 @@ export * from "./elements/services/propertiesService/PropertyGroupsService.js";
 export * from "./elements/services/propertiesService/propertyEditors/BasePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/BooleanPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ColorPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/CssNumericPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/CssLengthPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/DatePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ImageButtonListPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyEditor.js";

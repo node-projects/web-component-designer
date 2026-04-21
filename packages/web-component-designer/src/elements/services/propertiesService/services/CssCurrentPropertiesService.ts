@@ -30,7 +30,8 @@ export class CssCurrentPropertiesService extends CssPropertiesService {
   }
 
   override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
-    return { name: name, type: 'string', service: this, propertyType: PropertyType.cssValue };
+    const camelName = PropertiesHelper.dashToCamelCase(name);
+    return this._enrichCssProperty({ name: name, type: cssProperties[camelName]?.type ?? 'string', values: cssProperties[camelName]?.values, service: this, propertyType: PropertyType.cssValue });
   }
 
   getPropertyNameSuggestions(designItems: IDesignItem[]): string[] {
@@ -71,16 +72,17 @@ export class CssCurrentPropertiesService extends CssPropertiesService {
       name: (x.selector ?? localName) + (x.specificity ? ' (' + x.specificity.A + '-' + x.specificity.B + '-' + x.specificity.C + ')' : ''), description: x.stylesheetName ?? '', properties: [
         ...x.declarations.map(y => {
           const camelName = PropertiesHelper.dashToCamelCase(y.name);
-          return {
+          return this._enrichCssProperty({
             name: y.name,
             renamable: true,
             type: cssProperties[camelName]?.type ?? 'string',
-            values: cssProperties[camelName]?.values ? [...cssProperties[camelName]?.values, 'initial', 'inherit', 'unset'] : ['initial', 'inherit', 'unset'],
+            values: cssProperties[camelName]?.values,
             service: this,
             propertyType: PropertyType.cssValue,
+            //@ts-ignore
             styleRule: x,
             styleDeclaration: y
-          }
+          })
         }),
         { name: '', type: 'addNew', service: this, propertyType: PropertyType.complex, styleRule: x }
       ]

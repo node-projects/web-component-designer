@@ -11,12 +11,16 @@ import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor.j
 import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor.js';
 import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEditor.js";
 import { FontPropertyEditor } from './propertyEditors/FontPropertyEditor.js';
-import { AnglePropertyEditor } from './propertyEditors/AnglePropertyEditor.js';
+import { CssNumericPropertyEditor } from './propertyEditors/CssNumericPropertyEditor.js';
+import { isCssNumericPropertyType } from './propertyEditors/CssNumericPropertyEditorConfig.js';
 
 export class DefaultEditorTypesService implements IEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
     if (property.createEditor)
       return property.createEditor(property);
+
+    if (isCssNumericPropertyType(property.type, property.name))
+      return new CssNumericPropertyEditor(property);
 
     switch (<string><any>property.type) {
       case "json":
@@ -39,10 +43,6 @@ export class DefaultEditorTypesService implements IEditorTypesService {
         {
           return new NumberPropertyEditor(property);
         }
-      case "angle":
-        {
-          return new AnglePropertyEditor(property);
-        }
       case "list":
         {
           return new SelectPropertyEditor(property);
@@ -63,7 +63,6 @@ export class DefaultEditorTypesService implements IEditorTypesService {
         {
           return new ThicknessPropertyEditor(property);
         }
-      case "css-length":
       case "string":
       default:
         {

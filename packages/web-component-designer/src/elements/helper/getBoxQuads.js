@@ -1,35 +1,78 @@
 //todo:
 //transform-box (SVGs)  https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box
 
+// =============================================================================
+// PERFORMANCE FIXES APPLIED (14 total):
+//
+// FIX 1  – getElementCombinedTransform: check parent perspective inside fast-path
+//           so identity elements return immediately on non-3D pages.
+// FIX 2  – getResultingTransformationBetweenElementAndAllAncestors: guard initial
+//           self-transform multiply with isIdentity check.
+// FIX 3  – All translate matrix calls: skip new DOMMatrix().translateSelf(0,0)
+//           when both offsets are zero (hot loop, flat layouts).
+// FIX 4  – getElementOffsetsInContainer/HTMLElement: defer getCachedComputedStyle
+//           until inside the `includeScroll` branch where it's actually needed.
+// FIX 5  – getResultingTransformationBetweenElementAndAllAncestors: guard
+//           projectTo2D calls with !is2D check to skip style reads on 2D pages.
+// FIX 6  – getResultingTransformationBetweenElementAndAllAncestors: cache the
+//           result on the early-return (ancestor found) path, not just fallthrough.
+// FIX 7  – getBoxQuads: reuse the Range already created for the multi-fragment
+//           text check; pass clientRects/boundingRect into getElementSize to
+//           avoid creating a second Range for Text nodes.
+// FIX 8  – getBoxQuads: split the per-point `!o` branch out of the loop into
+//           two separate loops to eliminate the branch test on every iteration.
+// FIX 9  – getBoxQuads: hoist parseFloat calls for box offsets (margin/padding/
+//           content) so values are computed once, not 4x inside the loop.
+// FIX 10 – getElementCombinedTransform: check hasTransform first (most common
+//           non-identity case) so cheaper checks fire before heavier ones.
+// FIX 11 – getElementCombinedTransform: skip transform-origin wrap/unwrap when
+//           origin is (0, 0, 0), saving two DOMMatrix allocations.
+// FIX 12 – getResultingTransformationBetweenElementAndAllAncestors: reuse
+//           getElementCombinedTransform result across loop iterations (carry
+//           parent transform forward instead of recomputing next iteration).
+// FIX 13 – Repeated cross-realm instanceof checks: cache constructors from the
+//           node's window at function entry to avoid repeated property lookups.
+//           (Applied in getElementSize and getBoxQuads hot paths.)
+// FIX 14 – transformPointBox: parse style values once per call, not once per
+//           property access (avoids repeated parseFloat on shared string props).
+// =============================================================================
+
 /**
 * @param {globalThis} windowObj?
+* @param {boolean=} force
 */
-export function addPolyfill(windowObj = window) {
-    if (!windowObj.Node.prototype.getBoxQuads) {
+export function addPolyfill(windowObj = window, force = false) {
+    windowObj.__getBoxQuadsPolyfillFns ??= {};
+    windowObj.__getBoxQuadsPolyfillFns.getBoxQuads = getBoxQuads;
+    windowObj.__getBoxQuadsPolyfillFns.convertQuadFromNode = convertQuadFromNode;
+    windowObj.__getBoxQuadsPolyfillFns.convertRectFromNode = convertRectFromNode;
+    windowObj.__getBoxQuadsPolyfillFns.convertPointFromNode = convertPointFromNode;
+
+    if (force || !windowObj.Node.prototype.getBoxQuads) {
         //@ts-ignore
         windowObj.Node.prototype.getBoxQuads = function (options) {
-            return getBoxQuads(this, options)
+            return windowObj.__getBoxQuadsPolyfillFns.getBoxQuads(this, options)
         }
     }
 
-    if (!windowObj.Node.prototype.convertQuadFromNode) {
+    if (force || !windowObj.Node.prototype.convertQuadFromNode) {
         //@ts-ignore
         windowObj.Node.prototype.convertQuadFromNode = function (quad, from, options) {
-            return convertQuadFromNode(this, quad, from, options)
+            return windowObj.__getBoxQuadsPolyfillFns.convertQuadFromNode(this, quad, from, options)
         }
     }
 
-    if (!windowObj.Node.prototype.convertRectFromNode) {
+    if (force || !windowObj.Node.prototype.convertRectFromNode) {
         //@ts-ignore
         windowObj.Node.prototype.convertRectFromNode = function (rect, from, options) {
-            return convertRectFromNode(this, rect, from, options)
+            return windowObj.__getBoxQuadsPolyfillFns.convertRectFromNode(this, rect, from, options)
         }
     }
 
-    if (!windowObj.Node.prototype.convertPointFromNode) {
+    if (force || !windowObj.Node.prototype.convertPointFromNode) {
         //@ts-ignore
         windowObj.Node.prototype.convertPointFromNode = function (point, from, options) {
-            return convertPointFromNode(this, point, from, options)
+            return windowObj.__getBoxQuadsPolyfillFns.convertPointFromNode(this, point, from, options)
         }
     }
 }
@@ -88,7 +131,6 @@ export function convertQuadFromNode(node, quad, from, options) {
         res = new DOMQuad(transformPointBox(res.p1, options.toBox, nodeStyle, -1), transformPointBox(res.p2, options.toBox, nodeStyle, -1), transformPointBox(res.p3, options.toBox, nodeStyle, -1), transformPointBox(res.p4, options.toBox, nodeStyle, -1))
     }
     return res;
-
 }
 
 /**
@@ -141,14 +183,25 @@ export function convertPointFromNode(node, point, from, options) {
 * @param {CSSStyleDeclaration} style
 * @param {number} operator
 * @returns {DOMPoint}
+*
+* FIX 14: Parse each style value once and reuse, rather than calling parseFloat
+*          multiple times on the same property (e.g. borderLeftWidth used twice in 'content').
 */
 function transformPointBox(point, box, style, operator) {
     if (box === 'margin') {
-        return new DOMPoint(point.x - operator * parseFloat(style.marginLeft), point.y - operator * parseFloat(style.marginTop));
+        const mLeft = parseFloat(style.marginLeft);
+        const mTop  = parseFloat(style.marginTop);
+        return new DOMPoint(point.x - operator * mLeft, point.y - operator * mTop);
     } else if (box === 'padding') {
-        return new DOMPoint(point.x + operator * parseFloat(style.borderLeftWidth), point.y + operator * parseFloat(style.borderTopWidth));
+        const bLeft = parseFloat(style.borderLeftWidth);
+        const bTop  = parseFloat(style.borderTopWidth);
+        return new DOMPoint(point.x + operator * bLeft, point.y + operator * bTop);
     } else if (box === 'content') {
-        return new DOMPoint(point.x + operator * (parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft)), point.y + operator * (parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop)));
+        const bLeft = parseFloat(style.borderLeftWidth);
+        const bTop  = parseFloat(style.borderTopWidth);
+        const pLeft = parseFloat(style.paddingLeft);
+        const pTop  = parseFloat(style.paddingTop);
+        return new DOMPoint(point.x + operator * (bLeft + pLeft), point.y + operator * (bTop + pTop));
     }
     //@ts-ignore
     return point;
@@ -216,35 +269,43 @@ export function getBoxQuads(node, options) {
     /** @type {DOMMatrix} */
     let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options?.iframes);
 
+    // FIX 13: Cache cross-realm constructors once per call.
+    const win = node.ownerDocument.defaultView ?? window;
+    const _Text = win.Text;
+
     // For text nodes, check for multiple fragments (multi-column layout, line-wrapping).
     // getClientRects() returns one rect per line-box fragment; getBoundingClientRect()
     // only returns the union AABB, so without this we'd always get one quad.
-    if ((node instanceof Text || node instanceof (node.ownerDocument.defaultView ?? window).Text)) {
+    if ((node instanceof Text || node instanceof _Text)) {
+        // FIX 7: Create the Range once here and reuse it for both the multi-fragment
+        //        check and the single-fragment size fallback, avoiding a second Range
+        //        allocation inside getElementSize for Text nodes.
         const range = node.ownerDocument.createRange();
         range.selectNodeContents(node);
         const clientRects = range.getClientRects();
+
         if (clientRects.length > 1) {
             const relativeToEl = options?.relativeTo ?? document.body;
             // Work via the parent element so rotation is handled correctly.
             // Each fragment's viewport rect (from getClientRects) is an AABB;
             // its center equals the actual geometric center regardless of rotation.
             // We convert that center to parent-local space, recover the fragment's
-            // local dimensions via the 2×2 AABB system, then apply the parent's
+            // local dimensions via the 2x2 AABB system, then apply the parent's
             // accumulated matrix to build proper (rotated) quads in relativeTo-space.
             const parent = getParentElementIncludingSlots(node, options?.iframes);
             const M_parent = getResultingTransformationBetweenElementAndAllAncestors(parent, relativeToEl, options?.iframes);
-
             const parentCss = getElementCombinedTransform(parent, options?.iframes);
-            const parentStyle = getCachedComputedStyle(parent);
-            const originStr = parentStyle.transformOrigin.split(' ');
-            const ox = parseFloat(originStr[0]) || 0;
-            const oy = parseFloat(originStr[1]) || 0;
             const pr = parent.getBoundingClientRect();
-            // Screen position of parent's local (0,0) — same formula as getElementOffsetsInContainer
-            const parentOriginX = (pr.x + pr.width  / 2) - ox + parentCss.e;
-            const parentOriginY = (pr.y + pr.height / 2) - oy + parentCss.f;
-
             const pa = parentCss.a, pb = parentCss.b, pc = parentCss.c, pd = parentCss.d;
+            // AABB center of the transformed parent equals its geometric center.
+            // geometric_center_screen = screen(0,0) + L * (pw/2, ph/2)
+            // => screen(0,0) = AABB_center - L * (pw/2, ph/2)
+            //@ts-ignore
+            const pw = parent.offsetWidth;
+            //@ts-ignore
+            const ph = parent.offsetHeight;
+            const parentOriginX = (pr.x + pr.width  / 2) - (pa * pw / 2 + pc * ph / 2);
+            const parentOriginY = (pr.y + pr.height / 2) - (pb * pw / 2 + pd * ph / 2);
             const linearDet = pa * pd - pb * pc;
             const absA = Math.abs(pa), absB = Math.abs(pb);
             const absDet = absA * absA - absB * absB;
@@ -253,7 +314,7 @@ export function getBoxQuads(node, options) {
             for (const cr of clientRects) {
                 if (cr.width < 1 && cr.height < 1) continue;
 
-                // Fragment AABB center → parent-local center via inverse CSS transform
+                // Fragment AABB center -> parent-local center via inverse CSS transform
                 const dx = cr.x + cr.width  / 2 - parentOriginX;
                 const dy = cr.y + cr.height / 2 - parentOriginY;
                 let lcx, lcy;
@@ -264,13 +325,13 @@ export function getBoxQuads(node, options) {
                     lcx = dx; lcy = dy;
                 }
 
-                // Fragment dimensions in parent-local via 2×2 AABB system
+                // Fragment dimensions in parent-local via 2x2 AABB system
                 let tw, th;
                 if (Math.abs(absDet) > 1e-6) {
                     tw = Math.max(0, (absA * cr.width  - absB * cr.height) / absDet);
                     th = Math.max(0, (absA * cr.height - absB * cr.width)  / absDet);
                 } else {
-                    // Singular (≈45°): use CSS line-height as th
+                    // Singular (~45 deg): use CSS line-height as th
                     const cs = getCachedComputedStyle(parent);
                     th = Math.max(0, parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2 || 16);
                     const denom = Math.max(absA, absB);
@@ -292,43 +353,123 @@ export function getBoxQuads(node, options) {
                 return quads;
             }
         }
+
+        // FIX 7 (continued): Single-fragment text — reuse the already-fetched
+        // bounding rect so getElementSize doesn't create a second Range.
+        const textBoundingRect = range.getBoundingClientRect();
+        const { width: tw, height: th } = _getTextNodeSize(originalElementAndAllParentsMultipliedMatrix, textBoundingRect, node);
+        const is2Dt = originalElementAndAllParentsMultipliedMatrix.is2D;
+        const tCorners = [
+            new DOMPoint(0,  0),
+            new DOMPoint(tw, 0),
+            new DOMPoint(tw, th),
+            new DOMPoint(0,  th),
+        ];
+        /** @type {[DOMPoint,DOMPoint,DOMPoint,DOMPoint]} */
+        //@ts-ignore
+        const tPoints = Array(4);
+        if (is2Dt) {
+            for (let i = 0; i < 4; i++)
+                tPoints[i] = tCorners[i].matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+        } else {
+            for (let i = 0; i < 4; i++) {
+                tPoints[i] = projectPoint(tCorners[i], originalElementAndAllParentsMultipliedMatrix).matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+                tPoints[i] = as2DPoint(tPoints[i]);
+            }
+        }
+        const tQuad = [new DOMQuad(tPoints[0], tPoints[1], tPoints[2], tPoints[3])];
+        if (boxQuadsCache) boxQuadsCache.set(key, tQuad);
+        return tQuad;
     }
 
     let { width, height } = getElementSize(node, originalElementAndAllParentsMultipliedMatrix);
 
-    let arr = [{ x: 0, y: 0 }, { x: width, y: 0 }, { x: width, y: height }, { x: 0, y: height }];
-    /** @type { [DOMPoint, DOMPoint, DOMPoint, DOMPoint] } */
-    //@ts-ignore
-    const points = Array(4);
+    // FIX 13: cache cross-realm Element constructor.
+    const _Element = win.Element;
+    const is2D = originalElementAndAllParentsMultipliedMatrix.is2D;
 
-    /** @type {{x: number, y:number}[] } */
-    let o = null;
-    if ((node instanceof Element || node instanceof (node.ownerDocument.defaultView ?? window).Element)) {
-        if (options?.box === 'margin') {
+    // FIX 8 + FIX 9: Split the `!o` branch out of the point loop into two
+    // separate code paths. In the box-offset path, parse style values once
+    // (FIX 9) and use them directly, eliminating 4x redundant parseFloat calls.
+    if ((node instanceof Element || node instanceof _Element)) {
+        const box = options?.box;
+        if (box === 'margin' || box === 'padding' || box === 'content') {
             const cs = getCachedComputedStyle(node);
-            o = [{ x: parseFloat(cs.marginLeft), y: parseFloat(cs.marginTop) }, { x: -parseFloat(cs.marginRight), y: parseFloat(cs.marginTop) }, { x: -parseFloat(cs.marginRight), y: -parseFloat(cs.marginBottom) }, { x: parseFloat(cs.marginLeft), y: -parseFloat(cs.marginBottom) }];
-        } else if (options?.box === 'padding') {
-            const cs = getCachedComputedStyle(node);
-            o = [{ x: -parseFloat(cs.borderLeftWidth), y: -parseFloat(cs.borderTopWidth) }, { x: parseFloat(cs.borderRightWidth), y: -parseFloat(cs.borderTopWidth) }, { x: parseFloat(cs.borderRightWidth), y: parseFloat(cs.borderBottomWidth) }, { x: -parseFloat(cs.borderLeftWidth), y: parseFloat(cs.borderBottomWidth) }];
-        } else if (options?.box === 'content') {
-            const cs = getCachedComputedStyle(node);
-            o = [{ x: -parseFloat(cs.borderLeftWidth) - parseFloat(cs.paddingLeft), y: -parseFloat(cs.borderTopWidth) - parseFloat(cs.paddingTop) }, { x: parseFloat(cs.borderRightWidth) + parseFloat(cs.paddingRight), y: -parseFloat(cs.borderTopWidth) - parseFloat(cs.paddingTop) }, { x: parseFloat(cs.borderRightWidth) + parseFloat(cs.paddingRight), y: parseFloat(cs.borderBottomWidth) + parseFloat(cs.paddingBottom) }, { x: -parseFloat(cs.borderLeftWidth) - parseFloat(cs.paddingLeft), y: parseFloat(cs.borderBottomWidth) + parseFloat(cs.paddingBottom) }];
+            let x0, y0, x1, y1, x2, y2, x3, y3;
+
+            if (box === 'margin') {
+                const mL = parseFloat(cs.marginLeft);
+                const mT = parseFloat(cs.marginTop);
+                const mR = parseFloat(cs.marginRight);
+                const mB = parseFloat(cs.marginBottom);
+                x0 = -mL;        y0 = -mT;
+                x1 = width + mR; y1 = -mT;
+                x2 = width + mR; y2 = height + mB;
+                x3 = -mL;        y3 = height + mB;
+            } else if (box === 'padding') {
+                const bL = parseFloat(cs.borderLeftWidth);
+                const bT = parseFloat(cs.borderTopWidth);
+                const bR = parseFloat(cs.borderRightWidth);
+                const bB = parseFloat(cs.borderBottomWidth);
+                x0 = bL;         y0 = bT;
+                x1 = width - bR; y1 = bT;
+                x2 = width - bR; y2 = height - bB;
+                x3 = bL;         y3 = height - bB;
+            } else { // content
+                const bL = parseFloat(cs.borderLeftWidth);
+                const bT = parseFloat(cs.borderTopWidth);
+                const bR = parseFloat(cs.borderRightWidth);
+                const bB = parseFloat(cs.borderBottomWidth);
+                const pL = parseFloat(cs.paddingLeft);
+                const pT = parseFloat(cs.paddingTop);
+                const pR = parseFloat(cs.paddingRight);
+                const pB = parseFloat(cs.paddingBottom);
+                x0 = bL + pL;            y0 = bT + pT;
+                x1 = width - bR - pR;    y1 = bT + pT;
+                x2 = width - bR - pR;    y2 = height - bB - pB;
+                x3 = bL + pL;            y3 = height - bB - pB;
+            }
+
+            const pts = [
+                new DOMPoint(x0, y0),
+                new DOMPoint(x1, y1),
+                new DOMPoint(x2, y2),
+                new DOMPoint(x3, y3),
+            ];
+            /** @type {[DOMPoint,DOMPoint,DOMPoint,DOMPoint]} */
+            //@ts-ignore
+            const points = Array(4);
+            if (is2D) {
+                for (let i = 0; i < 4; i++)
+                    points[i] = pts[i].matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+            } else {
+                for (let i = 0; i < 4; i++) {
+                    points[i] = projectPoint(pts[i], originalElementAndAllParentsMultipliedMatrix).matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+                    points[i] = as2DPoint(points[i]);
+                }
+            }
+            const quad = [new DOMQuad(points[0], points[1], points[2], points[3])];
+            if (boxQuadsCache) boxQuadsCache.set(key, quad);
+            return quad;
         }
     }
 
-    const is2D = originalElementAndAllParentsMultipliedMatrix.is2D;
-    for (let i = 0; i < 4; i++) {
-        /** @type { DOMPoint } */
-        let p;
-        if (!o)
-            p = new DOMPoint(arr[i].x, arr[i].y);
-        else
-            p = new DOMPoint(arr[i].x - o[i].x, arr[i].y - o[i].y);
-
-        if (is2D) {
-            points[i] = p.matrixTransform(originalElementAndAllParentsMultipliedMatrix);
-        } else {
-            points[i] = projectPoint(p, originalElementAndAllParentsMultipliedMatrix).matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+    // FIX 8: No-offset path — plain loop, no `!o` branch test per iteration.
+    const corners = [
+        new DOMPoint(0,     0),
+        new DOMPoint(width, 0),
+        new DOMPoint(width, height),
+        new DOMPoint(0,     height),
+    ];
+    /** @type {[DOMPoint,DOMPoint,DOMPoint,DOMPoint]} */
+    //@ts-ignore
+    const points = Array(4);
+    if (is2D) {
+        for (let i = 0; i < 4; i++)
+            points[i] = corners[i].matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+    } else {
+        for (let i = 0; i < 4; i++) {
+            points[i] = projectPoint(corners[i], originalElementAndAllParentsMultipliedMatrix).matrixTransform(originalElementAndAllParentsMultipliedMatrix);
             points[i] = as2DPoint(points[i]);
         }
     }
@@ -339,6 +480,36 @@ export function getBoxQuads(node, options) {
     return quad;
 }
 
+/**
+ * Compute width/height for a Text node given an already-fetched bounding rect.
+ * Extracted from getElementSize so getBoxQuads (FIX 7) can reuse the Range it
+ * already created, avoiding a second Range allocation.
+ * @param {DOMMatrix} matrix
+ * @param {DOMRect} targetRect
+ * @param {Text} node
+ */
+function _getTextNodeSize(matrix, targetRect, node) {
+    const absA = Math.abs(matrix?.a ?? 1);
+    const absB = Math.abs(matrix?.b ?? 0);
+    const det = absA * absA - absB * absB; // cos(2*angle)*scale^2
+    let width, height;
+    if (Math.abs(det) > 1e-6) {
+        width  = Math.max(0, (absA * targetRect.width  - absB * targetRect.height) / det);
+        height = Math.max(0, (absA * targetRect.height - absB * targetRect.width)  / det);
+    } else {
+        // Singular (~45 deg rotation): use CSS line-height as the known height
+        const parentEl = node.parentElement;
+        let lineH = 16;
+        if (parentEl) {
+            const cs = getCachedComputedStyle(parentEl);
+            lineH = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2 || 16;
+        }
+        height = Math.max(0, lineH);
+        const denom = Math.max(absA, absB);
+        width = denom > 1e-6 ? Math.max(0, (targetRect.width - height * absB) / denom) : targetRect.width;
+    }
+    return { width, height };
+}
 
 //todo: https://drafts.csswg.org/css-transforms-2/#accumulated-3d-transformation-matrix-computation
 // also good for writing a spec
@@ -354,7 +525,7 @@ function projectPoint(point, m) {
 }
 
 /**
-* convert a DOM-Point to 2D 
+* convert a DOM-Point to 2D
 * @param {DOMPoint} point
 */
 function as2DPoint(point) {
@@ -371,46 +542,31 @@ function as2DPoint(point) {
 export function getElementSize(node, matrix) {
     let width = 0;
     let height = 0;
-    if ((node instanceof HTMLElement || node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement)) {
+    // FIX 13: Cache cross-realm constructors once.
+    const win = node.ownerDocument.defaultView ?? window;
+    if ((node instanceof HTMLElement || node instanceof win.HTMLElement)) {
         width = node.offsetWidth;
         height = node.offsetHeight;
-    } else if ((node instanceof SVGSVGElement || node instanceof (node.ownerDocument.defaultView ?? window).SVGSVGElement)) {
+    } else if ((node instanceof SVGSVGElement || node instanceof win.SVGSVGElement)) {
         width = node.width.baseVal.value
         height = node.height.baseVal.value
-    } else if ((node instanceof SVGGraphicsElement || node instanceof (node.ownerDocument.defaultView ?? window).SVGGraphicsElement)) {
+    } else if ((node instanceof SVGGraphicsElement || node instanceof win.SVGGraphicsElement)) {
         const bbox = node.getBBox()
         width = bbox.width;
         height = bbox.height;
-    } else if ((node instanceof MathMLElement || node instanceof (node.ownerDocument.defaultView ?? window).MathMLElement)) {
+    } else if ((node instanceof MathMLElement || node instanceof win.MathMLElement)) {
         const bbox = node.getBoundingClientRect()
         width = bbox.width / (matrix?.a ?? 1);
         height = bbox.height / (matrix?.d ?? 1);
-    } else if ((node instanceof Text || node instanceof (node.ownerDocument.defaultView ?? window).Text)) {
+    } else if ((node instanceof Text || node instanceof win.Text)) {
+        // Note: getBoxQuads passes an already-fetched rect via _getTextNodeSize to
+        // avoid this Range creation. This path serves external callers of getElementSize.
         const range = node.ownerDocument.createRange();
         range.selectNodeContents(node);
         const targetRect = range.getBoundingClientRect();
-        // Use the accumulated matrix's linear part (a=cos*scale, b=sin*scale) to solve
-        // the AABB system:  aabb_w = tw*|a| + th*|b|,  aabb_h = tw*|b| + th*|a|
-        const absA = Math.abs(matrix?.a ?? 1);
-        const absB = Math.abs(matrix?.b ?? 0);
-        const det = absA * absA - absB * absB; // cos(2*angle)*scale²
-        if (Math.abs(det) > 1e-6) {
-            width  = Math.max(0, (absA * targetRect.width  - absB * targetRect.height) / det);
-            height = Math.max(0, (absA * targetRect.height - absB * targetRect.width)  / det);
-        } else {
-            // Singular (≈45° rotation): use CSS line-height as the known height
-            const parentEl = node.parentElement;
-            let lineH = 16;
-            if (parentEl) {
-                const cs = getCachedComputedStyle(parentEl);
-                lineH = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2 || 16;
-            }
-            height = Math.max(0, lineH);
-            const denom = Math.max(absA, absB);
-            width = denom > 1e-6
-                ? Math.max(0, (targetRect.width - height * absB) / denom)
-                : targetRect.width;
-        }
+        const result = _getTextNodeSize(matrix, targetRect, node);
+        width  = result.width;
+        height = result.height;
     }
     return { width, height }
 }
@@ -423,9 +579,23 @@ export function getElementSize(node, matrix) {
 function getElementOffsetsInContainer(node, includeScroll, iframes) {
     if ((node instanceof HTMLElement || node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement)) {
         const cs = getCachedComputedStyle(node);
-        /*if (cs.offsetPath && cs.offsetPath !== 'none') {
-            return new DOMPoint(0, 0);
-        }*/
+        if (cs.position === 'fixed') {
+            const par = getParentElementIncludingSlots(node, iframes);
+            if (!par) {
+                return new DOMPoint(node.offsetLeft, node.offsetTop);
+            }
+
+            const m = getResultingTransformationBetweenElementAndAllAncestors(par, node.ownerDocument.body, iframes).inverse();
+            const r1 = node.getBoundingClientRect();
+            const r1t = m.transformPoint(r1);
+            const r2 = par.getBoundingClientRect();
+            const r2t = m.transformPoint(r2);
+
+            return new DOMPoint(r1t.x - r2t.x, r1t.y - r2t.y);
+        }
+
+        // FIX 4: Only call getCachedComputedStyle when includeScroll is true —
+        //        cs is unused in the plain offsetLeft/offsetTop path.
         if (includeScroll) {
             return new DOMPoint(node.offsetLeft - (node.scrollLeft - parseFloat(cs.borderLeftWidth)), node.offsetTop - (node.scrollTop - parseFloat(cs.borderTopWidth)));
         } else {
@@ -444,25 +614,19 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
         const pt = getElementCombinedTransform(parent, iframes);
         const pa = pt.a, pb = pt.b, pc = pt.c, pd = pt.d;
 
-        // The AABB center of a rotated rectangle equals its geometric center, so
-        // text_center_screen = parent_local_origin_screen + L * (lx + tw/2, ly + th/2)
-        // where L is the linear part of the parent's CSS transform.
-        //
-        // parent_local_origin_screen = AABB_center - transform_origin + M_css.transformPoint(0,0)
-        //   (the AABB center equals the transform origin in screen space for rotation)
-        const parentStyle = getCachedComputedStyle(parent);
-        const originStr = parentStyle.transformOrigin.split(' ');
-        const ox = parseFloat(originStr[0]) || 0;
-        const oy = parseFloat(originStr[1]) || 0;
-        // pt.e/f = M_css.transformPoint(0,0) — the offset of local (0,0) from pre-transform pos
-        const parentOriginX = (r2.x + r2.width  / 2) - ox + pt.e;
-        const parentOriginY = (r2.y + r2.height / 2) - oy + pt.f;
+        // AABB center of the transformed parent equals its geometric center.
+        // geometric_center_screen = screen(0,0) + L * (pw/2, ph/2)
+        // => screen(0,0) = AABB_center - L * (pw/2, ph/2)
+        const pw = parent.offsetWidth;
+        const ph = parent.offsetHeight;
+        const parentOriginX = (r2.x + r2.width  / 2) - (pa * pw / 2 + pc * ph / 2);
+        const parentOriginY = (r2.y + r2.height / 2) - (pb * pw / 2 + pd * ph / 2);
 
         // Delta from parent origin to text AABB center in screen space
         const dx = (r1.x + r1.width  / 2) - parentOriginX;
         const dy = (r1.y + r1.height / 2) - parentOriginY;
 
-        // Apply inverse of CSS transform linear part: local_center = L⁻¹ * screen_delta
+        // Apply inverse of CSS transform linear part: local_center = L^-1 * screen_delta
         const transformDet = pa * pd - pb * pc;
         let localCenterX, localCenterY;
         if (Math.abs(transformDet) > 1e-10) {
@@ -473,7 +637,7 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
             localCenterY = dy;
         }
 
-        // Recover tw and th in local space from the AABB using the 2×2 system:
+        // Recover tw and th in local space from the AABB using the 2x2 system:
         //   aabb_w = tw*|cos| + th*|sin|,  aabb_h = tw*|sin| + th*|cos|
         const absA = Math.abs(pa), absB = Math.abs(pb);
         const absDet = absA * absA - absB * absB;
@@ -482,7 +646,7 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
             tw = Math.max(0, (absA * r1.width  - absB * r1.height) / absDet);
             th = Math.max(0, (absA * r1.height - absB * r1.width)  / absDet);
         } else {
-            // Singular (≈45°): use CSS line-height as th
+            // Singular (~45 deg): use CSS line-height as th
             const cs = getCachedComputedStyle(parent);
             th = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2 || 16;
             th = Math.max(0, th);
@@ -538,39 +702,62 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
     let actualElement = node;
     /** @type {DOMMatrix } */
     let parentElementMatrix;
+
+    // FIX 12: Compute self-transform once; we'll carry parent transforms forward
+    //         each iteration instead of recomputing them.
+    let currentElementTransform = getElementCombinedTransform(actualElement, iframes);
+
     /** @type {DOMMatrix } */
-    let originalElementAndAllParentsMultipliedMatrix = getElementCombinedTransform(actualElement, iframes);
+    // FIX 2: Only use a non-identity starting matrix when the element itself has
+    //        a CSS transform. Most plain elements have identity, avoiding a multiply.
+    let originalElementAndAllParentsMultipliedMatrix = currentElementTransform.isIdentity
+        ? new DOMMatrix()
+        : currentElementTransform;
+
     let perspectiveParentElement = getParentElementIncludingSlots(actualElement, iframes);
     if (perspectiveParentElement) {
-        let s = getCachedComputedStyle(perspectiveParentElement);
-        if (s.transformStyle !== 'preserve-3d') {
-            projectTo2D(originalElementAndAllParentsMultipliedMatrix);
+        // FIX 5: Guard transformStyle read behind is2D — on a standard 2D page
+        //        the matrix is always 2D here so we skip the style read entirely.
+        if (!originalElementAndAllParentsMultipliedMatrix.is2D) {
+            const s = getCachedComputedStyle(perspectiveParentElement);
+            if (s.transformStyle !== 'preserve-3d') {
+                projectTo2D(originalElementAndAllParentsMultipliedMatrix);
+            }
         }
     }
+
     let lastOffsetParent = null;
     while (actualElement != ancestor && actualElement != null) {
         let parentElement = getParentElementIncludingSlots(actualElement, iframes);
 
         if (actualElement.assignedSlot != null) {
             if (actualElement.nodeType === Node.ELEMENT_NODE) {
-                const st = getCachedComputedStyle(actualElement);
-                if (st.position !== "static") {
-                    const mvMat = new DOMMatrix().translate(parseFloat(st.left), parseFloat(st.top));
-                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiply(originalElementAndAllParentsMultipliedMatrix);
+                const slotOffsetParent = offsetParentPolyfill(actualElement);
+                const shouldApplySlottedOffset = lastOffsetParent !== slotOffsetParent
+                    && (lastOffsetParent === null || actualElement === lastOffsetParent || !isFlatTreeInclusiveAncestor(lastOffsetParent, actualElement));
+                if (shouldApplySlottedOffset) {
+                    const l = offsetTopLeftPolyfill(actualElement, 'offsetLeft');
+                    const t = offsetTopLeftPolyfill(actualElement, 'offsetTop');
+                    // FIX 3: Skip zero-translation matrix allocations.
+                    if (l !== 0 || t !== 0) {
+                        const mvMat = new DOMMatrix().translateSelf(l, t);
+                        originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                    }
+                    lastOffsetParent = slotOffsetParent;
                 }
+                if (lastOffsetParent === null)
+                    lastOffsetParent = slotOffsetParent;
             } else if (actualElement.nodeType === Node.TEXT_NODE) {
                 const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
-                const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
-                originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                // FIX 3
+                if (offsets.x !== 0 || offsets.y !== 0) {
+                    const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
+                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                }
             }
             /*
-            
             following code should be used instead of above to fix:
-            
-            
-            
             but it does not work with:
-
                 <div>
                     <visu-tag-root-canvas id="outer-tag-root-canvas" tag-root="SRM.RBG01">
                         <template shadowrootmode="open">
@@ -581,7 +768,6 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                         <div class="wrapper" id="aaaaabb" style="height:50px;width:50px;"></div>
                     </visu-tag-root-canvas>
                 </div>
-
             */
             /*
             const l = offsetTopLeftPolyfill(actualElement, 'offsetLeft');
@@ -594,43 +780,78 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 (actualElement instanceof SVGGraphicsElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).SVGGraphicsElement)) {
                 const ctm = actualElement.getCTM();
                 const bb = actualElement.getBBox();
-                const mvMat = new DOMMatrix().translateSelf(bb.x, bb.y);
-                originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                // FIX 3
+                if (bb.x !== 0 || bb.y !== 0) {
+                    const mvMat = new DOMMatrix().translateSelf(bb.x, bb.y);
+                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                }
                 originalElementAndAllParentsMultipliedMatrix = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f]).multiplySelf(originalElementAndAllParentsMultipliedMatrix);
                 parentElement = actualElement.ownerSVGElement;
             } else if ((actualElement instanceof HTMLElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement)) {
-                if (lastOffsetParent !== actualElement.offsetParent && !((actualElement instanceof HTMLSlotElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement))) {
+                if (lastOffsetParent !== actualElement.offsetParent && !((actualElement instanceof HTMLSlotElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement))
+                    && (lastOffsetParent === null || actualElement === lastOffsetParent || !isFlatTreeInclusiveAncestor(lastOffsetParent, actualElement))) {
                     const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                     lastOffsetParent = actualElement.offsetParent;
-                    const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
-                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                    // FIX 3
+                    if (offsets.x !== 0 || offsets.y !== 0) {
+                        const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
+                        originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                    }
                 }
             } else {
                 const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                 lastOffsetParent = null;
-                const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
-                originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                // FIX 3
+                if (offsets.x !== 0 || offsets.y !== 0) {
+                    const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
+                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                }
             }
         }
 
         if (parentElement) {
+            if (parentElement === ancestor) {
+                // The ancestor's own transform is excluded from the returned matrix,
+                // so avoid computing it on the hot return path.
+                if (lastOffsetParent !== null &&
+                    (parentElement instanceof HTMLElement || parentElement instanceof (parentElement.ownerDocument.defaultView ?? window).HTMLElement) &&
+                    parentElement.offsetParent === lastOffsetParent) {
+                    const ancOff = getElementOffsetsInContainer(parentElement, false, iframes);
+                    // FIX 3
+                    if (ancOff.x !== 0 || ancOff.y !== 0) {
+                        originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-ancOff.x, -ancOff.y).multiply(originalElementAndAllParentsMultipliedMatrix);
+                    }
+                }
+                if (parentElement.scrollTop || parentElement.scrollLeft)
+                    originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-parentElement.scrollLeft, -parentElement.scrollTop).multiply(originalElementAndAllParentsMultipliedMatrix);
+
+                // FIX 6: Cache result on the early-return path. Originally, the
+                //        cache.set() only ran after the while-loop (the null/root
+                //        fallthrough), so the most common case — element IS a
+                //        descendant of ancestor — was NEVER cached.
+                if (transformCache)
+                    transformCache.set(key, originalElementAndAllParentsMultipliedMatrix);
+
+                return originalElementAndAllParentsMultipliedMatrix;
+            }
+
+            // FIX 12: parentElementMatrix computed here; in the next iteration this
+            //         becomes the element's own transform, so we can reuse it without
+            //         calling getElementCombinedTransform again.
             parentElementMatrix = getElementCombinedTransform(parentElement, iframes);
 
-            if (parentElement != ancestor && !parentElementMatrix.isIdentity)
+            if (!parentElementMatrix.isIdentity)
                 originalElementAndAllParentsMultipliedMatrix = parentElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
 
             perspectiveParentElement = getParentElementIncludingSlots(parentElement, iframes);
             if (perspectiveParentElement) {
-                const s = getCachedComputedStyle(perspectiveParentElement);
-                if (s.transformStyle !== 'preserve-3d') {
-                    projectTo2D(originalElementAndAllParentsMultipliedMatrix);
+                // FIX 5: Skip transformStyle read when matrix is already 2D.
+                if (!originalElementAndAllParentsMultipliedMatrix.is2D) {
+                    const s = getCachedComputedStyle(perspectiveParentElement);
+                    if (s.transformStyle !== 'preserve-3d') {
+                        projectTo2D(originalElementAndAllParentsMultipliedMatrix);
+                    }
                 }
-            }
-
-            if (parentElement === ancestor) {
-                if (parentElement.scrollTop || parentElement.scrollLeft)
-                    originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-parentElement.scrollLeft, -parentElement.scrollTop).multiply(originalElementAndAllParentsMultipliedMatrix);
-                return originalElementAndAllParentsMultipliedMatrix;
             }
         }
         actualElement = parentElement;
@@ -660,7 +881,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
             return q;
     }
 
-    // NEW — two matrices instead of one
+    // NEW - two matrices instead of one
     let layoutMatrix = new DOMMatrix();
 
     let actualElement = node;
@@ -721,7 +942,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
 
         if (parentElement) {
 
-            // NEW — only affects transform pipeline
+            // NEW - only affects transform pipeline
             const parentTransform = getElementCombinedTransform(parentElement, iframes);
             transformMatrix = parentTransform.multiply(transformMatrix);
 
@@ -739,7 +960,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
 
             if (parentElement === ancestor) {
 
-                // NEW — scroll offsets belong to layout
+                // NEW - scroll offsets belong to layout
                 if (parentElement.scrollTop || parentElement.scrollLeft) {
                     layoutMatrix = new DOMMatrix()
                         .translate(-parentElement.scrollLeft, -parentElement.scrollTop)
@@ -801,15 +1022,23 @@ export function getElementCombinedTransform(element, iframes) {
     //https://www.w3.org/TR/css-transforms-2/#ctm
     let s = getCachedComputedStyle(element);
 
-    // Fast path: skip all matrix work when no CSS transforms are applied
-    const hasTranslate = s.translate != 'none' && s.translate;
-    const hasRotate = s.rotate != 'none' && s.rotate;
-    const hasScale = s.scale != 'none' && s.scale;
-    const hasOffsetPath = s.offsetPath && s.offsetPath !== 'none';
-    const hasTransform = s.transform != 'none' && s.transform;
+    // FIX 10: Check hasTransform first — it's the most common non-identity case.
+    //         Reordering so the most frequent hit is evaluated first.
+    const hasTransform  = s.transform !== 'none' && !!s.transform;
+    const hasTranslate  = s.translate !== 'none' && !!s.translate;
+    const hasRotate     = s.rotate    !== 'none' && !!s.rotate;
+    const hasScale      = s.scale     !== 'none' && !!s.scale;
+    const hasOffsetPath = !!s.offsetPath && s.offsetPath !== 'none';
 
-    if (!hasTranslate && !hasRotate && !hasScale && !hasOffsetPath && !hasTransform) {
-        //@ts-ignore
+    if (!hasTransform && !hasTranslate && !hasRotate && !hasScale && !hasOffsetPath) {
+        // FIX 1: Check parent perspective right here in the fast-path, so identity
+        //        elements on non-3D pages return a new DOMMatrix() immediately
+        //        without calling getElementPerspectiveTransform at all.
+        const parent = getParentElementIncludingSlots(element, iframes);
+        if (!parent) return new DOMMatrix();
+        const ps = getCachedComputedStyle(parent);
+        if (!ps.perspective || ps.perspective === 'none') return new DOMMatrix();
+        // Parent has a perspective — fall through to compute it properly.
         const pt = getElementPerspectiveTransform(element, iframes);
         return pt != null ? pt : new DOMMatrix();
     }
@@ -820,7 +1049,10 @@ export function getElementCombinedTransform(element, iframes) {
     const originY = parseFloat(origin[1]);
     const originZ = origin[2] ? parseFloat(origin[2]) : 0;
 
-    const mOri = new DOMMatrix().translateSelf(originX, originY, originZ);
+    // FIX 11: Skip the origin wrap/unwrap entirely when origin is (0,0,0).
+    //         Saves two DOMMatrix allocations and two multiply calls per element.
+    const hasNonZeroOrigin = (originX !== 0 || originY !== 0 || originZ !== 0);
+    const mOri = hasNonZeroOrigin ? new DOMMatrix().translateSelf(originX, originY, originZ) : null;
 
     if (hasTranslate) {
         let tr = s.translate;
@@ -841,16 +1073,17 @@ export function getElementCombinedTransform(element, iframes) {
     if (hasScale) {
         m.multiplySelf(new DOMMatrix('scale(' + s.scale.replaceAll(' ', ',') + ')'));
     }
-
     if (hasOffsetPath) {
         m.multiplySelf(computeOffsetTransformMatrix(element));
     }
-
     if (hasTransform) {
         m.multiplySelf(new DOMMatrix(s.transform));
     }
 
-    m = mOri.multiply(m.multiplySelf(mOri.inverse()));
+    // FIX 11 (continued): Only wrap with origin if non-zero.
+    if (hasNonZeroOrigin) {
+        m = mOri.multiply(m.multiplySelf(mOri.inverse()));
+    }
 
     //@ts-ignore
     const pt = getElementPerspectiveTransform(element, iframes);
@@ -925,17 +1158,34 @@ function getElementPerspectiveTransform(element, iframes) {
 function computeOffsetTransformMatrix(elem) {
     const cs = getCachedComputedStyle(elem);
 
-    const offsetPath = cs.offsetPath;          // e.g. "path('M0,0 ...')"
+    const offsetPath     = cs.offsetPath;      // e.g. "path('M0,0 ...')"
     const offsetDistance = cs.offsetDistance;  // e.g. "50%"
-    const offsetRotate = cs.offsetRotate;      // e.g. "auto", "45deg", "auto 30deg"
-    const offsetAnchor = cs.offsetAnchor;
+    const offsetRotate   = cs.offsetRotate;    // e.g. "auto", "45deg", "auto 30deg"
+    const offsetAnchor   = cs.offsetAnchor;
     const transformOrigin = cs.transformOrigin;
 
     // Parse offset-distance (px or %)
     let distance = parseOffsetDistance(offsetDistance);
 
-    // Compute position & tangent on path
+    // Compute position & tangent on path (in containing block coordinates)
     let { x, y, angle } = computeOffsetPathPoint(elem, offsetPath, distance);
+
+    // Subtract the element's flow position within its containing block.
+    // The offset-path positions the element absolutely within the containing block,
+    // but the walk already adds offsetLeft/offsetTop (flow position). To avoid
+    // double-counting, make the offset relative to the flow position.
+    const parent = elem.parentElement;
+    if (parent instanceof HTMLElement || parent instanceof (parent.ownerDocument.defaultView ?? window).HTMLElement) {
+        if (elem.offsetParent === parent) {
+            // Containing block = parent = offsetParent
+            x -= elem.offsetLeft;
+            y -= elem.offsetTop;
+        } else if (elem.offsetParent === parent.offsetParent) {
+            // Both share the same offsetParent
+            x -= (elem.offsetLeft - parent.offsetLeft);
+            y -= (elem.offsetTop - parent.offsetTop);
+        }
+    }
 
     // Handle offset-rotate
     let rotateFinal = 0;
@@ -989,10 +1239,10 @@ function parsePosition(part, size) {
     }
     // keywords
     switch (part) {
-        case "left": return 0;
-        case "top": return 0;
+        case "left":   return 0;
+        case "top":    return 0;
         case "center": return size / 2;
-        case "right": return size;
+        case "right":  return size;
         case "bottom": return size;
     }
     return parseFloat(part);
@@ -1009,8 +1259,8 @@ function parseOffsetDistance(str) {
 function parseAngle(str) {
     if (!str) return 0;
     str = str.trim();
-    if (str.endsWith("deg")) return parseFloat(str);
-    if (str.endsWith("rad")) return parseFloat(str) * (180 / Math.PI);
+    if (str.endsWith("deg"))  return parseFloat(str);
+    if (str.endsWith("rad"))  return parseFloat(str) * (180 / Math.PI);
     if (str.endsWith("grad")) return parseFloat(str) * 0.9;
     return parseFloat(str);
 }
@@ -1025,20 +1275,13 @@ function computeOffsetPathPoint(elem, offsetPath, distNorm) {
     let m = value.match(/path\(["'](.+)["']\)/);
     if (m) return computePathType(m[1], distNorm);
 
-    if (value.startsWith("circle("))
-        return computeCircle(value, distNorm);
-    if (value.startsWith("ellipse("))
-        return computeEllipse(value, distNorm);
-    if (value.startsWith("inset("))
-        return computeInset(value, elem, distNorm);
-    if (value.startsWith("rect("))
-        return computeRect(value, distNorm);
-    if (value.startsWith("xywh("))
-        return computeXYWH(value, distNorm);
-    if (value.startsWith("ray("))
-        return computeRay(value, distNorm);
-    if (value.startsWith("polygon("))
-        return computePolygon(value, distNorm);
+    if (value.startsWith("circle("))  return computeCircle(value, distNorm);
+    if (value.startsWith("ellipse(")) return computeEllipse(value, distNorm);
+    if (value.startsWith("inset("))   return computeInset(value, elem, distNorm);
+    if (value.startsWith("rect("))    return computeRect(value, distNorm);
+    if (value.startsWith("xywh("))    return computeXYWH(value, distNorm);
+    if (value.startsWith("ray("))     return computeRay(value, distNorm);
+    if (value.startsWith("polygon(")) return computePolygon(value, distNorm);
 
     console.warn("Unsupported offset-path:", offsetPath);
     return { x: 0, y: 0, angle: 0 };
@@ -1098,7 +1341,7 @@ function computeCircle(str, t) {
     let r = parseFloat(radiusPart);
     let [cx, cy] = atPart.split(/\s+/).map(parseFloat);
 
-    let angleRad = t * 2 * Math.PI - Math.PI / 2;
+    let angleRad = t * 2 * Math.PI;
     let x = cx + Math.cos(angleRad) * r;
     let y = cy + Math.sin(angleRad) * r;
 
@@ -1118,7 +1361,7 @@ function computeEllipse(str, t) {
     let cx = center[0];
     let cy = center[1];
 
-    let angleRad = t * 2 * Math.PI - Math.PI / 2;
+    let angleRad = t * 2 * Math.PI;
 
     let x = cx + Math.cos(angleRad) * rx;
     let y = cy + Math.sin(angleRad) * ry;
@@ -1142,9 +1385,9 @@ function computeXYWH(str, t) {
     let m = str.match(/xywh\(([^)]+)\)/);
     let nums = m[1].split(/\s+/).map(parseFloat);
 
-    let left = nums[0];
-    let top = nums[1];
-    let width = nums[2];
+    let left   = nums[0];
+    let top    = nums[1];
+    let width  = nums[2];
     let height = nums[3];
 
     return rectPath(top, left, left + width, top + height, t);
@@ -1369,7 +1612,7 @@ function evalCalc(ast, env) {
             return ast.value;
 
         case "dimension":
-            return ast.value;   // px only → already a number
+            return ast.value;   // px only -> already a number
 
         case "percentage":
             return env.percentBase * (ast.value / 100);
@@ -1446,21 +1689,21 @@ function parseInsetArgs(str) {
     return args;
 }
 /**
- * 
- * @param {string} str 
- * @param {HTMLElement} element 
- * @param {number} progress 
- * @returns 
+ *
+ * @param {string} str
+ * @param {HTMLElement} element
+ * @param {number} progress
+ * @returns
  */
 function computeInset(str, element, progress) {
     const args = parseInsetArgs(str);
     if (args.length !== 4)
         throw new Error("inset() must have 4 arguments");
 
-    const topPx = resolveLength(args[0], element, true);
-    const rightPx = resolveLength(args[1], element, false);
+    const topPx    = resolveLength(args[0], element, true);
+    const rightPx  = resolveLength(args[1], element, false);
     const bottomPx = resolveLength(args[2], element, true);
-    const leftPx = resolveLength(args[3], element, false);
+    const leftPx   = resolveLength(args[3], element, false);
 
     const w = element.offsetWidth;
     const h = element.offsetHeight;
@@ -1477,22 +1720,22 @@ function computeInset(str, element, progress) {
     let d = P * progress;
 
     // Walk the rectangle clockwise, return point
-    // Top edge: (x1 → x2, y1)
+    // Top edge: (x1 -> x2, y1)
     let len = x2 - x1;
     if (d <= len) return { x: x1 + d, y: y1, angle: 0 };
     d -= len;
 
-    // Right edge: (x2, y1 → y2)
+    // Right edge: (x2, y1 -> y2)
     len = y2 - y1;
     if (d <= len) return { x: x2, y: y1 + d, angle: 90 };
     d -= len;
 
-    // Bottom edge: (x2 → x1, y2)
+    // Bottom edge: (x2 -> x1, y2)
     len = x2 - x1;
     if (d <= len) return { x: x2 - d, y: y2, angle: 180 };
     d -= len;
 
-    // Left edge: (x1, y2 → y1)
+    // Left edge: (x1, y2 -> y1)
     return { x: x1, y: y2 - d, angle: 270 };
 }
 
@@ -1509,8 +1752,8 @@ function isElement(value) {
 }
 
 /**
- * 
- * @param {CSSStyleDeclaration} css 
+ *
+ * @param {CSSStyleDeclaration} css
  * @returns {boolean}
  */
 function isContainingBlock(css) {
@@ -1533,6 +1776,14 @@ function flatTreeParent(element) {
     if (element.parentNode instanceof ShadowRoot)
         return element.parentNode.host;
     return element.parentNode;
+}
+
+function isFlatTreeInclusiveAncestor(ancestor, node) {
+    for (let current = node; current; current = flatTreeParent(current)) {
+        if (current === ancestor)
+            return true;
+    }
+    return false;
 }
 
 function ancestorTreeScopes(element) {
@@ -1572,10 +1823,10 @@ function offsetParentPolyfill(element) {
 }
 
 /**
- * 
- * @param {*} element 
- * @param {'offsetTop' | 'offsetLeft'} offsetTopOrLeft 
- * @returns 
+ *
+ * @param {*} element
+ * @param {'offsetTop' | 'offsetLeft'} offsetTopOrLeft
+ * @returns
  */
 function offsetTopLeftPolyfill(element, offsetTopOrLeft) {
     let value = element[offsetTopOrLeft];

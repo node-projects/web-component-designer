@@ -25,9 +25,9 @@ export interface IPropertiesService extends IService {
 
   getPropertyNameSuggestions?(designItems: IDesignItem[]): string[];
 
-  setValue(designItems: IDesignItem[], property: IProperty, value: any) : Promise<void>;
-  previewValue?(designItems: IDesignItem[], property: IProperty, value: any) : Promise<void>;
-  removePreviewValue?(designItems: IDesignItem[], property: IProperty) : Promise<void>;
+  setValue(designItems: IDesignItem[], property: IProperty, value: any): Promise<void>;
+  previewValue?(designItems: IDesignItem[], property: IProperty, value: any): Promise<void>;
+  removePreviewValue?(designItems: IDesignItem[], property: IProperty): Promise<void>;
   clearValue(designItems: IDesignItem[], property: IProperty, clearType: 'all' | 'binding' | 'value');
   isSet(designItems: IDesignItem[], property: IProperty): ValueType;
   getValue(designItems: IDesignItem[], property: IProperty): any;
