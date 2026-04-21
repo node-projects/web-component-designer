@@ -3,13 +3,13 @@ import { ZplImage } from "../widgets/zpl-image.js";
 
 export class ZplImageDrop implements IExternalDragDropService {
 
-    public dragOver(event: DragEvent): 'none' | 'copy' | 'link' | 'move' {
+    public dragOver(designerCanvas: IDesignerCanvas, event: DragEvent): 'none' | 'copy' | 'link' | 'move' {
         if (event.dataTransfer.items[0].type.startsWith('image/'))
             return 'copy';
         return 'none';
     }
 
-    drop(designerView: IDesignerCanvas, event: DragEvent) {
+    drop(designerCanvas: IDesignerCanvas, event: DragEvent) {
         if (event.dataTransfer.files[0].type.startsWith('image/')) {
             let name = event.dataTransfer.files[0].name;
             let reader = new FileReader();
@@ -20,8 +20,8 @@ export class ZplImageDrop implements IExternalDragDropService {
                     let zplImage = new ZplImage();
                     let zpl = this._convertImage(img, name);
                     const targetRect = (<HTMLElement>event.target).getBoundingClientRect();
-                    let x = event.offsetX + targetRect.left - designerView.containerBoundingRect.x + 'px'
-                    let y = event.offsetY + targetRect.top - designerView.containerBoundingRect.y + 'px';
+                    let x = event.offsetX + targetRect.left - designerCanvas.containerBoundingRect.x + 'px'
+                    let y = event.offsetY + targetRect.top - designerCanvas.containerBoundingRect.y + 'px';
                     zplImage.style.position = "absolute";
                     zplImage.style.left = x;
                     zplImage.style.top = y;
@@ -31,11 +31,11 @@ export class ZplImageDrop implements IExternalDragDropService {
                     zplImage.setAttribute("hex-image", zpl.hexData);
                     zplImage.setAttribute("scale-x", "1");
                     zplImage.setAttribute("scale-y", "1");
-                    const di = DesignItem.createDesignItemFromInstance(zplImage, designerView.serviceContainer, designerView.instanceServiceContainer);
+                    const di = DesignItem.createDesignItemFromInstance(zplImage, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
                     let grp = di.openGroup("Insert of &lt;img&gt;");
-                    designerView.instanceServiceContainer.undoService.execute(new InsertAction(designerView.rootDesignItem, designerView.rootDesignItem.childCount, di));
+                    designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
                     grp.commit();
-                    requestAnimationFrame(() => designerView.instanceServiceContainer.selectionService.setSelectedElements([di]));
+                    requestAnimationFrame(() => designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di]));
 
                 }
             }
