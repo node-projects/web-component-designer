@@ -303,13 +303,12 @@ export class ContextMenu implements IContextMenu {
 
     window.addEventListener("keyup", this._windowKeyUp);
     window.addEventListener("resize", this._windowResize);
+    window.addEventListener("mousedown", this._windowDown);
     setTimeout(() => {
       if (!ContextMenu._openedContextMenus.has(this))
         return;
-
-      window.addEventListener("mousedown", this._windowDown);
       window.addEventListener("contextmenu", this._windowDown);
-    }, 0);
+    }, 150);
   }
 
   _windowResize() {
@@ -339,9 +338,9 @@ export class ContextMenu implements IContextMenu {
     this.hideDescendantSubmenus(this._menuElement);
     this.hidePopover(this._menuElement);
     this._menuElement.remove();
-    window.removeEventListener("keyup", this._windowKeyUp);
     window.removeEventListener("mousedown", this._windowDown);
     window.removeEventListener("resize", this._windowResize);
+    window.removeEventListener("keyup", this._windowKeyUp);
     setTimeout(() => window.removeEventListener("contextmenu", this._windowDown), 10);
     ContextMenu._openedContextMenus.delete(this);
   }

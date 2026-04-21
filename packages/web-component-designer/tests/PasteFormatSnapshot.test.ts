@@ -48,6 +48,41 @@ test('collects border, background, and text properties and skips unrelated style
   ]);
 });
 
+test('collects transform properties and includes them in the all group', () => {
+  const values: Record<string, string> = {
+    'transform': 'translateX(12px) rotate(12deg)',
+    'translate': '12px 0',
+    'rotate': '12deg',
+    'scale': '1.2',
+    'transform-origin': 'center center',
+    'display': 'grid'
+  };
+
+  const fakeStyle = {
+    length: 6,
+    0: 'transform',
+    1: 'translate',
+    2: 'rotate',
+    3: 'scale',
+    4: 'transform-origin',
+    5: 'display',
+    getPropertyValue(name: string) {
+      return values[name] ?? '';
+    }
+  } as Pick<CSSStyleDeclaration, 'getPropertyValue' | 'length'> & ArrayLike<string>;
+
+  const snapshot = createPasteFormatSnapshot(fakeStyle);
+
+  expect(snapshot.transform).toEqual([
+    { name: 'transform', value: 'translateX(12px) rotate(12deg)' },
+    { name: 'translate', value: '12px 0' },
+    { name: 'rotate', value: '12deg' },
+    { name: 'scale', value: '1.2' },
+    { name: 'transform-origin', value: 'center center' }
+  ]);
+  expect(getPasteFormatEntries(snapshot, 'all')).toEqual(snapshot.transform);
+});
+
 test('keeps duplicate properties out of the all group', () => {
   const values: Record<string, string> = {
     'background-image': 'none',
@@ -79,12 +114,18 @@ test('creates a snapshot from design item style entries', () => {
   const snapshot = createPasteFormatSnapshotFromEntries([
     ['border-top-color', ' red '],
     ['background-color', ' rgb(1, 2, 3) '],
+    ['transform', ' translateX(12px) '],
+    ['rotate', ' 12deg '],
     ['font-family', ' Fira Code '],
     ['color', ' white ']
   ]);
 
   expect(snapshot?.border).toEqual([{ name: 'border-top-color', value: 'red' }]);
   expect(snapshot?.background).toEqual([{ name: 'background-color', value: 'rgb(1, 2, 3)' }]);
+  expect(snapshot?.transform).toEqual([
+    { name: 'transform', value: 'translateX(12px)' },
+    { name: 'rotate', value: '12deg' }
+  ]);
   expect(snapshot?.text).toEqual([
     { name: 'font-family', value: 'Fira Code' },
     { name: 'color', value: 'white' }

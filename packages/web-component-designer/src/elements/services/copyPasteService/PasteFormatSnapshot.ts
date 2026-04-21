@@ -1,6 +1,6 @@
 import { PropertiesHelper } from "../propertiesService/services/PropertiesHelper.js";
 
-export const pasteFormatKinds = ['all', 'border', 'background', 'text'] as const;
+export const pasteFormatKinds = ['all', 'border', 'background', 'transform', 'text'] as const;
 
 export type PasteFormatKind = typeof pasteFormatKinds[number];
 
@@ -13,6 +13,7 @@ export interface IPasteFormatSnapshot {
   readonly all: readonly IPasteFormatEntry[];
   readonly border: readonly IPasteFormatEntry[];
   readonly background: readonly IPasteFormatEntry[];
+  readonly transform: readonly IPasteFormatEntry[];
   readonly text: readonly IPasteFormatEntry[];
 }
 
@@ -35,12 +36,24 @@ const explicitTextProperties = new Set([
   'unicode-bidi'
 ]);
 
+const explicitTransformProperties = new Set([
+  'translate',
+  'rotate',
+  'scale'
+]);
+
 function isBorderProperty(name: string): boolean {
   return name.startsWith('border');
 }
 
 function isBackgroundProperty(name: string): boolean {
   return name.startsWith('background');
+}
+
+function isTransformProperty(name: string): boolean {
+  return name === 'transform'
+    || name.startsWith('transform-')
+    || explicitTransformProperties.has(name);
 }
 
 function isTextProperty(name: string): boolean {
@@ -74,12 +87,13 @@ function collectEntries(style: StyleArrayLike, predicate: (name: string) => bool
 function createPasteFormatSnapshotFromNormalizedEntries(entries: IPasteFormatEntry[]): IPasteFormatSnapshot {
   const border = entries.filter(x => isBorderProperty(x.name));
   const background = entries.filter(x => isBackgroundProperty(x.name));
+  const transform = entries.filter(x => isTransformProperty(x.name));
   const text = entries.filter(x => isTextProperty(x.name));
 
   const all: IPasteFormatEntry[] = [];
   const seen = new Set<string>();
 
-  for (const group of [border, background, text]) {
+  for (const group of [border, background, transform, text]) {
     for (const entry of group) {
       if (seen.has(entry.name)) {
         continue;
@@ -90,7 +104,7 @@ function createPasteFormatSnapshotFromNormalizedEntries(entries: IPasteFormatEnt
     }
   }
 
-  return { all, border, background, text };
+  return { all, border, background, transform, text };
 }
 
 export function createPasteFormatSnapshot(style: StyleArrayLike): IPasteFormatSnapshot {

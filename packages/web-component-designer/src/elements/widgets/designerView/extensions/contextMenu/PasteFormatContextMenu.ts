@@ -19,6 +19,7 @@ export class PasteFormatContextMenu implements IContextMenuExtension {
         { title: '-' },
         this._createPasteFormatItem(designerCanvas, 'border'),
         this._createPasteFormatItem(designerCanvas, 'background'),
+        this._createPasteFormatItem(designerCanvas, 'transform'),
         this._createPasteFormatItem(designerCanvas, 'text')
       ]
     }];
