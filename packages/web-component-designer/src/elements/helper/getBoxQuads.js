@@ -776,7 +776,14 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
 
     // FIX 12: Compute self-transform once; we'll carry parent transforms forward
     //         each iteration instead of recomputing them.
-    let currentElementTransform = getElementTransformWithZoom(actualElement, iframes, !excludeSelfZoom);
+    const useOwnSvgCtm =
+        (actualElement instanceof SVGGraphicsElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).SVGGraphicsElement) &&
+        !((actualElement instanceof SVGSVGElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).SVGSVGElement));
+    // SVGGraphicsElement.getCTM() already includes the element's local SVG/CSS transform.
+    // Starting with getElementTransformWithZoom here would double-apply self rotate/scale.
+    let currentElementTransform = useOwnSvgCtm
+        ? new DOMMatrix()
+        : getElementTransformWithZoom(actualElement, iframes, !excludeSelfZoom);
 
     /** @type {DOMMatrix } */
     // FIX 2: Only use a non-identity starting matrix when the element itself has
