@@ -385,7 +385,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         for (let e of changes) {
           if (e.changeType === 'changed') {
             for (const d of e.designItems) {
-              this.refreshNode(d[wbNodeSymbol], d);
+              if (d[wbNodeSymbol])
+                this.refreshNode(d[wbNodeSymbol], d);
             }
           } else {
             this.createTree(value.rootDesignItem);
