@@ -119,8 +119,8 @@ export function patchAdoptNode(windowObj = window) {
 */
 export function convertQuadFromNode(node, quad, from, options) {
     const ancestor = (node.ownerDocument.defaultView ?? window).document.body;
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, ancestor, options?.iframes);
-    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, options?.iframes).inverse();
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, ancestor, options?.iframes, true);
+    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, options?.iframes, true).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         const fromStyle = getCachedComputedStyle(from);
         quad = new DOMQuad(transformPointBox(quad.p1, options.fromBox, fromStyle, -1), transformPointBox(quad.p2, options.fromBox, fromStyle, -1), transformPointBox(quad.p3, options.fromBox, fromStyle, -1), transformPointBox(quad.p4, options.fromBox, fromStyle, -1))
@@ -142,8 +142,8 @@ export function convertQuadFromNode(node, quad, from, options) {
 */
 export function convertRectFromNode(node, rect, from, options) {
     const ancestor = (node.ownerDocument.defaultView ?? window).document.body.parentElement;
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, ancestor, options?.iframes);
-    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, options?.iframes).inverse();
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, ancestor, options?.iframes, true);
+    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, options?.iframes, true).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         const p = transformPointBox(new DOMPoint(rect.x, rect.y), options.fromBox, getCachedComputedStyle(from), 1);
         rect = new DOMRect(p.x, p.y, rect.width, rect.height);
@@ -165,8 +165,8 @@ export function convertRectFromNode(node, rect, from, options) {
 */
 export function convertPointFromNode(node, point, from, options) {
     const ancestor = (node.ownerDocument.defaultView ?? window).document.body.parentElement;
-    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, ancestor, options?.iframes);
-    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, options?.iframes).inverse();
+    const m1 = getResultingTransformationBetweenElementAndAllAncestors(from, ancestor, options?.iframes, true);
+    const m2 = getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, options?.iframes, true).inverse();
     if (options?.fromBox && options?.fromBox !== 'border') {
         point = transformPointBox(point, options.fromBox, getCachedComputedStyle(from), 1);
     }
@@ -244,6 +244,74 @@ function getCachedComputedStyle(element) {
         computedStyleCache.set(element, style);
     }
     return style;
+}
+
+/**
+* @param {Node} node
+* @returns {boolean}
+*/
+function isElementNode(node) {
+    return !!node && node.nodeType === Node.ELEMENT_NODE;
+}
+
+/**
+* @param {Node} element
+* @returns {number}
+*/
+function getElementZoom(element) {
+    if (!isElementNode(element)) {
+        return 1;
+    }
+    /** @type {Element} */
+    // @ts-ignore
+    const actualElement = element;
+    const zoom = getCachedComputedStyle(actualElement).zoom;
+    if (!zoom || zoom === 'normal') {
+        return 1;
+    }
+    if (zoom.endsWith('%')) {
+        const percentage = parseFloat(zoom);
+        return Number.isFinite(percentage) && percentage > 0 ? percentage / 100 : 1;
+    }
+    const value = parseFloat(zoom);
+    return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+/**
+* `zoom` scales the element's internal coordinate space while also shifting the
+* element within its parent from the top-center anchor in the default writing-mode.
+* For descendant coordinates we keep the scale in the matrix pipeline and apply
+* the parent-position shift separately in the layout translation step.
+* @param {Node} element
+* @returns {DOMMatrix}
+*/
+function getElementZoomScaleTransform(element) {
+    if (!isElementNode(element)) {
+        return new DOMMatrix();
+    }
+    const zoom = getElementZoom(element);
+    if (zoom === 1) {
+        return new DOMMatrix();
+    }
+    return new DOMMatrix().scaleSelf(zoom);
+}
+
+/**
+* @param {Node} element
+* @param {HTMLIFrameElement[]=} iframes
+* @param {boolean=} includeZoom
+* @returns {DOMMatrix}
+*/
+function getElementTransformWithZoom(element, iframes, includeZoom = true) {
+    const transform = getElementCombinedTransform(element, iframes);
+    if (!includeZoom || !isElementNode(element)) {
+        return transform;
+    }
+    const zoomTransform = getElementZoomScaleTransform(element);
+    if (zoomTransform.isIdentity) {
+        return transform;
+    }
+    return transform.multiply(zoomTransform);
 }
 
 /**
@@ -585,7 +653,7 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
                 return new DOMPoint(node.offsetLeft, node.offsetTop);
             }
 
-            const m = getResultingTransformationBetweenElementAndAllAncestors(par, node.ownerDocument.body, iframes).inverse();
+            const m = getResultingTransformationBetweenElementAndAllAncestors(par, node.ownerDocument.body, iframes, true).inverse();
             const r1 = node.getBoundingClientRect();
             const r1t = m.transformPoint(r1);
             const r2 = par.getBoundingClientRect();
@@ -667,7 +735,7 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
         }
 
         const par = getParentElementIncludingSlots(node, iframes);
-        const m = getResultingTransformationBetweenElementAndAllAncestors(par, document.body, iframes).inverse();
+        const m = getResultingTransformationBetweenElementAndAllAncestors(par, document.body, iframes, true).inverse();
         const r1 = node.getBoundingClientRect();
         const r1t = m.transformPoint(r1);
         const r2 = par.getBoundingClientRect();
@@ -681,8 +749,9 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
 * @param {Node} node
 * @param {Element} ancestor
 * @param {HTMLIFrameElement[]} iframes
+* @param {boolean=} excludeSelfZoom
 */
-export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, iframes) {
+export function getResultingTransformationBetweenElementAndAllAncestors(node, ancestor, iframes, excludeSelfZoom = false) {
     let key;
     if (transformCache) {
         let i1 = hash.get(node);
@@ -691,7 +760,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
         let i2 = hash.get(ancestor);
         if (i2 === undefined)
             hash.set(ancestor, i2 = hashId++);
-        key = i1 + '_' + i2;
+        key = i1 + '_' + i2 + '_' + (excludeSelfZoom ? 'no-self-zoom' : 'full');
         const q = transformCache.get(key);
         if (q)
             return q;
@@ -705,7 +774,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
 
     // FIX 12: Compute self-transform once; we'll carry parent transforms forward
     //         each iteration instead of recomputing them.
-    let currentElementTransform = getElementCombinedTransform(actualElement, iframes);
+    let currentElementTransform = getElementTransformWithZoom(actualElement, iframes, !excludeSelfZoom);
 
     /** @type {DOMMatrix } */
     // FIX 2: Only use a non-identity starting matrix when the element itself has
@@ -791,10 +860,11 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 if (lastOffsetParent !== actualElement.offsetParent && !((actualElement instanceof HTMLSlotElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement))
                     && (lastOffsetParent === null || actualElement === lastOffsetParent || !isFlatTreeInclusiveAncestor(lastOffsetParent, actualElement))) {
                     const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
+                    const zoom = getElementZoom(actualElement);
                     lastOffsetParent = actualElement.offsetParent;
                     // FIX 3
                     if (offsets.x !== 0 || offsets.y !== 0) {
-                        const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
+                        const mvMat = new DOMMatrix().translateSelf(offsets.x * zoom, offsets.y * zoom);
                         originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
                     }
                 }
@@ -825,6 +895,10 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 if (parentElement.scrollTop || parentElement.scrollLeft)
                     originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-parentElement.scrollLeft, -parentElement.scrollTop).multiply(originalElementAndAllParentsMultipliedMatrix);
 
+                const ancestorZoom = getElementZoomScaleTransform(parentElement);
+                if (!ancestorZoom.isIdentity)
+                    originalElementAndAllParentsMultipliedMatrix = ancestorZoom.multiply(originalElementAndAllParentsMultipliedMatrix);
+
                 // FIX 6: Cache result on the early-return path. Originally, the
                 //        cache.set() only ran after the while-loop (the null/root
                 //        fallthrough), so the most common case — element IS a
@@ -838,7 +912,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
             // FIX 12: parentElementMatrix computed here; in the next iteration this
             //         becomes the element's own transform, so we can reuse it without
             //         calling getElementCombinedTransform again.
-            parentElementMatrix = getElementCombinedTransform(parentElement, iframes);
+            parentElementMatrix = getElementTransformWithZoom(parentElement, iframes);
 
             if (!parentElementMatrix.isIdentity)
                 originalElementAndAllParentsMultipliedMatrix = parentElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
@@ -1012,15 +1086,19 @@ function getParentElementIncludingSlots(node, iframes) {
 }
 
 /**
-* @param {Element} element
+ * @param {Node} element
 * @param {HTMLIFrameElement[]=} iframes
 */
 export function getElementCombinedTransform(element, iframes) {
     if ((element instanceof Text || element instanceof (element.ownerDocument.defaultView ?? window).Text))
         return new DOMMatrix;
 
+    /** @type {Element} */
+    // @ts-ignore
+    const actualElement = element;
+
     //https://www.w3.org/TR/css-transforms-2/#ctm
-    let s = getCachedComputedStyle(element);
+    let s = getCachedComputedStyle(actualElement);
 
     // FIX 10: Check hasTransform first — it's the most common non-identity case.
     //         Reordering so the most frequent hit is evaluated first.
@@ -1034,12 +1112,13 @@ export function getElementCombinedTransform(element, iframes) {
         // FIX 1: Check parent perspective right here in the fast-path, so identity
         //        elements on non-3D pages return a new DOMMatrix() immediately
         //        without calling getElementPerspectiveTransform at all.
-        const parent = getParentElementIncludingSlots(element, iframes);
+        const parent = getParentElementIncludingSlots(actualElement, iframes);
         if (!parent) return new DOMMatrix();
         const ps = getCachedComputedStyle(parent);
         if (!ps.perspective || ps.perspective === 'none') return new DOMMatrix();
         // Parent has a perspective — fall through to compute it properly.
-        const pt = getElementPerspectiveTransform(element, iframes);
+        //@ts-ignore
+        const pt = getElementPerspectiveTransform(actualElement, iframes);
         return pt != null ? pt : new DOMMatrix();
     }
 
@@ -1058,7 +1137,7 @@ export function getElementCombinedTransform(element, iframes) {
         let tr = s.translate;
         if (tr.includes('%')) {
             const v = tr.split(' ');
-            const r = element.getBoundingClientRect();
+            const r = actualElement.getBoundingClientRect();
             if (v[0].endsWith('%'))
                 v[0] = (parseFloat(v[0]) * r.width / 100) + 'px';
             if (v[1]?.endsWith('%'))
