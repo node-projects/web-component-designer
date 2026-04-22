@@ -34,4 +34,8 @@ export enum ExtensionType {
    * Extension when the Primary Selection is refreshed, means clicked a second time
    */
   PrimarySelectionRefreshed = 15,
+  /**
+   * Extension manually applied by the user. But registered, caus we need the styles.
+   */
+  ManualApplied = 16,
 }

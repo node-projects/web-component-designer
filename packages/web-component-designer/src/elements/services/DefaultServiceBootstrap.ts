@@ -110,8 +110,9 @@ import { DeletionService } from './deletionService/DeletionService.js';
 import { MiniatureViewService } from './miniatureViewService/MiniatureViewService.js';
 import { DisplayMediaPngWriterService } from './pngCreatorService/DisplayMediaPngWriterService.js';
 import { SearchService } from './searchService/SearchService.js';
-//import { SkewExtensionProvider } from '../widgets/designerView/extensions/SkewExtensionProvider.js';
-//import { ProjectiveTransformExtensionProvider } from '../widgets/designerView/extensions/ProjectiveTransformExtensionProvider.js';
+import { BasicContextMenu } from '../widgets/designerView/extensions/contextMenu/BasicContextMenu.js';
+import { ProjectiveTransformExtension } from '../widgets/designerView/extensions/transforms/ProjectiveTransformExtension.js';
+import { ProjectiveTransformExtensionProvider } from '../widgets/designerView/extensions/transforms/ProjectiveTransformExtensionProvider.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -170,8 +171,6 @@ export function createDefaultServiceContainer() {
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),
-    //new SkewExtensionProvider(),
-    //new ProjectiveTransformExtensionProvider(),
   ]);
   serviceContainer.designerExtensions.set(ExtensionType.MultipleItemsSelected, [
     new RotateGroupExtensionProvider(),
@@ -218,6 +217,10 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
     new EditTextExtensionProvider()
   ]);
+  serviceContainer.designerExtensions.set(ExtensionType.ManualApplied, [
+    new ProjectiveTransformExtensionProvider()
+  ]);
+
   serviceContainer.designerPointerExtensions.push(
     //new CursorLinePointerExtensionProvider()
   );
@@ -275,7 +278,17 @@ export function createDefaultServiceContainer() {
   serviceContainer.designerContextMenuExtensions = [
     new ChildContextMenu('edit', new CopyPasteContextMenu(), new SeperatorContextMenu(), new PasteFormatContextMenu()),
     new SeperatorContextMenu(),
-    new ChildContextMenu('modify', new RotateLeftAndRight(), new SeperatorContextMenu(), new ZMoveContextMenu(), new SeperatorContextMenu(), new AlignItemsContextMenu()),
+    new ChildContextMenu('modify',
+      new RotateLeftAndRight(),
+      new SeperatorContextMenu(),
+      new ZMoveContextMenu(),
+      new SeperatorContextMenu(),
+      new AlignItemsContextMenu(),
+      new SeperatorContextMenu(),
+      new BasicContextMenu({ title: '3D transform', action: (e, designerCanvas, designItem) => { 
+        designerCanvas.extensionManager.removeExtensions([designItem], false, ExtensionType.PrimarySelection); 
+        designerCanvas.extensionManager.removeExtensions([designItem], false, ExtensionType.OnlyOneItemSelected); 
+        designerCanvas.extensionManager.applyExtensionInstance(designItem, new ProjectiveTransformExtension(designerCanvas.extensionManager, designerCanvas, designItem), ExtensionType.OnlyOneItemSelected); } })),
     new SeperatorContextMenu(),
     new ChildContextMenu('view', new JumpToElementContextMenu(), new ZoomToElementContextMenu()),
     new SeperatorContextMenu(),

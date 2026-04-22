@@ -236,7 +236,7 @@ export class ExtensionManager implements IExtensionManager {
     this.designerCanvas.overlayLayer.endBatch();
   }
 
-  applyExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension) {
+  applyExtensionInstance(designItem: IDesignItem, extension: IDesignerExtension, extensionType: ExtensionType = ExtensionType.Directly) {
     let appE = wmGet(designItem, this._appliedDesignerExtensions).get(ExtensionType.Directly);
     if (!appE)
       appE = [];
@@ -247,7 +247,7 @@ export class ExtensionManager implements IExtensionManager {
       console.error(err);
     }
     appE.push(extension);
-    wmGet(designItem, this._appliedDesignerExtensions).set(ExtensionType.Directly, appE);
+    wmGet(designItem, this._appliedDesignerExtensions).set(extensionType, appE);
     this.designItemsWithExtentions.add(designItem);
   }
 

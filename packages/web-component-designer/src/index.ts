@@ -391,6 +391,7 @@ export * from "./elements/widgets/designerView/extensions/EditText/EditTextExten
 export * from "./elements/widgets/designerView/extensions/EditText/EditTextExtensionProvider.js";
 
 export type { IContextMenuExtension, ContextmenuInitiator } from "./elements/widgets/designerView/extensions/contextMenu/IContextMenuExtension.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/BasicContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ChildContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ItemsBelowContextMenu.js";
