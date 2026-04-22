@@ -13,8 +13,8 @@ function createSyntheticTransactionItem(title?: string): ITransactionItem {
   return {
     title: title ?? 'remote change',
     affectedItems: [],
-    do: () => { },
-    undo: () => { },
+    do: () => { return null; },
+    undo: () => { return null; },
     mergeWith: () => false
   };
 }
@@ -191,7 +191,7 @@ export class DefaultCollaborationService implements ICollaborationService {
   }
 
   updateRemoteSelection(peerId: string, selectedNodeIndexes: number[], primaryNodeIndex?: number): void {
-    const rootDesignItem = this._designerCanvas.instanceServiceContainer.contentService.rootDesignItem;
+    const rootDesignItem = this._designerCanvas.instanceServiceContainer.rootDesignItem;
     const selectedDesignItemIds = selectedNodeIndexes
       .map(x => getDesignItemByCollaborationNodeIndex(rootDesignItem, x)?.id)
       .filter(x => !!x);
@@ -228,7 +228,7 @@ export class DefaultCollaborationService implements ICollaborationService {
   removePeer(peerId: string, source: UndoChangeSource = 'local'): void {
     this._peers.delete(peerId);
     this.onPeersChanged.emit({ source, peerId, peers: this.peers });
-if (source === 'remote')
+    if (source === 'remote')
       this.requestExtensionRefresh();
   }
 

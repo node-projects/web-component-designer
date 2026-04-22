@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon for collaboration features",
   "name": "@node-projects/web-component-designer-collaboration-service",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@node-projects/base-custom-webcomponent": ">=0.27.8",
-    "@node-projects/web-component-designer": ">=0.1.224"
+    "@node-projects/web-component-designer": ">=0.2.0"
   },
   "devDependencies": {
     "esbuild": "^0.25.10"
