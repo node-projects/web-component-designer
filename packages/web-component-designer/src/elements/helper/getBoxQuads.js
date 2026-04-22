@@ -311,7 +311,9 @@ function getElementTransformWithZoom(element, iframes, includeZoom = true) {
     if (zoomTransform.isIdentity) {
         return transform;
     }
-    return transform.multiply(zoomTransform);
+    // `zoom` scales transform translations as well as the element's local axes,
+    // so it needs to wrap the transform matrix instead of being appended to it.
+    return zoomTransform.multiply(transform);
 }
 
 /**

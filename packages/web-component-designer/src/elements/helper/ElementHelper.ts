@@ -146,6 +146,18 @@ export function getBoundingClientRectAlsoForDisplayContents(element: Element): D
   return r;
 }
 
+export function getElementZoomFactor(element: Element): number {
+  const zoom = (element.ownerDocument.defaultView ?? window).getComputedStyle(element).zoom;
+  if (!zoom || zoom === 'normal')
+    return 1;
+  if (zoom.endsWith('%')) {
+    const percentage = parseFloat(zoom);
+    return Number.isFinite(percentage) && percentage > 0 ? percentage / 100 : 1;
+  }
+  const value = parseFloat(zoom);
+  return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
 const windowOffsetsCacheKey = Symbol('windowOffsetsCacheKey');
 export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element, zoom: number, cache: Record<string | symbol, any> = {}) {
   let offsetLeft = 0;

@@ -10,7 +10,7 @@ import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 import { NodeType } from '../../item/NodeType.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
-import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/ElementHelper.js';
+import { getBoundingClientRectAlsoForDisplayContents, getElementZoomFactor } from '../../helper/ElementHelper.js';
 
 export function filterNonElementItems(items: IDesignItem[]) {
   const filterdPlaceItems: IDesignItem[] = [];
@@ -143,6 +143,12 @@ export class DefaultPlacementService implements IPlacementService {
         m = m.multiply(new DOMMatrix('scale(' + cs.scale.replace(' ', ',') + ')'));
       }
       transformedPoint = m.inverse().transformPoint(transformedPoint);
+
+      const zoom = getElementZoomFactor(designItem.element);
+      if (zoom !== 1) {
+        // CSS zoom scales translate(), so drag previews must be converted back to local units.
+        transformedPoint = new DOMPoint(transformedPoint.x / zoom, transformedPoint.y / zoom);
+      }
 
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
       combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());

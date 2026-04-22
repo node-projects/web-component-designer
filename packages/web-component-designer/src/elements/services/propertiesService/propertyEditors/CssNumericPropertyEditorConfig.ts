@@ -1,7 +1,7 @@
 import type { IDesignItem } from '../../../item/IDesignItem.js';
 import type { IProperty } from '../IProperty.js';
 
-export type CssNumericPropertyType = 'length' | 'angle' | 'time' | 'frequency' | 'flex' | 'resolution';
+export type CssNumericPropertyType = 'length' | 'angle' | 'time' | 'frequency' | 'flex' | 'resolution' | 'scale';
 
 export type CssNumericUnitConversionResult = string | number | null | undefined;
 
@@ -32,7 +32,8 @@ export const defaultCssNumericUnits: Record<CssNumericPropertyType, string[]> = 
   time: ['ms', 's'],
   frequency: ['hz', 'khz'],
   flex: ['fr'],
-  resolution: ['dpi', 'dpcm', 'dppx', 'x']
+  resolution: ['dpi', 'dpcm', 'dppx', 'x'],
+  scale: ['', '%']
 };
 
 export const defaultCssNumericUnitSteps: Record<CssNumericPropertyType, Record<string, number>> = {
@@ -41,7 +42,8 @@ export const defaultCssNumericUnitSteps: Record<CssNumericPropertyType, Record<s
   time: { ms: 10, s: 0.1 },
   frequency: { khz: 0.1 },
   flex: { fr: 0.1 },
-  resolution: { dppx: 0.1, x: 0.1 }
+  resolution: { dppx: 0.1, x: 0.1 },
+  scale: { '': 0.1, '%': 10 }
 };
 
 const inferredCssNumericPropertyNames: Record<CssNumericPropertyType, Set<string>> = {
@@ -89,6 +91,10 @@ const inferredCssNumericPropertyNames: Record<CssNumericPropertyType, Set<string
   flex: new Set(),
   resolution: new Set([
     'imageResolution'
+  ]),
+  scale: new Set([
+    'zoom',
+    'scale'
   ])
 };
 

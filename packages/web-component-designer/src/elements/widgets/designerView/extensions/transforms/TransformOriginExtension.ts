@@ -2,7 +2,7 @@ import { EventNames } from '../../../../../enums/EventNames.js';
 import { IPoint } from '../../../../../interfaces/IPoint.js';
 import { convertCssUnit, getCssUnit } from '../../../../helper/CssUnitConverter.js';
 import { getBoundingClientRectAlsoForDisplayContents } from '../../../../helper/ElementHelper.js';
-import { clearCache } from '../../../../helper/getBoxQuads.js';
+import { clearCache, getResultingTransformationBetweenElementAndAllAncestors } from '../../../../helper/getBoxQuads.js';
 import { roundValue } from '../../../../helper/LayoutHelper.js';
 import { IDesignItem } from '../../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
@@ -20,10 +20,15 @@ export class TransformOriginExtension extends AbstractExtension {
     super(extensionManager, designerView, extendedItem);
   }
 
-  override refresh(cache: Record<string | symbol, any>, event?: Event) {
+  private _getTransformOriginCanvasPoint() {
     const computed = getComputedStyle(this.extendedItem.element);
     const to = computed.transformOrigin.split(' ');
-    const toDOMPoint = this.designerCanvas.canvas.convertPointFromNode({ x: parseFloat(to[0]), y: parseFloat(to[1]) }, this.extendedItem.element);
+    const transform = getResultingTransformationBetweenElementAndAllAncestors(this.extendedItem.element, this.designerCanvas.canvas, this.designerCanvas.iframes);
+    return transform.transformPoint(new DOMPoint(parseFloat(to[0]), parseFloat(to[1])));
+  }
+
+  override refresh(cache: Record<string | symbol, any>, event?: Event) {
+    const toDOMPoint = this._getTransformOriginCanvasPoint();
     if (this._valuesHaveChanges(toDOMPoint.x, toDOMPoint.y, this.designerCanvas.zoomFactor)) {
       this._removeAllOverlays();
       this._circle = this._drawCircle(toDOMPoint.x, toDOMPoint.y, 5 / this.designerCanvas.zoomFactor, 'svg-transform-origin');
@@ -39,9 +44,7 @@ export class TransformOriginExtension extends AbstractExtension {
   }
 
   override extend(cache: Record<string | symbol, any>, event?: Event) {
-    const computed = getComputedStyle(this.extendedItem.element);
-    const to = computed.transformOrigin.split(' ');
-    const toDOMPoint = this.designerCanvas.canvas.convertPointFromNode({ x: parseFloat(to[0]), y: parseFloat(to[1]) }, this.extendedItem.element);
+    const toDOMPoint = this._getTransformOriginCanvasPoint();
     if (isNaN(toDOMPoint.x) || isNaN(toDOMPoint.y)) {
       this.remove();
       return;
@@ -61,7 +64,7 @@ export class TransformOriginExtension extends AbstractExtension {
     const toInPercentage = [];
     toInPercentage[0] = parseFloat(to[0]) / parseFloat((<HTMLElement>this.extendedItem.element).style.width);
     toInPercentage[1] = parseFloat(to[1]) / parseFloat((<HTMLElement>this.extendedItem.element).style.height);
-    const toDOMPoint = this.designerCanvas.canvas.convertPointFromNode({ x: parseFloat(to[0]), y: parseFloat(to[1]) }, this.extendedItem.element);
+    const toDOMPoint = this._getTransformOriginCanvasPoint();
     const mp = this.designerCanvas.getNormalizedEventCoordinates(event);
     const evPoint = this.extendedItem.element.convertPointFromNode(mp, this.designerCanvas.canvas);
     const normalized = this.designerCanvas.getNormalizedEventCoordinates(event);
