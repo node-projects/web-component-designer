@@ -22,6 +22,7 @@ export class PointerTool implements ITool {
   private _initialPoint: IPoint;
   private _actionType?: PointerActionType;
   private _actionStartedDesignItem?: IDesignItem;
+  private _actionStartedClickDesignItem?: IDesignItem;
   private _actionStartedDesignItems?: IDesignItem[];
   private _clonedItems?: IDesignItem[];
   private _copiedItemsInserted = false;
@@ -130,7 +131,6 @@ export class PointerTool implements ITool {
 
     if (this._actionType == null) {
       this._initialPoint = currentPoint;
-      this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, currentElement);
       if (event.shiftKey) {
         event.preventDefault();
         this._actionType = PointerActionType.DrawSelection;
@@ -176,9 +176,11 @@ export class PointerTool implements ITool {
   private _resetTool() {
     this._actionType = null;
     this._actionStartedDesignItem = null;
+    this._actionStartedClickDesignItem = null;
     this._actionStartedDesignItems = null;
     this._movedSinceStartedAction = false;
     this._initialPoint = null;
+    this._initialOffset = null;
   }
 
   private _pointerActionTypeDrawSelection(designerView: IDesignerCanvas, event: PointerEvent, currentElement: HTMLElement) {
@@ -195,6 +197,8 @@ export class PointerTool implements ITool {
       this._holdTimeout = null;
     }
 
+    let clickDesignItem = currentDesignItem;
+
     if (event.altKey) {
       if (event.type == EventNames.PointerDown) {
         const currentSelection = designerCanvas.instanceServiceContainer.selectionService.primarySelection;
@@ -209,12 +213,17 @@ export class PointerTool implements ITool {
             currentDesignItem = DesignItem.GetOrCreateDesignItem(currentElement, currentElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
         }
       }
+      clickDesignItem = currentDesignItem;
+    } else if (event.type == EventNames.PointerDown) {
+      currentDesignItem = this._getDesignItemToStartDrag(designerCanvas, currentDesignItem, currentPoint);
     }
 
     switch (event.type) {
       case EventNames.PointerDown:
         {
+          this._actionStartedClickDesignItem = clickDesignItem;
           this._actionStartedDesignItem = currentDesignItem;
+          this._initialOffset = designerCanvas.getNormalizedOffsetInElement(event, this._actionStartedDesignItem.element);
 
           this._moveItemsOffset = { x: 0, y: 0 };
 
@@ -233,11 +242,12 @@ export class PointerTool implements ITool {
           }
 
           if (this._firstTimeInMove) {
-            if (!currentDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(currentDesignItem)) {
+            const dragDesignItem = this._actionStartedDesignItem ?? currentDesignItem;
+            if (!dragDesignItem.instanceServiceContainer.selectionService.selectedElements.includes(dragDesignItem)) {
               if (hasCommandKey(event))
-                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([...currentDesignItem.instanceServiceContainer.selectionService.selectedElements, currentDesignItem], event);
+                dragDesignItem.instanceServiceContainer.selectionService.setSelectedElements([...dragDesignItem.instanceServiceContainer.selectionService.selectedElements, dragDesignItem], event);
               else
-                currentDesignItem.instanceServiceContainer.selectionService.setSelectedElements([currentDesignItem], event);
+                dragDesignItem.instanceServiceContainer.selectionService.setSelectedElements([dragDesignItem], event);
               this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
               if (designerCanvas.alignOnSnap)
                 designerCanvas.snapLines.calculateSnaplines(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
@@ -379,7 +389,7 @@ export class PointerTool implements ITool {
           this._started = false;
           if (!this._movedSinceStartedAction || this._actionType == PointerActionType.DragOrSelect) {
             if (this._previousEventName == EventNames.PointerDown && !hasCommandKey(event)) {
-              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedDesignItem], event);
+              designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([this._actionStartedClickDesignItem ?? this._actionStartedDesignItem], event);
             } else {
               this.checkSelectElement(event, designerCanvas, currentDesignItem);
             }
@@ -433,6 +443,73 @@ export class PointerTool implements ITool {
           break;
         }
     }
+  }
+
+  private _getDesignItemToStartDrag(designerCanvas: IDesignerCanvas, currentDesignItem: IDesignItem, currentPoint: IPoint): IDesignItem {
+    const selectedElements = designerCanvas.instanceServiceContainer.selectionService.selectedElements;
+    if (!selectedElements?.length || currentDesignItem.isRootItem || selectedElements.includes(currentDesignItem)) {
+      return currentDesignItem;
+    }
+
+    for (const designItem of selectedElements) {
+      if (!designItem || designItem.isRootItem || designItem === currentDesignItem) {
+        continue;
+      }
+      if (this._isPointInsideDesignItemQuad(designerCanvas, designItem, currentPoint)) {
+        return designItem;
+      }
+    }
+
+    return currentDesignItem;
+  }
+
+  private _isPointInsideDesignItemQuad(designerCanvas: IDesignerCanvas, designItem: IDesignItem, point: IPoint): boolean {
+    const quad = designItem.element.getBoxQuads({ box: 'border', relativeTo: designerCanvas.canvas, iframes: designerCanvas.iframes })[0];
+    if (!quad) {
+      return false;
+    }
+
+    return this._isPointInsideQuad(point, quad);
+  }
+
+  private _isPointInsideQuad(point: IPoint, quad: DOMQuad): boolean {
+    const points = [quad.p1, quad.p2, quad.p3, quad.p4];
+    for (let i = 0; i < points.length; i++) {
+      const start = points[i];
+      const end = points[(i + 1) % points.length];
+      if (this._isPointOnSegment(point, start, end)) {
+        return true;
+      }
+    }
+
+    let inside = false;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+      const start = points[i];
+      const end = points[j];
+      const intersects = ((start.y > point.y) !== (end.y > point.y)) &&
+        (point.x < ((end.x - start.x) * (point.y - start.y)) / ((end.y - start.y) || Number.EPSILON) + start.x);
+      if (intersects) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  }
+
+  private _isPointOnSegment(point: IPoint, start: DOMPoint, end: DOMPoint): boolean {
+    const epsilon = 0.0001;
+    const crossProduct = (point.y - start.y) * (end.x - start.x) - (point.x - start.x) * (end.y - start.y);
+    if (Math.abs(crossProduct) > epsilon) {
+      return false;
+    }
+
+    const dotProduct = (point.x - start.x) * (end.x - start.x) + (point.y - start.y) * (end.y - start.y);
+    if (dotProduct < -epsilon) {
+      return false;
+    }
+
+    const squaredLength = (end.x - start.x) * (end.x - start.x) + (end.y - start.y) * (end.y - start.y);
+    return dotProduct <= squaredLength + epsilon;
   }
 
   private checkSelectElement(event: PointerEvent, designerCanvas: IDesignerCanvas, currentDesignItem: IDesignItem) {
