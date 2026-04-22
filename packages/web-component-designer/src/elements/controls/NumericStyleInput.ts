@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { combineNumericStyleInputValue, formatNumericStyleInputNumber, parseNumericStyleInputValue } from './NumericStyleInputValueHelpers.js';
+import { combineNumericStyleInputValue, formatNumericStyleInputNumber, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit } from './NumericStyleInputValueHelpers.js';
 
 export type { ParsedNumericStyleInputValue } from './NumericStyleInputValueHelpers.js';
 export { parseNumericStyleInputValue, formatNumericStyleInputNumber, combineNumericStyleInputValue } from './NumericStyleInputValueHelpers.js';
@@ -27,7 +27,6 @@ type NumericStyleInputDisplayState = {
 
 const customOptionValue = '__node-projects-custom-value__';
 const dragHandleGlyph = '⋮';
-
 export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
 
   public static override readonly style = css`
@@ -501,7 +500,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     this._select.value = displayState.selectValue;
     this._autoSizeSelect();
 
-    if (displayState.mode === 'unit' && displayState.selectedUnit)
+    if (displayState.mode === 'unit' && displayState.selectedUnit != null)
       this._lastNumericUnit = displayState.selectedUnit;
     if (displayState.mode === 'unit' && displayState.inputValue !== '') {
       const typedNumericValue = Number(displayState.inputValue);
@@ -526,13 +525,13 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
       if (parsedValue.unit && this._units.length && !this._units.includes(parsedValue.unit))
         return this._createCustomDisplayState(value);
 
-      const selectedUnit = parsedValue.unit || this._lastNumericUnit || this._units[0] || '';
+      const selectedUnit = resolveNumericStyleInputSelectedUnit(parsedValue.unit, this._lastNumericUnit, this._units) ?? '';
       return {
         mode: 'unit',
         inputValue: parsedValue.numberText,
         inputVisible: true,
         inputEnabled: true,
-        selectValue: selectedUnit || this._select.value || customOptionValue,
+        selectValue: this._units.includes(selectedUnit) ? selectedUnit : (this._select.value || customOptionValue),
         selectedUnit
       };
     }
@@ -553,8 +552,8 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     if (this._preferCustomMode)
       return this._createCustomDisplayState('');
 
-    const selectedUnit = this._lastNumericUnit || this._units[0];
-    if (selectedUnit) {
+    const selectedUnit = this._lastNumericUnit ?? this._units[0] ?? '';
+    if (this._units.includes(selectedUnit)) {
       return {
         mode: 'unit',
         inputValue: '',
@@ -597,7 +596,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
       const group = document.createElement('optgroup');
       group.label = 'Units';
       for (const unit of this._units)
-        group.appendChild(this._createOption(unit, unit, 'unit'));
+        group.appendChild(this._createOption(getNumericStyleInputUnitLabel(unit), unit, 'unit'));
       this._select.appendChild(group);
     }
 
@@ -612,8 +611,10 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     if (this._allowCustomValue || this._select.options.length === 0)
       this._select.appendChild(this._createOption('custom', customOptionValue, 'custom'));
 
-    if (selectedValue)
+    if (selectedValue !== '')
       this._select.value = selectedValue;
+    else if (this._select.querySelector('option[value=""]'))
+      this._select.value = '';
   }
 
   private _createOption(label: string, value: string, kind: NumericStyleInputMode): HTMLOptionElement {
@@ -647,10 +648,10 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   }
 
   private _convertNumericValue(parsedValue: { numberText: string, value: number, unit: string }, selectedUnit: string) {
-    if (!selectedUnit)
+    if (selectedUnit == null)
       return this._value;
 
-    const fromUnit = parsedValue.unit || selectedUnit;
+    const fromUnit = parsedValue.unit;
     const convertedValue = this._unitValueConverter?.({
       value: parsedValue.value,
       numberText: parsedValue.numberText,
@@ -663,7 +664,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   }
 
   private _resolveCurrentValueForUnit(selectedUnit: string) {
-    if (!selectedUnit)
+    if (selectedUnit == null)
       return null;
 
     const convertedValue = this._unitValueConverter?.({
@@ -876,8 +877,8 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   }
 
   private _switchToUnitModeForInteraction(): boolean {
-    const targetUnit = this._lastNumericUnit || this._units[0];
-    if (!targetUnit)
+    const targetUnit = this._lastNumericUnit ?? this._units[0];
+    if (targetUnit == null)
       return false;
 
     this._preferCustomMode = false;
@@ -897,7 +898,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   }
 
   private _normalizeOptionValues(values: string[]) {
-    return [...new Set((values ?? []).map(x => x?.trim()).filter(x => !!x))];
+    return normalizeNumericStyleInputOptionValues(values);
   }
 
   private _clampNumericValue(value: number) {

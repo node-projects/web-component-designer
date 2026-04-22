@@ -38,3 +38,20 @@ export function combineNumericStyleInputValue(numberText: string, unit: string):
     return '';
   return trimmedNumberText + (unit ?? '');
 }
+
+export function getNumericStyleInputUnitLabel(unit: string): string {
+  return unit === '' ? ' ' : unit;
+}
+
+export function normalizeNumericStyleInputOptionValues(values?: string[]): string[] {
+  const normalizedValues = (values ?? [])
+    .map(x => x == null ? null : x.trim())
+    .filter((x): x is string => x != null);
+  return [...new Set(normalizedValues)];
+}
+
+export function resolveNumericStyleInputSelectedUnit(parsedUnit: string | undefined, lastNumericUnit: string | undefined, units: string[]): string | null {
+  if (parsedUnit != null && units.includes(parsedUnit))
+    return parsedUnit;
+  return lastNumericUnit ?? units[0] ?? null;
+}

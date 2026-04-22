@@ -473,6 +473,9 @@ export function defaultConvertCssNumericUnitValue(context: CssNumericUnitConvers
     case 'flex':
       convertedValue = convertibleContext.value;
       break;
+    case 'scale':
+      convertedValue = convertScaleValue(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit);
+      break;
   }
 
   if (convertedValue == null)
@@ -498,6 +501,21 @@ function convertLengthValue(value: number, fromUnit: string, toUnit: string, con
   return value * fromUnitSize / toUnitSize;
 }
 
+function convertScaleValue(value: number, fromUnit: string, toUnit: string): number | null {
+  const normalizedFromUnit = fromUnit?.toLowerCase() ?? '';
+  const normalizedToUnit = toUnit?.toLowerCase() ?? '';
+
+  if (normalizedFromUnit === normalizedToUnit)
+    return value;
+
+  const fromFactor = normalizedFromUnit === '%' ? 0.01 : normalizedFromUnit === '' ? 1 : null;
+  const toFactor = normalizedToUnit === '%' ? 0.01 : normalizedToUnit === '' ? 1 : null;
+  if (fromFactor == null || toFactor == null)
+    return null;
+
+  return value * fromFactor / toFactor;
+}
+
 function convertUsingUnitTable(value: number, fromUnit: string, toUnit: string, table?: Map<string, number>): number | null {
   const normalizedFromUnit = fromUnit?.toLowerCase() ?? '';
   const normalizedToUnit = toUnit?.toLowerCase() ?? '';
@@ -517,7 +535,7 @@ function convertUsingUnitTable(value: number, fromUnit: string, toUnit: string, 
 export function getCssNumericPropertyType(type?: string, propertyName?: string): CssNumericPropertyType | null {
   if (type === 'css-length')
     return 'length';
-  if (type === 'length' || type === 'angle' || type === 'time' || type === 'frequency' || type === 'flex' || type === 'resolution')
+  if (type === 'length' || type === 'angle' || type === 'time' || type === 'frequency' || type === 'flex' || type === 'resolution' || type === 'scale')
     return type;
 
   const camelName = dashToCamelCase(propertyName);

@@ -1,7 +1,7 @@
 import { expect, test } from '@jest/globals';
 import type { IProperty } from '../src/elements/services/propertiesService/IProperty';
 import { PropertyType } from '../src/elements/services/propertiesService/PropertyType';
-import { combineNumericStyleInputValue, parseNumericStyleInputValue } from '../src/elements/controls/NumericStyleInputValueHelpers';
+import { combineNumericStyleInputValue, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit } from '../src/elements/controls/NumericStyleInputValueHelpers';
 import { applyCssNumericPropertyDefaults, convertCssNumericUnitValue, defaultCssNumericUnits, defaultCssNumericUnitSteps, getCssNumericEditorConfig, getCssNumericPropertyType, isCssNumericPropertyType } from '../src/elements/services/propertiesService/propertyEditors/CssNumericPropertyEditorConfig';
 
 test('parses numeric, fixed, and custom values', () => {
@@ -10,6 +10,14 @@ test('parses numeric, fixed, and custom values', () => {
   expect(parseNumericStyleInputValue('calc(100% - 4px)')).toEqual({ kind: 'text', text: 'calc(100% - 4px)' });
   expect(parseNumericStyleInputValue('')).toEqual({ kind: 'empty' });
   expect(combineNumericStyleInputValue('24', 'rem')).toBe('24rem');
+});
+
+test('numeric style input helpers preserve the unitless option', () => {
+  expect(normalizeNumericStyleInputOptionValues(['', '%', ' ', '%'])).toEqual(['', '%']);
+  expect(getNumericStyleInputUnitLabel('')).toBe(' ');
+  expect(resolveNumericStyleInputSelectedUnit('', '%', ['', '%'])).toBe('');
+  expect(resolveNumericStyleInputSelectedUnit(undefined, '', ['', '%'])).toBe('');
+  expect(resolveNumericStyleInputSelectedUnit('rem', '', ['', '%'])).toBe('');
 });
 
 test('converts css numeric values outside the editor', () => {
@@ -142,6 +150,26 @@ test('converts css numeric values outside the editor', () => {
     toUnit: '%'
   })).toBe('40%');
 
+  expect(convertCssNumericUnitValue({
+    property: { ...baseProperty, type: 'scale', name: 'zoom' },
+    numericType: 'scale',
+    value: 2,
+    numberText: '2',
+    rawValue: '2',
+    fromUnit: '',
+    toUnit: '%'
+  })).toBe('200%');
+
+  expect(convertCssNumericUnitValue({
+    property: { ...baseProperty, type: 'scale', name: 'zoom' },
+    numericType: 'scale',
+    value: 200,
+    numberText: '200',
+    rawValue: '200%',
+    fromUnit: '%',
+    toUnit: ''
+  })).toBe('2');
+
   if (originalGetComputedStyle == null)
     delete (globalThis as any).getComputedStyle;
   else
@@ -167,7 +195,9 @@ test('recognizes css numeric property types and resolves editor configuration', 
   expect(getCssNumericPropertyType('css-length')).toBe('length');
   expect(getCssNumericPropertyType('angle')).toBe('angle');
   expect(getCssNumericPropertyType('time')).toBe('time');
+  expect(getCssNumericPropertyType('scale')).toBe('scale');
   expect(getCssNumericPropertyType(undefined, 'width')).toBe('length');
+  expect(getCssNumericPropertyType(undefined, 'zoom')).toBe('scale');
   expect(getCssNumericPropertyType(undefined, 'animation-duration')).toBe('time');
   expect(isCssNumericPropertyType('string')).toBe(false);
 
