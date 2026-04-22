@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { combineNumericStyleInputValue, formatNumericStyleInputNumber, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit } from './NumericStyleInputValueHelpers.js';
+import { combineNumericStyleInputValue, formatNumericStyleInputNumber, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit, resolveNumericStyleInputStep } from './NumericStyleInputValueHelpers.js';
 
 export type { ParsedNumericStyleInputValue } from './NumericStyleInputValueHelpers.js';
 export { parseNumericStyleInputValue, formatNumericStyleInputNumber, combineNumericStyleInputValue } from './NumericStyleInputValueHelpers.js';
@@ -820,12 +820,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   }
 
   private _getEffectiveStep(unit?: string): number {
-    if (unit) {
-      const unitStep = this._unitSteps[unit];
-      if (Number.isFinite(unitStep) && unitStep > 0)
-        return unitStep;
-    }
-    return this._step;
+    return resolveNumericStyleInputStep(this._unitSteps, this._step, unit);
   }
 
   private _getInteractiveStepValue(value: number, stepCount: number, step?: number) {

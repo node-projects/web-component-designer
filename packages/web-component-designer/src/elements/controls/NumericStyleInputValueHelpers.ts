@@ -55,3 +55,12 @@ export function resolveNumericStyleInputSelectedUnit(parsedUnit: string | undefi
     return parsedUnit;
   return lastNumericUnit ?? units[0] ?? null;
 }
+
+export function resolveNumericStyleInputStep(unitSteps: Record<string, number> | undefined, defaultStep: number, unit?: string): number {
+  if (unit != null) {
+    const unitStep = unitSteps?.[unit];
+    if (Number.isFinite(unitStep) && unitStep > 0)
+      return unitStep;
+  }
+  return defaultStep;
+}

@@ -595,11 +595,13 @@ export function getCssNumericEditorConfig(property: IProperty): CssNumericEditor
   if (!numericType)
     return null;
 
+  const defaultUnitSteps = defaultCssNumericUnitSteps[numericType] ?? {};
+
   return {
     numericType,
     units: property.units?.length ? property.units : defaultCssNumericUnits[numericType],
     fixedValues: getCssNumericKeywordValues(property.values),
-    unitSteps: property.unitSteps ?? defaultCssNumericUnitSteps[numericType] ?? {},
+    unitSteps: { ...defaultUnitSteps, ...(property.unitSteps ?? {}) },
     convertValue: context => convertCssNumericUnitValue({ ...context, property, numericType })
   };
 }

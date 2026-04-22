@@ -1,7 +1,7 @@
 import { expect, test } from '@jest/globals';
 import type { IProperty } from '../src/elements/services/propertiesService/IProperty';
 import { PropertyType } from '../src/elements/services/propertiesService/PropertyType';
-import { combineNumericStyleInputValue, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit } from '../src/elements/controls/NumericStyleInputValueHelpers';
+import { combineNumericStyleInputValue, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit, resolveNumericStyleInputStep } from '../src/elements/controls/NumericStyleInputValueHelpers';
 import { applyCssNumericPropertyDefaults, convertCssNumericUnitValue, defaultCssNumericUnits, defaultCssNumericUnitSteps, getCssNumericEditorConfig, getCssNumericPropertyType, isCssNumericPropertyType } from '../src/elements/services/propertiesService/propertyEditors/CssNumericPropertyEditorConfig';
 
 test('parses numeric, fixed, and custom values', () => {
@@ -18,6 +18,9 @@ test('numeric style input helpers preserve the unitless option', () => {
   expect(resolveNumericStyleInputSelectedUnit('', '%', ['', '%'])).toBe('');
   expect(resolveNumericStyleInputSelectedUnit(undefined, '', ['', '%'])).toBe('');
   expect(resolveNumericStyleInputSelectedUnit('rem', '', ['', '%'])).toBe('');
+  expect(resolveNumericStyleInputStep({ '': 0.1, '%': 10 }, 1, '')).toBe(0.1);
+  expect(resolveNumericStyleInputStep({ '': 0.1, '%': 10 }, 1, '%')).toBe(10);
+  expect(resolveNumericStyleInputStep({ '': 0.1, '%': 10 }, 1, 'px')).toBe(1);
 });
 
 test('converts css numeric values outside the editor', () => {
@@ -216,6 +219,15 @@ test('recognizes css numeric property types and resolves editor configuration', 
   };
   const angleConfig = getCssNumericEditorConfig(angleProperty);
   expect(angleConfig?.unitSteps).toEqual({ rad: 0.01, turn: 0.1 });
+
+  const scaleConfig = getCssNumericEditorConfig({
+    name: 'zoom',
+    type: 'scale',
+    unitSteps: { '%': 5 },
+    service: {} as any,
+    propertyType: PropertyType.cssValue
+  });
+  expect(scaleConfig?.unitSteps).toEqual({ '': 0.1, '%': 5 });
 
   const convertedByOverride = getCssNumericEditorConfig({
     ...property,
