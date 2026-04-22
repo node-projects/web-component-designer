@@ -41,6 +41,19 @@ export interface IGeometrySegment {
   };
 }
 
+export type GeometryWriteTarget = 'attribute' | 'style';
+
+export interface IGeometryWrite {
+  attribute: string;
+  value: string;
+  target?: GeometryWriteTarget;
+}
+
+export interface IGeometrySerializationHint {
+  target: GeometryWriteTarget;
+  unit?: string;
+}
+
 /**
  * Abstraction over any editable geometry (SVG shapes, CSS shapes, etc.)
  */
@@ -49,6 +62,8 @@ export interface IGeometry {
   segments: IGeometrySegment[];
   /** Whether this geometry represents a closed shape */
   closed: boolean;
+  /** Optional write-back hints for readers that preserve style-vs-attribute storage */
+  serializationHints?: Record<string, IGeometrySerializationHint>;
 }
 
 /**
@@ -58,5 +73,5 @@ export interface IGeometryReader {
   /** Read the element's current geometry */
   read(element: Element): IGeometry;
   /** Write the geometry back to the element as attribute string */
-  serialize(geometry: IGeometry): { attribute: string; value: string }[];
+  serialize(geometry: IGeometry): IGeometryWrite[];
 }

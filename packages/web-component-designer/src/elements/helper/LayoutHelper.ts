@@ -6,6 +6,7 @@ import { IPoint } from "../../interfaces/IPoint.js";
 import { IDesignItem } from "../item/IDesignItem.js";
 import { getBoundingClientRectAlsoForDisplayContents } from "./ElementHelper.js";
 import { getGeometryReader } from "../widgets/designerView/extensions/svg/geometry/GeometryReaderFactory.js";
+import { applyGeometryWritesToDesignItem } from '../widgets/designerView/extensions/svg/geometry/GeometryWriteHelper.js';
 
 /**
  * This function filters a items list, so only the outer elments are used for example in a move
@@ -133,9 +134,7 @@ function _placeSvgDesignItem(designItem: IDesignItem, offset: IPoint): boolean {
   }
 
   const group = designItem.openGroup('place svg geometry');
-  for (const attr of attrs) {
-    designItem.setAttribute(attr.attribute, attr.value);
-  }
+  applyGeometryWritesToDesignItem(designItem, attrs);
   group.commit();
 
   return true;

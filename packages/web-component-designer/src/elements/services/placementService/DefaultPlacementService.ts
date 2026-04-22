@@ -11,6 +11,12 @@ import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 import { NodeType } from '../../item/NodeType.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
 import { getBoundingClientRectAlsoForDisplayContents, getElementZoomFactor } from '../../helper/ElementHelper.js';
+import { getGeometryReader } from '../../widgets/designerView/extensions/svg/geometry/GeometryReaderFactory.js';
+
+function usesSvgGeometryPlacement(designItem: IDesignItem) {
+  const element = designItem.element;
+  return element instanceof SVGGraphicsElement && !(element instanceof SVGSVGElement) && !!getGeometryReader(element);
+}
 
 export function filterNonElementItems(items: IDesignItem[]) {
   const filterdPlaceItems: IDesignItem[] = [];
@@ -208,7 +214,9 @@ export class DefaultPlacementService implements IPlacementService {
       if (cs.scale != 'none' && cs.scale) {
         m = m.multiply(new DOMMatrix('scale(' + cs.scale.replace(' ', ',') + ')'));
       }
-      track = m.transformPoint(track);
+      if (!usesSvgGeometryPlacement(designItem)) {
+        track = m.transformPoint(track);
+      }
 
       placeDesignItem(container, designItem, { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y }, 'position');
     }

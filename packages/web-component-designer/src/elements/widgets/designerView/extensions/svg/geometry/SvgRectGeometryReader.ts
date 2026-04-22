@@ -1,13 +1,49 @@
-import { IGeometry, IGeometryReader, IGeometrySegment, SegmentType } from './IGeometry.js';
+import { IGeometry, IGeometryReader, IGeometrySegment, IGeometrySerializationHint, IGeometryWrite, SegmentType } from './IGeometry.js';
+
+const rectGeometryProperties = ['x', 'y', 'width', 'height'] as const;
+type RectGeometryProperty = typeof rectGeometryProperties[number];
+
+function getRectSerializationHint(rect: SVGRectElement, property: RectGeometryProperty): IGeometrySerializationHint {
+  const styleValue = rect.style.getPropertyValue(property).trim();
+  if (styleValue) {
+    return { target: 'style', unit: extractStyleUnit(styleValue) };
+  }
+  return { target: 'attribute' };
+}
+
+function extractStyleUnit(value: string): string {
+  const match = value.trim().match(/^-?(?:\d+|\d*\.\d+)([a-z%]*)$/i);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return 'px';
+}
+
+function serializeRectValue(property: RectGeometryProperty, value: number, hints?: IGeometry['serializationHints']): IGeometryWrite {
+  const hint = hints?.[property];
+  if (hint?.target === 'style') {
+    return {
+      attribute: property,
+      value: `${value}${hint.unit ?? 'px'}`,
+      target: 'style'
+    };
+  }
+
+  return {
+    attribute: property,
+    value: value.toString()
+  };
+}
 
 export class SvgRectGeometryReader implements IGeometryReader {
 
   read(element: Element): IGeometry {
     const rect = element as SVGRectElement;
-    const x = rect.x.baseVal.value;
-    const y = rect.y.baseVal.value;
-    const w = rect.width.baseVal.value;
-    const h = rect.height.baseVal.value;
+    const bbox = rect.getBBox();
+    const x = bbox.x;
+    const y = bbox.y;
+    const w = bbox.width;
+    const h = bbox.height;
 
     const segments: IGeometrySegment[] = [
       { type: SegmentType.Move, relative: false, point: { x, y } },
@@ -17,10 +53,14 @@ export class SvgRectGeometryReader implements IGeometryReader {
       { type: SegmentType.Close, relative: false, point: { x, y } },
     ];
 
-    return { segments, closed: true };
+    const serializationHints = Object.fromEntries(
+      rectGeometryProperties.map(property => [property, getRectSerializationHint(rect, property)])
+    );
+
+    return { segments, closed: true, serializationHints };
   }
 
-  serialize(geometry: IGeometry): { attribute: string; value: string }[] {
+  serialize(geometry: IGeometry): IGeometryWrite[] {
     const pts = geometry.segments.filter(s => s.type !== SegmentType.Close);
     if (pts.length < 2) return [];
 
@@ -32,10 +72,10 @@ export class SvgRectGeometryReader implements IGeometryReader {
     const maxY = Math.max(...ys);
 
     return [
-      { attribute: 'x', value: minX.toString() },
-      { attribute: 'y', value: minY.toString() },
-      { attribute: 'width', value: (maxX - minX).toString() },
-      { attribute: 'height', value: (maxY - minY).toString() },
+      serializeRectValue('x', minX, geometry.serializationHints),
+      serializeRectValue('y', minY, geometry.serializationHints),
+      serializeRectValue('width', maxX - minX, geometry.serializationHints),
+      serializeRectValue('height', maxY - minY, geometry.serializationHints),
     ];
   }
 }

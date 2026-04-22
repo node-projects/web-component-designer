@@ -9,6 +9,7 @@ import { IContextMenuItem } from '../../../../helper/contextMenu/IContextMenuIte
 import { OverlayLayer } from '../OverlayLayer.js';
 import { IGeometry, IGeometryReader, IGeometrySegment, SegmentType } from './geometry/IGeometry.js';
 import { getGeometryReader } from './geometry/GeometryReaderFactory.js';
+import { applyGeometryWritesToDesignItem, applyGeometryWritesToElement } from './geometry/GeometryWriteHelper.js';
 
 interface DragState {
   startCursorPos: IPoint;
@@ -786,9 +787,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   private _applyGeometryToElement() {
     if (!this._reader || !this._geometry) return;
     const attrs = this._reader.serialize(this._geometry);
-    for (const attr of attrs) {
-      this.extendedItem.element.setAttribute(attr.attribute, attr.value);
-    }
+    applyGeometryWritesToElement(this.extendedItem.element, attrs);
   }
 
   /** Commit geometry change through the designItem undo system.
@@ -797,9 +796,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     if (!this._reader || !this._geometry) return;
     const attrs = this._reader.serialize(this._geometry);
     const group = this.extendedItem.openGroup('editGeometry');
-    for (const attr of attrs) {
-      this.extendedItem.setAttribute(attr.attribute, attr.value);
-    }
+    applyGeometryWritesToDesignItem(this.extendedItem, attrs);
     group.commit();
   }
 
