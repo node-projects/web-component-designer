@@ -320,8 +320,6 @@ export * from "./elements/widgets/designerView/extensions/HighlightElementExtens
 export * from "./elements/widgets/designerView/extensions/HighlightElementExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/MultipleSelectionRectExtension.js";
 export * from "./elements/widgets/designerView/extensions/MultipleSelectionRectExtensionProvider.js";
-export * from "./elements/widgets/designerView/extensions/svg/SvgElementExtension.js";
-export * from "./elements/widgets/designerView/extensions/svg/SvgElementExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/UnifiedGeometryExtension.js";
 export * from "./elements/widgets/designerView/extensions/svg/UnifiedGeometryExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/svg/geometry/IGeometry.js";
