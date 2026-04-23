@@ -1,13 +1,13 @@
 import type { IDesignItem } from '../../../item/IDesignItem.js';
 import type { IProperty } from '../IProperty.js';
 
-export type CssNumericPropertyType = 'length' | 'angle' | 'time' | 'frequency' | 'flex' | 'resolution' | 'scale';
+export type UnitPropertyType = 'css-length' | 'css-angle' | 'css-time' | 'css-frequency' | 'css-flex' | 'css-resolution' | 'css-scale' | 'svg-length';
 
-export type CssNumericUnitConversionResult = string | number | null | undefined;
+export type UnitConversionResult = string | number | null | undefined;
 
-export type CssNumericUnitConversionContext = {
+export type UnitConversionContext = {
   property: IProperty,
-  numericType: CssNumericPropertyType,
+  numericType: UnitPropertyType,
   designItems?: IDesignItem[],
   value: number,
   numberText: string,
@@ -16,86 +16,38 @@ export type CssNumericUnitConversionContext = {
   toUnit: string
 };
 
-export type CssNumericEditorConfig = {
-  numericType: CssNumericPropertyType,
+export type UnitEditorConfig = {
+  numericType: UnitPropertyType,
   units: string[],
   fixedValues: string[],
   unitSteps: Record<string, number>,
-  convertValue: (context: Omit<CssNumericUnitConversionContext, 'property' | 'numericType'>) => string
+  convertValue: (context: Omit<UnitConversionContext, 'property' | 'numericType'>) => string
 };
 
 const cssNumericKeywordValues = ['initial', 'inherit', 'unset'];
 
-export const defaultCssNumericUnits: Record<CssNumericPropertyType, string[]> = {
-  length: ['px', '%', 'em', 'rem', 'vw', 'vh', 'vmin', 'vmax', 'pt', 'pc', 'in', 'cm', 'mm', 'q', 'ch', 'ex'],
-  angle: ['deg', 'grad', 'rad', 'turn'],
-  time: ['ms', 's'],
-  frequency: ['hz', 'khz'],
-  flex: ['fr'],
-  resolution: ['dpi', 'dpcm', 'dppx', 'x'],
-  scale: ['', '%']
+export const defaultCssNumericUnits: Record<UnitPropertyType, string[]> = {
+  "css-length": ['px', '%', 'em', 'rem', 'vw', 'vh', 'vmin', 'vmax', 'pt', 'pc', 'in', 'cm', 'mm', 'q', 'ch', 'ex'],
+  "css-angle": ['deg', 'grad', 'rad', 'turn'],
+  "css-time": ['ms', 's'],
+  "css-frequency": ['hz', 'khz'],
+  "css-flex": ['fr'],
+  "css-resolution": ['dpi', 'dpcm', 'dppx', 'x'],
+  "css-scale": ['', '%'],
+  "svg-length": ['', '%']
 };
 
-export const defaultCssNumericUnitSteps: Record<CssNumericPropertyType, Record<string, number>> = {
-  length: { em: 0.1, rem: 0.1, 'in': 0.01, cm: 0.1, ch: 0.1, ex: 0.1 },
-  angle: { rad: 0.01, turn: 0.1 },
-  time: { ms: 10, s: 0.1 },
-  frequency: { khz: 0.1 },
-  flex: { fr: 0.1 },
-  resolution: { dppx: 0.1, x: 0.1 },
-  scale: { '': 0.1, '%': 10 }
-};
+const editorTypes = Object.keys(defaultCssNumericUnits)
 
-const inferredCssNumericPropertyNames: Record<CssNumericPropertyType, Set<string>> = {
-  length: new Set([
-    'width',
-    'height',
-    'minWidth',
-    'minHeight',
-    'maxWidth',
-    'maxHeight',
-    'blockSize',
-    'inlineSize',
-    'minBlockSize',
-    'minInlineSize',
-    'maxBlockSize',
-    'maxInlineSize',
-    'top',
-    'left',
-    'right',
-    'bottom',
-    'fontSize',
-    'lineHeight',
-    'columnGap',
-    'rowGap',
-    'gap',
-    'flexBasis',
-    'letterSpacing',
-    'wordSpacing',
-    'textIndent',
-    'outlineWidth',
-    'outlineOffset',
-    'perspective'
-  ]),
-  angle: new Set([
-    'rotate',
-    'offsetRotate'
-  ]),
-  time: new Set([
-    'animationDelay',
-    'animationDuration',
-    'transitionDelay',
-    'transitionDuration'
-  ]),
-  frequency: new Set(),
-  flex: new Set(),
-  resolution: new Set([
-    'imageResolution'
-  ]),
-  scale: new Set([
-    'zoom',
-    'scale'
-  ])
+export const defaultCssNumericUnitSteps: Record<UnitPropertyType, Record<string, number>> = {
+  "css-length": { em: 0.1, rem: 0.1, 'in': 0.01, cm: 0.1, ch: 0.1, ex: 0.1 },
+  "css-angle": { rad: 0.01, turn: 0.1 },
+  "css-time": { ms: 10, s: 0.1 },
+  "css-frequency": { khz: 0.1 },
+  "css-flex": { fr: 0.1 },
+  "css-resolution": { dppx: 0.1, x: 0.1 },
+  "css-scale": { '': 0.1, '%': 10 },
+  "svg-length": { '': 1, '%': 10 }
 };
 
 const absoluteLengthUnitInPx = new Map<string, number>([
@@ -221,11 +173,11 @@ function camelToDashCase(text?: string): string {
   return text?.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`) ?? '';
 }
 
-function getNumericValueDecimalPlaces(context: CssNumericUnitConversionContext): number {
+function getNumericValueDecimalPlaces(context: UnitConversionContext): number {
   return context.property.numericValueDecimalPlaces ?? (context.fromUnit === '%' || context.toUnit === '%' ? 2 : 4);
 }
 
-function normalizeConvertedValue(result: CssNumericUnitConversionResult, toUnit: string, decimalPlaces: number): string | null {
+function normalizeConvertedValue(result: UnitConversionResult, toUnit: string, decimalPlaces: number): string | null {
   if (result == null)
     return null;
   if (typeof result === 'number')
@@ -233,7 +185,7 @@ function normalizeConvertedValue(result: CssNumericUnitConversionResult, toUnit:
   return result;
 }
 
-function getPrimaryElement(context: CssNumericUnitConversionContext): HTMLElement | null {
+function getPrimaryElement(context: UnitConversionContext): HTMLElement | null {
   return <HTMLElement>context.designItems?.[0]?.element ?? null;
 }
 
@@ -269,7 +221,7 @@ function getComputedPixelValue(value: string | null | undefined): number | null 
   return numericValue;
 }
 
-function readComputedCssValue(context: CssNumericUnitConversionContext): string | null {
+function readComputedCssValue(context: UnitConversionContext): string | null {
   if (typeof getComputedStyle !== 'function')
     return null;
 
@@ -298,7 +250,7 @@ function readComputedCssValue(context: CssNumericUnitConversionContext): string 
   return (computedStyle as CSSStyleDeclaration & Record<string, string>)[camelName]?.trim() ?? null;
 }
 
-function getConvertibleNumericContext(context: CssNumericUnitConversionContext): CssNumericUnitConversionContext | null {
+function getConvertibleNumericContext(context: UnitConversionContext): UnitConversionContext | null {
   const parsedRawValue = parseNumericStyleInputValue(context.rawValue);
   if (parsedRawValue.kind === 'numeric') {
     return {
@@ -313,7 +265,7 @@ function getConvertibleNumericContext(context: CssNumericUnitConversionContext):
   const computedValue = readComputedCssValue(context);
   const parsedComputedValue = parseNumericStyleInputValue(computedValue);
   if (parsedComputedValue.kind !== 'numeric') {
-    if (context.numericType !== 'length')
+    if (context.numericType !== 'css-length')
       return null;
 
     const measuredSizeInPx = getMeasuredSizeInPx(context);
@@ -356,7 +308,7 @@ function getViewportUnitInPx(unit: string): number | null {
   }
 }
 
-function getFontSizeReferenceInPx(context: CssNumericUnitConversionContext, relativeToParent: boolean): number | null {
+function getFontSizeReferenceInPx(context: UnitConversionContext, relativeToParent: boolean): number | null {
   if (typeof getComputedStyle !== 'function')
     return null;
   const element = getPrimaryElement(context);
@@ -373,7 +325,7 @@ function getRootFontSizeInPx(): number | null {
   return getComputedPixelValue(getComputedStyle(document.documentElement).fontSize);
 }
 
-function getPercentageReferenceInPx(context: CssNumericUnitConversionContext): number | null {
+function getPercentageReferenceInPx(context: UnitConversionContext): number | null {
   if (typeof getComputedStyle !== 'function')
     return null;
   const element = getPrimaryElement(context);
@@ -398,7 +350,7 @@ function getPercentageReferenceInPx(context: CssNumericUnitConversionContext): n
   return rect.width;
 }
 
-function getMeasuredSizeInPx(context: CssNumericUnitConversionContext): number | null {
+function getMeasuredSizeInPx(context: UnitConversionContext): number | null {
   const element = getPrimaryElement(context);
   if (!element)
     return null;
@@ -416,7 +368,7 @@ function getMeasuredSizeInPx(context: CssNumericUnitConversionContext): number |
   return null;
 }
 
-function getLengthUnitSizeInPx(context: CssNumericUnitConversionContext, unit: string): number | null {
+function getLengthUnitSizeInPx(context: UnitConversionContext, unit: string): number | null {
   const normalizedUnit = unit?.toLowerCase() ?? '';
   if (!normalizedUnit)
     return null;
@@ -446,7 +398,7 @@ function getLengthUnitSizeInPx(context: CssNumericUnitConversionContext, unit: s
   return getViewportUnitInPx(normalizedUnit);
 }
 
-export function defaultConvertCssNumericUnitValue(context: CssNumericUnitConversionContext): string {
+export function defaultConvertCssNumericUnitValue(context: UnitConversionContext): string {
   const convertibleContext = getConvertibleNumericContext(context);
   if (!convertibleContext)
     return combineNumericStyleInputValue(context.numberText, context.toUnit);
@@ -455,25 +407,25 @@ export function defaultConvertCssNumericUnitValue(context: CssNumericUnitConvers
 
   let convertedValue: number | null;
   switch (convertibleContext.numericType) {
-    case 'length':
+    case 'css-length':
       convertedValue = convertLengthValue(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit, convertibleContext);
       break;
-    case 'angle':
+    case 'css-angle':
       convertedValue = convertUsingUnitTable(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit, angleUnitInDeg);
       break;
-    case 'time':
+    case 'css-time':
       convertedValue = convertUsingUnitTable(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit, timeUnitInMs);
       break;
-    case 'frequency':
+    case 'css-frequency':
       convertedValue = convertUsingUnitTable(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit, frequencyUnitInHz);
       break;
-    case 'resolution':
+    case 'css-resolution':
       convertedValue = convertUsingUnitTable(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit, resolutionUnitInDpi);
       break;
-    case 'flex':
+    case 'css-flex':
       convertedValue = convertibleContext.value;
       break;
-    case 'scale':
+    case 'css-scale':
       convertedValue = convertScaleValue(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit);
       break;
   }
@@ -484,7 +436,7 @@ export function defaultConvertCssNumericUnitValue(context: CssNumericUnitConvers
   return combineNumericStyleInputValue(formatNumericStyleInputNumber(convertedValue, decimalPlaces), convertibleContext.toUnit);
 }
 
-function convertLengthValue(value: number, fromUnit: string, toUnit: string, context: CssNumericUnitConversionContext): number | null {
+function convertLengthValue(value: number, fromUnit: string, toUnit: string, context: UnitConversionContext): number | null {
   const normalizedFromUnit = fromUnit?.toLowerCase() ?? '';
   const normalizedToUnit = toUnit?.toLowerCase() ?? '';
   if (normalizedFromUnit !== '%' && normalizedToUnit === '%') {
@@ -532,29 +484,17 @@ function convertUsingUnitTable(value: number, fromUnit: string, toUnit: string, 
   return value * fromFactor / toFactor;
 }
 
-export function getCssNumericPropertyType(type?: string, propertyName?: string): CssNumericPropertyType | null {
-  if (type === 'css-length')
-    return 'length';
-  if (type === 'length' || type === 'angle' || type === 'time' || type === 'frequency' || type === 'flex' || type === 'resolution' || type === 'scale')
-    return type;
-
-  const camelName = dashToCamelCase(propertyName);
-  if (!camelName)
-    return null;
-
-  for (const numericType of <CssNumericPropertyType[]>Object.keys(inferredCssNumericPropertyNames)) {
-    if (inferredCssNumericPropertyNames[numericType].has(camelName))
-      return numericType;
-  }
-
+export function getUnitPropertyType(type?: string, propertyName?: string): UnitPropertyType | null {
+  if (editorTypes.includes(type ?? ''))
+    return <UnitPropertyType>type;
   return null;
 }
 
-export function isCssNumericPropertyType(type?: string, propertyName?: string): boolean {
-  return getCssNumericPropertyType(type, propertyName) != null;
+export function isUnitPropertyType(type?: string, propertyName?: string): boolean {
+  return getUnitPropertyType(type, propertyName) != null;
 }
 
-export function convertCssNumericUnitValue(context: CssNumericUnitConversionContext): string {
+export function convertNumericUnitValue(context: UnitConversionContext): string {
   const decimalPlaces = getNumericValueDecimalPlaces(context);
   const overrideResult = normalizeConvertedValue(
     context.property.numericValueConverter?.(context.value, context.fromUnit, context.toUnit, context.property, context.numericType, context.numberText, context.rawValue, context.designItems),
@@ -571,14 +511,14 @@ export function getCssNumericKeywordValues(values?: string[]): string[] {
 }
 
 export function applyCssNumericPropertyDefaults(property: IProperty): IProperty {
-  const numericType = getCssNumericPropertyType(property.type, property.propertyName ?? property.name);
+  const numericType = getUnitPropertyType(property.type, property.propertyName ?? property.name);
   property.values = getCssNumericKeywordValues(property.values);
   if (numericType) {
     property.units ??= [...defaultCssNumericUnits[numericType]];
     property.unitSteps ??= { ...defaultCssNumericUnitSteps[numericType] };
     property.numericValueConverter ??= (value, fromUnit, toUnit, converterProperty, converterNumericType, numberText, rawValue, designItems) => defaultConvertCssNumericUnitValue({
       property: converterProperty,
-      numericType: <CssNumericPropertyType>converterNumericType,
+      numericType: <UnitPropertyType>converterNumericType,
       designItems,
       value,
       numberText: numberText ?? `${value}`,
@@ -590,8 +530,8 @@ export function applyCssNumericPropertyDefaults(property: IProperty): IProperty 
   return property;
 }
 
-export function getCssNumericEditorConfig(property: IProperty): CssNumericEditorConfig | null {
-  const numericType = getCssNumericPropertyType(property.type, property.name);
+export function getCssNumericEditorConfig(property: IProperty): UnitEditorConfig | null {
+  const numericType = getUnitPropertyType(property.type, property.name);
   if (!numericType)
     return null;
 
@@ -602,6 +542,6 @@ export function getCssNumericEditorConfig(property: IProperty): CssNumericEditor
     units: property.units?.length ? property.units : defaultCssNumericUnits[numericType],
     fixedValues: getCssNumericKeywordValues(property.values),
     unitSteps: { ...defaultUnitSteps, ...(property.unitSteps ?? {}) },
-    convertValue: context => convertCssNumericUnitValue({ ...context, property, numericType })
+    convertValue: context => convertNumericUnitValue({ ...context, property, numericType })
   };
 }

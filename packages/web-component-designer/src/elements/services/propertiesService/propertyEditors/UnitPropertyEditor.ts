@@ -3,9 +3,9 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IProperty } from '../IProperty.js';
 import { BasePropertyEditor } from './BasePropertyEditor.js';
 import { ValueType } from '../ValueType.js';
-import { getCssNumericEditorConfig } from './CssNumericPropertyEditorConfig.js';
+import { getCssNumericEditorConfig } from './UnitPropertyEditorConfig.js';
 
-export class CssNumericPropertyEditor extends BasePropertyEditor<NumericStyleInput> {
+export class UnitPropertyEditor extends BasePropertyEditor<NumericStyleInput> {
 
   constructor(property: IProperty) {
     super(property);

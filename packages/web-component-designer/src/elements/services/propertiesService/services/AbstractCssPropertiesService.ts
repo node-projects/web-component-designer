@@ -3,7 +3,7 @@ import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { RefreshMode } from '../IPropertiesService.js';
 import { IProperty } from '../IProperty.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
-import { applyCssNumericPropertyDefaults } from '../propertyEditors/CssNumericPropertyEditorConfig.js';
+import { applyCssNumericPropertyDefaults } from '../propertyEditors/UnitPropertyEditorConfig.js';
 
 export abstract class AbstractCssPropertiesService extends CommonPropertiesService {
 

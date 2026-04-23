@@ -3,6 +3,9 @@ export default {
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
   extensionsToTreatAsEsm: ['.ts', '.mts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
   transform: {
     '^.+\\.(mts|ts|tsx|mjs|js)$': [
       "ts-jest",

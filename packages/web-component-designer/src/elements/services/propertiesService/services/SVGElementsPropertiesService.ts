@@ -3,70 +3,69 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { CommonPropertiesService } from './CommonPropertiesService.js';
 import { PropertyType } from '../PropertyType.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
+import { RefreshMode } from '../IPropertiesService.js';
 
 export class SVGElementsPropertiesService extends CommonPropertiesService {
 
   private rectProperties: IProperty[] = [
     {
       name: "x",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "y",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "width",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "height",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "rx",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "ry",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "pathLength",
-      type: "number",
+      type: "svg-length",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "fill",
-      type: "list",
-      values: ["transparent", "black", "white", "blue", "green", "red", "yellow", "orange", "brown", "grey"],
+      type: "color",
       defaultValue: "transparent",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "fill-opacity",
-      type: "list",
-      values: ["0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"],
+      type: "number",
       defaultValue: "1",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
@@ -76,35 +75,35 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
   private lineProperties: IProperty[] = [
     {
       name: "x1",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "y1",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "x2",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "y2",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "pathLength",
-      type: "number",
+      type: "svg-length",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     }
@@ -113,50 +112,48 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
   private ellipseProperties: IProperty[] = [
     {
       name: "cx",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "cy",
-      type: "number",
+      type: "svg-length",
       defaultValue: "0",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "rx",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "ry",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "pathLength",
-      type: "number",
+      type: "svg-length",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "fill",
-      type: "list",
-      values: ["transparent", "black", "white", "blue", "green", "red", "yellow", "orange", "brown", "grey"],
+      type: "color",
       defaultValue: "transparent",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "fill-opacity",
-      type: "list",
-      values: ["0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"],
+      type: "number",
       defaultValue: "1",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
@@ -173,7 +170,7 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
     },
     {
       name: "pathLength",
-      type: "number",
+      type: "svg-length",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     }
@@ -183,46 +180,43 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
   private svgProperties: IProperty[] = [
     {
       name: "width",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
       propertyType: PropertyType.cssValue
     },
     {
       name: "height",
-      type: "number",
+      type: "svg-length",
       defaultValue: "auto",
       service: this,
       propertyType: PropertyType.cssValue
     },
     {
       name: "viewBox",
-      type: "number",
+      type: "string",
       service: this,
       propertyType: PropertyType.cssValue
     }
   ];
 
-
   private defaultProperties: IProperty[] = [
     {
       name: "stroke",
-      type: "list",
-      values: ["black", "white", "blue", "green", "red", "yellow", "orange", "brown", "grey"],
+      type: "color",
       defaultValue: "currentcolor",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "stroke-width",
-      type: "number",
+      type: "svg-length",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
     },
     {
       name: "stroke-opacity",
-      type: "list",
-      values: ["0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"],
+      type: "number",
       defaultValue: "1",
       service: this,
       propertyType: PropertyType.propertyAndAttribute
@@ -237,8 +231,11 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
     }
   ];
 
-
   public override name = "svg"
+
+  public override getRefreshMode(designItem: IDesignItem) {
+    return RefreshMode.fullOnClassChange;
+  }
 
   override isHandledElement(designItem: IDesignItem): boolean {
     switch (designItem.element.localName) {
@@ -260,7 +257,7 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
     if (!this.isHandledElement(designItem))
       return null;
     switch (designItem.element.localName) {
-      
+
       case 'rect':
         return [...this.rectProperties, ...this.defaultProperties];
       case 'line':

@@ -136,6 +136,19 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
     }
   }
 
+  getPropertyNameSuggestions(designItems: IDesignItem[]): string[] {
+    return Object.keys(cssProperties).map(x => PropertiesHelper.camelToDashCase(x));
+  }
+
+  protected _getPropertyType(name: string): string {
+    const typeFromJson = cssProperties[name]?.type;
+    return typeFromJson ? 'css-' + typeFromJson : 'string';
+  }
+
+  protected _getPropertyValues(name: string): string[] {
+    return cssProperties[name]?.values;
+  }
+
   _getPropertyDef(name: string): IProperty {
     const camelName = PropertiesHelper.dashToCamelCase(name);
     switch (camelName) {
@@ -147,8 +160,8 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
         return this._enrichCssProperty({
           name,
           //attributeName: PropertiesHelper.camelToDashCase(name),
-          type: cssProperties[camelName]?.type ?? 'string',
-          values: cssProperties[camelName]?.values,
+          type: this._getPropertyType(camelName),
+          values: this._getPropertyValues(camelName),
           service: this,
           propertyType: PropertyType.cssValue
         })

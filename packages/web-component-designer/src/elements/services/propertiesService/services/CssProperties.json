@@ -70,9 +70,13 @@
     "alignmentBaseline": {},
     "all": {},
     "animation": {},
-    "animationDelay": {},
+    "animationDelay": {
+        "type": "time"
+    },
     "animationDirection": {},
-    "animationDuration": {},
+    "animationDuration": {
+        "type": "time"
+    },
     "animationFillMode": {},
     "animationIterationCount": {},
     "animationName": {},
@@ -102,7 +106,9 @@
     "backgroundSize": {},
     "basePalette": {},
     "baselineShift": {},
-    "blockSize": {},
+    "blockSize": {
+        "type": "length"
+    },
     "border": {},
     "borderBlock": {},
     "borderBlockColor": {
@@ -193,7 +199,9 @@
             "thick"
         ]
     },
-    "bottom": {},
+    "bottom": {
+        "type": "length"
+    },
     "boxShadow": {},
     "boxSizing": {
         "type": "list",
@@ -293,7 +301,9 @@
     "fillRule": {},
     "filter": {},
     "flex": {},
-    "flexBasis": {},
+    "flexBasis": {
+        "type": "length"
+    },
     "flexDirection": {
         "type": "list",
         "values": [
@@ -342,7 +352,9 @@
     "fontKerning": {},
     "fontOpticalSizing": {},
     "fontPalette": {},
-    "fontSize": {},
+    "fontSize": {
+        "type": "length"
+    },
     "fontSizeAdjust": {},
     "fontStretch": {},
     "fontStyle": {},
@@ -385,14 +397,21 @@
     "gridTemplateAreas": {},
     "gridTemplateColumns": {},
     "gridTemplateRows": {},
-    "height": {},
+    "height": {
+        "type": "length"
+    },
     "hyphenateCharacter": {},
     "hyphens": {},
     "imageOrientation": {},
     "imageRendering": {},
+    "imageResolution": {
+        "type": "resolution"
+    },
     "inherits": {},
     "initialValue": {},
-    "inlineSize": {},
+    "inlineSize": {
+        "type": "length"
+    },
     "inset": {},
     "insetBlock": {},
     "insetBlockEnd": {},
@@ -465,14 +484,20 @@
             "unsafe"
         ]
     },
-    "left": {},
-    "letterSpacing": {},
+    "left": {
+        "type": "length"
+    },
+    "letterSpacing": {
+        "type": "length"
+    },
     "lightingColor": {
         "type": "color"
     },
     "lineBreak": {},
     "lineGapOverride": {},
-    "lineHeight": {},
+    "lineHeight": {
+        "type": "length"
+    },
     "listStyle": {},
     "listStyleImage": {},
     "listStylePosition": {},
@@ -510,14 +535,30 @@
     "markerStart": {},
     "mask": {},
     "maskType": {},
-    "maxBlockSize": {},
-    "maxHeight": {},
-    "maxInlineSize": {},
-    "maxWidth": {},
-    "minBlockSize": {},
-    "minHeight": {},
-    "minInlineSize": {},
-    "minWidth": {},
+    "maxBlockSize": {
+        "type": "length"
+    },
+    "maxHeight": {
+        "type": "length"
+    },
+    "maxInlineSize": {
+        "type": "length"
+    },
+    "maxWidth": {
+        "type": "length"
+    },
+    "minBlockSize": {
+        "type": "length"
+    },
+    "minHeight": {
+        "type": "length"
+    },
+    "minInlineSize": {
+        "type": "length"
+    },
+    "minWidth": {
+        "type": "length"
+    },
     "mixBlendMode": {},
     "negative": {},
     "objectFit": {},
@@ -528,7 +569,9 @@
     "offset": {},
     "offsetDistance": {},
     "offsetPath": {},
-    "offsetRotate": {},
+    "offsetRotate": {
+        "type": "angle"
+    },
     "opacity": {
         "type": "number"
     },
@@ -538,9 +581,18 @@
     "outlineColor": {
         "type": "color"
     },
-    "outlineOffset": {},
+    "outlineOffset": {
+        "type": "length"
+    },
     "outlineStyle": {},
-    "outlineWidth": {},
+    "outlineWidth": {
+        "type": "length",
+        "values": [
+            "medium",
+            "thin",
+            "thick"
+        ]
+    },
     "overflow": {
         "type": "list",
         "values": [
@@ -598,7 +650,9 @@
     "pageBreakInside": {},
     "pageOrientation": {},
     "paintOrder": {},
-    "perspective": {},
+    "perspective": {
+        "type": "length"
+    },
     "perspectiveOrigin": {},
     "placeContent": {},
     "placeItems": {},
@@ -619,8 +673,12 @@
     "r": {},
     "range": {},
     "resize": {},
-    "right": {},
-    "rotate": {},
+    "right": {
+        "type": "length"
+    },
+    "rotate": {
+        "type": "angle"
+    },
     "rowGap": {
         "type": "length"
     },
@@ -628,7 +686,9 @@
     "rubyPosition": {},
     "rx": {},
     "ry": {},
-    "scale": {},
+    "scale": {
+        "type": "scale"
+    },
     "scrollbarColor": {},
     "scrollbarGutter": {
         "type": "list",
@@ -734,7 +794,9 @@
     },
     "textEmphasisPosition": {},
     "textEmphasisStyle": {},
-    "textIndent": {},
+    "textIndent": {
+        "type": "length"
+    },
     "textOrientation": {},
     "textOverflow": {},
     "textRendering": {},
@@ -760,16 +822,22 @@
             "stable"
         ]
     },
-    "top": {},
+    "top": {
+        "type": "length"
+    },
     "touchAction": {},
     "transform": {},
     "transformBox": {},
     "transformOrigin": {},
     "transformStyle": {},
     "transition": {},
-    "transitionDelay": {},
+    "transitionDelay": {
+        "type": "time"
+    },
     "transitionBehavior": {},
-    "transitionDuration": {},
+    "transitionDuration": {
+        "type": "time"
+    },
     "transitionProperty": {},
     "transitionTimingFunction": {},
     "translate": {},
@@ -781,14 +849,20 @@
     "visibility": {},
     "whiteSpace": {},
     "widows": {},
-    "width": {},
+    "width": {
+        "type": "length"
+    },
     "willChange": {},
     "wordBreak": {},
-    "wordSpacing": {},
+    "wordSpacing": {
+        "type": "length"
+    },
     "wordWrap": {},
     "writingMode": {},
     "x": {},
     "y": {},
     "zIndex": {},
-    "zoom": {}
+    "zoom": {
+        "type": "scale"
+    }
 }

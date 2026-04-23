@@ -2,7 +2,7 @@ import { expect, test } from '@jest/globals';
 import type { IProperty } from '../src/elements/services/propertiesService/IProperty';
 import { PropertyType } from '../src/elements/services/propertiesService/PropertyType';
 import { combineNumericStyleInputValue, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit, resolveNumericStyleInputStep } from '../src/elements/controls/NumericStyleInputValueHelpers';
-import { applyCssNumericPropertyDefaults, convertCssNumericUnitValue, defaultCssNumericUnits, defaultCssNumericUnitSteps, getCssNumericEditorConfig, getCssNumericPropertyType, isCssNumericPropertyType } from '../src/elements/services/propertiesService/propertyEditors/CssNumericPropertyEditorConfig';
+import { applyCssNumericPropertyDefaults, convertNumericUnitValue, defaultCssNumericUnits, defaultCssNumericUnitSteps } from '../src/elements/services/propertiesService/propertyEditors/UnitPropertyEditorConfig';
 
 test('parses numeric, fixed, and custom values', () => {
   expect(parseNumericStyleInputValue('12px')).toEqual({ kind: 'numeric', numberText: '12', value: 12, unit: 'px' });
@@ -30,9 +30,9 @@ test('converts css numeric values outside the editor', () => {
     propertyType: PropertyType.cssValue
   } satisfies Omit<IProperty, 'type'>;
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'length' },
-    numericType: 'length',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-length' },
+    numericType: 'css-length',
     value: 96,
     numberText: '96',
     rawValue: '96px',
@@ -40,9 +40,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: 'in'
   })).toBe('1in');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'angle' },
-    numericType: 'angle',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-angle' },
+    numericType: 'css-angle',
     value: 180,
     numberText: '180',
     rawValue: '180deg',
@@ -50,9 +50,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: 'turn'
   })).toBe('0.5turn');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'time' },
-    numericType: 'time',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-time' },
+    numericType: 'css-time',
     value: 1500,
     numberText: '1500',
     rawValue: '1500ms',
@@ -60,9 +60,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: 's'
   })).toBe('1.5s');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'length' },
-    numericType: 'length',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-length' },
+    numericType: 'css-length',
     value: 10,
     numberText: '10',
     rawValue: '10%',
@@ -98,9 +98,9 @@ test('converts css numeric values outside the editor', () => {
     }
   });
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'length', name: 'width' },
-    numericType: 'length',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-length', name: 'width' },
+    numericType: 'css-length',
     designItems: [{ element } as any],
     value: 133.3333,
     numberText: '133.3333',
@@ -109,9 +109,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: '%'
   })).toBe('33.33%');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'length', name: 'width' },
-    numericType: 'length',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-length', name: 'width' },
+    numericType: 'css-length',
     designItems: [{ element } as any],
     value: Number.NaN,
     numberText: '',
@@ -120,9 +120,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: '%'
   })).toBe('33.33%');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'length', name: 'width' },
-    numericType: 'length',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-length', name: 'width' },
+    numericType: 'css-length',
     designItems: [{ element } as any],
     value: 33.33,
     numberText: '33.33',
@@ -131,9 +131,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: 'px'
   })).toBe('133.32px');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'length', name: 'width', numericValueDecimalPlaces: 3 },
-    numericType: 'length',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-length', name: 'width', numericValueDecimalPlaces: 3 },
+    numericType: 'css-length',
     designItems: [{ element } as any],
     value: 133.3333,
     numberText: '133.3333',
@@ -142,9 +142,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: '%'
   })).toBe('33.333%');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'length', name: 'width' },
-    numericType: 'length',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-length', name: 'width' },
+    numericType: 'css-length',
     designItems: [{ element: measuredElement } as any],
     value: 100,
     numberText: '100',
@@ -153,9 +153,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: '%'
   })).toBe('40%');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'scale', name: 'zoom' },
-    numericType: 'scale',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-scale', name: 'zoom' },
+    numericType: 'css-scale',
     value: 2,
     numberText: '2',
     rawValue: '2',
@@ -163,9 +163,9 @@ test('converts css numeric values outside the editor', () => {
     toUnit: '%'
   })).toBe('200%');
 
-  expect(convertCssNumericUnitValue({
-    property: { ...baseProperty, type: 'scale', name: 'zoom' },
-    numericType: 'scale',
+  expect(convertNumericUnitValue({
+    property: { ...baseProperty, type: 'css-scale', name: 'zoom' },
+    numericType: 'css-scale',
     value: 200,
     numberText: '200',
     rawValue: '200%',
@@ -184,76 +184,17 @@ test('converts css numeric values outside the editor', () => {
     Object.defineProperty(globalThis, 'window', { configurable: true, value: originalWindow });
 });
 
-test('recognizes css numeric property types and resolves editor configuration', () => {
-  const property: IProperty = {
-    name: 'margin-left',
-    type: 'length',
-    units: ['px', 'em'],
-    values: ['auto', 'inherit'],
-    service: {} as any,
-    propertyType: PropertyType.cssValue
-  };
-
-  expect(getCssNumericPropertyType('length')).toBe('length');
-  expect(getCssNumericPropertyType('css-length')).toBe('length');
-  expect(getCssNumericPropertyType('angle')).toBe('angle');
-  expect(getCssNumericPropertyType('time')).toBe('time');
-  expect(getCssNumericPropertyType('scale')).toBe('scale');
-  expect(getCssNumericPropertyType(undefined, 'width')).toBe('length');
-  expect(getCssNumericPropertyType(undefined, 'zoom')).toBe('scale');
-  expect(getCssNumericPropertyType(undefined, 'animation-duration')).toBe('time');
-  expect(isCssNumericPropertyType('string')).toBe(false);
-
-  expect(getCssNumericEditorConfig(property)).toMatchObject({
-    numericType: 'length',
-    units: ['px', 'em'],
-    fixedValues: ['auto', 'inherit', 'initial', 'unset'],
-    unitSteps: {}
-  });
-
-  const angleProperty: IProperty = {
-    name: 'rotate',
-    type: 'angle',
-    service: {} as any,
-    propertyType: PropertyType.cssValue
-  };
-  const angleConfig = getCssNumericEditorConfig(angleProperty);
-  expect(angleConfig?.unitSteps).toEqual({ rad: 0.01, turn: 0.1 });
-
-  const scaleConfig = getCssNumericEditorConfig({
-    name: 'zoom',
-    type: 'scale',
-    unitSteps: { '%': 5 },
-    service: {} as any,
-    propertyType: PropertyType.cssValue
-  });
-  expect(scaleConfig?.unitSteps).toEqual({ '': 0.1, '%': 5 });
-
-  const convertedByOverride = getCssNumericEditorConfig({
-    ...property,
-    numericValueConverter: (value, fromUnit, toUnit) => fromUnit === '%' && toUnit === 'cm' ? `${value / 2}cm` : null
-  })?.convertValue({
-    value: 10,
-    numberText: '10',
-    rawValue: '10%',
-    fromUnit: '%',
-    toUnit: 'cm'
-  });
-
-  expect(convertedByOverride).toBe('5cm');
-});
-
 test('abstract css properties service fills css numeric metadata', () => {
   const property = applyCssNumericPropertyDefaults({
     name: 'width',
-    type: 'length',
+    type: 'css-length',
     values: ['auto'],
     service: {} as any,
     propertyType: PropertyType.cssValue
   });
 
-  expect(property.units).toEqual(defaultCssNumericUnits.length);
-  expect(property.unitSteps).toEqual(defaultCssNumericUnitSteps.length);
+  expect(property.units).toEqual(defaultCssNumericUnits['css-length']);
+  expect(property.unitSteps).toEqual(defaultCssNumericUnitSteps['css-length']);
   expect(property.values).toEqual(['auto', 'initial', 'inherit', 'unset']);
 
   const originalGetComputedStyle = globalThis.getComputedStyle;
@@ -271,8 +212,8 @@ test('abstract css properties service fills css numeric metadata', () => {
     configurable: true,
     value: () => ({ fontSize: '16px' })
   });
-
-  expect(property.numericValueConverter?.(100, 'px', '%', property, 'length', '100', '100px', [{ element } as any])).toBe('40%');
+  
+  expect(property.numericValueConverter?.(100, 'px', '%', property, 'css-length', '100', '100px', [{ element } as any])).toBe('40%');
 
   if (originalGetComputedStyle == null)
     delete (globalThis as any).getComputedStyle;

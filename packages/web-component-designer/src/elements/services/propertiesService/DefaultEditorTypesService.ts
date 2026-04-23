@@ -11,16 +11,16 @@ import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor.j
 import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor.js';
 import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEditor.js";
 import { FontPropertyEditor } from './propertyEditors/FontPropertyEditor.js';
-import { CssNumericPropertyEditor } from './propertyEditors/CssNumericPropertyEditor.js';
-import { isCssNumericPropertyType } from './propertyEditors/CssNumericPropertyEditorConfig.js';
+import { UnitPropertyEditor } from './propertyEditors/UnitPropertyEditor.js';
+import { isUnitPropertyType } from './propertyEditors/UnitPropertyEditorConfig.js';
 
 export class DefaultEditorTypesService implements IEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
     if (property.createEditor)
       return property.createEditor(property);
 
-    if (isCssNumericPropertyType(property.type, property.name))
-      return new CssNumericPropertyEditor(property);
+    if (isUnitPropertyType(property.type, property.name))
+      return new UnitPropertyEditor(property);
 
     switch (<string><any>property.type) {
       case "json":

@@ -6,7 +6,6 @@ import { IPropertyGroup } from '../IPropertyGroup.js';
 import { IStyleDeclaration, IStyleRule } from '../../stylesheetService/IStylesheetService.js';
 import { ValueType } from '../ValueType.js';
 import { NodeType } from '../../../item/NodeType.js';
-import cssProperties from "./CssProperties.json" with { type: 'json' };
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 import { AbstractPropertiesService } from './AbstractPropertiesService.js';
@@ -31,11 +30,7 @@ export class CssCurrentPropertiesService extends CssPropertiesService {
 
   override async getProperty(designItem: IDesignItem, name: string): Promise<IProperty> {
     const camelName = PropertiesHelper.dashToCamelCase(name);
-    return this._enrichCssProperty({ name: name, type: cssProperties[camelName]?.type ?? 'string', values: cssProperties[camelName]?.values, service: this, propertyType: PropertyType.cssValue });
-  }
-
-  getPropertyNameSuggestions(designItems: IDesignItem[]): string[] {
-    return Object.keys(cssProperties).map(x => PropertiesHelper.camelToDashCase(x));
+    return this._enrichCssProperty({ name: name, type: this._getPropertyType(camelName), values: this._getPropertyValues(camelName), service: this, propertyType: PropertyType.cssValue });
   }
 
   override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
@@ -75,8 +70,8 @@ export class CssCurrentPropertiesService extends CssPropertiesService {
           return this._enrichCssProperty({
             name: y.name,
             renamable: true,
-            type: cssProperties[camelName]?.type ?? 'string',
-            values: cssProperties[camelName]?.values,
+            type: this._getPropertyType(camelName),
+            values: this._getPropertyValues(camelName),
             service: this,
             propertyType: PropertyType.cssValue,
             //@ts-ignore

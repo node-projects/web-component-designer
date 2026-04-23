@@ -80,8 +80,7 @@ export class PropertyGroupsService implements IPropertyGroupsService {
             return lst;
         }
 
-        this._pgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
-        this._svgPgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
+        this._svgChildPgList[0].propertiesService = this._svgPgList[0].propertiesService = this._pgList[0].propertiesService = designItems[0].serviceContainer.getLastServiceWhere('propertyService', x => x.isHandledElement(designItems[0]));
 
         let lst = this._pgList;
         if (designItems[0].element instanceof designItems[0].window.SVGElement) {
