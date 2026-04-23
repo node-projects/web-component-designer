@@ -322,14 +322,16 @@ function getElementTransformWithZoom(element, iframes, includeZoom = true) {
 * @returns {DOMQuad[]}
 */
 export function getBoxQuads(node, options) {
+    const defaultRelativeTo = node.ownerDocument.documentElement ?? node.ownerDocument.body;
+    const relativeTo = options?.relativeTo ?? defaultRelativeTo;
     let key;
     if (boxQuadsCache) {
         let i1 = hash.get(node);
         if (i1 === undefined)
             hash.set(node, i1 = hashId++);
-        let i2 = hash.get(options?.relativeTo ?? document.body);
+        let i2 = hash.get(relativeTo);
         if (i2 === undefined)
-            hash.set(options?.relativeTo ?? document.body, i2 = hashId++);
+            hash.set(relativeTo, i2 = hashId++);
         key = i1 + '_' + i2 + '_' + (options?.box ?? 'border');
         const q = boxQuadsCache.get(key);
         if (q)
@@ -337,7 +339,7 @@ export function getBoxQuads(node, options) {
     }
 
     /** @type {DOMMatrix} */
-    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, options?.relativeTo ?? document.body, options?.iframes);
+    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, relativeTo, options?.iframes);
 
     // FIX 13: Cache cross-realm constructors once per call.
     const win = node.ownerDocument.defaultView ?? window;
@@ -347,15 +349,43 @@ export function getBoxQuads(node, options) {
     // getClientRects() returns one rect per line-box fragment; getBoundingClientRect()
     // only returns the union AABB, so without this we'd always get one quad.
     if ((node instanceof Text || node instanceof _Text)) {
+        const canUseViewportTextRects = originalElementAndAllParentsMultipliedMatrix.is2D
+            && Math.abs(originalElementAndAllParentsMultipliedMatrix.b) < 1e-10
+            && Math.abs(originalElementAndAllParentsMultipliedMatrix.c) < 1e-10;
         // FIX 7: Create the Range once here and reuse it for both the multi-fragment
         //        check and the single-fragment size fallback, avoiding a second Range
         //        allocation inside getElementSize for Text nodes.
         const range = node.ownerDocument.createRange();
         range.selectNodeContents(node);
         const clientRects = range.getClientRects();
+        const viewportRoot = node.ownerDocument.documentElement ?? node.ownerDocument.body;
+        const viewportRootRect = viewportRoot?.getBoundingClientRect();
+
+        const convertViewportRectToRelativeQuad = (rect) => {
+            const rectInViewportRoot = new DOMRect(
+                rect.x - (viewportRootRect?.x ?? 0),
+                rect.y - (viewportRootRect?.y ?? 0),
+                rect.width,
+                rect.height,
+            );
+            return convertRectFromNode(relativeTo, rectInViewportRoot, viewportRoot, {
+                iframes: options?.iframes,
+            });
+        };
 
         if (clientRects.length > 1) {
-            const relativeToEl = options?.relativeTo ?? document.body;
+            if (canUseViewportTextRects) {
+                const quads = [];
+                for (const cr of clientRects) {
+                    if (cr.width < 1 && cr.height < 1) continue;
+                    quads.push(convertViewportRectToRelativeQuad(cr));
+                }
+                if (quads.length > 0) {
+                    if (boxQuadsCache) boxQuadsCache.set(key, quads);
+                    return quads;
+                }
+            }
+
             // Work via the parent element so rotation is handled correctly.
             // Each fragment's viewport rect (from getClientRects) is an AABB;
             // its center equals the actual geometric center regardless of rotation.
@@ -363,7 +393,7 @@ export function getBoxQuads(node, options) {
             // local dimensions via the 2x2 AABB system, then apply the parent's
             // accumulated matrix to build proper (rotated) quads in relativeTo-space.
             const parent = getParentElementIncludingSlots(node, options?.iframes);
-            const M_parent = getResultingTransformationBetweenElementAndAllAncestors(parent, relativeToEl, options?.iframes);
+            const M_parent = getResultingTransformationBetweenElementAndAllAncestors(parent, relativeTo, options?.iframes);
             const parentCss = getElementCombinedTransform(parent, options?.iframes);
             const pr = parent.getBoundingClientRect();
             const pa = parentCss.a, pb = parentCss.b, pc = parentCss.c, pd = parentCss.d;
@@ -427,6 +457,11 @@ export function getBoxQuads(node, options) {
         // FIX 7 (continued): Single-fragment text — reuse the already-fetched
         // bounding rect so getElementSize doesn't create a second Range.
         const textBoundingRect = range.getBoundingClientRect();
+        if (canUseViewportTextRects) {
+            const tQuad = [convertViewportRectToRelativeQuad(textBoundingRect)];
+            if (boxQuadsCache) boxQuadsCache.set(key, tQuad);
+            return tQuad;
+        }
         const { width: tw, height: th } = _getTextNodeSize(originalElementAndAllParentsMultipliedMatrix, textBoundingRect, node);
         const is2Dt = originalElementAndAllParentsMultipliedMatrix.is2D;
         const tCorners = [
