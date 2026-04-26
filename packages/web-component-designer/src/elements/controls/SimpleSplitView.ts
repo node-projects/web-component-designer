@@ -14,17 +14,23 @@ export class SimpleSplitView extends BaseCustomWebComponentConstructorAppend {
       display: grid;
       align-items: center;
     }
+    :host([orientation="horizontal"]) #split {
+      grid-template-rows: 100%;
+      grid-template-columns: calc(var(--split) * 1%) 5px calc(((100 - var(--split)) * 1%) - 5px);
+    }
     #splitter {
       user-select: none;
       -webkit-user-select: none;
     }
-    :host(:not([orientation="vertical"])) > div > #splitter {
+    :host([orientation="horizontal"]) > div > #splitter {
       cursor: ew-resize;
       width: 5px;
+      height: 100%;
     }
     :host([orientation="vertical"]) > div > #splitter {
       cursor: ns-resize;
       height: 5px;
+      width: 100%;
     }`;
 
   static override readonly template = html`
@@ -38,10 +44,18 @@ export class SimpleSplitView extends BaseCustomWebComponentConstructorAppend {
     orientation: String
   }
 
-  orientation: 'vertical' | 'horizontal' = 'vertical';
+  private _orientation: 'vertical' | 'horizontal' = 'vertical';
+  public get orientation() {
+    return this._orientation;
+  }
+  public set orientation(value) {
+    this._orientation = value;
+    this.setAttribute('orientation', value);
+  }
 
   constructor() {
     super();
+    this._restoreCachedInititalValues();
   }
 
   ready() {
