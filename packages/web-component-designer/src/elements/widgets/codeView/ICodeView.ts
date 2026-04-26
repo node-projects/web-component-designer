@@ -5,10 +5,10 @@ import { IStringPosition } from '../../services/htmlWriterService/IStringPositio
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
 
 export interface ICodeView extends IUiCommandHandler, IDisposable, HTMLElement {
-  update(code: string, instanceServiceContainer?: InstanceServiceContainer);
-  getText();
-  setSelection(position: IStringPosition);
-  focusEditor();
+  update(code: string, instanceServiceContainer?: InstanceServiceContainer) : void;
+  getText(): string;
+  setSelection(position: IStringPosition): void;
+  focusEditor(): void;
   onTextChanged: TypedEvent<string>;
   readOnly?: boolean;
 }
