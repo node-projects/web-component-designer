@@ -156,11 +156,11 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
         <div>
             <table>
                     <tr><th colspan="2">Styling</th></tr>
-                    <tr><td>display</td><td>[[?this.computedStyle.display]]</td></tr>
-                    <tr><td>position</td><td>[[?this.computedStyle.position]]</td></tr>
-                    <tr><td>visibility</td><td>[[?this.computedStyle.visibility]]</td></tr>
-                    <tr><td>pointerEvents</td><td>[[?this.computedStyle.pointerEvents]]</td></tr>
-                    <tr><td>zIndex</td><td>[[?this.computedStyle.zIndex]]</td></tr>
+                    <tr><td>display</td><td>[[?this.computedStyle?.display]]</td></tr>
+                    <tr><td>position</td><td>[[?this.computedStyle?.position]]</td></tr>
+                    <tr><td>visibility</td><td>[[?this.computedStyle?.visibility]]</td></tr>
+                    <tr><td>pointerEvents</td><td>[[?this.computedStyle?.pointerEvents]]</td></tr>
+                    <tr><td>zIndex</td><td>[[?this.computedStyle?.zIndex]]</td></tr>
                     <tr><th colspan="2">Context</th></tr>
                     <tr><td>offsetParent</td><td class="lnk" @click="[[this._clickLink(event, 'offsetParent')]]">[[?this.selectedElementOffsetParentText]]</td></tr>
                     <tr><td>createsStackingContext</td><td>[[this.createsStackingContext]]</td></tr>
