@@ -407,6 +407,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.onKeyUp = this.onKeyUp.bind(this);
     this._onDblClick = this._onDblClick.bind(this);
     this._pointerEventHandler = this._pointerEventHandler.bind(this);
+    this._pointerEventHandlerCapture = this._pointerEventHandlerCapture.bind(this);
     this._onWheel = this._onWheel.bind(this);
 
     this._getDomElement<HTMLElement>('node-projects-designer-search-close').onclick = () => this._searchHideOverlay();
@@ -846,6 +847,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this._touchGestureHelper = TouchGestureHelper.addTouchEvents(this.clickOverlay);
       this.clickOverlay.addEventListener(EventNames.PointerDown, this._pointerEventHandler);
       this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandler);
+      this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandlerCapture, true);
       this.clickOverlay.addEventListener(EventNames.PointerUp, this._pointerEventHandler);
       this.clickOverlay.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event));
       this.clickOverlay.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
@@ -1385,6 +1387,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
   }
 
+  private _pointerEventHandlerCapture(event: PointerEvent, forceElement: Node = null) {
+    this.fillCalculationrects();
+    if (this._pointerextensions) {
+      for (let pe of this._pointerextensions)
+        pe.refresh(event);
+    }
+  }
+
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
     if (this._ignoreEvent === event)
       return;
@@ -1394,13 +1404,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     if (this._touchGestureHelper.multitouchEventActive)
       return;
-
-    this.fillCalculationrects();
-
-    if (this._pointerextensions) {
-      for (let pe of this._pointerextensions)
-        pe.refresh(event);
-    }
 
     let currentElement: Node;
     if (forceElement)

@@ -412,6 +412,8 @@ export type { IDesignerPointerExtensionProvider } from "./elements/widgets/desig
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/AbstractDesignerPointerExtension.js";
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtension.js";
 export * from "./elements/widgets/designerView/extensions/pointerExtensions/CursorLinePointerExtensionProvider.js";
+export * from "./elements/widgets/designerView/extensions/pointerExtensions/LinePointerExtension.js";
+export * from "./elements/widgets/designerView/extensions/pointerExtensions/LinePointerExtensionProvider.js";
 
 export type { IMiniatureView } from "./elements/widgets/miniatureView/IMiniatureView.js";
 export * from "./elements/widgets/miniatureView/miniatureView.js";

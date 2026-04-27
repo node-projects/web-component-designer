@@ -27,6 +27,7 @@ export class DefaultPropertyEditorTypesService implements IPropertyEditorTypesSe
         {
           return new JsonPropertyEditor(property);
         }
+      case "css-color":
       case "color":
         {
           return new ColorPropertyEditor(property);

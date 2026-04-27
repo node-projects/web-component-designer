@@ -1,4 +1,3 @@
-import { css } from '@node-projects/base-custom-webcomponent';
 import { OverlayLayer } from '../OverlayLayer.js';
 import { AbstractDesignerPointerExtension } from './AbstractDesignerPointerExtension.js';
 
@@ -24,8 +23,4 @@ export class CursorLinePointerExtension extends AbstractDesignerPointerExtension
   dispose() {
     super._removeAllOverlays();
   }
-
-  style = css`
-    .svg-cursor-line { stroke: black; pointer-events: none }
-  `;
 }

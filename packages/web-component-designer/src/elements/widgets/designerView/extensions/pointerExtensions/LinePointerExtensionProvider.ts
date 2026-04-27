@@ -1,15 +1,15 @@
 import { css } from '@node-projects/base-custom-webcomponent';
 import { IDesignerCanvas } from '../../IDesignerCanvas.js';
-import { CursorLinePointerExtension } from './CursorLinePointerExtension.js';
 import { IDesignerPointerExtension } from './IDesignerPointerExtension.js';
 import { IDesignerPointerExtensionProvider } from './IDesignerPointerExtensionProvider.js';
+import { LinePointerExtension } from './LinePointerExtension.js';
 
-export class CursorLinePointerExtensionProvider implements IDesignerPointerExtensionProvider { 
+export class LinePointerExtensionProvider implements IDesignerPointerExtensionProvider {
   getExtension(designerCanvas: IDesignerCanvas): IDesignerPointerExtension {
-    return new CursorLinePointerExtension(designerCanvas.extensionManager, designerCanvas)
+    return new LinePointerExtension(designerCanvas.extensionManager, designerCanvas)
   }
   
   style = css`
-    .svg-cursor-line { stroke: black; pointer-events: none }
+    .svg-cursor-line-dashed { stroke: black; pointer-events: none; stroke-dasharray: 4 4 }
   `;
 }
