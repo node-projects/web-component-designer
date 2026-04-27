@@ -12,7 +12,10 @@ import { DesignerCanvas } from '../designerCanvas.js';
 const offset = 10;
 
 type optionsType = {
-  angleStep?: number; // if true, lines will be straightened to the nearest angle defined by angleStep
+  angleStep?: number; // if true, lines will be straightened to the nearest angle defined by angleStep,
+  strokeColor?: string,
+  fillBrush?: string,
+  strokeThickness?: string
 }
 
 export class DrawPathTool implements ITool {
@@ -32,7 +35,7 @@ export class DrawPathTool implements ITool {
   private _pointerId?: number;
   private _angleStep?: number;
 
-  constructor(options?: optionsType) {
+  constructor(private options?: optionsType) {
     if (options?.angleStep !== undefined) {
       this._angleStep = options.angleStep;
     }
@@ -61,9 +64,9 @@ export class DrawPathTool implements ITool {
           this._path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           this._pathD = "M " + currentPoint.x + " " + currentPoint.y + " ";
           this._path.setAttribute("d", this._pathD);
-          this._path.setAttribute("stroke", designerCanvas.serviceContainer.globalContext.strokeColor);
-          this._path.setAttribute("fill", designerCanvas.serviceContainer.globalContext.fillBrush);
-          this._path.setAttribute("stroke-width", designerCanvas.serviceContainer.globalContext.strokeThickness);
+          this._path.setAttribute("stroke", this.options?.strokeColor ?? designerCanvas.serviceContainer.globalContext.strokeColor);
+          this._path.setAttribute("fill", this.options?.fillBrush ?? designerCanvas.serviceContainer.globalContext.fillBrush);
+          this._path.setAttribute("stroke-width", this.options?.strokeThickness ?? designerCanvas.serviceContainer.globalContext.strokeThickness);
           designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foreground);
           this._startPoint = currentPoint;
         }
