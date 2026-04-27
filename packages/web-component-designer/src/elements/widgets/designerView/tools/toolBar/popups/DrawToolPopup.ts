@@ -1,6 +1,5 @@
 import { html, css } from '@node-projects/base-custom-webcomponent';
 import { assetsPath } from "../../../../../../Constants.js";
-import { DesignerToolbar } from '../DesignerToolbar.js';
 import { AbstractBaseToolPopup } from './AbstractBaseToolPopup.js';
 import { IDesignerCanvas } from '../../../IDesignerCanvas.js';
 import { CommandType } from '../../../../../../commandHandling/CommandType.js';
