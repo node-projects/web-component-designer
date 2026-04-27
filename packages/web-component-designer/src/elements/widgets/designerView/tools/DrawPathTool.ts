@@ -96,8 +96,8 @@ export class DrawPathTool implements ITool {
         } else {  // shows line preview
           if (this._path) {
             let straightLine = currentPoint;
-            if (event.shiftKey) {
-              straightLine = straightenLine(this._lastPoint!, currentPoint);
+            if (event.shiftKey || this._angleStep) {
+              straightLine = straightenLine(this._lastPoint!, currentPoint, this._angleStep ?? 45);
             }
             this._path.setAttribute("d", this._pathD + "L " + straightLine.x + " " + straightLine.y) + " ";
           }
@@ -171,8 +171,10 @@ export class DrawPathTool implements ITool {
     svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
     svg.style.height = Math.round(coords.height + 2 * offset) + 'px';
     svg.style.overflow = 'visible';
-    svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
-    svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
+    svg.style.stroke = this.options?.strokeColor ?? designerCanvas.serviceContainer.globalContext.strokeColor;
+    svg.style.fill = this.options?.fillBrush ?? designerCanvas.serviceContainer.globalContext.fillBrush;
+    svg.style.strokeWidth = this.options?.strokeThickness ?? designerCanvas.serviceContainer.globalContext.strokeThickness;
+
     //designerView.rootDesignItem.element.appendChild(svg);
     this._path = undefined;
     this._pathD = undefined;
