@@ -1,9 +1,21 @@
-import { BaseCustomWebComponentLazyAppend, css, cssFromString, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { BaseCustomWebComponentLazyAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { CommandType, IActivateable, ICodeView, InstanceServiceContainer, IStringPosition, IUiCommand, IUiCommandHandler } from '@node-projects/web-component-designer';
-import type * as monacoType from 'monaco-editor'
+import type * as monacoType from 'monaco-editor';
 
 export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements ICodeView, IActivateable, IUiCommandHandler {
-  static monacoLib: { editor: typeof monacoType.editor, Range: typeof monacoType.Range };
+  private static _monaco: { editor: typeof monacoType.editor, Range: typeof monacoType.Range };
+  private static _monacoStyle: CSSStyleSheet;
+  public static async getMonacoLib() {
+    if (CodeViewMonaco._monaco) {
+      return CodeViewMonaco._monaco;
+    }
+    const monaco = await import('monaco-editor');
+    CodeViewMonaco._monaco = monaco;
+    //@ts-ignore
+    CodeViewMonaco._monacoStyle = (await import("monaco-editor/min/vs/editor/editor.main.css", { with: { type: 'css' } })).default;
+    return monaco;
+  }
+
   private _disableSelectionAfterSel: boolean;
 
   dispose(): void {
@@ -23,9 +35,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
   public set theme(value: string) {
     this._theme = value;
-    //@ts-ignore
-    CodeViewMonaco.monacoLib ??= window.monaco;
-    CodeViewMonaco.monacoLib.editor.setTheme(value);
+    CodeViewMonaco.getMonacoLib().then(monaco => monaco.editor.setTheme(value));
   }
 
   #code: string = null;
@@ -72,9 +82,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     }
     `;
 
-  static override readonly template = html`
-      <div id="container" style="overflow: hidden; width: 100%; height: 100%; position: absolute;"></div>
-  `;
+  static override readonly template = html`<div id="container" style="overflow: hidden; width: 100%; height: 100%; position: absolute;"></div>`;
 
   executeCommand(command: IUiCommand) {
     switch (command.type) {
@@ -110,28 +118,6 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     return false;
   }
 
-  static loadMonacoEditorViaRequire(path = 'node_modules/monaco-editor/min/vs') {
-    return new Promise<void>(async resolve => {
-      //@ts-ignore
-      require.config({ paths: { 'vs': path } });
-      //@ts-ignore
-      require(['vs/editor/editor.main'], () => {
-        //@ts-ignore
-        CodeViewMonaco.monacoLib = window.monaco;
-        resolve();
-      });
-    });
-  }
-
-  static async loadMonacoEditorViaImport() {
-    let monaco = await import('monaco-editor');
-    CodeViewMonaco.monacoLib = monaco;
-  }
-
-  static setMonacoLibrary(monaco: any) {
-    CodeViewMonaco.monacoLib = monaco;
-  }
-
   constructor() {
     super();
     this._restoreCachedInititalValues();
@@ -141,15 +127,10 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   async ready() {
     this._parseAttributesToProperties();
 
-    //@ts-ignore
-    let style = await import("monaco-editor/min/vs/editor/editor.main.css", { with: { type: 'css' } });
-
-    this.shadowRoot.adoptedStyleSheets = [cssFromString(style), (<any>this.constructor).style];
+    const monaco = await CodeViewMonaco.getMonacoLib();
+    this.shadowRoot.adoptedStyleSheets = [CodeViewMonaco._monacoStyle, (<any>this.constructor).style];
 
     this._editor = this._getDomElement<HTMLDivElement>('container');
-
-    //@ts-ignore
-    CodeViewMonaco.monacoLib ??= window.monaco;
 
     const resizeObserver = new ResizeObserver(() => {
       if (this._editor.offsetWidth > 0) {
@@ -181,7 +162,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
           options.scrollbar.horizontal = 'visible';
         }
 
-        this._monacoEditor = CodeViewMonaco.monacoLib.editor.create(this._editor, options);
+        this._monacoEditor = monaco.editor.create(this._editor, options);
 
         let selectionTimeout;
         let disableCursorChange;
@@ -260,9 +241,11 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       this._disableSelectionAfterUpd = true;
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
-      CodeViewMonaco.monacoLib.editor.setTheme(this._theme);
-      CodeViewMonaco.monacoLib.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
       this._disableSelectionAfterUpd = false;
+      CodeViewMonaco.getMonacoLib().then(monaco => {
+        monaco.editor.setTheme(this._theme);
+        monaco.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
+      });
     }
   }
 
@@ -278,7 +261,9 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       let point2 = model.getPositionAt(position.start + position.length);
       setTimeout(() => {
         this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
-        this._monacoEditor.revealRangeInCenterIfOutsideViewport(new CodeViewMonaco.monacoLib.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
+        CodeViewMonaco.getMonacoLib().then(monaco => {
+          this._monacoEditor.revealRangeInCenterIfOutsideViewport(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
+        });
         setTimeout(() => {
           this._disableSelectionAfterSel = false;
         }, 50);
