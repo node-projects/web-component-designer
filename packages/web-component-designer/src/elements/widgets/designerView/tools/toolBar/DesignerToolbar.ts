@@ -69,7 +69,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
       if (typeof designerToolbarButton.popup === 'string')
         instance = document.createElement(designerToolbarButton.popup);
       else
-        instance = new designerToolbarButton.popup();
+        instance = new designerToolbarButton.popup(this.designerView.designerCanvas);
       this._popupContainer.appendChild(instance);
     }
   }
@@ -79,27 +79,6 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
       this._popupContainer.innerHTML = '';
     }
     this.designerView.designerCanvas.executeCommand({ type: CommandType.setTool, parameter: tool });
-  }
-
-  public setStrokeColor(color: string) {
-    if (this._popupContainer.children.length) {
-      this._popupContainer.innerHTML = '';
-    }
-    this.designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeColor, parameter: color });
-  }
-
-  public setFillBrush(color: string) {
-    if (this._popupContainer.children.length) {
-      this._popupContainer.innerHTML = '';
-    }
-    this.designerView.designerCanvas.executeCommand({ type: CommandType.setFillBrush, parameter: color });
-  }
-
-  public setStrokeThickness(input: string) {
-    if (this._popupContainer.children.length) {
-      this._popupContainer.innerHTML = '';
-    }
-    this.designerView.designerCanvas.executeCommand({ type: CommandType.setStrokeThickness, parameter: input });
   }
 }
 

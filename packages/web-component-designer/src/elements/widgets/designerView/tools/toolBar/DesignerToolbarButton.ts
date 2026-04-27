@@ -30,7 +30,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
 
   public tools: Record<string | NamedTools, { icon: string }>;
 
-  public popup: string | (new (...args: any[]) => HTMLElement);
+  public popup: string | (new (designerCanvas?: IDesignerCanvas) => HTMLElement);
   public currentToolOnButton: string;
 
   private _img: HTMLImageElement;

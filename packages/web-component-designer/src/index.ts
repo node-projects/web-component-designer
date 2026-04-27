@@ -129,9 +129,10 @@ export * from "./elements/services/modelCommandService/DefaultModelCommandServic
 export type { IMultiplayerService } from "./elements/services/multiplayerService/IMultiplayerService.js";
 export * from "./elements/services/multiplayerService/MultiplayerService.js";
 
-
-export * from "./elements/services/propertiesService/DefaultEditorTypesService.js";
-export type { IEditorTypesService } from "./elements/services/propertiesService/IEditorTypesService.js";
+export * from "./elements/services/propertiesService/DefaultPropertyEditorTypesService.js";
+export type { IPropertyEditorTypesService } from "./elements/services/propertiesService/IPropertyEditorTypesService.js";
+export * from "./elements/services/propertiesService/DefaultEditorTypeService.js";
+export type { IEditorTypeService } from "./elements/services/propertiesService/IEditorTypeService.js";
 
 export type { IPropertiesService } from "./elements/services/propertiesService/IPropertiesService.js";
 export type { IProperty } from "./elements/services/propertiesService/IProperty.js";

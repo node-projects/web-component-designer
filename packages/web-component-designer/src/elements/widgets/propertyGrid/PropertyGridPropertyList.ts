@@ -253,7 +253,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     if (property.createEditor)
       editor = property.createEditor(property);
     else {
-      editor = this._serviceContainer.forSomeServicesTillResult("editorTypesService", x => x.getEditorForProperty(property));
+      editor = this._serviceContainer.forSomeServicesTillResult("propertyEditorTypesService", x => x.getEditorForProperty(property));
     }
     if (editor) {
       let rectContainer = document.createElement("div")

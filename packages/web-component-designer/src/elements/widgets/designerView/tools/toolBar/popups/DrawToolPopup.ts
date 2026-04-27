@@ -2,6 +2,8 @@ import { html, css } from '@node-projects/base-custom-webcomponent';
 import { assetsPath } from "../../../../../../Constants.js";
 import { DesignerToolbar } from '../DesignerToolbar.js';
 import { AbstractBaseToolPopup } from './AbstractBaseToolPopup.js';
+import { IDesignerCanvas } from '../../../IDesignerCanvas.js';
+import { CommandType } from '../../../../../../commandHandling/CommandType.js';
 
 export class DrawToolPopup extends AbstractBaseToolPopup {
 
@@ -11,28 +13,16 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
           min-height: 300px;
       }
       .inputs{
-        float: left;
-        margin-top: 5px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 5px;
         align-items: center;
-      }
-      .input {
-        display: flex;
-        align-items: center; 
-        margin-top: 5px;
       }
       .text {
         margin-left: 5px;
         font-size: 14px;
       }
-      .strokecolor{ 
-        float: both;
-      }
-      .fillbrush{
-        float: both;
-      }
-      .strokethickness{
-        float: both;
-      }`]
+      `]
 
   static override template = html`
         <div class="container">
@@ -45,40 +35,35 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
               <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/tools/DrawEllipTool.svg');"></div>
               <div class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" style="background-image: url('${assetsPath}images/tools/ColorPickerTool.svg');"></div>
             </div>
-            <div class="inputs">
-              <div class="input">
-                <input id="strokecolor" class="strokecolor" type="color" title="stroke color" value="#000000" style="padding: 0; width:31px; height:31px;">
+            <div class="inputs">   
                 <text class="text">Stroke Color</text>
-              </div>
-              <div class="input">
-                <input id="fillbrush" class="fillbrush" type="color" title="fill brush" value="#ffffff" style="padding: 0; width:31px; height:31px;">
+                [[this.getEditor('setStrokeColor', 'color', {}, this.designerCanvas.serviceContainer.globalContext.strokeColor)]] 
                 <text class="text">Fill Brush</text>
-              </div>
-              <div class="input">
-                <input id="strokethickness" class="strokethickness" type="range" title="stroke thickness" min="1" max="20" value="3" style="padding: 0; width:80px; height:20px; margin-right: 5px;">
+                [[this.getEditor('setFillBrush', 'color', {}, this.designerCanvas.serviceContainer.globalContext.fillBrush)]] 
                 <text class="text">Stroke Thickness</text>
-              </div>
+                [[this.getEditor('setStrokeThickness', 'range', { min: 1, max: 20, step: 1 }, this.designerCanvas.serviceContainer.globalContext.strokeThickness)]] 
             </div>
           </main>
         </div>`;
 
-  constructor() {
+  constructor(private designerCanvas: IDesignerCanvas) {
     super();
+  }
 
-    if(this.shadowRoot.querySelector("input.strokecolor")) {
-      let input = <HTMLInputElement>this._getDomElement("strokecolor");
-      input.onchange = () => (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setStrokeColor(input.value);
-    }
+  ready() {
+    this._bindingsParse();
+    this.designerCanvas.serviceContainer.globalContext.strokeColor
+  }
 
-    if(this.shadowRoot.querySelector("input.fillbrush")) {
-      let input = <HTMLInputElement>this._getDomElement("fillbrush");
-      input.onchange = () => (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setFillBrush(input.value);
-    }
-
-    if(this.shadowRoot.querySelector("input.strokethickness")) {
-      let input = <HTMLInputElement>this._getDomElement("strokethickness");
-      input.onchange = () => (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setStrokeThickness(input.value);
-    }
+  //todo currentvalue
+  getEditor(commandType: CommandType, type: string, additional: { [key: string]: any }, currentValue: any) {
+    const res = this.designerCanvas.serviceContainer.forSomeServicesTillResult('editorTypeService',
+      x => x.getEditor(type, {
+        changedCallback: (newValue) => this.designerCanvas.executeCommand({ type: commandType, parameter: newValue }),
+        ...additional
+      }));
+    res.setValue(currentValue);
+    return res.element;
   }
 }
 

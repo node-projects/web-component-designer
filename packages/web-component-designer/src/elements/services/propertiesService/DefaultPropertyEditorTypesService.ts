@@ -1,4 +1,4 @@
-import { IEditorTypesService } from './IEditorTypesService.js';
+import { IPropertyEditorTypesService } from './IPropertyEditorTypesService.js';
 import { IProperty } from './IProperty.js';
 import { IPropertyEditor } from './IPropertyEditor.js';
 import { ColorPropertyEditor } from './propertyEditors/ColorPropertyEditor.js';
@@ -14,7 +14,7 @@ import { FontPropertyEditor } from './propertyEditors/FontPropertyEditor.js';
 import { UnitPropertyEditor } from './propertyEditors/UnitPropertyEditor.js';
 import { isUnitPropertyType } from './propertyEditors/UnitPropertyEditorConfig.js';
 
-export class DefaultEditorTypesService implements IEditorTypesService {
+export class DefaultPropertyEditorTypesService implements IPropertyEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
     if (property.createEditor)
       return property.createEditor(property);

@@ -4,7 +4,7 @@ import { LitElementPropertiesService } from './propertiesService/services/LitEle
 import { NativeElementsPropertiesService } from './propertiesService/services/NativeElementsPropertiesService.js';
 import { SVGElementsPropertiesService } from './propertiesService/services/SVGElementsPropertiesService.js';
 import { DefaultInstanceService } from './instanceService/DefaultInstanceService.js';
-import { DefaultEditorTypesService } from './propertiesService/DefaultEditorTypesService.js';
+import { DefaultPropertyEditorTypesService } from './propertiesService/DefaultPropertyEditorTypesService.js';
 import { BaseCustomWebComponentPropertiesService } from './propertiesService/services/BaseCustomWebComponentPropertiesService.js';
 import { DefaultPlacementService } from './placementService/DefaultPlacementService.js';
 import { DefaultHtmlParserService } from './htmlParserService/DefaultHtmlParserService.js';
@@ -113,6 +113,7 @@ import { SearchService } from './searchService/SearchService.js';
 import { BasicContextMenu } from '../widgets/designerView/extensions/contextMenu/BasicContextMenu.js';
 import { ProjectiveTransformExtension } from '../widgets/designerView/extensions/transforms/ProjectiveTransformExtension.js';
 import { ProjectiveTransformExtensionProvider } from '../widgets/designerView/extensions/transforms/ProjectiveTransformExtensionProvider.js';
+import { DefaultEditorTypeService } from './propertiesService/DefaultEditorTypeService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -131,7 +132,8 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService());
   serviceContainer.register("propertyGroupsService", new PropertyGroupsService());
   serviceContainer.register("instanceService", new DefaultInstanceService());
-  serviceContainer.register("editorTypesService", new DefaultEditorTypesService());
+  serviceContainer.register("propertyEditorTypesService", new DefaultPropertyEditorTypesService());
+  serviceContainer.register("editorTypeService", new DefaultEditorTypeService());
   serviceContainer.register("htmlWriterService", new HtmlWriterService());
   serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
