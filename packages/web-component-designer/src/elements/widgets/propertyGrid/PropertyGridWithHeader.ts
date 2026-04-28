@@ -78,7 +78,6 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   private _innerRect: HTMLDivElement;
   private _propertiesService: ContentAndIdPropertiesService;
   private _configButton: HTMLButtonElement;
-  //private _contentChangedHandler: Disposable;
 
   constructor() {
     super();
@@ -157,19 +156,14 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
   public set instanceServiceContainer(value: InstanceServiceContainer) {
     const currentContainer = value;
     this._instanceServiceContainer = currentContainer;
-    this._selectionChangedHandler?.dispose()
-    //this._contentChangedHandler?.dispose();
+    this._selectionChangedHandler?.dispose();
     if (currentContainer) {
       this._selectionChangedHandler = currentContainer.selectionService.onSelectionChanged.on(async e => {
         this.propertyGrid.instanceServiceContainer = currentContainer;
         await sleep(20); // delay assignment a little bit, so onblur above could still set the value.
-        //await this._refreshHeaderForCurrentSelection(currentContainer);
+        await this._refreshHeaderForCurrentSelection(currentContainer);
       });
-      /*this._contentChangedHandler = currentContainer.onContentChanged.on(async e => {
-        if (doesContentChangeAffectDesignItems(e, currentContainer.selectionService.selectedElements))
-          await this._refreshHeaderForCurrentSelection(currentContainer);
-      });*/
-      void this._refreshHeaderForCurrentSelection(currentContainer);
+      this._refreshHeaderForCurrentSelection(currentContainer);
     } else {
       this._configButton.style.display = 'none';
       

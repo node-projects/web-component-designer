@@ -1,4 +1,5 @@
 export enum BindingTarget {
+    /** Bindings for example starting with . to explicitly target a property */
     explicitProperty = 'explicitProperty',
     property = 'property',
     attribute = 'attribute',

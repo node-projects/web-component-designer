@@ -76,7 +76,6 @@ export class ContentAndIdPropertiesService extends AbstractPropertiesService {
       let all = true;
       let some = false;
       if (designItems != null && designItems.length !== 0) {
-
         designItems.forEach((x) => {
           let has = false;
           has = x.element.childNodes.length > 0;
