@@ -102,6 +102,8 @@ export interface ShowMessageBox {
   width?: string;
   height?: string;
   additionalData?: string;
+
+  exitScriptOnCancel?: boolean; // if true the script execution will be stopped when the user clicks a button that is considered negative (cancel, no, retry, abort)
 }
 
 export interface ShowPrompt {
@@ -123,6 +125,10 @@ export interface ShowPrompt {
    * @TJS-format signal
    */
   resultSignal: string;
+  /**
+   * if true the script execution will be stopped when the user clicks a button that is considered negative (cancel, no, retry, abort)
+   */
+  exitScriptOnCancel?: boolean;
 
   width?: string;
   height?: string;

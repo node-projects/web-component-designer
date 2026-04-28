@@ -298,6 +298,7 @@ export class ScriptSystem {
 
       case 'ShowMessageBox': {
         let res = null;
+        const exitScriptOnCancel = await this.getValue(command.exitScriptOnCancel, context);
         const buttons = await this.getValue(command.buttons, context);
         if (buttons == 'yesNo') {
           const message = await this.getValue(command.message, context);
@@ -313,6 +314,11 @@ export class ScriptSystem {
         if (resultSignal) {
           this._visualizationHandler.setState(resultSignal, res);
         }
+        
+        if (exitScriptOnCancel && res != 1) {
+          return false;
+        }
+        
         break;
       }
 
