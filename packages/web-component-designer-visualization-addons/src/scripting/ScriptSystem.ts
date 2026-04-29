@@ -8,9 +8,17 @@ import { Script } from "./Script.js";
 import { ScriptCommands, signalTarget } from "./ScriptCommands.js";
 import Long from 'long'
 import { ScriptUpgrades } from "./ScriptUpgrader.js";
+import { cyclicAttributeName } from "../services/VisualizationEventsService.js";
 
 export type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any>, relativeSignalsPath?: string };
 
+type ContextCreator = (
+  root: HTMLElement,
+  event: Event | null,
+  element: Element,
+  parameters: Record<string, any>,
+  relativeSignalsPath: string
+) => any;
 export class ScriptSystem {
 
   _visualizationHandler: VisualizationHandler;
@@ -314,11 +322,11 @@ export class ScriptSystem {
         if (resultSignal) {
           this._visualizationHandler.setState(resultSignal, res);
         }
-        
+
         if (exitScriptOnCancel && res != 1) {
           return false;
         }
-        
+
         break;
       }
 
@@ -473,74 +481,162 @@ export class ScriptSystem {
     return { root, event, element, parameters, relativeSignalsPath };
   }
 
-  async assignAllScripts(source: string, javascriptCode: string, shadowRoot: ShadowRoot, instance: HTMLElement, visualizationHandler: VisualizationHandler, contextCreator?: (root: HTMLElement, event: Event, element: Element, parameters: Record<string, any>, relativeSignalsPath: string) => any, assignExternalScript?: (element: Element, event: string, scriptData: any) => void, runInitalization?: (jsObject: VisualisationElementScript) => void): Promise<VisualisationElementScript> {
-    const allElements = shadowRoot.querySelectorAll('*');
+  async assignAllScripts(
+    source: string,
+    javascriptCode: string,
+    shadowRoot: ShadowRoot,
+    instance: HTMLElement,
+    visualizationHandler: VisualizationHandler,
+    contextCreator?: (root: HTMLElement, event: Event, element: Element, parameters: Record<string, any>, relativeSignalsPath: string) => any,
+    assignExternalScript?: (element: Element, event: string, scriptData: any) => void,
+    runInitalization?: (jsObject: VisualisationElementScript) => void
+  ): Promise<VisualisationElementScript> {
     contextCreator ??= this.createScriptContext;
-    let jsObject: VisualisationElementScript = null;
-    if (javascriptCode) {
-      try {
-        const scriptUrl = URL.createObjectURL(new Blob([javascriptCode], { type: 'application/javascript' }));
-        jsObject = await import(scriptUrl);
-        if (runInitalization)
-          runInitalization(jsObject);
-        else {
-          if (jsObject.init) {
-            jsObject.init(instance, shadowRoot);
+
+    const jsObject = await this.loadAndInitJsObject(source, javascriptCode, shadowRoot, instance, runInitalization);
+
+    for (const element of shadowRoot.querySelectorAll('*')) {
+      for (const attr of element.attributes) {
+        if (attr.name[0] !== '@') continue;
+
+        try {
+          const evtName = attr.name.substring(1);
+          const script = attr.value.trim();
+          const isCyclic = evtName.startsWith(cyclicAttributeName);
+          const interval = isCyclic ? parseInt(evtName.substring(evtName.indexOf(':') + 1)) : null;
+
+          const handler = await this.resolveHandler(
+            script, jsObject, element, shadowRoot, instance,
+            visualizationHandler, contextCreator, assignExternalScript, evtName
+          );
+
+          if (handler) {
+            this.bindHandler(element, evtName, isCyclic, interval, handler);
           }
-        }
-      } catch (err) {
-        console.error('error parsing javascript - ' + source, err)
-      }
-    }
-    for (let e of allElements) {
-      for (let a of e.attributes) {
-        if (a.name[0] == '@') {
-          try {
-            let evtName = a.name.substring(1);
-            let script = a.value.trim();
-            if (script[0] == '{') {
-              let scriptObj: Script = JSON.parse(script);
-              if ('commands' in scriptObj) {
-                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, contextCreator(instance, evt, e, scriptObj.parameters, scriptObj.relativeSignalsPath)));
-              } else if ('blocks' in scriptObj) {
-                let compiledFunc: Awaited<ReturnType<typeof generateEventCodeFromBlockly>> = null;
-                e.addEventListener(evtName, async (evt) => {
-                  if (!compiledFunc)
-                    compiledFunc = await generateEventCodeFromBlockly(scriptObj);
-                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '', visualizationHandler, contextCreator(instance, evt, e, (<any>scriptObj).parameters, (<any>scriptObj).relativeSignalsPath));
-                });
-              } else {
-                if (assignExternalScript)
-                  assignExternalScript(e, evtName, scriptObj);
-                else {
-                  if ('name' in scriptObj) {
-                    //@ts-ignore
-                    const nm = scriptObj.name;
-                    e.addEventListener(evtName, (evt) => {
-                      if (!jsObject[nm])
-                        console.warn('javascript function named: ' + nm + ' not found, maybe missing a "export" ?');
-                      else
-                        jsObject[nm](evt, e, shadowRoot, instance, (<{ parameters: any }>scriptObj).parameters);
-                    });
-                  }
-                }
-              }
-            } else {
-              e.addEventListener(evtName, (evt) => {
-                if (!jsObject[script])
-                  console.warn('javascript function named: ' + script + ' not found, maybe missing a "export" ?');
-                else
-                  jsObject[script](evt, e, shadowRoot, instance);
-              });
-            }
-          }
-          catch (err) {
-            console.warn('error assigning script', e, a);
-          }
+        } catch (err) {
+          console.warn('error assigning script', element, attr);
         }
       }
     }
 
     return jsObject;
+  }
+
+  // --- Hilfsmethoden ---
+
+  private async loadAndInitJsObject(
+    source: string,
+    javascriptCode: string,
+    shadowRoot: ShadowRoot,
+    instance: HTMLElement,
+    runInitalization?: (jsObject: VisualisationElementScript) => void
+  ): Promise<VisualisationElementScript | null> {
+    if (!javascriptCode) return null;
+
+    try {
+      const scriptUrl = URL.createObjectURL(new Blob([javascriptCode], { type: 'application/javascript' }));
+      const jsObject = await import(scriptUrl);
+
+      if (runInitalization) {
+        runInitalization(jsObject);
+      } else {
+        jsObject.init?.(instance, shadowRoot);
+      }
+
+      return jsObject;
+    } catch (err) {
+      console.error('error parsing javascript - ' + source, err);
+      return null;
+    }
+  }
+
+  // Gibt eine normalisierte Handler-Funktion (evt) => void zurück
+  private async resolveHandler(
+    script: string,
+    jsObject: VisualisationElementScript,
+    element: Element,
+    shadowRoot: ShadowRoot,
+    instance: HTMLElement,
+    visualizationHandler: VisualizationHandler,
+    contextCreator: ContextCreator,
+    assignExternalScript?: (element: Element, event: string, scriptData: any) => void,
+    evtName?: string
+  ): Promise<((evt: Event | null) => void) | null> {
+
+    // Plain-String: direkte Referenz auf eine JS-Funktion
+    if (script[0] !== '{') {
+      return (evt) => {
+        if (!jsObject?.[script]) {
+          console.warn(`javascript function named: "${script}" not found, maybe missing a "export" ?`);
+        } else {
+          jsObject[script](evt, element, shadowRoot, instance);
+        }
+      };
+    }
+
+    const scriptObj: Script = JSON.parse(script);
+
+    // commands-Script
+    if ('commands' in scriptObj) {
+      return (evt) => this.execute(
+        scriptObj.commands,
+        contextCreator(instance, evt, element, scriptObj.parameters, scriptObj.relativeSignalsPath)
+      );
+    }
+
+    // Blockly-Script
+    if ('blocks' in scriptObj) {
+      let compiledFunc: Awaited<ReturnType<typeof generateEventCodeFromBlockly>> | null = null;
+      return async (evt) => {
+        compiledFunc ??= await generateEventCodeFromBlockly(scriptObj);
+        compiledFunc(
+          evt, shadowRoot,
+          (scriptObj as any).parameters,
+          (scriptObj as any).relativeSignalsPath ?? '',
+          visualizationHandler,
+          contextCreator(instance, evt, element, (scriptObj as any).parameters, (scriptObj as any).relativeSignalsPath)
+        );
+      };
+    }
+
+    // Externes Script oder benannte JS-Funktion
+    if ('name' in scriptObj) {
+      if (assignExternalScript) {
+        assignExternalScript(element, evtName, scriptObj);
+        return null; // wird extern verwaltet
+      }
+
+      const nm = (scriptObj as any).name;
+      return (evt) => {
+        if (!jsObject?.[nm]) {
+          console.warn(`javascript function named: "${nm}" not found, maybe missing a "export" ?`);
+        } else {
+          jsObject[nm](evt, element, shadowRoot, instance, (scriptObj as any).parameters);
+        }
+      };
+    }
+
+    return null;
+  }
+
+  private bindHandler(
+    element: Element,
+    evtName: string,
+    isCyclic: boolean,
+    interval: number | null,
+    handler: (evt: Event | null) => void
+  ): void {
+    if (!isCyclic) {
+      element.addEventListener(evtName, handler);
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      if (!element.isConnected) {
+        clearInterval(intervalId);
+      } else {
+        handler(null);
+      }
+    }, interval);
   }
 }
