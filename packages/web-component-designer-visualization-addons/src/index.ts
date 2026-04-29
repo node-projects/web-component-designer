@@ -29,5 +29,6 @@ export * from './services/VisualizationBindingsRefactorService.js';
 export * from './services/PropertyGridDragDropService.js';
 export * from './services/ScriptRefactorService.js';
 export * from './services/SignalPropertyEditor.js';
+export * from './services/VisualizationEventsService.js';
 
 //export * from './setupVisuService.js';

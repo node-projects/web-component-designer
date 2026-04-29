@@ -8,6 +8,7 @@ import { Script } from "./Script.js";
 import { ScriptCommands, signalTarget } from "./ScriptCommands.js";
 import Long from 'long'
 import { ScriptUpgrades } from "./ScriptUpgrader.js";
+import { cyclicAttributeName } from "../services/VisualizationEventsService.js";
 
 export type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any>, relativeSignalsPath?: string };
 
@@ -314,11 +315,11 @@ export class ScriptSystem {
         if (resultSignal) {
           this._visualizationHandler.setState(resultSignal, res);
         }
-        
+
         if (exitScriptOnCancel && res != 1) {
           return false;
         }
-        
+
         break;
       }
 
@@ -498,17 +499,44 @@ export class ScriptSystem {
           try {
             let evtName = a.name.substring(1);
             let script = a.value.trim();
+            let isCyclicScript = evtName.startsWith(cyclicAttributeName);
+
             if (script[0] == '{') {
               let scriptObj: Script = JSON.parse(script);
               if ('commands' in scriptObj) {
-                e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, contextCreator(instance, evt, e, scriptObj.parameters, scriptObj.relativeSignalsPath)));
+                if (isCyclicScript) {
+                  let interval = parseInt(evtName.substring(evtName.indexOf(':') + 1));
+                  let intervalId = setInterval(() => {
+                    if (!e.isConnected) {
+                      clearInterval(intervalId);
+                    }
+                    else {
+                      this.execute(scriptObj.commands, contextCreator(instance, null, e, scriptObj.parameters, scriptObj.relativeSignalsPath))
+                    }
+                  }, interval);
+                } else {
+                  e.addEventListener(evtName, (evt) => this.execute(scriptObj.commands, contextCreator(instance, evt, e, scriptObj.parameters, scriptObj.relativeSignalsPath)));
+                }
               } else if ('blocks' in scriptObj) {
                 let compiledFunc: Awaited<ReturnType<typeof generateEventCodeFromBlockly>> = null;
-                e.addEventListener(evtName, async (evt) => {
-                  if (!compiledFunc)
-                    compiledFunc = await generateEventCodeFromBlockly(scriptObj);
-                  compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '', visualizationHandler, contextCreator(instance, evt, e, (<any>scriptObj).parameters, (<any>scriptObj).relativeSignalsPath));
-                });
+                if (isCyclicScript) {
+                  let interval = parseInt(evtName.substring(evtName.indexOf(':') + 1));
+                  let intervalId = setInterval(async () => {
+                    if (!e.isConnected) {
+                      clearInterval(intervalId);
+                    } else {
+                      if (!compiledFunc)
+                        compiledFunc = await generateEventCodeFromBlockly(scriptObj);
+                      compiledFunc(null, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '', visualizationHandler, contextCreator(instance, null, e, (<any>scriptObj).parameters, (<any>scriptObj).relativeSignalsPath));
+                    }
+                  }, interval);
+                } else {
+                  e.addEventListener(evtName, async (evt) => {
+                    if (!compiledFunc)
+                      compiledFunc = await generateEventCodeFromBlockly(scriptObj);
+                    compiledFunc(evt, shadowRoot, (<{ parameters: any }>scriptObj).parameters, (<{ relativeSignalsPath: string }>scriptObj).relativeSignalsPath ?? '', visualizationHandler, contextCreator(instance, evt, e, (<any>scriptObj).parameters, (<any>scriptObj).relativeSignalsPath));
+                  });
+                }
               } else {
                 if (assignExternalScript)
                   assignExternalScript(e, evtName, scriptObj);
@@ -516,22 +544,56 @@ export class ScriptSystem {
                   if ('name' in scriptObj) {
                     //@ts-ignore
                     const nm = scriptObj.name;
-                    e.addEventListener(evtName, (evt) => {
-                      if (!jsObject[nm])
-                        console.warn('javascript function named: ' + nm + ' not found, maybe missing a "export" ?');
-                      else
-                        jsObject[nm](evt, e, shadowRoot, instance, (<{ parameters: any }>scriptObj).parameters);
-                    });
+                    if (isCyclicScript) {
+                      let interval = parseInt(evtName.substring(evtName.indexOf(':') + 1));
+                      let intervalId = setInterval(() => {
+                        if (!e.isConnected) {
+                          clearInterval(intervalId);
+                        } else {
+                          if (!jsObject[nm]) {
+                            console.warn('javascript function named: ' + nm + ' not found, maybe missing a "export" ?');
+                          } else {
+                            jsObject[nm](null, e, shadowRoot, instance, (<{ parameters: any }>scriptObj).parameters);
+                          }
+                        }
+                      }, interval);
+                    }
+                    else {
+                      e.addEventListener(evtName, (evt) => {
+                        if (!jsObject[nm])
+                          console.warn('javascript function named: ' + nm + ' not found, maybe missing a "export" ?');
+                        else
+                          jsObject[nm](evt, e, shadowRoot, instance, (<{ parameters: any }>scriptObj).parameters);
+                      });
+                    }
                   }
                 }
               }
             } else {
-              e.addEventListener(evtName, (evt) => {
-                if (!jsObject[script])
-                  console.warn('javascript function named: ' + script + ' not found, maybe missing a "export" ?');
-                else
-                  jsObject[script](evt, e, shadowRoot, instance);
-              });
+              if (isCyclicScript) {
+                let interval = parseInt(evtName.substring(evtName.indexOf(':') + 1));
+                let intervalId = setInterval(() => {
+                  if (!e.isConnected) {
+                    clearInterval(intervalId);
+                  } else {
+                    if (!jsObject[script]) {
+
+                      console.warn('javascript function named: ' + script + ' not found, maybe missing a "export" ?');
+                    } else {
+                      jsObject[script](null, e, shadowRoot, instance);
+                    }
+                  }
+                }, interval);
+              } else {
+                e.addEventListener(evtName, (evt) => {
+                  if (!jsObject[script]) {
+
+                    console.warn('javascript function named: ' + script + ' not found, maybe missing a "export" ?');
+                  } else {
+                    jsObject[script](evt, e, shadowRoot, instance);
+                  }
+                });
+              }
             }
           }
           catch (err) {
