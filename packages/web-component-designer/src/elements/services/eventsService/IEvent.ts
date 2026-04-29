@@ -1,5 +1,6 @@
 export interface IEvent {
-    name: string;
-    propertyName?: string;
-    eventObjectName?: string
+  name: string;
+  propertyName?: string;
+  eventObjectName?: string;
+  description?: string;
 }
