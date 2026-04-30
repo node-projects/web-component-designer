@@ -46,6 +46,7 @@ export class InstanceServiceContainer extends BaseServiceContainer<InstanceServi
   public designer: any; //usable to assign designer from outside
   public documentContainer: DocumentContainer; //usable to assign designer from outside
 
+  /** Event fired when the content of the designer changes, but raised from UndoService, so it should not be used to modify the elements again */
   public readonly onContentChanged = new TypedEvent<IContentChanged[]>();
   
   constructor(designerCanvas: IDesignerCanvas) {
