@@ -184,6 +184,7 @@ export class UndoService implements IUndoService {
       yield this._redoStack[i];
   }
 
+  /** Event emitted when a transaction occurs, needed for remote collaboration */
   readonly onTransaction = new TypedEvent<IUndoChangeEvent>();
 
   private emitTransaction(item: ITransactionItem, kind: UndoChangeKind, source: UndoChangeSource) {
