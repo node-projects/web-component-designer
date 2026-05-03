@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, html, css } from '@node-projects/base-custom-webcomponent';
-//import Blockly from 'blockly';
+import Blockly from 'blockly';
 
 export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend {
 
@@ -43,7 +43,7 @@ export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend
         //@ts-ignore
         const theme = Blockly.Theme.defineTheme(themename, {
             //@ts-ignore
-            'base': Blockly.Themes.Classic,
+            'base': Blockly.Themes.Zelos,
             'blockStyles': {
                 "hat_blocks": {
                     "colourPrimary": "#4a148c"
