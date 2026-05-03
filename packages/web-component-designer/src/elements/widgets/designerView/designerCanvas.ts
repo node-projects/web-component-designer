@@ -419,7 +419,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.clickOverlay.oncontextmenu = (e) => e.preventDefault();
 
     this._resizeObserver = new ResizeObserver(() => {
-      this.extensionManager.refreshAllAppliedExtentions();
+      this.extensionManager?.refreshAllAppliedExtentions();
     });
     this._resizeObserver.observe(this);
   }
@@ -924,6 +924,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public _internalSetDesignItems(designItems: IDesignItem[]) {
     this.fillCalculationrects();
+    this.extensionManager.removeAllExtensions();
     this.overlayLayer.removeAllOverlays();
     DomHelper.removeAllChildnodes(this.overlayLayer);
     for (let i of [...this.rootDesignItem.children()])

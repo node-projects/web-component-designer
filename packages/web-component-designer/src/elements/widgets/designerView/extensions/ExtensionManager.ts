@@ -357,6 +357,24 @@ export class ExtensionManager implements IExtensionManager {
     }
   }
 
+  removeAllExtensions() {
+    this.designItemsWithExtentions.forEach(i => {
+      wmGet(i, this._shouldAppliedDesignerExtensions).clear();
+      for (let appE of wmGet(i, this._appliedDesignerExtensions)) {
+        for (let e of appE[1]) {
+          try {
+            e.dispose();
+          }
+          catch (err) {
+            console.error(err);
+          }
+        }
+      }
+      wmGet(i, this._appliedDesignerExtensions).clear();
+    });
+    this.designItemsWithExtentions.clear();
+  }
+
   refreshExtension(designItem: IDesignItem, extensionType?: ExtensionType, event?: Event) {
     if (this.designerCanvas.checkVisibility && !this.designerCanvas.checkVisibility())
       return;
