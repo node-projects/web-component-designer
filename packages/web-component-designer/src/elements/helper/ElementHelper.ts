@@ -77,30 +77,6 @@ export function getActiveElement(): Element {
   return activeElement;
 }
 
-export function getParentElementIncludingSlots(element: Element): Element {
-  if (element.assignedSlot)
-    return element.assignedSlot;
-  if (element.parentElement == null) {
-    if (instanceOf(element.parentNode, ShadowRoot)) {
-      //@ts-ignore
-      return element.parentNode.host;
-    }
-  }
-  return element.parentElement;
-}
-
-export function getElementOffsetParent(element: Element) {
-  let el = getParentElementIncludingSlots(element);
-  while (el) {
-    const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
-    if (cs.position === 'absolute' || cs.position === 'relative' || cs.position === 'fixed') {
-      return el;
-    }
-    el = getParentElementIncludingSlots(el);
-  }
-  return document.body;
-}
-
 export function getElementOffsetsInContainer(element: Element) {
   if (instanceOf(element, HTMLElement)) {
     //@ts-ignore
@@ -156,97 +132,6 @@ export function getElementZoomFactor(element: Element): number {
   }
   const value = parseFloat(zoom);
   return Number.isFinite(value) && value > 0 ? value : 1;
-}
-
-const windowOffsetsCacheKey = Symbol('windowOffsetsCacheKey');
-export function getElementsWindowOffsetWithoutSelfAndParentTransformations(element, zoom: number, cache: Record<string | symbol, any> = {}) {
-  let offsetLeft = 0;
-  let offsetTop = 0;
-
-  let ch: Map<any, { offsetLeft: number, offsetTop: number }>;
-  if (cache)
-    ch = cache[windowOffsetsCacheKey] ??= new Map<any, { offsetLeft: number, offsetTop: number }>();
-  else
-    ch = new Map<any, { offsetLeft: number, offsetTop: number }>();
-
-  let lst: { offsetLeft: number, offsetTop: number }[] = [];
-
-  let currentElement = element;
-  while (currentElement) {
-    let cachedObj = ch.get(currentElement);
-    if (cachedObj) {
-      offsetLeft += cachedObj.offsetLeft;
-      offsetTop += cachedObj.offsetTop;
-
-      lst.forEach(x => { x.offsetLeft += cachedObj.offsetLeft; x.offsetTop += cachedObj.offsetTop; });
-      break;
-    }
-
-    let nextParent = currentElement.offsetParent ? currentElement.offsetParent : (<ShadowRoot>currentElement.getRootNode()).host;
-
-    if (instanceOfAny(currentElement, SVGSVGElement, HTMLBodyElement, HTMLHtmlElement)) {
-      nextParent = currentElement.parentElement ? currentElement.parentElement : (<ShadowRoot>currentElement.getRootNode()).host;
-    } else if (instanceOf(currentElement, SVGGraphicsElement)) {
-      //@ts-ignore
-      nextParent = currentElement.ownerSVGElement;
-    } else if (instanceOf(currentElement, MathMLElement)) {
-      //@ts-ignore
-      nextParent = currentElement.parentElement ?? nextParent;
-    }
-
-    let scrollLeft = 0;
-    let scrollTop = 0;
-    if (instanceOf(currentElement, HTMLElement)) {
-      //@ts-ignore
-      let parent = currentElement.parentElement;
-      while (parent !== null && parent !== nextParent) {
-        scrollLeft += parent.scrollLeft;
-        scrollTop += parent.scrollTop;
-        parent = parent.parentElement;
-      }
-    }
-
-    if (nextParent) {
-      scrollLeft += nextParent.scrollLeft;
-      scrollTop += nextParent.scrollTop;
-    }
-
-    let currLeft = 0;
-    let currTop = 0;
-    if (instanceOfAny(currentElement, SVGSVGElement, MathMLElement)) {
-      //TODO: !maybe huge Perf impact! - fix without transformation
-      let t = currentElement.style.transform;
-      currentElement.style.transform = '';
-      const bcEl = currentElement.getBoundingClientRect();
-      const bcPar = currentElement.parentElement ? currentElement.parentElement.getBoundingClientRect() : (<ShadowRoot>currentElement.getRootNode()).host.getBoundingClientRect();
-      currentElement.style.transform = t;
-      currLeft = (bcEl.left - bcPar.left) / zoom;
-      currTop = (bcEl.top - bcPar.top) / zoom;
-    } else if (instanceOf(currentElement, SVGGraphicsElement)) {
-      //@ts-ignore
-      let bbox = currentElement.getBBox();
-      currLeft = bbox.x
-      currTop = bbox.y;
-    } else if (element == currentElement && (element === element.ownerDocument.body || instanceOf(element, HTMLHtmlElement))) {
-      const cs = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
-      currLeft = element.offsetLeft - scrollLeft + parseInt(cs.marginLeft);
-      currTop = element.offsetTop - scrollTop + parseInt(cs.marginTop);
-    } else {
-      currLeft = currentElement.offsetLeft - scrollLeft;
-      currTop = currentElement.offsetTop - scrollTop;
-    }
-
-    lst.forEach(x => { x.offsetLeft += currLeft; x.offsetTop += currTop });
-    const cacheEntry = { offsetLeft: currLeft, offsetTop: currTop };
-    lst.push(cacheEntry);
-    ch.set(currentElement, cacheEntry);
-
-    offsetLeft += currLeft;
-    offsetTop += currTop;
-
-    currentElement = nextParent;
-  }
-  return { offsetLeft: offsetLeft, offsetTop: offsetTop };
 }
 
 export function getContentBoxContentOffsets(element): IPoint {
