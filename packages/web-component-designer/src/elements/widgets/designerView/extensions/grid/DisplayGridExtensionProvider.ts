@@ -6,6 +6,7 @@ import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 import { DisplayGridExtension } from './DisplayGridExtension.js';
 import { svgAsString } from '../../../../helper/SvgHelper.js';
+import { NodeType } from '../../../../item/NodeType.js';
 
 export const gridExtensionShowOverlayOptionName = 'gridExtensionShowOverlay';
 
@@ -20,6 +21,8 @@ export class DisplayGridExtensionProvider implements IDesignerExtensionProvider 
   }
 
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
+    if (designItem.nodeType != NodeType.Element)
+      return false;
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
     if (display == 'grid' || display == 'inline-grid')
       return designerCanvas.instanceServiceContainer.designContext.extensionOptions[gridExtensionShowOverlayOptionName] !== false;

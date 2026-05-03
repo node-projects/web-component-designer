@@ -5,12 +5,15 @@ import { IDesignerExtension } from '../IDesignerExtension.js';
 import { IExtensionManager } from '../IExtensionManger.js';
 import { css } from "@node-projects/base-custom-webcomponent";
 import { FlexboxExtension } from './FlexboxExtension.js';
+import { NodeType } from '../../../../item/NodeType.js';
 
 export const flexboxExtensionShowOverlayOptionName = 'flexboxExtensionShowOverlay';
 
 export class FlexboxExtensionProvider implements IDesignerExtensionProvider {
 
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
+    if (designItem.nodeType != NodeType.Element)
+          return false;
     const display = getComputedStyle((<HTMLElement>designItem.element)).display;
     if (display == 'flex' || display == 'inline-flex')
       return designerCanvas.instanceServiceContainer.designContext.extensionOptions[flexboxExtensionShowOverlayOptionName] !== false;
