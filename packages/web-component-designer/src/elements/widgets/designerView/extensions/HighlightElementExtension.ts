@@ -3,7 +3,7 @@ import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
 import { OverlayLayer } from './OverlayLayer.js';
-import { createOverlayPathDataFromSvgGeometryElement } from './svg/SvgHelper.js';
+import { createOverlayPathDataFromSvgGeometryElement } from '../../../helper/SvgHelper.js';
 
 export interface HighlightElementExtensionOptions {
   useSvgGeometryOutline?: boolean;

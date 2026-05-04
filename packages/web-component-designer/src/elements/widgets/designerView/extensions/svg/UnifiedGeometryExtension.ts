@@ -10,7 +10,7 @@ import { OverlayLayer } from '../OverlayLayer.js';
 import { IGeometry, IGeometryReader, IGeometrySegment, SegmentType } from './geometry/IGeometry.js';
 import { getGeometryReader } from './geometry/GeometryReaderFactory.js';
 import { applyGeometryWritesToDesignItem, applyGeometryWritesToElement } from './geometry/GeometryWriteHelper.js';
-import { fromOverlayPointToSvgUserSpace, toOverlayPointFromSvgUserSpace } from './SvgHelper.js';
+import { fromOverlayPointToSvgUserSpace, toOverlayPointFromSvgUserSpace } from '../../../../helper/SvgHelper.js';
 
 interface DragState {
   startCursorPos: IPoint;
