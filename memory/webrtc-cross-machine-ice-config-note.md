@@ -1,0 +1,8 @@
+- Manual WebRTC signaling in collaboration-service worked on the same machine but failed across machines until the transport exposed optional `rtcConfiguration`.
+- Root cause: the transport created `RTCPeerConnection()` with no configurable STUN/TURN servers, so cross-machine connections depended only on local host candidates.
+- Demo support was added via `collabIceServer` query params and optional JSON `collabRtcConfiguration`; when the demo compiles against an older published package, pass the new option object as `any` at the constructor call site to stay compatible.
+- Cloudflare TURN should be integrated through the official server-side `generate-ice-servers` flow from `https://developers.cloudflare.com/realtime/turn/generate-credentials/`; a direct public `https://speed.cloudflare.com/turn-creds` link is not the supported integration path even though the speed test site can fetch credentials internally.
+- Cloudflare's official TURN API endpoint at `https://rtc.live.cloudflare.com/v1/turn/keys/{TURN_KEY_ID}/credentials/generate-ice-servers` is callable from the browser with user-supplied key id and API token; for the demo this is acceptable as a dev/test convenience, but it still exposes the long-lived API token to the browser.
+
+- Older static gist TURN hosts like `numb.viagenie.ca`, `turn.bistri.com`, `turn.anyfirewall.com`, and the raw gist `hubl.in` entries did not verify and should not be exposed as presets.
+- OpenRelay is still live as a free-tier provider, but it needs signup/API credentials or auth-secret integration, so expose it as a manual provider workflow rather than an unauthenticated preset.

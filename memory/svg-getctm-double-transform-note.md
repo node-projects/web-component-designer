@@ -1,0 +1,3 @@
+- In the getBoxQuads transform walk, do not seed SVGGraphicsElement (non-root SVG) with getElementTransformWithZoom for self transforms when the loop also multiplies getCTM(); getCTM already includes the element's local SVG/CSS transform and double-applies rotate/scale otherwise.
+- A rotated CSS-sized SVG rect can expose this immediately: 90deg rotate produced a 180deg-style quad until the self CSS transform was skipped and getCTM handled it alone.
+- For SVG geometry placement commit, the drag preview translation extracted from element.style.transform is already in local geometry coordinates; do not rotate it again before calling placeDesignItem, or rotated shapes jump on mouseup.

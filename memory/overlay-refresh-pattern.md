@@ -1,0 +1,2 @@
+- Designer extensions should prefer passing existing SVG nodes back into _drawLine/_drawCircle/_drawPath and gate refresh work with _valuesHaveChanges.
+- Only rebuild overlays when geometry structure changes (segment count/type or control-point presence), otherwise update positions/styles in place to preserve pointer capture and avoid stale handles.

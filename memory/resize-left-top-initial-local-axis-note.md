@@ -1,0 +1,3 @@
+- Left/top resize handles cannot derive drag deltas by converting the current pointer into the element's current local space, because the element origin moves during the resize and cancels part of the delta.
+- Compute resize deltas from the pointer's movement in the initial local-axis basis (initial element-local-to-canvas matrix, translation removed), then apply opposite-corner correction from the current local border-box anchor converted back to canvas/parent space.
+- Rereading live getBoxQuads() during the same pointermove turn can add jitter; prefer current local anchor geometry plus convertPointFromNode().

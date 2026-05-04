@@ -1,0 +1,3 @@
+- PointerTool drag start must distinguish click target from drag source.
+- After alt-selecting an element underneath another, a plain click should still reselect the topmost hit element.
+- A plain drag should move the selected underlying item when the pointer is inside that item's border quad; recompute initial drag offset from the chosen drag source element.

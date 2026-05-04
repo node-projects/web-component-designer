@@ -1,0 +1,3 @@
+- In ContextMenu, popover top-layer rendering becomes non-interactive when combined with CSS anchor positioning in the demo browser check.
+- For the popover path, use explicit fixed left/top placement with viewport fallbacks; reserve anchor positioning for non-popover fallback paths only.
+- Deferred registration of global mousedown/contextmenu close listeners avoids immediately closing menus opened from mousedown-based triggers like undo/redo hold menus.

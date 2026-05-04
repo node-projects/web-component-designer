@@ -1,0 +1,2 @@
+- PropertyGrid refresh can run correctly while editors still show stale values if external DOM changes bypass DesignItem APIs; properties services read DesignItem `_attributes`/`_styles` caches.
+- Fix: add `IDesignItem.refreshAttributesAndStylesFromElement()` and call it before PropertyGrid/PropertyGridWithHeader refresh or rebuild work so `getValue`, `isSet`, `attributes()`, and `getAllStyles()` see live DOM state.
