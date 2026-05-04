@@ -10,6 +10,7 @@ import { OverlayLayer } from '../OverlayLayer.js';
 import { IGeometry, IGeometryReader, IGeometrySegment, SegmentType } from './geometry/IGeometry.js';
 import { getGeometryReader } from './geometry/GeometryReaderFactory.js';
 import { applyGeometryWritesToDesignItem, applyGeometryWritesToElement } from './geometry/GeometryWriteHelper.js';
+import { fromOverlayPointToSvgUserSpace, toOverlayPointFromSvgUserSpace } from './SvgHelper.js';
 
 interface DragState {
   startCursorPos: IPoint;
@@ -18,14 +19,6 @@ interface DragState {
   originalPoint: IPoint;
   originalSegments: { point: IPoint; cp1?: IPoint; cp2?: IPoint }[];
   startScrollOffset: IPoint;
-}
-
-type ProjectiveMatrix = [number, number, number, number, number, number, number, number, number];
-
-interface SvgOverlayTransform {
-  bbox: DOMRect;
-  matrix: ProjectiveMatrix;
-  inverseMatrix: ProjectiveMatrix;
 }
 
 export interface UnifiedGeometryExtensionOptions {
@@ -175,165 +168,12 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
   /** Convert an SVG user-space coordinate to overlay (canvas) coordinates. */
   private _toOverlay(p: IPoint): IPoint {
-    const transform = this._getSvgOverlayTransform();
-    if (transform) {
-      return this._mapSvgPointToOverlay(p, transform);
-    }
-
-    const fallbackLocalPoint = this._toElementReferenceBoxPoint(p);
-    const tp = this.designerCanvas.canvas.convertPointFromNode(fallbackLocalPoint, this.extendedItem.element, { iframes: this.designerCanvas.iframes });
-    return { x: tp.x, y: tp.y };
+    return toOverlayPointFromSvgUserSpace(this.extendedItem.element, this.designerCanvas, p);
   }
 
   /** Convert overlay (canvas) coordinates back to SVG user-space. */
   private _fromOverlay(p: IPoint): IPoint {
-    const transform = this._getSvgOverlayTransform();
-    if (transform) {
-      return this._mapOverlayPointToSvg(p, transform);
-    }
-
-    const tp = this.extendedItem.element.convertPointFromNode({ x: p.x, y: p.y }, this.designerCanvas.canvas, { iframes: this.designerCanvas.iframes });
-    return this._fromElementReferenceBoxPoint({ x: tp.x, y: tp.y });
-  }
-
-  private _getSvgOverlayTransform(): SvgOverlayTransform | null {
-    const element = this.extendedItem.element;
-    if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {
-      return null;
-    }
-
-    const bbox = element.getBBox();
-    if (Math.abs(bbox.width) < 1e-10 || Math.abs(bbox.height) < 1e-10) {
-      return null;
-    }
-
-    const quad = element.getBoxQuads({ relativeTo: this.designerCanvas.canvas, iframes: this.designerCanvas.iframes })[0];
-    if (!quad) {
-      return null;
-    }
-
-    const matrix = this._createProjectiveMatrixForQuad(quad);
-    if (!matrix) {
-      return null;
-    }
-
-    const inverseMatrix = this._invertProjectiveMatrix(matrix);
-    if (!inverseMatrix) {
-      return null;
-    }
-
-    return { bbox, matrix, inverseMatrix };
-  }
-
-  private _mapSvgPointToOverlay(p: IPoint, transform: SvgOverlayTransform): IPoint {
-    const local = this._toElementReferenceBoxPoint(p);
-    return this._applyProjectiveMatrix(transform.matrix, local.x / transform.bbox.width, local.y / transform.bbox.height);
-  }
-
-  private _mapOverlayPointToSvg(p: IPoint, transform: SvgOverlayTransform): IPoint {
-    const normalized = this._applyProjectiveMatrix(transform.inverseMatrix, p.x, p.y);
-    return {
-      x: transform.bbox.x + normalized.x * transform.bbox.width,
-      y: transform.bbox.y + normalized.y * transform.bbox.height,
-    };
-  }
-
-  private _createProjectiveMatrixForQuad(quad: DOMQuad): ProjectiveMatrix | null {
-    const x1 = quad.p1.x;
-    const y1 = quad.p1.y;
-    const x2 = quad.p2.x;
-    const y2 = quad.p2.y;
-    const x3 = quad.p3.x;
-    const y3 = quad.p3.y;
-    const x4 = quad.p4.x;
-    const y4 = quad.p4.y;
-
-    const sx = x1 - x2 + x3 - x4;
-    const sy = y1 - y2 + y3 - y4;
-    const dx1 = x2 - x3;
-    const dy1 = y2 - y3;
-    const dx2 = x4 - x3;
-    const dy2 = y4 - y3;
-
-    let g = 0;
-    let h = 0;
-
-    if (Math.abs(sx) >= 1e-10 || Math.abs(sy) >= 1e-10) {
-      const denominator = dx1 * dy2 - dy1 * dx2;
-      if (Math.abs(denominator) < 1e-10) {
-        return null;
-      }
-
-      g = (sx * dy2 - sy * dx2) / denominator;
-      h = (dx1 * sy - dy1 * sx) / denominator;
-    }
-
-    return [
-      x2 - x1 + g * x2,
-      x4 - x1 + h * x4,
-      x1,
-      y2 - y1 + g * y2,
-      y4 - y1 + h * y4,
-      y1,
-      g,
-      h,
-      1,
-    ];
-  }
-
-  private _applyProjectiveMatrix(matrix: ProjectiveMatrix, x: number, y: number): IPoint {
-    const projectedX = matrix[0] * x + matrix[1] * y + matrix[2];
-    const projectedY = matrix[3] * x + matrix[4] * y + matrix[5];
-    const projectedW = matrix[6] * x + matrix[7] * y + matrix[8];
-    const safeW = Math.abs(projectedW) < 1e-10 ? (projectedW < 0 ? -1e-10 : 1e-10) : projectedW;
-    return {
-      x: projectedX / safeW,
-      y: projectedY / safeW,
-    };
-  }
-
-  private _invertProjectiveMatrix(matrix: ProjectiveMatrix): ProjectiveMatrix | null {
-    const determinant =
-      matrix[0] * (matrix[4] * matrix[8] - matrix[5] * matrix[7]) -
-      matrix[1] * (matrix[3] * matrix[8] - matrix[5] * matrix[6]) +
-      matrix[2] * (matrix[3] * matrix[7] - matrix[4] * matrix[6]);
-
-    if (Math.abs(determinant) < 1e-10) {
-      return null;
-    }
-
-    const inverseDeterminant = 1 / determinant;
-    return [
-      (matrix[4] * matrix[8] - matrix[5] * matrix[7]) * inverseDeterminant,
-      (matrix[2] * matrix[7] - matrix[1] * matrix[8]) * inverseDeterminant,
-      (matrix[1] * matrix[5] - matrix[2] * matrix[4]) * inverseDeterminant,
-      (matrix[5] * matrix[6] - matrix[3] * matrix[8]) * inverseDeterminant,
-      (matrix[0] * matrix[8] - matrix[2] * matrix[6]) * inverseDeterminant,
-      (matrix[2] * matrix[3] - matrix[0] * matrix[5]) * inverseDeterminant,
-      (matrix[3] * matrix[7] - matrix[4] * matrix[6]) * inverseDeterminant,
-      (matrix[1] * matrix[6] - matrix[0] * matrix[7]) * inverseDeterminant,
-      (matrix[0] * matrix[4] - matrix[1] * matrix[3]) * inverseDeterminant,
-    ];
-  }
-
-  private _toElementReferenceBoxPoint(p: IPoint): IPoint {
-    const bbox = this._getSvgGeometryBBoxOffset();
-    return { x: p.x - bbox.x, y: p.y - bbox.y };
-  }
-
-  private _fromElementReferenceBoxPoint(p: IPoint): IPoint {
-    const bbox = this._getSvgGeometryBBoxOffset();
-    return { x: p.x + bbox.x, y: p.y + bbox.y };
-  }
-
-  private _getSvgGeometryBBoxOffset(): IPoint {
-    const element = this.extendedItem.element;
-    if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {
-      return { x: 0, y: 0 };
-    }
-
-    const bbox = element.getBBox();
-    return { x: bbox.x, y: bbox.y };
+    return fromOverlayPointToSvgUserSpace(this.extendedItem.element, this.designerCanvas, p);
   }
 
   private _drawOverlays() {
