@@ -48,7 +48,7 @@ export function isInline(element: HTMLElement): boolean {
 export function isInlineAfter(element: HTMLElement): boolean {
   if (element == null)
     return false;
-  if (instanceOfAny(element, SVGElement, HTMLHtmlElement, HTMLHeadElement, HTMLBodyElement))
+  if (instanceOfAny(element, SVGElement, HTMLHtmlElement, HTMLHeadElement, HTMLBodyElement, HTMLSelectElement, HTMLOptionElement))
     return false;
   return (element.ownerDocument.defaultView ?? window).getComputedStyle(element).display.startsWith('inline');
 }

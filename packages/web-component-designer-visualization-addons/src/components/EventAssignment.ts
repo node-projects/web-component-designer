@@ -70,7 +70,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         'empty': 'pink'
     }
 
-    static readonly is = 'node-projects-visualization-event-assignment';
+    static readonly is: string = 'node-projects-visualization-event-assignment';
     constructor() {
         super();
         this._restoreCachedInititalValues();
@@ -197,20 +197,20 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     }
 
     protected _getScriptType(eventItem: eventWithDesignItem): scriptType {
-            if (eventItem.designItem.hasAttribute('@' + eventItem.name)) {
-                const val = eventItem.designItem.getAttribute('@' + eventItem.name);
-                if (val.startsWith('{')) {
-                    const parsed = JSON.parse(val);
-                    if ('blocks' in parsed)
-                        return 'blockly';
-                    if ('commands' in parsed)
-                        return 'script';
-                    return 'js';
-                } else if (val == '')
-                    return 'empty';
-                else
-                    return 'js';
-            }
+        if (eventItem.designItem.hasAttribute('@' + eventItem.name)) {
+            const val = eventItem.designItem.getAttribute('@' + eventItem.name);
+            if (val.startsWith('{')) {
+                const parsed = JSON.parse(val);
+                if ('blocks' in parsed)
+                    return 'blockly';
+                if ('commands' in parsed)
+                    return 'script';
+                return 'js';
+            } else if (val == '')
+                return 'empty';
+            else
+                return 'js';
+        }
         return 'none';
     }
 
