@@ -1,0 +1,3 @@
+- Jest node/jsdom in this repo is not reliable for CSS shorthand serialization checks.
+- For CssCombiner tests, fake document.createElement/style before importing the module because it creates a helper element at module load.
+- Prefer focused fake CSSOM tests or real-browser validation when changing cssText/shorthand behavior.

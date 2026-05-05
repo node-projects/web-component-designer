@@ -4,6 +4,8 @@ import { ValueType } from '../ValueType.js';
 
 export class TextPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
 
+  private static _nextListId = 0;
+
   constructor(property: IProperty) {
     super(property);
 
@@ -11,6 +13,22 @@ export class TextPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
     element.type = "text";
     if (property.readonly)
       element.readOnly = true;
+
+    if (property.values?.length) {
+      const listId = `wcd-text-property-editor-values-${TextPropertyEditor._nextListId++}`;
+      const datalist = document.createElement('datalist');
+      datalist.id = listId;
+
+      for (const value of property.values) {
+        const option = document.createElement('option');
+        option.value = value;
+        datalist.appendChild(option);
+      }
+
+      element.setAttribute('list', listId);
+      element.appendChild(datalist);
+    }
+
     element.onchange = (e) => this._valueChanged(element.value);
     element.onfocus = (e) => {
       element.selectionStart = 0;

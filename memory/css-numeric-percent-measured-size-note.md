@@ -1,0 +1,3 @@
+- For CSS numeric size properties, `to %` conversion should prefer the element's measured box size (`getBoundingClientRect`) over the raw numeric text value so the unit switch preserves the current rendered size.
+- Keep `% -> px` on the normal reference-size path unless a concrete regression shows otherwise.
+- Numeric scrub drag is more reliable in the property grid with window-level pointer move/up/cancel listeners than element-local move/up listeners.

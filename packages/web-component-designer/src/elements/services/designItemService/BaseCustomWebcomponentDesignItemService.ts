@@ -17,7 +17,7 @@ export class BaseCustomWebcomponentDesignItemService extends DesignItemService {
         for (let n = 0; n < repeatCount; n++) {
           let par: Element = node;
           for (const n of node.content.childNodes) {
-            par = this.instancateNode(par, n);
+            par = this.instanciateNode(par, n);
           }
         }
       });
@@ -25,7 +25,7 @@ export class BaseCustomWebcomponentDesignItemService extends DesignItemService {
     return di;
   }
 
-  instancateNode(parent: Element, node: Node, append = false): Element {
+  instanciateNode(parent: Element, node: Node, append = false): Element {
     const nd = node.cloneNode(false);
     if (append)
       parent.appendChild(<Element>nd);
@@ -35,7 +35,7 @@ export class BaseCustomWebcomponentDesignItemService extends DesignItemService {
     }
     DesignItem.GetDesignItem(node).setView(<Element>nd);
     for (const n of node.childNodes) {
-      this.instancateNode(<Element>nd, n, true);
+      this.instanciateNode(<Element>nd, n, true);
     }
     return <Element>nd;
   }

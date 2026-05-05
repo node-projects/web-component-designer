@@ -61,14 +61,14 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
       type: "color",
       defaultValue: "transparent",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "fill-opacity",
       type: "number",
       defaultValue: "1",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     }
   ];
 
@@ -78,34 +78,34 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
       type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "y1",
       type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "x2",
       type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "y2",
       type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "pathLength",
       type: "svg-length",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     }
   ];
 
@@ -115,48 +115,48 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
       type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "cy",
       type: "svg-length",
       defaultValue: "0",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "rx",
       type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "ry",
       type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "pathLength",
       type: "svg-length",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "fill",
       type: "color",
       defaultValue: "transparent",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "fill-opacity",
       type: "number",
       defaultValue: "1",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     }
   ];
 
@@ -166,13 +166,13 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
       type: "string",
       defaultValue: '',
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "pathLength",
       type: "svg-length",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     }
 
   ];
@@ -183,20 +183,20 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
       type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.cssValue
+      propertyType: PropertyType.attribute
     },
     {
       name: "height",
       type: "svg-length",
       defaultValue: "auto",
       service: this,
-      propertyType: PropertyType.cssValue
+      propertyType: PropertyType.attribute
     },
     {
       name: "viewBox",
       type: "string",
       service: this,
-      propertyType: PropertyType.cssValue
+      propertyType: PropertyType.attribute
     }
   ];
 
@@ -206,20 +206,20 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
       type: "color",
       defaultValue: "currentcolor",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "stroke-width",
       type: "svg-length",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "stroke-opacity",
       type: "number",
       defaultValue: "1",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     },
     {
       name: "visibility",
@@ -227,7 +227,7 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
       values: ["visible", "hidden"],
       defaultValue: "visible",
       service: this,
-      propertyType: PropertyType.propertyAndAttribute
+      propertyType: PropertyType.attribute
     }
   ];
 
@@ -254,22 +254,47 @@ export class SVGElementsPropertiesService extends CommonPropertiesService {
   }
 
   override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
+    let props: IProperty[] = null;
     if (!this.isHandledElement(designItem))
       return null;
     switch (designItem.element.localName) {
-
       case 'rect':
-        return [...this.rectProperties, ...this.defaultProperties];
+        props = [...this.rectProperties, ...this.defaultProperties];
+        break;
       case 'line':
-        return [...this.lineProperties, ...this.defaultProperties];
+        props = [...this.lineProperties, ...this.defaultProperties];
+        break;
       case 'ellipse':
-        return [...this.ellipseProperties, ...this.defaultProperties];
+        props = [...this.ellipseProperties, ...this.defaultProperties];
+        break;
       case 'path':
-        return [...this.pathProperties, ...this.defaultProperties];
+        props = [...this.pathProperties, ...this.defaultProperties];
+        break;
       case 'svg':
-        return this.svgProperties;
+        props = this.svgProperties;
+        break;
     }
 
-    return null;
+    if (designItem.element.localName == 'line' || designItem.element.localName == 'path') {
+      const markers = this.getAllMarkerIds(designItem);
+      if (markers.length > 0 || designItem.hasAttribute('marker-start')) {
+        props.push({ name: "marker-start", type: "string", values: markers, service: this, propertyType: PropertyType.attribute });
+      }
+      if (markers.length > 0 || designItem.hasAttribute('marker-mid')) {
+        props.push({ name: "marker-mid", type: "string", values: markers, service: this, propertyType: PropertyType.attribute });
+      }
+      if (markers.length > 0 || designItem.hasAttribute('marker-end')) {
+        props.push({ name: "marker-end", type: "string", values: markers, service: this, propertyType: PropertyType.attribute });
+      }
+    }
+
+    return props;
+  }
+
+  private getAllMarkerIds(designItem: IDesignItem): string[] {
+    const svgElement = designItem.element as SVGElement;
+    const svg = svgElement.ownerSVGElement;
+    const markerElements = svg.querySelectorAll<SVGMarkerElement>('defs > marker');
+    return [...markerElements].map(m => `url(#${m.id})`).filter(id => !!id);
   }
 }

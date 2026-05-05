@@ -6,6 +6,8 @@ import { DrawToolPopup } from "../popups/DrawToolPopup.js";
 
 export class DrawToolButtonProvider implements IDesignViewToolbarButtonProvider {
   provideButton(designerCanvas: IDesignerCanvas): HTMLElement {
+    if (designerCanvas.readOnly)
+      return null;
     const button = new DesignerToolbarButton(designerCanvas, {
       'DrawLine': { icon: assetsPath + 'images/tools/DrawLineTool.svg' },
       'DrawPath': { icon: assetsPath + 'images/tools/DrawPathTool.svg' },

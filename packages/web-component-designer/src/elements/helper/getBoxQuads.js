@@ -683,6 +683,13 @@ export function getElementSize(node, matrix) {
 */
 function getElementOffsetsInContainer(node, includeScroll, iframes) {
     if ((node instanceof HTMLElement || node instanceof (node.ownerDocument.defaultView ?? window).HTMLElement)) {
+        // When <html> appears inside a shadow DOM canvas the browser reflects
+        // body's top margin into html.offsetTop (but not offsetLeft), causing
+        // a Y-only shift in the transform walk.  The html element has no real
+        // layout offset relative to its shadow-host container, so return 0,0.
+        if ((node instanceof HTMLHtmlElement || node instanceof (node.ownerDocument.defaultView ?? window).HTMLHtmlElement)) {
+            return new DOMPoint(0, 0);
+        }
         const cs = getCachedComputedStyle(node);
         if (cs.position === 'fixed') {
             const par = getParentElementIncludingSlots(node, iframes);

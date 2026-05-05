@@ -13,6 +13,7 @@ export * from "./elements/helper/IndentedTextWriter.js";
 export * from "./elements/helper/PathDataPolyfill.js";
 export * from "./elements/helper/PopupHelper.js";
 export * from "./elements/helper/Screenshot.js";
+export * from "./elements/helper/SvgHelper.js";
 export * from "./elements/helper/ClipboardHelper.js";
 export * from "./elements/helper/TouchGestureHelper.js";
 

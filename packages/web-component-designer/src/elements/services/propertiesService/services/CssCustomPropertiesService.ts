@@ -32,6 +32,8 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
   }
 
   override async getProperties(designItem: IDesignItem): Promise<IProperty[] | IPropertyGroup[]> {
+    if (designItem.nodeType != Node.ELEMENT_NODE)
+      return [];
     if (designItem?.element?.computedStyleMap) {
       let rootMap = Array.from((<DesignerCanvas>designItem.instanceServiceContainer.designerCanvas).computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
       let props = Array.from(designItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"))

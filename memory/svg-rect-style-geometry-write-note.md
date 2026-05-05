@@ -1,0 +1,3 @@
+- For SVG rect editing in the unified geometry path, read rendered geometry from getBBox() instead of rect.x/rect.width baseVal values when CSS width/height may be the source of truth.
+- Preserve style-backed SVG geometry on write by carrying per-property serialization hints (style vs attribute, unit) through the geometry model, then applying writes with setStyle/style.setProperty instead of always setAttribute.
+- This avoids stacked rect corner handles for CSS-sized rects and prevents drag/resize from injecting width/height attributes when those properties were authored in inline style.

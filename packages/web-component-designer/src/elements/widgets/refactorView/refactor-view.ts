@@ -127,7 +127,7 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
         }
       }
     }
-    if (!grp)
+    if (grp)
       grp.commit();
   }
 
