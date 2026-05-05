@@ -1,5 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, html, css } from '@node-projects/base-custom-webcomponent';
-import Blockly from 'blockly';
+//import Blockly from 'blockly';
 
 export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend {
 
