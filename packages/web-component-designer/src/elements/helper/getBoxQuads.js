@@ -1919,11 +1919,16 @@ function isFlatTreeInclusiveAncestor(ancestor, node) {
 function ancestorTreeScopes(element) {
     const scopes = new Set();
     let currentScope = element.getRootNode();
+    const shadowRootCtor = element.ownerDocument?.defaultView?.ShadowRoot ?? ShadowRoot;
     while (currentScope) {
         scopes.add(currentScope);
-        currentScope = currentScope.parentNode
-            ? currentScope.parentNode.getRootNode()
-            : null;
+        if (currentScope instanceof shadowRootCtor) {
+            currentScope = currentScope.host?.getRootNode() ?? null;
+        } else {
+            currentScope = currentScope.parentNode
+                ? currentScope.parentNode.getRootNode()
+                : null;
+        }
     }
 
     return scopes;
