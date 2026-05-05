@@ -531,7 +531,7 @@ export class BindingsHelper {
     }
   }
 
-  applyAllBindings(rootElement: ParentNode, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler): (() => void)[] {
+  applyAllBindings(rootElement: ParentNode, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler, skipChildrenFor?: (element: Element) => boolean): (() => void)[] {
     let retVal: (() => void)[] = [];
     const tw = document.createTreeWalker(rootElement, NodeFilter.SHOW_ELEMENT);
     let e: Element;
@@ -555,6 +555,12 @@ export class BindingsHelper {
           }
         } catch (err) {
           console.warn("error applying binding", e, b, err)
+        }
+      }
+      if (skipChildrenFor) {
+        if (skipChildrenFor(e)) {
+          e = <Element>tw.nextSibling();
+          continue;
         }
       }
     }

@@ -10,7 +10,8 @@ export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog |
   WriteSignalsInGroup | ClearSignalsInGroup |
   RunScript |
   CopySignalValuesFromFolder | ShowMessageBox | ShowPrompt |
-  ExportSignalValuesAsJson | ImportSignalValuesFromJson;
+  ExportSignalValuesAsJson | ImportSignalValuesFromJson |
+  Repeat;
 
 /**
  * signal - a signal (the default)
@@ -518,4 +519,23 @@ export interface RunScript {
   */
   scriptType: 'string';
   additionalData?: string;
+}
+
+export interface Repeat {
+  type: 'Repeat';
+  /**
+  * Name of the Label to jump to, if empty it jumps to the start.
+  */
+  label?: string;
+  /**
+  * Number of times the script repeats itself. If 0, it repeats indefinitly 
+  * @default 0
+  */
+  count?: number;
+  /**
+  * always: script repeats until count is 0 or indefinitly when count is 0
+  * eventValid: script repeats until event is no longer active
+  * @default eventValid
+  */
+  mode: 'eventValid' | 'always';
 }

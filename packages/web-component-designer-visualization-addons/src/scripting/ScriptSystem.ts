@@ -19,6 +19,16 @@ type ContextCreator = (
   parameters: Record<string, any>,
   relativeSignalsPath: string
 ) => any;
+
+const eventOpposites: Record<string, string> = {
+  'pointerdown': 'pointerup',
+  'pointerenter': 'pointerleave',
+  'mouseenter': 'mouseleave',
+  'mouseover': 'mouseout',
+  'focus': 'blur',
+  'focusin': 'focusout',
+  'keydown': 'keyup',
+};
 export class ScriptSystem {
 
   _visualizationHandler: VisualizationHandler;
@@ -29,6 +39,21 @@ export class ScriptSystem {
   }
 
   async execute(scriptCommands: ScriptCommands[], outerContext: contextType) {
+    let repeatCount = -1;
+    let eventNotValid = false;
+
+    const triggerEvent = outerContext.event?.type;
+    const cancelEvent = triggerEvent ? eventOpposites[triggerEvent] : null;
+
+    if (cancelEvent) {
+      let element: Element | Window = outerContext.element;
+      if(triggerEvent == 'pointerdown'){
+        element = window;
+      }
+      element.addEventListener(cancelEvent, () => {
+        eventNotValid = true;
+      }, { once: true });
+    }
     for (let i = 0; i < scriptCommands.length; i++) {
       let c = scriptCommands[i];
       if (c.type == "Exit") {
@@ -74,6 +99,31 @@ export class ScriptSystem {
               break;
           }
         }
+      } else if (c.type == "Repeat") {
+        const label = await this.getValue(c.label, outerContext);
+        const count = await this.getValue(c.count, outerContext);
+        const mode = await this.getValue(c.mode, outerContext);
+
+        if (mode == 'eventValid' && eventNotValid) {
+          eventNotValid = false;
+          continue;
+        }
+
+        if (count != 0 && repeatCount == -1) {
+          repeatCount = count - 1;
+        }
+        if (repeatCount == 0) {
+          continue;
+        }
+        if (repeatCount > 0) {
+          repeatCount--;
+        }
+
+        i = -1;
+        if (label) {
+          i = scriptCommands.findIndex(x => x.type == "Label" && x.label == label);
+          if (i < 0) continue;
+        }
       } else {
         const continueScript = await this.runScriptCommand(c, outerContext);
         if (!continueScript) {
@@ -115,6 +165,7 @@ export class ScriptSystem {
       case 'Condition':
       case 'Goto':
       case 'Exit':
+      case 'Repeat':
         {
           //Do nothing on this commands
           break;

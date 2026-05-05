@@ -6,6 +6,8 @@ import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { BlocklyScriptEditor } from "../blockly/BlocklyScriptEditor.js";
 import { SimpleScriptEditor } from "./SimpleScriptEditor.js";
 
+type eventWithDesignItem = IEvent & { designItem: IDesignItem };
+
 type scriptType = 'jsdirect' | 'js' | 'script' | 'blockly' | 'none' | 'empty';
 export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
 
@@ -68,7 +70,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         'empty': 'pink'
     }
 
-    static readonly is = 'node-projects-visualization-event-assignment';
+    static readonly is: string = 'node-projects-visualization-event-assignment';
     constructor() {
         super();
         this._restoreCachedInititalValues();
@@ -79,7 +81,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     }
 
     private _blocklyToolbox: any;
-    private _instanceServiceContainer: InstanceServiceContainer;
+    protected _instanceServiceContainer: InstanceServiceContainer;
     private _selectionChangedHandler: Disposable;
     private _selectedItems: IDesignItem[];
     private _visualizationHandler: VisualizationHandler;
@@ -87,7 +89,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     private _scriptCommandsTypeInfo: any;
     private _propertiesTypeInfo: any
 
-    public events: IEvent[];
+    public events: (IEvent & { designItem: IDesignItem })[];
 
     public initialize(visualizationHandler: VisualizationHandler, visualizationShell: VisualizationShell, scriptCommandsTypeInfo: any, propertiesTypeInfo: any, blocklyToolbox: any) {
         this._visualizationHandler = visualizationHandler;
@@ -106,7 +108,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         this.selectedItems = this._instanceServiceContainer.selectionService.selectedElements;
     }
 
-    protected _createControlsForScript(eventItem: IEvent) {
+    protected _createControlsForScript(eventItem: eventWithDesignItem) {
         const st = this._getScriptType(eventItem);
         switch (st) {
             case 'none':
@@ -188,28 +190,26 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         return false;
     }
 
-    protected _getScriptTypeColor(eventItem: IEvent) {
+    protected _getScriptTypeColor(eventItem: eventWithDesignItem) {
         const st = this._getScriptType(eventItem);
         const color = EventAssignment.scriptTypeColors[st];
         return color ?? 'white';
     }
 
-    protected _getScriptType(eventItem: IEvent): scriptType {
-        if (this.selectedItems && this.selectedItems.length) {
-            if (this.selectedItems[0].hasAttribute('@' + eventItem.name)) {
-                const val = this.selectedItems[0].getAttribute('@' + eventItem.name);
-                if (val.startsWith('{')) {
-                    const parsed = JSON.parse(val);
-                    if ('blocks' in parsed)
-                        return 'blockly';
-                    if ('commands' in parsed)
-                        return 'script';
-                    return 'js';
-                } else if (val == '')
-                    return 'empty';
-                else
-                    return 'js';
-            }
+    protected _getScriptType(eventItem: eventWithDesignItem): scriptType {
+        if (eventItem.designItem.hasAttribute('@' + eventItem.name)) {
+            const val = eventItem.designItem.getAttribute('@' + eventItem.name);
+            if (val.startsWith('{')) {
+                const parsed = JSON.parse(val);
+                if ('blocks' in parsed)
+                    return 'blockly';
+                if ('commands' in parsed)
+                    return 'script';
+                return 'js';
+            } else if (val == '')
+                return 'empty';
+            else
+                return 'js';
         }
         return 'none';
     }
@@ -225,7 +225,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         this.selectedItems[0].setAttribute('@' + eventItem.name, el.value);
     }
 
-    protected _ctxMenu(e: MouseEvent, eventItem: IEvent) {
+    protected _ctxMenu(e: MouseEvent, eventItem: eventWithDesignItem) {
         e.preventDefault();
         const evtType = this._getScriptType(eventItem);
         if (evtType == 'empty')
@@ -259,7 +259,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         }
     }
 
-    protected _createAssignScriptContextMenu(event: MouseEvent, eventItem: IEvent) {
+    protected _createAssignScriptContextMenu(event: MouseEvent, eventItem: eventWithDesignItem) {
         let ctxMenu: IContextMenuItem[] = [
             {
                 title: 'Simple Script',
@@ -310,7 +310,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         return ctxMenu;
     }
 
-    protected async _showContextMenuAssignScript(event: MouseEvent, eventItem: IEvent, isCtxMenu: boolean) {
+    protected async _showContextMenuAssignScript(event: MouseEvent, eventItem: eventWithDesignItem, isCtxMenu: boolean) {
         event.preventDefault();
         const evtType = this._getScriptType(eventItem);
         if (evtType != 'none' && evtType != 'empty' && !isCtxMenu) {
@@ -321,12 +321,11 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
         }
     }
 
-    protected async _editParameter(e: MouseEvent, eventItem: IEvent) {
-        let selectedItem = this.selectedItems[0];
+    protected async _editParameter(e: MouseEvent, eventItem: IEvent & { designItem: IDesignItem }) {
         const edt = new ParameterEditor();
         let existingParameter = {};
-        edt.title = "ParameterEditor for '" + eventItem.name + "' of '" + selectedItem.name + "'";
-        let data = selectedItem.getAttribute('@' + eventItem.name);
+        edt.title = "ParameterEditor for '" + eventItem.name + "' of '" + eventItem.designItem.name + "'";
+        let data = eventItem.designItem.getAttribute('@' + eventItem.name);
         if (data && data[0] == '{') {
             try {
                 const parsed = JSON.parse(data);
@@ -350,16 +349,15 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                 delete newObj.parameters;
 
             const newData = JSON.stringify(newObj);
-            selectedItem.setAttribute('@' + eventItem.name, newData);
+            eventItem.designItem.setAttribute('@' + eventItem.name, newData);
             this._bindingsRefresh();
         }
     }
 
-    protected async _editBlockly(e: MouseEvent, eventItem: IEvent) {
-        let selectedItem = this.selectedItems[0];
+    protected async _editBlockly(e: MouseEvent, eventItem: eventWithDesignItem) {
         const edt = new BlocklyScriptEditor(this._blocklyToolbox);
-        edt.title = "Blockly Script for '" + eventItem.name + "' of '" + selectedItem.name + "'";
-        let data = selectedItem.getAttribute('@' + eventItem.name);
+        edt.title = "Blockly Script for '" + eventItem.name + "' of '" + eventItem.designItem.name + "'";
+        let data = eventItem.designItem.getAttribute('@' + eventItem.name);
         let parameters = null;
         let relativeSignalsPath = null;
         if (data) {
@@ -377,18 +375,17 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             if (relativeSignalsPath) {
                 blockObj.relativeSignalsPath = relativeSignalsPath;
             }
-            selectedItem.setAttribute('@' + eventItem.name, JSON.stringify(blockObj));
+            eventItem.designItem.setAttribute('@' + eventItem.name, JSON.stringify(blockObj));
             this._bindingsRefresh();
         }
     }
 
-    protected async _editJavascript(e: MouseEvent, eventItem: IEvent) {
+    protected async _editJavascript(e: MouseEvent, eventItem: eventWithDesignItem) {
         // todo ?
     }
 
-    protected async _editSimpleScript(e: MouseEvent, eventItem: IEvent) {
-        let selectedItem = this.selectedItems[0];
-        let scriptString = <string>selectedItem.getAttribute('@' + eventItem.name);
+    protected async _editSimpleScript(e: MouseEvent, eventItem: eventWithDesignItem) {
+        let scriptString = <string>eventItem.designItem.getAttribute('@' + eventItem.name);
         if (!scriptString || scriptString.startsWith('{')) {
             let script = { commands: [] };
             let parameters = null;
@@ -401,15 +398,15 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                 relativeSignalsPath = script.relativeSignalsPath;
             }
             let sc = new SimpleScriptEditor();
-            sc.serviceContainer = selectedItem.serviceContainer;
-            sc.instanceServiceContainer = selectedItem.instanceServiceContainer;
+            sc.serviceContainer = eventItem.designItem.serviceContainer;
+            sc.instanceServiceContainer = eventItem.designItem.instanceServiceContainer;
             sc.scriptCommandsTypeInfo = this._scriptCommandsTypeInfo;
             sc.propertiesTypeInfo = this._propertiesTypeInfo;
             sc.visualizationShell = this._visualizationShell;
             sc.visualizationHandler = this._visualizationHandler;
 
             sc.loadScript(script);
-            sc.title = "Script '" + eventItem.name + "' on " + selectedItem.name;
+            sc.title = "Script '" + eventItem.name + "' on " + eventItem.designItem.name;
 
             let res = await this._visualizationShell.openConfirmation(sc, { x: 100, y: 100, width: 600, height: 500 });
             if (res) {
@@ -425,14 +422,14 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
                         sc.relativeSignalsPath = relativeSignalsPath;
                     }
                     let json = JSON.stringify(sc);
-                    selectedItem.setAttribute('@' + eventItem.name, json);
+                    eventItem.designItem.setAttribute('@' + eventItem.name, json);
                     this._bindingsRefresh();
                 }
             }
         }
     }
 
-    public async _editEvent(evtType: scriptType, e: MouseEvent, eventItem: IEvent) {
+    public async _editEvent(evtType: scriptType, e: MouseEvent, eventItem: eventWithDesignItem) {
         if (evtType == 'js') {
             this._editJavascript(e, eventItem);
         } else if (evtType == 'blockly') {
@@ -444,7 +441,7 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
 
     public refresh() {
         if (this._selectedItems != null && this._selectedItems.length) {
-            this.events = this._selectedItems[0].serviceContainer.getLastServiceWhere('eventsService', x => x.isHandledElementFromEventsService(this._selectedItems[0])).getPossibleEvents(this._selectedItems[0]);
+            this.events = this._selectedItems[0].serviceContainer.getLastServiceWhere('eventsService', x => x.isHandledElementFromEventsService(this._selectedItems[0])).getPossibleEvents(this._selectedItems[0]).map(x => ({ ...x, designItem: this._selectedItems[0] }));
         } else {
             this.events = [];
         }
