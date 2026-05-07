@@ -265,6 +265,11 @@ export * from "./elements/widgets/designerView/tools/toolBar/buttons/TransformTo
 export * from "./elements/widgets/designerView/tools/toolBar/buttons/SimpleToolButtonProvider.js";
 
 export * from "./elements/widgets/designerView/tools/toolBar/popups/AbstractBaseToolPopup.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/DraggableToolWindow.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/BoxShadowEditorWindow.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/TextShadowEditorWindow.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/GradientEditorWindow.js";
+export * from "./elements/widgets/designerView/tools/toolBar/popups/BorderRadiusEditorWindow.js";
 export * from "./elements/widgets/designerView/tools/toolBar/popups/DrawToolPopup.js";
 export * from "./elements/widgets/designerView/tools/toolBar/popups/PointerToolPopup.js";
 export * from "./elements/widgets/designerView/tools/toolBar/popups/SelectionToolPopup.js";
@@ -407,6 +412,7 @@ export * from "./elements/widgets/designerView/extensions/contextMenu/JumpToElem
 export * from "./elements/widgets/designerView/extensions/contextMenu/AlignItemsContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/ForceCssContextMenu.js";
 export * from "./elements/widgets/designerView/extensions/contextMenu/PasteFormatContextMenu.js";
+export * from "./elements/widgets/designerView/extensions/contextMenu/ToolWindowsContextMenu.js";
 
 export type { IDesignerPointerExtension } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtension.js";
 export type { IDesignerPointerExtensionProvider } from "./elements/widgets/designerView/extensions/pointerExtensions/IDesignerPointerExtensionProvider.js";

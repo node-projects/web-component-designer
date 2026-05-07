@@ -1,14 +1,14 @@
-import { html, BaseCustomWebComponentConstructorAppend, css } from '@node-projects/base-custom-webcomponent';
-import { DesignerToolbar } from '../DesignerToolbar.js';
+import { css } from '@node-projects/base-custom-webcomponent';
+import { DraggableToolWindow } from './DraggableToolWindow.js';
+import { IDesignerCanvas } from '../../../IDesignerCanvas.js';
 import { filterChildPlaceItems } from '../../../../../helper/LayoutHelper.js';
 import { IRect } from '../../../../../../interfaces/IRect.js';
 import { IPoint } from '../../../../../../interfaces/IPoint.js';
-import { DesignerView } from '../../../designerView.js';
 import { calculateOuterRect } from '../../../../../helper/ElementHelper.js';
 import { IDesignItem } from '../../../../../item/IDesignItem.js';
 
-export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend {
-  private _designerView: DesignerView;
+export class TransformToolPopup extends DraggableToolWindow {
+  private _designerCanvas: IDesignerCanvas;
   private _previousSelectionRect: IRect;
   private _selectionChanged: boolean;
 
@@ -35,17 +35,10 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
   private _transformMode: "relative" | "absolute";
   private _transformOrigin: "topLeft" | "topMid" | "topRight" | "midLeft" | "midMid" | "midRight" | "botLeft" | "botMid" | "botRight";
 
-  static override style = css`
-      .container {
-          width: 220px;
-          min-height: 200px;
-          color: white;
-          background-color: rgb(64, 64, 64);
-          border: 1px solid black;
-      }
-      header {
-          text-align: center;
-      }
+  protected override get windowTitle(): string { return 'Transform'; }
+
+  protected override get windowContentStyle(): CSSStyleSheet {
+    return css`
       .inputs{
         float: left;
         margin-top: 5px;
@@ -60,15 +53,6 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
         margin-left: 5px;
         font-size: 14px;
       }
-      .strokecolor{ 
-        float: both;
-      }
-      .fillbrush{
-        float: both;
-      }
-      .strokethickness{
-        float: both;
-      }
       #input-div{
         display: grid;
         grid-template-columns: 1fr 9fr;
@@ -76,6 +60,7 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
         grid-row-gap: 2px;
         font-size: small;
         margin: 10px;
+        color: white;
       }
       #button-div{
         display: grid;
@@ -117,58 +102,56 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
         justify-content: center;
         align-items: center;
         width: 100%;
+        color: white;
       }
-      `
+    `;
+  }
 
-  static override template = html`
-        <div class="container">
-          <header>
-            <h2 id="title" style="margin:0px;">Transform</h2>
-          </header>
-          <main id="content-area">
-            <div id="input-div">
-              <span>X:</span>
-              <input type="number" id="transform-input-x">
-              <span>Y:</span>
-              <input type="number" id="transform-input-y">
-              <span>R:</span>
-              <input type="number" id="transform-input-r">
-            </div>
-            <div id="button-div">
-              <button id="transform-button-absolute">absolute</button>
-              <button id="transform-button-relative">relative</button>
-            </div>
+  protected override get windowTemplate(): string {
+    return `
+      <div id="input-div">
+        <span>X:</span>
+        <input type="number" id="transform-input-x">
+        <span>Y:</span>
+        <input type="number" id="transform-input-y">
+        <span>R:</span>
+        <input type="number" id="transform-input-r">
+      </div>
+      <div id="button-div">
+        <button id="transform-button-absolute">absolute</button>
+        <button id="transform-button-relative">relative</button>
+      </div>
 
-            <div id="spacing-div">
-                <span>X spacing</span>
-                <span>Y spacing</span>
-                <input type="number" id="spacing-input-x">
-                <input type="number" id="spacing-input-y">
-            </div>
+      <div id="spacing-div">
+          <span>X spacing</span>
+          <span>Y spacing</span>
+          <input type="number" id="spacing-input-x">
+          <input type="number" id="spacing-input-y">
+      </div>
 
-            <div style="justify-content: center; display: grid; height: 100px">
-              <div id="cube-background"></div>
-                <div id="cube">
-                  <input id="origin-top-left" type="radio" name="origin-radio">
-                  <input id="origin-top-mid" type="radio" name="origin-radio">
-                  <input id="origin-top-right" type="radio" name="origin-radio">
-                  <input id="origin-mid-left" type="radio" name="origin-radio">
-                  <input id="origin-mid-mid" type="radio" name="origin-radio" checked>
-                  <input id="origin-mid-right" type="radio" name="origin-radio">
-                  <input id="origin-bot-left" type="radio" name="origin-radio">
-                  <input id="origin-bot-mid" type="radio" name="origin-radio">
-                  <input id="origin-bot-right" type="radio" name="origin-radio">
-                </div>
-            </div>
+      <div style="justify-content: center; display: grid; height: 100px">
+        <div id="cube-background"></div>
+          <div id="cube">
+            <input id="origin-top-left" type="radio" name="origin-radio">
+            <input id="origin-top-mid" type="radio" name="origin-radio">
+            <input id="origin-top-right" type="radio" name="origin-radio">
+            <input id="origin-mid-left" type="radio" name="origin-radio">
+            <input id="origin-mid-mid" type="radio" name="origin-radio" checked>
+            <input id="origin-mid-right" type="radio" name="origin-radio">
+            <input id="origin-bot-left" type="radio" name="origin-radio">
+            <input id="origin-bot-mid" type="radio" name="origin-radio">
+            <input id="origin-bot-right" type="radio" name="origin-radio">
+          </div>
+      </div>
 
-            <div id="apply-div">
-              <button id="transform-button-apply" style="width:100px;">apply</button>
-            </div>
-          </main>
-        </div>`;
+      <div id="apply-div">
+        <button id="transform-button-apply" style="width:100px;">apply</button>
+      </div>`;
+  }
 
-  constructor() {
+  constructor(designerCanvas?: IDesignerCanvas) {
     super();
+    this._designerCanvas = designerCanvas;
 
     this._relativeButton = this._getDomElement<HTMLButtonElement>("transform-button-relative");
     this._absoluteButton = this._getDomElement<HTMLButtonElement>("transform-button-absolute");
@@ -216,12 +199,12 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
 
   private _applyTransform() {
     this._checkOrigin();
-    this._designerView = (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).designerView;
-    let selection = this._designerView.instanceServiceContainer.selectionService.selectedElements;
+    if (!this._designerCanvas) return;
+    let selection = this._designerCanvas.instanceServiceContainer.selectionService.selectedElements;
     selection = filterChildPlaceItems(selection);
 
     this._selectionChanged = false;
-    this._designerView.instanceServiceContainer.selectionService.onSelectionChanged.once(() => {
+    this._designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.once(() => {
       this._selectionChanged = true;
       this._previousSelectionRect = null;
     });
@@ -236,7 +219,7 @@ export class TransformToolPopup extends BaseCustomWebComponentConstructorAppend 
 
       let grp = selection[0].openGroup("Transform selection")
       if (!this._previousSelectionRect || this._selectionChanged)
-        this._previousSelectionRect = calculateOuterRect(selection, this._designerView.designerCanvas);
+        this._previousSelectionRect = calculateOuterRect(selection, this._designerCanvas);
       let origin = this._calculateTransformOriginPosition(this._previousSelectionRect);
       for (let item of selection) {
         let itemPos: IRect = {

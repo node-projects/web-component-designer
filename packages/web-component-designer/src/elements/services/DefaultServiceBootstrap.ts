@@ -26,6 +26,7 @@ import { ZoomTool } from '../widgets/designerView/tools/ZoomTool.js';
 import { PanTool } from '../widgets/designerView/tools/PanTool.js';
 import { CopyPasteContextMenu } from '../widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js';
 import { PasteFormatContextMenu } from '../widgets/designerView/extensions/contextMenu/PasteFormatContextMenu.js';
+import { ToolWindowsContextMenu } from '../widgets/designerView/extensions/contextMenu/ToolWindowsContextMenu.js';
 import { ZMoveContextMenu } from '../widgets/designerView/extensions/contextMenu/ZMoveContextMenu.js';
 import { MultipleItemsSelectedContextMenu } from '../widgets/designerView/extensions/contextMenu/MultipleItemsSelectedContextMenu.js';
 import { RectangleSelectorTool } from '../widgets/designerView/tools/RectangleSelectorTool.js';
@@ -279,6 +280,8 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designerContextMenuExtensions = [
     new ChildContextMenu('edit', new CopyPasteContextMenu(), new SeperatorContextMenu(), new PasteFormatContextMenu()),
+    new SeperatorContextMenu(),
+    new ToolWindowsContextMenu(),
     new SeperatorContextMenu(),
     new ChildContextMenu('modify',
       new RotateLeftAndRight(),

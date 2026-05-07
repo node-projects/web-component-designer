@@ -3,6 +3,7 @@ import { CommandType } from "../../../../../commandHandling/CommandType.js";
 import { ServiceContainer } from "../../../../services/ServiceContainer.js";
 import { DesignerView } from "../../designerView.js";
 import { DesignerToolbarButton } from './DesignerToolbarButton.js';
+import { DraggableToolWindow } from './popups/DraggableToolWindow.js';
 
 export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
   static override readonly style = css`
@@ -70,7 +71,11 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
         instance = document.createElement(designerToolbarButton.popup);
       else
         instance = new designerToolbarButton.popup(this.designerView.designerCanvas);
-      this._popupContainer.appendChild(instance);
+      if (instance instanceof DraggableToolWindow) {
+        DraggableToolWindow.showWindow(instance, designerToolbarButton);
+      } else {
+        this._popupContainer.appendChild(instance);
+      }
     }
   }
 
