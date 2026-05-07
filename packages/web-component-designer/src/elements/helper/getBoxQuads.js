@@ -507,13 +507,14 @@ export function getBoxQuads(node, options) {
                 && node.ownerSVGElement;
 
             if (needsStrokeInflation) {
-                const strokeInflation = strokeWidth * 2;
-                const ownerSvgRect = node.ownerSVGElement.getBoundingClientRect();
+                const strokeInflation = getSvgStrokeInflation(node, bbox, strokeWidth);
+                const scaleX = getSvgBBoxScale(rect.width, bbox.width, rect.height, bbox.height);
+                const scaleY = getSvgBBoxScale(rect.height, bbox.height, rect.width, bbox.width);
                 rect = new DOMRect(
-                    ownerSvgRect.x + bbox.x - strokeInflation,
-                    ownerSvgRect.y + bbox.y - strokeInflation,
-                    bbox.width + strokeInflation * 2,
-                    bbox.height + strokeInflation * 2,
+                    rect.x - strokeInflation.left * scaleX,
+                    rect.y - strokeInflation.top * scaleY,
+                    rect.width + (strokeInflation.left + strokeInflation.right) * scaleX,
+                    rect.height + (strokeInflation.top + strokeInflation.bottom) * scaleY,
                 );
             }
 
@@ -732,6 +733,45 @@ export function getElementSize(node, matrix) {
         height = result.height;
     }
     return { width, height }
+}
+
+function getSvgBBoxScale(primaryRectSize, primaryBBoxSize, fallbackRectSize, fallbackBBoxSize) {
+    if (Math.abs(primaryBBoxSize) > 1e-10) {
+        return primaryRectSize / primaryBBoxSize;
+    }
+    if (Math.abs(fallbackBBoxSize) > 1e-10) {
+        return fallbackRectSize / fallbackBBoxSize;
+    }
+    return 1;
+}
+
+function getSvgStrokeInflation(node, bbox, strokeWidth) {
+    const halfStrokeWidth = strokeWidth / 2;
+    if ((node instanceof SVGLineElement || node instanceof (node.ownerDocument.defaultView ?? window).SVGLineElement)) {
+        const x1 = node.x1.baseVal.value;
+        const y1 = node.y1.baseVal.value;
+        const x2 = node.x2.baseVal.value;
+        const y2 = node.y2.baseVal.value;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.hypot(dx, dy);
+
+        if (length > 1e-10) {
+            let inflateX = halfStrokeWidth * Math.abs(dy) / length;
+            let inflateY = halfStrokeWidth * Math.abs(dx) / length;
+            const lineCap = getCachedComputedStyle(node).strokeLinecap;
+
+            if (lineCap === 'round' || lineCap === 'square') {
+                inflateX += halfStrokeWidth * Math.abs(dx) / length;
+                inflateY += halfStrokeWidth * Math.abs(dy) / length;
+            }
+
+            return { left: inflateX, right: inflateX, top: inflateY, bottom: inflateY };
+        }
+    }
+
+    const genericInflation = strokeWidth * 2;
+    return { left: genericInflation, right: genericInflation, top: genericInflation, bottom: genericInflation };
 }
 
 /**
