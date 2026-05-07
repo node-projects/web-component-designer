@@ -782,8 +782,18 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     }
 
     // Segment type conversion (only for path elements)
-    if (isPath && segIndex > 0 && seg.type !== SegmentType.Move && seg.type !== SegmentType.Close) {
+    if (isPath && segIndex > 0 && seg.type !== SegmentType.Close) {
       items.push({ title: '---' });
+
+      if (seg.type !== SegmentType.Move) {
+        items.push({
+          title: 'Convert to moveto', action: () => {
+            this._convertToMove(segIndex);
+            this._applyGeometryToElement();
+            this._commitGeometryChange();
+          }
+        });
+      }
 
       if (seg.type !== SegmentType.Line && seg.type !== SegmentType.HorizontalLine && seg.type !== SegmentType.VerticalLine) {
         items.push({
@@ -914,6 +924,15 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       point: newPoint,
     };
     this._geometry.segments.splice(segIndex + 1, 0, newSeg);
+  }
+
+  private _convertToMove(segIndex: number) {
+    if (!this._geometry) return;
+    const seg = this._geometry.segments[segIndex];
+    seg.type = SegmentType.Move;
+    delete seg.cp1;
+    delete seg.cp2;
+    delete seg.arc;
   }
 
   private _convertToLine(segIndex: number) {
