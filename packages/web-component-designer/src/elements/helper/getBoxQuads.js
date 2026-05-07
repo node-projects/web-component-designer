@@ -692,15 +692,17 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
         }
         const cs = getCachedComputedStyle(node);
         if (cs.position === 'fixed') {
-            const par = getParentElementIncludingSlots(node, iframes);
-            if (!par) {
-                return new DOMPoint(node.offsetLeft, node.offsetTop);
+            const fixedContainer = getNearestFixedContainingBlock(node, iframes);
+            if (!fixedContainer) {
+                const left = cs.left && cs.left !== 'auto' ? parseFloat(cs.left) : node.offsetLeft;
+                const top = cs.top && cs.top !== 'auto' ? parseFloat(cs.top) : node.offsetTop;
+                return new DOMPoint(left, top);
             }
 
-            const m = getResultingTransformationBetweenElementAndAllAncestors(par, node.ownerDocument.body, iframes, true).inverse();
+            const m = getResultingTransformationBetweenElementAndAllAncestors(fixedContainer, node.ownerDocument.body, iframes, true).inverse();
             const r1 = node.getBoundingClientRect();
             const r1t = m.transformPoint(r1);
-            const r2 = par.getBoundingClientRect();
+            const r2 = fixedContainer.getBoundingClientRect();
             const r2t = m.transformPoint(r2);
 
             return new DOMPoint(r1t.x - r2t.x, r1t.y - r2t.y);
@@ -850,6 +852,14 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
     while (actualElement != ancestor && actualElement != null) {
         let parentElement = getParentElementIncludingSlots(actualElement, iframes);
 
+        if ((actualElement instanceof HTMLElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement)) {
+            const fixedStyle = getCachedComputedStyle(actualElement);
+            if (fixedStyle.position === 'fixed') {
+                const fixedContainer = getNearestFixedContainingBlock(actualElement, iframes);
+                parentElement = fixedContainer ?? ancestor;
+            }
+        }
+
         if (actualElement.assignedSlot != null) {
             if (actualElement.nodeType === Node.ELEMENT_NODE) {
                 const slotOffsetParent = offsetParentPolyfill(actualElement);
@@ -908,7 +918,9 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 originalElementAndAllParentsMultipliedMatrix = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f]).multiplySelf(originalElementAndAllParentsMultipliedMatrix);
                 parentElement = actualElement.ownerSVGElement;
             } else if ((actualElement instanceof HTMLElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLElement)) {
-                if (lastOffsetParent !== actualElement.offsetParent && !((actualElement instanceof HTMLSlotElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement))
+                const actualStyle = getCachedComputedStyle(actualElement);
+                const isFixedSelf = actualStyle.position === 'fixed' && actualElement === node;
+                if ((isFixedSelf || lastOffsetParent !== actualElement.offsetParent) && !((actualElement instanceof HTMLSlotElement || actualElement instanceof (actualElement.ownerDocument.defaultView ?? window).HTMLSlotElement))
                     && (lastOffsetParent === null || actualElement === lastOffsetParent || !isFlatTreeInclusiveAncestor(lastOffsetParent, actualElement))) {
                     const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                     const zoom = getElementZoom(actualElement);
@@ -1974,4 +1986,40 @@ function offsetTopLeftPolyfill(element, offsetTopOrLeft) {
     }
 
     return value;
+}
+
+/**
+* @param {Element} element
+* @returns {boolean}
+*/
+function createsFixedContainingBlock(element) {
+    const cs = getCachedComputedStyle(element);
+    if ((cs.transform && cs.transform !== 'none') ||
+        (cs.perspective && cs.perspective !== 'none') ||
+        (cs.filter && cs.filter !== 'none') ||
+        (cs.backdropFilter && cs.backdropFilter !== 'none')) {
+        return true;
+    }
+
+    const contain = cs.contain || '';
+    if (contain.includes('paint') || contain.includes('layout') || contain.includes('strict') || contain.includes('content')) {
+        return true;
+    }
+
+    const willChange = cs.willChange || '';
+    return /transform|perspective|filter|backdrop-filter/.test(willChange);
+}
+
+/**
+* @param {HTMLElement} element
+* @param {HTMLIFrameElement[]=} iframes
+* @returns {Element | null}
+*/
+function getNearestFixedContainingBlock(element, iframes) {
+    let parent = getParentElementIncludingSlots(element, iframes);
+    while (parent) {
+        if (createsFixedContainingBlock(parent)) return parent;
+        parent = getParentElementIncludingSlots(parent, iframes);
+    }
+    return null;
 }
