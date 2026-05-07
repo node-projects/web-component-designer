@@ -10,6 +10,7 @@ import { IUiCommandHandler } from '../commandHandling/IUiCommandHandler.js';
 import { IUiCommand } from '../commandHandling/IUiCommand.js';
 import { IDisposable } from '../interfaces/IDisposable.js';
 import { ISelectionChangedEvent } from "./services/selectionService/ISelectionChangedEvent.js";
+import { ISelectionRefreshEvent } from './services/selectionService/ISelectionRefreshEvent.js';
 import { SimpleSplitView } from './controls/SimpleSplitView.js';
 import { IStylesheet } from "./services/stylesheetService/IStylesheetService.js";
 import { sleep } from "./helper/Helper.js";
@@ -84,6 +85,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   private _content: string = '';
   private _tabControl: DesignerTabControl;
   private _selectionPosition: IStringPosition;
+  private _lastCodeSelectionKey: string;
   private _splitDiv: SimpleSplitView;
   private _designerDiv: HTMLDivElement;
   private _codeDiv: HTMLDivElement;
@@ -126,6 +128,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this.designerView.initialize(this._serviceContainer);
     this.designerView.instanceServiceContainer.documentContainer = this;
     this.designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e))
+    this.designerView.instanceServiceContainer.selectionService.onSelectionRefresh.on(e => this.designerSelectionChanged(e))
     this.designerView.instanceServiceContainer.onContentChanged.on(() => this.designerContentChanged())
 
     this.codeView = new serviceContainer.config.codeViewWidget();
@@ -192,14 +195,15 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this._tabControl.selectedIndex = tabIndex.preview;
   }
 
-  designerSelectionChanged(e: ISelectionChangedEvent) {
+  designerSelectionChanged(e: ISelectionChangedEvent | ISelectionRefreshEvent) {
     if (this._tabControl.selectedIndex === tabIndex.split) {
       let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
       if (primarySelection) {
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
-          this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
+          this._selectionPosition = this.instanceServiceContainer.selectionService.selectedPart?.textRange
+            ?? this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
           if (this._selectionPosition)
-            this.codeView.setSelection(this._selectionPosition);
+            this.setCodeViewSelection(this._selectionPosition);
           this._selectionPosition = null;
         }
       }
@@ -216,11 +220,13 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
         this._content = this.designerView.getDesignerHTML();
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
+        this._lastCodeSelectionKey = null;
         if (primarySelection) {
           if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
-            this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
+            this._selectionPosition = this.instanceServiceContainer.selectionService.selectedPart?.textRange
+              ?? this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
             if (this._selectionPosition)
-              this.codeView.setSelection(this._selectionPosition);
+              this.setCodeViewSelection(this._selectionPosition);
             this._selectionPosition = null;
           }
         }
@@ -297,7 +303,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
         this._content = this.designerView.getDesignerHTML();
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
-          this._selectionPosition = this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
+          this._selectionPosition = this.instanceServiceContainer.selectionService.selectedPart?.textRange
+            ?? this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
         }
       } else if (i.oldIndex === tabIndex.code) {
         this._content = this.codeView.getText();
@@ -313,11 +320,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this.updateDesignerHtml();
       if (i.newIndex === tabIndex.code || i.newIndex === tabIndex.split) {
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
+        this._lastCodeSelectionKey = null;
         if (this._selectionPosition) {
-          this.codeView.setSelection(this._selectionPosition);
+          this.setCodeViewSelection(this._selectionPosition);
           sleep(20).then(x => {
             if (this._selectionPosition)
-              this.codeView.setSelection(this._selectionPosition);
+              this.setCodeViewSelection(this._selectionPosition);
             this._selectionPosition = null;
           });
         }
@@ -361,6 +369,18 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this.designerView.designerCanvas.extensionManager.reapplyAllAppliedExtentions(null, [ExtensionType.Permanent, ExtensionType.Selection, ExtensionType.PrimarySelection, ExtensionType.PrimarySelectionContainer, ExtensionType.OnlyOneItemSelected, ExtensionType.MultipleItemsSelected]);
       }
     }
+  }
+
+  private setCodeViewSelection(position: IStringPosition) {
+    if (!position)
+      return;
+
+    const key = `${position.start}:${position.length}`;
+    if (this._lastCodeSelectionKey === key)
+      return;
+
+    this._lastCodeSelectionKey = key;
+    this.codeView.setSelection(position);
   }
 
   public get instanceServiceContainer(): InstanceServiceContainer {

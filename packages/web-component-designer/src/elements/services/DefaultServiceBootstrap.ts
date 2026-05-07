@@ -87,6 +87,7 @@ import { DrawElementTool } from '../widgets/designerView/tools/DrawElementTool.j
 import { RoundPixelsDesignViewConfigButton } from '../widgets/designerView/extensions/buttons/RoundPixelsDesignViewConfigButton.js';
 import { MathMLElementsPropertiesService } from './propertiesService/services/MathMLElementsPropertiesService.js';
 import { UnifiedGeometryExtensionProvider } from '../widgets/designerView/extensions/svg/UnifiedGeometryExtensionProvider.js';
+import { SvgPathSourceMapProvider } from './sourceMapService/SvgPathSourceMapProvider.js';
 import { ConditionExtensionProvider } from '../widgets/designerView/extensions/logic/ConditionExtensionProvider.js';
 import { GridToolbarExtensionProvider } from '../widgets/designerView/extensions/grid/GridToolbarExtensionProvider.js';
 import { FlexToolbarExtensionProvider } from '../widgets/designerView/extensions/flex/FlexToolbarExtensionProvider.js';
@@ -154,6 +155,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
   serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
   serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
+  serviceContainer.sourceMapProviders.push(new SvgPathSourceMapProvider());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
     new InvisibleElementExtensionProvider(),

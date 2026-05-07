@@ -4,6 +4,7 @@ import { IHtmlParserService } from './IHtmlParserService.js';
 import { DesignItem } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { isFirefox } from '../../helper/Browser.js';
+import { IndentedTextWriter } from '../../helper/IndentedTextWriter.js';
 
 export class DefaultHtmlParserService implements IHtmlParserService {
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
@@ -19,7 +20,13 @@ export class DefaultHtmlParserService implements IHtmlParserService {
 
     const headNodes = this.createDesignItems(doc.head.childNodes, serviceContainer, instanceServiceContainer);
     const bodyNodes = this.createDesignItems(doc.body.childNodes, serviceContainer, instanceServiceContainer);
-    return [...headNodes, ...bodyNodes];
+    const designItems = [...headNodes, ...bodyNodes];
+
+    if (!parseSnippet && instanceServiceContainer.designItemDocumentPositionService && designItems.length) {
+      serviceContainer.htmlWriterService.write(new IndentedTextWriter(), designItems, true, true);
+    }
+
+    return designItems;
   }
 
   public createDesignItems(elements: NodeListOf<ChildNode> | Node[] | HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer) {

@@ -11,6 +11,8 @@ import { IGeometry, IGeometryReader, IGeometrySegment, SegmentType } from './geo
 import { getGeometryReader } from './geometry/GeometryReaderFactory.js';
 import { applyGeometryWritesToDesignItem, applyGeometryWritesToElement } from './geometry/GeometryWriteHelper.js';
 import { fromOverlayPointToSvgUserSpace, toOverlayPointFromSvgUserSpace } from '../../../../helper/SvgHelper.js';
+import { ISourcePart, ISvgPathHandleSourcePartData } from '../../../../services/sourceMapService/ISourcePart.js';
+import { createSvgPathHandleSourcePartKey } from '../../../../services/sourceMapService/SvgPathSourceMapProvider.js';
 
 interface DragState {
   startCursorPos: IPoint;
@@ -19,6 +21,7 @@ interface DragState {
   originalPoint: IPoint;
   originalSegments: { point: IPoint; cp1?: IPoint; cp2?: IPoint }[];
   startScrollOffset: IPoint;
+  geometryChanged: boolean;
 }
 
 export interface UnifiedGeometryExtensionOptions {
@@ -133,7 +136,8 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     const values: (number | string)[] = [
       this.designerCanvas.zoomFactor,
       this.designerCanvas.scaleFactor,
-      this._overlayStructureSignature ?? ''
+      this._overlayStructureSignature ?? '',
+      this._getSelectedHandleRefreshKey()
     ];
 
     if (transformedBoxQuad) {
@@ -164,6 +168,15 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     }
 
     return values;
+  }
+
+  private _getSelectedHandleRefreshKey(): string {
+    const selectedPart = this.extendedItem.instanceServiceContainer.selectionService.selectedPart;
+    const data = selectedPart?.data as ISvgPathHandleSourcePartData;
+    if (selectedPart?.designItem !== this.extendedItem || selectedPart.kind !== 'svg-path-handle') {
+      return 'selected:none';
+    }
+    return `selected:${data?.segmentIndex}:${data?.handleType}`;
   }
 
   /** Convert an SVG user-space coordinate to overlay (canvas) coordinates. */
@@ -234,6 +247,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     for (const [key, circle] of this._overlayCircles) {
       circle.setAttribute('r', (key.startsWith('anchor-') ? anchorRadius : controlRadius).toString());
       circle.style.strokeWidth = strokeWidth;
+      circle.classList.toggle('svg-path-selected-part', this._isSelectedHandle(key));
     }
 
     for (const line of this._overlayLines) {
@@ -289,6 +303,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   private _onPointerDown(event: PointerEvent, circle: SVGCircleElement, segIndex: number, handleType: 'anchor' | 'cp1' | 'cp2') {
     event.stopPropagation();
     event.preventDefault();
+    this._selectSourcePart(segIndex, handleType, event);
     (event.target as Element).setPointerCapture(event.pointerId);
     const cursorPos = this.designerCanvas.getNormalizedEventCoordinates(event);
 
@@ -318,7 +333,35 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       originalPoint,
       originalSegments,
       startScrollOffset: this.designerCanvas.canvasOffset,
+      geometryChanged: false,
     };
+  }
+
+  private _selectSourcePart(segIndex: number, handleType: 'anchor' | 'cp1' | 'cp2', event: Event) {
+    const selectionService = this.extendedItem.instanceServiceContainer.selectionService;
+    const sourcePart = this._getSourcePart(segIndex, handleType);
+    if (selectionService.primarySelection !== this.extendedItem)
+      selectionService.setSelectedElements([this.extendedItem], event, sourcePart);
+
+    else if (sourcePart)
+      selectionService.setSelectedPart(sourcePart, event);
+  }
+
+  private _getSourcePart(segIndex: number, handleType: 'anchor' | 'cp1' | 'cp2'): ISourcePart<ISvgPathHandleSourcePartData> {
+    const key = createSvgPathHandleSourcePartKey(segIndex, handleType);
+    return this.extendedItem.instanceServiceContainer.designItemDocumentPositionService
+      ?.getSourceParts(this.extendedItem)
+      .find(x => x.key === key) as ISourcePart<ISvgPathHandleSourcePartData>;
+  }
+
+  private _isSelectedHandle(circleKey: string) {
+    const [handleType, segmentIndexText] = circleKey.split('-') as ['anchor' | 'cp1' | 'cp2', string];
+    const selectedPart = this.extendedItem.instanceServiceContainer.selectionService.selectedPart;
+    const data = selectedPart?.data as ISvgPathHandleSourcePartData;
+    return selectedPart?.designItem === this.extendedItem
+      && selectedPart.kind === 'svg-path-handle'
+      && data?.segmentIndex === Number(segmentIndexText)
+      && data?.handleType === handleType;
   }
 
   private _onPointerMove(event: PointerEvent, circle: SVGCircleElement, segIndex: number, handleType: 'anchor' | 'cp1' | 'cp2') {
@@ -330,6 +373,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     const cursorPos = this.designerCanvas.getNormalizedEventCoordinates(event);
     let dx = cursorPos.x - this._dragState.startCursorPos.x;
     let dy = cursorPos.y - this._dragState.startCursorPos.y;
+    if (dx === 0 && dy === 0) return;
 
     // Shift key: constrain to axis
     if (event.shiftKey) {
@@ -339,6 +383,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         dx = 0;
       }
     }
+    if (dx === 0 && dy === 0) return;
 
     // Alt key + anchor drag: move entire shape
     if (event.altKey && handleType === 'anchor' && this._options.allowShapeDrag !== false) {
@@ -346,6 +391,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     } else {
       this._dragSingleHandle(segIndex, handleType, dx, dy);
     }
+    this._dragState.geometryChanged = true;
 
     // Update geometry model
     this._applyGeometryToElement();
@@ -688,11 +734,11 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     event.stopPropagation();
     (event.target as Element).releasePointerCapture(event.pointerId);
 
-    if (this._dragState && this._geometry) {
+    if (this._dragState?.geometryChanged && this._geometry) {
       // Commit via designItem for undo support (follows PathExtension pattern)
       this._commitGeometryChange();
-      this._dragState = null;
     }
+    this._dragState = null;
   }
 
   // -- Geometry manipulation --

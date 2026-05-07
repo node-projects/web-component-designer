@@ -75,6 +75,10 @@ export type { IDemoProviderService } from "./elements/services/demoProviderServi
 
 export * from "./elements/services/designItemDocumentPositionService/DesignItemDocumentPositionService.js";
 export type { IDesignItemDocumentPositionService } from "./elements/services/designItemDocumentPositionService/IDesignItemDocumentPositionService.js";
+export type { ISourcePart, ISvgPathHandleSourcePartData, SourcePartKind } from "./elements/services/sourceMapService/ISourcePart.js";
+export type { ISourceMapContext, ISourceMapProvider, SourceMapContextKind } from "./elements/services/sourceMapService/ISourceMapProvider.js";
+export * from "./elements/services/sourceMapService/SvgPathDataSourceMap.js";
+export * from "./elements/services/sourceMapService/SvgPathSourceMapProvider.js";
 
 export type { IConfigUiService } from "./elements/services/configUiService/IConfigUiService.js";
 

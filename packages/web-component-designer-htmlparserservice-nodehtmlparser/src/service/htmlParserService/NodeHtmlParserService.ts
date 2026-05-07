@@ -11,6 +11,9 @@ export class NodeHtmlParserService implements IHtmlParserService {
   }
 
   async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean, positionOffset = 0): Promise<IDesignItem[]> {
+    if (!parseSnippet)
+      instanceServiceContainer.designItemDocumentPositionService?.clearSourceParts();
+
     const parsed = parser.parse(html, { comment: true });
 
     let designItems: IDesignItem[] = [];
@@ -44,6 +47,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
         this._designItemCreatedCallback(designItem);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
+      this._addAttributeSourceParts(item, designItem, serviceContainer, snippet, positionOffset);
 
       let style = '';
 
@@ -110,5 +114,86 @@ export class NodeHtmlParserService implements IHtmlParserService {
     if (serviceContainer.designItemService.finishedDesignItem)
       serviceContainer.designItemService.finishedDesignItem(designItem);
     return designItem;
+  }
+
+  private _addAttributeSourceParts(item: any, designItem: IDesignItem, serviceContainer: ServiceContainer, snippet: boolean, positionOffset: number) {
+    const positionService = designItem.instanceServiceContainer.designItemDocumentPositionService;
+    if (snippet || !positionService || !item.rawAttrs)
+      return;
+
+    const rawAttrs = item.rawAttrs as string;
+    const openingTag = this._getOpeningTagText(item.outerHTML ?? '');
+    const rawAttrsIndex = openingTag.indexOf(rawAttrs);
+    if (rawAttrsIndex < 0)
+      return;
+
+    const rawAttrsStart = item.range[0] + positionOffset + rawAttrsIndex;
+    const attributeRegex = /([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+    let match: RegExpExecArray;
+    while (match = attributeRegex.exec(rawAttrs)) {
+      const attributeName = match[1];
+      const attributeStart = rawAttrsStart + match.index;
+      positionService.addSourcePart({
+        designItem,
+        kind: 'attribute',
+        key: `attribute:${attributeName}`,
+        name: attributeName,
+        textRange: { start: attributeStart, length: match[0].length }
+      });
+
+      const valueRange = this._getAttributeValueRange(match[0]);
+      if (valueRange) {
+        const textRange = { start: attributeStart + valueRange.start, length: valueRange.length };
+        positionService.addSourcePart({
+          designItem,
+          kind: 'attribute-value',
+          key: `attribute:${attributeName}/value`,
+          name: attributeName,
+          textRange
+        });
+
+        const context = { designItem, sourceKind: 'attribute' as const, name: attributeName, value: valueRange.value, valueTextRange: textRange };
+        for (const provider of serviceContainer.sourceMapProviders) {
+          if (provider.canMap(context))
+            positionService.addSourceParts(provider.map(context));
+        }
+      }
+    }
+  }
+
+  private _getOpeningTagText(outerHtml: string) {
+    let quote: '"' | '\'' = null;
+    for (let i = 0; i < outerHtml.length; i++) {
+      const char = outerHtml[i];
+      if (quote) {
+        if (char === quote)
+          quote = null;
+      } else if (char === '"' || char === '\'') {
+        quote = char;
+      } else if (char === '>') {
+        return outerHtml.substring(0, i + 1);
+      }
+    }
+    return outerHtml;
+  }
+
+  private _getAttributeValueRange(attributeText: string): { start: number, length: number, value: string } {
+    const equalsIndex = attributeText.indexOf('=');
+    if (equalsIndex < 0)
+      return null;
+
+    let valueStart = equalsIndex + 1;
+    while (valueStart < attributeText.length && /\s/.test(attributeText[valueStart]))
+      valueStart++;
+
+    const quote = attributeText[valueStart];
+    if (quote === '"' || quote === '\'') {
+      const contentStart = valueStart + 1;
+      const contentEnd = attributeText.lastIndexOf(quote);
+      const length = Math.max(0, contentEnd - contentStart);
+      return { start: contentStart, length, value: attributeText.substring(contentStart, contentStart + length) };
+    }
+
+    return { start: valueStart, length: attributeText.length - valueStart, value: attributeText.substring(valueStart) };
   }
 }

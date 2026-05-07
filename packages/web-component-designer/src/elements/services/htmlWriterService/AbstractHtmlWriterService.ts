@@ -5,6 +5,7 @@ import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { CssCombiner } from '../../helper/CssCombiner.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ITextWriter } from '../../helper/ITextWriter.js';
+import { IStringPosition } from './IStringPosition.js';
 
 export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
@@ -21,9 +22,10 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
   abstract write(indentedTextWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, updatePositions?: boolean);
 
-  writeAttributes(indentedTextWriter: ITextWriter, designItem: IDesignItem) {
+  writeAttributes(indentedTextWriter: ITextWriter, designItem: IDesignItem, updatePositions: boolean = false) {
     if (designItem.hasAttributes) {
       for (const a of designItem.attributes()) {
+        const attributeStart = indentedTextWriter.position;
         indentedTextWriter.write(' ');
         if (typeof a[1] === 'string') {
           if (a[1] === "")
@@ -41,7 +43,8 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
                   txt = JSON.stringify(j, null, 2);
                 else
                   txt = JSON.stringify(j);
-                indentedTextWriter.write(a[0] + '=\'' + DomConverter.normalizeAttributeValue(txt, true) + '\'');
+                const writtenValue = DomConverter.normalizeAttributeValue(txt, true);
+                this._writeAttributeWithValue(indentedTextWriter, designItem, a[0], writtenValue, '\'', updatePositions);
                 continue;
               }
               catch { }
@@ -50,11 +53,11 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
             if (content.indexOf('&quot;')) {
               const contentSingle = DomConverter.normalizeAttributeValue(a[1], true);
               if (contentSingle.length < content.length)
-                indentedTextWriter.write(a[0] + '=\'' + contentSingle + '\'');
+                this._writeAttributeWithValue(indentedTextWriter, designItem, a[0], contentSingle, '\'', updatePositions);
               else
-                indentedTextWriter.write(a[0] + '="' + content + '"');
+                this._writeAttributeWithValue(indentedTextWriter, designItem, a[0], content, '"', updatePositions);
             } else
-              indentedTextWriter.write(a[0] + '="' + content + '"');
+              this._writeAttributeWithValue(indentedTextWriter, designItem, a[0], content, '"', updatePositions);
           }
         }
         else if (!a[1])
@@ -62,8 +65,46 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
         else {
           //TODO: writing of bindings, really ???
         }
+        if (updatePositions)
+          this._addAttributeSourcePart(designItem, a[0], { start: attributeStart + 1, length: indentedTextWriter.position - attributeStart - 1 });
       }
     }
+  }
+
+  private _writeAttributeWithValue(indentedTextWriter: ITextWriter, designItem: IDesignItem, attributeName: string, writtenValue: string, quote: '"' | '\'', updatePositions: boolean) {
+    indentedTextWriter.write(attributeName + '=' + quote);
+    const valueStart = indentedTextWriter.position;
+    indentedTextWriter.write(writtenValue);
+    const valueRange = { start: valueStart, length: indentedTextWriter.position - valueStart };
+    indentedTextWriter.write(quote);
+
+    if (!updatePositions)
+      return;
+
+    const positionService = designItem.instanceServiceContainer.designItemDocumentPositionService;
+    positionService.addSourcePart({
+      designItem,
+      kind: 'attribute-value',
+      key: `attribute:${attributeName}/value`,
+      name: attributeName,
+      textRange: valueRange
+    });
+
+    const context = { designItem, sourceKind: 'attribute' as const, name: attributeName, value: writtenValue, valueTextRange: valueRange };
+    for (const provider of designItem.serviceContainer.sourceMapProviders) {
+      if (provider.canMap(context))
+        positionService.addSourceParts(provider.map(context));
+    }
+  }
+
+  private _addAttributeSourcePart(designItem: IDesignItem, attributeName: string, textRange: IStringPosition) {
+    designItem.instanceServiceContainer.designItemDocumentPositionService.addSourcePart({
+      designItem,
+      kind: 'attribute',
+      key: `attribute:${attributeName}`,
+      name: attributeName,
+      textRange
+    });
   }
 
   writeStyles(indentedTextWriter: ITextWriter, designItem: IDesignItem) {

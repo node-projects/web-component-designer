@@ -54,6 +54,7 @@ import { IPngCreatorService } from './pngCreatorService/IPngCreatorService.js';
 import { ISearchService } from './searchService/ISearchService.js';
 import { ICollaborationService } from './collaborationService/ICollaborationService.js';
 import { IEditorTypeService } from './propertiesService/IEditorTypeService.js';
+import { ISourceMapProvider } from './sourceMapService/ISourceMapProvider.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -110,6 +111,7 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
     };
 
   public readonly designerExtensions: Map<(ExtensionType | string), IDesignerExtensionProvider[]> = new Map();
+  public readonly sourceMapProviders: ISourceMapProvider[] = [];
 
   removeDesignerExtensionOfType(container: (ExtensionType | string), lambda: new (...args: any[]) => IDesignerExtensionProvider): void {
     const extContainer = this.designerExtensions.get(container);

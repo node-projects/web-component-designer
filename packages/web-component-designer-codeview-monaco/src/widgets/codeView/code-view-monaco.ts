@@ -17,6 +17,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _disableSelectionAfterSel: boolean;
+  private _setSelectionTimeout: ReturnType<typeof setTimeout>;
+  private _pendingSelectionKey: string;
 
   dispose(): void {
     this._monacoEditor?.dispose();
@@ -238,6 +240,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     this.#code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
+      this.clearPendingSetSelection();
       this._disableSelectionAfterUpd = true;
       if (this._monacoEditor)
         this._monacoEditor.setValue(code);
@@ -255,11 +258,18 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   setSelection(position: IStringPosition) {
     if (this._monacoEditor && !this._disableSelection && !this._disableSelectionAfterSel && position) {
+      const selectionKey = `${position.start}:${position.length}`;
+      if (this._pendingSelectionKey === selectionKey)
+        return;
+
       this._disableSelectionAfterSel = true;
+      this._pendingSelectionKey = selectionKey;
       let model = this._monacoEditor.getModel();
       let point1 = model.getPositionAt(position.start);
       let point2 = model.getPositionAt(position.start + position.length);
-      setTimeout(() => {
+      this._setSelectionTimeout = setTimeout(async () => {
+        this._setSelectionTimeout = null;
+        this._pendingSelectionKey = null;
         this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
         CodeViewMonaco.getMonacoLib().then(monaco => {
           this._monacoEditor.revealRangeInCenterIfOutsideViewport(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
@@ -269,6 +279,15 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         }, 50);
       }, 50);
     }
+  }
+
+  private clearPendingSetSelection() {
+    if (this._setSelectionTimeout) {
+      clearTimeout(this._setSelectionTimeout);
+      this._setSelectionTimeout = null;
+    }
+    this._pendingSelectionKey = null;
+    this._disableSelectionAfterSel = false;
   }
 }
 

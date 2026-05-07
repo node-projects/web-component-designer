@@ -50,5 +50,10 @@ export class UnifiedGeometryExtensionProvider implements IDesignerExtensionProvi
       fill: white;
       pointer-events: auto;
     }
+
+    .svg-path-selected-part {
+      stroke: black;
+      fill: lime;
+    }
   `;
 }

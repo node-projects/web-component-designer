@@ -109,4 +109,33 @@ export class AttributesPropertiesService extends AbstractPropertiesService {
   override getUnsetValue(designItems: IDesignItem[], property: IProperty) {
     return property.defaultValue;
   }
+
+  override getContextMenu(designItems: IDesignItem[], property: IProperty) {
+    const ctxMenuItems = super.getContextMenu(designItems, property);
+    const sourcePart = this._getAttributeSourcePart(designItems, property);
+
+    if (sourcePart) {
+      ctxMenuItems.splice(1, 0, {
+        title: 'jump to definition',
+        action: () => {
+          const selectionService = designItems[0].instanceServiceContainer.selectionService;
+          if (selectionService.primarySelection !== designItems[0])
+            selectionService.setSelectedElements([designItems[0]], null, sourcePart);
+          else
+            selectionService.setSelectedPart(sourcePart);
+        }
+      });
+    }
+
+    return ctxMenuItems;
+  }
+
+  private _getAttributeSourcePart(designItems: IDesignItem[], property: IProperty) {
+    if (designItems?.length !== 1 || !property?.name)
+      return null;
+
+    return designItems[0].instanceServiceContainer.designItemDocumentPositionService
+      ?.getSourceParts(designItems[0])
+      .find(x => x.kind === 'attribute' && x.key === `attribute:${property.name}`);
+  }
 }

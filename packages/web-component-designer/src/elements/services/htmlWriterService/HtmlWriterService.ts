@@ -46,6 +46,8 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
   }
 
   write(indentedTextWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, updatePositions: boolean = false) {
+    if (updatePositions)
+      designItems[0]?.instanceServiceContainer.designItemDocumentPositionService?.clearSourceParts();
     for (const d of designItems) {
       this.internalWrite(indentedTextWriter, d, updatePositions, false);
     }
@@ -75,7 +77,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
       start = indentedTextWriter.position;
       indentedTextWriter.write('<' + designItem.name);
 
-      this.writeAttributes(indentedTextWriter, designItem);
+      this.writeAttributes(indentedTextWriter, designItem, updatePositions);
       this.writeStyles(indentedTextWriter, designItem);
 
       indentedTextWriter.write('>');
