@@ -344,6 +344,8 @@ export function getBoxQuads(node, options) {
     // FIX 13: Cache cross-realm constructors once per call.
     const win = node.ownerDocument.defaultView ?? window;
     const _Text = win.Text;
+    const _SVGGraphicsElement = win.SVGGraphicsElement;
+    const _SVGSVGElement = win.SVGSVGElement;
 
     // For text nodes, check for multiple fragments (multi-column layout, line-wrapping).
     // getClientRects() returns one rect per line-box fragment; getBoundingClientRect()
@@ -485,6 +487,62 @@ export function getBoxQuads(node, options) {
         const tQuad = [new DOMQuad(tPoints[0], tPoints[1], tPoints[2], tPoints[3])];
         if (boxQuadsCache) boxQuadsCache.set(key, tQuad);
         return tQuad;
+    }
+
+    if ((node instanceof SVGGraphicsElement || node instanceof _SVGGraphicsElement)
+        && !((node instanceof SVGSVGElement || node instanceof _SVGSVGElement))) {
+        const canUseViewportSvgRect = originalElementAndAllParentsMultipliedMatrix.is2D
+            && Math.abs(originalElementAndAllParentsMultipliedMatrix.b) < 1e-10
+            && Math.abs(originalElementAndAllParentsMultipliedMatrix.c) < 1e-10;
+
+        if (canUseViewportSvgRect) {
+            const viewportRoot = node.ownerDocument.documentElement ?? node.ownerDocument.body;
+            let rect = node.getBoundingClientRect();
+            const bbox = node.getBBox();
+            const svgStyle = getCachedComputedStyle(node);
+            const strokeWidth = svgStyle.stroke !== 'none' ? parseFloat(svgStyle.strokeWidth) || 0 : 0;
+            const needsStrokeInflation = strokeWidth > 0
+                && Math.abs(rect.width - bbox.width) < 0.5
+                && Math.abs(rect.height - bbox.height) < 0.5
+                && node.ownerSVGElement;
+
+            if (needsStrokeInflation) {
+                const strokeInflation = strokeWidth * 2;
+                const ownerSvgRect = node.ownerSVGElement.getBoundingClientRect();
+                rect = new DOMRect(
+                    ownerSvgRect.x + bbox.x - strokeInflation,
+                    ownerSvgRect.y + bbox.y - strokeInflation,
+                    bbox.width + strokeInflation * 2,
+                    bbox.height + strokeInflation * 2,
+                );
+            }
+
+            let svgQuad;
+            if (relativeTo === node.ownerDocument.body || relativeTo === node.ownerDocument.documentElement) {
+                const relativeRect = relativeTo.getBoundingClientRect();
+                const relativeX = rect.x - relativeRect.x + relativeTo.scrollLeft;
+                const relativeY = rect.y - relativeRect.y + relativeTo.scrollTop;
+                svgQuad = [new DOMQuad(
+                    new DOMPoint(relativeX, relativeY),
+                    new DOMPoint(relativeX + rect.width, relativeY),
+                    new DOMPoint(relativeX + rect.width, relativeY + rect.height),
+                    new DOMPoint(relativeX, relativeY + rect.height),
+                )];
+            } else {
+                const viewportRootRect = viewportRoot?.getBoundingClientRect();
+                const rectInViewportRoot = new DOMRect(
+                    rect.x - (viewportRootRect?.x ?? 0),
+                    rect.y - (viewportRootRect?.y ?? 0),
+                    rect.width,
+                    rect.height,
+                );
+                svgQuad = [convertRectFromNode(relativeTo, rectInViewportRoot, viewportRoot, {
+                    iframes: options?.iframes,
+                })];
+            }
+            if (boxQuadsCache) boxQuadsCache.set(key, svgQuad);
+            return svgQuad;
+        }
     }
 
     let { width, height } = getElementSize(node, originalElementAndAllParentsMultipliedMatrix);
