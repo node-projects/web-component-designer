@@ -112,9 +112,11 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
     this._closeBtn = this._getDomElement<HTMLButtonElement>('close-btn');
     this._contentArea = this._getDomElement<HTMLElement>('window-content');
 
+    //@ts-ignore
     this._titleText.textContent = this.windowTitle;
 
     // Inject content
+    //@ts-ignore
     const tpl = this.windowTemplate;
     if (typeof tpl === 'string') {
       const temp = document.createElement('template');
