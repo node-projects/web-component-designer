@@ -499,70 +499,6 @@ export function getBoxQuads(node, options) {
         return tQuad;
     }
 
-    if ((node instanceof SVGGraphicsElement || node instanceof _SVGGraphicsElement)
-        && !((node instanceof SVGSVGElement || node instanceof _SVGSVGElement))) {
-        const canUseViewportSvgRect = originalElementAndAllParentsMultipliedMatrix.is2D
-            && Math.abs(originalElementAndAllParentsMultipliedMatrix.b) < 1e-10
-            && Math.abs(originalElementAndAllParentsMultipliedMatrix.c) < 1e-10;
-
-        if (canUseViewportSvgRect) {
-            const viewportRoot = node.ownerDocument.documentElement ?? node.ownerDocument.body;
-            let rect = node.getBoundingClientRect();
-            const bbox = node.getBBox();
-            const svgStyle = getCachedComputedStyle(node);
-            const strokeWidth = svgStyle.stroke !== 'none' ? parseFloat(svgStyle.strokeWidth) || 0 : 0;
-            const needsStrokeInflation = strokeWidth > 0
-                && Math.abs(rect.width - bbox.width) < 0.5
-                && Math.abs(rect.height - bbox.height) < 0.5
-                && node.ownerSVGElement;
-
-            if (needsStrokeInflation) {
-                const strokeInflation = getSvgStrokeInflation(node, bbox, strokeWidth);
-                const scaleX = getSvgBBoxScale(rect.width, bbox.width, rect.height, bbox.height);
-                const scaleY = getSvgBBoxScale(rect.height, bbox.height, rect.width, bbox.width);
-                rect = new DOMRect(
-                    rect.x - strokeInflation.left * scaleX,
-                    rect.y - strokeInflation.top * scaleY,
-                    rect.width + (strokeInflation.left + strokeInflation.right) * scaleX,
-                    rect.height + (strokeInflation.top + strokeInflation.bottom) * scaleY,
-                );
-            }
-
-            let svgQuad;
-            if (relativeTo === node.ownerDocument.documentElement) {
-                svgQuad = [new DOMQuad(
-                    new DOMPoint(rect.x, rect.y),
-                    new DOMPoint(rect.x + rect.width, rect.y),
-                    new DOMPoint(rect.x + rect.width, rect.y + rect.height),
-                    new DOMPoint(rect.x, rect.y + rect.height),
-                )];
-            } else if (relativeTo === node.ownerDocument.body) {
-                const relativeRect = relativeTo.getBoundingClientRect();
-                const relativeX = rect.x - relativeRect.x + relativeTo.scrollLeft;
-                const relativeY = rect.y - relativeRect.y + relativeTo.scrollTop;
-                svgQuad = [new DOMQuad(
-                    new DOMPoint(relativeX, relativeY),
-                    new DOMPoint(relativeX + rect.width, relativeY),
-                    new DOMPoint(relativeX + rect.width, relativeY + rect.height),
-                    new DOMPoint(relativeX, relativeY + rect.height),
-                )];
-            } else {
-                const viewportRootRect = viewportRoot?.getBoundingClientRect();
-                const rectInViewportRoot = new DOMRect(
-                    rect.x - (viewportRootRect?.x ?? 0),
-                    rect.y - (viewportRootRect?.y ?? 0),
-                    rect.width,
-                    rect.height,
-                );
-                svgQuad = [convertRectFromNode(relativeTo, rectInViewportRoot, viewportRoot, {
-                    iframes: options?.iframes,
-                })];
-            }
-            if (boxQuadsCache) boxQuadsCache.set(key, svgQuad);
-            return svgQuad;
-        }
-    }
-
     if (
         (node instanceof win.Element)
         && relativeTo === node.ownerDocument.documentElement
@@ -812,45 +748,6 @@ export function getElementSize(node, matrix) {
         height = result.height;
     }
     return { width, height }
-}
-
-function getSvgBBoxScale(primaryRectSize, primaryBBoxSize, fallbackRectSize, fallbackBBoxSize) {
-    if (Math.abs(primaryBBoxSize) > 1e-10) {
-        return primaryRectSize / primaryBBoxSize;
-    }
-    if (Math.abs(fallbackBBoxSize) > 1e-10) {
-        return fallbackRectSize / fallbackBBoxSize;
-    }
-    return 1;
-}
-
-function getSvgStrokeInflation(node, bbox, strokeWidth) {
-    const halfStrokeWidth = strokeWidth / 2;
-    if ((node instanceof SVGLineElement || node instanceof (node.ownerDocument.defaultView ?? window).SVGLineElement)) {
-        const x1 = node.x1.baseVal.value;
-        const y1 = node.y1.baseVal.value;
-        const x2 = node.x2.baseVal.value;
-        const y2 = node.y2.baseVal.value;
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        const length = Math.hypot(dx, dy);
-
-        if (length > 1e-10) {
-            let inflateX = halfStrokeWidth * Math.abs(dy) / length;
-            let inflateY = halfStrokeWidth * Math.abs(dx) / length;
-            const lineCap = getCachedComputedStyle(node).strokeLinecap;
-
-            if (lineCap === 'round' || lineCap === 'square') {
-                inflateX += halfStrokeWidth * Math.abs(dx) / length;
-                inflateY += halfStrokeWidth * Math.abs(dy) / length;
-            }
-
-            return { left: inflateX, right: inflateX, top: inflateY, bottom: inflateY };
-        }
-    }
-
-    const genericInflation = strokeWidth * 2;
-    return { left: genericInflation, right: genericInflation, top: genericInflation, bottom: genericInflation };
 }
 
 /**
