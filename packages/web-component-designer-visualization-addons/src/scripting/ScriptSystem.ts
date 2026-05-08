@@ -8,8 +8,8 @@ import { Script } from "./Script.js";
 import { ScriptCommands, signalTarget } from "./ScriptCommands.js";
 import Long from 'long'
 import { ScriptUpgrades } from "./ScriptUpgrader.js";
-import { cyclicAttributeName } from "../services/VisualizationEventsService.js";
 
+export const cyclicAttributeName = 'cyclic';
 export type contextType = { event: Event, element: Element, root: HTMLElement, parameters?: Record<string, any>, relativeSignalsPath?: string };
 
 type ContextCreator = (

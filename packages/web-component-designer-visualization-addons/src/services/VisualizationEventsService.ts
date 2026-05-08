@@ -3,8 +3,7 @@ import {
   IDesignItem,
   IEvent,
 } from "@node-projects/web-component-designer";
-
-export const cyclicAttributeName = 'cyclic';
+import { cyclicAttributeName } from "../scripting/ScriptSystem.js";
 
 export class VisualizationEventsService extends EventsService {
   public static _cyclicEvent: IEvent[] = [
