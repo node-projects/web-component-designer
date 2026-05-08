@@ -364,6 +364,15 @@ export function getBoxQuads(node, options) {
         const viewportRootRect = viewportRoot?.getBoundingClientRect();
 
         const convertViewportRectToRelativeQuad = (rect) => {
+            if (relativeTo === viewportRoot) {
+                return new DOMQuad(
+                    new DOMPoint(rect.x, rect.y),
+                    new DOMPoint(rect.x + rect.width, rect.y),
+                    new DOMPoint(rect.x + rect.width, rect.y + rect.height),
+                    new DOMPoint(rect.x, rect.y + rect.height),
+                );
+            }
+
             const rectInViewportRoot = new DOMRect(
                 rect.x - (viewportRootRect?.x ?? 0),
                 rect.y - (viewportRootRect?.y ?? 0),
@@ -442,12 +451,13 @@ export function getBoxQuads(node, options) {
 
                 // Fragment top-left in parent-local, then transform all 4 corners via M_parent
                 const lx = lcx - tw / 2, ly = lcy - th / 2;
-                quads.push(new DOMQuad(
+                const quad = new DOMQuad(
                     M_parent.transformPoint(new DOMPoint(lx,      ly)),
                     M_parent.transformPoint(new DOMPoint(lx + tw, ly)),
                     M_parent.transformPoint(new DOMPoint(lx + tw, ly + th)),
                     M_parent.transformPoint(new DOMPoint(lx,      ly + th))
-                ));
+                );
+                quads.push(toViewportRelativeDocumentElementQuad(quad, node, relativeTo, options?.iframes));
             }
 
             if (quads.length > 0) {
@@ -484,7 +494,7 @@ export function getBoxQuads(node, options) {
                 tPoints[i] = as2DPoint(tPoints[i]);
             }
         }
-        const tQuad = [new DOMQuad(tPoints[0], tPoints[1], tPoints[2], tPoints[3])];
+        const tQuad = [toViewportRelativeDocumentElementQuad(new DOMQuad(tPoints[0], tPoints[1], tPoints[2], tPoints[3]), node, relativeTo, options?.iframes)];
         if (boxQuadsCache) boxQuadsCache.set(key, tQuad);
         return tQuad;
     }
@@ -519,7 +529,14 @@ export function getBoxQuads(node, options) {
             }
 
             let svgQuad;
-            if (relativeTo === node.ownerDocument.body || relativeTo === node.ownerDocument.documentElement) {
+            if (relativeTo === node.ownerDocument.documentElement) {
+                svgQuad = [new DOMQuad(
+                    new DOMPoint(rect.x, rect.y),
+                    new DOMPoint(rect.x + rect.width, rect.y),
+                    new DOMPoint(rect.x + rect.width, rect.y + rect.height),
+                    new DOMPoint(rect.x, rect.y + rect.height),
+                )];
+            } else if (relativeTo === node.ownerDocument.body) {
                 const relativeRect = relativeTo.getBoundingClientRect();
                 const relativeX = rect.x - relativeRect.x + relativeTo.scrollLeft;
                 const relativeY = rect.y - relativeRect.y + relativeTo.scrollTop;
@@ -544,6 +561,25 @@ export function getBoxQuads(node, options) {
             if (boxQuadsCache) boxQuadsCache.set(key, svgQuad);
             return svgQuad;
         }
+    }
+
+    if (
+        (node instanceof win.Element)
+        && relativeTo === node.ownerDocument.documentElement
+        && (!options?.box || options.box === 'border')
+        && originalElementAndAllParentsMultipliedMatrix.is2D
+        && Math.abs(originalElementAndAllParentsMultipliedMatrix.b) < 1e-10
+        && Math.abs(originalElementAndAllParentsMultipliedMatrix.c) < 1e-10
+    ) {
+        const rect = node.getBoundingClientRect();
+        const viewportQuad = [new DOMQuad(
+            new DOMPoint(rect.x, rect.y),
+            new DOMPoint(rect.x + rect.width, rect.y),
+            new DOMPoint(rect.x + rect.width, rect.y + rect.height),
+            new DOMPoint(rect.x, rect.y + rect.height),
+        )];
+        if (boxQuadsCache) boxQuadsCache.set(key, viewportQuad);
+        return viewportQuad;
     }
 
     let { width, height } = getElementSize(node, originalElementAndAllParentsMultipliedMatrix);
@@ -612,7 +648,7 @@ export function getBoxQuads(node, options) {
                     points[i] = as2DPoint(points[i]);
                 }
             }
-            const quad = [new DOMQuad(points[0], points[1], points[2], points[3])];
+            const quad = [toViewportRelativeDocumentElementQuad(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes)];
             if (boxQuadsCache) boxQuadsCache.set(key, quad);
             return quad;
         }
@@ -638,10 +674,53 @@ export function getBoxQuads(node, options) {
         }
     }
 
-    const quad = [new DOMQuad(points[0], points[1], points[2], points[3])];
+    const quad = [toViewportRelativeDocumentElementQuad(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes)];
     if (boxQuadsCache)
         boxQuadsCache.set(key, quad);
     return quad;
+}
+
+function toViewportRelativeDocumentElementQuad(quad, node, relativeTo, iframes) {
+    if (relativeTo !== node.ownerDocument.documentElement) {
+        return quad;
+    }
+    if (isViewportFixedAnchoredNode(node, iframes)) {
+        return quad;
+    }
+
+    const win = node.ownerDocument.defaultView ?? window;
+    const scrollX = win.scrollX ?? node.ownerDocument.documentElement.scrollLeft ?? 0;
+    const scrollY = win.scrollY ?? node.ownerDocument.documentElement.scrollTop ?? 0;
+    if (scrollX === 0 && scrollY === 0) {
+        return quad;
+    }
+
+    return new DOMQuad(
+        new DOMPoint(quad.p1.x - scrollX, quad.p1.y - scrollY),
+        new DOMPoint(quad.p2.x - scrollX, quad.p2.y - scrollY),
+        new DOMPoint(quad.p3.x - scrollX, quad.p3.y - scrollY),
+        new DOMPoint(quad.p4.x - scrollX, quad.p4.y - scrollY),
+    );
+}
+
+function isViewportFixedAnchoredNode(node, iframes) {
+    const win = node.ownerDocument.defaultView ?? window;
+    let element = null;
+    if (node instanceof win.Text) {
+        element = getParentElementIncludingSlots(node, iframes);
+    } else if (node instanceof win.Element) {
+        element = node;
+    }
+
+    while (element && element !== node.ownerDocument.documentElement) {
+        const cs = getCachedComputedStyle(element);
+        if (cs.position === 'fixed') {
+            return getNearestFixedContainingBlock(element, iframes) == null;
+        }
+        element = getParentElementIncludingSlots(element, iframes);
+    }
+
+    return false;
 }
 
 /**
@@ -1053,7 +1132,14 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                         originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-ancOff.x, -ancOff.y).multiply(originalElementAndAllParentsMultipliedMatrix);
                     }
                 }
-                if (parentElement.scrollTop || parentElement.scrollLeft)
+                // FIX 15: Do NOT subtract the scroll of documentElement (the viewport/window
+                //         scroll). The offsetLeft/offsetTop walk already yields document-absolute
+                //         coordinates; subtracting documentElement.scrollTop would wrongly
+                //         shift positions to viewport-space when the page is scrolled.
+                //         Only subtract scroll for a non-root ancestor that is itself a
+                //         scroll container (e.g. an overflow:scroll div used as relativeTo).
+                const isViewportScrollContainer = parentElement === parentElement.ownerDocument.documentElement;
+                if (!isViewportScrollContainer && (parentElement.scrollTop || parentElement.scrollLeft))
                     originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-parentElement.scrollLeft, -parentElement.scrollTop).multiply(originalElementAndAllParentsMultipliedMatrix);
 
                 const ancestorZoom = getElementZoomScaleTransform(parentElement);
