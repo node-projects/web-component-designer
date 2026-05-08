@@ -673,6 +673,13 @@ function convertViewportQuadToRelativeNode(quad, node, relativeTo, iframes) {
         }
     }
 
+    if (relativeTo.ownerDocument === node.ownerDocument && relativeTo instanceof win.HTMLElement) {
+        const htmlQuad = convertViewportQuadToHtmlElement(quad, relativeTo, iframes);
+        if (htmlQuad) {
+            return htmlQuad;
+        }
+    }
+
     if (relativeTo === node.ownerDocument.body) {
         const relativeRect = relativeTo.getBoundingClientRect();
         const scrollLeft = relativeTo.scrollLeft || 0;
@@ -686,6 +693,131 @@ function convertViewportQuadToRelativeNode(quad, node, relativeTo, iframes) {
     }
 
     return convertQuadFromNode(relativeTo, quad, viewportRoot, { iframes });
+}
+
+function convertViewportQuadToHtmlElement(quad, relativeTo, iframes) {
+    const scale = getPositiveAxisAlignedViewportScale(relativeTo, iframes);
+    if (!scale) {
+        return null;
+    }
+
+    const relativeRect = relativeTo.getBoundingClientRect();
+    const scaleX = scale.x;
+    const scaleY = scale.y;
+    if (!Number.isFinite(scaleX) || !Number.isFinite(scaleY) || Math.abs(scaleX) < 1e-10 || Math.abs(scaleY) < 1e-10) {
+        return null;
+    }
+
+    const scrollLeft = relativeTo.scrollLeft || 0;
+    const scrollTop = relativeTo.scrollTop || 0;
+    const convertPoint = (point) => new DOMPoint(
+        (point.x - relativeRect.x) / scaleX + scrollLeft,
+        (point.y - relativeRect.y) / scaleY + scrollTop,
+    );
+
+    return new DOMQuad(
+        convertPoint(quad.p1),
+        convertPoint(quad.p2),
+        convertPoint(quad.p3),
+        convertPoint(quad.p4),
+    );
+}
+
+function getPositiveAxisAlignedViewportScale(element, iframes) {
+    const win = element.ownerDocument.defaultView ?? window;
+    const scale = { x: 1, y: 1 };
+    let current = element;
+    while (current && current !== element.ownerDocument.documentElement) {
+        if (current instanceof win.Element) {
+            const style = getCachedComputedStyle(current);
+            const transformScale = getPositiveAxisAlignedTransformScale(style);
+            if (!transformScale) {
+                return null;
+            }
+            const zoom = getElementZoom(current);
+            scale.x *= transformScale.x * zoom;
+            scale.y *= transformScale.y * zoom;
+        }
+        current = getParentElementIncludingSlots(current, iframes);
+    }
+    return scale;
+}
+
+function getPositiveAxisAlignedTransformScale(style) {
+    if (style.perspective && style.perspective !== 'none') {
+        return null;
+    }
+    if (style.rotate && style.rotate !== 'none' && !isZeroAngleValue(style.rotate)) {
+        return null;
+    }
+    const individualScale = parsePositiveScaleValue(style.scale);
+    if (!individualScale) {
+        return null;
+    }
+
+    const transform = style.transform;
+    if (!transform || transform === 'none') {
+        return individualScale;
+    }
+
+    if (transform.startsWith('matrix3d(')) {
+        const values = parseCssMatrixValues(transform);
+        if (values?.length === 16
+            && values[0] > 0
+            && values[5] > 0
+            && Math.abs(values[1]) < 1e-10
+            && Math.abs(values[4]) < 1e-10
+            && Math.abs(values[3]) < 1e-10
+            && Math.abs(values[7]) < 1e-10
+            && Math.abs(values[11]) < 1e-10) {
+            return { x: individualScale.x * values[0], y: individualScale.y * values[5] };
+        }
+        return null;
+    }
+
+    if (transform.startsWith('matrix(')) {
+        const values = parseCssMatrixValues(transform);
+        if (values?.length === 6
+            && values[0] > 0
+            && values[3] > 0
+            && Math.abs(values[1]) < 1e-10
+            && Math.abs(values[2]) < 1e-10) {
+            return { x: individualScale.x * values[0], y: individualScale.y * values[3] };
+        }
+        return null;
+    }
+
+    return null;
+}
+
+function parsePositiveScaleValue(value) {
+    if (!value || value === 'none') {
+        return { x: 1, y: 1 };
+    }
+    const parts = value.split(/\s+/).map(part => parseFloat(part)).filter(Number.isFinite);
+    if (parts.length === 0 || parts[0] <= 0 || (parts[1] != null && parts[1] <= 0)) {
+        return null;
+    }
+    return { x: parts[0], y: parts[1] ?? parts[0] };
+}
+
+function parseCssMatrixValues(transform) {
+    const start = transform.indexOf('(');
+    const end = transform.lastIndexOf(')');
+    if (start < 0 || end <= start) {
+        return null;
+    }
+    const values = transform.slice(start + 1, end).split(',').map(value => parseFloat(value.trim()));
+    return values.every(Number.isFinite) ? values : null;
+}
+
+function isZeroAngleValue(value) {
+    const matches = value.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi);
+    if (!matches?.length) {
+        return false;
+    }
+    const angle = parseFloat(matches[matches.length - 1]);
+    return Number.isFinite(angle) && Math.abs(angle) < 1e-10;
 }
 
 function hasTransformedHtmlAncestor(node, relativeTo, iframes) {
