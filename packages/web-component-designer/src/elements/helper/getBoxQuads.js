@@ -76,7 +76,6 @@ export function addPolyfill(windowObj = window, force = false) {
         }
     }
 }
-
 /**
 * @param {globalThis} windowObj?
 */
@@ -109,7 +108,6 @@ export function patchAdoptNode(windowObj = window) {
         }
     }
 }
-
 /**
 * @param {Node} node
 * @param {DOMQuadInit} quad
@@ -132,7 +130,6 @@ export function convertQuadFromNode(node, quad, from, options) {
     }
     return res;
 }
-
 /**
 * @param {Node} node
 * @param {{x: number, y: number, width: number, height: number}} rect
@@ -155,7 +152,6 @@ export function convertRectFromNode(node, rect, from, options) {
     }
     return res;
 }
-
 /**
 * @param {Node} node
 * @param {DOMPointInit} point
@@ -176,7 +172,6 @@ export function convertPointFromNode(node, point, from, options) {
     }
     return res;
 }
-
 /**
 * @param {DOMPointInit} point
 * @param {'margin'|'border'|'padding'|'content'} box
@@ -206,7 +201,6 @@ function transformPointBox(point, box, style, operator) {
     //@ts-ignore
     return point;
 }
-
 /** @type { WeakMap<Node, number> } */
 let hash;
 /** @type { Map<string, DOMQuad[]> } */
@@ -229,7 +223,6 @@ export function useCache() {
     transformCache = new Map();
     computedStyleCache = new WeakMap();
 }
-
 /**
 * @param {Element} element
 * @returns {CSSStyleDeclaration}
@@ -245,7 +238,6 @@ function getCachedComputedStyle(element) {
     }
     return style;
 }
-
 /**
 * @param {Node} node
 * @returns {boolean}
@@ -253,7 +245,6 @@ function getCachedComputedStyle(element) {
 function isElementNode(node) {
     return !!node && node.nodeType === Node.ELEMENT_NODE;
 }
-
 /**
 * @param {Node} element
 * @returns {number}
@@ -276,7 +267,6 @@ function getElementZoom(element) {
     const value = parseFloat(zoom);
     return Number.isFinite(value) && value > 0 ? value : 1;
 }
-
 /**
 * `zoom` scales the element's internal coordinate space while also shifting the
 * element within its parent from the top-center anchor in the default writing-mode.
@@ -295,7 +285,6 @@ function getElementZoomScaleTransform(element) {
     }
     return new DOMMatrix().scaleSelf(zoom);
 }
-
 /**
 * @param {Node} element
 * @param {HTMLIFrameElement[]=} iframes
@@ -315,7 +304,6 @@ function getElementTransformWithZoom(element, iframes, includeZoom = true) {
     // so it needs to wrap the transform matrix instead of being appended to it.
     return zoomTransform.multiply(transform);
 }
-
 /**
 * @param {Node} node
 * @param {{box?: 'margin'|'border'|'padding'|'content', relativeTo?: Element, iframes?: HTMLIFrameElement[]}=} options
@@ -499,6 +487,55 @@ export function getBoxQuads(node, options) {
         return tQuad;
     }
 
+    if ((node instanceof SVGGraphicsElement || node instanceof _SVGGraphicsElement)
+        && !((node instanceof SVGSVGElement || node instanceof _SVGSVGElement))) {
+        const bbox = node.getBBox();
+        const visualBox = getSvgVisualBox(node, bbox);
+        const x0 = visualBox.x - bbox.x;
+        const y0 = visualBox.y - bbox.y;
+        const x1 = x0 + visualBox.width;
+        const y1 = y0 + visualBox.height;
+        const screenPts = [
+            new DOMPoint(visualBox.x, visualBox.y),
+            new DOMPoint(visualBox.x + visualBox.width, visualBox.y),
+            new DOMPoint(visualBox.x + visualBox.width, visualBox.y + visualBox.height),
+            new DOMPoint(visualBox.x, visualBox.y + visualBox.height),
+        ];
+        const pts = [
+            new DOMPoint(x0, y0),
+            new DOMPoint(x1, y0),
+            new DOMPoint(x1, y1),
+            new DOMPoint(x0, y1),
+        ];
+        const screenCtm = !hasTransformedHtmlAncestor(node, relativeTo, options?.iframes) ? node.getScreenCTM() : null;
+        if (screenCtm) {
+            const screenQuad = new DOMQuad(
+                screenPts[0].matrixTransform(screenCtm),
+                screenPts[1].matrixTransform(screenCtm),
+                screenPts[2].matrixTransform(screenCtm),
+                screenPts[3].matrixTransform(screenCtm),
+            );
+            const svgQuad = [convertViewportQuadToRelativeNode(screenQuad, node, relativeTo, options?.iframes)];
+            if (boxQuadsCache) boxQuadsCache.set(key, svgQuad);
+            return svgQuad;
+        }
+
+        /** @type {[DOMPoint,DOMPoint,DOMPoint,DOMPoint]} */
+        //@ts-ignore
+        const points = Array(4);
+        if (originalElementAndAllParentsMultipliedMatrix.is2D) {
+            for (let i = 0; i < 4; i++)
+                points[i] = pts[i].matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+        } else {
+            for (let i = 0; i < 4; i++) {
+                points[i] = projectPoint(pts[i], originalElementAndAllParentsMultipliedMatrix).matrixTransform(originalElementAndAllParentsMultipliedMatrix);
+                points[i] = as2DPoint(points[i]);
+            }
+        }
+        const svgQuad = [toViewportRelativeDocumentElementQuad(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes)];
+        if (boxQuadsCache) boxQuadsCache.set(key, svgQuad);
+        return svgQuad;
+    }
     if (
         (node instanceof win.Element)
         && relativeTo === node.ownerDocument.documentElement
@@ -616,6 +653,56 @@ export function getBoxQuads(node, options) {
     return quad;
 }
 
+function convertViewportQuadToRelativeNode(quad, node, relativeTo, iframes) {
+    const viewportRoot = node.ownerDocument.documentElement ?? node.ownerDocument.body;
+    if (relativeTo === viewportRoot) {
+        return quad;
+    }
+
+    const win = node.ownerDocument.defaultView ?? window;
+    if (relativeTo instanceof win.SVGElement) {
+        const relativeScreenCtm = relativeTo.getScreenCTM();
+        if (relativeScreenCtm) {
+            const inverse = relativeScreenCtm.inverse();
+            return new DOMQuad(
+                quad.p1.matrixTransform(inverse),
+                quad.p2.matrixTransform(inverse),
+                quad.p3.matrixTransform(inverse),
+                quad.p4.matrixTransform(inverse),
+            );
+        }
+    }
+
+    if (relativeTo === node.ownerDocument.body) {
+        const relativeRect = relativeTo.getBoundingClientRect();
+        const scrollLeft = relativeTo.scrollLeft || 0;
+        const scrollTop = relativeTo.scrollTop || 0;
+        return new DOMQuad(
+            new DOMPoint(quad.p1.x - relativeRect.x + scrollLeft, quad.p1.y - relativeRect.y + scrollTop),
+            new DOMPoint(quad.p2.x - relativeRect.x + scrollLeft, quad.p2.y - relativeRect.y + scrollTop),
+            new DOMPoint(quad.p3.x - relativeRect.x + scrollLeft, quad.p3.y - relativeRect.y + scrollTop),
+            new DOMPoint(quad.p4.x - relativeRect.x + scrollLeft, quad.p4.y - relativeRect.y + scrollTop),
+        );
+    }
+
+    return convertQuadFromNode(relativeTo, quad, viewportRoot, { iframes });
+}
+
+function hasTransformedHtmlAncestor(node, relativeTo, iframes) {
+    const win = node.ownerDocument.defaultView ?? window;
+    let element = getParentElementIncludingSlots(node, iframes);
+    while (element && element !== relativeTo && element !== node.ownerDocument.documentElement) {
+        if (element instanceof win.HTMLElement) {
+            const css = getCachedComputedStyle(element);
+            if (transformProperties.some((value) => css[value] ? css[value] !== 'none' : false)) {
+                return true;
+            }
+        }
+        element = getParentElementIncludingSlots(element, iframes);
+    }
+    return false;
+}
+
 function toViewportRelativeDocumentElementQuad(quad, node, relativeTo, iframes) {
     if (relativeTo !== node.ownerDocument.documentElement) {
         return quad;
@@ -658,7 +745,6 @@ function isViewportFixedAnchoredNode(node, iframes) {
 
     return false;
 }
-
 /**
  * Compute width/height for a Text node given an already-fetched bounding rect.
  * Extracted from getElementSize so getBoxQuads (FIX 7) can reuse the Range it
@@ -702,7 +788,6 @@ function projectPoint(point, m) {
     const z = -(point.x * m.m13 + point.y * m.m23 + m.m43) / m.m33;
     return new DOMPoint(point.x, point.y, z, 1);
 }
-
 /**
 * convert a DOM-Point to 2D
 * @param {DOMPoint} point
@@ -713,7 +798,6 @@ function as2DPoint(point) {
         point.y / point.w
     );
 }
-
 /**
 * @param {Node} node
 * @param {DOMMatrix=} matrix
@@ -750,6 +834,50 @@ export function getElementSize(node, matrix) {
     return { width, height }
 }
 
+function getSvgVisualBox(node, bbox) {
+    const svgStyle = getCachedComputedStyle(node);
+    const strokeWidth = svgStyle.stroke !== 'none' ? parseFloat(svgStyle.strokeWidth) || 0 : 0;
+    if (strokeWidth <= 0) {
+        return bbox;
+    }
+
+    const strokeInflation = getSvgStrokeInflation(node, bbox, strokeWidth);
+    return new DOMRect(
+        bbox.x - strokeInflation.left,
+        bbox.y - strokeInflation.top,
+        bbox.width + strokeInflation.left + strokeInflation.right,
+        bbox.height + strokeInflation.top + strokeInflation.bottom,
+    );
+}
+
+function getSvgStrokeInflation(node, bbox, strokeWidth) {
+    const halfStrokeWidth = strokeWidth / 2;
+    if ((node instanceof SVGLineElement || node instanceof (node.ownerDocument.defaultView ?? window).SVGLineElement)) {
+        const x1 = node.x1.baseVal.value;
+        const y1 = node.y1.baseVal.value;
+        const x2 = node.x2.baseVal.value;
+        const y2 = node.y2.baseVal.value;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.hypot(dx, dy);
+
+        if (length > 1e-10) {
+            let inflateX = halfStrokeWidth * Math.abs(dy) / length;
+            let inflateY = halfStrokeWidth * Math.abs(dx) / length;
+            const lineCap = getCachedComputedStyle(node).strokeLinecap;
+
+            if (lineCap === 'round' || lineCap === 'square') {
+                inflateX += halfStrokeWidth * Math.abs(dx) / length;
+                inflateY += halfStrokeWidth * Math.abs(dy) / length;
+            }
+
+            return { left: inflateX, right: inflateX, top: inflateY, bottom: inflateY };
+        }
+    }
+
+    const genericInflation = strokeWidth * 2;
+    return { left: genericInflation, right: genericInflation, top: genericInflation, bottom: genericInflation };
+}
 /**
 * @param {Node} node
 * @param {boolean} includeScroll
@@ -864,7 +992,6 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
         return new DOMPoint(r1t.x - r2t.x, r1t.y - r2t.y);
     }
 }
-
 /**
 * @param {Node} node
 * @param {Element} ancestor
@@ -1228,7 +1355,6 @@ function getParentElementIncludingSlots(node, iframes) {
     }
     return node.parentElement;
 }
-
 /**
  * @param {Node} element
 * @param {HTMLIFrameElement[]=} iframes
@@ -1315,7 +1441,6 @@ export function getElementCombinedTransform(element, iframes) {
     }
     return m;
 }
-
 /**
 * project a DOM-Matrix to 2D (from firefox matrix.h)
 * @param {DOMMatrix} m
@@ -1346,7 +1471,6 @@ function projectTo2D(m) {
         m.m44 = 1.0;
     }
 }
-
 /**
 * @param {HTMLElement} element
 * @param {HTMLIFrameElement[]} iframes
@@ -1973,7 +2097,6 @@ function isElement(value) {
     const elType = value?.ownerDocument?.defaultView?.Element;
     return value instanceof Element || (elType != null && value instanceof elType);
 }
-
 /**
  *
  * @param {CSSStyleDeclaration} css
@@ -2049,7 +2172,6 @@ function offsetParentPolyfill(element) {
     }
     return null;
 }
-
 /**
  *
  * @param {*} element
@@ -2068,7 +2190,6 @@ function offsetTopLeftPolyfill(element, offsetTopOrLeft) {
 
     return value;
 }
-
 /**
 * @param {Element} element
 * @returns {boolean}
@@ -2090,7 +2211,6 @@ function createsFixedContainingBlock(element) {
     const willChange = cs.willChange || '';
     return /transform|perspective|filter|backdrop-filter/.test(willChange);
 }
-
 /**
 * @param {HTMLElement} element
 * @param {HTMLIFrameElement[]=} iframes

@@ -43,7 +43,7 @@ const explicitTransformProperties = new Set([
 ]);
 
 function isBorderProperty(name: string): boolean {
-  return name.startsWith('border');
+  return name.startsWith('border') || name.startsWith('corner');
 }
 
 function isBackgroundProperty(name: string): boolean {

@@ -1,5 +1,5 @@
-# getBoxQuads SVG fast path removal
+# getBoxQuads SVG visual boxes
 
-The SVGGraphicsElement fast path in `getBoxQuads.js` used `getBoundingClientRect()` as the returned quad and then manually inflated stroke. That is not a correct substitute for native `getBoxQuads` on SVG geometry and can produce bad `relativeTo` results in split/designer views.
+SVGGraphicsElement quads should be built from a local SVG visual box, then transformed into the requested coordinate system. A viewport `getBoundingClientRect()` shortcut is not generally correct because it is already post-transform and loses orientation under rotated/3D HTML ancestors. A raw `getBBox()` is also not enough because native Firefox includes stroke bounds for SVG lines and paths.
 
-For SVG graphics, let the normal SVG matrix path use `getBBox()` plus the accumulated transform instead. This produces stable document/canvas/svg-relative quads for the diagonal line sample without designer-side compensation.
+The current polyfill computes a local visual box from `getBBox()` plus stroke inflation, uses `getScreenCTM()` when there is no transformed HTML ancestor, and otherwise uses the existing accumulated transform matrix. This covers plain lines, nested SVG-in-SVG lines, CSS-transformed SVGs, and the i14 stroke-bound path sample.
