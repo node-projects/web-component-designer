@@ -105,6 +105,7 @@ export class VisualizationPropertyGrid extends PropertyGrid {
                 btn.style.boxSizing = 'border-box';
                 btn.onclick = async () => {
                     let cvm = new CodeViewMonaco();
+                    const monaco = await CodeViewMonaco.getMonacoLib();
                     if (property.format == 'html') {
                         cvm.language = 'html';
                     } else {
