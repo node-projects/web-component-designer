@@ -15,6 +15,7 @@ export interface IDesignItem {
   readonly document: Document;
   readonly usableContainer: ShadowRoot | Element | Document;
   updateChildrenFromNodesChildren();
+  refreshRenderedDesignItem();
 
   setView(node: Element);
 

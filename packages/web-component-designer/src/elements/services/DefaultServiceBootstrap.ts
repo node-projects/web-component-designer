@@ -116,6 +116,7 @@ import { BasicContextMenu } from '../widgets/designerView/extensions/contextMenu
 import { ProjectiveTransformExtension } from '../widgets/designerView/extensions/transforms/ProjectiveTransformExtension.js';
 import { ProjectiveTransformExtensionProvider } from '../widgets/designerView/extensions/transforms/ProjectiveTransformExtensionProvider.js';
 import { DefaultEditorTypeService } from './propertiesService/DefaultEditorTypeService.js';
+import { StyleElementRenderedDesignItemService } from './renderedDesignItemService/StyleElementRenderedDesignItemService.js';
 
 export function createDefaultServiceContainer() {
   let serviceContainer = new ServiceContainer();
@@ -139,6 +140,7 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("htmlWriterService", new HtmlWriterService());
   serviceContainer.register("snaplinesProviderService", new SnaplinesProviderService());
   serviceContainer.register("htmlParserService", new DefaultHtmlParserService());
+  serviceContainer.register("renderedDesignItemService", new StyleElementRenderedDesignItemService());
   serviceContainer.register("elementAtPointService", new ElementAtPointService());
   serviceContainer.register("externalDragDropService", new ExternalDragDropService());
   serviceContainer.register("dragDropService", new DragDropService());

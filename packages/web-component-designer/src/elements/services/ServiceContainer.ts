@@ -55,6 +55,7 @@ import { ISearchService } from './searchService/ISearchService.js';
 import { ICollaborationService } from './collaborationService/ICollaborationService.js';
 import { IEditorTypeService } from './propertiesService/IEditorTypeService.js';
 import { ISourceMapProvider } from './sourceMapService/ISourceMapProvider.js';
+import { IRenderedDesignItemService } from './renderedDesignItemService/IRenderedDesignItemService.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -89,6 +90,7 @@ interface ServiceNameMap {
   "pngCreatorService": IPngCreatorService;
   "searchService": ISearchService;
   "editorTypeService": IEditorTypeService;
+  "renderedDesignItemService": IRenderedDesignItemService;
 
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;
@@ -210,6 +212,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   get htmlParserService(): IHtmlParserService {
     return this.getLastService('htmlParserService');
+  }
+
+  get renderedDesignItemServices(): IRenderedDesignItemService[] {
+    return this.getServices('renderedDesignItemService');
   }
 
   get intializationService(): IIntializationService {

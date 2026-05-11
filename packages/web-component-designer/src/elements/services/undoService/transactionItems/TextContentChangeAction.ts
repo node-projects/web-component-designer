@@ -21,11 +21,13 @@ export class TextContentChangeAction implements ITransactionItem {
 
   undo(): IContentChanged[] | null {
     this.designItem.element.textContent = this.oldValue;
+    this.designItem.refreshRenderedDesignItem();
     return [{ changeType: 'changed', designItems: this.affectedItems, type: 'property', name: 'textContent', oldValue: this.newValue, newValue: this.oldValue }];
   }
 
   do(): IContentChanged[] | null {
     this.designItem.element.textContent = this.newValue;
+    this.designItem.refreshRenderedDesignItem();
     return [{ changeType: 'changed', designItems: this.affectedItems, type: 'property', name: 'textContent', oldValue: this.oldValue, newValue: this.newValue }];
   }
 

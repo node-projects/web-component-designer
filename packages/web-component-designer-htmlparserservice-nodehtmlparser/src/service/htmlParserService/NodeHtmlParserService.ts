@@ -42,6 +42,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
           element = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElement(item.rawTagName);
         manualCreatedElement = true;
       }
+      element = <Element>DesignItem.updateRenderedNode(serviceContainer, element);
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (this._designItemCreatedCallback)
         this._designItemCreatedCallback(designItem);
@@ -92,7 +93,8 @@ export class NodeHtmlParserService implements IHtmlParserService {
         if (di.node instanceof HTMLTemplateElement && di.getAttribute('shadowrootmode') == 'open') {
           try {
             const shadow = (<HTMLElement>designItem.node).attachShadow({ mode: 'open' });
-            shadow.appendChild(di.node.content.cloneNode(true));
+            const content = di.node.content.cloneNode(true);
+            shadow.appendChild(content);
           } catch (err) {
             console.error("error attaching shadowdom", err)
           }
@@ -101,15 +103,21 @@ export class NodeHtmlParserService implements IHtmlParserService {
     } else if (item.nodeType == 3) {
       const parseDiv = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElement("div");
       parseDiv.innerHTML = item.rawText;
-      let element = parseDiv.childNodes[0];
+      let element = DesignItem.updateRenderedNode(serviceContainer, parseDiv.childNodes[0]);
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
     } else if (item.nodeType == 8) {
-      let element = document.createComment(item.rawText);
+      let element = DesignItem.updateRenderedNode(serviceContainer, document.createComment(item.rawText));
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
+    }
+    if (designItem) {
+      const renderedNode = DesignItem.updateRenderedNode(serviceContainer, designItem.node);
+      if (renderedNode !== designItem.node)
+        designItem.replaceNode(renderedNode);
+      designItem.refreshRenderedDesignItem();
     }
     if (serviceContainer.designItemService.finishedDesignItem)
       serviceContainer.designItemService.finishedDesignItem(designItem);

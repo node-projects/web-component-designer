@@ -5,6 +5,7 @@ import { InstanceServiceContainer } from "../InstanceServiceContainer.js";
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { forceActiveAttributeName, forceFocusAttributeName, forceFocusVisibleAttributeName, forceFocusWithinAttributeName, forceHoverAttributeName, forceVisitedAttributeName } from "../../item/DesignItem.js";
 import { Specificity, calculateSpecificity } from "./SpecificityCalculator.js";
+import { patchStylesheetSelectorForDesigner } from "../../helper/DesignerStylesheetPatcher.js";
 
 export abstract class AbstractStylesheetService implements IStylesheetService {
     protected _stylesheets = new Map<string, { stylesheet: IStylesheet, ast: any }>();
@@ -153,23 +154,26 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
     public stylesheetsChanged: TypedEvent<void> = new TypedEvent<void>();
 
     public static patchStylesheetSelectorForDesigner(text: string) {
-        return text.replaceAll(':hover', '[' + forceHoverAttributeName + ']')
-            .replaceAll(':active', '[' + forceActiveAttributeName + ']')
-            .replaceAll(':visited', '[' + forceVisitedAttributeName + ']')
-            .replaceAll(':focus', '[' + forceFocusAttributeName + ']')
-            .replaceAll(':focus-within', '[' + forceFocusWithinAttributeName + ']')
-            .replaceAll(':focus-visible', '[' + forceFocusVisibleAttributeName + ']');
+        return patchStylesheetSelectorForDesigner(text, {
+            forceHoverAttributeName,
+            forceActiveAttributeName,
+            forceVisitedAttributeName,
+            forceFocusAttributeName,
+            forceFocusWithinAttributeName,
+            forceFocusVisibleAttributeName
+        });
     }
 
     protected elementMatchesASelector(designItem: IDesignItem, selectors: string[]): false | Specificity {
         let s: Specificity = null;
         for (let selector of selectors) {
             try {
-                if (designItem && selector === ':host' && designItem.isRootItem) {
+                const patchedSelector = AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector);
+                if (designItem && patchedSelector === ':host' && designItem.isRootItem) {
                     let spec = calculateSpecificity(selector);
                     if (s === null || spec.A > s.A || (spec.A === s.A && (spec.B > s.B || (spec.B === s.B && spec.C > s.C))))
                         s = spec;
-                } else if (!designItem || designItem.element.matches(AbstractStylesheetService.patchStylesheetSelectorForDesigner(selector))) {
+                } else if (!designItem || designItem.element.matches(patchedSelector)) {
                     let spec = calculateSpecificity(selector);
                     if (s === null || spec.A > s.A || (spec.A === s.A && (spec.B > s.B || (spec.B === s.B && spec.C > s.C))))
                         s = spec;

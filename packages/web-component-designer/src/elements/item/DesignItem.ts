@@ -393,12 +393,14 @@ export class DesignItem implements IDesignItem {
   }
 
   public static createDesignItemFromInstance(node: Node, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): DesignItem {
+    node = DesignItem.updateRenderedNode(serviceContainer, node);
     let designItem = <DesignItem>serviceContainer.designItemService.createDesignItem(node, node, serviceContainer, instanceServiceContainer);
 
     if (node instanceof (node.ownerDocument.defaultView ?? window).HTMLTemplateElement && node.getAttribute('shadowrootmode') == 'open') {
       try {
         const shadow = (<HTMLElement>node.parentNode).attachShadow({ mode: 'open' });
-        shadow.appendChild(node.content.cloneNode(true));
+        const content = node.content.cloneNode(true);
+        shadow.appendChild(content);
       } catch (err) {
         console.error("error attaching shadowdom", err)
       }
@@ -431,7 +433,20 @@ export class DesignItem implements IDesignItem {
       (<DesignItem>c)._parent = designItem;
     }
 
+    designItem.refreshRenderedDesignItem();
+
     return designItem;
+  }
+
+  static updateRenderedNode(serviceContainer: ServiceContainer, node: Node) {
+    let renderedNode = node;
+    for (const service of serviceContainer.renderedDesignItemServices ?? []) {
+      const nextNode = service.updateRenderedNode(renderedNode) ?? renderedNode;
+      if (nextNode !== renderedNode && renderedNode.parentNode)
+        renderedNode.parentNode.replaceChild(nextNode, renderedNode);
+      renderedNode = nextNode;
+    }
+    return renderedNode;
   }
 
   querySelectorAll<T extends HTMLElement>(selectors: string): NodeListOf<T> {
@@ -518,6 +533,12 @@ export class DesignItem implements IDesignItem {
   public setView(node: Element) {
     this.view = node;
     DesignItem._designItemMap.set(node, this);
+    this.refreshRenderedDesignItem();
+  }
+
+  public refreshRenderedDesignItem() {
+    for (const service of this.serviceContainer.renderedDesignItemServices ?? [])
+      service.updateRenderedDesignItem(this);
   }
 
   public openGroup(title: string): ChangeGroup {
@@ -798,7 +819,7 @@ export class DesignItem implements IDesignItem {
     }
     */
 
-    this._refreshIfStyleSheet();
+    this.refreshRenderedDesignItem();
   }
   public _removeChildInternal(designItem: IDesignItem) {
     if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
@@ -815,21 +836,7 @@ export class DesignItem implements IDesignItem {
       (<DesignItem>designItem)._parent = null;
     }
 
-    this._refreshIfStyleSheet();
-  }
-
-  _refreshIfStyleSheet() {
-    if (this.name == 'style' || this.parent?.name == 'style') {
-      //Update Stylesheetservice with sheet info
-      //Patch this sheetdata
-
-      //TODO: do not patch styles in templates, this needs to be recursive, cause the style does not need to be on the root
-      /*const realContent = this._childArray.reduce((a, b) => a + b.content, '');
-      this.view.textContent = AbstractStylesheetService.buildPatchedStyleSheet([cssFromString(realContent)]);
-      this.instanceServiceContainer.designerCanvas.lazyTriggerReparseDocumentStylesheets();*/
-    } else if (this.name == 'link') {
-
-    }
+    this.refreshRenderedDesignItem();
   }
 
   getPlacementService(style?: CSSStyleDeclaration): IPlacementService {
