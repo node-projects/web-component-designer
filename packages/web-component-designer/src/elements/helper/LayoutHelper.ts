@@ -101,6 +101,18 @@ export function placeDesignItem(container: IDesignItem, designItem: IDesignItem,
   }
 }
 
+export function transformOffsetByInverseLinearMatrix(offset: IPoint, matrix: Pick<DOMMatrixReadOnly, 'a' | 'b' | 'c' | 'd'>): IPoint {
+  const determinant = matrix.a * matrix.d - matrix.b * matrix.c;
+  if (Math.abs(determinant) < 1e-10) {
+    return offset;
+  }
+
+  return {
+    x: (matrix.d * offset.x - matrix.c * offset.y) / determinant,
+    y: (-matrix.b * offset.x + matrix.a * offset.y) / determinant,
+  };
+}
+
 function _placeSvgDesignItem(designItem: IDesignItem, offset: IPoint): boolean {
   const element = designItem.element;
   if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {

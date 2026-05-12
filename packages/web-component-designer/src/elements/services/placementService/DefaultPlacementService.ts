@@ -3,7 +3,7 @@ import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { combineTransforms, extractTranslationFromDOMMatrix } from '../../helper/TransformHelper.js';
-import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem } from '../../helper/LayoutHelper.js';
+import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem, transformOffsetByInverseLinearMatrix } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
@@ -218,7 +218,12 @@ export class DefaultPlacementService implements IPlacementService {
         track = m.transformPoint(track);
       }
 
-      placeDesignItem(container, designItem, { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y }, 'position');
+      let placementOffset = { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y };
+      if (usesSvgGeometryPlacement(designItem)) {
+        placementOffset = transformOffsetByInverseLinearMatrix(placementOffset, new DOMMatrix(designItem.getStyle('transform') ?? ''));
+      }
+
+      placeDesignItem(container, designItem, placementOffset, 'position');
     }
 
     for (const item of items) {
