@@ -391,6 +391,9 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     } else {
       this._dragSingleHandle(segIndex, handleType, dx, dy);
     }
+    if (handleType === 'anchor') {
+      this._normalizeAxisLineSegments();
+    }
     this._dragState.geometryChanged = true;
 
     // Update geometry model
@@ -417,14 +420,50 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       if (this.extendedItem.element instanceof SVGEllipseElement && this._dragEllipseCardinal(segIndex, newLocal)) {
         return;
       }
-      seg.point.x = newLocal.x;
-      seg.point.y = newLocal.y;
+      if (seg.type === SegmentType.HorizontalLine) {
+        const prevPt = this._findPreviousAnchor(segIndex);
+        seg.point.x = newLocal.x;
+        seg.point.y = prevPt?.y ?? seg.point.y;
+      } else if (seg.type === SegmentType.VerticalLine) {
+        const prevPt = this._findPreviousAnchor(segIndex);
+        seg.point.x = prevPt?.x ?? seg.point.x;
+        seg.point.y = newLocal.y;
+      } else {
+        seg.point.x = newLocal.x;
+        seg.point.y = newLocal.y;
+      }
     } else if (handleType === 'cp1') {
       seg.cp1!.x = newLocal.x;
       seg.cp1!.y = newLocal.y;
     } else {
       seg.cp2!.x = newLocal.x;
       seg.cp2!.y = newLocal.y;
+    }
+  }
+
+  private _normalizeAxisLineSegments() {
+    if (!this._geometry) return;
+
+    let prevAnchor: IPoint | null = null;
+    const firstAnchor = this._geometry.segments.find(s => s.type !== SegmentType.Close)?.point;
+
+    for (const seg of this._geometry.segments) {
+      if (seg.type === SegmentType.Close) {
+        if (firstAnchor) {
+          seg.point = { ...firstAnchor };
+        }
+        continue;
+      }
+
+      if (prevAnchor) {
+        if (seg.type === SegmentType.HorizontalLine) {
+          seg.point.y = prevAnchor.y;
+        } else if (seg.type === SegmentType.VerticalLine) {
+          seg.point.x = prevAnchor.x;
+        }
+      }
+
+      prevAnchor = seg.point;
     }
   }
 
@@ -830,10 +869,11 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     // Segment type conversion (only for path elements)
     if (isPath && segIndex > 0 && seg.type !== SegmentType.Close) {
       items.push({ title: '---' });
+      const conversionItems: IContextMenuItem[] = [];
 
       if (seg.type !== SegmentType.Move) {
-        items.push({
-          title: 'Convert to moveto', action: () => {
+        conversionItems.push({
+          title: 'moveto', action: () => {
             this._convertToMove(segIndex);
             this._applyGeometryToElement();
             this._commitGeometryChange();
@@ -842,8 +882,8 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       }
 
       if (seg.type !== SegmentType.Line && seg.type !== SegmentType.HorizontalLine && seg.type !== SegmentType.VerticalLine) {
-        items.push({
-          title: 'Convert to line', action: () => {
+        conversionItems.push({
+          title: 'line', action: () => {
             this._convertToLine(segIndex);
             this._applyGeometryToElement();
             this._commitGeometryChange();
@@ -851,9 +891,29 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         });
       }
 
+      if (seg.type !== SegmentType.HorizontalLine) {
+        conversionItems.push({
+          title: 'horizontal line', action: () => {
+            this._convertToHorizontalLine(segIndex);
+            this._applyGeometryToElement();
+            this._commitGeometryChange();
+          }
+        });
+      }
+
+      if (seg.type !== SegmentType.VerticalLine) {
+        conversionItems.push({
+          title: 'vertical line', action: () => {
+            this._convertToVerticalLine(segIndex);
+            this._applyGeometryToElement();
+            this._commitGeometryChange();
+          }
+        });
+      }
+
       if (seg.type !== SegmentType.QuadraticBezier) {
-        items.push({
-          title: 'Convert to quadratic bézier', action: () => {
+        conversionItems.push({
+          title: 'quadratic bézier', action: () => {
             this._convertToQuadratic(segIndex);
             this._applyGeometryToElement();
             this._commitGeometryChange();
@@ -862,8 +922,8 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       }
 
       if (seg.type !== SegmentType.CubicBezier) {
-        items.push({
-          title: 'Convert to cubic bézier', action: () => {
+        conversionItems.push({
+          title: 'cubic bézier', action: () => {
             this._convertToCubic(segIndex);
             this._applyGeometryToElement();
             this._commitGeometryChange();
@@ -872,21 +932,27 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       }
 
       if (seg.type !== SegmentType.Arc) {
-        items.push({
-          title: 'Convert to arc', action: () => {
+        conversionItems.push({
+          title: 'arc', action: () => {
             this._convertToArc(segIndex, false);
             this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
-        items.push({
-          title: 'Convert to inverted arc', action: () => {
+        conversionItems.push({
+          title: 'inverted arc', action: () => {
             this._convertToArc(segIndex, true);
             this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
-      } else {
+      }
+
+      if (conversionItems.length > 0) {
+        items.push({ title: 'Convert to', children: conversionItems });
+      }
+
+      if (seg.type === SegmentType.Arc) {
         items.push({
           title: 'Invert arc', action: () => {
             this._invertArc(segIndex);
@@ -985,6 +1051,32 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     if (!this._geometry) return;
     const seg = this._geometry.segments[segIndex];
     seg.type = SegmentType.Line;
+    delete seg.cp1;
+    delete seg.cp2;
+    delete seg.arc;
+  }
+
+  private _convertToHorizontalLine(segIndex: number) {
+    if (!this._geometry) return;
+    const seg = this._geometry.segments[segIndex];
+    const prevPt = this._findPreviousAnchor(segIndex);
+    if (!prevPt) return;
+
+    seg.type = SegmentType.HorizontalLine;
+    seg.point.y = prevPt.y;
+    delete seg.cp1;
+    delete seg.cp2;
+    delete seg.arc;
+  }
+
+  private _convertToVerticalLine(segIndex: number) {
+    if (!this._geometry) return;
+    const seg = this._geometry.segments[segIndex];
+    const prevPt = this._findPreviousAnchor(segIndex);
+    if (!prevPt) return;
+
+    seg.type = SegmentType.VerticalLine;
+    seg.point.x = prevPt.x;
     delete seg.cp1;
     delete seg.cp2;
     delete seg.arc;
