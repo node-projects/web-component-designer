@@ -430,6 +430,8 @@ export * from "./elements/widgets/designerView/extensions/pointerExtensions/Line
 
 export type { IMiniatureView } from "./elements/widgets/miniatureView/IMiniatureView.js";
 export * from "./elements/widgets/miniatureView/miniatureView.js";
+export type { ILayerDepthView } from "./elements/widgets/layerDepthView/ILayerDepthView.js";
+export * from "./elements/widgets/layerDepthView/layerDepthView.js";
 
 export * from "./elements/widgets/debugView/debug-view.js";
 
