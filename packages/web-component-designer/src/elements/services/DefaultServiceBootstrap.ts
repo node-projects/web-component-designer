@@ -234,7 +234,7 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());
   serviceContainer.designerTools.set(NamedTools.DrawSelection, new RectangleSelectorTool());
-  serviceContainer.designerTools.set(NamedTools.DrawPath, new DrawPathTool());
+  serviceContainer.designerTools.set(NamedTools.DrawPath, new DrawPathTool({ interpolatePoints: true }));
   serviceContainer.designerTools.set(NamedTools.DrawRect, new DrawRectTool());
   serviceContainer.designerTools.set(NamedTools.DrawEllipsis, new DrawEllipsisTool());
   serviceContainer.designerTools.set(NamedTools.DrawLine, new DrawLineTool());

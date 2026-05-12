@@ -1145,6 +1145,32 @@ export function calculateAlpha(p1: IPoint, p2: IPoint): number {
   return alpha;
 }
 
+export function interpolateLinePoints(p1: IPoint, p2: IPoint, maxDistance: number): IPoint[] {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance === 0) {
+    return [];
+  }
+
+  if (maxDistance <= 0) {
+    return [p2];
+  }
+
+  const segments = Math.max(1, Math.ceil(distance / maxDistance));
+  const points: IPoint[] = [];
+
+  for (let i = 1; i <= segments; i++) {
+    points.push({
+      x: p1.x + dx * i / segments,
+      y: p1.y + dy * i / segments
+    });
+  }
+
+  return points;
+}
+
 export function moveSVGPath(path: SVGPathElement, xFactor: number, yFactor: number): string {
   let newPathData = "";
   let pd = path.getPathData({ normalize: true });

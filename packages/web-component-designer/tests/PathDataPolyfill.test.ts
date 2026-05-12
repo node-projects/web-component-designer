@@ -13,6 +13,7 @@ const svgElementGlobals = [
 type SvgElementGlobalName = (typeof svgElementGlobals)[number];
 
 let straightenLine: typeof import('../src/elements/helper/PathDataPolyfill').straightenLine;
+let interpolateLinePoints: typeof import('../src/elements/helper/PathDataPolyfill').interpolateLinePoints;
 const originalGlobals = new Map<SvgElementGlobalName, unknown>();
 
 beforeAll(async () => {
@@ -21,7 +22,7 @@ beforeAll(async () => {
     (<any>globalThis)[globalName] = class { };
   }
 
-  ({ straightenLine } = await import('../src/elements/helper/PathDataPolyfill'));
+  ({ straightenLine, interpolateLinePoints } = await import('../src/elements/helper/PathDataPolyfill'));
 });
 
 afterAll(() => {
@@ -46,4 +47,22 @@ test('straightenLine keeps downward vertical snap downward', () => {
 
   expect(result.x).toBeCloseTo(10);
   expect(result.y).toBeCloseTo(25);
+});
+
+test('interpolateLinePoints fills long gaps with evenly spaced points', () => {
+  const result = interpolateLinePoints({ x: 0, y: 0 }, { x: 12, y: 0 }, 5);
+
+  expect(result).toHaveLength(3);
+  expect(result[0].x).toBeCloseTo(4);
+  expect(result[0].y).toBeCloseTo(0);
+  expect(result[1].x).toBeCloseTo(8);
+  expect(result[1].y).toBeCloseTo(0);
+  expect(result[2].x).toBeCloseTo(12);
+  expect(result[2].y).toBeCloseTo(0);
+});
+
+test('interpolateLinePoints does not duplicate identical points', () => {
+  const result = interpolateLinePoints({ x: 3, y: 4 }, { x: 3, y: 4 }, 5);
+
+  expect(result).toEqual([]);
 });

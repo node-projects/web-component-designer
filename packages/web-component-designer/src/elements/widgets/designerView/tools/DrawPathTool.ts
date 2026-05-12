@@ -1,5 +1,5 @@
 import { EventNames } from '../../../../enums/EventNames.js';
-import { moveSVGPath, straightenLine } from '../../../helper/PathDataPolyfill.js';
+import { interpolateLinePoints, moveSVGPath, straightenLine } from '../../../helper/PathDataPolyfill.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { ITool } from './ITool.js';
@@ -10,12 +10,15 @@ import { IPoint } from '../../../../interfaces/IPoint.js';
 import { DesignerCanvas } from '../designerCanvas.js';
 
 const offset = 10;
+const freehandInterpolationDistance = 5;
 
 type optionsType = {
   angleStep?: number; // if true, lines will be straightened to the nearest angle defined by angleStep,
   strokeColor?: string,
   fillBrush?: string,
-  strokeThickness?: string
+  strokeThickness?: string,
+  interpolatePoints?: boolean,
+  interpolationDistance?: number
 }
 
 export class DrawPathTool implements ITool {
@@ -89,9 +92,16 @@ export class DrawPathTool implements ITool {
         }
         if (!this._p2pMode) {
           this._dragMode = true;
-          if (this._path) {
-            this._pathD += "L " + currentPoint.x + " " + currentPoint.y + " ";
+          if (this._path && this._lastPoint) {
+            const points = this.options?.interpolatePoints
+              ? interpolateLinePoints(this._lastPoint, currentPoint, this.options.interpolationDistance ?? freehandInterpolationDistance)
+              : [currentPoint];
+
+            for (const point of points) {
+              this._pathD += "L " + point.x + " " + point.y + " ";
+            }
             this._path.setAttribute("d", this._pathD!);
+            this._lastPoint = currentPoint;
           }
         } else {  // shows line preview
           if (this._path) {
