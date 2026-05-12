@@ -13,9 +13,18 @@ import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEdit
 import { FontPropertyEditor } from './propertyEditors/FontPropertyEditor.js';
 import { UnitPropertyEditor } from './propertyEditors/UnitPropertyEditor.js';
 import { isUnitPropertyType } from './propertyEditors/UnitPropertyEditorConfig.js';
+import { PropertyType } from './PropertyType.js';
+import { CssPropertyEditor } from './propertyEditors/CssPropertyEditor.js';
 
 export class DefaultPropertyEditorTypesService implements IPropertyEditorTypesService {
   getEditorForProperty(property: IProperty): IPropertyEditor {
+    if (property.propertyType === PropertyType.cssValue)
+      return new CssPropertyEditor(property, p => this._getEditorForProperty(p));
+
+    return this._getEditorForProperty(property);
+  }
+
+  private _getEditorForProperty(property: IProperty): IPropertyEditor {
     if (property.createEditor)
       return property.createEditor(property);
 

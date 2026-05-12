@@ -6,12 +6,14 @@ enum Token {
 }
 
 export class CssEntry {
-  constructor(name: string, value: string) {
+  constructor(name: string, value: string, important: boolean) {
     this.name = name.trim();
     this.value = value.trim();
+    this.important = important;
   }
   name: string;
   value: string;
+  important: boolean;
 }
 
 export class CssAttributeParser {
@@ -36,7 +38,8 @@ export class CssAttributeParser {
           name += c;
       } else if (token === Token.Value) {
         if (c === ';') {
-          this.entries.push(new CssEntry(name, value));
+          const entry = this.createEntry(name, value);
+          this.entries.push(entry);
           name = '';
           value = '';
           token = Token.Name;
@@ -62,7 +65,15 @@ export class CssAttributeParser {
     }
 
     if (name.trim() !== '') {
-      this.entries.push(new CssEntry(name, value));
+      this.entries.push(this.createEntry(name, value));
     }
+  }
+
+  private createEntry(name: string, value: string) {
+    const match = value.match(/\s*!\s*important\s*$/i);
+    if (!match)
+      return new CssEntry(name, value, false);
+
+    return new CssEntry(name, value.substring(0, match.index), true);
   }
 }

@@ -42,7 +42,7 @@ export interface IDesignItem {
   _insertChildsInternal(designItems: IDesignItem[], index?: number);
   _insertChildInternal(designItem: IDesignItem, index?: number);
   _removeChildInternal(designItem: IDesignItem);
-  _withoutUndoSetStyle(name: string, value: string);
+  _withoutUndoSetStyle(name: string, value: string, important?: boolean);
   _withoutUndoRemoveStyle(name: string);
   _withoutUndoSetAttribute(name: string, value: string);
   _withoutUndoRemoveAttribute(name: string);
@@ -78,6 +78,7 @@ export interface IDesignItem {
 
   styles(): Iterable<[name: string, value: string]>;
   getStyle(name: string): string
+  isStyleImportant(name: string): boolean
   hasStyle(name: string): boolean
   setStyle(name: string, value?: string | null, important?: boolean);
   setStyleAsync(name: string, value?: string | null, important?: boolean): Promise<void>;

@@ -140,6 +140,7 @@ export class DesignItem implements IDesignItem {
   }
 
   private _styles: Map<string, string>
+  private _stylePriorities: Map<string, boolean>
   public get hasStyles() {
     return this._styles.size > 0;
   }
@@ -155,22 +156,33 @@ export class DesignItem implements IDesignItem {
       nm = PropertiesHelper.camelToDashCase(name);
     return this._styles.get(nm);
   }
+  public isStyleImportant(name: string) {
+    let nm = name;
+    if (!nm.startsWith('--'))
+      nm = PropertiesHelper.camelToDashCase(name);
+    return this._stylePriorities.get(nm) === true;
+  }
   public *styles() {
     for (let s of this._styles) {
       yield s;
     }
   }
-  _withoutUndoSetStyle(name: string, value: string) {
+  _withoutUndoSetStyle(name: string, value: string, important: boolean = false) {
     let nm = name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
     this._styles.set(nm, value);
+    if (important)
+      this._stylePriorities.set(nm, true);
+    else
+      this._stylePriorities.delete(nm);
   }
   _withoutUndoRemoveStyle(name: string) {
     let nm = name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
     this._styles.delete(nm);
+    this._stylePriorities.delete(nm);
   }
 
   /*
@@ -203,6 +215,8 @@ export class DesignItem implements IDesignItem {
         cssParser.parse(styleText);
         for (const entry of cssParser.entries) {
           this._styles.set(entry.name, entry.value);
+          if (entry.important)
+            this._stylePriorities.set(entry.name, true);
         }
       }
     }
@@ -420,6 +434,8 @@ export class DesignItem implements IDesignItem {
           cssParser.parse(st);
           for (let e of cssParser.entries) {
             designItem._styles.set(<string>e.name, e.value);
+            if (e.important)
+              designItem._stylePriorities.set(<string>e.name, true);
           }
         }
         serviceContainer.designItemService.handleSpecialAttributes(lockAtDesignTimeAttributeName, designItem);
@@ -526,6 +542,7 @@ export class DesignItem implements IDesignItem {
 
     this._attributes = new Map();
     this._styles = new Map();
+    this._stylePriorities = new Map();
 
     DesignItem._designItemMap.set(node, this);
   }
@@ -574,7 +591,7 @@ export class DesignItem implements IDesignItem {
     if (this.isRootItem) {
       throw 'not allowed to set style on root item or use async setStyle';
     } else {
-      const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
+      const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm), important, this.isStyleImportant(nm));
       this.instanceServiceContainer.undoService.execute(action);
     }
   }
@@ -605,7 +622,7 @@ export class DesignItem implements IDesignItem {
         }
       }
     } else {
-      const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm));
+      const action = new CssStyleChangeAction(this, nm, value, this._styles.get(nm), important, this.isStyleImportant(nm));
       this.instanceServiceContainer.undoService.execute(action);
     }
   }
@@ -614,7 +631,7 @@ export class DesignItem implements IDesignItem {
     let nm = name;
     if (!nm.startsWith('--'))
       nm = PropertiesHelper.camelToDashCase(name);
-    const action = new CssStyleChangeAction(this, nm, '', this._styles.get(nm));
+    const action = new CssStyleChangeAction(this, nm, '', this._styles.get(nm), false, this.isStyleImportant(nm));
     this.instanceServiceContainer.undoService.execute(action);
   }
   public updateStyleInSheetOrLocal(name: string, value?: string | null, important?: boolean, forceSet?: boolean) {
@@ -627,12 +644,12 @@ export class DesignItem implements IDesignItem {
     if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
       // Set style locally
       if (this.getStyle(nm) != value || forceSet) {
-        this.setStyle(nm, value);
+        this.setStyle(nm, value, important);
       } else if (value == null) {
         this.removeStyle(nm);
       }
     } else {
-      this.instanceServiceContainer.stylesheetService.updateDeclarationValue(declarations[0], value, false);
+      this.instanceServiceContainer.stylesheetService.updateDeclarationValue(declarations[0], value, important);
     }
   }
   public async updateStyleInSheetOrLocalAsync(name: string, value?: string | null, important?: boolean, forceSet?: boolean): Promise<void> {
@@ -645,12 +662,12 @@ export class DesignItem implements IDesignItem {
     if (this.hasStyle(name) || this.instanceServiceContainer.designContext.extensionOptions[enableStylesheetService] === false || !declarations?.length) {
       // Set style locally
       if (this.getStyle(nm) != value || forceSet) {
-        await this.setStyleAsync(nm, value);
+        await this.setStyleAsync(nm, value, important);
       } else if (value == null) {
         this.removeStyle(nm);
       }
     } else {
-      this.instanceServiceContainer.stylesheetService.updateDeclarationValue(declarations[0], value, false);
+      this.instanceServiceContainer.stylesheetService.updateDeclarationValue(declarations[0], value, important);
     }
   }
 
@@ -710,7 +727,7 @@ export class DesignItem implements IDesignItem {
     if (this.nodeType != NodeType.Element)
       return [];
 
-    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: false, parent: null }));
+    const localStyles = [...this._styles.entries()].map(x => ({ name: x[0], value: x[1], important: this.isStyleImportant(x[0]), parent: null }));
     if (this.instanceServiceContainer.stylesheetService) {
       try {
         const rules = this.instanceServiceContainer.stylesheetService?.getAppliedRules(this);

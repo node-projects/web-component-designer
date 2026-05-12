@@ -6,6 +6,7 @@ import { CssCombiner } from '../../helper/CssCombiner.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ITextWriter } from '../../helper/ITextWriter.js';
 import { IStringPosition } from './IStringPosition.js';
+import { appendCssImportant } from '../../helper/CssImportant.js';
 
 export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
@@ -110,15 +111,18 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
   writeStyles(indentedTextWriter: ITextWriter, designItem: IDesignItem) {
     if (designItem.hasStyles) {
       indentedTextWriter.write(' style="');
-      let styles = designItem.styles();
-      if (this.options.compressCssToShorthandProperties)
-        styles = CssCombiner.combine(new Map(styles));
+      const styleEntries = [...designItem.styles()];
+      const hasImportantStyle = styleEntries.some(x => designItem.isStyleImportant(x[0]));
+      let styles: Iterable<[name: string, value: string]> = styleEntries;
+      if (this.options.compressCssToShorthandProperties && !hasImportantStyle)
+        styles = CssCombiner.combine(new Map(styleEntries));
       for (const s of styles) {
         if (s[0]) {
+          const value = DomConverter.normalizeAttributeValue(appendCssImportant(s[1], designItem.isStyleImportant(s[0])));
           if (s[0].startsWith('--'))
-            indentedTextWriter.write(s[0] + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+            indentedTextWriter.write(s[0] + ':' + value + ';');
           else
-            indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+            indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + value + ';');
         }
       }
       indentedTextWriter.write('"');

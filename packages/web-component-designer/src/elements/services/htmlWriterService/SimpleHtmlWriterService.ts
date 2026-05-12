@@ -7,6 +7,7 @@ import { NodeType } from '../../item/NodeType.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
 import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
+import { appendCssImportant } from '../../helper/CssImportant.js';
 
 export enum ElementContainerType {
   block,
@@ -53,12 +54,14 @@ export class SimpleHtmlWriterService implements IHtmlWriterService {
   protected writeStyles(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasStyles) {
       writeContext.indentedTextWriter.write(' style="');
-      let styles = designItem.styles();
-      if (writeContext.options.compressCssToShorthandProperties)
-        styles = CssCombiner.combine(new Map(styles));
+      const styleEntries = [...designItem.styles()];
+      const hasImportantStyle = styleEntries.some(x => designItem.isStyleImportant(x[0]));
+      let styles: Iterable<[name: string, value: string]> = styleEntries;
+      if (writeContext.options.compressCssToShorthandProperties && !hasImportantStyle)
+        styles = CssCombiner.combine(new Map(styleEntries));
       for (const s of styles) {
         if (s[0]) {
-          writeContext.indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+          writeContext.indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(appendCssImportant(s[1], designItem.isStyleImportant(s[0]))) + ';');
         }
       }
       writeContext.indentedTextWriter.write('"');

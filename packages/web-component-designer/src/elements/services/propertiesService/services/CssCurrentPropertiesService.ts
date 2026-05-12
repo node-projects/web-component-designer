@@ -10,6 +10,7 @@ import { BindingTarget } from '../../../item/BindingTarget.js';
 import { PropertiesHelper } from './PropertiesHelper.js';
 import { AbstractPropertiesService } from './AbstractPropertiesService.js';
 import { CssPropertiesService } from './CssPropertiesService.js';
+import { appendCssImportant, splitCssImportant } from '../../../helper/CssImportant.js';
 
 const localName = '&lt;local&gt;';
 
@@ -86,21 +87,22 @@ export class CssCurrentPropertiesService extends CssPropertiesService {
   }
 
   override async setValue(designItems: IDesignItem[], property: (IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }), value: any) {
+    const parsedValue = typeof value === 'string' ? splitCssImportant(value) : { value, important: false };
     // No selector means local style, styleDeclaration is null means new property
     if (property.styleRule?.selector !== null && property.styleDeclaration) {
-      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(property.styleDeclaration, value, false);
+      designItems[0].instanceServiceContainer.stylesheetService.updateDeclarationValue(property.styleDeclaration, parsedValue.value, parsedValue.important);
       this._notifyChangedProperty(designItems[0], property, value);
       return;
     }
     if (property.styleRule?.selector !== null && !property.styleDeclaration) {
-      designItems[0].instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(property.styleRule, property.name, value, false);
+      designItems[0].instanceServiceContainer.stylesheetService.insertDeclarationIntoRule(property.styleRule, property.name, parsedValue.value, parsedValue.important);
       this._notifyChangedProperty(designItems[0], property, value);
       return;
     }
 
     for (const d of designItems) {
       // Local style
-      d.setStyle(property.name, value);
+      d.setStyle(property.name, parsedValue.value, parsedValue.important);
       //unkown css property names do not trigger the mutation observer of property grid, 
       //fixed by assinging stle again to the attribute
       (<HTMLElement>d.element).setAttribute('style', (<HTMLElement>d.element).getAttribute('style'));
@@ -117,13 +119,13 @@ export class CssCurrentPropertiesService extends CssPropertiesService {
 
   override getValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
     if (property.styleRule?.selector && property.styleDeclaration)
-      return property.styleDeclaration.value
+      return appendCssImportant(property.styleDeclaration.value, property.styleDeclaration.important);
     return super.getValue(designItems, property);
   }
 
   override getUnsetValue(designItems: IDesignItem[], property: IProperty & { styleRule: IStyleRule, styleDeclaration: IStyleDeclaration }) {
     if (property.styleRule?.selector && property.styleDeclaration)
-      return property.styleDeclaration.value
+      return appendCssImportant(property.styleDeclaration.value, property.styleDeclaration.important);
     return super.getUnsetValue(designItems, property);
   }
 

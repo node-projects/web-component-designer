@@ -7,6 +7,7 @@ import { ValueType } from '../ValueType.js';
 import { BindingTarget } from '../../../item/BindingTarget.js';
 import { DesignerCanvas } from '../../../widgets/designerView/designerCanvas.js';
 import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
+import { appendCssImportant } from '../../../helper/CssImportant.js';
 
 export class CssCustomPropertiesService extends AbstractCssPropertiesService {
 
@@ -70,7 +71,7 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
   override getValue(designItems: IDesignItem[], property: IProperty) {
     let val = designItems[0].getStyle(property.name);
     if (val)
-      return val;
+      return appendCssImportant(val, designItems[0].isStyleImportant(property.name));
     return getComputedStyle(designItems[0].element).getPropertyValue(property.name);
   }
 

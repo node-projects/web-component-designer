@@ -8,6 +8,7 @@ import { NodeType } from '../../item/NodeType.js';
 import { IStringPosition } from './IStringPosition.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
 import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
+import { appendCssImportant } from '../../helper/CssImportant.js';
 
 enum ElementContainerType {
   inline,
@@ -58,12 +59,14 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
   private writeStyles(writeContext: IWriteContext, designItem: IDesignItem) {
     if (designItem.hasStyles) {
       writeContext.indentedTextWriter.write(' style="');
-      let styles = designItem.styles();
-      if (writeContext.options.compressCssToShorthandProperties)
-        styles = CssCombiner.combine(new Map(styles));
+      const styleEntries = [...designItem.styles()];
+      const hasImportantStyle = styleEntries.some(x => designItem.isStyleImportant(x[0]));
+      let styles: Iterable<[name: string, value: string]> = styleEntries;
+      if (writeContext.options.compressCssToShorthandProperties && !hasImportantStyle)
+        styles = CssCombiner.combine(new Map(styleEntries));
       for (const s of styles) {
         if (s[0]) {
-          writeContext.indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(s[1]) + ';');
+          writeContext.indentedTextWriter.write(PropertiesHelper.camelToDashCase(s[0]) + ':' + DomConverter.normalizeAttributeValue(appendCssImportant(s[1], designItem.isStyleImportant(s[0]))) + ';');
         }
       }
       writeContext.indentedTextWriter.write('"');

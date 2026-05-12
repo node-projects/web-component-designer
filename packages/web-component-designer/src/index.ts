@@ -5,6 +5,7 @@ export * from "./elements/controls/PlainScrollbar.js"
 export * from "./elements/services/DefaultServiceBootstrap.js";
 
 export * from "./elements/helper/CssAttributeParser.js";
+export * from "./elements/helper/CssImportant.js";
 export * from "./elements/helper/KeyboardHelper.js";
 export * from "./elements/helper/CssCombiner.js";
 export * from "./elements/helper/ObservedCustomElementsRegistry.js";
@@ -152,6 +153,7 @@ export * from "./elements/services/propertiesService/PropertyGroupsService.js";
 export * from "./elements/services/propertiesService/propertyEditors/BasePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/BooleanPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ColorPropertyEditor.js";
+export * from "./elements/services/propertiesService/propertyEditors/CssPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/UnitPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/DatePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ImageButtonListPropertyEditor.js";

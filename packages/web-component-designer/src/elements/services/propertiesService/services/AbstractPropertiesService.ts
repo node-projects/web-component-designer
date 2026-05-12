@@ -10,6 +10,7 @@ import { NodeType } from '../../../item/NodeType.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { newElementFromString } from '../../../helper/ElementHelper.js';
 import { IContextMenuItem } from '../../../helper/contextMenu/IContextMenuItem.js';
+import { appendCssImportant, splitCssImportant } from '../../../helper/CssImportant.js';
 
 export abstract class AbstractPropertiesService implements IPropertiesService {
 
@@ -51,7 +52,8 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
         continue;
 
       if (property.propertyType == PropertyType.cssValue) {
-        await d.updateStyleInSheetOrLocalAsync(property.propertyName ?? property.name, value);
+        const parsedValue = typeof value === 'string' ? splitCssImportant(value) : { value, important: false };
+        await d.updateStyleInSheetOrLocalAsync(property.propertyName ?? property.name, parsedValue.value, parsedValue.important);
         //TODO: fix this hack somehow
         //unkown css property names do not trigger the mutation observer of property grid, 
         //fixed by assinging style again to the attribute
@@ -223,7 +225,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
             break;
           }
         }
-        return lastValue;
+        return typeof lastValue === 'string' ? appendCssImportant(lastValue, designItems[0].isStyleImportant(property.propertyName ?? property.name)) : lastValue;
       } else if (property.propertyType == PropertyType.property) {
         let propertyName = property.propertyName
         if (!propertyName)

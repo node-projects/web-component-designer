@@ -68,9 +68,9 @@ export class NodeHtmlParserService implements IHtmlParserService {
         let styleParser = new CssAttributeParser();
         styleParser.parse(style);
         for (let s of styleParser.entries) {
-          designItem._withoutUndoSetStyle(s.name, s.value);
+          designItem._withoutUndoSetStyle(s.name, s.value, s.important);
           if (manualCreatedElement) {
-            element.style[s.name] = s.value;
+            element.style.setProperty(s.name, s.value, s.important ? 'important' : '');
           }
         }
       }
