@@ -1,4 +1,5 @@
 export * from "./elements/controls/DesignerTabControl.js";
+export * from "./elements/controls/MetricsEditor.js";
 export * from "./elements/controls/NumericStyleInput.js";
 export * from "./elements/controls/PlainScrollbar.js"
 

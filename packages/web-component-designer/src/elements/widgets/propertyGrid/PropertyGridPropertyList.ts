@@ -316,7 +316,9 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         }
         this._div.appendChild(label);
       } else {
-        if (!property.renamable) {
+        if (property.hideLabel) {
+          labelHolder = document.createElement("span");
+        } else if (!property.renamable) {
           let label = document.createElement("label");
           labelHolder = label;
           if (isInGroup)
@@ -355,6 +357,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         editor.element.id = property.name;
       if (editor.element instanceof HTMLElement)
         editor.element.classList.add('editor-control');
+      if (property.hideLabel)
+        (<HTMLElement>editor.element).style.gridColumn = '2 / 4';
       this._div.appendChild(editor.element);
 
       this._propertyMap.set(property, { isSetElement: rect, labelElement: labelHolder, editor: editor });

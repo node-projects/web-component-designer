@@ -7,6 +7,7 @@ export interface IProperty {
   name: string;
   renamable?: boolean;
   displayName?: string; // nused in property grid
+  hideLabel?: boolean; // property grid renders editor across the label and editor columns
   propertyName?: string; // normaly camelCased name of property (also used for css properties)
   group?: string;
   attributeName?: string; // normaly dash seperated name of property

@@ -155,7 +155,7 @@ export class CssPropertiesService extends AbstractCssPropertiesService {
       case 'assignedRowColumn':
         return { name, service: this, propertyType: PropertyType.complex, createEditor: (p) => new GridAssignedRowColumnPropertyEditor(p) };
       case 'metrics':
-        return { name, service: this, propertyType: PropertyType.complex, createEditor: (p) => new MetricsPropertyEditor(p) };
+        return { name, service: this, propertyType: PropertyType.complex, hideLabel: true, createEditor: (p) => new MetricsPropertyEditor(p) };
       default:
         return this._enrichCssProperty({
           name,
