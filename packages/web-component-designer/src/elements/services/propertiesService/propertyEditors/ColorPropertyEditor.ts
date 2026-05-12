@@ -1,34 +1,29 @@
 import { IProperty } from '../IProperty.js';
 import { BasePropertyEditor } from './BasePropertyEditor.js';
 import { ValueType } from '../ValueType.js';
-import { w3color } from '../../../helper/w3color.js';
+import { ColorInput } from '../../../controls/ColorEditor.js';
 
-export class ColorPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
+export class ColorPropertyEditor extends BasePropertyEditor<ColorInput> {
   constructor(property: IProperty) {
     super(property);
 
-    let element = document.createElement('input');
-    element.type = 'color'
+    let element = document.createElement('node-projects-color-input') as ColorInput;
     if (property.readonly)
       element.readOnly = true;
     element.onchange = async (e) => {
-      let w3Col = w3color.toColorObject(element.value);
       await this.property.service.removePreviewValue?.(this.designItems, this.property);
-      this._valueChanged(w3Col.toNameOrHexString());
+      this._valueChanged(element.value);
     };
     element.oninput = async (e) => {
-      let w3Col = w3color.toColorObject(element.value);
-      await this.property.service.previewValue?.(this.designItems, this.property, w3Col.toNameOrHexString());
+      await this.property.service.previewValue?.(this.designItems, this.property, element.value);
     };
     this.element = element;
   }
 
   refreshValue(valueType: ValueType, value: any) {
     if (!value)
-      this.element.value = '#000000';
-    else {
-      let w3Col = w3color.toColorObject(value);
-      this.element.value = w3Col.toHexString();
-    }
+      this.element.value = 'rgba(0, 0, 0, 1)';
+    else
+      this.element.value = value;
   }
 }

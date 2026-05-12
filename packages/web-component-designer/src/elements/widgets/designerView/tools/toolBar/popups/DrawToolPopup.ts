@@ -16,6 +16,9 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
         grid-template-columns: 1fr 1fr;
         margin: 5px;
         align-items: center;
+        & span {
+          height: 100%;
+        }
       }
       .text {
         margin-left: 5px;
