@@ -8,6 +8,7 @@ import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { DesignerCanvas } from '../designerCanvas.js';
+import { roundNumericParts, roundValueToDecimalPlaces } from '../extensions/svg/geometry/GeometryWriteHelper.js';
 
 const offset = 10;
 const freehandInterpolationDistance = 5;
@@ -167,16 +168,17 @@ export class DrawPathTool implements ITool {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     const mvX = coords.x - offset;
     const mvY = coords.y - offset;
+    const decimalPlaces = designerCanvas.serviceContainer.options.roundPixelsToDecimalPlaces;
 
     this._path!.setAttribute("d", this._pathD!);
     const d = moveSVGPath(this._path!, mvX, mvY);
-    this._path!.setAttribute("d", d);
+    this._path!.setAttribute("d", roundNumericParts(d, decimalPlaces));
     this._path!.removeAttribute("stroke");
     this._path!.removeAttribute("stroke-width");
     this._path!.removeAttribute("overlay-source");
     svg.appendChild(this._path!);
-    svg.style.left = (mvX) + 'px';
-    svg.style.top = (mvY) + 'px';
+    svg.style.left = roundValueToDecimalPlaces(mvX, decimalPlaces) + 'px';
+    svg.style.top = roundValueToDecimalPlaces(mvY, decimalPlaces) + 'px';
     svg.style.position = 'absolute';
     svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
     svg.style.height = Math.round(coords.height + 2 * offset) + 'px';

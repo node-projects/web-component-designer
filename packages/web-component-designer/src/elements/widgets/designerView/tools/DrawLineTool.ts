@@ -7,6 +7,7 @@ import { straightenLine } from '../../../helper/PathDataPolyfill.js';
 import { DesignItem } from '../../../item/DesignItem.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
+import { roundValueToDecimalPlaces } from '../extensions/svg/geometry/GeometryWriteHelper.js';
 
 export class DrawLineTool implements ITool {
 
@@ -75,16 +76,17 @@ export class DrawLineTool implements ITool {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         const mvX = coords.x - offset;
         const mvY = coords.y - offset;
-        this._path.setAttribute("x1", (this._startPoint.x - mvX).toString());
-        this._path.setAttribute("y1", (this._startPoint.y - mvY).toString());
-        this._path.setAttribute("x2", (this._endPoint.x - mvX).toString());
-        this._path.setAttribute("y2", (this._endPoint.y - mvY).toString());
+        const decimalPlaces = designerCanvas.serviceContainer.options.roundPixelsToDecimalPlaces;
+        this._path.setAttribute("x1", roundValueToDecimalPlaces(this._startPoint.x - mvX, decimalPlaces));
+        this._path.setAttribute("y1", roundValueToDecimalPlaces(this._startPoint.y - mvY, decimalPlaces));
+        this._path.setAttribute("x2", roundValueToDecimalPlaces(this._endPoint.x - mvX, decimalPlaces));
+        this._path.setAttribute("y2", roundValueToDecimalPlaces(this._endPoint.y - mvY, decimalPlaces));
         this._path.removeAttribute("stroke");
         this._path.removeAttribute("stroke-width");
         this._path.removeAttribute("overlay-source");
         svg.appendChild(this._path);
-        svg.style.left = (mvX) + 'px';
-        svg.style.top = (mvY) + 'px';
+        svg.style.left = roundValueToDecimalPlaces(mvX, decimalPlaces) + 'px';
+        svg.style.top = roundValueToDecimalPlaces(mvY, decimalPlaces) + 'px';
         svg.style.position = 'absolute';
         svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
         svg.style.height = Math.round(coords.height + 2 * offset) + 'px';

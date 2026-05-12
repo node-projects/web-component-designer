@@ -8,6 +8,7 @@ import { DesignItem } from '../../../item/DesignItem.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
+import { roundValueToDecimalPlaces } from '../extensions/svg/geometry/GeometryWriteHelper.js';
 
 export class DrawRectTool implements ITool {
 
@@ -111,14 +112,17 @@ export class DrawRectTool implements ITool {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         const mvX = coords.x - offset;
         const mvY = coords.y - offset;
-        this._path.setAttribute("x", (this._px - mvX).toString());
-        this._path.setAttribute("y", (this._py - mvY).toString());
+        const decimalPlaces = designerCanvas.serviceContainer.options.roundPixelsToDecimalPlaces;
+        this._path.setAttribute("x", roundValueToDecimalPlaces(this._px - mvX, decimalPlaces));
+        this._path.setAttribute("y", roundValueToDecimalPlaces(this._py - mvY, decimalPlaces));
+        this._path.setAttribute("width", roundValueToDecimalPlaces(Number(this._path.getAttribute("width")), decimalPlaces));
+        this._path.setAttribute("height", roundValueToDecimalPlaces(Number(this._path.getAttribute("height")), decimalPlaces));
         this._path.removeAttribute("stroke");
         this._path.removeAttribute("stroke-width");
         this._path.removeAttribute("overlay-source");
         svg.appendChild(this._path);
-        svg.style.left = (mvX) + 'px';
-        svg.style.top = (mvY) + 'px';
+        svg.style.left = roundValueToDecimalPlaces(mvX, decimalPlaces) + 'px';
+        svg.style.top = roundValueToDecimalPlaces(mvY, decimalPlaces) + 'px';
         svg.style.position = 'absolute';
         svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
         svg.style.height = Math.round(coords.height + 2 * offset) + 'px';

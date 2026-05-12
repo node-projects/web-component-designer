@@ -8,6 +8,7 @@ import { DesignItem } from '../../../item/DesignItem.js';
 import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
+import { roundValueToDecimalPlaces } from '../extensions/svg/geometry/GeometryWriteHelper.js';
 
 export class DrawEllipsisTool implements ITool {
 
@@ -95,14 +96,17 @@ export class DrawEllipsisTool implements ITool {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         const mvX = coords.x - offset;
         const mvY = coords.y - offset;
+        const decimalPlaces = designerCanvas.serviceContainer.options.roundPixelsToDecimalPlaces;
         svg.appendChild(this._path);
-        this._path.setAttribute("cx", (this._cx - mvX).toString());
-        this._path.setAttribute("cy", (this._cy - mvY).toString());
+        this._path.setAttribute("cx", roundValueToDecimalPlaces(this._cx - mvX, decimalPlaces));
+        this._path.setAttribute("cy", roundValueToDecimalPlaces(this._cy - mvY, decimalPlaces));
+        this._path.setAttribute("rx", roundValueToDecimalPlaces(Number(this._path.getAttribute("rx")), decimalPlaces));
+        this._path.setAttribute("ry", roundValueToDecimalPlaces(Number(this._path.getAttribute("ry")), decimalPlaces));
         this._path.removeAttribute("stroke");
         this._path.removeAttribute("stroke-width");
         this._path.removeAttribute("overlay-source");
-        svg.style.left = (mvX) + 'px';
-        svg.style.top = (mvY) + 'px';
+        svg.style.left = roundValueToDecimalPlaces(mvX, decimalPlaces) + 'px';
+        svg.style.top = roundValueToDecimalPlaces(mvY, decimalPlaces) + 'px';
         svg.style.position = 'absolute';
         svg.style.width = Math.round(coords.width + 2 * offset) + 'px';
         svg.style.height = Math.round(coords.height + 2 * offset) + 'px';

@@ -786,7 +786,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   private _applyGeometryToElement() {
     if (!this._reader || !this._geometry) return;
     const attrs = this._reader.serialize(this._geometry);
-    applyGeometryWritesToElement(this.extendedItem.element, attrs);
+    applyGeometryWritesToElement(this.extendedItem.element, attrs, this.extendedItem.serviceContainer.options.roundPixelsToDecimalPlaces);
   }
 
   /** Commit geometry change through the designItem undo system.

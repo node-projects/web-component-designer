@@ -78,7 +78,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       margin-right: 1px;
     }
     .toolbar-control {
-      width: 16px;
+      min-width: 16px;
       height: 16px;
       display: block;
       margin-right: 1px;
