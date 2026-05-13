@@ -1,0 +1,198 @@
+{
+    "elements": [
+        {
+            "name": "node",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "120px",
+            "defaultHeight": "54px",
+            "defaultAttributes": {
+                "node-id": "A",
+                "label": "Node",
+                "shape": "rectangle"
+            }
+        },
+        {
+            "name": "decision",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "120px",
+            "defaultHeight": "80px",
+            "defaultAttributes": {
+                "node-id": "Decision",
+                "label": "Decision",
+                "shape": "decision"
+            }
+        },
+        {
+            "name": "subgraph",
+            "tag": "mermaid-subgraph",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "360px",
+            "defaultHeight": "240px",
+            "defaultAttributes": {
+                "subgraph-id": "Group",
+                "title": "Group"
+            }
+        },
+        {
+            "name": "document",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "140px",
+            "defaultHeight": "64px",
+            "defaultAttributes": { "node-id": "Document", "label": "Document", "shape": "doc" }
+        },
+        {
+            "name": "database",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "120px",
+            "defaultHeight": "64px",
+            "defaultAttributes": { "node-id": "Database", "label": "Database", "shape": "cylinder" }
+        },
+        {
+            "name": "cloud",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "140px",
+            "defaultHeight": "64px",
+            "defaultAttributes": { "node-id": "Cloud", "label": "Cloud", "shape": "cloud" }
+        },
+        {
+            "name": "junction",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "80px",
+            "defaultHeight": "80px",
+            "defaultAttributes": { "node-id": "Junction", "label": "", "shape": "f-circ" }
+        },
+        {
+            "name": "fork/join",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "140px",
+            "defaultHeight": "28px",
+            "defaultAttributes": { "node-id": "Fork", "label": "", "shape": "fork" }
+        },
+        {
+            "name": "manual input",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "140px",
+            "defaultHeight": "60px",
+            "defaultAttributes": { "node-id": "ManualInput", "label": "Manual Input", "shape": "sl-rect" }
+        },
+        {
+            "name": "data store",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "140px",
+            "defaultHeight": "60px",
+            "defaultAttributes": { "node-id": "DataStore", "label": "Data Store", "shape": "datastore" }
+        },
+        {
+            "name": "text block",
+            "tag": "mermaid-node",
+            "type": "polymer",
+            "diagramTypes": ["flowchart"],
+            "defaultWidth": "140px",
+            "defaultHeight": "54px",
+            "defaultAttributes": { "node-id": "Text", "label": "Text", "shape": "text" }
+        },
+        {
+            "name": "mindmap node",
+            "tag": "mermaid-mindmap-node",
+            "type": "polymer",
+            "diagramTypes": ["mindmap"],
+            "defaultWidth": "150px",
+            "defaultHeight": "44px",
+            "defaultAttributes": {
+                "mindmap-id": "Node",
+                "label": "Node",
+                "shape": "default"
+            }
+        },
+        {
+            "name": "sequence participant",
+            "tag": "mermaid-sequence-participant",
+            "type": "polymer",
+            "diagramTypes": ["sequenceDiagram"],
+            "defaultWidth": "140px",
+            "defaultHeight": "44px",
+            "defaultAttributes": {
+                "participant-id": "Alice",
+                "label": "Alice",
+                "participant-type": "participant"
+            }
+        },
+        {
+            "name": "sequence actor",
+            "tag": "mermaid-sequence-participant",
+            "type": "polymer",
+            "diagramTypes": ["sequenceDiagram"],
+            "defaultWidth": "140px",
+            "defaultHeight": "44px",
+            "defaultAttributes": {
+                "participant-id": "Actor",
+                "label": "Actor",
+                "participant-type": "actor"
+            }
+        },
+        {
+            "name": "sequence message",
+            "tag": "mermaid-sequence-message",
+            "type": "polymer",
+            "diagramTypes": ["sequenceDiagram"],
+            "defaultWidth": "220px",
+            "defaultHeight": "36px",
+            "defaultAttributes": {
+                "from": "Alice",
+                "to": "Bob",
+                "label": "Message",
+                "message-type": "solid",
+                "connector": "->>"
+            }
+        },
+        {
+            "name": "requirement",
+            "tag": "mermaid-requirement-node",
+            "type": "polymer",
+            "diagramTypes": ["requirementDiagram"],
+            "defaultWidth": "220px",
+            "defaultHeight": "160px",
+            "defaultAttributes": {
+                "node-kind": "requirement",
+                "label": "Req",
+                "requirement-type": "requirement",
+                "requirement-id": "1",
+                "text": "Requirement text",
+                "risk": "low",
+                "verify-method": "test"
+            }
+        },
+        {
+            "name": "element",
+            "tag": "mermaid-requirement-node",
+            "type": "polymer",
+            "diagramTypes": ["requirementDiagram"],
+            "defaultWidth": "170px",
+            "defaultHeight": "84px",
+            "defaultAttributes": {
+                "node-kind": "element",
+                "label": "Element",
+                "element-type": "simulation"
+            }
+        }
+    ]
+}

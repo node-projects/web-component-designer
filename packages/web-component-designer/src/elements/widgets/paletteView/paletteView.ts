@@ -37,6 +37,9 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
         paletteElement.title = s.name;
         this._designerTabControl.appendChild(paletteElement);
         paletteElement.loadElements(serviceContainer, elements);
+        s.onElementsChanged?.on(async () => {
+          paletteElement.loadElements(serviceContainer, await s.getElements());
+        });
       } catch (err) {
         console.warn('Error loading elements', err);
       }

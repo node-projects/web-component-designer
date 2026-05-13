@@ -120,7 +120,8 @@ export class DesignItem implements IDesignItem {
   }
   _withoutUndoSetAttribute(name: string, value: string) {
     try {
-      this.element.setAttribute(name, value);
+      if (!this.isRootItem)
+        this.element.setAttribute(name, value);
     } catch (e: any) {
       if (e?.code !== 5)
         console.warn(e)
@@ -130,7 +131,8 @@ export class DesignItem implements IDesignItem {
   }
   _withoutUndoRemoveAttribute(name: string) {
     try {
-      this.element.removeAttribute(name);
+      if (!this.isRootItem)
+        this.element.removeAttribute(name);
     } catch (e: any) {
       if (e?.code !== 5)
         console.warn(e)
@@ -747,8 +749,6 @@ export class DesignItem implements IDesignItem {
   }
 
   public setAttribute(name: string, value?: string | null) {
-    if (this.isRootItem)
-      throw 'not allowed to set attribute on root item';
     const action = new AttributeChangeAction(this, name, value, this._attributes.get(name));
     this.instanceServiceContainer.undoService.execute(action);
   }

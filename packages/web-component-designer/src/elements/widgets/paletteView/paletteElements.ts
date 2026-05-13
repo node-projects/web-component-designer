@@ -60,6 +60,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
   }
 
   loadElements(serviceContainer: ServiceContainer, elementDefintions: IElementDefinition[], relativeImagePath?: string) {
+    this._table.replaceChildren();
     for (const elementDefintion of elementDefintions) {
       const tr = document.createElement("tr");
 

@@ -365,6 +365,9 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     if (this._designerCanvas.rootDesignItem.childCount > 0) {
       return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), true, true);
     }
+    if (this.serviceContainer.htmlWriterService.supportsRootItemWrite) {
+      return DomConverter.ConvertToString([this._designerCanvas.rootDesignItem], true, true);
+    }
     return '';
   }
 
