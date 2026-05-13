@@ -1,9 +1,14 @@
 {
   "description": "web-component-designer addon: Widgets and Services for creating a Mermaid Designer",
   "name": "@node-projects/web-component-designer-mermaid",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "author": "jochen.kuehner@gmx.de",
   "license": "MIT",
   "scripts": {
