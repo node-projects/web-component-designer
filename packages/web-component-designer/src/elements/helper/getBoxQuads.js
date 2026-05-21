@@ -312,6 +312,8 @@ function getElementTransformWithZoom(element, iframes, includeZoom = true) {
 export function getBoxQuads(node, options) {
     const defaultRelativeTo = node.ownerDocument.documentElement ?? node.ownerDocument.body;
     const relativeTo = options?.relativeTo ?? defaultRelativeTo;
+    const viewportRoot = node.ownerDocument.documentElement ?? node.ownerDocument.body;
+    const resolveFixedThroughViewport = relativeTo !== viewportRoot && shouldResolveFixedPositionThroughViewport(node, relativeTo, options?.iframes);
     let key;
     if (boxQuadsCache) {
         let i1 = hash.get(node);
@@ -327,7 +329,11 @@ export function getBoxQuads(node, options) {
     }
 
     /** @type {DOMMatrix} */
-    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(node, relativeTo, options?.iframes);
+    let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(
+        node,
+        resolveFixedThroughViewport ? viewportRoot : relativeTo,
+        options?.iframes
+    );
 
     // FIX 13: Cache cross-realm constructors once per call.
     const win = node.ownerDocument.defaultView ?? window;
@@ -392,7 +398,11 @@ export function getBoxQuads(node, options) {
             // local dimensions via the 2x2 AABB system, then apply the parent's
             // accumulated matrix to build proper (rotated) quads in relativeTo-space.
             const parent = getParentElementIncludingSlots(node, options?.iframes);
-            const M_parent = getResultingTransformationBetweenElementAndAllAncestors(parent, relativeTo, options?.iframes);
+            const M_parent = getResultingTransformationBetweenElementAndAllAncestors(
+                parent,
+                resolveFixedThroughViewport ? viewportRoot : relativeTo,
+                options?.iframes
+            );
             const parentCss = getElementCombinedTransform(parent, options?.iframes);
             const pr = parent.getBoundingClientRect();
             const pa = parentCss.a, pb = parentCss.b, pc = parentCss.c, pd = parentCss.d;
@@ -445,7 +455,7 @@ export function getBoxQuads(node, options) {
                     M_parent.transformPoint(new DOMPoint(lx + tw, ly + th)),
                     M_parent.transformPoint(new DOMPoint(lx,      ly + th))
                 );
-                quads.push(toViewportRelativeDocumentElementQuad(quad, node, relativeTo, options?.iframes));
+                quads.push(finishQuadRelativeToTarget(quad, node, relativeTo, options?.iframes, resolveFixedThroughViewport, options?.box));
             }
 
             if (quads.length > 0) {
@@ -482,7 +492,7 @@ export function getBoxQuads(node, options) {
                 tPoints[i] = as2DPoint(tPoints[i]);
             }
         }
-        const tQuad = [toViewportRelativeDocumentElementQuad(new DOMQuad(tPoints[0], tPoints[1], tPoints[2], tPoints[3]), node, relativeTo, options?.iframes)];
+        const tQuad = [finishQuadRelativeToTarget(new DOMQuad(tPoints[0], tPoints[1], tPoints[2], tPoints[3]), node, relativeTo, options?.iframes, resolveFixedThroughViewport, options?.box)];
         if (boxQuadsCache) boxQuadsCache.set(key, tQuad);
         return tQuad;
     }
@@ -532,7 +542,7 @@ export function getBoxQuads(node, options) {
                 points[i] = as2DPoint(points[i]);
             }
         }
-        const svgQuad = [toViewportRelativeDocumentElementQuad(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes)];
+        const svgQuad = [finishQuadRelativeToTarget(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes, resolveFixedThroughViewport, options?.box)];
         if (boxQuadsCache) boxQuadsCache.set(key, svgQuad);
         return svgQuad;
     }
@@ -621,7 +631,7 @@ export function getBoxQuads(node, options) {
                     points[i] = as2DPoint(points[i]);
                 }
             }
-            const quad = [toViewportRelativeDocumentElementQuad(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes)];
+            const quad = [finishQuadRelativeToTarget(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes, resolveFixedThroughViewport, options?.box)];
             if (boxQuadsCache) boxQuadsCache.set(key, quad);
             return quad;
         }
@@ -647,10 +657,41 @@ export function getBoxQuads(node, options) {
         }
     }
 
-    const quad = [toViewportRelativeDocumentElementQuad(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes)];
+    const quad = [finishQuadRelativeToTarget(new DOMQuad(points[0], points[1], points[2], points[3]), node, relativeTo, options?.iframes, resolveFixedThroughViewport, options?.box)];
     if (boxQuadsCache)
         boxQuadsCache.set(key, quad);
     return quad;
+}
+
+function finishQuadRelativeToTarget(quad, node, relativeTo, iframes, resolveFixedThroughViewport, box) {
+    if (resolveFixedThroughViewport) {
+        quad = alignViewportBorderQuadToRenderedBox(quad, node, box);
+        return convertViewportQuadToRelativeNode(quad, node, relativeTo, iframes);
+    }
+    return toViewportRelativeDocumentElementQuad(quad, node, relativeTo, iframes);
+}
+
+function alignViewportBorderQuadToRenderedBox(quad, node, box) {
+    if (box && box !== 'border') {
+        return quad;
+    }
+
+    const win = node.ownerDocument.defaultView ?? window;
+    if (!(node instanceof win.Element)) {
+        return quad;
+    }
+
+    const rect = node.getBoundingClientRect();
+    const left = Math.min(quad.p1.x, quad.p2.x, quad.p3.x, quad.p4.x);
+    const top = Math.min(quad.p1.y, quad.p2.y, quad.p3.y, quad.p4.y);
+    const dx = rect.left - left;
+    const dy = rect.top - top;
+    if (Math.abs(dx) < 1e-10 && Math.abs(dy) < 1e-10) {
+        return quad;
+    }
+
+    const translate = (point) => new DOMPoint(point.x + dx, point.y + dy, point.z, point.w);
+    return new DOMQuad(translate(quad.p1), translate(quad.p2), translate(quad.p3), translate(quad.p4));
 }
 
 function convertViewportQuadToRelativeNode(quad, node, relativeTo, iframes) {
@@ -871,6 +912,31 @@ function isViewportFixedAnchoredNode(node, iframes) {
         const cs = getCachedComputedStyle(element);
         if (cs.position === 'fixed') {
             return getNearestFixedContainingBlock(element, iframes) == null;
+        }
+        element = getParentElementIncludingSlots(element, iframes);
+    }
+
+    return false;
+}
+
+function shouldResolveFixedPositionThroughViewport(node, relativeTo, iframes) {
+    const win = node.ownerDocument.defaultView ?? window;
+    let element = null;
+    if (node instanceof win.Text) {
+        element = getParentElementIncludingSlots(node, iframes);
+    } else if (node instanceof win.Element) {
+        element = node;
+    }
+
+    while (element && element !== node.ownerDocument.documentElement) {
+        const cs = getCachedComputedStyle(element);
+        if (cs.position === 'fixed') {
+            const fixedContainer = getNearestFixedContainingBlock(element, iframes);
+            return fixedContainer == null
+                || (fixedContainer !== relativeTo && !isFlatTreeInclusiveAncestor(relativeTo, fixedContainer));
+        }
+        if (element === relativeTo) {
+            break;
         }
         element = getParentElementIncludingSlots(element, iframes);
     }
