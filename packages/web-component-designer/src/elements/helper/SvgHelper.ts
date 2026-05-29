@@ -69,13 +69,14 @@ export function svgAsString(strings: TemplateStringsArray, ...values: any[]) {
 }
 
 export function isSupportedSvgGeometryElement(element: Element): element is SVGGraphicsElement {
-  return element instanceof SVGPathElement ||
-    element instanceof SVGRectElement ||
-    element instanceof SVGLineElement ||
-    element instanceof SVGCircleElement ||
-    element instanceof SVGEllipseElement ||
-    element instanceof SVGPolygonElement ||
-    element instanceof SVGPolylineElement;
+  const win = element.ownerDocument.defaultView ?? window;
+  return element instanceof win.SVGPathElement ||
+    element instanceof win.SVGRectElement ||
+    element instanceof win.SVGLineElement ||
+    element instanceof win.SVGCircleElement ||
+    element instanceof win.SVGEllipseElement ||
+    element instanceof win.SVGPolygonElement ||
+    element instanceof win.SVGPolylineElement;
 }
 
 export function toOverlayPointFromSvgUserSpace(element: Element, designerCanvas: IDesignerCanvas, point: IPoint): IPoint {
@@ -230,7 +231,7 @@ function _createOverlayPathDataWithoutMarkers(element: Element, designerCanvas: 
 }
 
 function _createMarkerOverlayPathData(element: Element, designerCanvas: IDesignerCanvas): string | null {
-  if (!(element instanceof SVGGraphicsElement)) {
+  if (!_isSvgGraphicsElement(element)) {
     return null;
   }
 
@@ -394,7 +395,7 @@ function _resolveMarkerReference(element: SVGGraphicsElement, attributeName: 'ma
 
   const rootNode = element.getRootNode() as ParentNode;
   const marker = typeof rootNode.querySelector === 'function' ? rootNode.querySelector(url) : null;
-  return marker instanceof SVGMarkerElement ? marker : null;
+  return marker instanceof (element.ownerDocument.defaultView ?? window).SVGMarkerElement ? marker : null;
 }
 
 function _createMarkerInstanceGroup(sourceElement: SVGGraphicsElement, placement: MarkerPlacement): SVGGElement | null {
@@ -608,7 +609,7 @@ function _fromElementReferenceBoxPoint(element: Element, point: IPoint): IPoint 
 }
 
 function _getSvgGeometryBBoxOffset(element: Element): IPoint {
-  if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {
+  if (!_isSvgGraphicsElement(element) || _isSvgSvgElement(element)) {
     return { x: 0, y: 0 };
   }
 
@@ -617,7 +618,7 @@ function _getSvgGeometryBBoxOffset(element: Element): IPoint {
 }
 
 function _getSvgOverlayTransform(element: Element, designerCanvas: IDesignerCanvas): SvgOverlayTransform | null {
-  if (!(element instanceof SVGGraphicsElement) || element instanceof SVGSVGElement) {
+  if (!_isSvgGraphicsElement(element) || _isSvgSvgElement(element)) {
     return null;
   }
 
@@ -626,7 +627,7 @@ function _getSvgOverlayTransform(element: Element, designerCanvas: IDesignerCanv
     return null;
   }
 
-  const quad = element.getBoxQuads({ relativeTo: designerCanvas.canvas, iframes: designerCanvas.iframes })[0];
+  const quad = _getSvgGeometryBBoxQuad(element, bbox, designerCanvas);
   if (!quad) {
     return null;
   }
@@ -642,6 +643,190 @@ function _getSvgOverlayTransform(element: Element, designerCanvas: IDesignerCanv
   }
 
   return { bbox, matrix, inverseMatrix };
+}
+
+function _isSvgGraphicsElement(element: Element): element is SVGGraphicsElement {
+  return element instanceof (element.ownerDocument.defaultView ?? window).SVGGraphicsElement;
+}
+
+function _isSvgSvgElement(element: Element): element is SVGSVGElement {
+  return element instanceof (element.ownerDocument.defaultView ?? window).SVGSVGElement;
+}
+
+function _getSvgGeometryBBoxQuad(element: SVGGraphicsElement, bbox: DOMRect, designerCanvas: IDesignerCanvas): DOMQuad | null {
+  if (!_hasNon2DTransformedHtmlAncestor(element, designerCanvas.canvas, designerCanvas.iframes)) {
+    const screenCtmQuad = _getSvgGeometryBBoxQuadFromScreenCtm(element, bbox, designerCanvas);
+    if (screenCtmQuad) {
+      return screenCtmQuad;
+    }
+  }
+
+  return _getSvgGeometryBBoxQuadFromVisualQuad(element, bbox, designerCanvas);
+}
+
+function _getSvgGeometryBBoxQuadFromVisualQuad(element: SVGGraphicsElement, bbox: DOMRect, designerCanvas: IDesignerCanvas): DOMQuad | null {
+  const visualQuad = element.getBoxQuads({ relativeTo: designerCanvas.canvas, iframes: designerCanvas.iframes })[0];
+  if (!visualQuad) {
+    return null;
+  }
+
+  const visualBox = _getSvgVisualBox(element, bbox);
+  if (Math.abs(visualBox.width) < 1e-10 || Math.abs(visualBox.height) < 1e-10) {
+    return null;
+  }
+
+  const visualMatrix = _createProjectiveMatrixForQuad(visualQuad);
+  if (!visualMatrix) {
+    return null;
+  }
+
+  const mapVisualBoxPoint = (x: number, y: number): IPoint => _applyProjectiveMatrix(
+    visualMatrix,
+    (x - visualBox.x) / visualBox.width,
+    (y - visualBox.y) / visualBox.height,
+  );
+
+  const p1 = mapVisualBoxPoint(bbox.x, bbox.y);
+  const p2 = mapVisualBoxPoint(bbox.x + bbox.width, bbox.y);
+  const p3 = mapVisualBoxPoint(bbox.x + bbox.width, bbox.y + bbox.height);
+  const p4 = mapVisualBoxPoint(bbox.x, bbox.y + bbox.height);
+
+  return new DOMQuad(
+    new DOMPoint(p1.x, p1.y),
+    new DOMPoint(p2.x, p2.y),
+    new DOMPoint(p3.x, p3.y),
+    new DOMPoint(p4.x, p4.y),
+  );
+}
+
+function _getSvgGeometryBBoxQuadFromScreenCtm(element: SVGGraphicsElement, bbox: DOMRect, designerCanvas: IDesignerCanvas): DOMQuad | null {
+  const screenCtm = element.getScreenCTM();
+  const canvasQuad = designerCanvas.canvas.getBoxQuads({ relativeTo: designerCanvas.canvas.ownerDocument.documentElement })[0];
+  if (!screenCtm || !canvasQuad) {
+    return null;
+  }
+
+  const canvasMatrix = _createProjectiveMatrixForQuad(canvasQuad);
+  const inverseCanvasMatrix = canvasMatrix ? _invertProjectiveMatrix(canvasMatrix) : null;
+  if (!inverseCanvasMatrix) {
+    return null;
+  }
+
+  const convertPoint = (point: DOMPoint): DOMPoint => {
+    const viewportPoint = _mapSvgScreenPointToCanvasDocument(point.matrixTransform(screenCtm), element, designerCanvas.canvas);
+    const normalizedCanvasPoint = _applyProjectiveMatrix(inverseCanvasMatrix, viewportPoint.x, viewportPoint.y);
+    return new DOMPoint(
+      normalizedCanvasPoint.x * designerCanvas.canvas.offsetWidth,
+      normalizedCanvasPoint.y * designerCanvas.canvas.offsetHeight,
+    );
+  };
+
+  return new DOMQuad(
+    convertPoint(new DOMPoint(bbox.x, bbox.y)),
+    convertPoint(new DOMPoint(bbox.x + bbox.width, bbox.y)),
+    convertPoint(new DOMPoint(bbox.x + bbox.width, bbox.y + bbox.height)),
+    convertPoint(new DOMPoint(bbox.x, bbox.y + bbox.height)),
+  );
+}
+
+function _mapSvgScreenPointToCanvasDocument(point: DOMPoint, element: SVGGraphicsElement, canvas: HTMLElement): DOMPoint {
+  let result = new DOMPoint(point.x, point.y);
+  if (element.ownerDocument === canvas.ownerDocument) {
+    return result;
+  }
+
+  let frameElement = element.ownerDocument.defaultView?.frameElement as HTMLIFrameElement | null;
+
+  while (frameElement) {
+    const frameRect = frameElement.getBoundingClientRect();
+    result = new DOMPoint(result.x + frameRect.left, result.y + frameRect.top);
+    if (frameElement.ownerDocument === canvas.ownerDocument) {
+      break;
+    }
+    frameElement = frameElement.ownerDocument.defaultView?.frameElement as HTMLIFrameElement | null;
+  }
+
+  return result;
+}
+
+function _hasNon2DTransformedHtmlAncestor(element: SVGGraphicsElement, relativeTo: HTMLElement, iframes: HTMLIFrameElement[]): boolean {
+  const win = element.ownerDocument.defaultView ?? window;
+  let current: Element | null = element.parentElement;
+
+  while (current && current !== relativeTo && current !== element.ownerDocument.documentElement) {
+    if (current instanceof win.HTMLElement && _hasNon2DTransform(current)) {
+      return true;
+    }
+    current = current.parentElement;
+  }
+
+  if (element.ownerDocument !== relativeTo.ownerDocument) {
+    const frameElement = iframes?.find(frame => frame?.contentDocument === element.ownerDocument)
+      ?? element.ownerDocument.defaultView?.frameElement as HTMLIFrameElement | null;
+    current = frameElement;
+
+    while (current && current !== relativeTo && current !== relativeTo.ownerDocument.documentElement) {
+      if (current instanceof relativeTo.ownerDocument.defaultView!.HTMLElement && _hasNon2DTransform(current)) {
+        return true;
+      }
+      current = current.parentElement;
+    }
+  }
+
+  return false;
+}
+
+function _hasNon2DTransform(element: HTMLElement): boolean {
+  const style = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+  return style.perspective !== 'none'
+    || style.transform.startsWith('matrix3d(')
+    || style.transformStyle === 'preserve-3d';
+}
+
+function _getSvgVisualBox(element: SVGGraphicsElement, bbox: DOMRect): DOMRect {
+  const svgStyle = (element.ownerDocument.defaultView ?? window).getComputedStyle(element);
+  const strokeWidth = svgStyle.stroke !== 'none' ? parseFloat(svgStyle.strokeWidth) || 0 : 0;
+  if (strokeWidth <= 0) {
+    return bbox;
+  }
+
+  const strokeInflation = _getSvgStrokeInflation(element, strokeWidth);
+  return new DOMRect(
+    bbox.x - strokeInflation.left,
+    bbox.y - strokeInflation.top,
+    bbox.width + strokeInflation.left + strokeInflation.right,
+    bbox.height + strokeInflation.top + strokeInflation.bottom,
+  );
+}
+
+function _getSvgStrokeInflation(element: SVGGraphicsElement, strokeWidth: number): { left: number, right: number, top: number, bottom: number } {
+  const win = element.ownerDocument.defaultView ?? window;
+  const halfStrokeWidth = strokeWidth / 2;
+  if (element instanceof win.SVGLineElement) {
+    const x1 = element.x1.baseVal.value;
+    const y1 = element.y1.baseVal.value;
+    const x2 = element.x2.baseVal.value;
+    const y2 = element.y2.baseVal.value;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const length = Math.hypot(dx, dy);
+
+    if (length > 1e-10) {
+      let inflateX = halfStrokeWidth * Math.abs(dy) / length;
+      let inflateY = halfStrokeWidth * Math.abs(dx) / length;
+      const lineCap = win.getComputedStyle(element).strokeLinecap;
+
+      if (lineCap === 'round' || lineCap === 'square') {
+        inflateX += halfStrokeWidth * Math.abs(dx) / length;
+        inflateY += halfStrokeWidth * Math.abs(dy) / length;
+      }
+
+      return { left: inflateX, right: inflateX, top: inflateY, bottom: inflateY };
+    }
+  }
+
+  const genericInflation = strokeWidth * 2;
+  return { left: genericInflation, right: genericInflation, top: genericInflation, bottom: genericInflation };
 }
 
 function _createProjectiveMatrixForQuad(quad: DOMQuad): ProjectiveMatrix | null {
