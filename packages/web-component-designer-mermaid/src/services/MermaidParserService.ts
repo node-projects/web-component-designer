@@ -48,6 +48,12 @@ type ParsedFlowchartDirective = {
     sourceRange?: { start: number; length: number };
 }
 
+type ParsedFlowchartEdgeDirective = {
+    edgeId: string;
+    animation?: string;
+    sourceRange?: { start: number; length: number };
+}
+
 type ParsedSequenceParticipant = {
     id: string;
     label: string;
@@ -164,6 +170,7 @@ async function parseFlowchart(html: string, serviceContainer: ServiceContainer, 
         const edges: ParsedEdge[] = [];
         const subgraphs = new Map<string, ParsedSubgraph>();
         const directives: ParsedFlowchartDirective[] = [];
+        const edgeDirectives = new Map<string, ParsedFlowchartEdgeDirective>();
         const subgraphStack: ParsedSubgraph[] = [];
         let direction: FlowchartDirection = "TD";
         const scannedNodes = new Map<string, ParsedNode>();
@@ -205,6 +212,12 @@ async function parseFlowchart(html: string, serviceContainer: ServiceContainer, 
                 continue;
             }
 
+            const edgeDirective = parseFlowchartEdgeDirective(line.trimmed, line.start);
+            if (edgeDirective) {
+                edgeDirectives.set(edgeDirective.edgeId, edgeDirective);
+                continue;
+            }
+
             const edge = parseEdge(line.trimmed, line.start);
             if (edge) {
                 scannedEdges.push(edge);
@@ -229,12 +242,16 @@ async function parseFlowchart(html: string, serviceContainer: ServiceContainer, 
             }
             for (const edge of parsed.edges) {
                 const scanned = getScannedEdge(scannedEdges, edge);
-                edges.push({ ...edge, ...scanned });
+                const edgeDirective = scanned.edgeId ? edgeDirectives.get(scanned.edgeId) : null;
+                edges.push({ ...edge, ...scanned, animation: edgeDirective?.animation ?? scanned.animation });
             }
         } else {
             for (const node of scannedNodes.values())
                 mergeNode(nodes, node);
-            edges.push(...scannedEdges);
+            edges.push(...scannedEdges.map(edge => {
+                const edgeDirective = edge.edgeId ? edgeDirectives.get(edge.edgeId) : null;
+                return { ...edge, animation: edgeDirective?.animation ?? edge.animation };
+            }));
         }
 
         const mermaidLayout = await getMermaidLayout(html, nodes);
@@ -391,10 +408,13 @@ function writeFlowchart(textWriter: ITextWriter, designItems: IDesignItem[], upd
         }
 }
 
-function writeFlowchartEdgeLine(textWriter: ITextWriter, designItem: IDesignItem, element: HTMLElement & { createMermaid?: () => string }, nodeItemsById: Map<string, IDesignItem>, explicitlyWrittenNodeIds: Set<string>, updatePositions?: boolean) {
+function writeFlowchartEdgeLine(textWriter: ITextWriter, designItem: IDesignItem, element: HTMLElement & { createMermaid?: () => string; createMermaidDirective?: () => string }, nodeItemsById: Map<string, IDesignItem>, explicitlyWrittenNodeIds: Set<string>, updatePositions?: boolean) {
     const start = textWriter.position;
     const line = indentEmbeddedNewlines("    " + element.createMermaid());
     textWriter.writeLine(line);
+    const directive = element.createMermaidDirective?.();
+    if (directive)
+        textWriter.writeLine("    " + directive);
     if (!updatePositions)
         return;
 
@@ -954,6 +974,23 @@ function parseFlowchartDirective(line: string, sourceStart: number): ParsedFlowc
     if (line.includes("@{") && !line.trim().startsWith("subgraph"))
         return null;
     return null;
+}
+
+function parseFlowchartEdgeDirective(line: string, sourceStart: number): ParsedFlowchartEdgeDirective | null {
+    const cursor = new SourceCursor(line);
+    const edgeId = cursor.readIdentifier();
+    if (!edgeId)
+        return null;
+    cursor.skipWhitespace();
+    if (!cursor.consume("@{"))
+        return null;
+    const contentEnd = line.lastIndexOf("}");
+    const content = contentEnd >= 0 ? line.substring(cursor.position, contentEnd) : line.substring(cursor.position);
+    const properties = parseObjectLiteralProperties(content);
+    const animation = properties.get("animation") ?? (properties.get("animate") === "true" ? "fast" : "");
+    if (!animation)
+        return null;
+    return { edgeId, animation, sourceRange: { start: sourceStart, length: line.length } };
 }
 
 function parseBinaryStatement(line: string, operators: string[]) {

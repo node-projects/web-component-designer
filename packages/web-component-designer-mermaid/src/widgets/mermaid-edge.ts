@@ -52,6 +52,12 @@ export class MermaidEdge extends BaseCustomWebComponentConstructorAppend {
         font-size: 12px;
         pointer-events: none;
     }
+
+    @keyframes mermaid-edge-flow {
+        to {
+            stroke-dashoffset: -28;
+        }
+    }
     `;
 
     static override readonly template = html`
@@ -154,7 +160,9 @@ export class MermaidEdge extends BaseCustomWebComponentConstructorAppend {
         const label = this.getAttribute("label") ?? this.label ?? "";
         this._path.setAttribute("marker-start", connector.startsWith("<") || edgeType === MermaidEdgeType.multi ? "url(#marker-start)" : "");
         this._path.setAttribute("marker-end", getMarkerEnd(edgeType, connector));
-        this._path.style.strokeDasharray = edgeType === MermaidEdgeType.dotted ? "4 4" : "";
+        const animation = this.getAttribute("animation") ?? this.animation;
+        this._path.style.strokeDasharray = animation ? "8 6" : edgeType === MermaidEdgeType.dotted ? "4 4" : "";
+        this._path.style.animation = animation ? `mermaid-edge-flow ${getAnimationDuration(animation)} linear infinite` : "";
         this._path.style.strokeWidth = edgeType === MermaidEdgeType.thick ? "4" : "2.5";
         this._path.style.opacity = edgeType === MermaidEdgeType.invisible ? "0" : "";
         this._label.textContent = label;
@@ -179,6 +187,23 @@ export class MermaidEdge extends BaseCustomWebComponentConstructorAppend {
 
         return `${from} ${prefix}${connector.plain} ${to}`;
     }
+
+    public createMermaidDirective() {
+        const rawEdgeId = this.getAttribute("edge-id") ?? this.edgeId;
+        const edgeId = rawEdgeId ? sanitizeId(rawEdgeId) : "";
+        const animation = this.getAttribute("animation") ?? this.animation;
+        if (!edgeId || !animation)
+            return "";
+        return `${edgeId}@{ animation: ${animation} }`;
+    }
+}
+
+function getAnimationDuration(animation: string) {
+    if (animation === "fast")
+        return "0.8s";
+    if (animation === "slow")
+        return "2s";
+    return "1.3s";
 }
 
 function getMarkerEnd(edgeType: MermaidEdgeType, connector: string) {
