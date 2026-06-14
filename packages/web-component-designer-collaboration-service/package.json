@@ -18,7 +18,7 @@
     "@node-projects/web-component-designer": ">=0.2.0"
   },
   "devDependencies": {
-    "esbuild": "^0.25.10"
+    "esbuild": "^0.28.1"
   },
   "repository": {
     "type": "git",

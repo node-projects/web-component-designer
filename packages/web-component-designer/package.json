@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.8.6",
-    "esbuild": "^0.25.10",
+    "esbuild": "^0.28.1",
     "esbuild-plugin-minify-html-literals": "^3.0.0",
     "mdn-data": "^2.4.2"
   },
