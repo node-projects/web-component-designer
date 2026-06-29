@@ -1030,7 +1030,14 @@ export class BindingsHelper {
     if (binding[1].target == BindingTarget.property)
       element[binding[0]] = v;
     else if (binding[1].target == BindingTarget.attribute)
-      element.setAttribute(binding[0], <string>v);
+      if (typeof v === 'boolean') {
+        if (v)
+          element.setAttribute(binding[0], '');
+        else
+          element.removeAttribute(binding[0]);
+      } else {
+        element.setAttribute(binding[0], <string>v);
+      }
     else if (binding[1].target == BindingTarget.css)
       (<HTMLElement>element).style[binding[0]] = v;
     else if (binding[1].target == BindingTarget.cssvar)
