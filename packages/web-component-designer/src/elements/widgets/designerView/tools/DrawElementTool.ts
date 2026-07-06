@@ -1,6 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
+import { getPossiblePlacementTarget } from '../../../helper/PlacementTargetHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IElementDefinition } from '../../../services/elementsService/IElementDefinition.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
@@ -56,13 +57,21 @@ export class DrawElementTool implements ITool {
     this._changeGroup = designerCanvas.rootDesignItem.openGroup("Insert Item");
     this._createdItem = await designerCanvas.serviceContainer.forSomeServicesTillResult("instanceService", (service) => service.getElement(this._elementDefinition, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer));
     this._createdItem.setStyle('position', 'absolute');
-    this._createdItem.setStyle('left', roundValue(this._createdItem, evPos.x) + 'px');
-    this._createdItem.setStyle('top', roundValue(this._createdItem, evPos.y) + 'px');
+
+    let [container] = getPossiblePlacementTarget(designerCanvas, event, [this._createdItem]);
+    if (!container)
+      container = designerCanvas.rootDesignItem;
+
+    const containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(container, container.getComputedStyle(), this._createdItem));
+    containerService.enterContainer(container, [this._createdItem], 'drop');
+
+    const containerPos = designerCanvas.getNormalizedElementCoordinates(container.element);
+    const startPositionInContainer = { x: evPos.x - containerPos.x, y: evPos.y - containerPos.y };
+    this._createdItem.setStyle('left', roundValue(this._createdItem, startPositionInContainer.x) + 'px');
+    this._createdItem.setStyle('top', roundValue(this._createdItem, startPositionInContainer.y) + 'px');
     this._createdItem.setStyle('width', '0');
     this._createdItem.setStyle('height', '0');
 
-    designerCanvas.rootDesignItem.insertChild(this._createdItem);
-    //draw via containerService??? how to draw into a grid, a stackpanel???
     designerCanvas.instanceServiceContainer.selectionService.clearSelectedElements();
   }
 

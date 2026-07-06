@@ -62,6 +62,128 @@ export class NpmPackageLoader {
         return packageHack;
     }
 
+    private static getExportImport(obj: any): string {
+        if (typeof obj == 'string')
+            return obj;
+        if (Array.isArray(obj)) {
+            for (const entry of obj) {
+                const imp = NpmPackageLoader.getExportImport(entry);
+                if (imp)
+                    return imp;
+            }
+            return null;
+        }
+        if (!obj)
+            return null;
+
+        const conditions = ['browser', 'import', 'module', 'default', 'node'];
+        for (const condition of conditions) {
+            const imp = NpmPackageLoader.getExportImport(obj[condition]);
+            if (imp)
+                return imp;
+        }
+        return null;
+    }
+
+    private static addExportsToImportMap(imports: Record<string, string>, baseUrl: string, packageJsonObj: { name?: string, exports?: any }) {
+        const normalizedExportPath = (path: string) => baseUrl + removeLeading(removeLeading(path, '.'), '/');
+        const addExport = (specifier: string, exportEntry: any) => {
+            const imp = NpmPackageLoader.getExportImport(exportEntry);
+            if (imp)
+                imports[specifier] = normalizedExportPath(imp);
+        }
+
+        const exports = packageJsonObj.exports;
+        if (!exports)
+            return;
+
+        const rootExport = NpmPackageLoader.getExportImport(exports);
+        if (rootExport) {
+            imports[packageJsonObj.name] = normalizedExportPath(rootExport);
+            return;
+        }
+
+        for (const exportName in exports) {
+            if (exportName.includes('*'))
+                continue;
+            if (exportName == '.') {
+                addExport(packageJsonObj.name, exports[exportName]);
+            } else if (exportName.startsWith('./')) {
+                addExport(packageJsonObj.name + '/' + exportName.substring(2), exports[exportName]);
+            }
+        }
+    }
+
+    private async getRegisteredElementTags(serviceContainer: ServiceContainer): Promise<Set<string>> {
+        const tags = new Set<string>();
+        for (const elementsService of serviceContainer.elementsServices) {
+            try {
+                for (const element of await elementsService.getElements()) {
+                    tags.add(element.tag);
+                }
+            } catch (err) {
+                console.warn('error reading registered elements service', err);
+            }
+        }
+        return tags;
+    }
+
+    private async loadDependencyCustomElementsJson(dependencies: Record<string, string>, serviceContainer: ServiceContainer, registeredTags: Set<string>): Promise<Set<string>> {
+        const addedTags = new Set<string>();
+        if (!dependencies)
+            return addedTags;
+
+        for (const dependency of Object.keys(dependencies)) {
+            if (dependency.startsWith('@types'))
+                continue;
+
+            try {
+                const dependencyTags = await this.loadPackageCustomElementsJson(dependency, serviceContainer, registeredTags);
+                dependencyTags.forEach(tag => addedTags.add(tag));
+            } catch (err) {
+                console.warn('error loading dependency custom-elements.json: ', dependency, err);
+            }
+        }
+        return addedTags;
+    }
+
+    private async loadPackageCustomElementsJson(pkg: string, serviceContainer: ServiceContainer, registeredTags: Set<string>): Promise<Set<string>> {
+        const addedTags = new Set<string>();
+        const baseUrl = window.location.protocol + this._packageSource + pkg + '/';
+        const packageJson = await fetch(baseUrl + 'package.json');
+        if (!packageJson.ok)
+            return addedTags;
+
+        const packageJsonObj = await packageJson.json();
+        let customElementsUrl = baseUrl + 'custom-elements.json';
+        let elementsRootPath = baseUrl;
+        if (packageJsonObj.customElements) {
+            customElementsUrl = baseUrl + removeLeading(removeTrailing(packageJsonObj.customElements, '/'), '/');
+            if (customElementsUrl.includes('/')) {
+                let idx = customElementsUrl.lastIndexOf('/');
+                elementsRootPath = customElementsUrl.substring(0, idx + 1);
+            }
+        }
+
+        const customElementsJson = await fetch(customElementsUrl);
+        if (!customElementsJson.ok)
+            return addedTags;
+
+        const customElementsJsonObj = await customElementsJson.json();
+        const elements = new WebcomponentManifestElementsService(packageJsonObj.name ?? pkg, elementsRootPath, customElementsJsonObj);
+        const elementDefinitions = await elements.getElements();
+        const newElementDefinitions = elementDefinitions.filter(elementDefinition => !registeredTags.has(elementDefinition.tag));
+        newElementDefinitions.forEach(elementDefinition => addedTags.add(elementDefinition.tag));
+        if (addedTags.size === 0)
+            return addedTags;
+
+        serviceContainer.register('elementsService', new PreDefinedElementsService(packageJsonObj.name ?? pkg, { elements: newElementDefinitions }));
+        const properties = new WebcomponentManifestPropertiesService(packageJsonObj.name ?? pkg, customElementsJsonObj);
+        serviceContainer.register('propertyService', properties);
+        addedTags.forEach(tag => registeredTags.add(tag));
+        return addedTags;
+    }
+
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
     async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: any, loadAllImports?: boolean, reportState?: (state: string) => void): Promise<{ html: string, style: string }> {
         if (!NpmPackageLoader.packageHacks) {
@@ -173,6 +295,10 @@ export class NpmPackageLoader {
         } else {
             console.warn('npm package: ' + pkg + ' - no custom-elements.json found, only loading javascript module');
 
+            const registeredTags = serviceContainer ? await this.getRegisteredElementTags(serviceContainer) : new Set<string>();
+            const dependencyCustomElementsTags = serviceContainer
+                ? await this.loadDependencyCustomElementsJson({ ...packageJsonObj.dependencies, ...packageHack?.dependencies }, serviceContainer, registeredTags)
+                : new Set<string>();
             const observedCustomElementsRegistry = new ObservedCustomElementsRegistry();
 
             if (packageJsonObj.module) {
@@ -197,15 +323,17 @@ export class NpmPackageLoader {
                 await import(scriptUrl);
             }
 
-            const newElements = observedCustomElementsRegistry.getNewElements();
+            const newElements = observedCustomElementsRegistry.getNewElements().filter(tag => !registeredTags.has(tag) && !dependencyCustomElementsTags.has(tag));
             if (newElements.length > 0 && serviceContainer && paletteTree) {
                 const elementsCfg: IElementsJson = {
-                    elements: newElements
+                    elements: newElements.map(tag => ({ tag, packageName: packageJsonObj.name ?? pkg }))
                 }
                 let elService = new PreDefinedElementsService(pkg, elementsCfg)
                 serviceContainer.register('elementsService', elService);
-                paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
             }
+
+            if ((dependencyCustomElementsTags.size > 0 || newElements.length > 0) && serviceContainer && paletteTree)
+                paletteTree.loadControls(serviceContainer, serviceContainer.elementsServices);
 
             observedCustomElementsRegistry.dispose();
         }
@@ -252,108 +380,14 @@ export class NpmPackageLoader {
         this.addToImportmap(baseUrl, packageJsonObj);
     }
 
-    async addToImportmap(baseUrl: string, packageJsonObj: { name?: string, module?: string, main?: string, unpkg?: string, exports?: Record<string, string> }) {
+    async addToImportmap(baseUrl: string, packageJsonObj: { name?: string, module?: string, main?: string, unpkg?: string, exports?: any }) {
         //@ts-ignore
         const map = importShim.getImportMap().imports;
         const importMap = { imports: {}, scopes: {} };
 
         if (!map.hasOwnProperty(packageJsonObj.name)) {
-            //TODO: use exports of package.json for importMap
             if (packageJsonObj.exports) {
-
-                /* "exports": {
-                ".": {
-                    "browser": "./index.browser.js",
-                    "default": "./index.js"
-                },
-                "./async": {
-                    "browser": "./async/index.browser.js",
-                    "default": "./async/index.js"
-                },
-                "./non-secure": "./non-secure/index.js",
-                "./package.json": "./package.json"
-            }
-           
-            "exports": {
-                "node": {
-                  "import": "./feature-node.mjs",
-                  "require": "./feature-node.cjs"
-                },
-                "default": "./feature.mjs"
-              }
-            
-            
-               "exports": {
-                ".": "./index.js",
-                "./feature.js": {
-                  "node": "./feature-node.js",
-                  "default": "./feature.js"
-                }
-              }
-
-            "exports": {
-                ".": {
-                    "types": "./dist/index.d.ts",
-                    "import": {
-                        "browser": {
-                            "development": "./dist/composed-offset-position.browser.mjs",
-                            "default": "./dist/composed-offset-position.browser.min.mjs"
-                        },
-                        "default": "./dist/composed-offset-position.mjs"
-                    },
-                    "module": "./dist/composed-offset-position.esm.js",
-                    "default": "./dist/composed-offset-position.umd.js"
-                },
-                "./package.json": "./package.json"
-            }
-            
-            */
-
-                /*  
-                "exports": {
-                    "import": "./index-module.js",
-                    "require": "./index-require.cjs"
-                }, 
-                */
-                let getImport = (obj: any) => {
-                    if (obj?.browser)
-                        return obj.browser;
-                    if (obj?.import)
-                        return obj.import;
-                    if (obj?.module)
-                        return obj.module;
-                    if (obj?.default)
-                        return obj.default;
-                    return obj?.node;
-                }
-                /*
-                for support of this:
-                "exports": {
-                ".": {
-                    "types": "./dist/index.d.ts",
-                    "import": {
-                        "browser": {
-                            "development": "./dist/composed-offset-position.browser.mjs",
-                            "default": "./dist/composed-offset-position.browser.min.mjs"
-                        },
-                */
-                let getImportFlat = (obj: any) => {
-                    let i = getImport(obj);
-                    if (!(typeof i == 'string'))
-                        i = getImport(i);
-                    if (!(typeof i == 'string'))
-                        i = getImport(i);
-                    if (!(typeof i == 'string'))
-                        i = null;
-                    return i;
-                }
-                //Names to use: browser, import, default, node
-                let imp = getImportFlat(packageJsonObj.exports);
-                if (imp) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeLeading(imp, '.'), '/');
-                } else if (imp = getImportFlat(packageJsonObj.exports?.['.'])) {
-                    importMap.imports[packageJsonObj.name] = baseUrl + removeLeading(removeLeading(imp, '.'), '/');
-                }
+                NpmPackageLoader.addExportsToImportMap(importMap.imports, baseUrl, packageJsonObj);
             }
 
             let mainImport = packageJsonObj.main;

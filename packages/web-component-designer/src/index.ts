@@ -27,6 +27,7 @@ export * from "./elements/helper/Helper.js";
 export * from "./elements/helper/Browser.js";
 export * from "./elements/helper/SwitchContainerHelper.js";
 export * from "./elements/helper/NpmPackageLoader.js";
+export * from "./elements/helper/PlacementTargetHelper.js";
 export * from "./elements/helper/LayoutHelper.js";
 export * from "./elements/helper/SelectionHelper.js";
 export * from "./elements/helper/QuadEdgeHandleHelper.js";
