@@ -53,6 +53,15 @@ export class NpmPackageLoader {
         }
     }
 
+    public static getPackageHack(pkg: string) {
+        let packageHack = NpmPackageLoader.packageHacks?.[pkg];
+        if (!packageHack) {
+            const wildcardPackage = Object.keys(NpmPackageLoader.packageHacks ?? {}).find(x => x.endsWith('*') && pkg.startsWith(x.substring(0, x.length - 1)));
+            packageHack = NpmPackageLoader.packageHacks?.[wildcardPackage];
+        }
+        return packageHack;
+    }
+
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
     async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: any, loadAllImports?: boolean, reportState?: (state: string) => void): Promise<{ html: string, style: string }> {
         if (!NpmPackageLoader.packageHacks) {
@@ -66,6 +75,7 @@ export class NpmPackageLoader {
             reportState(pkg + ": loading package.json");
         const packageJson = await fetch(packageJsonUrl);
         const packageJsonObj = await packageJson.json();
+        const packageHack = NpmPackageLoader.getPackageHack(pkg);
 
         this.addToImportmap(baseUrl, packageJsonObj);
 
@@ -73,6 +83,11 @@ export class NpmPackageLoader {
         if (packageJsonObj.dependencies) {
             for (let d in packageJsonObj.dependencies) {
                 depPromises.push(this.loadDependency(d, packageJsonObj.dependencies[d]));
+            }
+        }
+        if (packageHack?.dependencies) {
+            for (let d in packageHack.dependencies) {
+                depPromises.push(this.loadDependency(d, packageHack.dependencies[d]));
             }
         }
         await Promise.all(depPromises)
@@ -148,11 +163,11 @@ export class NpmPackageLoader {
             }
 
             /* Package Hacks */
-            if (NpmPackageLoader.packageHacks[pkg]?.import) {
-                import(NpmPackageLoader.packageHacks[pkg]?.import);
+            if (packageHack?.import) {
+                import(packageHack.import);
             }
-            if (NpmPackageLoader.packageHacks[pkg]?.script) {
-                const scriptUrl = URL.createObjectURL(new Blob([NpmPackageLoader.packageHacks[pkg]?.script], { type: 'application/javascript' }));
+            if (packageHack?.script) {
+                const scriptUrl = URL.createObjectURL(new Blob([packageHack.script], { type: 'application/javascript' }));
                 import(scriptUrl);
             }
         } else {
@@ -174,11 +189,11 @@ export class NpmPackageLoader {
             }
 
             /* Package Hacks */
-            if (NpmPackageLoader.packageHacks[pkg]?.import) {
-                await import(NpmPackageLoader.packageHacks[pkg]?.import);
+            if (packageHack?.import) {
+                await import(packageHack.import);
             }
-            if (NpmPackageLoader.packageHacks[pkg]?.script) {
-                const scriptUrl = URL.createObjectURL(new Blob([NpmPackageLoader.packageHacks[pkg]?.script], { type: 'application/javascript' }));
+            if (packageHack?.script) {
+                const scriptUrl = URL.createObjectURL(new Blob([packageHack.script], { type: 'application/javascript' }));
                 await import(scriptUrl);
             }
 
@@ -199,11 +214,11 @@ export class NpmPackageLoader {
 
         let retVal: any = {};
 
-        if (NpmPackageLoader.packageHacks[pkg]?.html) {
-            retVal.html = (<string>NpmPackageLoader.packageHacks[pkg]?.html).replaceAll("${baseUrl}", baseUrl);
+        if (packageHack?.html) {
+            retVal.html = (<string>packageHack.html).replaceAll("${baseUrl}", baseUrl);
         }
-        if (NpmPackageLoader.packageHacks[pkg]?.style) {
-            retVal.style = (<string>NpmPackageLoader.packageHacks[pkg]?.style).replaceAll("${baseUrl}", baseUrl);
+        if (packageHack?.style) {
+            retVal.style = (<string>packageHack.style).replaceAll("${baseUrl}", baseUrl);
         }
         return retVal;
     }
@@ -355,9 +370,10 @@ export class NpmPackageLoader {
 
             importMap.imports[packageJsonObj.name + '/'] = baseUrl;
 
-            if (NpmPackageLoader.packageHacks[packageJsonObj.name]?.map) {
-                for (let h in NpmPackageLoader.packageHacks[packageJsonObj.name]?.map) [
-                    importMap.imports[h] = baseUrl + NpmPackageLoader.packageHacks[packageJsonObj.name].map[h]
+            const packageHack = NpmPackageLoader.getPackageHack(packageJsonObj.name);
+            if (packageHack?.map) {
+                for (let h in packageHack.map) [
+                    importMap.imports[h] = baseUrl + packageHack.map[h]
                 ]
             }
 

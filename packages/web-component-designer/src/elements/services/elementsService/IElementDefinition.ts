@@ -14,6 +14,7 @@ export interface IElementDefinition {
   name?: string;
   description?: string;
   import?: string;
+  packageName?: string;
   className?: string;
   type?: string;
   defaultContent?: any;

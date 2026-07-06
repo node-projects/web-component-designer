@@ -23,13 +23,13 @@ export class WebcomponentManifestElementsService implements IElementsService {
     for (let m of manifest.modules) {
       for (let e of m.exports) {
         if (e.kind == 'custom-element-definition') {
-          let elDef: IElementDefinition = { tag: e.name, import: removeTrailing(this._importPrefix, '/') + '/' + removeLeading(m.path, '/'), defaultWidth: "200px", defaultHeight: "200px", className: e.declaration.name }
+          let elDef: IElementDefinition = { tag: e.name, import: removeTrailing(this._importPrefix, '/') + '/' + removeLeading(m.path, '/'), packageName: this._name, defaultWidth: "200px", defaultHeight: "200px", className: e.declaration.name }
           this._elementList.push(elDef);
         }
       }
       for (let d of m.declarations) {
         if (d.tagName) {
-          let elDef: IElementDefinition = { tag: d.tagName, import: removeTrailing(this._importPrefix, '/') + '/' + removeLeading(m.path, '/'), defaultWidth: "200px", defaultHeight: "200px", className: d.name }
+          let elDef: IElementDefinition = { tag: d.tagName, import: removeTrailing(this._importPrefix, '/') + '/' + removeLeading(m.path, '/'), packageName: this._name, defaultWidth: "200px", defaultHeight: "200px", className: d.name }
           this._elementList.push(elDef);
         }
       }

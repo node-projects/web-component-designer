@@ -6,6 +6,17 @@ import { IPlacementService } from "../placementService/IPlacementService.js";
 import { IElementDefinition } from "../elementsService/IElementDefinition.js";
 import { ExtensionType } from "../../widgets/designerView/extensions/ExtensionType.js";
 import { dragDropFormatNameElementDefinition } from "../../../Constants.js";
+import { NpmPackageLoader } from "../../helper/NpmPackageLoader.js";
+
+interface IPlacementEnsureAncestor {
+  selector: string;
+  create?: {
+    tag?: string;
+    attributes?: Record<string, string>;
+    styles?: Record<string, string>;
+  };
+  mode?: 'wrap';
+}
 
 export class DragDropService implements IDragDropService {
   private _dragOverExtensionItem: IDesignItem;
@@ -88,8 +99,12 @@ export class DragDropService implements IDragDropService {
       newContainer = designerCanvas.rootDesignItem;
 
     const grp = di.openGroup("Insert of &lt;" + di.name + "&gt;");
-    const containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, newContainer.getComputedStyle(), di))
-    containerService.enterContainer(newContainer, [di], 'drop');
+    const placement = this.applyPlacementRules(designerCanvas, newContainer, di, elementDefinition);
+    newContainer = placement.container;
+    const placedItem = placement.placedItem;
+
+    const containerService = designerCanvas.serviceContainer.getLastServiceWhere('containerService', x => x.serviceForContainer(newContainer, newContainer.getComputedStyle(), placedItem))
+    containerService.enterContainer(newContainer, [placedItem], 'drop');
 
     const containerPos = designerCanvas.getNormalizedElementCoordinates(newContainer.element);
     const evCoord = designerCanvas.getNormalizedEventCoordinates(event);
@@ -98,12 +113,66 @@ export class DragDropService implements IDragDropService {
     let offset = { x: 0, y: 0 };
     if (elementDefinition.mouseOffset)
       offset = elementDefinition.mouseOffset;
-    containerService.place(event, designerCanvas, newContainer, offset, { x: 0, y: 0 }, pos, [di]);
-    containerService.finishPlace(event, designerCanvas, newContainer, offset, { x: 0, y: 0 }, pos, [di]);
+    containerService.place(event, designerCanvas, newContainer, offset, { x: 0, y: 0 }, pos, [placedItem]);
+    containerService.finishPlace(event, designerCanvas, newContainer, offset, { x: 0, y: 0 }, pos, [placedItem]);
     requestAnimationFrame(() => {
       designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di], event);
       grp.commit();
     });
+  }
+
+  private applyPlacementRules(designerCanvas: IDesignerCanvas, container: IDesignItem, item: IDesignItem, elementDefinition: IElementDefinition): { container: IDesignItem, placedItem: IDesignItem } {
+    const packageHack = elementDefinition.packageName ? NpmPackageLoader.getPackageHack(elementDefinition.packageName) : null;
+    const rules: IPlacementEnsureAncestor[] = packageHack?.placement?.ensureAncestors;
+    if (!rules?.length)
+      return { container, placedItem: item };
+
+    let placedItem = item;
+    for (const rule of rules) {
+      if (rule.mode !== 'wrap' || !rule.selector || this.hasAncestorMatching(container, rule.selector))
+        continue;
+
+      const wrapper = this.createWrapperDesignItem(designerCanvas, rule);
+      if (!wrapper)
+        continue;
+
+      container.insertChild(wrapper);
+      container = wrapper;
+    }
+    return { container, placedItem };
+  }
+
+  private hasAncestorMatching(container: IDesignItem, selector: string): boolean {
+    let current = container;
+    while (current) {
+      try {
+        if (current.element?.matches(selector))
+          return true;
+      } catch (err) {
+        console.warn('invalid placement ancestor selector: ', selector, err);
+        return false;
+      }
+      current = current.parent;
+    }
+    return false;
+  }
+
+  private createWrapperDesignItem(designerCanvas: IDesignerCanvas, rule: IPlacementEnsureAncestor): IDesignItem {
+    if (!rule.create?.tag)
+      return null;
+
+    const wrapperElement = designerCanvas.rootDesignItem.document.createElement(rule.create.tag);
+    if (rule.create.attributes) {
+      for (const name in rule.create.attributes) {
+        wrapperElement.setAttribute(name, rule.create.attributes[name]);
+      }
+    }
+    if (rule.create.styles) {
+      for (const name in rule.create.styles) {
+        wrapperElement.style[name] = rule.create.styles[name];
+      }
+    }
+    return DesignItem.createDesignItemFromInstance(wrapperElement, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
   }
 
   public getPossibleContainerForDragDrop(designerCanvas: IDesignerCanvas, event: DragEvent, designItems?: IDesignItem[]): [newContainerElementDesignItem: IDesignItem, newContainerService: IPlacementService] {

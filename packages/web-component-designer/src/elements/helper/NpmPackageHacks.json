@@ -12,6 +12,32 @@
     "@material/web": {
         "import": "@material/web/all.js"
     },
+    "@spectrum-web-components/*": {
+        "dependencies": {
+            "@spectrum-web-components/theme": "*"
+        },
+        "script": "await import('@spectrum-web-components/theme/sp-theme.js');\nawait Promise.all([\n    import('@spectrum-web-components/theme/theme-light.js'),\n    import('@spectrum-web-components/theme/scale-medium.js')\n]);",
+        "placement": {
+            "ensureAncestors": [
+                {
+                    "selector": "sp-theme",
+                    "create": {
+                        "tag": "sp-theme",
+                        "attributes": {
+                            "system": "spectrum",
+                            "color": "light",
+                            "scale": "medium"
+                        },
+                        "styles": {
+                            "width": "100%",
+                            "height": "100%"
+                        }
+                    },
+                    "mode": "wrap"
+                }
+            ]
+        }
+    },
     "@stencil/core": {
         "map": {
             "@stencil/core/internal/client": "internal/client/index.js",
