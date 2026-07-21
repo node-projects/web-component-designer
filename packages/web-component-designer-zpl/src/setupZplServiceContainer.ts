@@ -1,4 +1,4 @@
-import { ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, PositionExtensionProvider, SelectionDefaultExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, DefaultEditorTypesService, TransformToolButtonProvider, DesignItemService, DeletionService } from '@node-projects/web-component-designer';
+import { DefaultPropertyEditorTypesService, DefaultEditorTypeService, ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, PositionExtensionProvider, SelectionDefaultExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, TransformToolButtonProvider, DesignItemService, DeletionService } from '@node-projects/web-component-designer';
 import { ZplLayoutPlacementService } from './services/ZplLayoutPlacementService.js';
 import { ZplParserService } from './services/ZplParserService.js';
 import { ZplImageDrop } from './services/ZplImageDrop.js';
@@ -20,7 +20,8 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.register("dragDropService", new DragDropService());
     serviceContainer.register("copyPasteService", new ZplLayoutCopyPasteService());
     serviceContainer.register("modelCommandService", new DefaultModelCommandService());
-    serviceContainer.register('editorTypesService', new DefaultEditorTypesService());
+    serviceContainer.register("editorTypeService", new DefaultEditorTypeService());
+    serviceContainer.register("propertyEditorTypesService", new DefaultPropertyEditorTypesService());
     serviceContainer.register("propertyGroupsService", new PropertyGroupsService());
     serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService(true));
     serviceContainer.register("designItemService", new DesignItemService());
