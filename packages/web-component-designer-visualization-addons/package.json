@@ -14,7 +14,7 @@
     "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@node-projects/css-parser --external:@blockly/* --external:blockly --external:long --external:wunderbaum --external:@node-projects/* --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
-    "@blockly/zoom-to-fit": ">=6.0.9",
+    "@blockly/zoom-to-fit": ">=13.0.0",
     "@node-projects/base-custom-webcomponent": ">=0.27.8",
     "@node-projects/css-parser": "^5.2.0",
     "@node-projects/propertygrid.webcomponent": ">=1.2.3",
@@ -22,7 +22,7 @@
     "@node-projects/web-component-designer": ">=0.1.224",
     "@node-projects/web-component-designer-codeview-monaco": ">=0.1.32",
     "@node-projects/web-component-designer-widgets-wunderbaum": ">=0.1.29",
-    "blockly": ">=11.1.1",
+    "blockly": ">=13.0.0",
     "long": ">=5.2.3"
   },
   "devDependencies": {
