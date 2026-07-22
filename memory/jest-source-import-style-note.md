@@ -1,1 +1,0 @@
-- In packages/web-component-designer Jest tests, import source modules with the package's existing ts-jest style (for example '../src/.../Module' without a '.js' suffix); using '.js' can fail module resolution in focused test runs.

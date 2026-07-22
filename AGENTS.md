@@ -1,6 +1,7 @@
 ## Project Agent Instructions
 
 - AI agents must store memories under the repository [memories/](memories) directory.
+- Do not create or use a singular `memory/` directory.
 
 ## Why These Guidelines Exist
 

@@ -1,4 +1,0 @@
-- NumericStyleInput should own its preview display lock internally; editor-level refresh suppression alone is not enough because property-grid refreshes can still race during drag/hold preview.
-- Clear the display lock when an explicit new value arrives that differs from the current underlying `_value`; keep it only across repeated stale refreshes.
-- Percent conversion for root elements must look past `parentElement` and fall back across shadow boundaries via `getRootNode().host`, then `ownerDocument.body/documentElement`.
-- Interactive drag/step changes should snap to step increments and format to step precision, not just use a generic 4-decimal formatter.

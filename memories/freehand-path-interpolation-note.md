@@ -1,1 +1,0 @@
-Freehand `DrawPathTool` can interpolate linear path points during drag with `interpolatePoints: true` and an optional `interpolationDistance`; the stock default tool opts in with 5px maximum spacing. Keep point-to-point path mode separate so its shift/angle snapping behavior stays unchanged.

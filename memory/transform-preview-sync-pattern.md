@@ -1,2 +1,0 @@
-- When previewing transform edits via direct writes to element.style.transform, always sync or clear that inline transform after commit.
-- If the persisted transform stays local, restore the local style value; if it is stylesheet-backed, clear the inline preview so it does not override the stylesheet declaration.

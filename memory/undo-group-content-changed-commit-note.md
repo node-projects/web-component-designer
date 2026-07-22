@@ -1,3 +1,0 @@
-- In packages/web-component-designer, grouped undo operations should not emit instanceServiceContainer.onContentChanged from UndoService.execute while a ChangeGroup is open.
-- ChangeGroup now accumulates IContentChanged payloads from execute calls and committed subgroups, and UndoService emits them once from commitTransactionItem on the outermost commit.
-- This keeps documentContainer, treeView, and propertyGrid from reacting to intermediate states during grouped edits.

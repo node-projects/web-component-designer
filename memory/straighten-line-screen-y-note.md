@@ -1,2 +1,0 @@
-- PathDataPolyfill.straightenLine uses calculateAlpha's clockwise screen-space angle; reconstruct snapped points with `y - Math.sin(rad) * length` or vertical directions invert.
-- Added PathDataPolyfill.test.ts with stubbed SVG globals because the helper module patches SVG element prototypes at import time.

@@ -1,2 +1,0 @@
-- For manual copy/paste WebRTC signaling, do not infer initial snapshot ownership from receiving `hello`; the copied direction can be opposite of the joining direction.
-- Carry an explicit `requestInitialSnapshot` flag in `hello` / `hello-ack`, and decide it from the local document state so the empty peer asks for content instead of sending an empty snapshot back.
