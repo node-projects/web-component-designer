@@ -7,6 +7,8 @@ export * from './blockly/components/components.js';
 export * from './components/BindingsEditor.js';
 export * from './components/BindingsEditorHistoric.js';
 export * from './components/SimpleScriptEditor.js';
+export * from './components/SimpleScriptCommandPicker.js';
+export * from './components/SimpleScriptEditorHelp.js';
 export * from './components/VisualizationPropertyGrid.js';
 export * from './components/ParameterEditor.js';
 export * from './components/EventAssignment.js';
@@ -21,6 +23,7 @@ export type * from './interfaces/VisualizationShell.js';
 
 export * from './scripting/Script.js';
 export * from './scripting/ScriptCommands.js';
+export * from './scripting/ScriptCommandsDescriptions.js';
 export * from './scripting/ScriptSystem.js';
 
 export * from './services/BindableObjectDragDropService.js';
