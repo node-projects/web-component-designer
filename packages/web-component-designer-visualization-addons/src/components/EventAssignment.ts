@@ -5,6 +5,7 @@ import { VisualizationShell } from "../interfaces/VisualizationShell.js";
 import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { BlocklyScriptEditor } from "../blockly/BlocklyScriptEditor.js";
 import { SimpleScriptEditor } from "./SimpleScriptEditor.js";
+import { ScriptCommandHelp } from "../scripting/ScriptCommandsDescriptions.js";
 
 type eventWithDesignItem = IEvent & { designItem: IDesignItem };
 
@@ -88,15 +89,17 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     private _visualizationShell: VisualizationShell;
     private _scriptCommandsTypeInfo: any;
     private _propertiesTypeInfo: any
+    private _commandDescriptions: Record<string, ScriptCommandHelp>;
 
     public events: (IEvent & { designItem: IDesignItem })[];
 
-    public initialize(visualizationHandler: VisualizationHandler, visualizationShell: VisualizationShell, scriptCommandsTypeInfo: any, propertiesTypeInfo: any, blocklyToolbox: any) {
+    public initialize(visualizationHandler: VisualizationHandler, visualizationShell: VisualizationShell, scriptCommandsTypeInfo: any, propertiesTypeInfo: any, blocklyToolbox: any, commandDescriptions?: Record<string, ScriptCommandHelp>) {
         this._visualizationHandler = visualizationHandler;
         this._visualizationShell = visualizationShell;
         this._scriptCommandsTypeInfo = scriptCommandsTypeInfo;
         this._propertiesTypeInfo = propertiesTypeInfo;
         this._blocklyToolbox = blocklyToolbox;
+        this._commandDescriptions = commandDescriptions;
     }
 
     public set instanceServiceContainer(value: InstanceServiceContainer) {
@@ -404,11 +407,14 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
             sc.propertiesTypeInfo = this._propertiesTypeInfo;
             sc.visualizationShell = this._visualizationShell;
             sc.visualizationHandler = this._visualizationHandler;
+            if (this._commandDescriptions) {
+                sc.commandDescriptions = { ...sc.commandDescriptions, ...this._commandDescriptions };
+            }
 
             sc.loadScript(script);
             sc.title = "Script '" + eventItem.name + "' on " + eventItem.designItem.name;
 
-            let res = await this._visualizationShell.openConfirmation(sc, { x: 100, y: 100, width: 600, height: 500 });
+            let res = await this._visualizationShell.openConfirmation(sc, {title: sc.title, width: 600, height: 500 });
             if (res) {
                 let scriptCommands = sc.getScriptCommands();
                 if (scriptCommands && scriptCommands.length) {
