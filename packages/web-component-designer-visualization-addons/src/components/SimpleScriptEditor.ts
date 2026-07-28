@@ -5,7 +5,7 @@ import {
   html,
 } from "@node-projects/base-custom-webcomponent";
 import { Script } from "../scripting/Script.js";
-import { ScriptCommands } from "../scripting/ScriptCommands.js";
+import { If, IfSignal, ScriptCommands } from "../scripting/ScriptCommands.js";
 import {
   ContextMenu,
   InstanceServiceContainer,
@@ -16,7 +16,7 @@ import {
   IProperty,
   typeInfoFromJsonSchema,
 } from "@node-projects/propertygrid.webcomponent";
-import { defaultOptions } from "@node-projects/web-component-designer-widgets-wunderbaum";
+import { defaultOptions, defaultStyle } from "@node-projects/web-component-designer-widgets-wunderbaum";
 import { Wunderbaum } from "wunderbaum";
 //@ts-ignore
 import wunderbaumStyle from "wunderbaum/dist/wunderbaum.css" with { type: "css" };
@@ -102,13 +102,19 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
       box-sizing: border-box;
     }
 
-    #commandList i.wb-expander,
-    #commandList i.wb-indent {
+    #commandList.hidden {
       display: none;
     }
 
-    #commandList.hidden {
-      display: none;
+    #commandList {
+      --wb-icon-outer-width: 22px;
+    }
+
+    #commandList i.wb-expander {
+      background-size: 9px 9px;
+      background-position-x: 6px;
+      background-position-y: 6px;
+      opacity: 0.55;
     }
 
     .code-view {
@@ -380,6 +386,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
 
     this.shadowRoot.adoptedStyleSheets = [
       wunderbaumStyle,
+      defaultStyle,
       SimpleScriptEditor.style,
     ];
   }
@@ -432,14 +439,237 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
       }
     };
 
+    let editFormula = async (data: { value: string; propertyPath: string }) => {
+      const editor = new CodeViewMonaco();
+      editor.language = "javascript";
+      editor.style.position = "relative";
+      editor.code = data.value ?? "";
+      const res = await this.visualizationShell.openConfirmation(editor, {
+        title: "Edit formula",
+        x: 100,
+        y: 50,
+        width: 700,
+        height: 450,
+        parent: this,
+      });
+      if (res) {
+        this._propertygrid.setPropertyValue(data.propertyPath, editor.code);
+        this._propertygrid.refresh();
+      }
+    };
+
+    const signalSources = [
+      "signal",
+      "property",
+      "elementProperty",
+      "signalInProperty",
+      "event",
+      "parameter",
+      "context",
+      "complexString",
+      "complexSignal",
+      "expression",
+    ];
+
+    const identifierRegex = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+    const jsReservedWords = new Set([
+      "break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do",
+      "else", "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof",
+      "new", "return", "super", "switch", "this", "throw", "try", "typeof", "var", "void", "while",
+      "with", "yield", "let", "static", "enum", "await", "implements", "package", "protected",
+      "interface", "private", "public", "null", "true", "false", "undefined", "arguments", "eval",
+    ]);
+
+    const signalSourceDescriptions: Record<string, string> = {
+      signal: "read the value from a Signal",
+      property: "read the value from a property of the customControl (not usable in screens)",
+      elementProperty: "a property defined on the element raising the event",
+      signalInProperty: "read the value from a Signal (wich name is in the Property)",
+      event: "read the value of a property of the event object",
+      parameter: "a parameter you hand over",
+      context: "a value of the context",
+      complexString: "a string with signals (contained in {})",
+      complexSignal: "read the value from a signal wich name is build here (it can contain other signals in {})",
+      expression: "js expression, 'ctx' is context object",
+    };
+
+    let editSignalList = async (data: {
+      value: IfSignal[];
+      propertyPath: string;
+    }) => {
+      const arr: IfSignal[] = (data.value ?? []).map((v) => ({
+        ...v,
+      }));
+
+      const getVarNameError = (i: number): string | null => {
+        const raw = (arr[i].varName ?? "").trim();
+        if (!raw) return null;
+        if (!identifierRegex.test(raw)) return `"${raw}" is not a valid JavaScript variable name.`;
+        if (jsReservedWords.has(raw)) return `"${raw}" is a reserved word and cannot be used as a variable name.`;
+        if (arr.some((e, j) => j !== i && (e.varName ?? "").trim() === raw)) return `"${raw}" is used by more than one signal.`;
+        return null;
+      };
+
+      const controlStyle = "height:22px; box-sizing:border-box; font-size:12px;";
+
+      const container = document.createElement("div");
+      container.style.cssText =
+        "display:flex; flex-direction:column; gap:6px; padding:8px; height:100%; box-sizing:border-box; overflow-y:auto; font-size:12px;";
+
+      const header = document.createElement("div");
+      header.style.cssText = "display:flex; align-items:center; gap:4px; font-weight:bold;";
+      const headerName = document.createElement("span");
+      headerName.textContent = "Name";
+      headerName.style.cssText = "flex:0 0 120px;";
+      const headerType = document.createElement("span");
+      headerType.textContent = "Typ";
+      headerType.style.cssText = "flex:0 0 130px;";
+      const headerSignal = document.createElement("span");
+      headerSignal.textContent = "Signal";
+      headerSignal.style.cssText = "flex:1 1 auto;";
+      const headerSpacer = document.createElement("span");
+      headerSpacer.style.cssText = "flex:0 0 22px;";
+      header.append(headerName, headerType, headerSignal, headerSpacer);
+      container.appendChild(header);
+
+      const rowsContainer = document.createElement("div");
+      rowsContainer.style.cssText =
+        "display:flex; flex-direction:column; gap:4px;";
+      container.appendChild(rowsContainer);
+
+      const descPanel = document.createElement("div");
+      descPanel.style.cssText =
+        "flex:0 0 auto; margin-top:4px; padding-top:6px; border-top:1px solid #ccc; font-size:12px;";
+      const descTitle = document.createElement("div");
+      descTitle.style.cssText = "font-weight:bold; margin-bottom:2px;";
+      const descText = document.createElement("div");
+      descText.style.cssText = "color:#333; white-space:pre-line;";
+      descPanel.append(descTitle, descText);
+
+      const showSourceDescription = (source: string) => {
+        descTitle.textContent = "Typ: " + source;
+        descText.textContent = signalSourceDescriptions[source] ?? "";
+      };
+
+      const varNameInputs: HTMLInputElement[] = [];
+
+      const revalidate = () => {
+        arr.forEach((_, i) => {
+          const input = varNameInputs[i];
+          if (!input) return;
+          const err = getVarNameError(i);
+          input.title = err ?? `Variable name used in the formula (defaults to __${i} if empty)`;
+          input.style.borderColor = err ? "#c0392b" : "";
+          input.style.backgroundColor = err ? "#fdecea" : "";
+        });
+      };
+
+      const renderRows = () => {
+        rowsContainer.innerHTML = "";
+        varNameInputs.length = 0;
+        arr.forEach((entry, i) => {
+          const row = document.createElement("div");
+          row.style.cssText = "display:flex; align-items:center; gap:4px;";
+
+          const varNameInput = document.createElement("input");
+          varNameInput.value = entry.varName ?? "";
+          varNameInput.placeholder = "__" + i;
+          varNameInput.style.cssText = controlStyle + " flex:0 0 120px; min-width: 120px; font-family:monospace;";
+          varNameInput.oninput = () => {
+            entry.varName = varNameInput.value || undefined;
+            revalidate();
+          };
+          varNameInputs.push(varNameInput);
+          row.appendChild(varNameInput);
+
+          const sourceSelect = document.createElement("select");
+          sourceSelect.style.cssText = controlStyle + " flex:0 0 130px;";
+          for (const s of signalSources) {
+            const opt = document.createElement("option");
+            opt.value = s;
+            opt.textContent = s;
+            if (entry.source === s) opt.selected = true;
+            sourceSelect.appendChild(opt);
+          }
+          sourceSelect.onchange = () => {
+            entry.source = <any>sourceSelect.value;
+            showSourceDescription(sourceSelect.value);
+          };
+          sourceSelect.onfocus = () => showSourceDescription(sourceSelect.value);
+          row.appendChild(sourceSelect);
+
+          const nameInput = document.createElement("input");
+          nameInput.value = entry.name ?? "";
+          nameInput.placeholder = "e.g. srm.rbg{__tagRoot}.error";
+          nameInput.style.cssText = controlStyle + " flex:1 1 auto;";
+          nameInput.oninput = () => {
+            entry.name = nameInput.value;
+          };
+          row.appendChild(nameInput);
+
+          const delBtn = document.createElement("button");
+          delBtn.title = "Remove signal";
+          delBtn.style.cssText = controlStyle + " flex:0 0 22px; width:22px; padding:0; display:flex; align-items:center; justify-content:center;";
+          const delIcon = document.createElement("img");
+          delIcon.src = assetsPath + "icons/delete.svg";
+          delIcon.style.cssText = "width:12px; height:12px;";
+          delBtn.appendChild(delIcon);
+          delBtn.onclick = () => {
+            arr.splice(i, 1);
+            renderRows();
+          };
+          row.appendChild(delBtn);
+
+          rowsContainer.appendChild(row);
+        });
+        revalidate();
+      };
+      renderRows();
+
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "+ Add signal";
+      addBtn.style.cssText = controlStyle + " align-self:flex-start; padding:0 8px;";
+      addBtn.onclick = () => {
+        arr.push({ source: "signal", name: "" });
+        renderRows();
+      };
+      container.appendChild(addBtn);
+
+      showSourceDescription(arr[0]?.source ?? "signal");
+      container.appendChild(descPanel);
+
+      const res = await this.visualizationShell.openConfirmation(container, {
+        title: "Edit signals",
+        x: 100,
+        y: 50,
+        width: 500,
+        height: 400,
+        parent: this,
+      });
+      if (res) {
+        this._propertygrid.setPropertyValue(data.propertyPath, arr);
+        this._propertygrid.refresh();
+      }
+    };
+
     this._propertygrid.visualizationHandler = this.visualizationHandler;
     this._propertygrid.visualizationShell = this.visualizationShell;
     this._propertygrid.serviceContainer = this.serviceContainer;
     this._propertygrid.instanceServiceContainer = this.instanceServiceContainer;
     this._propertygrid.bindableObjectsTarget = "script";
 
-    this._propertygrid.getTypeInfo = (obj, type) =>
-      typeInfoFromJsonSchema(this.scriptCommandsTypeInfo, obj, type);
+    this._propertygrid.setNameColumnWidth(130);
+
+    this._propertygrid.getTypeInfo = (obj, type) => {
+      const info = typeInfoFromJsonSchema(this.scriptCommandsTypeInfo, obj, type);
+      // trueCommands/elseCommands of "If" are edited as nested tree nodes, not in the property grid
+      if (info && (type === "If" || obj?.type === "If")) {
+        info.properties = info.properties.filter(
+          (p) => p.name !== "trueCommands" && p.name !== "elseCommands",
+        );
+      }
+      return info;
+    };
     this._propertygrid.getSpecialEditorForType = async (
       property: IProperty,
       currentValue,
@@ -453,6 +683,71 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
         property.specialAllreadyAdded = true;
         if (property.format === "collection") {
           //TODO: create a collection edt. in property grid control used
+        } else if (property.format === "signalList") {
+          let rB = document.createElement("button");
+          rB.style.height = "calc(100% - 6px)";
+          rB.style.position = "relative";
+          rB.style.display = "flex";
+          rB.style.justifyContent = "center";
+          rB.style.width = "20px";
+          rB.style.boxSizing = "content-box";
+          rB.innerText = "del";
+          rB.onclick = () => {
+            this._propertygrid.setPropertyValue(propertyPath, undefined);
+            this._propertygrid.refresh();
+          };
+          wbRender.nodeElem.insertAdjacentElement("afterbegin", rB);
+
+          const arr: IfSignal[] = Array.isArray(currentValue) ? currentValue : [];
+          let d = document.createElement("div");
+          d.style.display = "flex";
+          let sp = document.createElement("span");
+          sp.innerText = arr
+            .map(
+              (v, i) =>
+                (v?.varName || "__" + i) + ": " + (v?.source ?? "") + ":" + (v?.name ?? ""),
+            )
+            .join(", ");
+          sp.style.overflow = "hidden";
+          sp.style.whiteSpace = "nowrap";
+          sp.style.textOverflow = "ellipsis";
+          sp.style.flexGrow = "1";
+          sp.title = JSON.stringify(arr);
+          d.appendChild(sp);
+          let b = document.createElement("button");
+          b.innerText = "...";
+          b.onclick = () => {
+            editSignalList({ value: arr, propertyPath });
+          };
+          d.appendChild(b);
+          wbRender.nodeElem.style.display = "flex";
+          return d;
+        } else if (property.format === "formula") {
+          const wrapper = document.createElement("div");
+          wrapper.style.cssText =
+            "display:flex; width:100%; height:100%; align-items:stretch;";
+
+          const editor = new CodeViewMonaco();
+          editor.language = "javascript";
+          editor.singleRow = true;
+          editor.style.cssText =
+            "flex:1 1 auto; min-width:0; height:100%; position:relative; overflow:hidden;";
+          editor.code = currentValue ?? "";
+          editor.addEventListener("code-changed", () => {
+            this._propertygrid.setPropertyValue(propertyPath, editor.code);
+          });
+          wrapper.appendChild(editor);
+
+          const expandBtn = document.createElement("button");
+          expandBtn.innerText = "...";
+          expandBtn.title = "Open in larger editor";
+          expandBtn.style.cssText = "flex:0 0 28px; width:20px;";
+          expandBtn.onclick = () =>
+            editFormula({ value: editor.code, propertyPath });
+          wrapper.appendChild(expandBtn);
+
+          wbRender.nodeElem.style.display = "flex";
+          return wrapper;
         } else if (
           (typeof currentValue === "object" && currentValue !== null) ||
           property.format === "complex"
@@ -625,56 +920,64 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
       icon: false,
       source: commandListTreeItems,
       activate: (e) => {
-        this._propertygrid.selectedObject = e.node.data.data.item;
+        this._propertygrid.selectedObject = e.node.data.data.item ?? null;
       },
       render: (e) => {
+        const isBranch = !!e.node.data.data?.branch;
+
         if (e.isNew) {
           e.nodeElem.oncontextmenu = (ev) => {
             ev.preventDefault();
             return false;
           };
 
-          const handle = document.createElement("div");
-          handle.className = "drag-handle";
-          handle.title = "Drag to reorder";
-          handle.innerHTML =
-            '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-
           const leadingSpacer = document.createElement("span");
           leadingSpacer.style.cssText = "display:inline-block; width:24px;";
-          e.nodeElem.prepend(leadingSpacer, handle);
+          e.nodeElem.prepend(leadingSpacer);
 
-          const rowElem = e.nodeElem.parentElement;
+          if (!isBranch) {
+            const handle = document.createElement("div");
+            handle.className = "drag-handle";
+            handle.title = "Drag to reorder";
+            handle.innerHTML =
+              '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+            e.nodeElem.prepend(handle);
 
-          const spacer = document.createElement("span");
-          spacer.style.cssText = "display:inline-block; width:32px;";
-          e.nodeElem.appendChild(spacer);
+            const rowElem = e.nodeElem.parentElement;
 
-          const cmd = document.createElement("div");
-          cmd.className = "cmd";
+            const spacer = document.createElement("span");
+            spacer.style.cssText = "display:inline-block; width:32px;";
+            e.nodeElem.appendChild(spacer);
 
-          const copyImg = document.createElement("img");
-          copyImg.src = assetsPath + "icons/copy.svg";
-          copyImg.title = "Duplicate";
-          copyImg.onclick = () => {
-            const clone = structuredClone(e.node.data.data.item);
-            const newNode = e.node.parent.addChildren(
-              this.createTreeItem(clone),
-            );
-            newNode.moveTo(e.node, "after");
-          };
+            const cmd = document.createElement("div");
+            cmd.className = "cmd";
 
-          const delImg = document.createElement("img");
-          delImg.src = assetsPath + "icons/delete.svg";
-          delImg.title = "Remove";
-          delImg.onclick = () => e.node.remove();
+            const copyImg = document.createElement("img");
+            copyImg.src = assetsPath + "icons/copy.svg";
+            copyImg.title = "Duplicate";
+            copyImg.onclick = () => {
+              const clone = structuredClone(e.node.data.data.item);
+              const newNode = e.node.parent.addChildren(
+                this.createTreeItem(clone),
+              );
+              newNode.moveTo(e.node, "after");
+            };
 
-          cmd.append(copyImg, delImg);
-          rowElem.appendChild(cmd);
+            const delImg = document.createElement("img");
+            delImg.src = assetsPath + "icons/delete.svg";
+            delImg.title = "Remove";
+            delImg.onclick = () => e.node.remove();
 
-          //@ts-ignore
-          e.nodeElem._reservedRowWidth =
-            leadingSpacer.offsetWidth + spacer.offsetWidth;
+            cmd.append(copyImg, delImg);
+            rowElem.appendChild(cmd);
+
+            //@ts-ignore
+            e.nodeElem._reservedRowWidth =
+              leadingSpacer.offsetWidth + spacer.offsetWidth;
+          } else {
+            //@ts-ignore
+            e.nodeElem._reservedRowWidth = leadingSpacer.offsetWidth;
+          }
         }
 
         //@ts-ignore
@@ -709,7 +1012,8 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
           const isMove =
             e.event.dataTransfer?.types.includes(SAME_TREE_MOVE_MIME);
           e.event.dataTransfer.dropEffect = isMove ? "move" : "copy";
-          return true;
+          const isBranchTarget = !!e.node.data.data?.branch;
+          return isBranchTarget ? new Set(["over"]) : new Set(["before", "after"]);
         },
         dragOver: (e) => {
           const isMove =
@@ -717,9 +1021,21 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
           e.event.dataTransfer.dropEffect = isMove ? "move" : "copy";
         },
         drop: async (e) => {
-          const region = e.region == "before" ? "before" : "after";
           const isMove =
             e.event.dataTransfer?.types.includes(SAME_TREE_MOVE_MIME);
+          if (e.region === "over") {
+            if (isMove && this._draggedNode) {
+              this._draggedNode.moveTo(e.node, <any>"appendChild");
+              this._draggedNode.setClass("wb-drag-source", false);
+            } else {
+              const type = e.event.dataTransfer?.getData("text/plain");
+              if (type) {
+                e.node.addChildren(this.createTreeItem(<any>{ type }));
+              }
+            }
+            return;
+          }
+          const region = e.region == "before" ? "before" : "after";
           if (isMove && this._draggedNode) {
             this._draggedNode.moveTo(e.node, region);
             this._draggedNode.setClass("wb-drag-source", false);
@@ -739,12 +1055,57 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
     this._commandListFancyTree.root.children?.[0]?.setActive();
   }
 
-  private createTreeItem(currentItem: ScriptCommands) {
-    let cti = {
+  private createTreeItem(currentItem: ScriptCommands): any {
+    if (currentItem.type === "If") {
+      const ifCommand = <If>currentItem;
+      ifCommand.trueCommands ??= [];
+      ifCommand.elseCommands ??= [];
+      return {
+        title: "If",
+        expanded: true,
+        data: { item: currentItem },
+        children: [
+          {
+            title: "true",
+            expanded: true,
+            data: { branch: "true" },
+            children: ifCommand.trueCommands.map((c) => this.createTreeItem(c)),
+          },
+          {
+            title: "else",
+            expanded: true,
+            data: { branch: "else" },
+            children: ifCommand.elseCommands.map((c) => this.createTreeItem(c)),
+          },
+        ],
+      };
+    }
+    return {
       title: currentItem.type,
       data: { item: currentItem },
     };
-    return cti;
+  }
+
+  /** Reconstructs a ScriptCommand (and, for "If", its true/else branches) from a tree node. */
+  private nodeToCommand(node: any): ScriptCommands {
+    const item: ScriptCommands = node.data.data.item;
+    if (item.type === "If") {
+      const trueNode = node.children?.find((c: any) => c.data.data?.branch === "true");
+      const elseNode = node.children?.find((c: any) => c.data.data?.branch === "else");
+      (<If>item).trueCommands = (trueNode?.children ?? []).map((c: any) => this.nodeToCommand(c));
+      (<If>item).elseCommands = (elseNode?.children ?? []).map((c: any) => this.nodeToCommand(c));
+    }
+    return item;
+  }
+
+  /** Walks up from `node` to the nearest branch ("true"/"else") container node, if any. */
+  private _getBranchContainerNode(node: any): any {
+    let n = node;
+    while (n) {
+      if (n.data?.data?.branch) return n;
+      n = n.parent;
+    }
+    return null;
   }
 
   async addCommand() {
@@ -757,7 +1118,11 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
       if (picker.selectedType) {
         const command = { type: picker.selectedType };
         const ti = this.createTreeItem(<any>command);
-        this._commandListFancyTree.addChildren(ti);
+        const branchContainer = this._getBranchContainerNode(
+          this._commandListFancyTree.activeNode,
+        );
+        if (branchContainer) branchContainer.addChildren(ti);
+        else this._commandListFancyTree.addChildren(ti);
       }
     });
 
@@ -782,7 +1147,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
     }
 
     let children = this._commandListFancyTree.root.children;
-    return children.map((x) => x.data.data.item);
+    return children.map((x) => this.nodeToCommand(x));
   }
 }
 

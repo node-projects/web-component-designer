@@ -6,6 +6,10 @@ export class ScriptUpgrades {
         if (scriptCommand.type === 'SetElementProperty') {
             return ScriptUpgrades.upgradeSetElementProperty(scriptCommand);
         }
+        if (scriptCommand.type === 'If') {
+            scriptCommand.trueCommands = (scriptCommand.trueCommands ?? []).map(c => ScriptUpgrades.upgradeScriptCommand(c));
+            scriptCommand.elseCommands = (scriptCommand.elseCommands ?? []).map(c => ScriptUpgrades.upgradeScriptCommand(c));
+        }
         return scriptCommand;
     }
 

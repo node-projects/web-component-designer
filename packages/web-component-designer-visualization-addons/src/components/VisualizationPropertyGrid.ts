@@ -18,6 +18,15 @@ export class VisualizationPropertyGrid extends PropertyGrid {
 
     bindingDoubleClicked: (bindableObject: IBindableObject<any>) => void;
 
+    /** Sets the name/label column to a fixed pixel width instead of the default 50/50 split. */
+    public setNameColumnWidth(px: number) {
+        const col = this._tree?.columns?.[0];
+        if (col) {
+            col.width = px + 'px';
+            this._tree.update(<any>'colStructure');
+        }
+    }
+
     public override async getEditorForType(property: IProperty, currentValue, propertyPath: string, wbRender: WbRenderEventType, additionalInfo?: any): Promise<HTMLElement> {
         if (this.getSpecialEditorForType) {
             let edt = await this.getSpecialEditorForType(property, currentValue, propertyPath, wbRender, additionalInfo);

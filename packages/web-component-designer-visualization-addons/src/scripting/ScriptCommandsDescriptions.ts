@@ -148,6 +148,11 @@ export const nativeScriptCommandDescriptions: Record<string, ScriptCommandHelp> 
     example: '{ "type": "Condition", "value1": {"source":"signal","name":".Is.On"}, "value2": true,\n  "comparisonType": "==", "trueGotoLabel": "lbl_off", "falseGotoLabel": "lbl_on" }',
     note: 'comparisonType: ==null | !=null | ==true | ==false | == | != | > | < | >= | <= | && | ||.',
   },
+  If: {
+    description: 'evaluate a formula and run nested commands depending on the result',
+    example: '{ "type": "If",\n  "signals": [{"source":"signal","name":".Is.On"}, {"varName":"ready","source":"signal","name":".Is.Ready"}],\n  "formula": "__0 == true && ready == false", "trueCommands": [], "elseCommands": [] }',
+    note: 'signals is a list of values (like Condition.value1). Each is referenced in the formula either positionally as __0, __1, ... or, if varName is set, by that name. trueCommands/elseCommands are edited as nested commands in the tree, not as JSON here.',
+  },
   Exit: {
     description: 'stop executing the current script chain',
     example: '{ "type": "Exit" }',
