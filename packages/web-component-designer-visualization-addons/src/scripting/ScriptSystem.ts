@@ -5,7 +5,7 @@ import { IScriptMultiplexValue } from "../interfaces/IScriptMultiplexValue.js";
 import { VisualisationElementScript } from "../interfaces/VisualisationElementScript.js";
 import { VisualizationHandler } from "../interfaces/VisualizationHandler.js";
 import { Script } from "./Script.js";
-import { ScriptCommands, signalTarget } from "./ScriptCommands.js";
+import { If, ScriptCommands, signalTarget } from "./ScriptCommands.js";
 import Long from 'long'
 import { ScriptUpgrades } from "./ScriptUpgrader.js";
 
@@ -38,9 +38,10 @@ export class ScriptSystem {
     this._visualizationHandler = visualizationHandler;
   }
 
-  async execute(scriptCommands: ScriptCommands[], outerContext: contextType) {
+  async execute(scriptCommands: ScriptCommands[], outerContext: contextType): Promise<boolean> {
     let repeatCount = -1;
     let eventNotValid = false;
+    let stopped = false;
 
     const triggerEvent = outerContext.event?.type;
     const cancelEvent = triggerEvent ? eventOpposites[triggerEvent] : null;
@@ -57,7 +58,16 @@ export class ScriptSystem {
     for (let i = 0; i < scriptCommands.length; i++) {
       let c = scriptCommands[i];
       if (c.type == "Exit") {
+        stopped = true;
         break;
+      } else if (c.type == "If") {
+        const res = await this.evaluateIfFormula(c, outerContext);
+        const branchCommands = (res ? c.trueCommands : c.elseCommands) ?? [];
+        const shouldContinue = await this.execute(branchCommands, outerContext);
+        if (!shouldContinue) {
+          stopped = true;
+          break;
+        }
       } else if (c.type == "Goto") {
         const label = await this.getValue(c.label, outerContext);
         i = scriptCommands.findIndex(x => x.type == "Label" && x.label == label);
@@ -127,10 +137,12 @@ export class ScriptSystem {
       } else {
         const continueScript = await this.runScriptCommand(c, outerContext);
         if (!continueScript) {
+          stopped = true;
           break;
         }
       }
     }
+    return !stopped;
   }
 
   async getValueFromTarget(target: signalTarget, name: string, context: contextType) {
@@ -163,6 +175,7 @@ export class ScriptSystem {
       case 'Comment':
       case 'Label':
       case 'Condition':
+      case 'If':
       case 'Goto':
       case 'Exit':
       case 'Repeat':
@@ -520,6 +533,18 @@ export class ScriptSystem {
       nm += v + parsed.parts[i + 1];
     }
     return nm;
+  }
+
+  async evaluateIfFormula(command: If, outerContext: contextType): Promise<boolean> {
+    const entries = command.signals ?? [];
+    const varNames = entries.map((e, i) => e.varName?.trim() || '__' + i);
+    const values = await Promise.all(entries.map(e => this.getValue(e, outerContext)));
+    const formula = await this.getValue(command.formula, outerContext);
+    if (!(<any>command).compiledFormula || (<any>command)._compiledFormulaSrc !== formula) {
+      (<any>command).compiledFormula = new Function(...varNames, 'return (' + formula + ');');
+      (<any>command)._compiledFormulaSrc = formula;
+    }
+    return !!(<any>command).compiledFormula(...values);
   }
 
   getSignalName(name: string, outerContext: contextType) {

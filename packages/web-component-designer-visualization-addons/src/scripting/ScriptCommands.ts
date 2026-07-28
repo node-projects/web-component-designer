@@ -1,5 +1,7 @@
+import { IScriptMultiplexValue } from "../interfaces/IScriptMultiplexValue.js";
+
 export declare type ScriptCommands = RunnableScriptCommands |
-  Comment | Condition | Exit | Label | Goto;
+  Comment | Condition | If | Exit | Label | Goto;
 
 export declare type RunnableScriptCommands = OpenScreen | OpenUrl | OpenDialog | CloseDialog |
   ToggleSignalValue | ToggleSignalValueThroughList | SetSignalValue | IncrementSignalValue | DecrementSignalValue |
@@ -488,6 +490,40 @@ export interface Condition {
   falseGotoLabel?: string;
   falseScriptName?: string;
   falseScriptType?: string;
+  additionalData?: string;
+}
+
+export interface IfSignal extends IScriptMultiplexValue {
+  /**
+  * Optional variable name to reference this value in the formula (e.g. "isOn").
+  * If empty, the value is referenced positionally as __0, __1, __2, ... (in listed order).
+  */
+  varName?: string;
+}
+
+export interface If {
+  type: 'If';
+  /**
+  * Values referenced in the formula, either positionally as __0, __1, __2, ... (in listed
+  * order) or, if varName is set, by that name. Each entry works like Condition.value1
+  * (source: signal/property/elementProperty/signalInProperty/event/parameter/context/
+  * complexString/complexSignal/expression)
+  * @TJS-format signalList
+  */
+  signals: IfSignal[];
+  /**
+  * Boolean formula, e.g. (__0 == true || __1 == true) && __2 == false
+  * @TJS-format formula
+  */
+  formula: string;
+  /**
+  * Commands executed when the formula evaluates to true
+  */
+  trueCommands: ScriptCommands[];
+  /**
+  * Commands executed when the formula evaluates to false
+  */
+  elseCommands: ScriptCommands[];
   additionalData?: string;
 }
 
