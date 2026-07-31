@@ -66,6 +66,9 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
       outline: none;
       box-shadow: none;
     }
+    #select option{
+      color: var(--numeric-style-input-select-option-color, black);
+    }
 
     #scrubber,
     #stepper button {
