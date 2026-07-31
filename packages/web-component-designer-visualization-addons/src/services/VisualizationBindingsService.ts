@@ -40,7 +40,13 @@ export class VisualizationBindingsService implements IBindingService {
     //@ts-ignore
     bnd.historic = binding.historic;
     bnd.type = binding.type;
-    bnd.converter = binding.converters;
+    if (typeof binding.converters === 'string') {
+      bnd.converter = binding.converters as any;
+    } else if (Array.isArray(binding.converters) && binding.converters.length > 0) {
+      bnd.converter = Object.fromEntries((binding.converters as { key: string, value: any }[]).map(c => [c.key, c.value]));
+    } else if (binding.converters != null) {
+      bnd.converter = binding.converters;
+    }
     bnd.target = binding.target;
     bnd.events = binding.changedEvents;
 
