@@ -2,6 +2,7 @@ import { IPropertiesService } from './IPropertiesService.js';
 import { IPropertyEditor } from './IPropertyEditor.js';
 import { PropertyType } from './PropertyType.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
+import type { UnitEditorAddon } from './propertyEditors/UnitPropertyEditorConfig.js';
 
 export interface IProperty {
   name: string;
@@ -23,6 +24,7 @@ export interface IProperty {
   unitSteps?: Record<string, number>;
   numericValueDecimalPlaces?: number; // rounding used by numeric unit conversions
   numericValueConverter?: (value: number, fromUnit: string, toUnit: string, property: IProperty, numericType: string, numberText?: string, rawValue?: string, designItems?: IDesignItem[]) => string | number | null | undefined;
+  unitEditorAddon?: UnitEditorAddon;
   enumValues?: [name: string, value: string | number][]; // list selectable enum values
   createEditor?: (property: IProperty) => IPropertyEditor;
   value?: any;

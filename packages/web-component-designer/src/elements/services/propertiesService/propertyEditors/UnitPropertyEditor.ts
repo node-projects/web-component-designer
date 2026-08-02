@@ -28,6 +28,28 @@ export class UnitPropertyEditor extends BasePropertyEditor<NumericStyleInput> {
         return;
       await this._valueChanged(e.newValue === '' ? null : e.newValue);
     });
+    if (config?.addon) {
+      const thisEditor = this;
+      const context = {
+        property,
+        get value() {
+          return selector.value;
+        },
+        get designItems() {
+          return thisEditor.designItems;
+        },
+        setValue: async (value: string | null) => {
+          selector.value = value ?? '';
+          await this._valueChanged(value);
+        },
+        previewValue: async (value: string | null) => {
+          selector.value = value ?? '';
+          await this._previewValueChanged(value);
+        },
+        removePreviewValue: async () => this._removePreviewValue()
+      };
+      selector.addon = config.addon(context);
+    }
     this.element = selector;
   }
 
