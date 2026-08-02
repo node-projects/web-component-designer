@@ -1,5 +1,6 @@
 import type { IDesignItem } from '../../../item/IDesignItem.js';
 import type { IProperty } from '../IProperty.js';
+import { createAngleUnitEditorAddon } from './AngleUnitEditorAddon.js';
 
 export type UnitPropertyType = 'css-length' | 'css-angle' | 'css-time' | 'css-frequency' | 'css-flex' | 'css-resolution' | 'css-scale' | 'svg-length';
 
@@ -563,6 +564,6 @@ export function getCssNumericEditorConfig(property: IProperty): UnitEditorConfig
     fixedValues: getCssNumericKeywordValues(property.values),
     unitSteps: { ...defaultUnitSteps, ...(property.unitSteps ?? {}) },
     convertValue: context => convertNumericUnitValue({ ...context, property, numericType }),
-    addon: property.unitEditorAddon
+    addon: property.unitEditorAddon ?? (numericType === 'css-angle' ? createAngleUnitEditorAddon : undefined)
   };
 }

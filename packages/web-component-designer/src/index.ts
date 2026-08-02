@@ -159,6 +159,7 @@ export * from "./elements/services/propertiesService/propertyEditors/ColorProper
 export * from "./elements/services/propertiesService/propertyEditors/CssPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/UnitPropertyEditor.js";
 export type { UnitEditorAddon, UnitEditorAddonContext } from "./elements/services/propertiesService/propertyEditors/UnitPropertyEditorConfig.js";
+export { createAngleUnitEditorAddon, getAngleInDegrees } from "./elements/services/propertiesService/propertyEditors/AngleUnitEditorAddon.js";
 export * from "./elements/services/propertiesService/propertyEditors/DatePropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/ImageButtonListPropertyEditor.js";
 export * from "./elements/services/propertiesService/propertyEditors/JsonPropertyEditor.js";

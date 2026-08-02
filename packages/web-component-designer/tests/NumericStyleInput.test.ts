@@ -3,6 +3,7 @@ import type { IProperty } from '../src/elements/services/propertiesService/IProp
 import { PropertyType } from '../src/elements/services/propertiesService/PropertyType';
 import { combineNumericStyleInputValue, getNumericStyleInputUnitLabel, normalizeNumericStyleInputOptionValues, parseNumericStyleInputValue, resolveNumericStyleInputSelectedUnit, resolveNumericStyleInputStep } from '../src/elements/controls/NumericStyleInputValueHelpers';
 import { applyCssNumericPropertyDefaults, convertNumericUnitValue, defaultCssNumericUnits, defaultCssNumericUnitSteps, getCssNumericEditorConfig } from '../src/elements/services/propertiesService/propertyEditors/UnitPropertyEditorConfig';
+import { createAngleUnitEditorAddon } from '../src/elements/services/propertiesService/propertyEditors/AngleUnitEditorAddon';
 
 test('parses numeric, fixed, and custom values', () => {
   expect(parseNumericStyleInputValue('12px')).toEqual({ kind: 'numeric', numberText: '12', value: 12, unit: 'px' });
@@ -232,4 +233,9 @@ test('css numeric editor configuration retains a unit editor addon', () => {
   };
 
   expect(getCssNumericEditorConfig(property)?.addon).toBe(addon);
+});
+
+test('css angle editor gets the built-in angle addon', () => {
+  const property: IProperty = { name: 'rotate', type: 'css-angle', service: {} as any, propertyType: PropertyType.cssValue };
+  expect(getCssNumericEditorConfig(property)?.addon).toBe(createAngleUnitEditorAddon);
 });

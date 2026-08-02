@@ -30,6 +30,7 @@ export class UnitPropertyEditor extends BasePropertyEditor<NumericStyleInput> {
     });
     if (config?.addon) {
       const thisEditor = this;
+      let previewStartValue: string | null = null;
       const context = {
         property,
         get value() {
@@ -40,13 +41,24 @@ export class UnitPropertyEditor extends BasePropertyEditor<NumericStyleInput> {
         },
         setValue: async (value: string | null) => {
           selector.value = value ?? '';
+          previewStartValue = null;
           await this._valueChanged(value);
         },
         previewValue: async (value: string | null) => {
+          previewStartValue ??= selector.value;
           selector.value = value ?? '';
           await this._previewValueChanged(value);
         },
-        removePreviewValue: async () => this._removePreviewValue()
+        removePreviewValue: async () => {
+          try {
+            await this._removePreviewValue();
+          } finally {
+            if (previewStartValue !== null) {
+              selector.value = previewStartValue;
+              previewStartValue = null;
+            }
+          }
+        }
       };
       selector.addon = config.addon(context);
     }
