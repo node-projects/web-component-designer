@@ -1,4 +1,4 @@
-import { IHtmlParserService, ServiceContainer, InstanceServiceContainer, IDesignItem, newElementFromString, DesignItem, CssAttributeParser } from "@node-projects/web-component-designer";
+import { IHtmlParserService, ServiceContainer, InstanceServiceContainer, IDesignItem, newElementFromString, DesignItem, CssAttributeParser, DomConverter } from "@node-projects/web-component-designer";
 import * as parser from "@node-projects/node-html-parser-esm";
 // Alternative Parser, cause when you use the Browser, it instanciates the CusomElements, 
 // and some Elements remove attributes from their DOM, so you loose Data
@@ -101,9 +101,10 @@ export class NodeHtmlParserService implements IHtmlParserService {
         }
       }
     } else if (item.nodeType == 3) {
-      const parseDiv = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElement("div");
-      parseDiv.innerHTML = item.rawText;
-      let element = DesignItem.updateRenderedNode(serviceContainer, parseDiv.childNodes[0]);
+      const document = instanceServiceContainer.designerCanvas.rootDesignItem.document;
+      const parentElementName = item.parentNode?.rawTagName?.toLowerCase();
+      const text = DomConverter.isRawTextElementName(parentElementName) ? item.rawText : item.text;
+      let element = DesignItem.updateRenderedNode(serviceContainer, document.createTextNode(text));
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });

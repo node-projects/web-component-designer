@@ -87,7 +87,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
         const children = designItem.children();
         contentSingleTextNode = designItem.childCount === 1 && designItem.firstChild.nodeType === NodeType.TextNode;
         if (contentSingleTextNode) {
-          const notrim = designItem.name == 'script' || designItem.name == 'style' || designItem.name == 'pre';
+          const notrim = DomConverter.isRawTextElementName(designItem.name) || designItem.name == 'pre';
           this.writeTextNode(indentedTextWriter, designItem, false, !notrim, currentPreserveInlineWhitespace);
         } else {
           if (!currentPreserveInlineWhitespace && (designItem.element instanceof designItem.window.HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof designItem.window.SVGElement))) {
@@ -109,7 +109,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
           }
         }
       } else if (designItem.hasContent) {
-        indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content));
+        indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content, designItem.name));
         //this._conditionalyWriteNewline(indentedTextWriter, designItem);
       }
 
@@ -131,11 +131,14 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
     let start = indentedTextWriter.position;
     let end = indentedTextWriter.position;
 
-    let content = DomConverter.normalizeContentValue(designItem.content);
-    if (preserveInlineWhitespace || this._hasInlineParent(designItem))
-      content = this._normalizeInlineTextContent(content);
-    else if (trim)
-      content = content.trim();
+    const parentElementName = designItem.nodeType === NodeType.Element ? designItem.name : designItem.parent?.name;
+    let content = DomConverter.normalizeContentValue(designItem.content, parentElementName);
+    if (!DomConverter.isRawTextElementName(parentElementName)) {
+      if (preserveInlineWhitespace || this._hasInlineParent(designItem))
+        content = this._normalizeInlineTextContent(content);
+      else if (trim)
+        content = content.trim();
+    }
     if (content) {
       if (indentAndNewline)
         this._conditionalyWriteIndent(indentedTextWriter, designItem, preserveInlineWhitespace);

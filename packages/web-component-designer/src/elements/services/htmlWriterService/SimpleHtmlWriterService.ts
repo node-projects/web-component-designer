@@ -70,7 +70,7 @@ export class SimpleHtmlWriterService implements IHtmlWriterService {
 
   private _writeTextNode(writeContext: IWriteContext, designItem: IDesignItem) {
     writeContext.lastElementDisplayType = ElementDisplayType.inline;
-    let content = DomConverter.normalizeContentValue(designItem.content);
+    let content = DomConverter.normalizeContentValue(designItem.content, designItem.parent?.name);
     writeContext.indentedTextWriter.write(content);
   }
 
@@ -90,7 +90,7 @@ export class SimpleHtmlWriterService implements IHtmlWriterService {
       const children = designItem.children();
       this._writeDesignItemList(currentElementDisplayType, writeContext, children);
     } else if (designItem.hasContent) {
-      writeContext.indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content));
+      writeContext.indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content, designItem.name));
     }
 
     if (!DomConverter.IsSelfClosingElement(designItem.name)) {

@@ -75,11 +75,14 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
 
   private _writeTextNode(writeContext: IWriteContext, designItem: IDesignItem) {
     writeContext.lastElementDisplayType = ElementDisplayType.inline;
-    let content = DomConverter.normalizeContentValue(designItem.content);
-    if (writeContext.containerDisplayType === ElementContainerType.inline)
-      content = this._normalizeInlineTextContent(content);
-    else
-      content = content.trim();
+    const parentElementName = designItem.parent?.name;
+    let content = DomConverter.normalizeContentValue(designItem.content, parentElementName);
+    if (!DomConverter.isRawTextElementName(parentElementName)) {
+      if (writeContext.containerDisplayType === ElementContainerType.inline)
+        content = this._normalizeInlineTextContent(content);
+      else
+        content = content.trim();
+    }
     if (content) {
       writeContext.indentedTextWriter.write(content);
     }
@@ -132,7 +135,7 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
       }
       writeContext.containerDisplayType = previousContainerDisplayType;
     } else if (designItem.hasContent) {
-      writeContext.indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content));
+      writeContext.indentedTextWriter.write(DomConverter.normalizeContentValue(designItem.content, designItem.name));
     }
 
     if (!DomConverter.IsSelfClosingElement(designItem.name)) {

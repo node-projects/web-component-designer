@@ -15,7 +15,20 @@ export class DomConverter {
     return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
   }
 
-  public static normalizeContentValue(value: string) {
+  public static isRawTextElementName(elementName: string) {
+    return elementName === 'script' ||
+      elementName === 'style' ||
+      elementName === 'xmp' ||
+      elementName === 'iframe' ||
+      elementName === 'noembed' ||
+      elementName === 'noframes' ||
+      elementName === 'noscript' ||
+      elementName === 'plaintext';
+  }
+
+  public static normalizeContentValue(value: string, parentElementName?: string) {
+    if (this.isRawTextElementName(parentElementName))
+      return value;
     if (value)
       return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll(' ', '&nbsp;');  // !caution! -> this is not normal space, it's nbsp
     return value;
