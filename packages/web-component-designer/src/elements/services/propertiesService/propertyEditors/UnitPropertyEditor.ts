@@ -40,6 +40,8 @@ export class UnitPropertyEditor extends BasePropertyEditor<NumericStyleInput> {
           return thisEditor.designItems;
         },
         setValue: async (value: string | null) => {
+          if (previewStartValue !== null)
+            await this._removePreviewValue();
           selector.value = value ?? '';
           previewStartValue = null;
           await this._valueChanged(value);

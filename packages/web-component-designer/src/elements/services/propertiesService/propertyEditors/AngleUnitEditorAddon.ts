@@ -26,6 +26,11 @@ export const createAngleUnitEditorAddon: UnitEditorAddon = context => {
   button.setAttribute('aria-label', 'Pick angle');
   button.textContent = '◉';
   button.style.cssText = 'border:0;background:transparent;color:inherit;cursor:pointer;padding:0 3px;height:24px;line-height:1;';
+  if (context.property.readonly) {
+    button.disabled = true;
+    button.style.cursor = 'default';
+    return button;
+  }
 
   let popup: HTMLDivElement | null = null;
   let circle: HTMLDivElement | null = null;
