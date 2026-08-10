@@ -20,8 +20,8 @@ export class LayerDepthView extends BaseCustomWebComponentConstructorAppend impl
           height: 100%;
           position: relative;
           isolation: isolate;
-          background: #f3f4f6;
-          color: #111827;
+          background: var(--wcd-layer-depth-view-background, #f3f4f6);
+          color: var(--wcd-layer-depth-view-text-color, #111827);
           user-select: none;
           -webkit-user-select: none;
         }
@@ -61,7 +61,7 @@ export class LayerDepthView extends BaseCustomWebComponentConstructorAppend impl
           display: none;
           align-items: center;
           justify-content: center;
-          color: #4b5563;
+          color: var(--wcd-layer-depth-view-muted-color, #4b5563);
           font: 13px sans-serif;
           pointer-events: none;
         }
@@ -77,8 +77,8 @@ export class LayerDepthView extends BaseCustomWebComponentConstructorAppend impl
           gap: 8px;
           box-sizing: border-box;
           padding: 7px 9px;
-          background: rgba(255, 255, 255, 0.92);
-          border: 1px solid rgba(17, 24, 39, 0.14);
+          background: var(--wcd-layer-depth-view-card-background, rgba(255, 255, 255, 0.92));
+          border: 1px solid var(--wcd-layer-depth-view-card-border-color, rgba(17, 24, 39, 0.14));
           font: 12px sans-serif;
           pointer-events: auto;
           z-index: 1;

@@ -22,8 +22,8 @@ export class ProjectiveTransformExtensionProvider implements IDesignerExtensionP
   }
 
   static readonly style = css`
-    .svg-primary-projective-handle { stroke: #3899ec; fill: white; stroke-width: 1; pointer-events: auto; }
-    .svg-primary-projective-handle-cross { stroke: #3899ec; fill: none; stroke-width: 1; stroke-linecap: round; pointer-events: none; }
-    .svg-primary-projective-outline { stroke: #3899ec; fill: none; stroke-width: 1; stroke-dasharray: 4 2; }
+    .svg-primary-projective-handle { stroke: var(--wcd-color-selection, #3899ec); fill: white; stroke-width: 1; pointer-events: auto; }
+    .svg-primary-projective-handle-cross { stroke: var(--wcd-color-selection, #3899ec); fill: none; stroke-width: 1; stroke-linecap: round; pointer-events: none; }
+    .svg-primary-projective-outline { stroke: var(--wcd-color-selection, #3899ec); fill: none; stroke-width: 1; stroke-dasharray: 4 2; }
   `;
 }

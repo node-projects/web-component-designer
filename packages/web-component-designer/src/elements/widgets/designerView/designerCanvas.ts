@@ -190,7 +190,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       touch-action: none;
     }
     #node-projects-designer-canvas-canvasContainer {
-      background: var(--node-projects-web-component-designer-background, border-box fixed 0px 0px repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAFXmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjIwIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMjAiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIyMCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMjAiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSIKICAgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIKICAgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIgogICB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCIKICAgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCI+CiAgIDxkYzp0aXRsZT4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+QmFja2dyb3VuZGdyaWRfMTBweDwvcmRmOmxpPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnRpdGxlPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgRGVzaWduZXIgMS4xMC42IgogICAgICBzdEV2dDp3aGVuPSIyMDIyLTEyLTA4VDA5OjE1OjQ4KzAxOjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4fvgn+AAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kc8rRFEUxz8GjRhRLCiLl7BCftTExmLkV2ExnvJr8+bNvBk1b+b13kiyVbaKEhu/FvwFbJW1UkRKlrImNug5b2ZqJplzO/d87vfec7r3XPCpSd10KnrATGXs8FhImZtfUPwvBKjCTx/Nmu5YUzOjKiXt854yL952ebVKn/vXaqIxR4eyKuEh3bIzwuPCk6sZy+Md4UY9oUWFz4Q7bbmg8J2nR3L86nE8x98e22p4GHz1wkq8iCNFrCdsU1heTpuZXNHz9/FeEoilZmcktoq34BBmjBAKE4wwTJBeBmUO0iX96ZYVJfJ7svnTpCVXl9liDZtl4iTI0CnqilSPSTREj8lIsub1/29fHaO/L1c9EILKZ9d9bwf/Nvxsue7Xkev+HEP5E1ymCvnpQxj4EH2roLUdQN0GnF8VtMguXGxC06Ol2VpWKhf3GQa8nULtPDTcQPVirmf5fU4eQF2Xr7qGvX3okPN1S790cWfsRnax1QAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAC9JREFUOI1jfPr0KQNuICUlhUeWCY8cQTCqeWRoZvz//z8e6WfPntHK5lHNI0MzAMChCNMTuPcnAAAAAElFTkSuQmCC));
+      background: var(--wcd-canvas-background, var(--node-projects-web-component-designer-background, border-box fixed 0px 0px repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAFXmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iCiAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgZXhpZjpQaXhlbFhEaW1lbnNpb249IjIwIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iMjAiCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgdGlmZjpJbWFnZVdpZHRoPSIyMCIKICAgdGlmZjpJbWFnZUxlbmd0aD0iMjAiCiAgIHRpZmY6UmVzb2x1dGlvblVuaXQ9IjIiCiAgIHRpZmY6WFJlc29sdXRpb249IjMwMC8xIgogICB0aWZmOllSZXNvbHV0aW9uPSIzMDAvMSIKICAgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIKICAgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIgogICB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCIKICAgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0xMi0wOFQwOToxNTo0OCswMTowMCI+CiAgIDxkYzp0aXRsZT4KICAgIDxyZGY6QWx0PgogICAgIDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+QmFja2dyb3VuZGdyaWRfMTBweDwvcmRmOmxpPgogICAgPC9yZGY6QWx0PgogICA8L2RjOnRpdGxlPgogICA8eG1wTU06SGlzdG9yeT4KICAgIDxyZGY6U2VxPgogICAgIDxyZGY6bGkKICAgICAgc3RFdnQ6YWN0aW9uPSJwcm9kdWNlZCIKICAgICAgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWZmaW5pdHkgRGVzaWduZXIgMS4xMC42IgogICAgICBzdEV2dDp3aGVuPSIyMDIyLTEyLTA4VDA5OjE1OjQ4KzAxOjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICA8L3JkZjpEZXNjcmlwdGlvbj4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz4fvgn+AAABgWlDQ1BzUkdCIElFQzYxOTY2LTIuMQAAKJF1kc8rRFEUxz8GjRhRLCiLl7BCftTExmLkV2ExnvJr8+bNvBk1b+b13kiyVbaKEhu/FvwFbJW1UkRKlrImNug5b2ZqJplzO/d87vfec7r3XPCpSd10KnrATGXs8FhImZtfUPwvBKjCTx/Nmu5YUzOjKiXt854yL952ebVKn/vXaqIxR4eyKuEh3bIzwuPCk6sZy+Md4UY9oUWFz4Q7bbmg8J2nR3L86nE8x98e22p4GHz1wkq8iCNFrCdsU1heTpuZXNHz9/FeEoilZmcktoq34BBmjBAKE4wwTJBeBmUO0iX96ZYVJfJ7svnTpCVXl9liDZtl4iTI0CnqilSPSTREj8lIsub1/29fHaO/L1c9EILKZ9d9bwf/Nvxsue7Xkev+HEP5E1ymCvnpQxj4EH2roLUdQN0GnF8VtMguXGxC06Ol2VpWKhf3GQa8nULtPDTcQPVirmf5fU4eQF2Xr7qGvX3okPN1S790cWfsRnax1QAAAAlwSFlzAAAuIwAALiMBeKU/dgAAAC9JREFUOI1jfPr0KQNuICUlhUeWCY8cQTCqeWRoZvz//z8e6WfPntHK5lHNI0MzAMChCNMTuPcnAAAAAElFTkSuQmCC)));
     }
     #node-projects-designer-canvas-canvas {
       image-rendering: pixelated;
@@ -202,7 +202,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
     
     #node-projects-designer-canvas-canvas.dragFileActive {
-      outline: blue 4px solid;
+      outline: var(--wcd-canvas-drag-file-outline-color, blue) 4px solid;
       outline-offset: -4px;
     }
     
@@ -257,19 +257,19 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       width: auto;
       right: 10px;
       top: 0;
-      background:rgb(242, 242, 242);
+      background: var(--wcd-canvas-search-container-background, rgb(242, 242, 242));
       padding: 5px 6px;
       border-bottom-left-radius: 5px;
       border-bottom-right-radius: 5px;
     }
     
     #node-projects-designer-search-container > #node-projects-designer-search-bar {
-      border: 1px solid black;
+      border: 1px solid var(--wcd-canvas-search-border-color, black);
       padding: 0;
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      background-color: white;
+      background-color: var(--wcd-canvas-search-background, white);
       padding: 1px 2px;
     }
     
@@ -284,12 +284,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     #node-projects-designer-search-container > div > #node-projects-designer-search-start {
       height:22px;
       border: none;
-      background-color: white;
+      background-color: var(--wcd-canvas-search-background, white);
       font-size: 13px;
     }
     
     #node-projects-designer-search-container > div > #node-projects-designer-search-start:hover {
-      background-color: #D3D3D3;
+      background-color: var(--wcd-canvas-search-button-hover-background, #D3D3D3);
       transition: 0.9s;
       border-radius: 2px;
     }
@@ -314,7 +314,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       top: 50%;
       left: 50%;
       width: 60%;
-      background-color: black;
+      background-color: var(--wcd-canvas-loading-background, black);
       height: 1px;
     }
     
@@ -614,7 +614,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public disableBackgroud() {
-    this._canvasContainer.style.background = 'var(--node-projects-web-component-designer-screenshot-background, white)';
+    this._canvasContainer.style.background = 'var(--wcd-screenshot-background, var(--node-projects-web-component-designer-screenshot-background, white))';
   }
 
   public enableBackground() {

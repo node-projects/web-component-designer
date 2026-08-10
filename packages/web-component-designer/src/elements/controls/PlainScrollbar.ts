@@ -401,17 +401,17 @@ export class PlainScrollbar extends HTMLElement {
 //------------------------------------------------------------------------------
 
 const EPS = 1E-9;
-const buttonSize = "var(--plain-scrollbar-button-size, 13px)";
+const buttonSize = "var(--wcd-plain-scrollbar-button-size, var(--plain-scrollbar-button-size, 13px))";
 const buttonPath = '<path d="M -60 30 h 120 L 0 -30 z" stroke-width="0"/>';
 
 const scrollbarStyle = css`
     :host {
        display: block;
        contain: content;
-       background-color: #f8f8f8;
+       background-color: var(--wcd-plain-scrollbar-track-background-color, #f8f8f8);
        border-style: solid;
        border-width: 1px;
-       border-color: #dddddd;
+       border-color: var(--wcd-plain-scrollbar-track-border-color, #dddddd);
     }
     #root {
        touch-action: none;
@@ -439,25 +439,25 @@ const scrollbarStyle = css`
        position: absolute;
        width: 100%;
        height: 100%;
-       background-color: var(--plain-scrollbar-thumb-background-color, #f0f0f0);
+       background-color: var(--wcd-plain-scrollbar-thumb-background-color, var(--plain-scrollbar-thumb-background-color, #f0f0f0));
        border-style: solid;
-       border-width: var(--plain-scrollbar-thumb-border-width, 1px);
-       border-color: var(--plain-scrollbar-thumb-border-color, #b8b8b8);
-       border-radius: var(--plain-scrollbar-thumb-border-radius, 4px);
+       border-width: var(--wcd-plain-scrollbar-thumb-border-width, var(--plain-scrollbar-thumb-border-width, 1px));
+       border-color: var(--wcd-plain-scrollbar-thumb-border-color, var(--plain-scrollbar-thumb-border-color, #b8b8b8));
+       border-radius: var(--wcd-plain-scrollbar-thumb-border-radius, var(--plain-scrollbar-thumb-border-radius, 4px));
        transition: background-color 50ms linear;
     }
     #thumb:hover {
-       background-color: var(--plain-scrollbar-thumb-background-color-hover, #e0e0e0);
+       background-color: var(--wcd-plain-scrollbar-thumb-background-color-hover, var(--plain-scrollbar-thumb-background-color-hover, #e0e0e0));
     }
     #thumb.active {
-       background-color: var(--plain-scrollbar-thumb-background-color-active, #c0c0c0);
+       background-color: var(--wcd-plain-scrollbar-thumb-background-color-active, var(--plain-scrollbar-thumb-background-color-active, #c0c0c0));
     }
     #button1,
     #button2 {
        box-sizing: border-box;
        position: absolute;
        display: block;
-       fill: var(--plain-scrollbar-button-color, #606060);
+       fill: var(--wcd-plain-scrollbar-button-color, var(--plain-scrollbar-button-color, #606060));
     }
     #root.vertical #button1 {
        top: 0;
@@ -497,11 +497,11 @@ const scrollbarStyle = css`
     }
     #button1:hover,
     #button2:hover {
-       background-color: var(--plain-scrollbar-button-color-hover, #e0e0e0);
+       background-color: var(--wcd-plain-scrollbar-button-color-hover, var(--plain-scrollbar-button-color-hover, #e0e0e0));
     }
     #button1.active,
     #button2.active {
-       background-color: var(--plain-scrollbar-button-color-active, #c0c0c0);
+       background-color: var(--wcd-plain-scrollbar-button-color-active, var(--plain-scrollbar-button-color-active, #c0c0c0));
     }
     `;
 

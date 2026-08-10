@@ -60,7 +60,7 @@ export class TransformToolPopup extends DraggableToolWindow {
         grid-row-gap: 2px;
         font-size: small;
         margin: 10px;
-        color: white;
+        color: var(--wcd-color-text, white);
       }
       #button-div{
         display: grid;
@@ -90,7 +90,7 @@ export class TransformToolPopup extends DraggableToolWindow {
       #cube-background{
         width: 60px;
         height: 60px;
-        background: gray;
+        background: var(--wcd-transform-tool-divider-color, gray);
         margin-top: 20px;
         margin-left: 20px;
       }
@@ -102,7 +102,7 @@ export class TransformToolPopup extends DraggableToolWindow {
         justify-content: center;
         align-items: center;
         width: 100%;
-        color: white;
+        color: var(--wcd-color-text, white);
       }
     `;
   }

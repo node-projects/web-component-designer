@@ -184,22 +184,22 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
       }
       
       table td, table th {
-        border: 1px solid #ddd;
+        border: 1px solid var(--wcd-debug-view-cell-border-color, #ddd);
         padding: 2px 4px;
       }
       
       table tr:nth-child(even){background-color: #f2f2f2;}
       
-      table tr:hover {background-color: #ddd;}
+      table tr:hover {background-color: var(--wcd-debug-view-row-hover-background, #ddd);}
       
       table th {
         text-align: left;
-        background-color: #989898;
-        color: white;
+        background-color: var(--wcd-debug-view-header-background, #989898);
+        color: var(--wcd-color-text, white);
       }
       
       .lnk {
-        color: blue;
+        color: var(--wcd-debug-view-link-color, blue);
       }
       .lnk:hover {
         text-decoration: underline;

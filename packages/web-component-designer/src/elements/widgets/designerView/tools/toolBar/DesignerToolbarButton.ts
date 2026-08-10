@@ -16,7 +16,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
     }
 
     div:hover {
-      background-color: darkgray;
+      background-color: var(--wcd-toolbar-button-selected-background, darkgray);
     }
 
     img {

@@ -48,8 +48,8 @@ export class ThicknessEditor extends BaseCustomWebComponentConstructorAppend {
   }
   #rect {
     grid-area: middle;
-    border: 1px solid black;
-    background: lightgray;
+    border: 1px solid var(--wcd-thickness-editor-border-color, black);
+    background: var(--wcd-thickness-editor-background, lightgray);
   }
   `;
 

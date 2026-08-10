@@ -305,12 +305,12 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
         flex-direction: column;
         width: 860px;
         max-width: calc(100vw - 48px);
-        color: #ddd;
+        color: var(--wcd-color-text, #ddd);
         font-family: sans-serif;
         font-size: 12px;
         gap: 4px;
         padding: 6px;
-        background: #2a2a2a;
+        background: var(--wcd-color-surface-raised, #2a2a2a);
       }
       .editors-row {
         display: grid;
@@ -324,8 +324,8 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
         gap: 4px;
       }
       .preview-area {
-        background: #1a1a1a;
-        border: 1px solid #444;
+        background: var(--wcd-color-surface, #1a1a1a);
+        border: 1px solid var(--wcd-color-border, #444);
         border-radius: 3px;
         height: 70px;
         display: flex;
@@ -336,7 +336,7 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
       .preview-box {
         width: 60px;
         height: 60px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--wcd-border-radius-editor-preview-background, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
         border-radius: 0;
       }
       .uniform-row {
@@ -351,7 +351,7 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
         gap: 3px;
         cursor: pointer;
         user-select: none;
-        color: #aaa;
+        color: var(--wcd-color-text-muted, #aaa);
       }
       .uniform-row input[type=checkbox] {
         cursor: pointer;
@@ -359,7 +359,7 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
         height: 14px;
       }
       .section-header {
-        color: #999;
+        color: var(--wcd-color-text-muted, #999);
         font-size: 10px;
         font-weight: bold;
         margin-top: 3px;
@@ -377,13 +377,13 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
         gap: 4px;
       }
       .corner-section {
-        background: #1e1e1e;
-        border: 1px solid #444;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border, #444);
         border-radius: 2px;
         padding: 4px;
       }
       .corner-header {
-        color: #888;
+        color: var(--wcd-color-text-muted, #888);
         font-size: 10px;
         margin-bottom: 3px;
         font-weight: bold;
@@ -396,14 +396,14 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
         margin-bottom: 2px;
       }
       .corner-row:last-child { margin-bottom: 0; }
-      .corner-row label { color: #888; font-size: 10px; }
+      .corner-row label { color: var(--wcd-color-text-muted, #888); font-size: 10px; }
       .corner-row input[type=range] { width: 100%; height: 16px; }
       .corner-row input[type=color] { width: 100%; height: 18px; cursor: pointer; }
       .corner-row .val-label { text-align: right; color: #777; font-size: 9px; }
       .bre-root select {
-        background: #2e2e2e;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #2e2e2e);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 2px;
         padding: 2px 3px;
         font-size: 10px;
@@ -427,14 +427,14 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
       }
       .separator {
         height: 1px;
-        background: #444;
+        background: var(--wcd-color-surface-hover, #444);
         margin: 2px 0;
       }
       .css-out {
-        background: #1e1e1e;
-        border: 1px solid #333;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border, #333);
         border-radius: 3px;
-        color: #7ec8e3;
+        color: var(--wcd-color-accent-text, #7ec8e3);
         font-family: monospace;
         font-size: 10px;
         padding: 4px;
@@ -450,17 +450,17 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
       .actions .load-btn { margin-right: auto; }
       .actions button, .apply-btn {
         padding: 3px 10px;
-        background: #3a3a3a;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #3a3a3a);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 2px;
         cursor: pointer;
         font-size: 11px;
       }
       .actions button:hover, .apply-btn:hover { background: #555; }
       .apply-btn {
-        background: #3a6a9a;
-        border-color: #2a5a8a;
+        background: var(--wcd-color-accent, #3a6a9a);
+        border-color: var(--wcd-color-accent-border, #2a5a8a);
       }
       .apply-btn:hover { background: #4a7aaa; }
     `;

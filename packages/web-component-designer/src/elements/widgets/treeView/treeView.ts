@@ -32,7 +32,7 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
       position: relative;
       width: 100%;
       height: 100%;
-      background: var(--dark-grey, #232733);
+      background: var(--wcd-tree-view-background, var(--dark-grey, var(--wcd-color-surface, #232733)));
       overflow-y: auto;
     }
     button {
@@ -45,22 +45,22 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
       text-align: left;
       display: inline-block;
       margin: 0;
-      background: var(--dark-grey, #232733);
+      background: var(--wcd-tree-view-background, var(--dark-grey, var(--wcd-color-surface, #232733)));
       position: relative;
-      color: white;
+      color: var(--wcd-color-text, white);
     }
     button:hover, button:focus {
-      background: var(--light-grey, #383f52);
+      background: var(--wcd-tree-view-item-hover-background, var(--light-grey, var(--wcd-color-surface-hover, #383f52)));
     }
     span {
       margin: 4px;
     }
     .id {
       font-style: italic;
-      color: var(--highlight-pink, #e91e63);
+      color: var(--wcd-tree-view-id-color, var(--highlight-pink, var(--wcd-color-accent, #e91e63)));
     }
     .selected {
-      background: var(--light-grey, #383f52);
+      background: var(--wcd-tree-view-item-selected-background, var(--light-grey, var(--wcd-color-surface-hover, #383f52)));
       outline: none;
     }
 
@@ -86,8 +86,8 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
         left: calc(var(--horz-shift) - var(--horz-margin));
         width: calc(var(--horz-margin) - var(--horz-shift));
         height: calc(var(--vert-shift) + var(--vert-margin));
-        border-left: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
+        border-left: 1px solid var(--wcd-tree-view-connector-color, #ccc);
+        border-bottom: 1px solid var(--wcd-tree-view-connector-color, #ccc);
         border-radius: 0;
     }
 
@@ -99,8 +99,8 @@ export class TreeView extends BaseCustomWebComponentLazyAppend implements ITreeV
         left: calc(var(--horz-shift) - var(--horz-margin));
         width: calc(var(--horz-margin) - var(--horz-shift));
         height: calc(100% - var(--vert-shift));
-        border-left: 1px solid #ccc;
-        border-top: 1px solid #ccc;
+        border-left: 1px solid var(--wcd-tree-view-connector-color, #ccc);
+        border-top: 1px solid var(--wcd-tree-view-connector-color, #ccc);
         border-radius: 0;
     }
 

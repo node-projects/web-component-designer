@@ -64,7 +64,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
     #lowertoolbar {
       height: 16px;
-      background: #787f82;
+      background: var(--wcd-designer-view-statusbar-background, #787f82);
       display: flex;
       bottom: 0;
       position: absolute;
@@ -91,10 +91,10 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       align-items: center;
     }
     .selected {
-      background-color: deepskyblue;
+      background-color: var(--wcd-designer-view-tool-selected-background, deepskyblue);
     }
     .toolbar-control:hover {
-      background-color:rgba(164,206,249,.6);
+      background-color: var(--wcd-designer-view-tool-hover-background, rgba(164,206,249,.6));
     }
     #outer {
       user-select: none;
@@ -113,7 +113,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       width: 24px;
       height: calc(100% - 32px);
       position: absolute;
-      background-color: lightgray;      
+      background-color: var(--wcd-designer-view-toolbar-background, lightgray);      
     }
   
     .zoom-in {
@@ -152,7 +152,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       bottom: 16px;
       right: 0;
       position: absolute;
-      background: #f0f0f0;
+      background: var(--wcd-designer-view-corner-background, #f0f0f0);
     }`;
 
   static override readonly template = html`
