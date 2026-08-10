@@ -39,6 +39,12 @@ https://www.npmjs.com/package/@node-projects/web-component-designer
 
 At first you have to setup a service container providing services for history, properties, elements, ...
 
+## Theming
+
+The designer chrome is styled with CSS custom properties, so it can be restyled from the
+outside without patching component styles. See [THEMING.md](THEMING.md) for the token
+reference.
+
 ## Code Editor
 
 You can select to use one of 3 code editors available (ACE, CodeMirrow, Monaco).

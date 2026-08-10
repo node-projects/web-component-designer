@@ -7,9 +7,9 @@ export abstract class AbstractBaseToolPopup extends BaseCustomWebComponentConstr
       .container {
           width: 120px;
           min-height: 100px;
-          color: white;
-          background-color: rgb(64, 64, 64);
-          border: 1px solid black;
+          color: var(--wcd-color-text, white);
+          background-color: var(--wcd-tool-popup-title-background, rgb(64, 64, 64));
+          border: 1px solid var(--wcd-tool-popup-border-color, black);
       }
       header {
           text-align: center;
@@ -17,12 +17,12 @@ export abstract class AbstractBaseToolPopup extends BaseCustomWebComponentConstr
       .tool {
           height: 32px;
           width: 32px;
-          background-color: rgb(255, 255, 255);
+          background-color: var(--wcd-tool-popup-background, rgb(255, 255, 255));
           background-size: 65%;
           background-repeat: no-repeat;
           background-position: center center;
           flex-shrink: 0;
-          border-bottom: 1px solid black;
+          border-bottom: 1px solid var(--wcd-tool-popup-border-color, black);
       }
       .tools {
           display: flex;

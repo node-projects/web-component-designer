@@ -20,8 +20,8 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       height: 100%;
       user-select: none;
       -webkit-user-select: none;
-      background: var(--medium-grey, #2f3545);
-      color: white;
+      background: var(--wcd-property-grid-background, var(--medium-grey, var(--wcd-color-surface-raised, #2f3545)));
+      color: var(--wcd-color-text, white);
     }
     div.root {
       display: grid;
@@ -36,13 +36,13 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
       margin-right: 5px;
     }
     input {
-      background: var(--medium-grey, #2f3545);
-      border: solid 1px gray;
-      color: white;
+      background: var(--wcd-property-grid-background, var(--medium-grey, var(--wcd-color-surface-raised, #2f3545)));
+      border: solid 1px var(--wcd-color-border, gray);
+      color: var(--wcd-color-text, white);
       width: calc(100% - 6px);
     }
     #type {
-      color: wheat;
+      color: var(--wcd-property-grid-header-highlight-color, wheat);
       white-space: nowrap;
       overflow: hidden;
       font-size: 12px;

@@ -34,7 +34,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             cursor: pointer; 
             height: 30px;
             width: calc(100% - 30px);
-            background-color: var(--dark-grey, #232733);
+            background-color: var(--wcd-tab-header-background, var(--dark-grey, var(--wcd-color-surface, #232733)));
             overflow-x: auto;
             scrollbar-width: none;  /* Firefox */
         }
@@ -43,24 +43,24 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             top: 0;
             width: 30px;
             position: absolute;
-            color: white;
+            color: var(--wcd-color-text, white);
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: math;
         }
         .header-more:hover {
-            background: var(--light-grey, #383f52);
+            background: var(--wcd-tab-header-hover-background, var(--light-grey, var(--wcd-color-surface-hover, #383f52)));
         }
         .more-container {
             z-index: 1;
             user-select: none;
             -webkit-user-select: none;
-            background-color: var(--dark-grey, #232733);
+            background-color: var(--wcd-tab-header-background, var(--dark-grey, var(--wcd-color-surface, #232733)));
             right: 0;
             top: 30px;
             position: absolute;
-            color: white;
+            color: var(--wcd-color-text, white);
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -82,7 +82,7 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             box-sizing: content-box;                
             padding-left: 5px;
             padding-right: 5px;
-            color: white;
+            color: var(--wcd-color-text, white);
             font-size: 12px;
             font-weight: 500;
             line-height: 1.5;
@@ -90,15 +90,15 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             white-space: nowrap;
         }
         .tab-header:hover {
-            background: var(--light-grey, #383f52);
+            background: var(--wcd-tab-header-hover-background, var(--light-grey, var(--wcd-color-surface-hover, #383f52)));
         }
         .selected {
-            background: var(--medium-grey, #2f3545);
-            box-shadow: inset 0 3px 0 var(--highlight-pink, #e91e63);
+            background: var(--wcd-tab-selected-background, var(--medium-grey, var(--wcd-color-surface-raised, #2f3545)));
+            box-shadow: inset 0 3px 0 var(--wcd-tab-selected-indicator-color, var(--highlight-pink, var(--wcd-color-accent, #e91e63)));
         }
         .panels {
             z-index: 0;
-            background: var(--medium-grey, #2f3545);
+            background: var(--wcd-tab-panel-background, var(--medium-grey, var(--wcd-color-surface-raised, #2f3545)));
             height: calc(100% - 30px);
         }
         `;

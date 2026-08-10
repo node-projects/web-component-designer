@@ -38,7 +38,7 @@ export class UnifiedGeometryExtensionProvider implements IDesignerExtensionProvi
 
   readonly style = css`
     .svg-control-line {
-      stroke: #3899ec;
+      stroke: var(--wcd-color-selection, #3899ec);
       fill: none;
       stroke-dasharray: 4;
       pointer-events: none;
@@ -46,14 +46,14 @@ export class UnifiedGeometryExtensionProvider implements IDesignerExtensionProvi
     }
 
     .svg-control-point {
-      stroke: #3899ec;
-      fill: white;
+      stroke: var(--wcd-color-selection, #3899ec);
+      fill: var(--wcd-color-handle, white);
       pointer-events: auto;
     }
 
     .svg-path-selected-part {
-      stroke: black;
-      fill: lime;
+      stroke: var(--wcd-color-handle-stroke, black);
+      fill: var(--wcd-color-handle-active, lime);
     }
   `;
 }

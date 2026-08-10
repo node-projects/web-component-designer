@@ -22,10 +22,10 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
       touch-action: none;
     }
     .window-frame {
-      background: #2c2c2c;
-      border: 1px solid #111;
+      background: var(--wcd-color-surface-raised, #2c2c2c);
+      border: 1px solid var(--wcd-color-border-strong, #111);
       border-radius: 4px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+      box-shadow: 0 4px 24px var(--wcd-tool-window-shadow-color, rgba(0,0,0,0.7));
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -34,7 +34,7 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #1a1a1a;
+      background: var(--wcd-color-surface, #1a1a1a);
       padding: 2px 5px;
       cursor: move;
       flex-shrink: 0;
@@ -42,7 +42,7 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
       box-sizing: border-box;
     }
     .title-text {
-      color: #ccc;
+      color: var(--wcd-color-text-muted, #ccc);
       font-size: 11px;
       font-family: sans-serif;
       font-weight: 500;
@@ -56,7 +56,7 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
       height: 14px;
       background: none;
       border: none;
-      color: #888;
+      color: var(--wcd-color-text-muted, #888);
       font-size: 12px;
       line-height: 1;
       cursor: pointer;
@@ -68,8 +68,8 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
       flex-shrink: 0;
     }
     .close-btn:hover {
-      background: #c0392b;
-      color: #fff;
+      background: var(--wcd-tool-window-close-hover-background, #c0392b);
+      color: var(--wcd-color-text, #fff);
     }
     .window-content {
       overflow: auto;

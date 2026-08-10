@@ -33,10 +33,10 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
       -webkit-user-select: none;
     }
     button:hover {
-      box-shadow: inset 0 3px 0 var(--light-grey);
+      box-shadow: inset 0 3px 0 var(--wcd-property-grid-tab-indicator-inactive-color, var(--light-grey));
     }
     button:focus {
-      box-shadow: inset 0 3px 0 var(--highlight-pink, #e91e63);
+      box-shadow: inset 0 3px 0 var(--wcd-property-grid-tab-indicator-color, var(--highlight-pink, var(--wcd-color-accent, #e91e63)));
     }
     `;
 

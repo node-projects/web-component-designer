@@ -26,10 +26,10 @@ export class ContextMenu implements IContextMenu {
 		transform-origin: top left;
 		padding: 0;
 		z-index: 2147483647;
-		color: var(--context-menu-color, black);
-		font-family: var(--context-menu-font-family, inherit);
-		font-size: var(--context-menu-font-size, inherit);
-		font-weight: var(--context-menu-font-weight, inherit);
+		color: var(--wcd-context-menu-color, var(--context-menu-color, black));
+		font-family: var(--wcd-context-menu-font-family, var(--context-menu-font-family, inherit));
+		font-size: var(--wcd-context-menu-font-size, var(--context-menu-font-size, inherit));
+		font-weight: var(--wcd-context-menu-font-weight, var(--context-menu-font-weight, inherit));
 	  }
 	  
 	  .context_menu.context_menu_display {
@@ -48,12 +48,12 @@ export class ContextMenu implements IContextMenu {
 	  
 	  .context_menu ul {
 		list-style-type: none;
-		padding: var(--context-menu-padding, 3px);
+		padding: var(--wcd-context-menu-padding, var(--context-menu-padding, 3px));
 		margin: 0;
-    border: var(--context-menu-border, none);
-		border-radius: var(--context-menu-border-radius, 0);
-		background-color: var(--context-menu-background, #f5f7f7);
-		box-shadow: var(--context-menu-shadow, 0 0 5px #333);
+    border: var(--wcd-context-menu-border, var(--context-menu-border, none));
+		border-radius: var(--wcd-context-menu-border-radius, var(--context-menu-border-radius, 0));
+		background-color: var(--wcd-context-menu-background, var(--context-menu-background, #f5f7f7));
+		box-shadow: var(--wcd-context-menu-shadow, var(--context-menu-shadow, 0 0 5px #333));
     max-inline-size: calc(100vw - 8px);
     max-block-size: calc(100vh - 8px);
     overflow: auto;
@@ -64,12 +64,12 @@ export class ContextMenu implements IContextMenu {
     .context_menu ul[popover] {
     inset: auto;
     margin: 0;
-    border: var(--context-menu-border, none);
-    border-radius: var(--context-menu-border-radius, 0);
+    border: var(--wcd-context-menu-border, var(--context-menu-border, none));
+    border-radius: var(--wcd-context-menu-border-radius, var(--context-menu-border-radius, 0));
     }
 	  
 	  .context_menu li {
-		padding: var(--context-menu-item-padding-y, 0) 1.7em var(--context-menu-item-padding-y, 0) 0;
+		padding: var(--wcd-context-menu-item-padding-y, var(--context-menu-item-padding-y, 0)) 1.7em var(--wcd-context-menu-item-padding-y, var(--context-menu-item-padding-y, 0)) 0;
 		cursor: pointer;
 		white-space: nowrap;
 		display: flex;
@@ -77,18 +77,18 @@ export class ContextMenu implements IContextMenu {
 	  }
 	  
 	  .context_menu li:hover {
-		background-color: var(--context-menu-hover-background, #bbb);
+		background-color: var(--wcd-context-menu-hover-background, var(--context-menu-hover-background, #bbb));
 	  }
 	  
 	  .context_menu li .context_menu_icon_span {
-		width: var(--context-menu-icon-column-width, 28px);
+		width: var(--wcd-context-menu-icon-column-width, var(--context-menu-icon-column-width, 28px));
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 	  }
 
 	  .context_menu li .context_menu_icon_span img {
-		height: var(--context-menu-icon-size, 18px);
+		height: var(--wcd-context-menu-icon-size, var(--context-menu-icon-size, 18px));
 	  }
 
 	  .context_menu li .context_menu_text {	
@@ -126,7 +126,7 @@ export class ContextMenu implements IContextMenu {
 	  }
 	  
 	  .context_menu li.context_menu_divider {
-		border-bottom: 1px solid var(--context-menu-divider-color, #aaa);
+		border-bottom: 1px solid var(--wcd-context-menu-divider-color, var(--context-menu-divider-color, #aaa));
 		margin: 5px;
 		padding: 0;
 		cursor: default;
@@ -137,7 +137,7 @@ export class ContextMenu implements IContextMenu {
 	  }
 	  
 	  .context_menu li[disabled=""] {
-		color: var(--context-menu-disabled-color, #777);
+		color: var(--wcd-context-menu-disabled-color, var(--context-menu-disabled-color, #777));
 		cursor: default;
 	  }
 	  
@@ -146,7 +146,7 @@ export class ContextMenu implements IContextMenu {
 	  }
 	  
 	  .context_menu li.context_menu_marked {
-		background-color: var(--context-menu-marked-background, #5ebdec);
+		background-color: var(--wcd-context-menu-marked-background, var(--context-menu-marked-background, #5ebdec));
 	  }`;
 
   static count = 0;
