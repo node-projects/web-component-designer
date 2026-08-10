@@ -14,6 +14,9 @@ export * from "./services/ZplLayoutCopyPasteService.js";
 export * from "./services/ZplLayoutPlacementService.js";
 export * from "./services/ZplParserService.js";
 
+export * from "./zplFontMetrics.js";
+export * from "./zplFontMeasure.js";
+
 export * from "./jsBarcodeOptions.js";
 export * from "./qr.js";
 export * from "./setupZplServiceContainer.js";
