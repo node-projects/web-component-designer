@@ -408,10 +408,10 @@ const scrollbarStyle = css`
     :host {
        display: block;
        contain: content;
-       background-color: var(--wcd-plain-scrollbar-track-background-color, #f8f8f8);
+       background-color: var(--wcd-plain-scrollbar-track-background-color, var(--plain-scrollbar-track-background-color, #f8f8f8));
        border-style: solid;
        border-width: 1px;
-       border-color: var(--wcd-plain-scrollbar-track-border-color, #dddddd);
+       border-color: var(--wcd-plain-scrollbar-track-border-color, var(--plain-scrollbar-track-border-color, #dddddd));
     }
     #root {
        touch-action: none;
