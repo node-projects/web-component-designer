@@ -64,7 +64,9 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
         }
         let designItems: IDesignItem[] = [];
         let fontName: string;
-        let fontHeight: number;
+        // ZPL keeps the last accepted ^A/^CF height when a later command omits
+        // it ("use current default"), so this is carried forward, not reset.
+        let fontHeight: number = 15;
         let fontWidth: number;
         let rotation: string = 'N';
         let x: number;
@@ -74,6 +76,9 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
         let bw: number;
         let bh: number;
         let br: number;
+        // ^FB block state, consumed by the next ^FD and then reset
+        const defaultFieldBlock = { width: 0, maxLines: 1, lineSpacing: 0, justification: 'L', indent: 0 };
+        let fieldBlock = defaultFieldBlock;
         // let bo: string;
         let barcode: ZplBarcode;
 
@@ -84,6 +89,16 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             let command = p.substring(0, 2);
             let fieldString = p.substring(2);
             let fields = fieldString.split(",");
+
+            // ^A<font><orientation>,<h>,<w> for any of the built in fonts (0, A..H).
+            if (command[0] === 'A' && "0ABCDEFGH".includes(command[1])) {
+                fontName = command[1];
+                rotation = getSetValue(fields[0], 'N');
+                fontHeight = parseInt(getSetValue(fields[1], fontHeight.toString())) || fontHeight;
+                // 0 means "derive from the height"; the metrics resolve it.
+                fontWidth = parseInt(getSetValue(fields[2], '0')) || 0;
+                continue;
+            }
 
             switch (command) {
                 case "XA":
@@ -97,35 +112,21 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                     comment.setAttribute("content", fieldString);
                     designItems.push(DesignItem.createDesignItemFromInstance(comment, serviceContainer, instanceServiceContainer));
                     break;
-                case "AA": //Ax x=fontname
-                case "A0": {
-                    fontName = command[1];
-                    rotation = getSetValue(fields[0], 'N');
-                    let defaultFontWidth = 15;
-                    switch (fontName) {
-                        case "A":
-                            defaultFontWidth = 15;
-                            break;
-                        case "0":
-                            defaultFontWidth = fontHeight;
-                    }
-                    fontHeight = parseInt(getSetValue(fields[1], defaultFontWidth));
-                    fontWidth = parseInt(getSetValue(fields[2], defaultFontWidth));
-                    break;
-                }
                 case "CF": //we should switch to use A, CF is default font
                     rotation = 'N';
                     fontName = fields[0];
-                    fontHeight = parseInt(fields[1]);
-                    let defaultFontWidth = 15;
-                    switch (fontName) {
-                        case "A":
-                            defaultFontWidth = 15;
-                            break;
-                        case "0":
-                            defaultFontWidth = fontHeight;
-                    }
-                    fontWidth = parseInt(getSetValue(fields[2], defaultFontWidth));
+                    fontHeight = parseInt(getSetValue(fields[1], fontHeight.toString())) || fontHeight;
+                    // 0 means "derive from the height"; the metrics resolve it.
+                    fontWidth = parseInt(getSetValue(fields[2], '0')) || 0;
+                    break;
+                case "FB":
+                    fieldBlock = {
+                        width: parseInt(getSetValue(fields[0], '0')) || 0,
+                        maxLines: parseInt(getSetValue(fields[1], '1')) || 1,
+                        lineSpacing: parseInt(getSetValue(fields[2], '0')) || 0,
+                        justification: getSetValue(fields[3], 'L'),
+                        indent: parseInt(getSetValue(fields[4], '0')) || 0,
+                    };
                     break;
                 case "FO":
                     x = parseInt(fields[0]);
@@ -220,11 +221,19 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                         text.setAttribute("font-height", fontHeight.toString());
                         text.setAttribute("font-width", fontWidth.toString());
                         text.setAttribute("content", fieldString);
+                        if (fieldBlock.width > 0) {
+                            text.setAttribute("block-width", fieldBlock.width.toString());
+                            text.setAttribute("max-lines", fieldBlock.maxLines.toString());
+                            text.setAttribute("line-spacing", fieldBlock.lineSpacing.toString());
+                            text.setAttribute("justification", fieldBlock.justification);
+                            text.setAttribute("hanging-indent", fieldBlock.indent.toString());
+                        }
                         if (rotation) {
                             this.createTransform(rotation, text);
                         }
                         designItems.push(DesignItem.createDesignItemFromInstance(text, serviceContainer, instanceServiceContainer));
                     }
+                    fieldBlock = defaultFieldBlock;
                     break;
                 case "XG":
                     let image = new ZplImage();
