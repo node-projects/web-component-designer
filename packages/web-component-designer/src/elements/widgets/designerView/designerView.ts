@@ -10,7 +10,7 @@ import { DefaultHtmlParserService } from '../../services/htmlParserService/Defau
 import { EventNames } from '../../../enums/EventNames.js';
 import { PlainScrollbar } from '../../controls/PlainScrollbar.js';
 import { DesignerToolbar } from './tools/toolBar/DesignerToolbar.js';
-
+import { getCanvasPointAtViewportCenter, ZoomHoldRepeater } from './ZoomHelper.js';
 
 export class DesignerView extends BaseCustomWebComponentConstructorAppend implements IUiCommandHandler {
   private _sVert: PlainScrollbar;
@@ -46,6 +46,9 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
   private _toolbar: DesignerToolbar;
+  private _zoomHoldRepeater = new ZoomHoldRepeater();
+  private _zoomPointerId: number;
+  private _zoomPointerTarget: HTMLElement;
 
   static override readonly style = css`
     :host {
@@ -204,34 +207,16 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     this._zoomInput.onkeydown = (e) => {
       if (e.key == 'Enter')
-        this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
+        this._zoomAroundViewportCenter(parseFloat(this._zoomInput.value) / 100);
     }
     this._zoomInput.onblur = () => {
-      this._designerCanvas.zoomFactor = parseFloat(this._zoomInput.value) / 100;
+      this._zoomAroundViewportCenter(parseFloat(this._zoomInput.value) / 100);
     }
     this._zoomInput.onclick = this._zoomInput.select
     let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
-    zoomIncrease.onclick = () => {
-      const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
-      const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
-      if (this._designerCanvas.zoomFactor > 0.1)
-        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor + 0.1)
-      else
-        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor + 0.01)
-    }
+    this._configureZoomButton(zoomIncrease, 1);
     let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
-    zoomDecrease.onclick = () => {
-      const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
-      const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
-
-      if (this._designerCanvas.zoomFactor > 0.11)
-        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor - 0.1)
-      else
-        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, this._designerCanvas.zoomFactor - 0.01)
-
-      if (this._designerCanvas.zoomFactor < 0.001)
-        this._designerCanvas.zoomPoint({ x: w / 2, y: h / 2 }, 0.001)
-    }
+    this._configureZoomButton(zoomDecrease, -1);
     let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
     zoomReset.onclick = () => {
       this.zoomReset();
@@ -275,6 +260,73 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   public zoomToFit() {
     this._designerCanvas.zoomToFit()
+  }
+
+  private _zoomAroundViewportCenter(newZoom: number) {
+    if (!Number.isFinite(newZoom) || newZoom <= 0)
+      return;
+
+    const viewport = this._designerCanvas.outerRect;
+    const centerPoint = getCanvasPointAtViewportCenter(
+      viewport.width,
+      viewport.height,
+      this._designerCanvas.zoomFactor,
+      this._designerCanvas.canvasOffset
+    );
+    this._designerCanvas.zoomPoint(centerPoint, newZoom);
+  }
+
+  private _configureZoomButton(button: HTMLElement, direction: 1 | -1) {
+    button.onpointerdown = event => {
+      if (!event.isPrimary || event.button != 0)
+        return;
+
+      this._stopZoomRepeat();
+      this._zoomPointerId = event.pointerId;
+      this._zoomPointerTarget = button;
+      try {
+        button.setPointerCapture(event.pointerId);
+      } catch {
+      }
+      this._zoomHoldRepeater.start(
+        () => this._zoomStep(direction),
+        () => this._zoomStep(direction, 4)
+      );
+      event.preventDefault();
+    };
+    button.onpointerup = event => this._stopZoomRepeat(event.pointerId);
+    button.onpointercancel = event => this._stopZoomRepeat(event.pointerId);
+    button.onlostpointercapture = event => this._stopZoomRepeat(event.pointerId);
+    button.oncontextmenu = event => event.preventDefault();
+  }
+
+  private _zoomStep(direction: 1 | -1, stepDivisor = 1) {
+    const currentZoom = this._designerCanvas.zoomFactor;
+    if (direction > 0) {
+      const zoomStep = (currentZoom > 0.1 ? 0.1 : 0.01) / stepDivisor;
+      this._zoomAroundViewportCenter(currentZoom + zoomStep);
+    } else {
+      const zoomStep = (currentZoom > 0.11 ? 0.1 : 0.01) / stepDivisor;
+      this._zoomAroundViewportCenter(Math.max(currentZoom - zoomStep, 0.001));
+    }
+  }
+
+  private _stopZoomRepeat(pointerId?: number) {
+    if (pointerId != null && pointerId !== this._zoomPointerId)
+      return;
+
+    const activePointerId = this._zoomPointerId;
+    const activeTarget = this._zoomPointerTarget;
+    this._zoomPointerId = null;
+    this._zoomPointerTarget = null;
+    this._zoomHoldRepeater.stop();
+    if (activeTarget && activePointerId != null) {
+      try {
+        if (activeTarget.hasPointerCapture(activePointerId))
+          activeTarget.releasePointerCapture(activePointerId);
+      } catch {
+      }
+    }
   }
 
   private _onScrollbar(e) {
