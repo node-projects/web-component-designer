@@ -1,5 +1,4 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
-import { requestAnimationFramePromise } from "@node-projects/web-component-designer";
 import { getZplCoordinates } from "../zplHelper.js";
 
 export class ZplImage extends BaseCustomWebComponentConstructorAppend {
@@ -17,6 +16,9 @@ export class ZplImage extends BaseCustomWebComponentConstructorAppend {
     `;
 
     static readonly is = 'zpl-image';
+    static get observedAttributes() {
+        return ['total-bytes', 'bytes-per-row', 'image-name', 'hex-image', 'scale-x', 'scale-y'];
+    }
 
 
     private _image: HTMLCanvasElement;
@@ -45,27 +47,28 @@ export class ZplImage extends BaseCustomWebComponentConstructorAppend {
         this._wrapper = this._getDomElement<HTMLDivElement>("wrapper");
     }
 
-    async ready() {
+    ready() {
         this._parseAttributesToProperties();
-        if (this.scaleX < 1)
-            this.scaleX = 1
-        if (this.scaleY < 1)
-            this.scaleY = 1
-        if (this.scaleX > 10)
-            this.scaleX = 10
-        if (this.scaleX > 10)
-            this.scaleX = 10
+        this._renderImage();
+    }
+
+    attributeChangedCallback(_name: string, oldValue: string | null, newValue: string | null) {
+        if (oldValue === newValue || !this._image) return;
+        this._parseAttributesToProperties();
+        this._renderImage();
+    }
+
+    private _renderImage() {
+        this.scaleX = Math.max(1, Math.min(10, Number(this.scaleX) || 1));
+        this.scaleY = Math.max(1, Math.min(10, Number(this.scaleY) || 1));
         if (this.hexImage && this.bytesPerRow)
             this.acsToCanvas(this.hexImage, this.bytesPerRow);
         // this._image.style.width = 100 * this.scaleX + "%";
         // this._image.style.aspectRatio = (this.scaleX / this.scaleY).toString();
         this._image.style.transformOrigin = "0 0";
         this._image.style.transform = "scaleX(" + this.scaleX + ") " + "scaleY(" + this.scaleY + ")";
-        await requestAnimationFramePromise();
-        let rect = this._image.getBoundingClientRect();
-        this._wrapper.style.width = rect.width + "px";
-        this._wrapper.style.height = rect.height + "px";
-
+        this._wrapper.style.width = this._image.width * this.scaleX + "px";
+        this._wrapper.style.height = this._image.height * this.scaleY + "px";
     }
 
     public createZplImage() {

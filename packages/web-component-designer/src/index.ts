@@ -357,6 +357,7 @@ export * from "./elements/widgets/designerView/extensions/ElementDragTitleExtens
 export * from "./elements/widgets/designerView/extensions/ElementDragTitleExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/ResizeExtension.js";
 export * from "./elements/widgets/designerView/extensions/ResizeExtensionProvider.js";
+export * from "./elements/services/resizeService/IElementResizeStrategy.js";
 export * from "./elements/widgets/designerView/extensions/transforms/SkewExtension.js";
 export * from "./elements/widgets/designerView/extensions/transforms/SkewExtensionProvider.js";
 export * from "./elements/widgets/designerView/extensions/transforms/RotateExtension.js";

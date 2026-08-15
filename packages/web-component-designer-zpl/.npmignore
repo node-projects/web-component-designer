@@ -1,6 +1,9 @@
 src/
 test/
 node_modules/
+/assets/
+/scripts/
 tsconfig.json
 tsconfig.tsbuildinfo
 !dist
+!dist/**

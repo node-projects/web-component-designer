@@ -9,6 +9,7 @@ import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { AbstractExtension } from './AbstractExtension.js';
 import { IExtensionManager } from './IExtensionManger.js';
+import { ElementResizeContext, IElementResizeStrategy, ResizeHandle } from '../../../services/resizeService/IElementResizeStrategy.js';
 
 export function normalizeToAbsolutePosition(element: HTMLElement, normalizeProperty: "left" | "top") {
   switch (normalizeProperty) {
@@ -46,10 +47,13 @@ export class ResizeExtension extends AbstractExtension {
   private _initialLocalToCanvasMatrix: DOMMatrix | null = null;
   private _initialBorderBoxSize: ISize | null = null;
   private _initialFixedResizeAnchor: DOMPoint | null = null;
+  private _resizeStrategy: IElementResizeStrategy | null;
+  private _resizeStrategyState: unknown;
 
   constructor(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, extendedItem: IDesignItem, resizeAllSelected: boolean) {
     super(extensionManager, designerCanvas, extendedItem);
     this.resizeAllSelected = resizeAllSelected;
+    this._resizeStrategy = designerCanvas.serviceContainer.getLastServiceWhere('elementResizeStrategy', strategy => strategy.isHandledElement(extendedItem));
   }
 
   override extend(cache: Record<string | symbol, any>, event?: Event) {
@@ -87,8 +91,11 @@ export class ResizeExtension extends AbstractExtension {
       circle.addEventListener(EventNames.PointerDown, event => this._pointerActionTypeResize(circle, event, cursor));
       circle.addEventListener(EventNames.PointerMove, event => this._pointerActionTypeResize(circle, event, cursor));
       circle.addEventListener(EventNames.PointerUp, event => this._pointerActionTypeResize(circle, event, cursor));
+      if (this._resizeStrategy)
+        circle.addEventListener('pointercancel', event => this._pointerActionTypeResize(circle, event, cursor));
     }
     circle.style.cursor = cursor;
+    circle.style.display = this._resizeStrategy && !this._resizeStrategy.getEnabledHandles(this.extendedItem).includes(cursor as ResizeHandle) ? 'none' : '';
     return circle;
   }
 
@@ -114,6 +121,9 @@ export class ResizeExtension extends AbstractExtension {
         this._actionModeStarted = actionMode;
 
         this._initialSizes.push(this._getInitialSize(this.extendedItem.element));
+        if (this._resizeStrategy) {
+          this._resizeStrategyState = this._resizeStrategy.begin(this._strategyContext(this._initialSizes[0]));
+        }
 
         if (this.resizeAllSelected) {
           for (const designItem of this.designerCanvas.instanceServiceContainer.selectionService.selectedElements) {
@@ -281,9 +291,15 @@ export class ResizeExtension extends AbstractExtension {
               break;
           }
 
-          const currentBorderBoxSize = this._getCurrentBorderBoxSize(deltaX, deltaY);
+          let currentBorderBoxSize = this._getCurrentBorderBoxSize(deltaX, deltaY);
           if (!currentBorderBoxSize) {
             return;
+          }
+
+          if (this._resizeStrategy) {
+            const strategySize = this._resizeStrategy.preview(this._strategyContext(currentBorderBoxSize), this._resizeStrategyState);
+            if (strategySize)
+              currentBorderBoxSize = strategySize;
           }
 
           this._applyAnchorCorrection(currentBorderBoxSize);
@@ -304,8 +320,13 @@ export class ResizeExtension extends AbstractExtension {
         let cg = this.extendedItem.openGroup((this.resizeAllSelected && this.designerCanvas.instanceServiceContainer.selectionService.selectedElements.length > 1) ? "Resize Elements" : "Resize &lt;" + this.extendedItem.name + "&gt;");
         try {
           const element = <HTMLElement>this.extendedItem.element;
-          this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
-          this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
+          if (this._resizeStrategy) {
+            const currentSize = getElementSize(this.extendedItem.element);
+            this._resizeStrategy.commit(this._strategyContext(currentSize), this._resizeStrategyState);
+          } else {
+            this.extendedItem.setStyle('width', (<HTMLElement>this.extendedItem.element).style.width);
+            this.extendedItem.setStyle('height', (<HTMLElement>this.extendedItem.element).style.height);
+          }
 
           let left = parseFloat(normalizeToAbsolutePosition(element, 'left'));
           let top = parseFloat(normalizeToAbsolutePosition(element, 'top'));
@@ -347,8 +368,26 @@ export class ResizeExtension extends AbstractExtension {
         this._initialLocalToCanvasMatrix = null;
         this._initialBorderBoxSize = null;
         this._initialFixedResizeAnchor = null;
+        this._resizeStrategyState = undefined;
+        break;
+      case 'pointercancel':
+        if (this._initialPoint && this._resizeStrategy && this._initialSizes) {
+          this._resizeStrategy.cancel(this._strategyContext(this._initialSizes[0]), this._resizeStrategyState);
+        }
+        this._initialSizes = null;
+        this._initialPoint = null;
+        this._resizeStrategyState = undefined;
         break;
     }
+  }
+
+  private _strategyContext(currentSize: ISize): ElementResizeContext {
+    return {
+      designItem: this.extendedItem,
+      handle: this._actionModeStarted as ResizeHandle,
+      initialSize: this._initialSizes?.[0] ?? currentSize,
+      currentSize
+    };
   }
 
   private _getLocalHandleDelta(currentHandleCanvasPoint: DOMPoint): DOMPoint | null {

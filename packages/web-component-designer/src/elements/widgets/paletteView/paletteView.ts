@@ -17,6 +17,13 @@ export class PaletteView extends BaseCustomWebComponentLazyAppend {
       flex-direction: column;
       flex: 1;
       height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    node-projects-designer-tab-control {
+      flex: 1;
+      min-height: 0;
     }`;
 
   constructor() {

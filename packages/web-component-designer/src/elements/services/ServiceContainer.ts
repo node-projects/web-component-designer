@@ -56,6 +56,7 @@ import { ICollaborationService } from './collaborationService/ICollaborationServ
 import { IEditorTypeService } from './propertiesService/IEditorTypeService.js';
 import { ISourceMapProvider } from './sourceMapService/ISourceMapProvider.js';
 import { IRenderedDesignItemService } from './renderedDesignItemService/IRenderedDesignItemService.js';
+import { IElementResizeStrategy } from './resizeService/IElementResizeStrategy.js';
 
 interface ServiceNameMap {
   "propertyService": IPropertiesService;
@@ -91,6 +92,7 @@ interface ServiceNameMap {
   "searchService": ISearchService;
   "editorTypeService": IEditorTypeService;
   "renderedDesignItemService": IRenderedDesignItemService;
+  "elementResizeStrategy": IElementResizeStrategy;
 
   //Factories for Instance Service Containers
   "undoService": (designerCanvas: IDesignerCanvas) => IUndoService;

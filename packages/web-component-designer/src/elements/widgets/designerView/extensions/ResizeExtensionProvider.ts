@@ -19,6 +19,9 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
       return false;
     if (designItem.element instanceof SVGElement || designItem.element instanceof HTMLTemplateElement)
       return false;
+    const strategy = designerCanvas.serviceContainer.getLastServiceWhere('elementResizeStrategy', current => current.isHandledElement(designItem));
+    if (strategy && strategy.getEnabledHandles(designItem).length === 0)
+      return false;
     return !designItem.isRootItem && designItem.nodeType == NodeType.Element;
   }
 

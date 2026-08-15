@@ -19,6 +19,7 @@ export class ZplGraphicBox extends BaseCustomWebComponentConstructorAppend {
     `;
 
     static readonly is = 'zpl-graphic-box';
+    static get observedAttributes() { return ['stroke-width', 'stroke-color', 'corner-rounding']; }
 
     public strokeWidth: number = 1;
     public strokeColor: string = 'black';
@@ -47,6 +48,12 @@ export class ZplGraphicBox extends BaseCustomWebComponentConstructorAppend {
             this.cornerRounding = 8;
         if (this.cornerRounding < 0)
             this.cornerRounding = 0;
+        this._drawSvg();
+    }
+
+    attributeChangedCallback(_name: string, oldValue: string | null, newValue: string | null) {
+        if (oldValue === newValue || !this._box) return;
+        this._parseAttributesToProperties();
         this._drawSvg();
     }
 
