@@ -3,11 +3,18 @@
 import { beforeAll, describe, expect, test } from '@jest/globals';
 
 let ZplText: typeof import('../src/widgets/zpl-text.js').ZplText;
-let zplTextPreviewYOffset: typeof import('../src/widgets/zpl-text.js').zplTextPreviewYOffset;
+let getZplTextOutputOffset: typeof import('../src/widgets/zpl-text.js').getZplTextOutputOffset;
+let zplTextOutputOriginCorrection: typeof import('../src/widgets/zpl-text.js').zplTextOutputOriginCorrection;
 let ZplBarcode: typeof import('../src/widgets/zpl-barcode.js').ZplBarcode;
 let ZplTextPropertiesService: typeof import('../src/services/ZplTextPropertiesService.js').ZplTextPropertiesService;
 let ZplBarcodePropertiesService: typeof import('../src/services/ZplBarcodePropertiesService.js').ZplBarcodePropertiesService;
 let ZplElementResizeStrategy: typeof import('../src/services/ZplElementResizeStrategy.js').ZplElementResizeStrategy;
+let ZplGraphicResizeStrategy: typeof import('../src/services/ZplGraphicResizeStrategy.js').ZplGraphicResizeStrategy;
+let ZplSelectionExtensionProvider: typeof import('../src/services/ZplSelectionExtensionProvider.js').ZplSelectionExtensionProvider;
+let resizeZplDiagonalEndpoint: typeof import('../src/services/ZplDiagonalLineExtension.js').resizeZplDiagonalEndpoint;
+let getZplDiagonalVisibleHeight: typeof import('../src/services/ZplDiagonalLineExtension.js').getZplDiagonalVisibleHeight;
+let getZplDiagonalElementHeight: typeof import('../src/services/ZplDiagonalLineExtension.js').getZplDiagonalElementHeight;
+let parseZplFontWidth: typeof import('../src/services/ZplParserService.js').parseZplFontWidth;
 
 beforeAll(async () => {
     for (const name of ['SVGPathElement', 'SVGRectElement', 'SVGCircleElement', 'SVGEllipseElement',
@@ -31,12 +38,22 @@ beforeAll(async () => {
     if (!document.fonts) {
         Object.defineProperty(document, 'fonts', { value: { add() { } } });
     }
+    if (!globalThis.ResizeObserver) {
+        Object.defineProperty(globalThis, 'ResizeObserver', {
+            value: class { observe() { } unobserve() { } disconnect() { } }
+        });
+    }
 
-    ({ ZplText, zplTextPreviewYOffset } = await import('../src/widgets/zpl-text.js'));
+    ({ ZplText, getZplTextOutputOffset, zplTextOutputOriginCorrection } = await import('../src/widgets/zpl-text.js'));
     ({ ZplBarcode } = await import('../src/widgets/zpl-barcode.js'));
     ({ ZplTextPropertiesService } = await import('../src/services/ZplTextPropertiesService.js'));
     ({ ZplBarcodePropertiesService } = await import('../src/services/ZplBarcodePropertiesService.js'));
     ({ ZplElementResizeStrategy } = await import('../src/services/ZplElementResizeStrategy.js'));
+    ({ ZplGraphicResizeStrategy } = await import('../src/services/ZplGraphicResizeStrategy.js'));
+    ({ ZplSelectionExtensionProvider } = await import('../src/services/ZplSelectionExtensionProvider.js'));
+    ({ resizeZplDiagonalEndpoint, getZplDiagonalVisibleHeight, getZplDiagonalElementHeight }
+        = await import('../src/services/ZplDiagonalLineExtension.js'));
+    ({ parseZplFontWidth } = await import('../src/services/ZplParserService.js'));
 });
 
 const flushReady = async () => {
@@ -70,7 +87,7 @@ describe('ZPL widget runtime updates', () => {
         expect((element.shadowRoot!.querySelector('#text-div') as HTMLElement).style.fontFamily).toContain('ZplOCRB');
     });
 
-    test('aligns browser text ink with the ZPL field origin', async () => {
+    test('keeps preview ink inside its design box and compensates the emitted origin', async () => {
         const element = document.createElement('zpl-text') as InstanceType<typeof ZplText>;
         element.setAttribute('content', 'Origin');
         element.setAttribute('font-name', '0');
@@ -82,9 +99,50 @@ describe('ZPL widget runtime updates', () => {
         await flushReady();
 
         const text = element.shadowRoot!.querySelector('#text-div') as HTMLElement;
-        expect(zplTextPreviewYOffset).toBe(-7);
-        expect(text.style.transform).toBe('translate(0px, -7px) scaleX(1)');
-        expect(element.createZpl()).toContain('^FO20,40,0^A0N,30,30');
+        expect(zplTextOutputOriginCorrection).toBe(3);
+        expect(text.style.transform).toBe('translate(0px, 0px) scaleX(1)');
+        expect(element.createZpl()).toContain('^FO20,43,0^A0N,30,30');
+    });
+
+    test('rotates the emitted text-origin compensation with the field', () => {
+        expect(getZplTextOutputOffset('N')).toEqual({ x: 0, y: 3 });
+        expect(getZplTextOutputOffset('R')).toEqual({ x: -3, y: 0 });
+        expect(getZplTextOutputOffset('I')).toEqual({ x: 0, y: -3 });
+        expect(getZplTextOutputOffset('B')).toEqual({ x: 3, y: 0 });
+    });
+
+    test('keeps omitted font width automatic and corrects large Font 0 preview origins', async () => {
+        expect(parseZplFontWidth(undefined)).toBe(0);
+        expect(parseZplFontWidth('')).toBe(0);
+        expect(parseZplFontWidth('18')).toBe(18);
+
+        const element = document.createElement('zpl-text') as InstanceType<typeof ZplText>;
+        element.setAttribute('content', 'CA');
+        element.setAttribute('font-name', '0');
+        element.setAttribute('font-height', '190');
+        element.setAttribute('font-width', '0');
+        document.body.appendChild(element);
+        await flushReady();
+
+        const text = element.shadowRoot!.querySelector('#text-div') as HTMLElement;
+        expect(text.style.transform).toBe('translate(0px, -16px) scaleX(1)');
+        expect(element.createZpl()).toContain('^A0N,190,0');
+    });
+
+    test('emits QR origins so visible printer ink matches the designer position', () => {
+        const element = document.createElement('zpl-barcode') as InstanceType<typeof ZplBarcode>;
+        element.setAttribute('type', 'qrcode');
+        // Invalid preview content avoids requiring a jsdom canvas; origin
+        // emission itself is independent of field validation.
+        element.setAttribute('content', '');
+        element.setAttribute('magnification', '4');
+        element.style.left = '400px';
+        element.style.top = '100px';
+
+        element.setAttribute('rotation', 'N');
+        expect(element.createZpl()).toContain('^FO400,90,0^BQN,2,4');
+        element.setAttribute('rotation', 'B');
+        expect(element.createZpl()).toContain('^FO390,100,0^BQB,2,4');
     });
 
     test('successive resize previews stay relative to the gesture start', async () => {
@@ -120,6 +178,30 @@ describe('ZPL widget runtime updates', () => {
         expect(element.getAttribute('font-height')).toBe('45');
     });
 
+    test('proportional resize preserves automatic device-font width', async () => {
+        const element = document.createElement('zpl-text') as InstanceType<typeof ZplText>;
+        element.setAttribute('content', 'Resize');
+        element.setAttribute('font-name', 'A');
+        element.setAttribute('font-height', '30');
+        element.setAttribute('font-width', '0');
+        document.body.appendChild(element);
+        await flushReady();
+        element.getBoundingClientRect = () => ({ width: 100, height: 30 } as DOMRect);
+        const designItem = { element, getAttribute: (name: string) => element.getAttribute(name),
+            setAttribute: (name: string, value: string) => element.setAttribute(name, value) } as any;
+        const strategy = new ZplElementResizeStrategy();
+        const initial = { designItem, handle: 'se-resize', initialSize: { width: 100, height: 30 }, currentSize: { width: 100, height: 30 } } as any;
+        const state = strategy.begin(initial);
+
+        strategy.preview({ ...initial, currentSize: { width: 200, height: 60 } }, state);
+        expect(element.getAttribute('font-height')).toBe('60');
+        expect(element.getAttribute('font-width')).toBe('0');
+
+        strategy.preview({ ...initial, currentSize: { width: 200, height: 30 } }, state);
+        expect(element.getAttribute('font-height')).toBe('30');
+        expect(element.getAttribute('font-width')).toBe('30');
+    });
+
     test('barcode property edits refresh the rendered rotation', async () => {
         const element = document.createElement('zpl-barcode') as InstanceType<typeof ZplBarcode>;
         element.setAttribute('type', 'qrcode');
@@ -141,5 +223,66 @@ describe('ZPL widget runtime updates', () => {
 
         expect(element.getAttribute('rotation')).toBe('R');
         expect((element.shadowRoot!.querySelector('#barcode-frame') as HTMLElement).style.transform).toContain('rotate(90deg)');
+    });
+
+    test('circle uses resize edge points and diagonal delegates to its endpoint extension', async () => {
+        const circle = document.createElement('zpl-graphic-circle') as HTMLElement;
+        const diagonal = document.createElement('zpl-graphic-diagonal-line') as HTMLElement;
+        diagonal.setAttribute('orientation', 'R');
+        const strategy = new ZplGraphicResizeStrategy();
+        const item = (element: HTMLElement) => ({ element, getAttribute: (name: string) => element.getAttribute(name) }) as any;
+
+        expect(strategy.getEnabledHandles(item(circle))).toEqual(['n-resize', 'w-resize', 's-resize', 'e-resize']);
+        expect(strategy.getEnabledHandles(item(diagonal))).toEqual([]);
+
+        const selection = new ZplSelectionExtensionProvider();
+        expect(selection.shouldExtend({} as any, {} as any, item(circle))).toBe(false);
+        expect(selection.shouldExtend({} as any, {} as any, item(diagonal))).toBe(false);
+    });
+
+    test('graphic resize commits the visual size through the design item', () => {
+        const circle = document.createElement('zpl-graphic-circle') as HTMLElement;
+        circle.style.width = '80px';
+        circle.style.height = '60px';
+        const committed: Record<string, string> = {};
+        const designItem = {
+            element: circle,
+            getAttribute: (name: string) => circle.getAttribute(name),
+            setStyle: (name: string, value: string) => { committed[name] = value; circle.style.setProperty(name, value); }
+        } as any;
+        const strategy = new ZplGraphicResizeStrategy();
+        const context = { designItem, handle: 'se-resize', initialSize: { width: 40, height: 30 }, currentSize: { width: 80, height: 60 } } as any;
+        const state = strategy.begin(context);
+        strategy.commit(context, state);
+        expect(committed).toEqual({ width: '80px', height: '60px' });
+    });
+
+    test('diagonal endpoint editing keeps the opposite endpoint immutable through crossings', () => {
+        const original = { first: { x: 100, y: 200 }, second: { x: 180, y: 260 } };
+
+        const above = resizeZplDiagonalEndpoint(original, 1, { x: 0, y: -100 }, 'L');
+        expect(above).toEqual({
+            endpoints: { first: { x: 100, y: 200 }, second: { x: 180, y: 160 } },
+            left: 100, top: 160, width: 80, height: 40, orientation: 'R'
+        });
+
+        const fartherAbove = resizeZplDiagonalEndpoint(original, 1, { x: 0, y: -150 }, 'L');
+        expect(fartherAbove.endpoints.first).toEqual(original.first);
+        expect(fartherAbove.endpoints.second).toEqual({ x: 180, y: 110 });
+        expect(fartherAbove).toMatchObject({ left: 100, top: 110, width: 80, height: 90, orientation: 'R' });
+    });
+
+    test('diagonal endpoint editing behaves symmetrically for either endpoint and both axes', () => {
+        const original = { first: { x: 100, y: 200 }, second: { x: 180, y: 260 } };
+        const crossedBoth = resizeZplDiagonalEndpoint(original, 0, { x: 120, y: 100 }, 'L');
+
+        expect(crossedBoth.endpoints.second).toEqual(original.second);
+        expect(crossedBoth.endpoints.first).toEqual({ x: 220, y: 300 });
+        expect(crossedBoth).toMatchObject({ left: 180, top: 260, width: 40, height: 40, orientation: 'L' });
+    });
+
+    test('diagonal endpoint geometry accounts for the inset lower SVG endpoint', () => {
+        expect(getZplDiagonalVisibleHeight(160, 10)).toBe(150);
+        expect(getZplDiagonalElementHeight(150, 10)).toBe(160);
     });
 });

@@ -1,6 +1,7 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { IUiCommand, InstanceServiceContainer, ServiceContainer } from '@node-projects/web-component-designer';
 import { IDemoView } from '@node-projects/web-component-designer/src/elements/widgets/demoView/IDemoView.js';
+import { zplPreviewDpmm } from '../../barcodes/bwipRenderer.js';
 
 export class ZplDemoView extends BaseCustomWebComponentConstructorAppend implements IDemoView {
 
@@ -31,7 +32,7 @@ export class ZplDemoView extends BaseCustomWebComponentConstructorAppend impleme
     async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
         const width = 4;
         const height = 6;
-        const dpmm = '24dpmm';
+        const dpmm = `${zplPreviewDpmm}dpmm`;
 
         const response = await fetch(`https://api.labelary.com/v1/printers/${dpmm}/labels/${width}x${height}/${0}`, {
             method: "POST",

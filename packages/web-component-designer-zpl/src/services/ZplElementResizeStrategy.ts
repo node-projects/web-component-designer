@@ -5,6 +5,7 @@ import {
 import { getBarcodeDefinition } from '../barcodes/barcodeRegistry.js';
 import { ZplBarcode } from '../widgets/zpl-barcode.js';
 import { ZplText } from '../widgets/zpl-text.js';
+import { getNaturalZplFontWidth, ZplFontName } from '../fonts/zplFonts.js';
 import { quantizeZplValue, zplAxisScales } from './zplResizeGeometry.js';
 export { quantizeZplValue, zplAxisScales } from './zplResizeGeometry.js';
 
@@ -92,9 +93,24 @@ export class ZplElementResizeStrategy implements IElementResizeStrategy {
         const scales = zplAxisScales(element.getAttribute('rotation'), context.initialSize, context.currentSize);
         const fontWidthScale = scales.width;
         const fontHeightScale = scales.height;
+        if (!state.originalAttributes.has('font-width')) state.originalAttributes.set('font-width', element.getAttribute('font-width'));
+        const originalWidth = Number(state.originalAttributes.get('font-width'));
+        const originalHeight = this._initialNumber(state, element, 'font-height', 30);
+        const fontHeight = clamp(originalHeight * fontHeightScale, 1, 32000);
+        let fontWidth: number;
+        if (Number.isFinite(originalWidth) && originalWidth > 0) {
+            fontWidth = clamp(originalWidth * fontWidthScale, 1, 32000);
+        } else if (Math.abs(fontWidthScale - fontHeightScale) < .01) {
+            // A proportional resize keeps Zebra's automatic-width semantics.
+            fontWidth = 0;
+        } else {
+            const font = (element.getAttribute('font-name') || '0') as ZplFontName;
+            const residualScale = fontWidthScale / Math.max(.01, fontHeightScale);
+            fontWidth = clamp(getNaturalZplFontWidth(font, fontHeight) * residualScale, 1, 32000);
+        }
         return {
-            'font-width': String(clamp(this._initialNumber(state, element, 'font-width', 30) * fontWidthScale, 1, 32000)),
-            'font-height': String(clamp(this._initialNumber(state, element, 'font-height', 30) * fontHeightScale, 1, 32000))
+            'font-width': String(fontWidth),
+            'font-height': String(fontHeight)
         };
     }
 

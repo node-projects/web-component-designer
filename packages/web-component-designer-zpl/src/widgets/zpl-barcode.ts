@@ -1,7 +1,8 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { getZplCoordinates } from '../zplHelper.js';
-import { BarcodeProps, BarcodeRotation, BarcodeType, barcodeObservedAttributes, getBarcodeDefinition, readBarcodeProps } from '../barcodes/barcodeRegistry.js';
-import { renderBarcode } from '../barcodes/bwipRenderer.js';
+import { BarcodeProps, BarcodeRotation, BarcodeType, barcodeObservedAttributes, getBarcodeDefinition, getBarcodeFieldOriginOffset, readBarcodeProps } from '../barcodes/barcodeRegistry.js';
+import { barcodeFieldOriginAboveOffset, barcodeHorizontalInsets, barcodeShowsInterpretation,
+    barcodeTextAbove, barcodeTextZoneDots, renderBarcode } from '../barcodes/bwipRenderer.js';
 
 export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
@@ -10,7 +11,7 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
         #barcode-frame { position: relative; transform-origin: 0 0; }
         canvas { display: block; image-rendering: pixelated; }
         #hri { position: absolute; left: 0; width: 100%; text-align: center; color: black;
-            font: 12px "ZplVeraMono", monospace; line-height: 14px; white-space: nowrap; }
+            font-family: "ZplVeraMono", monospace; white-space: nowrap; }
         #error { width: 160px; min-height: 48px; padding: 6px; border: 1px dashed #c62828;
             color: #8e0000; background: #fff4f4; font: 11px sans-serif; overflow: hidden; }
     `;
@@ -106,6 +107,9 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
         this._frame.style.transform = '';
         this._frame.style.width = '';
         this._frame.style.height = '';
+        this._surface.style.position = '';
+        this._surface.style.left = '';
+        this._surface.style.top = '';
 
         if (!result.canvas) {
             this._error.textContent = `${definition.label}: ${result.error ?? 'cannot render this value'}`;
@@ -115,20 +119,44 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
         }
 
         const canvas = result.canvas;
-        const uprightWidth = canvas.width;
-        let uprightHeight = canvas.height;
-        if (definition.resizeKind === 'linear' || definition.resizeKind === 'tlc39') {
+        const uprightWidth = result.width;
+        const horizontalInsets = barcodeHorizontalInsets(props);
+        let uprightHeight = result.height;
+        if (definition.resizeKind === 'linear') {
             const linear = props as Extract<BarcodeProps, { barHeight: number }>;
-            canvas.style.width = `${canvas.width}px`;
+            canvas.style.width = `${uprightWidth - horizontalInsets.left - horizontalInsets.right}px`;
             canvas.style.height = `${linear.barHeight}px`;
             uprightHeight = linear.barHeight;
-            const showHri = 'printInterpretation' in linear && linear.printInterpretation;
-            if (showHri) {
-                this._hri.textContent = linear.content;
-                this._hri.style.top = linear.printInterpretationAbove ? '-14px' : `${uprightHeight}px`;
-                this._hri.hidden = false;
-                uprightHeight += 14;
+            const showHri = barcodeShowsInterpretation(props);
+            const textZone = barcodeTextZoneDots(props);
+            const textAbove = barcodeTextAbove(props);
+            if (textAbove && textZone > 0) {
+                this._surface.style.position = 'absolute';
+                this._surface.style.left = `${horizontalInsets.left}px`;
+                this._surface.style.top = `${textZone}px`;
+            } else if (horizontalInsets.left > 0) {
+                this._surface.style.position = 'absolute';
+                this._surface.style.left = `${horizontalInsets.left}px`;
+                this._surface.style.top = '0';
             }
+            if (showHri) {
+                const genericHri = ['code128', 'code39', 'code93', 'code11', 'interleaved2of5',
+                    'standard2of5', 'industrial2of5', 'codabar', 'msi'].includes(props.type);
+                const hriFontSize = genericHri ? 9.7 * Math.max(1, Math.round(linear.moduleWidth)) : 12;
+                this._hri.textContent = linear.content;
+                this._hri.style.height = `${textZone}px`;
+                this._hri.style.fontSize = `${hriFontSize}px`;
+                this._hri.style.lineHeight = `${hriFontSize}px`;
+                this._hri.style.letterSpacing = genericHri ? '.6px' : 'normal';
+                this._hri.style.transform = genericHri ? 'translateX(-3px)' : '';
+                // Zebra keeps a roughly five-dot bar-to-cap gap. Vera Mono's
+                // cap top sits about .14em below its line-box top. The DOM
+                // rasterizer needs three extra dots to match the printer cap.
+                const belowTop = uprightHeight + 8 - hriFontSize * .14;
+                this._hri.style.top = textAbove ? '0' : `${belowTop}px`;
+                this._hri.hidden = false;
+            }
+            uprightHeight += textZone;
         }
         this._surface.appendChild(canvas);
         this._setRotatedBounds(uprightWidth, uprightHeight, props.rotation);
@@ -158,7 +186,10 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
     public createZpl() {
         const props = this.barcodeProps;
         const emitted = getBarcodeDefinition(props.type).emit(props);
-        return `${getZplCoordinates(this, 0)}${emitted.by ?? ''}${emitted.command}^FD${emitted.fieldData}^FS`;
+        const offset = getBarcodeFieldOriginOffset(props.type, props.rotation);
+        const aboveOffset = props.rotation === 'N' ? barcodeFieldOriginAboveOffset(props) : 0;
+        const horizontalOffset = props.rotation === 'N' ? barcodeHorizontalInsets(props).left : 0;
+        return `${getZplCoordinates(this, 0, offset.x + horizontalOffset, offset.y + aboveOffset)}${emitted.by ?? ''}${emitted.command}^FD${emitted.fieldData}^FS`;
     }
 }
 

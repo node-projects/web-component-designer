@@ -78,6 +78,16 @@ export function getDeviceFontMetrics(font: ZplFontName, height: number, width: n
     };
 }
 
+/** Numeric ZPL width that represents the natural cell at a given requested
+ * height. Used only when an automatic-width field is stretched
+ * disproportionately and therefore has to become explicit. */
+export function getNaturalZplFontWidth(font: ZplFontName, height: number): number {
+    if (font === '0') return Math.max(1, Math.round(height));
+    const spec = deviceFonts[font];
+    const magnificationHeight = Math.min(10, Math.max(1, Math.round(height / spec.magStep)));
+    return magnificationHeight * spec.magWidthStep;
+}
+
 export function applyDeviceFontCase(font: ZplFontName, content: string): string {
     if (font === 'B') return content.toUpperCase();
     if (font === 'H') return content.replace(/[a-z]/g, '');

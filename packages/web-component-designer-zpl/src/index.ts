@@ -16,6 +16,7 @@ export * from "./services/ZplIncludeInOutputPropertiesService.js";
 export * from "./services/ZplBarcodeElementsService.js";
 export * from "./services/ZplElementResizeStrategy.js";
 export * from "./services/ZplTextPropertiesService.js";
+export * from "./services/ZplDiagonalLineExtension.js";
 
 export * from "./barcodes/barcodeRegistry.js";
 export * from "./barcodes/bwipRenderer.js";

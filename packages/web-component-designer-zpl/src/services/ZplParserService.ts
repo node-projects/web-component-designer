@@ -3,14 +3,15 @@ import {
     IHtmlWriterOptions, IHtmlWriterService, InstanceServiceContainer, ITextWriter,
     ServiceContainer
 } from '@node-projects/web-component-designer';
-import { attributesForBarcode, barcodeCommandRegistry, BarcodeByState, BarcodeDefinition } from '../barcodes/barcodeRegistry.js';
+import { attributesForBarcode, barcodeCommandRegistry, BarcodeByState, BarcodeDefinition, getBarcodeFieldOriginOffset, readBarcodeProps } from '../barcodes/barcodeRegistry.js';
+import { barcodeFieldOriginAboveOffset, barcodeHorizontalInsets } from '../barcodes/bwipRenderer.js';
 import { ZplBarcode } from '../widgets/zpl-barcode.js';
 import { ZplComment } from '../widgets/zpl-comment.js';
 import { ZplGraphicBox } from '../widgets/zpl-graphic-box.js';
 import { ZplGraphicCircle } from '../widgets/zpl-graphic-circle.js';
 import { ZplGraphicDiagonalLine } from '../widgets/zpl-graphic-diagonal-line.js';
 import { ZplImage } from '../widgets/zpl-image.js';
-import { ZplText } from '../widgets/zpl-text.js';
+import { getZplTextOutputOffset, ZplText } from '../widgets/zpl-text.js';
 import { createHiddenZplComments, hiddenPayloads, tokenizeZpl } from './hiddenMetadata.js';
 export { createHiddenZplComments, decodeHiddenZplComments, tokenizeZpl } from './hiddenMetadata.js';
 
@@ -23,6 +24,9 @@ interface GraphicDefinition {
 
 
 const first = (...values: (string | number | undefined | null)[]) => values.find(value => value !== '' && value != null && value !== 'NaN');
+
+/** Zebra uses zero/omitted width as the natural aspect ratio. */
+export const parseZplFontWidth = (value: string | undefined) => Number(first(value, 0));
 
 function setPosition(element: HTMLElement, x: number, y: number) {
     element.style.position = 'absolute';
@@ -51,10 +55,10 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
         let y = 0;
         let fontName = '0';
         let fontHeight = 30;
-        let fontWidth = 30;
+        let fontWidth = 0;
         let fontRotation = 'N';
         let by: BarcodeByState = { moduleWidth: 2, wideRatio: 3, barHeight: 100 };
-        let pendingBarcode: { element: ZplBarcode; definition: BarcodeDefinition } | null = null;
+        let pendingBarcode: { element: ZplBarcode; definition: BarcodeDefinition; outputX: number; outputY: number } | null = null;
 
         for (const token of tokens) {
             const fields = token.data.split(',');
@@ -70,13 +74,17 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             } else if (token.command === 'CF') {
                 fontName = fields[0] || '0';
                 fontHeight = Number(first(fields[1], 30));
-                fontWidth = Number(first(fields[2], fontHeight));
+                // An omitted width means the font's natural aspect ratio. For
+                // bitmap fonts A-H this also means "use the height
+                // magnification"; substituting the numeric height would pick
+                // a different (usually much wider) cell magnification.
+                fontWidth = parseZplFontWidth(fields[2]);
                 fontRotation = 'N';
             } else if (token.command[0] === 'A' && /^[0A-H]$/.test(token.command[1])) {
                 fontName = token.command[1];
                 fontRotation = fields[0] || 'N';
                 fontHeight = Number(first(fields[1], fontHeight, 30));
-                fontWidth = Number(first(fields[2], fontHeight));
+                fontWidth = parseZplFontWidth(fields[2]);
             } else if (token.command === 'BY') {
                 by = {
                     moduleWidth: Number(first(fields[0], by.moduleWidth, 2)),
@@ -86,11 +94,10 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             } else if (barcodeCommandRegistry[token.command]) {
                 const definition = barcodeCommandRegistry[token.command];
                 const element = new ZplBarcode();
-                setPosition(element, x, y);
                 const values = definition.parse(fields, by);
                 const attributes = attributesForBarcode(definition.type, values);
                 for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
-                pendingBarcode = { element, definition };
+                pendingBarcode = { element, definition, outputX: x, outputY: y };
             } else if (token.command === 'FD') {
                 if (pendingBarcode) {
                     let content = token.data;
@@ -102,11 +109,17 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
                         }
                     }
                     pendingBarcode.element.setAttribute('content', content);
+                    const props = readBarcodeProps(pendingBarcode.element);
+                    const offset = getBarcodeFieldOriginOffset(props.type, props.rotation);
+                    const aboveOffset = props.rotation === 'N' ? barcodeFieldOriginAboveOffset(props) : 0;
+                    const horizontalOffset = props.rotation === 'N' ? barcodeHorizontalInsets(props).left : 0;
+                    setPosition(pendingBarcode.element, pendingBarcode.outputX - offset.x - horizontalOffset, pendingBarcode.outputY - offset.y - aboveOffset);
                     result.push(designItem(pendingBarcode.element, serviceContainer, instanceServiceContainer));
                     pendingBarcode = null;
                 } else {
                     const element = new ZplText();
-                    setPosition(element, x, y);
+                    const offset = getZplTextOutputOffset(fontRotation as 'N' | 'R' | 'I' | 'B');
+                    setPosition(element, x - offset.x, y - offset.y);
                     element.setAttribute('font-name', fontName);
                     element.setAttribute('font-height', String(fontHeight));
                     element.setAttribute('font-width', String(fontWidth));

@@ -12,6 +12,13 @@ export interface ElementResizeContext {
     readonly currentSize: ISize;
 }
 
+/** A strategy may remap the active handle after normalising signed geometry.
+ * This keeps the original fixed point anchored when a dragged corner crosses
+ * it on either axis. */
+export interface ElementResizePreview extends ISize {
+    readonly anchorHandle?: ResizeHandle;
+}
+
 /**
  * Maps a visual resize gesture to element-specific model properties. The
  * ResizeExtension owns pointer geometry and the undo group; a strategy owns
@@ -21,7 +28,7 @@ export interface IElementResizeStrategy extends IService {
     isHandledElement(designItem: IDesignItem): boolean;
     getEnabledHandles(designItem: IDesignItem): readonly ResizeHandle[];
     begin(context: ElementResizeContext): unknown;
-    preview(context: ElementResizeContext, state: unknown): ISize | void;
+    preview(context: ElementResizeContext, state: unknown): ElementResizePreview | void;
     commit(context: ElementResizeContext, state: unknown): void;
     cancel(context: ElementResizeContext, state: unknown): void;
 }

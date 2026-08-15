@@ -119,6 +119,30 @@ export interface BarcodeDefinition<T extends BarcodeType = BarcodeType> {
     readonly emit: (props: BarcodeProps) => { by?: string; command: string; fieldData: string };
     readonly parse: (fields: string[], by: BarcodeByState) => Record<string, string | number | boolean>;
     readonly bwipOptions?: (props: BarcodeProps) => Record<string, unknown>;
+    /** ZPL field-origin correction required to align preview ink with printer ink. */
+    readonly fieldOriginOffset?: (rotation: BarcodeRotation) => Readonly<{ x: number; y: number }>;
+}
+
+export const dataMatrixSquareSizes = Object.freeze([
+    10, 12, 14, 16, 18, 20, 22, 24, 26, 32, 36, 40, 44, 48, 52,
+    64, 72, 80, 88, 96, 104, 120, 132, 144
+] as const);
+
+export const dataMatrixRectangularSizes = Object.freeze([
+    [8, 18], [8, 32], [12, 26], [12, 36], [16, 36], [16, 48]
+] as const);
+
+export function isDataMatrixRectangular(props: DataMatrixBarcodeProps): boolean {
+    return props.quality === 200 && props.aspectRatio === 2;
+}
+
+/** Returns a BWIP version only for a symbol size Zebra accepts for ECC 200. */
+export function getDataMatrixVersion(props: DataMatrixBarcodeProps): string | undefined {
+    if (props.quality !== 200 || !props.columns || !props.rows) return undefined;
+    const valid = isDataMatrixRectangular(props)
+        ? dataMatrixRectangularSizes.some(([rows, columns]) => rows === props.rows && columns === props.columns)
+        : props.rows === props.columns && dataMatrixSquareSizes.includes(props.rows as typeof dataMatrixSquareSizes[number]);
+    return valid ? `${props.rows}x${props.columns}` : undefined;
 }
 
 const p = {
@@ -165,6 +189,32 @@ function validateProps(props: BarcodeProps): string | null {
         if (property.min != null && value < property.min) return `${property.name} must be at least ${property.min}`;
         if (property.max != null && value > property.max) return `${property.name} must be at most ${property.max}`;
     }
+    return null;
+}
+
+function validatePostnet(props: BarcodeProps): string | null {
+    const common = validateProps(props);
+    if (common) return common;
+    return /^\d+$/.test(props.content) ? null : 'POSTNET content must contain digits only';
+}
+
+function validateDataMatrix(props: BarcodeProps): string | null {
+    const common = validateProps(props);
+    if (common) return common;
+    const value = props as DataMatrixBarcodeProps;
+    if (![0, 50, 80, 100, 140, 200].includes(value.quality)) return 'quality is not supported';
+    if ((value.columns === 0) !== (value.rows === 0)) return 'rows and columns must both be zero or both be set';
+    if (value.columns > 0 && value.quality === 200 && !getDataMatrixVersion(value))
+        return `rows and columns are not a valid ${isDataMatrixRectangular(value) ? 'rectangular' : 'square'} ECC 200 size`;
+    return null;
+}
+
+function validateTlc39(props: BarcodeProps): string | null {
+    const common = validateProps(props);
+    if (common) return common;
+    const [eci, serial = ''] = props.content.split(',', 2);
+    if (!/^\d{6}$/.test(eci)) return 'TLC39 ECI must contain exactly six digits';
+    if (!/^[0-9A-Z ]{0,25}$/i.test(serial)) return 'TLC39 serial must contain at most 25 alphanumeric characters';
     return null;
 }
 
@@ -259,11 +309,18 @@ const definitions: BarcodeDefinition[] = [
             { name: 'symbology', attributeName: 'symbology', type: 'number', min: 1, max: 7, step: 1 },
             { name: 'segments', attributeName: 'segments', type: 'number', min: 2, max: 22, step: 2 }],
         validate: validateProps,
+        fieldOriginOffset: rotation => rotation === 'N' ? { x: -2, y: 0 }
+            : rotation === 'R' ? { x: 0, y: -2 }
+                : rotation === 'I' ? { x: 2, y: 0 } : { x: 0, y: 2 },
         emit: props => { const v = props as Gs1DataBarProps; return { by: `^BY${v.magnification}`, command: `^BR${v.rotation},${v.symbology},${v.magnification},2,100${v.symbology === 7 ? `,${v.segments}` : ''}`, fieldData: v.content }; },
         parse: (f, by) => ({ rotation: rotation(f[0]), symbology: number(f[1], 1), magnification: number(f[2], by.moduleWidth), segments: number(f[5], 22) })
     },
     linearDefinition('planet', 'Planet Code', 'B5', 'planet', '12345678901', 'height', { properties: linearHriProperties }),
-    linearDefinition('postnet', 'POSTNET', 'BZ', 'postnet', '12345', 'height', { properties: linearHriProperties }),
+    linearDefinition('postnet', 'POSTNET', 'BZ', 'postnet', '12345', 'height', {
+        properties: [p.content, p.rotation, p.moduleWidth, p.barHeight,
+            p.printInterpretation, p.printInterpretationAbove],
+        validate: validatePostnet
+    }, null),
     linearDefinition('ean13', 'EAN-13', 'BE', 'ean13', '590123412345', 'height', { properties: linearHriProperties }),
     linearDefinition('ean8', 'EAN-8', 'B8', 'ean8', '1234567', 'height', { properties: linearHriProperties }),
     linearDefinition('upca', 'UPC-A', 'BU', 'upca', '01234567890', 'upca', { properties: linearHriProperties }),
@@ -283,6 +340,11 @@ const definitions: BarcodeDefinition[] = [
             { name: 'errorCorrection', attributeName: 'error-correction', type: 'enum', values: ['H', 'Q', 'M', 'L'] },
             { name: 'model', attributeName: 'model', type: 'number', min: 1, max: 2, step: 1 }],
         validate: validateProps,
+        // Zebra-compatible renderers place QR ink ten dots below ^FO for N and
+        // ten dots right of ^FO for B. Compensate in output so designer bounds
+        // continue to describe the visible symbol.
+        fieldOriginOffset: rotation => rotation === 'N' ? { x: 0, y: -10 }
+            : rotation === 'B' ? { x: -10, y: 0 } : { x: 0, y: 0 },
         emit: props => { const v = props as QrBarcodeProps; return { command: `^BQ${v.rotation},${v.model},${v.magnification}`, fieldData: `${v.errorCorrection}A,${v.content}` }; },
         parse: f => ({ rotation: rotation(f[0]), model: number(f[1], 2), magnification: number(f[2], 4) })
     },
@@ -294,8 +356,8 @@ const definitions: BarcodeDefinition[] = [
             { name: 'rows', attributeName: 'rows', type: 'number', min: 0, max: 144, step: 1 },
             { name: 'gs1', attributeName: 'gs1', type: 'boolean' },
             { name: 'aspectRatio', attributeName: 'aspect-ratio', type: 'number', min: 1, max: 2, step: 1 }],
-        validate: validateProps,
-        emit: props => { const v = props as DataMatrixBarcodeProps; const args: (string | number)[] = [v.rotation, v.dimension, v.quality, v.columns || '', v.rows || '', '', v.gs1 ? '_' : '', v.aspectRatio === 2 ? 2 : '']; while (args.at(-1) === '') args.pop(); return { command: `^BX${args.join(',')}`, fieldData: v.content }; },
+        validate: validateDataMatrix,
+        emit: props => { const v = props as DataMatrixBarcodeProps; const args: (string | number)[] = [v.rotation, v.dimension, v.quality, v.columns || '', v.rows || '', '', v.gs1 ? '_' : '', isDataMatrixRectangular(v) ? 2 : '']; while (args.at(-1) === '') args.pop(); return { command: `^BX${args.join(',')}`, fieldData: v.content }; },
         parse: f => ({ rotation: rotation(f[0]), dimension: number(f[1], 5), quality: number(f[2], 200), columns: number(f[3], 0), rows: number(f[4], 0), gs1: !!f[6], aspectRatio: number(f[7], 1) })
     },
     {
@@ -350,7 +412,7 @@ const definitions: BarcodeDefinition[] = [
         properties: [p.content, p.rotation, p.moduleWidth, p.wideRatio, p.barHeight,
             { name: 'microPdfModuleWidth', attributeName: 'micro-pdf-module-width', type: 'number', min: 1, max: 10, step: 1 },
             { name: 'microPdfRowHeight', attributeName: 'micro-pdf-row-height', type: 'number', min: 1, max: 9999, step: 1 }],
-        validate: validateProps,
+        validate: validateTlc39,
         emit: props => { const v = props as Tlc39BarcodeProps; return { by: `^BY${v.moduleWidth}`, command: `^BT${v.rotation},${v.moduleWidth},${v.wideRatio},${v.barHeight},${v.microPdfModuleWidth},${v.microPdfRowHeight}`, fieldData: v.content }; },
         parse: (f, by) => ({ rotation: rotation(f[0]), moduleWidth: number(f[1], by.moduleWidth), wideRatio: number(f[2], by.wideRatio), barHeight: number(f[3], by.barHeight), microPdfModuleWidth: number(f[4], 2), microPdfRowHeight: number(f[5], 4) })
     }
@@ -363,6 +425,10 @@ export const barcodeRegistry: Readonly<Record<BarcodeType, BarcodeDefinition>> =
 export const barcodeCommandRegistry: Readonly<Record<string, BarcodeDefinition>> = Object.freeze(
     Object.fromEntries(definitions.map(definition => [definition.command, definition]))
 );
+
+export function getBarcodeFieldOriginOffset(type: BarcodeType, rotation: BarcodeRotation) {
+    return barcodeRegistry[type].fieldOriginOffset?.(rotation) ?? { x: 0, y: 0 };
+}
 
 /** Every attribute that can affect a barcode preview.  Keeping this list
  * registry-derived makes custom-element reactivity follow the property grid. */
@@ -388,7 +454,8 @@ export function readBarcodeProps(element: Element): BarcodeProps {
         const raw = element.getAttribute(property.attributeName);
         if (raw == null) continue;
         if (property.type === 'boolean') result[property.name] = raw === '' || raw === 'true' || raw === 'Y';
-        else if (property.type === 'number') result[property.name] = number(raw, Number(definition.defaults[property.name] ?? 0));
+        else if (property.type === 'number' || (property.type === 'enum' && typeof definition.defaults[property.name] === 'number'))
+            result[property.name] = number(raw, Number(definition.defaults[property.name] ?? 0));
         else result[property.name] = raw;
     }
     return result as unknown as BarcodeProps;

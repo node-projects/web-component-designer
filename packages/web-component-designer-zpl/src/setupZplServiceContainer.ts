@@ -1,4 +1,4 @@
-import { DefaultPropertyEditorTypesService, DefaultEditorTypeService, ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, PositionExtensionProvider, SelectionDefaultExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, TransformToolButtonProvider, DesignItemService, DeletionService, ResizeExtensionProvider } from '@node-projects/web-component-designer';
+import { DefaultPropertyEditorTypesService, DefaultEditorTypeService, ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, PositionExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, TransformToolButtonProvider, DesignItemService, DeletionService, ResizeExtensionProvider } from '@node-projects/web-component-designer';
 import { ZplLayoutPlacementService } from './services/ZplLayoutPlacementService.js';
 import { ZplParserService } from './services/ZplParserService.js';
 import { ZplImageDrop } from './services/ZplImageDrop.js';
@@ -9,6 +9,9 @@ import { ZplIncludeInOutputPropertiesService } from './services/ZplIncludeInOutp
 import { ZplBarcodeElementsService } from './services/ZplBarcodeElementsService.js';
 import { ZplElementResizeStrategy } from './services/ZplElementResizeStrategy.js';
 import { ZplTextPropertiesService } from './services/ZplTextPropertiesService.js';
+import { ZplGraphicResizeStrategy } from './services/ZplGraphicResizeStrategy.js';
+import { ZplSelectionExtensionProvider } from './services/ZplSelectionExtensionProvider.js';
+import { ZplDiagonalLineExtensionProvider } from './services/ZplDiagonalLineExtension.js';
 
 export function createZplDesignerServiceContainer() {
     let serviceContainer = new ServiceContainer();
@@ -32,6 +35,7 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.register("propertyService", new ZplTextPropertiesService());
     serviceContainer.register("attachedPropertyService", new ZplIncludeInOutputPropertiesService());
     serviceContainer.register("elementResizeStrategy", new ZplElementResizeStrategy());
+    serviceContainer.register("elementResizeStrategy", new ZplGraphicResizeStrategy());
     serviceContainer.register("designItemService", new DesignItemService());
     serviceContainer.register("deletionService", new DeletionService());
 
@@ -44,10 +48,11 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
         new ElementDragTitleExtensionProvider(),
         new PositionExtensionProvider(),
+        new ZplDiagonalLineExtensionProvider(),
         new ResizeExtensionProvider(false)
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.Selection, [
-        new SelectionDefaultExtensionProvider()
+        new ZplSelectionExtensionProvider()
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
     ]);

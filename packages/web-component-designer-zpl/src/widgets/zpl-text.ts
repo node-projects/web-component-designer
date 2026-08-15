@@ -4,8 +4,17 @@ import { getZplCoordinates } from '../zplHelper.js';
 
 type ZplRotation = 'N' | 'R' | 'I' | 'B';
 
-/** Align the browser font's visible ink with the ZPL field origin. */
-export const zplTextPreviewYOffset = -7;
+/** Compensate for the printer font origin without moving preview ink outside its design box. */
+export const zplTextOutputOriginCorrection = 3;
+
+export function getZplTextOutputOffset(rotation: ZplRotation) {
+    switch (rotation) {
+        case 'R': return { x: -zplTextOutputOriginCorrection, y: 0 };
+        case 'I': return { x: 0, y: -zplTextOutputOriginCorrection };
+        case 'B': return { x: zplTextOutputOriginCorrection, y: 0 };
+        default: return { x: 0, y: zplTextOutputOriginCorrection };
+    }
+}
 
 export class ZplText extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
@@ -23,7 +32,7 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
     public content = '';
     public fontName: ZplFontName = '0';
     public fontHeight = 30;
-    public fontWidth = 30;
+    public fontWidth = 0;
     public rotation: ZplRotation = 'N';
 
     private _text: HTMLDivElement;
@@ -64,13 +73,19 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
         const metrics = getDeviceFontMetrics(font, this.fontHeight, this.fontWidth);
         const fontSize = metrics?.fontSize ?? Math.max(1, this.fontHeight);
         const scaleX = metrics?.scaleX ?? (this.fontWidth > 0 ? this.fontWidth / this.fontHeight : 1);
+        // PrintLab's browser line box drifts progressively below Zebra Font 0
+        // as the requested em grows. This curve is calibrated against one
+        // batched 15..240-dot printer fixture and keeps the visible ink inside
+        // the ZPL-origin selection frame (rather than moving the element).
+        const scalableFontYOffset = font === '0'
+            ? -Math.max(0, Math.round((this.fontHeight - 60) * .12))
+            : 0;
         this._text.textContent = applyDeviceFontCase(font, this.content ?? '');
         this._text.style.fontFamily = `"${zplFontFamilies[font]}", monospace`;
         this._text.style.fontSize = `${fontSize}px`;
         this._text.style.fontWeight = font === '0' ? 'bold' : 'normal';
         this._text.style.letterSpacing = `${metrics?.letterSpacing ?? 0}px`;
-        const previewYOffset = (metrics?.yOffset ?? 0) + zplTextPreviewYOffset;
-        this._text.style.transform = `translate(${metrics?.xOffset ?? 0}px, ${previewYOffset}px) scaleX(${scaleX})`;
+        this._text.style.transform = `translate(${metrics?.xOffset ?? 0}px, ${(metrics?.yOffset ?? 0) + scalableFontYOffset}px) scaleX(${scaleX})`;
 
         // Force layout here. Resize strategies need the quantized bounds in the
         // same pointer event, rather than one animation frame later.
@@ -111,7 +126,8 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
     }
 
     public createZpl() {
-        return `${getZplCoordinates(this, 0)}^A${this.fontName}${this.rotation},${this.fontHeight},${this.fontWidth}^FD${this.content}^FS`;
+        const offset = getZplTextOutputOffset(this.rotation);
+        return `${getZplCoordinates(this, 0, offset.x, offset.y)}^A${this.fontName}${this.rotation},${this.fontHeight},${this.fontWidth}^FD${this.content}^FS`;
     }
 }
 

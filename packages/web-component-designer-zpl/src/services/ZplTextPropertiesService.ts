@@ -23,7 +23,7 @@ export class ZplTextPropertiesService extends AbstractPropertiesService {
             { name: 'content', type: 'string', attributeName: 'content' },
             { name: 'fontName', displayName: 'font', type: 'enum', attributeName: 'font-name', enumValues: [...'0ABCDEFGH'].map(value => [value, value]) },
             { name: 'fontHeight', displayName: 'font height', type: 'number', attributeName: 'font-height', min: 1, max: 32000, step: 1 },
-            { name: 'fontWidth', displayName: 'font width', type: 'number', attributeName: 'font-width', min: 1, max: 32000, step: 1 },
+            { name: 'fontWidth', displayName: 'font width (0 = automatic)', type: 'number', attributeName: 'font-width', min: 0, max: 32000, step: 1 },
             { name: 'rotation', type: 'enum', attributeName: 'rotation', enumValues: ['N', 'R', 'I', 'B'].map(value => [value, value]) }
         ];
         return definitions.map(property => ({ ...property, service: this, propertyType: PropertyType.attribute } as IProperty));

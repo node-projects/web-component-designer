@@ -47,6 +47,7 @@ export class ResizeExtension extends AbstractExtension {
   private _initialLocalToCanvasMatrix: DOMMatrix | null = null;
   private _initialBorderBoxSize: ISize | null = null;
   private _initialFixedResizeAnchor: DOMPoint | null = null;
+  private _currentAnchorHandle: ResizeHandle | null = null;
   private _resizeStrategy: IElementResizeStrategy | null;
   private _resizeStrategyState: unknown;
 
@@ -70,21 +71,64 @@ export class ResizeExtension extends AbstractExtension {
       return;
     }
     if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y)) {
-      this._circle1 = this._drawResizerOverlay(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, 'nw-resize', this._circle1);
-      this._circle2 = this._drawResizerOverlay((transformedCornerPoints.p1.x + (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x) / 2), (transformedCornerPoints.p1.y + (transformedCornerPoints.p2.y - transformedCornerPoints.p1.y) / 2), 'n-resize', this._circle2);
-      this._circle3 = this._drawResizerOverlay(transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, 'ne-resize', this._circle3);
+      const points: Record<ResizeHandle, IPoint> = {
+        'nw-resize': transformedCornerPoints.p1,
+        'n-resize': { x: (transformedCornerPoints.p1.x + transformedCornerPoints.p2.x) / 2, y: (transformedCornerPoints.p1.y + transformedCornerPoints.p2.y) / 2 },
+        'ne-resize': transformedCornerPoints.p2,
+        'w-resize': { x: (transformedCornerPoints.p1.x + transformedCornerPoints.p4.x) / 2, y: (transformedCornerPoints.p1.y + transformedCornerPoints.p4.y) / 2 },
+        'sw-resize': transformedCornerPoints.p4,
+        's-resize': { x: (transformedCornerPoints.p4.x + transformedCornerPoints.p3.x) / 2, y: (transformedCornerPoints.p4.y + transformedCornerPoints.p3.y) / 2 },
+        'e-resize': { x: (transformedCornerPoints.p2.x + transformedCornerPoints.p3.x) / 2, y: (transformedCornerPoints.p2.y + transformedCornerPoints.p3.y) / 2 },
+        'se-resize': transformedCornerPoints.p3,
+      };
+      const overlay = (handle: ResizeHandle, oldCircle?: SVGCircleElement) => {
+        let pointHandle = handle;
+        let visibility: 'show' | 'hide' | undefined;
+        const originalHandle = this._actionModeStarted as ResizeHandle;
+        const effectiveHandle = this._currentAnchorHandle;
+        if (this._initialPoint && effectiveHandle && effectiveHandle !== originalHandle) {
+          if (handle === originalHandle) {
+            // Keep the circle that owns pointer capture alive and move it to
+            // the normalised endpoint after a signed-axis crossing.
+            pointHandle = effectiveHandle;
+            visibility = 'show';
+          } else if (handle === effectiveHandle) {
+            if (this._oppositeHandle(originalHandle) === effectiveHandle) {
+              // Crossing both axes swaps the two endpoint circles.
+              pointHandle = originalHandle;
+              visibility = 'show';
+            } else {
+              // A one-axis crossing already displays this endpoint through
+              // the captured circle above; suppress the duplicate.
+              visibility = 'hide';
+            }
+          }
+        }
+        const point = points[pointHandle];
+        return this._drawResizerOverlay(point.x, point.y, handle, oldCircle, visibility);
+      };
 
-      this._circle4 = this._drawResizerOverlay((transformedCornerPoints.p1.x + (transformedCornerPoints.p4.x - transformedCornerPoints.p1.x) / 2), (transformedCornerPoints.p1.y + (transformedCornerPoints.p4.y - transformedCornerPoints.p1.y) / 2), 'w-resize', this._circle4);
-      this._circle5 = this._drawResizerOverlay(transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, 'sw-resize', this._circle5);
-
-      this._circle6 = this._drawResizerOverlay((transformedCornerPoints.p4.x + (transformedCornerPoints.p3.x - transformedCornerPoints.p4.x) / 2), (transformedCornerPoints.p4.y + (transformedCornerPoints.p3.y - transformedCornerPoints.p4.y) / 2), 's-resize', this._circle6);
-      this._circle8 = this._drawResizerOverlay((transformedCornerPoints.p2.x + (transformedCornerPoints.p3.x - transformedCornerPoints.p2.x) / 2), (transformedCornerPoints.p2.y + (transformedCornerPoints.p3.y - transformedCornerPoints.p2.y) / 2), 'e-resize', this._circle8);
-
-      this._circle7 = this._drawResizerOverlay(transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'se-resize', this._circle7);
+      this._circle1 = overlay('nw-resize', this._circle1);
+      this._circle2 = overlay('n-resize', this._circle2);
+      this._circle3 = overlay('ne-resize', this._circle3);
+      this._circle4 = overlay('w-resize', this._circle4);
+      this._circle5 = overlay('sw-resize', this._circle5);
+      this._circle6 = overlay('s-resize', this._circle6);
+      this._circle8 = overlay('e-resize', this._circle8);
+      this._circle7 = overlay('se-resize', this._circle7);
     }
   }
 
-  _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement): SVGCircleElement {
+  private _oppositeHandle(handle: ResizeHandle): ResizeHandle {
+    const opposite: Record<ResizeHandle, ResizeHandle> = {
+      'nw-resize': 'se-resize', 'n-resize': 's-resize', 'ne-resize': 'sw-resize',
+      'w-resize': 'e-resize', 'sw-resize': 'ne-resize', 's-resize': 'n-resize',
+      'e-resize': 'w-resize', 'se-resize': 'nw-resize'
+    };
+    return opposite[handle];
+  }
+
+  _drawResizerOverlay(x: number, y: number, cursor: string, oldCircle?: SVGCircleElement, visibility?: 'show' | 'hide'): SVGCircleElement {
     let circle = this._drawCircle(x, y, this.designerCanvas.serviceContainer.options.resizerPixelSize / this.designerCanvas.zoomFactor, 'svg-primary-resizer', oldCircle);
     circle.style.strokeWidth = (1 / this.designerCanvas.zoomFactor).toString();
     if (!oldCircle) {
@@ -95,7 +139,8 @@ export class ResizeExtension extends AbstractExtension {
         circle.addEventListener('pointercancel', event => this._pointerActionTypeResize(circle, event, cursor));
     }
     circle.style.cursor = cursor;
-    circle.style.display = this._resizeStrategy && !this._resizeStrategy.getEnabledHandles(this.extendedItem).includes(cursor as ResizeHandle) ? 'none' : '';
+    circle.style.display = visibility === 'show' ? '' : visibility === 'hide' ? 'none'
+      : this._resizeStrategy && !this._resizeStrategy.getEnabledHandles(this.extendedItem).includes(cursor as ResizeHandle) ? 'none' : '';
     return circle;
   }
 
@@ -117,6 +162,7 @@ export class ResizeExtension extends AbstractExtension {
         this._initialLocalToCanvasMatrix = getElementLocalToCanvasMatrix(this.extendedItem);
         this._initialBorderBoxSize = getElementSize(this.extendedItem.element);
         this._initialFixedResizeAnchor = this._getFixedResizeAnchor(this.extendedItem.element.getBoxQuads({ box: 'border', relativeTo: this.designerCanvas.canvas, iframes: this.designerCanvas.iframes })[0], actionMode);
+        this._currentAnchorHandle = actionMode as ResizeHandle;
         this._initialSizes = [];
         this._actionModeStarted = actionMode;
 
@@ -298,8 +344,10 @@ export class ResizeExtension extends AbstractExtension {
 
           if (this._resizeStrategy) {
             const strategySize = this._resizeStrategy.preview(this._strategyContext(currentBorderBoxSize), this._resizeStrategyState);
-            if (strategySize)
+            if (strategySize) {
               currentBorderBoxSize = strategySize;
+              this._currentAnchorHandle = strategySize.anchorHandle ?? this._actionModeStarted as ResizeHandle;
+            }
           }
 
           this._applyAnchorCorrection(currentBorderBoxSize);
@@ -368,6 +416,7 @@ export class ResizeExtension extends AbstractExtension {
         this._initialLocalToCanvasMatrix = null;
         this._initialBorderBoxSize = null;
         this._initialFixedResizeAnchor = null;
+        this._currentAnchorHandle = null;
         this._resizeStrategyState = undefined;
         break;
       case 'pointercancel':
@@ -377,6 +426,7 @@ export class ResizeExtension extends AbstractExtension {
         this._initialSizes = null;
         this._initialPoint = null;
         this._resizeStrategyState = undefined;
+        this._currentAnchorHandle = null;
         break;
     }
   }
@@ -517,7 +567,7 @@ export class ResizeExtension extends AbstractExtension {
       return null;
     }
 
-    const currentAnchorLocal = this._getFixedResizeAnchorLocal(currentBorderBoxSize, this._actionModeStarted);
+    const currentAnchorLocal = this._getFixedResizeAnchorLocal(currentBorderBoxSize, this._currentAnchorHandle ?? this._actionModeStarted);
     if (!currentAnchorLocal) {
       return null;
     }
