@@ -10,6 +10,7 @@ export class ZplComment extends BaseCustomWebComponentConstructorAppend {
     static override readonly template = html``;
 
     static readonly is = 'zpl-comment';
+    static get observedAttributes() { return ['content']; }
 
     public content: string;
 
@@ -26,10 +27,12 @@ export class ZplComment extends BaseCustomWebComponentConstructorAppend {
         this._parseAttributesToProperties();
     }
 
+    attributeChangedCallback(_name: string, oldValue: string | null, newValue: string | null) {
+        if (oldValue !== newValue) this._parseAttributesToProperties();
+    }
+
     public createZpl() {
-        let zpl = "";
-        zpl += "^FX" + this.content
-        return zpl;
+        return "^FX" + this.content + "^FS";
     }
 }
 

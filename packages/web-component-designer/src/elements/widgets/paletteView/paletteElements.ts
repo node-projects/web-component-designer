@@ -16,7 +16,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
 
     button {
       background-color: transparent;
-      color: white;
+      color: var(--wcd-color-text, white);
       border: none;
       font-size: 13px;
       display: block;
@@ -26,7 +26,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
       padding: 8px 14px;
     }
     button:hover {
-      background: var(--light-grey, #383f52);
+      background: var(--wcd-palette-item-hover-background, var(--light-grey, var(--wcd-color-surface-hover, #383f52)));
     }
 
     table {
@@ -34,7 +34,7 @@ export class PaletteElements extends BaseCustomWebComponentLazyAppend {
     }
 
     td {
-      color: white;
+      color: var(--wcd-color-text, white);
       font-size: 13px;
     }
 

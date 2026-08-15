@@ -117,16 +117,16 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
         display: flex;
         flex-direction: column;
         width: 360px;
-        color: #ddd;
+        color: var(--wcd-color-text, #ddd);
         font-family: sans-serif;
         font-size: 12px;
         gap: 6px;
         padding: 8px;
-        background: #2a2a2a;
+        background: var(--wcd-color-surface-raised, #2a2a2a);
       }
       .preview-area {
-        background: #1a1a1a;
-        border: 1px solid #444;
+        background: var(--wcd-color-surface, #1a1a1a);
+        border: 1px solid var(--wcd-color-border, #444);
         border-radius: 4px;
         height: 60px;
         display: flex;
@@ -136,7 +136,7 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
       .preview-text {
         font-size: 28px;
         font-weight: bold;
-        color: #fff;
+        color: var(--wcd-color-text, #fff);
         user-select: none;
       }
       .layers-row {
@@ -148,11 +148,11 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
         list-style: none;
         margin: 0;
         padding: 0;
-        border: 1px solid #444;
+        border: 1px solid var(--wcd-color-border, #444);
         border-radius: 3px;
         max-height: 80px;
         overflow-y: auto;
-        background: #1e1e1e;
+        background: var(--wcd-color-surface, #1e1e1e);
       }
       .layer-list li {
         display: flex;
@@ -167,7 +167,7 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
       .swatch {
         width: 12px; height: 12px;
         border-radius: 2px;
-        border: 1px solid #555;
+        border: 1px solid var(--wcd-color-border, #555);
         flex-shrink: 0;
       }
       .disabled-label { opacity: 0.4; }
@@ -178,9 +178,9 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
       }
       .layer-buttons button {
         width: 22px; height: 22px;
-        background: #3a3a3a;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #3a3a3a);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
         cursor: pointer;
         font-size: 13px;
@@ -193,15 +193,15 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
         gap: 3px 6px;
         align-items: center;
       }
-      .controls label { color: #aaa; }
+      .controls label { color: var(--wcd-color-text-muted, #aaa); }
       .controls input[type=range] { width: 100%; }
       .controls input[type=color] {
         width: 100%;
         height: 22px;
         padding: 1px;
-        border: 1px solid #555;
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
-        background: #1e1e1e;
+        background: var(--wcd-color-surface, #1e1e1e);
         cursor: pointer;
       }
       .check-row {
@@ -217,10 +217,10 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
         user-select: none;
       }
       .css-out {
-        background: #1e1e1e;
-        border: 1px solid #333;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border, #333);
         border-radius: 3px;
-        color: #7ec8e3;
+        color: var(--wcd-color-accent-text, #7ec8e3);
         font-family: monospace;
         font-size: 11px;
         padding: 6px;
@@ -236,20 +236,20 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
       .actions .load-btn { margin-right: auto; }
       .actions button, .apply-btn {
         padding: 4px 12px;
-        background: #3a3a3a;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #3a3a3a);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
         cursor: pointer;
         font-size: 12px;
       }
       .actions button:hover, .apply-btn:hover { background: #555; }
       .apply-btn {
-        background: #3a6a9a;
-        border-color: #2a5a8a;
+        background: var(--wcd-color-accent, #3a6a9a);
+        border-color: var(--wcd-color-accent-border, #2a5a8a);
       }
       .apply-btn:hover { background: #4a7aaa; }
-      .val-label { text-align: right; color: #888; }
+      .val-label { text-align: right; color: var(--wcd-color-text-muted, #888); }
     `;
   }
 

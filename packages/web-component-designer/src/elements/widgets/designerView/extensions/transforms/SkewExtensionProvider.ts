@@ -21,7 +21,7 @@ export class SkewExtensionProvider implements IDesignerExtensionProvider {
   }
 
   static readonly style = css`
-    .svg-primary-skew { stroke: #3899ec; fill: white; stroke-width: 1; pointer-events: auto; }
-    .svg-primary-skew-line { stroke: #3899ec; fill: none; stroke-width: 1; }
+    .svg-primary-skew { stroke: var(--wcd-color-selection, #3899ec); fill: white; stroke-width: 1; pointer-events: auto; }
+    .svg-primary-skew-line { stroke: var(--wcd-color-selection, #3899ec); fill: none; stroke-width: 1; }
   `;
 }

@@ -23,6 +23,7 @@ export class ZplGraphicDiagonalLine extends BaseCustomWebComponentConstructorApp
     `;
 
     static readonly is = 'zpl-graphic-diagonal-line';
+    static get observedAttributes() { return ['stroke-width', 'stroke-color', 'orientation']; }
 
     public strokeWidth: number = 1;
     public strokeColor: string = "black";
@@ -46,6 +47,12 @@ export class ZplGraphicDiagonalLine extends BaseCustomWebComponentConstructorApp
     }
 
     async ready() {
+        this._parseAttributesToProperties();
+        this._drawSvg();
+    }
+
+    attributeChangedCallback(_name: string, oldValue: string | null, newValue: string | null) {
+        if (oldValue === newValue || !this._line) return;
         this._parseAttributesToProperties();
         this._drawSvg();
     }

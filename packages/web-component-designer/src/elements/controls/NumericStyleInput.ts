@@ -67,7 +67,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
       box-shadow: none;
     }
     #select option{
-      color: var(--numeric-style-input-select-option-color, black);
+      color: var(--wcd-numeric-style-input-select-option-color, var(--numeric-style-input-select-option-color, black));
     }
 
     #scrubber,
@@ -96,7 +96,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     #stepper button:focus {
       outline: none;
       box-shadow: none;
-      border-color: var(--input-border-color, #596c7a);
+      border-color: var(--wcd-input-border-color, var(--input-border-color, var(--wcd-color-border, #596c7a)));
     }
 
     #input[disabled],

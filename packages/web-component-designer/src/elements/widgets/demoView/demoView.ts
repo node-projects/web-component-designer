@@ -15,7 +15,7 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
   :host {
     display: block;
     overflow: hidden;
-    background: white;
+    background: var(--wcd-demo-view-background, white);
     height: 100%;
     width: 100%;
     position: relative;
@@ -37,12 +37,12 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     top: 0;
     height: 100%;
     width: 24px;
-    border-right: solid white 1px;
+    border-right: solid var(--wcd-demo-view-toolbar-border-color, white) 1px;
     box-sizing: border-box;
-    background: black;
+    background: var(--wcd-demo-view-toolbar-background, black);
   }
   span {
-    color: white;
+    color: var(--wcd-color-text, white);
     rotate: 270deg;
     display: block;
     position: absolute;

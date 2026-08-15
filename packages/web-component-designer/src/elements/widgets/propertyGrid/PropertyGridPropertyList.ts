@@ -47,7 +47,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
     label, input, select {
       display: inline-block;
-      color: white;
+      color: var(--wcd-color-text, white);
       background: transparent;
       margin: 2px 0;
       padding: 0 2px 0 4px;
@@ -71,7 +71,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       border: none;
     }
     .editor-control, .content-wrapper > input, .content-wrapper > select {
-      border: 1px solid var(--input-border-color, #596c7a);
+      border: 1px solid var(--wcd-input-border-color, var(--input-border-color, var(--wcd-color-border, #596c7a)));
       border-radius: 0;
     }
     .editor-control, input, select {
@@ -90,22 +90,22 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       margin-left: 4px;
     }*/
     .editor-control[disabled], input[disabled], select[disabled] {
-      color: #BDBDBD;
+      color: var(--wcd-color-text-muted, #BDBDBD);
     }
     select {
       background: transparent;
     }
     select:focus option {
-      color: black;
+      color: var(--wcd-property-grid-select-option-color, black);
     }
     .unset-value {
-      color: lightslategray
+      color: var(--wcd-property-grid-unset-value-color, var(--wcd-color-text-muted, lightslategray))
     }
     .unset-value > * {
-      color: lightslategray
+      color: var(--wcd-property-grid-unset-value-color, var(--wcd-color-text-muted, lightslategray))
     }
     .unset-value:focus {
-      color: white
+      color: var(--wcd-color-text, white)
     }
     .group-header {
       grid-column: 1 / 3;
@@ -114,7 +114,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
     .group-header[clickable]:hover {
       cursor:pointer;
-      color: orange;
+      color: var(--wcd-property-grid-group-header-hover-color, orange);
       text-decoration: underline;
     }
     .group-header::after{
@@ -133,11 +133,11 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
     .group-desc[clickable]:hover {
       cursor:pointer;
-      color: orange;
+      color: var(--wcd-property-grid-group-header-hover-color, orange);
       text-decoration: underline;
     }
     .dragOverProperty {
-      outline: 2px dashed orange;
+      outline: 2px dashed var(--wcd-property-grid-drop-target-color, orange);
       outline-offset: -2px;
     }
     `;

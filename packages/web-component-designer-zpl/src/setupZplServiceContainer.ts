@@ -1,10 +1,18 @@
-import { DefaultPropertyEditorTypesService, DefaultEditorTypeService, ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, PositionExtensionProvider, SelectionDefaultExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, TransformToolButtonProvider, DesignItemService, DeletionService } from '@node-projects/web-component-designer';
+import { DefaultPropertyEditorTypesService, DefaultEditorTypeService, ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, PositionExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, TransformToolButtonProvider, DesignItemService, DeletionService, ResizeExtensionProvider } from '@node-projects/web-component-designer';
 import { ZplLayoutPlacementService } from './services/ZplLayoutPlacementService.js';
 import { ZplParserService } from './services/ZplParserService.js';
 import { ZplImageDrop } from './services/ZplImageDrop.js';
 import { ZplLayoutCopyPasteService } from './services/ZplLayoutCopyPasteService.js';
-import { ZplLayoutResizeExtensionProvider } from './extensions/ZplLayoutResizeExtensionProvider.js';
 import { ZplDemoView } from './widgets/views/zpl-demo-view.js';
+import { ZplBarcodePropertiesService } from './services/ZplBarcodePropertiesService.js';
+import { ZplIncludeInOutputPropertiesService } from './services/ZplIncludeInOutputPropertiesService.js';
+import { ZplBarcodeElementsService } from './services/ZplBarcodeElementsService.js';
+import { ZplElementResizeStrategy } from './services/ZplElementResizeStrategy.js';
+import { ZplTextPropertiesService } from './services/ZplTextPropertiesService.js';
+import { ZplGraphicResizeStrategy } from './services/ZplGraphicResizeStrategy.js';
+import { ZplSelectionExtensionProvider } from './services/ZplSelectionExtensionProvider.js';
+import { ZplDiagonalLineExtensionProvider } from './services/ZplDiagonalLineExtension.js';
+import { ZplTextEditExtensionProvider } from './services/ZplTextEditExtension.js';
 
 export function createZplDesignerServiceContainer() {
     let serviceContainer = new ServiceContainer();
@@ -24,6 +32,11 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.register("propertyEditorTypesService", new DefaultPropertyEditorTypesService());
     serviceContainer.register("propertyGroupsService", new PropertyGroupsService());
     serviceContainer.register("propertyService", new BaseCustomWebComponentPropertiesService(true));
+    serviceContainer.register("propertyService", new ZplBarcodePropertiesService());
+    serviceContainer.register("propertyService", new ZplTextPropertiesService());
+    serviceContainer.register("attachedPropertyService", new ZplIncludeInOutputPropertiesService());
+    serviceContainer.register("elementResizeStrategy", new ZplElementResizeStrategy());
+    serviceContainer.register("elementResizeStrategy", new ZplGraphicResizeStrategy());
     serviceContainer.register("designItemService", new DesignItemService());
     serviceContainer.register("deletionService", new DeletionService());
 
@@ -36,15 +49,19 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.designerExtensions.set(ExtensionType.PrimarySelection, [
         new ElementDragTitleExtensionProvider(),
         new PositionExtensionProvider(),
-        new ZplLayoutResizeExtensionProvider(true)
+        new ZplDiagonalLineExtensionProvider(),
+        new ResizeExtensionProvider(false)
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.Selection, [
-        new SelectionDefaultExtensionProvider()
+        new ZplSelectionExtensionProvider()
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.PrimarySelectionContainer, [
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
         new HighlightElementExtensionProvider()
+    ]);
+    serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
+        new ZplTextEditExtensionProvider()
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
         new GrayOutExtensionProvider()
@@ -84,7 +101,7 @@ export function createZplDesignerServiceContainer() {
     serviceContainer.config.demoViewWidget = ZplDemoView;
 
     serviceContainer.register('elementsService', new JsonFileElementsService('zpl', new URL("./widgets/elements.json", import.meta.url)));
+    serviceContainer.register('elementsService', new ZplBarcodeElementsService());
 
     return serviceContainer;
 }
-

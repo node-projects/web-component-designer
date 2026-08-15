@@ -23,6 +23,6 @@ export class ElementDragTitleExtensionProvider implements IDesignerExtensionProv
   }
 
   static readonly style = css`
-    .svg-text-primary { stroke: none; color: white; font-family: monospace; }
+    .svg-text-primary { stroke: none; color: var(--wcd-color-text, white); font-family: monospace; }
   `;
 }

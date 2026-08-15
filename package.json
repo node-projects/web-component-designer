@@ -37,7 +37,6 @@
     "jest-environment-jsdom": "^30.3.0",
     "jquery": "^3.7.1",
     "jquery.fancytree": "^2.38.3",
-    "jsbarcode": "^3.11.6",
     "long": "^5.2.3",
     "mdn-data": "^2.12.1",
     "monaco-editor": "^0.52.0",

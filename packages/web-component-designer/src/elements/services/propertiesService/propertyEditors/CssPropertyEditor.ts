@@ -33,7 +33,7 @@ export class CssPropertyEditor implements IPropertyEditor {
     this._importantButton.style.height = '18px';
     this._importantButton.style.margin = '-2px 0 0 -2px';
     this._importantButton.style.padding = '0';
-    this._importantButton.style.border = '1px solid var(--input-border-color, #596c7a)';
+    this._importantButton.style.border = '1px solid var(--wcd-input-border-color, var(--input-border-color, var(--wcd-color-border, #596c7a)))';
     this._importantButton.style.background = 'transparent';
     this._importantButton.style.color = 'lightslategray';
     this._importantButton.style.fontWeight = 'bold';

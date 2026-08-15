@@ -5,16 +5,16 @@ export class ImageButtonListSelector extends BaseCustomWebComponentConstructorAp
   public static override readonly style = css`
     div {
       font-size: 10px;
-      color: white;
+      color: var(--wcd-color-text, white);
     }
     #property {
-      color: #00aff0;
+      color: var(--wcd-image-button-list-selector-property-color, #00aff0);
     }
     #value {
-      color: lightgray;
+      color: var(--wcd-image-button-list-selector-value-color, lightgray);
     }
     #value.value-set {
-      color: wheat;
+      color: var(--wcd-image-button-list-selector-value-set-color, wheat);
     }
     .container {
       display: flex;
@@ -24,8 +24,8 @@ export class ImageButtonListSelector extends BaseCustomWebComponentConstructorAp
       min-width: 24px;
       height: 24px;
       padding: 1px;
-      background: white;
-      border: 1px solid lightgray;
+      background: var(--wcd-image-button-list-selector-button-background, white);
+      border: 1px solid var(--wcd-image-button-list-selector-button-border-color, lightgray);
     }
   `;
 

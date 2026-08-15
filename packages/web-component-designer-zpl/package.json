@@ -1,21 +1,26 @@
 {
   "description": "web-component-designer addon: Widgets and Services for creating a ZPL Designer",
   "name": "@node-projects/web-component-designer-zpl",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "main": "./dist/index.js",
   "author": "jochen.kuehner@gmx.de",
   "license": "MIT",
   "scripts": {
     "tsc": "tsc",
+    "prebuild": "node -e \"const fs=require('node:fs'); fs.rmSync('dist', { recursive: true, force: true }); fs.rmSync('tsconfig.tsbuildinfo', { force: true })\"",
     "build": "tsc",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --config ../../jest.config.js packages/web-component-designer-zpl/test --runInBand",
+    "copy": "node scripts/copy-package-files.mjs",
+    "attribution:generate": "node scripts/generate-third-party-licenses.mjs",
+    "attribution:check": "node scripts/generate-third-party-licenses.mjs --check",
     "link": "npm link",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run attribution:check && npm run build && npm run copy"
   },
   "dependencies": {
     "@node-projects/base-custom-webcomponent": ">=0.27.8",
     "@node-projects/web-component-designer": ">=0.2.0",
-    "jsbarcode": "^3.11.6"
+    "@bwip-js/browser": "4.11.2"
   },
   "repository": {
     "type": "git",

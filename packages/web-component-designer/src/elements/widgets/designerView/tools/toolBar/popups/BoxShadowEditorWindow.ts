@@ -155,12 +155,12 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         display: flex;
         flex-direction: column;
         width: 380px;
-        color: #ddd;
+        color: var(--wcd-color-text, #ddd);
         font-family: sans-serif;
         font-size: 12px;
         padding: 8px;
         gap: 8px;
-        background: #2c2c2c;
+        background: var(--wcd-color-surface-raised, #2c2c2c);
       }
       .preview-area {
         display: flex;
@@ -169,12 +169,12 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         height: 110px;
         background: repeating-conic-gradient(#444 0% 25%, #333 0% 50%) 0 0 / 16px 16px;
         border-radius: 4px;
-        border: 1px solid #111;
+        border: 1px solid var(--wcd-color-border-strong, #111);
       }
       .preview-box {
         width: 70px;
         height: 70px;
-        background: #fff;
+        background: var(--wcd-box-shadow-editor-preview-background, #fff);
         border-radius: 4px;
       }
       .layers-row {
@@ -190,8 +190,8 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         min-height: 60px;
         max-height: 100px;
         overflow-y: auto;
-        background: #1e1e1e;
-        border: 1px solid #111;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border-strong, #111);
         border-radius: 3px;
       }
       .layer-list li {
@@ -205,13 +205,13 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         text-overflow: ellipsis;
       }
       .layer-list li.selected {
-        background: #3a3a5a;
+        background: var(--wcd-box-shadow-editor-preview-box-background, #3a3a5a);
       }
       .layer-list li .swatch {
         width: 12px;
         height: 12px;
         border-radius: 2px;
-        border: 1px solid #555;
+        border: 1px solid var(--wcd-color-border, #555);
         flex-shrink: 0;
         display: inline-block;
       }
@@ -226,9 +226,9 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         height: 24px;
         padding: 0;
         font-size: 14px;
-        background: #444;
-        color: #ddd;
-        border: 1px solid #222;
+        background: var(--wcd-color-surface-hover, #444);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border-strong, #222);
         border-radius: 3px;
         cursor: pointer;
         line-height: 1;
@@ -240,13 +240,13 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         gap: 4px 6px;
         align-items: center;
       }
-      .controls label { color: #aaa; }
+      .controls label { color: var(--wcd-color-text-muted, #aaa); }
       .controls input[type=range] { width: 100%; }
       .controls input[type=number] {
         width: 100%;
-        background: #1e1e1e;
-        border: 1px solid #444;
-        color: #ddd;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border, #444);
+        color: var(--wcd-color-text, #ddd);
         border-radius: 3px;
         padding: 2px 4px;
       }
@@ -254,8 +254,8 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         width: 100%;
         height: 24px;
         padding: 1px;
-        background: #1e1e1e;
-        border: 1px solid #444;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border, #444);
         border-radius: 3px;
         cursor: pointer;
       }
@@ -273,10 +273,10 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         user-select: none;
       }
       .css-out {
-        background: #1e1e1e;
-        border: 1px solid #333;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border, #333);
         border-radius: 3px;
-        color: #7ec8e3;
+        color: var(--wcd-color-accent-text, #7ec8e3);
         font-family: monospace;
         font-size: 11px;
         padding: 6px;
@@ -292,20 +292,20 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
       .actions .load-btn { margin-right: auto; }
       .actions button, .apply-btn {
         padding: 4px 12px;
-        background: #3a3a3a;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #3a3a3a);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
         cursor: pointer;
         font-size: 12px;
       }
       .actions button:hover, .apply-btn:hover { background: #555; }
       .apply-btn {
-        background: #3a6a9a;
-        border-color: #2a5a8a;
+        background: var(--wcd-color-accent, #3a6a9a);
+        border-color: var(--wcd-color-accent-border, #2a5a8a);
       }
       .apply-btn:hover { background: #4a7aaa; }
-      .val-label { text-align: right; color: #888; }
+      .val-label { text-align: right; color: var(--wcd-color-text-muted, #888); }
     `;
   }
 

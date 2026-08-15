@@ -7,14 +7,20 @@ export * from "./widgets/zpl-text.js";
 
 export * from "./monaco/ZplLanguage.js";
 
-export * from "./extensions/ZplLayoutResizeExtensionProvider.js";
-
 export * from "./services/ZplImageDrop.js";
 export * from "./services/ZplLayoutCopyPasteService.js";
 export * from "./services/ZplLayoutPlacementService.js";
 export * from "./services/ZplParserService.js";
+export * from "./services/ZplBarcodePropertiesService.js";
+export * from "./services/ZplIncludeInOutputPropertiesService.js";
+export * from "./services/ZplBarcodeElementsService.js";
+export * from "./services/ZplElementResizeStrategy.js";
+export * from "./services/ZplTextPropertiesService.js";
+export * from "./services/ZplDiagonalLineExtension.js";
+export * from "./services/ZplTextEditExtension.js";
 
-export * from "./jsBarcodeOptions.js";
-export * from "./qr.js";
+export * from "./barcodes/barcodeRegistry.js";
+export * from "./barcodes/bwipRenderer.js";
+export * from "./fonts/zplFonts.js";
 export * from "./setupZplServiceContainer.js";
 export * from "./zplHelper.js";

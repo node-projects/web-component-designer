@@ -1,0 +1,6 @@
+{
+  "code128": { "width": 112, "height": 10 },
+  "qrcode": { "width": 25, "height": 25 },
+  "datamatrix": { "width": 12, "height": 12 },
+  "pdf417": { "width": 86, "height": 24 }
+}

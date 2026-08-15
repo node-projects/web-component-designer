@@ -19,6 +19,7 @@ export class ZplGraphicCircle extends BaseCustomWebComponentConstructorAppend {
     `;
 
     static readonly is = 'zpl-graphic-circle';
+    static get observedAttributes() { return ['stroke-width', 'stroke-color']; }
 
     public strokeWidth: number = 1;
     public strokeColor: string = 'black';
@@ -40,6 +41,12 @@ export class ZplGraphicCircle extends BaseCustomWebComponentConstructorAppend {
     }
 
     async ready() {
+        this._parseAttributesToProperties();
+        this._drawSvg();
+    }
+
+    attributeChangedCallback(_name: string, oldValue: string | null, newValue: string | null) {
+        if (oldValue === newValue || !this._circle) return;
         this._parseAttributesToProperties();
         this._drawSvg();
     }

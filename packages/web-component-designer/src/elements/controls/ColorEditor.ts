@@ -17,7 +17,7 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
       display: block;
       box-sizing: border-box;
       width: 280px;
-      color: var(--property-grid-text-color, #e8edf2);
+      color: var(--wcd-property-grid-text-color, var(--property-grid-text-color, var(--wcd-color-text, #e8edf2)));
       font: 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -28,7 +28,7 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
       padding: 12px;
       border: 1px solid rgba(255, 255, 255, .14);
       border-radius: 8px;
-      background: var(--color-editor-background, #20252b);
+      background: var(--wcd-color-editor-background, var(--color-editor-background, var(--wcd-color-surface, #20252b)));
       box-shadow: 0 14px 38px rgba(0, 0, 0, .36);
     }
 
@@ -66,7 +66,7 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
     }
 
     .slider-row span {
-      color: rgba(232, 237, 242, .68);
+      color: var(--wcd-color-text-muted, rgba(232, 237, 242, .68));
       font-size: 11px;
       text-transform: uppercase;
     }
@@ -161,7 +161,7 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
       min-width: 0;
       border: 1px solid rgba(255, 255, 255, .14);
       border-radius: 5px;
-      background: #161a1f;
+      background: var(--wcd-color-surface, #161a1f);
       color: inherit;
       font: inherit;
       outline: none;
@@ -177,7 +177,7 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
       display: grid;
       gap: 3px;
       min-width: 0;
-      color: rgba(232, 237, 242, .68);
+      color: var(--wcd-color-text-muted, rgba(232, 237, 242, .68));
       font-size: 10px;
       text-transform: uppercase;
     }
@@ -190,7 +190,7 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
       height: 26px;
       border: 1px solid rgba(255, 255, 255, .14);
       border-radius: 5px;
-      background: #161a1f;
+      background: var(--wcd-color-surface, #161a1f);
       color: inherit;
       font: inherit;
       outline: none;
@@ -207,13 +207,13 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
     }
 
     #text.invalid {
-      border-color: #e66b6b;
-      box-shadow: 0 0 0 1px rgba(230, 107, 107, .35);
+      border-color: var(--wcd-color-error, #e66b6b);
+      box-shadow: 0 0 0 1px var(--wcd-color-error-glow, rgba(230, 107, 107, .35));
     }
 
     input:focus,
     select:focus {
-      border-color: #79b8ff;
+      border-color: var(--wcd-color-focus, #79b8ff);
       box-shadow: 0 0 0 1px rgba(121, 184, 255, .28);
     }
 
@@ -518,15 +518,15 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
       width: 100%;
       height: 100%;
       padding: 3px;
-      border: 1px solid var(--input-border-color, #596c7a);
+      border: 1px solid var(--wcd-input-border-color, var(--input-border-color, var(--wcd-color-border, #596c7a)));
       border-radius: 4px;
-      background: var(--input-background-color, #1d2228);
+      background: var(--wcd-input-background-color, var(--input-background-color, var(--wcd-color-surface, #1d2228)));
       cursor: pointer;
       outline: none;
     }
 
     button:focus {
-      border-color: #79b8ff;
+      border-color: var(--wcd-color-focus, #79b8ff);
       box-shadow: 0 0 0 1px rgba(121, 184, 255, .28);
     }
 

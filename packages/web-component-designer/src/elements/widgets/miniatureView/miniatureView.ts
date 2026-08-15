@@ -39,7 +39,7 @@ export class MiniatureView extends BaseCustomWebComponentConstructorAppend imple
           left: 0;
           width: 100%;
           height: 100%;
-          border: 1px solid black;
+          border: 1px solid var(--wcd-miniature-view-border-color, black);
           pointer-events: none;
         }`;
 

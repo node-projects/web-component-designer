@@ -254,23 +254,23 @@ export class GradientEditorWindow extends DraggableToolWindow {
         display: flex;
         flex-direction: column;
         width: 380px;
-        color: #ddd;
+        color: var(--wcd-color-text, #ddd);
         font-family: sans-serif;
         font-size: 12px;
         gap: 6px;
         padding: 8px;
-        background: #2a2a2a;
+        background: var(--wcd-color-surface-raised, #2a2a2a);
       }
       .preview-strip {
         height: 50px;
         border-radius: 4px 4px 0 0;
-        border: 1px solid #444;
+        border: 1px solid var(--wcd-color-border, #444);
         border-bottom: none;
       }
       .stop-track {
         height: 20px;
         background: repeating-conic-gradient(#333 0% 25%, #444 0% 50%) 0 0 / 10px 10px;
-        border: 1px solid #444;
+        border: 1px solid var(--wcd-color-border, #444);
         border-radius: 0 0 4px 4px;
         position: relative;
         cursor: crosshair;
@@ -282,14 +282,14 @@ export class GradientEditorWindow extends DraggableToolWindow {
         width: 16px;
         height: 16px;
         border-radius: 50%;
-        border: 2px solid #aaa;
+        border: 2px solid var(--wcd-gradient-editor-stop-border-color, #aaa);
         cursor: pointer;
         transform: translateX(-50%);
         transition: border-color 0.1s;
       }
       .stop-marker.selected {
-        border-color: #fff;
-        box-shadow: 0 0 0 2px #3a7ad5;
+        border-color: var(--wcd-gradient-editor-stop-selected-border-color, #fff);
+        box-shadow: 0 0 0 2px var(--wcd-gradient-editor-stop-selected-glow-color, #3a7ad5);
         z-index: 1;
       }
       .row {
@@ -304,21 +304,21 @@ export class GradientEditorWindow extends DraggableToolWindow {
       .row.multi {
         grid-template-columns: 70px 1fr 70px 1fr;
       }
-      .row label { color: #aaa; }
+      .row label { color: var(--wcd-color-text-muted, #aaa); }
       .row input[type=range] { width: 100%; }
       .row input[type=color] {
         width: 100%;
         height: 22px;
         padding: 1px;
-        border: 1px solid #555;
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
-        background: #1e1e1e;
+        background: var(--wcd-color-surface, #1e1e1e);
         cursor: pointer;
       }
       select {
-        background: #2e2e2e;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #2e2e2e);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
         padding: 2px 4px;
         font-size: 11px;
@@ -326,14 +326,14 @@ export class GradientEditorWindow extends DraggableToolWindow {
       }
       .separator {
         height: 1px;
-        background: #444;
+        background: var(--wcd-color-surface-hover, #444);
         margin: 2px 0;
       }
       .stop-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        color: #888;
+        color: var(--wcd-color-text-muted, #888);
         font-size: 11px;
       }
       .stop-header .stop-actions {
@@ -342,20 +342,20 @@ export class GradientEditorWindow extends DraggableToolWindow {
       }
       .stop-actions button {
         padding: 1px 7px;
-        background: #3a3a3a;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #3a3a3a);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
         cursor: pointer;
         font-size: 12px;
       }
       .stop-actions button:hover { background: #555; }
-      .val-label { text-align: right; color: #888; }
+      .val-label { text-align: right; color: var(--wcd-color-text-muted, #888); }
       .css-out {
-        background: #1e1e1e;
-        border: 1px solid #333;
+        background: var(--wcd-color-surface, #1e1e1e);
+        border: 1px solid var(--wcd-color-border, #333);
         border-radius: 3px;
-        color: #7ec8e3;
+        color: var(--wcd-color-accent-text, #7ec8e3);
         font-family: monospace;
         font-size: 11px;
         padding: 6px;
@@ -371,17 +371,17 @@ export class GradientEditorWindow extends DraggableToolWindow {
       .actions .load-btn { margin-right: auto; }
       .actions button, .apply-btn {
         padding: 4px 12px;
-        background: #3a3a3a;
-        color: #ddd;
-        border: 1px solid #555;
+        background: var(--wcd-color-surface-raised, #3a3a3a);
+        color: var(--wcd-color-text, #ddd);
+        border: 1px solid var(--wcd-color-border, #555);
         border-radius: 3px;
         cursor: pointer;
         font-size: 12px;
       }
       .actions button:hover, .apply-btn:hover { background: #555; }
       .apply-btn {
-        background: #3a6a9a;
-        border-color: #2a5a8a;
+        background: var(--wcd-color-accent, #3a6a9a);
+        border-color: var(--wcd-color-accent-border, #2a5a8a);
       }
       .apply-btn:hover { background: #4a7aaa; }
     `;

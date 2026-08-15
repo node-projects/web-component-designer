@@ -1,0 +1,577 @@
+import bwipjs from '@bwip-js/browser';
+import {
+    AztecBarcodeProps, BarcodeProps, DataMatrixBarcodeProps, Gs1DataBarProps,
+    LinearBarcodeProps, MaxiCodeBarcodeProps, QrBarcodeProps, StackedBarcodeProps,
+    Tlc39BarcodeProps, getBarcodeDefinition, getDataMatrixVersion, isDataMatrixRectangular
+} from './barcodeRegistry.js';
+
+export interface BarcodeRenderResult {
+    canvas: HTMLCanvasElement | null;
+    error: string | null;
+    /** Preview bounds in ZPL dots. The canvas may have a larger backing store. */
+    width: number;
+    height: number;
+}
+
+export interface BarcodeModuleGeometry {
+    width: number;
+    height: number;
+}
+
+export interface BarcodeBarRectangle {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+}
+
+/** The add-on preview and its Labelary demo use the same printer density. */
+export const zplPreviewDpmm = 24;
+
+const maxicodeWidthMm = 202 / 8;
+const maxicodeHeightMm = 192 / 8;
+const microPdf417Modes: readonly { columns: number; rows: number }[] = [
+    { columns: 1, rows: 11 }, { columns: 1, rows: 14 }, { columns: 1, rows: 17 },
+    { columns: 1, rows: 20 }, { columns: 1, rows: 24 }, { columns: 1, rows: 28 },
+    { columns: 2, rows: 8 }, { columns: 2, rows: 11 }, { columns: 2, rows: 14 },
+    { columns: 2, rows: 17 }, { columns: 2, rows: 20 }, { columns: 2, rows: 23 },
+    { columns: 2, rows: 26 }, { columns: 3, rows: 6 }, { columns: 3, rows: 8 },
+    { columns: 3, rows: 10 }, { columns: 3, rows: 12 }, { columns: 3, rows: 15 },
+    { columns: 3, rows: 20 }, { columns: 3, rows: 26 }, { columns: 3, rows: 32 },
+    { columns: 3, rows: 38 }, { columns: 3, rows: 44 }, { columns: 4, rows: 6 },
+    { columns: 4, rows: 8 }, { columns: 4, rows: 10 }, { columns: 4, rows: 12 },
+    { columns: 4, rows: 15 }, { columns: 4, rows: 20 }, { columns: 4, rows: 26 },
+    { columns: 4, rows: 32 }, { columns: 4, rows: 38 }, { columns: 4, rows: 44 },
+    { columns: 4, rows: 4 }
+];
+const tlc39Rows = [6, 8, 10, 12, 15, 20, 26, 32, 38, 44] as const;
+const tlc39LinkGapModules = 10;
+
+function microPdf417Mode(mode: number) {
+    return microPdf417Modes[mode] ?? microPdf417Modes[0];
+}
+
+function estimatePdf417Columns(content: string, securityLevel: number) {
+    const dataCodewords = Math.ceil((content.length || 1) / 2.3);
+    const eccCodewords = Math.pow(2, securityLevel + 1);
+    return Math.max(1, Math.min(30, Math.floor(Math.sqrt((dataCodewords + eccCodewords) / 4))));
+}
+
+function code11Weighted(value: string, maxWeight: number): string {
+    let sum = 0;
+    for (let i = 0; i < value.length; i++) {
+        const character = value[value.length - 1 - i];
+        const digit = character === '-' ? 10 : Number(character);
+        if (Number.isFinite(digit)) sum += digit * ((i % maxWeight) + 1);
+    }
+    const result = sum % 11;
+    return result === 10 ? '-' : String(result);
+}
+
+function code11CheckDigits(value: string, two: boolean): string {
+    const c = code11Weighted(value, 10);
+    return two ? c + code11Weighted(value + c, 9) : c;
+}
+
+/** Firmware-visible HRI/guard zone in dots, used by both widget and tests. */
+export function barcodeTextZoneDots(props: BarcodeProps): number {
+    if (props.type === 'logmars')
+        return (props as LinearBarcodeProps).printInterpretation ? 26 : 20;
+    if (props.type === 'postnet' || props.type === 'planet')
+        return (props as LinearBarcodeProps).printInterpretation ? 20 : 0;
+    if (props.type === 'upceanextension')
+        return (props as LinearBarcodeProps).printInterpretation ? 18 : 0;
+    if (['ean13', 'ean8', 'upca', 'upce'].includes(props.type))
+        return (props as LinearBarcodeProps).printInterpretation ? 18 : 13;
+    if ('printInterpretation' in props && props.printInterpretation)
+        return 7 * (Math.max(1, Math.round(props.moduleWidth)) + 1);
+    return 0;
+}
+
+export function barcodeTextAbove(props: BarcodeProps): boolean {
+    return ((props.type === 'logmars' || props.type === 'upceanextension') &&
+        (props as LinearBarcodeProps).printInterpretation) ||
+        ('printInterpretationAbove' in props && props.printInterpretationAbove);
+}
+
+/** LOGMARS always prints its interpretation; its boolean selects above/below. */
+export function barcodeShowsInterpretation(props: BarcodeProps): boolean {
+    return props.type === 'logmars' ||
+        ('printInterpretation' in props && props.printInterpretation);
+}
+
+/** Amount by which visible HRI extends above the ZPL ^FO anchor. */
+export function barcodeFieldOriginAboveOffset(props: BarcodeProps): number {
+    return barcodeTextAbove(props) && barcodeShowsInterpretation(props) ? barcodeTextZoneDots(props) : 0;
+}
+
+/** Visible EAN/UPC digits extend beyond the guard bars on Zebra output. */
+export function barcodeHorizontalInsets(props: BarcodeProps): Readonly<{ left: number; right: number }> {
+    if (!('moduleWidth' in props) || !('printInterpretation' in props) || !props.printInterpretation)
+        return { left: 0, right: 0 };
+    const moduleWidth = Math.max(1, Math.round(props.moduleWidth));
+    if (props.type === 'ean13') return { left: Math.round(10.5 * moduleWidth), right: 0 };
+    if (props.type === 'upca' || props.type === 'upce')
+        return { left: 11 * moduleWidth, right: Math.round(6.5 * moduleWidth) };
+    return { left: 0, right: 0 };
+}
+
+const gs1DataBarBcid: Record<number, string> = {
+    1: 'databaromni', 2: 'databartruncated', 3: 'databarstacked',
+    4: 'databarstackedomni', 5: 'databarlimited', 6: 'databarexpanded',
+    7: 'databarexpandedstacked'
+};
+
+function gtin14(value: string): string {
+    const digits = value.replace(/\D/g, '').padStart(13, '0').slice(0, 13);
+    const sum = [...digits].reduce((total, digit, index) => total + Number(digit) * (index % 2 === 0 ? 3 : 1), 0);
+    return `${digits}${(10 - sum % 10) % 10}`;
+}
+
+function cleanError(error: unknown): string {
+    return String(error instanceof Error ? error.message : error)
+        .replace(/^bwip-js:\s*/i, '').replace(/^bwipp\.[^:]+:\s*/i, '');
+}
+
+/** A bare Zebra ^BC starts in Code Set B. BWIP-JS otherwise optimizes an
+ * all-numeric value into Set C, producing a much narrower symbol than the
+ * printer. Feed BWIP's raw-symbol syntax to preserve Zebra's default. */
+function toCode128BRaw(text: string): string | null {
+    if (!text) return null;
+    const symbols = ['^104'];
+    for (const character of text) {
+        const code = character.charCodeAt(0);
+        if (code < 32 || code > 126) return null;
+        symbols.push(`^${String(code - 32).padStart(3, '0')}`);
+    }
+    return symbols.join('');
+}
+
+function bwipRetryOptions(options: Record<string, unknown>): Record<string, unknown> | null {
+    if (options.bcid === 'azteccodecompact' && options.layers === undefined)
+        return { ...options, bcid: 'azteccode' };
+    if (options.bcid === 'micropdf417' && options.rows !== undefined) {
+        const { rows: _rows, ...retry } = options;
+        return retry;
+    }
+    return null;
+}
+
+export function buildBwipOptions(props: BarcodeProps): Record<string, unknown> {
+    const definition = getBarcodeDefinition(props.type);
+    if (definition.bwipOptions) return definition.bwipOptions(props);
+
+    if (definition.resizeKind === 'linear') {
+        const v = props as LinearBarcodeProps;
+        let bcid = definition.bcid;
+        let text = v.content || definition.defaultContent || '0';
+        if (v.type === 'upceanextension') bcid = text.length === 2 ? 'ean2' : 'ean5';
+        if (v.type === 'upce' && text.length === 6) text = `0${text}`;
+        if (v.type === 'logmars' || v.type === 'code39' || v.type === 'codabar' || v.type === 'plessey') text = text.toUpperCase();
+        if (v.type === 'code11') text += code11CheckDigits(text, !v.checkDigit);
+        if (v.type === 'planet') {
+            text = text.replace(/\D/g, '') || '0';
+            if (text.length < 11) text = text.padStart(11, '0');
+            else if (text.length === 12) text = text.padStart(13, '0');
+        }
+        const options: Record<string, unknown> = {
+            bcid, text, scale: Math.max(1, Math.round(v.moduleWidth)), height: 10,
+            includetext: false
+        };
+        if (v.type === 'code128' && !v.gs1) {
+            const raw = toCode128BRaw(text);
+            if (raw) {
+                options.text = raw;
+                options.raw = true;
+            }
+        }
+        if (!['msi', 'plessey', 'postnet', 'planet', 'ean13', 'ean8', 'upca', 'upce', 'upceanextension', 'code49'].includes(v.type)) {
+            options.ratio = v.wideRatio;
+        }
+        if (v.checkDigit && ['code39', 'interleaved2of5', 'msi'].includes(v.type)) options.includecheck = true;
+        if (v.type === 'code93') options.includecheck = true;
+        if (v.type === 'logmars') options.includecheck = true;
+        if (v.type === 'code49') {
+            options.rowheight = Math.max(8, Math.min(50, Math.round(v.barHeight / Math.max(v.moduleWidth, 1))));
+            if (v.mode !== 'A') options.mode = Number(v.mode);
+        }
+        return options;
+    }
+
+    switch (props.type) {
+        case 'gs1databar': {
+            const v = props as Gs1DataBarProps;
+            const text = v.symbology >= 6
+                ? (v.content.includes('(') ? v.content : `(01)${gtin14(v.content)}`)
+                : `(01)${gtin14(v.content)}`;
+            return {
+                bcid: gs1DataBarBcid[v.symbology] ?? 'databaromni', text,
+                scale: v.magnification, ...(v.symbology === 7 ? { segments: v.segments } : {})
+            };
+        }
+        case 'qrcode': {
+            const v = props as QrBarcodeProps;
+            return { bcid: 'qrcode', text: v.content || ' ', scale: v.magnification, eclevel: v.errorCorrection };
+        }
+        case 'datamatrix': {
+            const v = props as DataMatrixBarcodeProps;
+            const rectangular = isDataMatrixRectangular(v);
+            const options: Record<string, unknown> = {
+                bcid: v.gs1 ? (rectangular ? 'gs1datamatrixrectangular' : 'gs1datamatrix') : (rectangular ? 'datamatrixrectangular' : 'datamatrix'),
+                text: v.content || ' ', scale: v.dimension
+            };
+            const version = getDataMatrixVersion(v);
+            if (version) options.version = version;
+            return options;
+        }
+        case 'pdf417': {
+            const v = props as StackedBarcodeProps;
+            const columns = v.columns || estimatePdf417Columns(v.content, Number(v.securityLevel));
+            return { bcid: 'pdf417', text: v.content || ' ', scale: 2,
+                rowheight: Math.max(1, Math.round(v.rowHeight / Math.max(v.moduleWidth, 1))),
+                columns, eclevel: String(v.securityLevel) };
+        }
+        case 'micropdf417': {
+            const v = props as StackedBarcodeProps;
+            const version = microPdf417Mode(v.mode);
+            return { bcid: 'micropdf417', text: v.content || ' ', scale: 2,
+                columns: version.columns, rows: version.rows,
+                rowheight: Math.max(1, Math.round(v.rowHeight / Math.max(v.moduleWidth, 1))) };
+        }
+        case 'codablock': {
+            const v = props as StackedBarcodeProps;
+            return { bcid: 'codablockf', text: v.content || ' ', scale: 2,
+                columns: Math.max(4, v.columns), rowheight: Math.max(8, Math.round(v.rowHeight / Math.max(v.moduleWidth, 1))) };
+        }
+        case 'aztec': {
+            const v = props as AztecBarcodeProps;
+            const options: Record<string, unknown> = { bcid: 'azteccodecompact', text: v.content || ' ', scale: v.magnification };
+            if (v.ecLevel === 300) Object.assign(options, { bcid: 'azteccode', format: 'rune' });
+            else if (v.ecLevel >= 201 && v.ecLevel <= 232) Object.assign(options, { bcid: 'azteccode', format: 'full', layers: v.ecLevel - 200 });
+            else if (v.ecLevel >= 101 && v.ecLevel <= 104) options.layers = v.ecLevel - 100;
+            else if (v.ecLevel >= 5 && v.ecLevel <= 95) options.eclevel = v.ecLevel;
+            return options;
+        }
+        case 'maxicode': {
+            const v = props as MaxiCodeBarcodeProps;
+            return { bcid: 'maxicode', text: v.content || ' ', scale: 2, mode: v.mode };
+        }
+        case 'tlc39': {
+            const v = props as Tlc39BarcodeProps;
+            return { bcid: 'code39', text: v.content.split(',')[0] || '0', scale: v.moduleWidth,
+                height: 10, includetext: false, ratio: v.wideRatio };
+        }
+    }
+    return { bcid: definition.bcid, text: ' ', scale: 2 };
+}
+
+/** Returns the encoder's unscaled module bounds without a canvas or network. */
+export function measureBarcodeModules(props: BarcodeProps): BarcodeModuleGeometry {
+    const validationError = getBarcodeDefinition(props.type).validate(props);
+    if (validationError) throw new Error(validationError);
+    const { scale: _scale, ...options } = buildBwipOptions(props);
+    const engine = bwipjs as unknown as { raw(options: Record<string, unknown>): Array<{
+        sbs?: number[]; bbs?: number[]; bhs?: number[]; pixx?: number; pixy?: number;
+    }> };
+    let symbol;
+    try {
+        symbol = engine.raw(options)[0];
+    } catch (error) {
+        const retry = bwipRetryOptions(options);
+        if (!retry) throw error;
+        symbol = engine.raw(retry)[0];
+    }
+    if (!symbol) throw new Error('BWIP-JS returned no geometry');
+    if (symbol.pixx != null && symbol.pixy != null) return { width: symbol.pixx, height: symbol.pixy };
+    const width = symbol.sbs?.reduce((total, value) => total + value, 0) ?? 0;
+    const height = Math.max(0, ...(symbol.bhs ?? []).map((value, index) => value + (symbol.bbs?.[index] ?? 0)));
+    return { width, height };
+}
+
+/**
+ * Returns the preview bounds in ZPL dots.
+ *
+ * BWIP-JS deliberately renders QR, DataMatrix, and Aztec modules as two canvas
+ * pixels at scale 1.  Keeping that larger bitmap is useful on HiDPI displays,
+ * but its backing-store dimensions must not become the designer dimensions.
+ */
+export function measureBarcodePreview(props: BarcodeProps, fallback: BarcodeModuleGeometry): BarcodeModuleGeometry {
+    switch (props.type) {
+        case 'qrcode': {
+            const modules = measureBarcodeModules(props);
+            const size = (props as QrBarcodeProps).magnification;
+            return { width: modules.width * size, height: modules.height * size };
+        }
+        case 'datamatrix': {
+            const modules = measureBarcodeModules(props);
+            const size = (props as DataMatrixBarcodeProps).dimension;
+            return { width: modules.width * size, height: modules.height * size };
+        }
+        case 'aztec': {
+            const modules = measureBarcodeModules(props);
+            const size = (props as AztecBarcodeProps).magnification;
+            return { width: modules.width * size, height: modules.height * size };
+        }
+        case 'gs1databar': {
+            const value = props as Gs1DataBarProps;
+            const heightModules: Partial<Record<number, number>> = {
+                1: 33, 2: 13, 3: 14, 4: 72, 5: 10, 6: 34
+            };
+            const modules = heightModules[value.symbology];
+            return { width: fallback.width, height: modules == null ? fallback.height : modules * value.magnification };
+        }
+        case 'pdf417': {
+            const value = props as StackedBarcodeProps;
+            const columns = value.columns || estimatePdf417Columns(value.content, Number(value.securityLevel));
+            const rows = Math.max(1, fallback.height / 6);
+            return { width: (17 * (columns + 4) + 1) * value.moduleWidth, height: rows * value.rowHeight };
+        }
+        case 'micropdf417': {
+            const value = props as StackedBarcodeProps;
+            const version = microPdf417Mode(value.mode);
+            return { width: fallback.width / 2 * value.moduleWidth, height: version.rows * value.rowHeight };
+        }
+        case 'codablock': {
+            const value = props as StackedBarcodeProps;
+            const rowHeightUnits = Math.max(8, Math.round(value.rowHeight / Math.max(value.moduleWidth, 1)));
+            return {
+                width: (fallback.width / 2 + 6) * value.moduleWidth,
+                height: Math.max(1, Math.round(fallback.height / 2 * (value.rowHeight / rowHeightUnits)))
+            };
+        }
+        case 'maxicode':
+            return {
+                width: Math.round(maxicodeWidthMm * zplPreviewDpmm),
+                height: Math.round(maxicodeHeightMm * zplPreviewDpmm)
+            };
+        case 'ean13':
+        case 'upca':
+        case 'upce': {
+            const insets = barcodeHorizontalInsets(props);
+            return { width: fallback.width + insets.left + insets.right, height: fallback.height };
+        }
+        default:
+            return fallback;
+    }
+}
+
+/** Zebra-width bar geometry shared by the renderer and offline regression tests. */
+export function getZebraWidthBarGeometry(props: LinearBarcodeProps):
+    { readonly rects: readonly BarcodeBarRectangle[]; readonly width: number; readonly height: number } | null {
+    if (!['plessey', 'planet', 'postnet'].includes(props.type)) return null;
+    const options = buildBwipOptions(props);
+    const engine = bwipjs as unknown as { raw(options: Record<string, unknown>): Array<{ sbs?: number[]; bhs?: number[] }> };
+    // The raw postal height flags are 0.125/0.05 only when BWIPP owns the
+    // nominal height. Passing the display height rewrites them to 10/4 and
+    // makes a fixed absolute threshold classify every bar as tall.
+    const raw = engine.raw({ bcid: options.bcid, text: options.text })[0];
+    const moduleWidth = Math.max(1, Math.round(props.moduleWidth));
+    const height = Math.max(1, Math.round(props.barHeight));
+    const rects: BarcodeBarRectangle[] = [];
+    let width = 0;
+
+    if (props.type === 'plessey' && raw.sbs) {
+        const runs = raw.sbs.map((value, index) => index % 2 === 0
+            ? value === 1 ? 1 : value === 3 ? 2 : value === 5 ? 3 : 0
+            : value === 2 ? 1 : value === 4 ? 2 : 0);
+        if (runs.some(value => value === 0)) throw new Error('BWIP-JS returned unsupported Plessey geometry');
+        runs.forEach((modules, index) => {
+            const runWidth = modules * moduleWidth;
+            if (index % 2 === 0) rects.push({ x: width, y: 0, width: runWidth, height });
+            width += runWidth;
+        });
+    } else if (raw.bhs) {
+        const pitch = 2.5 * moduleWidth;
+        const shortHeight = Math.round(height * .4);
+        raw.bhs.forEach((barHeight, index) => {
+            const tall = barHeight >= .1;
+            rects.push({ x: Math.round(index * pitch), y: tall ? 0 : height - shortHeight,
+                width: moduleWidth, height: tall ? height : shortHeight });
+        });
+        width = raw.bhs.length ? Math.round((raw.bhs.length - 1) * pitch) + moduleWidth : 0;
+    }
+    return { rects, width, height };
+}
+
+interface Tlc39Geometry {
+    readonly runs: readonly number[];
+    readonly tallFromModule: number | null;
+    readonly width: number;
+    readonly height: number;
+    readonly code39Y: number;
+    readonly stopOverhang: number;
+    readonly microPdf: null | {
+        readonly x: number; readonly y: number; readonly width: number; readonly height: number; readonly rows: number;
+    };
+}
+
+function tlc39Code39Runs(text: string, wideRatio: number): number[] {
+    const engine = bwipjs as unknown as { raw(options: Record<string, unknown>): Array<{ sbs?: number[] }> };
+    const raw = engine.raw({ bcid: 'code39', text: text || ' ' })[0];
+    if (!raw?.sbs?.length) throw new Error('BWIP-JS returned no TLC39 Code 39 geometry');
+    const runs = raw.sbs.map((value, index) => index % 10 === 9 ? 1 : Number(value) >= 3 ? wideRatio : 1);
+    if (runs.length % 10 === 0) runs.pop();
+    return runs;
+}
+
+function firstTlc39MicroPdf(serial: string) {
+    const engine = bwipjs as unknown as { toSVG(options: Record<string, unknown>): string };
+    for (const rows of tlc39Rows) {
+        try {
+            const svg = engine.toSVG({ bcid: 'micropdf417', text: serial, scale: 2, columns: 4, rows });
+            const viewBox = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+            if (viewBox) return { rows, width: Number(viewBox[1]), height: Number(viewBox[2]) };
+        } catch { /* try the next firmware-supported row count */ }
+    }
+    return null;
+}
+
+/** Composite TLC39 footprint adapted from ZPLab's ZD230-measured layout. */
+export function getTlc39Geometry(props: Tlc39BarcodeProps): Tlc39Geometry {
+    const comma = props.content.indexOf(',');
+    const eci = comma < 0 ? props.content : props.content.slice(0, comma);
+    const serial = comma < 0 ? '' : props.content.slice(comma + 1);
+    const runs = tlc39Code39Runs(eci, props.wideRatio);
+    const micro = serial ? firstTlc39MicroPdf(serial) : null;
+    let tallFromModule: number | null = null;
+    if (micro) {
+        const linkRuns = tlc39Code39Runs('T', props.wideRatio).slice(10, 19);
+        if (linkRuns.length === 9) {
+            tallFromModule = runs.reduce((sum, value) => sum + value, 0) + tlc39LinkGapModules;
+            runs.push(tlc39LinkGapModules, ...linkRuns);
+        }
+    }
+    const code39Width = Math.round(runs.reduce((sum, value) => sum + value, 0) * props.moduleWidth);
+    const code39Height = Math.max(1, Math.round(props.barHeight));
+    if (!micro) return {
+        runs, tallFromModule, width: code39Width, height: code39Height,
+        code39Y: 0, stopOverhang: 0, microPdf: null
+    };
+
+    const microWidth = Math.round(micro.width / 2 * props.microPdfModuleWidth);
+    const microHeight = micro.rows * props.microPdfRowHeight;
+    const microX = Math.round(props.moduleWidth);
+    const gap = Math.round(props.moduleWidth);
+    const stopOverhang = Math.round(code39Height / 5);
+    const microY = Math.max(0, stopOverhang - (microHeight + gap));
+    const code39Y = microY + microHeight + gap;
+    return {
+        runs, tallFromModule,
+        width: Math.max(code39Width, microX + microWidth),
+        height: code39Y + code39Height + stopOverhang,
+        code39Y, stopOverhang,
+        microPdf: { x: microX, y: microY, width: microWidth, height: microHeight, rows: micro.rows }
+    };
+}
+
+function renderTlc39Canvas(props: Tlc39BarcodeProps): HTMLCanvasElement | null {
+    const geometry = getTlc39Geometry(props);
+    const canvas = document.createElement('canvas');
+    canvas.width = geometry.width;
+    canvas.height = geometry.height;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    context.fillStyle = 'black';
+    let xModules = 0;
+    geometry.runs.forEach((modules, index) => {
+        if (index % 2 === 0) {
+            const tall = geometry.tallFromModule != null && xModules >= geometry.tallFromModule;
+            const x0 = Math.round(xModules * props.moduleWidth);
+            const x1 = Math.round((xModules + modules) * props.moduleWidth);
+            context.fillRect(x0, tall ? geometry.code39Y - geometry.stopOverhang : geometry.code39Y,
+                Math.max(1, x1 - x0), props.barHeight + (tall ? 2 * geometry.stopOverhang : 0));
+        }
+        xModules += modules;
+    });
+    if (geometry.microPdf) {
+        const source = document.createElement('canvas');
+        const serial = props.content.slice(props.content.indexOf(',') + 1);
+        try {
+            (bwipjs as unknown as { toCanvas(canvas: HTMLCanvasElement, options: Record<string, unknown>): void })
+                .toCanvas(source, { bcid: 'micropdf417', text: serial, scale: 2, columns: 4, rows: geometry.microPdf.rows });
+            context.imageSmoothingEnabled = false;
+            context.drawImage(source, geometry.microPdf.x, geometry.microPdf.y,
+                geometry.microPdf.width, geometry.microPdf.height);
+        } catch { /* the Code 39 component remains a stable fallback */ }
+    }
+    return canvas;
+}
+
+/** Headless preview footprint used by the widget and regression fixtures. */
+export function measureBarcodeBounds(props: BarcodeProps): BarcodeModuleGeometry {
+    if (props.type === 'tlc39') {
+        const geometry = getTlc39Geometry(props as Tlc39BarcodeProps);
+        return { width: geometry.width, height: geometry.height };
+    }
+    if ('moduleWidth' in props) {
+        const zebra = getZebraWidthBarGeometry(props as LinearBarcodeProps);
+        if (zebra) return { width: zebra.width, height: zebra.height };
+    }
+    const options = buildBwipOptions(props);
+    const engine = bwipjs as unknown as { toSVG(options: Record<string, unknown>): string };
+    let svg: string;
+    try {
+        svg = engine.toSVG(options);
+    } catch (error) {
+        const retry = bwipRetryOptions(options);
+        if (!retry) throw error;
+        svg = engine.toSVG(retry);
+    }
+    const viewBox = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+    if (!viewBox) throw new Error('BWIP-JS returned SVG without viewBox geometry');
+    return measureBarcodePreview(props, { width: Number(viewBox[1]), height: Number(viewBox[2]) });
+}
+
+function renderZebraWidthBars(props: LinearBarcodeProps): HTMLCanvasElement | null {
+    const geometry = getZebraWidthBarGeometry(props);
+    if (!geometry) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = geometry.width;
+    canvas.height = geometry.height;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    context.fillStyle = 'black';
+    for (const rectangle of geometry.rects)
+        context.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    return canvas;
+}
+
+function cropMaxicodeCanvas(source: HTMLCanvasElement): HTMLCanvasElement {
+    if (source.width < 2 || source.height < 3) return source;
+    const canvas = document.createElement('canvas');
+    canvas.width = source.width - 1;
+    canvas.height = source.height - 2;
+    const context = canvas.getContext('2d');
+    if (!context) return source;
+    context.drawImage(source, 0, 1, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+    return canvas;
+}
+
+export function renderBarcode(props: BarcodeProps): BarcodeRenderResult {
+    try {
+        const validationError = getBarcodeDefinition(props.type).validate(props);
+        if (validationError) return { canvas: null, error: validationError, width: 0, height: 0 };
+        let canvas = props.type === 'tlc39' ? renderTlc39Canvas(props as Tlc39BarcodeProps)
+            : 'moduleWidth' in props ? renderZebraWidthBars(props as LinearBarcodeProps) : null;
+        if (!canvas) {
+            canvas = document.createElement('canvas');
+            const engine = bwipjs as unknown as { toCanvas(canvas: HTMLCanvasElement, options: Record<string, unknown>): void };
+            const options = buildBwipOptions(props);
+            try {
+                engine.toCanvas(canvas, options);
+            } catch (error) {
+                const retry = bwipRetryOptions(options);
+                if (!retry) throw error;
+                engine.toCanvas(canvas, retry);
+            }
+        }
+        if (props.type === 'maxicode') canvas = cropMaxicodeCanvas(canvas);
+        const bounds = measureBarcodeBounds(props);
+        canvas.style.width = `${bounds.width}px`;
+        canvas.style.height = `${bounds.height}px`;
+        return { canvas, error: null, ...bounds };
+    } catch (error) {
+        return { canvas: null, error: cleanError(error), width: 0, height: 0 };
+    }
+}

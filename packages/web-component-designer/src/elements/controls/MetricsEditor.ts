@@ -66,7 +66,7 @@ export class MetricsEditor extends BaseCustomWebComponentConstructorAppend {
       display: block;
       box-sizing: border-box;
       min-width: 0;
-      color: var(--property-grid-text-color, white);
+      color: var(--wcd-property-grid-text-color, var(--property-grid-text-color, var(--wcd-color-text, white)));
       font: 11px monospace;
       overflow: hidden;
     }
@@ -111,19 +111,19 @@ export class MetricsEditor extends BaseCustomWebComponentConstructorAppend {
 
     #margin {
       grid-area: margin;
-      background: #f6c89f;
+      background: var(--wcd-metrics-editor-margin-background, #f6c89f);
     }
 
     #border {
       grid-area: inner;
-      background: #f7dd9c;
+      background: var(--wcd-metrics-editor-border-background, #f7dd9c);
       border-style: solid;
       min-height: 76px;
     }
 
     #padding {
       grid-area: inner;
-      background: #c8d08f;
+      background: var(--wcd-metrics-editor-padding-background, #c8d08f);
       min-height: 38px;
     }
 
@@ -138,7 +138,7 @@ export class MetricsEditor extends BaseCustomWebComponentConstructorAppend {
       height: 100%;
       min-height: 24px;
       box-sizing: border-box;
-      background: #8fb9c3;
+      background: var(--wcd-metrics-editor-content-background, #8fb9c3);
       border: 1px solid rgba(0, 0, 0, .65);
     }
 
@@ -185,7 +185,7 @@ export class MetricsEditor extends BaseCustomWebComponentConstructorAppend {
 
     input:hover,
     input:focus {
-      background: rgba(255, 255, 255, .72);
+      background: var(--wcd-metrics-editor-label-background, rgba(255, 255, 255, .72));
       box-shadow: 0 0 0 1px rgba(0, 0, 0, .35);
     }
 

@@ -21,26 +21,26 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
     }
 
     .svg-invisible { stroke: transparent; fill: transparent; pointer-events: auto; }
-    .svg-snapline { stroke: purple; stroke-dasharray: 4; fill: transparent; }
-    .svg-selector { stroke: black; fill: #3899ec55; stroke-width: 1; stroke-dasharray: 2; }
-    .svg-primary-selection-move { stroke: #3899ec; fill: #3899ec; cursor: move; pointer-events: auto; }
+    .svg-snapline { stroke: var(--wcd-color-snapline, purple); stroke-dasharray: 4; fill: transparent; }
+    .svg-selector { stroke: black; fill: var(--wcd-color-selection-fill, #3899ec55); stroke-width: 1; stroke-dasharray: 2; }
+    .svg-primary-selection-move { stroke: var(--wcd-color-selection, #3899ec); fill: var(--wcd-color-selection, #3899ec); cursor: move; pointer-events: auto; }
     .svg-position  { stroke: black; stroke-dasharray: 2; }
-    .svg-path { stroke: #3899ec; fill: orange; pointer-events: auto; }
-    .svg-path-line { stroke: #3899ec; stroke-dasharray: 2; }
+    .svg-path { stroke: var(--wcd-color-selection, #3899ec); fill: orange; pointer-events: auto; }
+    .svg-path-line { stroke: var(--wcd-color-selection, #3899ec); stroke-dasharray: 2; }
     .svg-draw-new-element { stroke: black; fill: transparent; stroke-width: 1; }
     .svg-toolbar-container { overflow: visible }
-    .svg-toolbar-container > div { padding: 5px; display: flex; gap: 2px; background: white; border-radius: 4px; box-shadow: 0 2px 10px 0 rgba(19,23,32,.2); align-items: center; }
+    .svg-toolbar-container > div { padding: 5px; display: flex; gap: 2px; background: var(--wcd-overlay-toolbar-background, white); border-radius: 4px; box-shadow: 0 2px 10px 0 rgba(19,23,32,.2); align-items: center; }
     
     node-projects-image-button-list-selector img {
       height: 16px;
-      border: 1px solid black;
+      border: 1px solid var(--wcd-overlay-toolbar-button-border-color, black);
       border-radius: 4px;
       box-sizing: border-box;
       pointer-events: auto;
       cursor: pointer;
     }
     node-projects-image-button-list-selector img:hover {
-      background: lightgray;
+      background: var(--wcd-overlay-toolbar-button-hover-background, lightgray);
     }
     node-projects-image-button-list-selector img:active {
       translate: 1px 1px

@@ -1,278 +1,228 @@
-import { DesignItem, ITextWriter, IDesignItem, IHtmlParserService, IHtmlWriterOptions, IHtmlWriterService, InstanceServiceContainer, ServiceContainer } from "@node-projects/web-component-designer";
-import { ZplBarcode } from "../widgets/zpl-barcode.js";
-import { ZplGraphicBox } from "../widgets/zpl-graphic-box.js";
-import { ZplGraphicDiagonalLine } from "../widgets/zpl-graphic-diagonal-line.js";
-import { ZplGraphicCircle } from "../widgets/zpl-graphic-circle.js";
-import { ZplText } from "../widgets/zpl-text.js";
-import { ZplImage } from "../widgets/zpl-image.js";
-import { ZplComment } from "../widgets/zpl-comment.js";
+import {
+    DesignItem, hideAtRunTimeAttributeName, IDesignItem, IHtmlParserService,
+    IHtmlWriterOptions, IHtmlWriterService, InstanceServiceContainer, ITextWriter,
+    ServiceContainer
+} from '@node-projects/web-component-designer';
+import { attributesForBarcode, barcodeCommandRegistry, BarcodeByState, BarcodeDefinition, getBarcodeFieldOriginOffset, readBarcodeProps } from '../barcodes/barcodeRegistry.js';
+import { barcodeFieldOriginAboveOffset, barcodeHorizontalInsets } from '../barcodes/bwipRenderer.js';
+import { ZplBarcode } from '../widgets/zpl-barcode.js';
+import { ZplComment } from '../widgets/zpl-comment.js';
+import { ZplGraphicBox } from '../widgets/zpl-graphic-box.js';
+import { ZplGraphicCircle } from '../widgets/zpl-graphic-circle.js';
+import { ZplGraphicDiagonalLine } from '../widgets/zpl-graphic-diagonal-line.js';
+import { ZplImage } from '../widgets/zpl-image.js';
+import { getZplTextOutputOffset, ZplText } from '../widgets/zpl-text.js';
+import { createHiddenZplComments, hiddenPayloads, tokenizeZpl } from './hiddenMetadata.js';
+export { createHiddenZplComments, decodeHiddenZplComments, tokenizeZpl } from './hiddenMetadata.js';
 
-function getSetValue(...args) {
-    for (let a of args)
-        if (a != '' && a != null && a != "NaN")
-            return a;
-}
-
-type image = {
+interface GraphicDefinition {
     name: string;
     totalBytes: number;
     bytesPerRow: number;
     hexData: string;
 }
 
-export class ZplParserService implements IHtmlParserService, IHtmlWriterService {
 
+const first = (...values: (string | number | undefined | null)[]) => values.find(value => value !== '' && value != null && value !== 'NaN');
+
+/** Zebra uses zero/omitted width as the natural aspect ratio. */
+export const parseZplFontWidth = (value: string | undefined) => Number(first(value, 0));
+
+function setPosition(element: HTMLElement, x: number, y: number) {
+    element.style.position = 'absolute';
+    element.style.left = `${Number.isFinite(x) ? x : 0}px`;
+    element.style.top = `${Number.isFinite(y) ? y : 0}px`;
+}
+
+function designItem(element: HTMLElement, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): IDesignItem {
+    return DesignItem.createDesignItemFromInstance(element, serviceContainer, instanceServiceContainer);
+}
+
+export class ZplParserService implements IHtmlParserService, IHtmlWriterService {
     options: IHtmlWriterOptions = {};
 
-    createTransform(char: string, el: HTMLElement) {
-        switch (char) {
-            case 'R': {
-                el.style.transform = 'rotate(90deg) translateY(-100%)';
-                el.style.transformOrigin = '0% 0%'
-                return;
-            };
-            case 'I': {
-                el.style.transform = 'rotate(180deg)';
-                el.style.transformOrigin = '50% 50%'
-                return;
-            }
-            case 'B': {
-                el.style.transform = 'rotate(270deg)';
-                el.style.transformOrigin = '100% 100%'
-                return;
-            };
-        }
-        return;
+    async parse(source: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, _parseSnippet: boolean): Promise<IDesignItem[]> {
+        return this._parse(source, serviceContainer, instanceServiceContainer, true);
     }
 
-    async parse(html: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, parseSnippet: boolean): Promise<IDesignItem[]> {
-        let parts = html.split("^");
-        let images: Record<string, image> = {};
-        if (parts[0][0] == "~") {
-            let imgStrings = parts[0].split("~");
-            for (let img of imgStrings) {
-                if (img == "")
-                    continue
-                let imgParts = img.split(",");
-                images[imgParts[0].substring(2)] = {
-                    name: imgParts[0].substring(2),
-                    totalBytes: parseInt(imgParts[1]),
-                    bytesPerRow: parseInt(imgParts[2]),
-                    hexData: imgParts[3]
-                }
+    private async _parse(source: string, serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, includeHidden: boolean): Promise<IDesignItem[]> {
+        const tokens = tokenizeZpl(source);
+        const hidden = includeHidden ? hiddenPayloads(tokens) : [];
+        const validMetadataComments = new Set(hidden.flatMap(payload => [...payload.comments]));
+        const graphics = new Map<string, GraphicDefinition>();
+        const result: IDesignItem[] = [];
+        let x = 0;
+        let y = 0;
+        let fontName = '0';
+        let fontHeight = 30;
+        let fontWidth = 0;
+        let fontRotation = 'N';
+        let by: BarcodeByState = { moduleWidth: 2, wideRatio: 3, barHeight: 100 };
+        let labelReverse = false;
+        let fieldReverse = false;
+        let pendingBarcode: { element: ZplBarcode; definition: BarcodeDefinition; outputX: number; outputY: number } | null = null;
+
+        for (const token of tokens) {
+            const fields = token.data.split(',');
+            if (token.prefix === '~' && token.command === 'DG') {
+                const name = fields[0].replace(/^[A-Z]:/i, '');
+                graphics.set(name, { name, totalBytes: Number(fields[1]), bytesPerRow: Number(fields[2]), hexData: fields.slice(3).join(',') });
+                continue;
             }
-        }
-        let designItems: IDesignItem[] = [];
-        let fontName: string;
-        let fontHeight: number;
-        let fontWidth: number;
-        let rotation: string = 'N';
-        let x: number;
-        let y: number;
-        let bc: boolean;
-        let qr: boolean;
-        let bw: number;
-        let bh: number;
-        let br: number;
-        // let bo: string;
-        let barcode: ZplBarcode;
-
-        //let a: number;
-        for (let p of parts) {
-            p = p.replaceAll("\n", "");
-            p = p.replaceAll("\r", "");
-            let command = p.substring(0, 2);
-            let fieldString = p.substring(2);
-            let fields = fieldString.split(",");
-
-            switch (command) {
-                case "XA":
-                case "XZ":
-                    break;
-                case "FX":
-                    let comment = new ZplComment();
-                    comment.style.position = "absolute";
-                    comment.style.left = x + "px";
-                    comment.style.top = y + "px";
-                    comment.setAttribute("content", fieldString);
-                    designItems.push(DesignItem.createDesignItemFromInstance(comment, serviceContainer, instanceServiceContainer));
-                    break;
-                case "AA": //Ax x=fontname
-                case "A0": {
-                    fontName = command[1];
-                    rotation = getSetValue(fields[0], 'N');
-                    let defaultFontWidth = 15;
-                    switch (fontName) {
-                        case "A":
-                            defaultFontWidth = 15;
-                            break;
-                        case "0":
-                            defaultFontWidth = fontHeight;
-                    }
-                    fontHeight = parseInt(getSetValue(fields[1], defaultFontWidth));
-                    fontWidth = parseInt(getSetValue(fields[2], defaultFontWidth));
-                    break;
-                }
-                case "CF": //we should switch to use A, CF is default font
-                    rotation = 'N';
-                    fontName = fields[0];
-                    fontHeight = parseInt(fields[1]);
-                    let defaultFontWidth = 15;
-                    switch (fontName) {
-                        case "A":
-                            defaultFontWidth = 15;
-                            break;
-                        case "0":
-                            defaultFontWidth = fontHeight;
-                    }
-                    fontWidth = parseInt(getSetValue(fields[2], defaultFontWidth));
-                    break;
-                case "FO":
-                    x = parseInt(fields[0]);
-                    y = parseInt(fields[1]);
-                    //a = parseInt(fields[2]);
-                    break;
-                case "GB":
-                    let rect = new ZplGraphicBox();
-                    rect.style.position = "absolute";
-                    rect.style.left = x + "px";
-                    rect.style.top = y + "px";
-                    rect.style.width = getSetValue(fields[0], fields[2], '1') + "px";
-                    rect.style.height = getSetValue(fields[1], fields[2], '1') + "px";
-                    rect.setAttribute("stroke-width", getSetValue(fields[2], '1'));
-                    rect.setAttribute("stroke-color", getSetValue(fields[3], 'B') == "B" ? "black" : "white");
-                    rect.setAttribute("corner-rounding", getSetValue(fields[4], '0'));
-                    designItems.push(DesignItem.createDesignItemFromInstance(rect, serviceContainer, instanceServiceContainer));
-                    break;
-                case "GD":
-                    let line = new ZplGraphicDiagonalLine();
-                    line.style.position = "absolute";
-                    line.style.left = x + "px";
-                    line.style.top = y + "px";
-                    line.style.width = getSetValue(fields[0], fields[2], '1') + "px";
-                    line.style.height = getSetValue(fields[1], fields[2], '1') + "px";
-                    line.setAttribute("stroke-width", getSetValue(fields[2], '1'));
-                    line.setAttribute("stroke-color", getSetValue(fields[3], 'B') == "B" ? "black" : "white");
-                    line.setAttribute("orientation", getSetValue(fields[4], 'R'));
-                    designItems.push(DesignItem.createDesignItemFromInstance(line, serviceContainer, instanceServiceContainer));
-                    break;
-                case "GE":
-                    let circle = new ZplGraphicCircle();
-                    circle.style.position = "absolute";
-                    circle.style.left = x + "px";
-                    circle.style.top = y + "px";
-                    circle.style.width = getSetValue(fields[0], fields[2], '1') + "px";
-                    circle.style.height = getSetValue(fields[1], fields[2], '1') + "px";
-                    circle.setAttribute("stroke-width", getSetValue(fields[2], '1'));
-                    circle.setAttribute("stroke-color", getSetValue(fields[3], 'B') == "B" ? "black" : "white");
-                    designItems.push(DesignItem.createDesignItemFromInstance(circle, serviceContainer, instanceServiceContainer));
-                    break;
-                case "BY":
-                    bw = parseInt(getSetValue(fields[0], "2"));
-                    br = parseFloat(getSetValue(fields[1], "3"));
-                    bh = parseInt(getSetValue(fields[2], "10"));
-                    break;
-                case "BC":
-                    bc = true;
-                    // bo = getSetValue(fields[0], 'N');
-                    barcode = new ZplBarcode();
-                    barcode.style.position = "absolute";
-                    barcode.style.left = x + "px";
-                    barcode.style.top = y + "px";
-                    barcode.setAttribute("type", "CODE128");
-                    if (bw)
-                        barcode.setAttribute("width", bw.toString());
-                    if (br)
-                        barcode.setAttribute("ratio", br.toString());
-                    barcode.setAttribute("height", getSetValue(fields[1], bh).toString());
-                    break;
-                case "BQ":
-                    qr = true;
-                    bc = true;
-                    // bo = getSetValue(fields[0], 'N');
-                    barcode = new ZplBarcode();
-                    barcode.style.position = "absolute";
-                    barcode.style.left = x + "px";
-                    barcode.style.top = y + "px";
-                    barcode.setAttribute("type", "QR");
-                    if (bw)
-                        barcode.setAttribute("width", bw.toString());
-                    if (br)
-                        barcode.setAttribute("ratio", br.toString());
-                    barcode.setAttribute("height", getSetValue(fields[2], bh).toString());
-                    break;
-                case "FD":
-                    if (bc) {
-                        if (qr)
-                            barcode.setAttribute("content", fieldString.substring(3));
-                        else
-                            barcode.setAttribute("content", fieldString);
-                        designItems.push(DesignItem.createDesignItemFromInstance(barcode, serviceContainer, instanceServiceContainer));
-                        bc = false;
-                        qr = false;
-                    }
-                    else {
-                        let text = new ZplText();
-                        text.style.position = "absolute";
-                        text.style.left = x + "px";
-                        text.style.top = y + "px";
-                        text.setAttribute("font-name", fontName);
-                        text.setAttribute("font-height", fontHeight.toString());
-                        text.setAttribute("font-width", fontWidth.toString());
-                        text.setAttribute("content", fieldString);
-                        if (rotation) {
-                            this.createTransform(rotation, text);
+            if (token.prefix !== '^') continue;
+            if (token.command === 'FO') {
+                // ^FR is scoped to one field and a new origin starts a new one.
+                fieldReverse = false;
+                x = Number(fields[0]) || 0;
+                y = Number(fields[1]) || 0;
+            } else if (token.command === 'LR') {
+                labelReverse = token.data.toUpperCase().startsWith('Y');
+            } else if (token.command === 'FR') {
+                fieldReverse = true;
+            } else if (token.command === 'FS') {
+                fieldReverse = false;
+            } else if (token.command === 'CF') {
+                fontName = fields[0] || '0';
+                fontHeight = Number(first(fields[1], 30));
+                // An omitted width means the font's natural aspect ratio. For
+                // bitmap fonts A-H this also means "use the height
+                // magnification"; substituting the numeric height would pick
+                // a different (usually much wider) cell magnification.
+                fontWidth = parseZplFontWidth(fields[2]);
+                fontRotation = 'N';
+            } else if (token.command[0] === 'A' && /^[0A-H]$/.test(token.command[1])) {
+                fontName = token.command[1];
+                fontRotation = fields[0] || 'N';
+                fontHeight = Number(first(fields[1], fontHeight, 30));
+                fontWidth = parseZplFontWidth(fields[2]);
+            } else if (token.command === 'BY') {
+                by = {
+                    moduleWidth: Number(first(fields[0], by.moduleWidth, 2)),
+                    wideRatio: Number(first(fields[1], by.wideRatio, 3)),
+                    barHeight: Number(first(fields[2], by.barHeight, 100))
+                };
+            } else if (barcodeCommandRegistry[token.command]) {
+                const definition = barcodeCommandRegistry[token.command];
+                const element = new ZplBarcode();
+                const values = definition.parse(fields, by);
+                const attributes = attributesForBarcode(definition.type, values);
+                for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+                pendingBarcode = { element, definition, outputX: x, outputY: y };
+            } else if (token.command === 'FD') {
+                if (pendingBarcode) {
+                    let content = token.data;
+                    if (pendingBarcode.definition.type === 'qrcode') {
+                        const prefix = content.match(/^([HQML])A,/);
+                        if (prefix) {
+                            pendingBarcode.element.setAttribute('error-correction', prefix[1]);
+                            content = content.slice(prefix[0].length);
                         }
-                        designItems.push(DesignItem.createDesignItemFromInstance(text, serviceContainer, instanceServiceContainer));
                     }
-                    break;
-                case "XG":
-                    let image = new ZplImage();
-                    let nm = fields[0].substring(2);
-                    image.style.position = "absolute";
-                    image.style.left = x + "px";
-                    image.style.top = y + "px";
-                    image.setAttribute("total-bytes", images[nm].totalBytes.toString());
-                    image.setAttribute("bytes-per-row", images[nm].bytesPerRow.toString());
-                    image.setAttribute("image-name", nm);
-                    image.setAttribute("hex-image", images[nm].hexData);
-                    image.setAttribute("scale-x", getSetValue(fields[1], "1"));
-                    image.setAttribute("scale-y", getSetValue(fields[2], "1"));
-                    designItems.push(DesignItem.createDesignItemFromInstance(image, serviceContainer, instanceServiceContainer));
-                    break;
+                    pendingBarcode.element.setAttribute('content', content);
+                    const props = readBarcodeProps(pendingBarcode.element);
+                    const offset = getBarcodeFieldOriginOffset(props.type, props.rotation);
+                    const aboveOffset = props.rotation === 'N' ? barcodeFieldOriginAboveOffset(props) : 0;
+                    const horizontalOffset = props.rotation === 'N' ? barcodeHorizontalInsets(props).left : 0;
+                    setPosition(pendingBarcode.element, pendingBarcode.outputX - offset.x - horizontalOffset, pendingBarcode.outputY - offset.y - aboveOffset);
+                    result.push(designItem(pendingBarcode.element, serviceContainer, instanceServiceContainer));
+                    pendingBarcode = null;
+                } else {
+                    const element = new ZplText();
+                    const offset = getZplTextOutputOffset(fontRotation as 'N' | 'R' | 'I' | 'B');
+                    setPosition(element, x - offset.x, y - offset.y);
+                    element.setAttribute('font-name', fontName);
+                    element.setAttribute('font-height', String(fontHeight));
+                    element.setAttribute('font-width', String(fontWidth));
+                    element.setAttribute('rotation', fontRotation);
+                    element.setAttribute('content', token.data);
+                    result.push(designItem(element, serviceContainer, instanceServiceContainer));
+                }
+            } else if (token.command === 'GB') {
+                const element = new ZplGraphicBox();
+                setPosition(element, x, y);
+                const width = Number(first(fields[0], fields[2], 1));
+                const height = Number(first(fields[1], fields[2], 1));
+                const thickness = Number(first(fields[2], 1));
+                element.style.width = `${width}px`;
+                element.style.height = `${height}px`;
+                element.setAttribute('stroke-width', String(thickness));
+                element.setAttribute('stroke-color', fields[3] === 'W' ? 'white' : 'black');
+                element.setAttribute('corner-rounding', String(first(fields[4], 0)));
+                if (thickness >= Math.min(width, height)) element.setAttribute('filled', '');
+                if (labelReverse || fieldReverse) element.setAttribute('reverse', '');
+                result.push(designItem(element, serviceContainer, instanceServiceContainer));
+            } else if (token.command === 'GD') {
+                const element = new ZplGraphicDiagonalLine();
+                setPosition(element, x, y);
+                element.style.width = `${Number(first(fields[0], fields[2], 1))}px`;
+                element.style.height = `${Number(first(fields[1], fields[2], 1))}px`;
+                element.setAttribute('stroke-width', String(first(fields[2], 1)));
+                element.setAttribute('stroke-color', fields[3] === 'W' ? 'white' : 'black');
+                element.setAttribute('orientation', String(first(fields[4], 'R')));
+                result.push(designItem(element, serviceContainer, instanceServiceContainer));
+            } else if (token.command === 'GE') {
+                const element = new ZplGraphicCircle();
+                setPosition(element, x, y);
+                element.style.width = `${Number(first(fields[0], fields[2], 1))}px`;
+                element.style.height = `${Number(first(fields[1], fields[2], 1))}px`;
+                element.setAttribute('stroke-width', String(first(fields[2], 1)));
+                element.setAttribute('stroke-color', fields[3] === 'W' ? 'white' : 'black');
+                result.push(designItem(element, serviceContainer, instanceServiceContainer));
+            } else if (token.command === 'XG') {
+                const name = fields[0].replace(/^[A-Z]:/i, '');
+                const graphic = graphics.get(name);
+                if (!graphic) continue;
+                const element = new ZplImage();
+                setPosition(element, x, y);
+                element.setAttribute('total-bytes', String(graphic.totalBytes));
+                element.setAttribute('bytes-per-row', String(graphic.bytesPerRow));
+                element.setAttribute('image-name', name);
+                element.setAttribute('hex-image', graphic.hexData);
+                element.setAttribute('scale-x', String(first(fields[1], 1)));
+                element.setAttribute('scale-y', String(first(fields[2], 1)));
+                result.push(designItem(element, serviceContainer, instanceServiceContainer));
+            } else if (token.command === 'FX' && !validMetadataComments.has(token.data)) {
+                const element = new ZplComment();
+                setPosition(element, x, y);
+                element.setAttribute('content', token.data);
+                result.push(designItem(element, serviceContainer, instanceServiceContainer));
             }
         }
 
-        return designItems;
+        for (const payload of hidden) {
+            const hiddenItems = await this._parse(payload.zpl, serviceContainer, instanceServiceContainer, false);
+            for (const item of hiddenItems) item._withoutUndoSetAttribute(hideAtRunTimeAttributeName, '');
+            result.splice(Math.min(payload.index, result.length), 0, ...hiddenItems);
+        }
+        return result;
     }
 
-    write(textWriter: ITextWriter, designItems: IDesignItem[], rootContainerKeepInline: boolean, updatePositions?: boolean) {
-        let tx = "^XA\n";
-        for (let d of designItems) {
-            if (d.element.nodeName == "ZPL-IMAGE") {
-                //@ts-ignore
-                textWriter.writeLine(d.element.createZplImage());
-                //@ts-ignore
-                tx += d.element.createZplImage() + '\n';
+    write(textWriter: ITextWriter, designItems: IDesignItem[], _rootContainerKeepInline: boolean, updatePositions?: boolean) {
+        textWriter.writeLine('^XA');
+        for (const designItem of designItems) {
+            if (!designItem.hideAtRunTime && designItem.element instanceof ZplImage) {
+                textWriter.writeLine(designItem.element.createZplImage());
             }
         }
-        for (let d of designItems) {
-            //@ts-ignore
-            tx += d.element.createZpl(); +'\n'
-        }
-        tx += "^XZ";
-
-        textWriter.writeLine("^XA");
-        // textWriter.writeLine("^FX For better view visit http://labelary.com/viewer.html?zpl=" + encodeURIComponent(tx));
-        for (let d of designItems) {
-            let start = textWriter.position;
-            //@ts-ignore
-            textWriter.writeLine(d.element.createZpl())
-            let end = textWriter.position;
-            if (updatePositions && d.instanceServiceContainer.designItemDocumentPositionService) {
-                d.instanceServiceContainer.designItemDocumentPositionService.setPosition(d, { start: start, length: end - start });
+        for (let index = 0; index < designItems.length; index++) {
+            const designItem = designItems[index];
+            const start = textWriter.position;
+            if (designItem.hideAtRunTime) {
+                const miniLines = ['^XA'];
+                if (designItem.element instanceof ZplImage) miniLines.push(designItem.element.createZplImage());
+                const createZpl = (designItem.element as HTMLElement & { createZpl?: () => string }).createZpl;
+                if (createZpl) miniLines.push(createZpl.call(designItem.element));
+                miniLines.push('^XZ');
+                for (const comment of createHiddenZplComments(index, miniLines.join('\n'))) textWriter.writeLine(comment);
+            } else {
+                const createZpl = (designItem.element as HTMLElement & { createZpl?: () => string }).createZpl;
+                if (createZpl) textWriter.writeLine(createZpl.call(designItem.element));
+            }
+            const end = textWriter.position;
+            if (updatePositions && designItem.instanceServiceContainer.designItemDocumentPositionService) {
+                designItem.instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start, length: end - start });
             }
         }
-        textWriter.writeLine("^XZ");
+        textWriter.writeLine('^XZ');
     }
 }
