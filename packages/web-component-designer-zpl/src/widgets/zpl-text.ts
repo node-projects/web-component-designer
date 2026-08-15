@@ -80,7 +80,8 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
         const scalableFontYOffset = font === '0'
             ? -Math.max(0, Math.round((this.fontHeight - 60) * .12))
             : 0;
-        this._text.textContent = applyDeviceFontCase(font, this.content ?? '');
+        const displayedContent = applyDeviceFontCase(font, this.content ?? '');
+        this._text.textContent = displayedContent;
         this._text.style.fontFamily = `"${zplFontFamilies[font]}", monospace`;
         this._text.style.fontSize = `${fontSize}px`;
         this._text.style.fontWeight = font === '0' ? 'bold' : 'normal';
@@ -90,7 +91,13 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
         // Force layout here. Resize strategies need the quantized bounds in the
         // same pointer event, rather than one animation frame later.
         const rawWidth = Math.max(1, this._text.scrollWidth);
-        const width = Math.max(1, rawWidth * scaleX + Math.abs(metrics?.xOffset ?? 0));
+        // Device fonts are fixed-cell bitmap fonts, so their printed advance is
+        // deterministic. Do not depend on scrollWidth: it is zero while the
+        // designer is hidden or being moved into split view, which previously
+        // collapsed the host selection box while its glyphs overflowed it.
+        const width = metrics
+            ? Math.max(1, [...displayedContent].length * metrics.characterAdvance + Math.abs(metrics.xOffset))
+            : Math.max(1, rawWidth * scaleX);
         const height = Math.max(1, fontSize + Math.abs(metrics?.yOffset ?? 0));
         this._setRotatedBounds(width, height, this.rotation);
     }

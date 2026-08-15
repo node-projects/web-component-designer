@@ -3,6 +3,8 @@ export type ZplFontName = '0' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
 export interface ZplDeviceFontMetrics {
     fontSize: number;
     scaleX: number;
+    /** Final Zebra character-cell advance in dots, after magnification. */
+    characterAdvance: number;
     xOffset: number;
     yOffset: number;
     letterSpacing: number;
@@ -19,6 +21,13 @@ interface DeviceFontSpec {
     xOffsetEm?: number;
     widthCorrection?: number;
     letterSpacingEm?: number;
+}
+
+export interface ZplDeviceFontMagnification {
+    height: number;
+    width: number;
+    heightStep: number;
+    widthStep: number;
 }
 
 const deviceFonts: Record<Exclude<ZplFontName, '0'>, DeviceFontSpec> = {
@@ -39,6 +48,23 @@ export const zplFontFamilies: Record<ZplFontName, string> = {
 };
 
 const documentLoads = new WeakMap<Document, Promise<void>>();
+
+const deviceMagnification = (requested: number, step: number) =>
+    Math.min(10, Math.max(1, Math.round(requested / step)));
+
+/** Resolve the printer's discrete bitmap-font magnifications. Width 0 means
+ * use the height magnification, rather than a zero-width glyph cell. */
+export function getDeviceFontMagnification(font: ZplFontName, height: number, width: number): ZplDeviceFontMagnification | null {
+    if (font === '0' || !(height > 0)) return null;
+    const spec = deviceFonts[font];
+    const heightMagnification = deviceMagnification(height, spec.magStep);
+    return {
+        height: heightMagnification,
+        width: width > 0 ? deviceMagnification(width, spec.magWidthStep) : heightMagnification,
+        heightStep: spec.magStep,
+        widthStep: spec.magWidthStep
+    };
+}
 
 export async function loadZplFonts(document: Document): Promise<void> {
     let loading = documentLoads.get(document);
@@ -63,15 +89,15 @@ export async function loadZplFonts(document: Document): Promise<void> {
 }
 
 export function getDeviceFontMetrics(font: ZplFontName, height: number, width: number): ZplDeviceFontMetrics | null {
-    if (font === '0' || !(height > 0)) return null;
+    const magnification = getDeviceFontMagnification(font, height, width);
+    if (!magnification) return null;
     const spec = deviceFonts[font];
-    const magnificationHeight = Math.min(10, Math.max(1, Math.round(height / spec.magStep)));
-    const magnificationWidth = width > 0 ? Math.min(10, Math.max(1, Math.round(width / spec.magWidthStep))) : magnificationHeight;
-    const fontSize = magnificationHeight * spec.capInkPerMag / spec.capPerEm;
-    const scaleX = magnificationWidth * spec.advancePerMag / (fontSize * spec.advancePerEm) * (spec.widthCorrection ?? 1);
+    const fontSize = magnification.height * spec.capInkPerMag / spec.capPerEm;
+    const scaleX = magnification.width * spec.advancePerMag / (fontSize * spec.advancePerEm) * (spec.widthCorrection ?? 1);
     return {
         fontSize,
         scaleX,
+        characterAdvance: magnification.width * spec.advancePerMag,
         xOffset: (spec.xOffsetEm ?? 0) * fontSize,
         yOffset: (spec.yOffsetEm ?? 0) * fontSize,
         letterSpacing: (spec.letterSpacingEm ?? 0) * fontSize
@@ -84,7 +110,7 @@ export function getDeviceFontMetrics(font: ZplFontName, height: number, width: n
 export function getNaturalZplFontWidth(font: ZplFontName, height: number): number {
     if (font === '0') return Math.max(1, Math.round(height));
     const spec = deviceFonts[font];
-    const magnificationHeight = Math.min(10, Math.max(1, Math.round(height / spec.magStep)));
+    const magnificationHeight = deviceMagnification(height, spec.magStep);
     return magnificationHeight * spec.magWidthStep;
 }
 

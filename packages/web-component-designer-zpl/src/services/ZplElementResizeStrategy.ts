@@ -5,7 +5,7 @@ import {
 import { getBarcodeDefinition } from '../barcodes/barcodeRegistry.js';
 import { ZplBarcode } from '../widgets/zpl-barcode.js';
 import { ZplText } from '../widgets/zpl-text.js';
-import { getNaturalZplFontWidth, ZplFontName } from '../fonts/zplFonts.js';
+import { getDeviceFontMagnification, ZplFontName } from '../fonts/zplFonts.js';
 import { quantizeZplValue, zplAxisScales } from './zplResizeGeometry.js';
 export { quantizeZplValue, zplAxisScales } from './zplResizeGeometry.js';
 
@@ -57,6 +57,12 @@ export class ZplElementResizeStrategy implements IElementResizeStrategy {
             state.previewAttributes.set(name, value);
             element.setAttribute(name, value);
         }
+        // ResizeExtension writes a temporary CSS box before invoking the ZPL
+        // strategy. When quantization keeps every attribute unchanged, native
+        // attribute callbacks do not fire and that temporary box would survive
+        // until the next device-font/barcode threshold, causing a large jump.
+        if (element instanceof ZplText) element.renderText();
+        else (element as ZplBarcode).renderBarcode();
         const bounds = element.getBoundingClientRect();
         return { width: bounds.width, height: bounds.height };
     }
@@ -96,6 +102,31 @@ export class ZplElementResizeStrategy implements IElementResizeStrategy {
         if (!state.originalAttributes.has('font-width')) state.originalAttributes.set('font-width', element.getAttribute('font-width'));
         const originalWidth = Number(state.originalAttributes.get('font-width'));
         const originalHeight = this._initialNumber(state, element, 'font-height', 30);
+        const font = (element.getAttribute('font-name') || '0') as ZplFontName;
+        const deviceFont = getDeviceFontMagnification(font, originalHeight, originalWidth);
+        if (deviceFont) {
+            // Bitmap fonts A-H can only change in integer cell
+            // magnifications. Scale the magnification visible at gesture start,
+            // not the raw requested dot value: e.g. Font A height 30 renders at
+            // 3x and must not jump to 4x after a two-dot drag.
+            const heightMagnification = clamp(deviceFont.height * fontHeightScale, 1, 10);
+            const widthMagnification = clamp(deviceFont.width * fontWidthScale, 1, 10);
+            const fontHeight = heightMagnification === deviceFont.height
+                ? originalHeight
+                : heightMagnification * deviceFont.heightStep;
+            let fontWidth: number;
+            if (!(originalWidth > 0) && widthMagnification === heightMagnification) {
+                fontWidth = 0;
+            } else if (originalWidth > 0 && widthMagnification === deviceFont.width) {
+                fontWidth = originalWidth;
+            } else {
+                fontWidth = widthMagnification * deviceFont.widthStep;
+            }
+            return {
+                'font-width': String(fontWidth),
+                'font-height': String(fontHeight)
+            };
+        }
         const fontHeight = clamp(originalHeight * fontHeightScale, 1, 32000);
         let fontWidth: number;
         if (Number.isFinite(originalWidth) && originalWidth > 0) {
@@ -104,9 +135,8 @@ export class ZplElementResizeStrategy implements IElementResizeStrategy {
             // A proportional resize keeps Zebra's automatic-width semantics.
             fontWidth = 0;
         } else {
-            const font = (element.getAttribute('font-name') || '0') as ZplFontName;
             const residualScale = fontWidthScale / Math.max(.01, fontHeightScale);
-            fontWidth = clamp(getNaturalZplFontWidth(font, fontHeight) * residualScale, 1, 32000);
+            fontWidth = clamp(fontHeight * residualScale, 1, 32000);
         }
         return {
             'font-width': String(fontWidth),

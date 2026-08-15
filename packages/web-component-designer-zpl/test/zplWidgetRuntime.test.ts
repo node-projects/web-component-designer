@@ -249,12 +249,55 @@ describe('ZPL widget runtime updates', () => {
         const state = strategy.begin(initial);
 
         strategy.preview({ ...initial, currentSize: { width: 200, height: 60 } }, state);
-        expect(element.getAttribute('font-height')).toBe('60');
+        // Font A starts at 3x for height 30. Doubling its visible size means
+        // 6x, whose canonical device-cell height is 54 dots.
+        expect(element.getAttribute('font-height')).toBe('54');
         expect(element.getAttribute('font-width')).toBe('0');
 
         strategy.preview({ ...initial, currentSize: { width: 200, height: 30 } }, state);
         expect(element.getAttribute('font-height')).toBe('30');
         expect(element.getAttribute('font-width')).toBe('30');
+    });
+
+    test('Font A automatic width does not jump on the first small resize', async () => {
+        const element = document.createElement('zpl-text') as InstanceType<typeof ZplText>;
+        element.setAttribute('content', 'John Doe');
+        element.setAttribute('font-name', 'A');
+        element.setAttribute('font-height', '30');
+        element.setAttribute('font-width', '0');
+        document.body.appendChild(element);
+        await flushReady();
+
+        // Device-font bounds do not depend on browser layout. This also covers
+        // parsing while the designer is hidden or entering split view, where
+        // jsdom-like scrollWidth is zero.
+        const initialSize = {
+            width: parseFloat(element.style.width),
+            height: parseFloat(element.style.height)
+        };
+        expect(initialSize.width).toBeGreaterThan(140);
+        expect(initialSize.height).toBeGreaterThan(30);
+        const designItem = {
+            element,
+            getAttribute: (name: string) => element.getAttribute(name),
+            setAttribute: (name: string, value: string) => element.setAttribute(name, value)
+        } as any;
+        const strategy = new ZplElementResizeStrategy();
+        const initial = { designItem, handle: 'se-resize', initialSize, currentSize: initialSize } as any;
+        const state = strategy.begin(initial);
+
+        const originalStyle = { width: element.style.width, height: element.style.height };
+        // Mirror the generic resize extension's temporary pre-strategy box.
+        element.style.width = `${initialSize.width + 2}px`;
+        element.style.height = `${initialSize.height + 2}px`;
+        strategy.preview({ ...initial, currentSize: { width: initialSize.width + 2, height: initialSize.height + 2 } }, state);
+        expect(element.getAttribute('font-height')).toBe('30');
+        expect(element.getAttribute('font-width')).toBe('0');
+        expect({ width: element.style.width, height: element.style.height }).toEqual(originalStyle);
+
+        strategy.preview({ ...initial, currentSize: { width: initialSize.width, height: initialSize.height * 1.2 } }, state);
+        expect(element.getAttribute('font-height')).toBe('36');
+        expect(element.getAttribute('font-width')).toBe('15');
     });
 
     test('barcode property edits refresh the rendered rotation', async () => {
