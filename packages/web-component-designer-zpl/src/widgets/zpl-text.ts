@@ -39,6 +39,7 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
     private _frame: HTMLDivElement;
     private _fontLoadStarted = false;
     private _widgetReady = false;
+    private _inlineEditing = false;
 
     static readonly properties = {
         content: String, fontName: String, fontHeight: Number, fontWidth: Number, rotation: String
@@ -81,7 +82,8 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
             ? -Math.max(0, Math.round((this.fontHeight - 60) * .12))
             : 0;
         const displayedContent = applyDeviceFontCase(font, this.content ?? '');
-        this._text.textContent = displayedContent;
+        if (!this._inlineEditing)
+            this._text.textContent = displayedContent;
         this._text.style.fontFamily = `"${zplFontFamilies[font]}", monospace`;
         this._text.style.fontSize = `${fontSize}px`;
         this._text.style.fontWeight = font === '0' ? 'bold' : 'normal';
@@ -90,7 +92,8 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
 
         // Force layout here. Resize strategies need the quantized bounds in the
         // same pointer event, rather than one animation frame later.
-        const rawWidth = Math.max(1, this._text.scrollWidth);
+        const layoutWidth = this._text.scrollWidth;
+        const rawWidth = Math.max(1, layoutWidth || this._measureTextWithoutLayout(displayedContent, fontSize, font));
         // Device fonts are fixed-cell bitmap fonts, so their printed advance is
         // deterministic. Do not depend on scrollWidth: it is zero while the
         // designer is hidden or being moved into split view, which previously
@@ -100,6 +103,81 @@ export class ZplText extends BaseCustomWebComponentConstructorAppend {
             : Math.max(1, rawWidth * scaleX);
         const height = Math.max(1, fontSize + Math.abs(metrics?.yOffset ?? 0));
         this._setRotatedBounds(width, height, this.rotation);
+    }
+
+    /**
+     * Text elements can temporarily have no layout box while the designer
+     * switches views. Canvas measurement keeps scalable Font 0 selectable in
+     * that state; the final approximation is only for DOM implementations
+     * without canvas support (notably unit-test DOMs).
+     */
+    private _measureTextWithoutLayout(content: string, fontSize: number, font: ZplFontName) {
+        try {
+            if (!this.ownerDocument.defaultView?.navigator.userAgent.includes('jsdom')) {
+                const canvas = this.ownerDocument.createElement('canvas');
+                const context = canvas.getContext('2d');
+                if (context) {
+                    context.font = `${font === '0' ? 'bold ' : ''}${fontSize}px "${zplFontFamilies[font]}", monospace`;
+                    return context.measureText(content).width;
+                }
+            }
+        } catch { /* use deterministic fallback */ }
+        return [...content].length * fontSize * .6;
+    }
+
+    /** Starts plain-text editing inside the widget's shadow DOM. */
+    public beginInlineEdit() {
+        if (this._inlineEditing) return;
+        this._inlineEditing = true;
+        this._text.textContent = this.content ?? '';
+        this._text.setAttribute('contenteditable', 'plaintext-only');
+        this._text.spellcheck = false;
+        this._text.style.cursor = 'text';
+        this._text.style.userSelect = 'text';
+        this._text.style.outline = 'none';
+        this.refreshInlineEditBounds();
+        this._text.focus({ preventScroll: true });
+
+        const selection = this.ownerDocument.getSelection();
+        if (selection) {
+            const range = this.ownerDocument.createRange();
+            range.selectNodeContents(this._text);
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+    public refreshInlineEditBounds() {
+        if (!this._inlineEditing) return;
+        const value = this.inlineEditContent;
+        const font = /^[0A-H]$/.test(this.fontName) ? this.fontName : '0';
+        const metrics = getDeviceFontMetrics(font, this.fontHeight, this.fontWidth);
+        const fontSize = metrics?.fontSize ?? Math.max(1, this.fontHeight);
+        const scaleX = metrics?.scaleX ?? (this.fontWidth > 0 ? this.fontWidth / this.fontHeight : 1);
+        const layoutWidth = this._text.scrollWidth;
+        const width = metrics
+            ? Math.max(1, [...value].length * metrics.characterAdvance + Math.abs(metrics.xOffset))
+            : Math.max(1, (layoutWidth || this._measureTextWithoutLayout(value, fontSize, font)) * scaleX);
+        const height = Math.max(1, fontSize + Math.abs(metrics?.yOffset ?? 0));
+        this._setRotatedBounds(width, height, this.rotation);
+    }
+
+    public get inlineEditElement() { return this._text; }
+
+    public get inlineEditContent() {
+        return (this._text.textContent ?? '').replace(/[\r\n]+/g, ' ');
+    }
+
+    public finishInlineEdit() {
+        if (!this._inlineEditing) return;
+        this._inlineEditing = false;
+        this._text.removeAttribute('contenteditable');
+        this._text.spellcheck = true;
+        this._text.style.cursor = '';
+        this._text.style.userSelect = '';
+        this._text.style.outline = '';
+        this.renderText();
     }
 
     private _ensureFontsLoaded() {

@@ -12,6 +12,7 @@ let ZplBarcodePropertiesService: typeof import('../src/services/ZplBarcodeProper
 let ZplElementResizeStrategy: typeof import('../src/services/ZplElementResizeStrategy.js').ZplElementResizeStrategy;
 let ZplGraphicResizeStrategy: typeof import('../src/services/ZplGraphicResizeStrategy.js').ZplGraphicResizeStrategy;
 let ZplSelectionExtensionProvider: typeof import('../src/services/ZplSelectionExtensionProvider.js').ZplSelectionExtensionProvider;
+let ZplTextEditExtensionProvider: typeof import('../src/services/ZplTextEditExtension.js').ZplTextEditExtensionProvider;
 let resizeZplDiagonalEndpoint: typeof import('../src/services/ZplDiagonalLineExtension.js').resizeZplDiagonalEndpoint;
 let getZplDiagonalVisibleHeight: typeof import('../src/services/ZplDiagonalLineExtension.js').getZplDiagonalVisibleHeight;
 let getZplDiagonalElementHeight: typeof import('../src/services/ZplDiagonalLineExtension.js').getZplDiagonalElementHeight;
@@ -53,6 +54,7 @@ beforeAll(async () => {
     ({ ZplElementResizeStrategy } = await import('../src/services/ZplElementResizeStrategy.js'));
     ({ ZplGraphicResizeStrategy } = await import('../src/services/ZplGraphicResizeStrategy.js'));
     ({ ZplSelectionExtensionProvider } = await import('../src/services/ZplSelectionExtensionProvider.js'));
+    ({ ZplTextEditExtensionProvider } = await import('../src/services/ZplTextEditExtension.js'));
     ({ resizeZplDiagonalEndpoint, getZplDiagonalVisibleHeight, getZplDiagonalElementHeight }
         = await import('../src/services/ZplDiagonalLineExtension.js'));
     ({ parseZplFontWidth } = await import('../src/services/ZplParserService.js'));
@@ -131,6 +133,47 @@ describe('ZPL widget runtime updates', () => {
         expect(element.createZpl()).toContain('^A0N,190,0');
     });
 
+    test('measures scalable Font 0 even when browser layout reports zero width', async () => {
+        const element = document.createElement('zpl-text') as InstanceType<typeof ZplText>;
+        element.setAttribute('content', 'John Doe');
+        element.setAttribute('font-name', '0');
+        element.setAttribute('font-height', '30');
+        element.setAttribute('font-width', '0');
+        document.body.appendChild(element);
+        await flushReady();
+
+        expect((element.shadowRoot!.querySelector('#text-div') as HTMLElement).scrollWidth).toBe(0);
+        expect(parseFloat(element.style.width)).toBeGreaterThan(100);
+    });
+
+    test('supports caret-based plain-text editing for ZPL text', async () => {
+        const element = document.createElement('zpl-text') as InstanceType<typeof ZplText>;
+        element.setAttribute('content', 'John Doe');
+        element.setAttribute('font-name', '0');
+        element.setAttribute('font-height', '30');
+        document.body.appendChild(element);
+        await flushReady();
+
+        element.beginInlineEdit();
+        expect(element.inlineEditElement.getAttribute('contenteditable')).toBe('plaintext-only');
+        expect(element.inlineEditElement.style.cursor).toBe('text');
+        element.inlineEditElement.textContent = 'Jane Doe';
+        element.refreshInlineEditBounds();
+        expect(element.inlineEditContent).toBe('Jane Doe');
+        expect(parseFloat(element.style.width)).toBeGreaterThan(100);
+
+        element.finishInlineEdit();
+        expect(element.inlineEditElement.hasAttribute('contenteditable')).toBe(false);
+        // The extension owns persistence; finishing the raw widget restores
+        // the current attribute value.
+        expect(element.inlineEditElement.textContent).toBe('John Doe');
+
+        const provider = new ZplTextEditExtensionProvider();
+        const designItem = { element } as any;
+        expect(provider.shouldExtend({} as any, { readOnly: false } as any, designItem)).toBe(true);
+        expect(provider.shouldExtend({} as any, { readOnly: true } as any, designItem)).toBe(false);
+    });
+
     test('emits QR origins so visible printer ink matches the designer position', () => {
         const element = document.createElement('zpl-barcode') as InstanceType<typeof ZplBarcode>;
         element.setAttribute('type', 'qrcode');
@@ -198,6 +241,27 @@ describe('ZPL widget runtime updates', () => {
         rect = element.shadowRoot!.querySelector('rect')!;
         expect(rect.getAttribute('fill')).toBe('white');
         expect(element.style.mixBlendMode).toBe('difference');
+    });
+
+    test('renders and preserves thin horizontal ^GB graphic lines', async () => {
+        const element = document.createElement('zpl-graphic-box') as InstanceType<typeof ZplGraphicBox>;
+        element.style.left = '50px';
+        element.style.top = '250px';
+        element.style.width = '700px';
+        element.style.height = '3px';
+        element.setAttribute('stroke-width', '3');
+        element.setAttribute('stroke-color', 'black');
+        element.setAttribute('corner-rounding', '0');
+        element.setAttribute('filled', '');
+        document.body.appendChild(element);
+        await flushReady();
+
+        const rect = element.shadowRoot!.querySelector('rect')!;
+        expect(rect.getAttribute('fill')).toBe('black');
+        expect((element.shadowRoot!.querySelector('#box-div') as HTMLElement).style.backgroundColor).toBe('black');
+        expect(rect.getAttribute('width')).toBe('700');
+        expect(rect.getAttribute('height')).toBe('3');
+        expect(element.createZpl()).toBe('^FO50,250,0^GB700,3,3,B,0^FS');
     });
 
     test('successive resize previews stay relative to the gesture start', async () => {

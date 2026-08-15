@@ -90,6 +90,11 @@ export class ZplGraphicBox extends BaseCustomWebComponentConstructorAppend {
         let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         const paint = reverse || this.strokeColor == StrokeColor.white ? 'white' : 'black';
+        // Very thin filled ^GB fields (for example 700x3 with thickness 3)
+        // can lose their SVG paint when the browser clips the inline SVG line
+        // box. Paint the backing div too so horizontal/vertical rules remain
+        // visible at their exact ZPL dimensions.
+        this._box.style.backgroundColor = filled ? paint : 'transparent';
         rect.setAttribute("stroke", filled ? "none" : paint);
         rect.setAttribute("fill", filled ? paint : "none");
         rect.setAttribute("stroke-width", filled ? "0" : this.strokeWidth.toString());

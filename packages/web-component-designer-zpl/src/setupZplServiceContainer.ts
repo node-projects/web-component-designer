@@ -12,6 +12,7 @@ import { ZplTextPropertiesService } from './services/ZplTextPropertiesService.js
 import { ZplGraphicResizeStrategy } from './services/ZplGraphicResizeStrategy.js';
 import { ZplSelectionExtensionProvider } from './services/ZplSelectionExtensionProvider.js';
 import { ZplDiagonalLineExtensionProvider } from './services/ZplDiagonalLineExtension.js';
+import { ZplTextEditExtensionProvider } from './services/ZplTextEditExtension.js';
 
 export function createZplDesignerServiceContainer() {
     let serviceContainer = new ServiceContainer();
@@ -58,6 +59,9 @@ export function createZplDesignerServiceContainer() {
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.MouseOver, [
         new HighlightElementExtensionProvider()
+    ]);
+    serviceContainer.designerExtensions.set(ExtensionType.Doubleclick, [
+        new ZplTextEditExtensionProvider()
     ]);
     serviceContainer.designerExtensions.set(ExtensionType.ContainerDrag, [
         new GrayOutExtensionProvider()
