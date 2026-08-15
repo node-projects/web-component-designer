@@ -58,6 +58,8 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
         let fontWidth = 0;
         let fontRotation = 'N';
         let by: BarcodeByState = { moduleWidth: 2, wideRatio: 3, barHeight: 100 };
+        let labelReverse = false;
+        let fieldReverse = false;
         let pendingBarcode: { element: ZplBarcode; definition: BarcodeDefinition; outputX: number; outputY: number } | null = null;
 
         for (const token of tokens) {
@@ -69,8 +71,16 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             }
             if (token.prefix !== '^') continue;
             if (token.command === 'FO') {
+                // ^FR is scoped to one field and a new origin starts a new one.
+                fieldReverse = false;
                 x = Number(fields[0]) || 0;
                 y = Number(fields[1]) || 0;
+            } else if (token.command === 'LR') {
+                labelReverse = token.data.toUpperCase().startsWith('Y');
+            } else if (token.command === 'FR') {
+                fieldReverse = true;
+            } else if (token.command === 'FS') {
+                fieldReverse = false;
             } else if (token.command === 'CF') {
                 fontName = fields[0] || '0';
                 fontHeight = Number(first(fields[1], 30));
@@ -130,11 +140,16 @@ export class ZplParserService implements IHtmlParserService, IHtmlWriterService 
             } else if (token.command === 'GB') {
                 const element = new ZplGraphicBox();
                 setPosition(element, x, y);
-                element.style.width = `${Number(first(fields[0], fields[2], 1))}px`;
-                element.style.height = `${Number(first(fields[1], fields[2], 1))}px`;
-                element.setAttribute('stroke-width', String(first(fields[2], 1)));
+                const width = Number(first(fields[0], fields[2], 1));
+                const height = Number(first(fields[1], fields[2], 1));
+                const thickness = Number(first(fields[2], 1));
+                element.style.width = `${width}px`;
+                element.style.height = `${height}px`;
+                element.setAttribute('stroke-width', String(thickness));
                 element.setAttribute('stroke-color', fields[3] === 'W' ? 'white' : 'black');
                 element.setAttribute('corner-rounding', String(first(fields[4], 0)));
+                if (thickness >= Math.min(width, height)) element.setAttribute('filled', '');
+                if (labelReverse || fieldReverse) element.setAttribute('reverse', '');
                 result.push(designItem(element, serviceContainer, instanceServiceContainer));
             } else if (token.command === 'GD') {
                 const element = new ZplGraphicDiagonalLine();

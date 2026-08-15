@@ -6,6 +6,7 @@ let ZplText: typeof import('../src/widgets/zpl-text.js').ZplText;
 let getZplTextOutputOffset: typeof import('../src/widgets/zpl-text.js').getZplTextOutputOffset;
 let zplTextOutputOriginCorrection: typeof import('../src/widgets/zpl-text.js').zplTextOutputOriginCorrection;
 let ZplBarcode: typeof import('../src/widgets/zpl-barcode.js').ZplBarcode;
+let ZplGraphicBox: typeof import('../src/widgets/zpl-graphic-box.js').ZplGraphicBox;
 let ZplTextPropertiesService: typeof import('../src/services/ZplTextPropertiesService.js').ZplTextPropertiesService;
 let ZplBarcodePropertiesService: typeof import('../src/services/ZplBarcodePropertiesService.js').ZplBarcodePropertiesService;
 let ZplElementResizeStrategy: typeof import('../src/services/ZplElementResizeStrategy.js').ZplElementResizeStrategy;
@@ -46,6 +47,7 @@ beforeAll(async () => {
 
     ({ ZplText, getZplTextOutputOffset, zplTextOutputOriginCorrection } = await import('../src/widgets/zpl-text.js'));
     ({ ZplBarcode } = await import('../src/widgets/zpl-barcode.js'));
+    ({ ZplGraphicBox } = await import('../src/widgets/zpl-graphic-box.js'));
     ({ ZplTextPropertiesService } = await import('../src/services/ZplTextPropertiesService.js'));
     ({ ZplBarcodePropertiesService } = await import('../src/services/ZplBarcodePropertiesService.js'));
     ({ ZplElementResizeStrategy } = await import('../src/services/ZplElementResizeStrategy.js'));
@@ -143,6 +145,59 @@ describe('ZPL widget runtime updates', () => {
         expect(element.createZpl()).toContain('^FO400,90,0^BQN,2,4');
         element.setAttribute('rotation', 'B');
         expect(element.createZpl()).toContain('^FO390,100,0^BQB,2,4');
+    });
+
+    test('reverse graphic boxes use knockout compositing and emit field reverse', async () => {
+        const element = document.createElement('zpl-graphic-box') as InstanceType<typeof ZplGraphicBox>;
+        element.style.left = '75px';
+        element.style.top = '75px';
+        element.style.width = '100px';
+        element.style.height = '100px';
+        element.setAttribute('stroke-width', '100');
+        element.setAttribute('stroke-color', 'black');
+        element.setAttribute('corner-rounding', '0');
+        document.body.appendChild(element);
+        await flushReady();
+
+        expect(element.style.mixBlendMode).toBe('');
+        element.setAttribute('reverse', '');
+        expect(element.style.mixBlendMode).toBe('difference');
+        expect(element.shadowRoot!.querySelector('rect')!.getAttribute('stroke')).toBe('white');
+        expect(element.createZpl()).toBe('^FO75,75,0^FR^GB100,100,100,B,0^FS');
+
+        element.removeAttribute('reverse');
+        expect(element.style.mixBlendMode).toBe('');
+        expect(element.createZpl()).not.toContain('^FR');
+    });
+
+    test('filled graphic boxes render solid and emit a valid ZPL fill thickness', async () => {
+        const element = document.createElement('zpl-graphic-box') as InstanceType<typeof ZplGraphicBox>;
+        element.style.width = '100px';
+        element.style.height = '60px';
+        element.setAttribute('stroke-width', '5');
+        element.setAttribute('stroke-color', 'black');
+        element.setAttribute('corner-rounding', '0');
+        document.body.appendChild(element);
+        await flushReady();
+
+        let rect = element.shadowRoot!.querySelector('rect')!;
+        expect(rect.getAttribute('fill')).toBe('none');
+        expect(rect.getAttribute('stroke')).toBe('black');
+        expect(element.createZpl()).toContain('^GB100,60,5,B,0');
+
+        element.setAttribute('filled', '');
+        rect = element.shadowRoot!.querySelector('rect')!;
+        expect(rect.getAttribute('fill')).toBe('black');
+        expect(rect.getAttribute('stroke')).toBe('none');
+        expect(element.createZpl()).toContain('^GB100,60,60,B,0');
+
+        element.style.width = '30px';
+        expect(element.createZpl()).toContain('^GB30,60,30,B,0');
+
+        element.setAttribute('reverse', '');
+        rect = element.shadowRoot!.querySelector('rect')!;
+        expect(rect.getAttribute('fill')).toBe('white');
+        expect(element.style.mixBlendMode).toBe('difference');
     });
 
     test('successive resize previews stay relative to the gesture start', async () => {

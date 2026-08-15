@@ -4,7 +4,7 @@ The original source code of `@node-projects/web-component-designer-zpl` is MIT l
 
 ## ZPLab
 
-Barcode command mappings, BWIP-JS preview geometry, resize behavior, device-font mappings and the bundled printer-preview fonts were adapted from [ZPLab](https://github.com/u8array/ZPLab) at commit `19af998017b1a5559f0a9b069c7ccb34ff4f4223`.
+Barcode command mappings, BWIP-JS preview geometry, reverse-field compositing, resize behavior, device-font mappings and the bundled printer-preview fonts were adapted from [ZPLab](https://github.com/u8array/ZPLab) at commit `19af998017b1a5559f0a9b069c7ccb34ff4f4223`.
 
 ```text
 MIT License
