@@ -264,6 +264,28 @@ describe('ZPL widget runtime updates', () => {
         expect(element.createZpl()).toBe('^FO50,250,0^GB700,3,3,B,0^FS');
     });
 
+    test('renders overlapping ^GB strokes as a solid rule without changing their thickness', async () => {
+        const element = document.createElement('zpl-graphic-box') as InstanceType<typeof ZplGraphicBox>;
+        element.style.left = '199px';
+        element.style.top = '324px';
+        element.style.width = '300px';
+        element.style.height = '7px';
+        element.setAttribute('stroke-width', '5');
+        element.setAttribute('stroke-color', 'black');
+        element.setAttribute('corner-rounding', '0');
+        document.body.appendChild(element);
+        await flushReady();
+
+        const box = element.shadowRoot!.querySelector('#box-div') as HTMLElement;
+        const svg = element.shadowRoot!.querySelector('svg') as SVGElement;
+        const rect = element.shadowRoot!.querySelector('rect')!;
+        expect(element.hasAttribute('filled')).toBe(false);
+        expect(box.style.backgroundColor).toBe('black');
+        expect(svg.style.display).toBe('block');
+        expect(rect.getAttribute('height')).toBe('2');
+        expect(element.createZpl()).toBe('^FO199,324,0^GB300,7,5,B,0^FS');
+    });
+
     test('successive resize previews stay relative to the gesture start', async () => {
         const element = document.createElement('zpl-text') as InstanceType<typeof ZplText>;
         element.setAttribute('content', 'Resize');

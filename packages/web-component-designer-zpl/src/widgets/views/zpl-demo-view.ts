@@ -5,7 +5,7 @@ import { zplPreviewDpmm } from '../../barcodes/bwipRenderer.js';
 
 export class ZplDemoView extends BaseCustomWebComponentConstructorAppend implements IDemoView {
 
-    static override readonly template = html`<h2>Label generated via http://api.labelary.com/</h2><br><img id="image">`;
+    static override readonly template = html`<div id="side"><span>Label generated via http://api.labelary.com/</span></div><img id="image">`;
 
     static override readonly style = css`
         :host {
@@ -16,8 +16,32 @@ export class ZplDemoView extends BaseCustomWebComponentConstructorAppend impleme
             width: 100%;
             position: relative;
         }
+        #side {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 24px;
+            background: var(--wcd-demo-view-toolbar-background, black);
+        }
+        #side > span {
+            color: var(--wcd-color-text, white);
+            rotate: 270deg;
+            display: block;
+            position: absolute;
+            top: 304px;
+            left: -305px;
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 24px;
+            white-space: nowrap;
+        }
         #image {
             border: solid 1px black;
+            position: absolute;
+            top: 0;
+            left: 24px;
+            border: 0;
         }`;
 
     constructor() {
@@ -42,7 +66,7 @@ export class ZplDemoView extends BaseCustomWebComponentConstructorAppend impleme
                 'Accept': 'image/png'
             },
         });
-        (<HTMLIFrameElement>this._getDomElement('image')).src = URL.createObjectURL(await response.blob());;
+        (<HTMLImageElement>this._getDomElement('image')).src = URL.createObjectURL(await response.blob());;
     }
 }
 

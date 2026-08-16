@@ -1,8 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
 import { attributesForBarcode, barcodeCommandRegistry, barcodeObservedAttributes, barcodeRegistry, barcodeTypes, BarcodeProps,
     getBarcodeFieldOriginOffset, getDataMatrixVersion, readBarcodeProps } from '../src/barcodes/barcodeRegistry.js';
-import { barcodeFieldOriginAboveOffset, barcodeHorizontalInsets, barcodeShowsInterpretation, barcodeTextAbove,
-    barcodeTextZoneDots, buildBwipOptions, getTlc39Geometry, getZebraWidthBarGeometry, measureBarcodeBounds, measureBarcodeModules,
+import { barcodeFieldOriginAboveOffset, barcodeHorizontalInsets, barcodeInterpretationText, barcodeShowsInterpretation, barcodeTextAbove,
+    barcodeTextZoneDots, buildBwipOptions, getEanUpcHriFragments, getEanUpcHriStyle, getTlc39Geometry, getZebraWidthBarGeometry, measureBarcodeBounds, measureBarcodeModules,
     measureBarcodePreview } from '../src/barcodes/bwipRenderer.js';
 import geometryFixtures from './fixtures/barcodeGeometry.json';
 import printerBounds from './fixtures/barcodePrinterBounds.json';
@@ -75,6 +75,45 @@ describe('ZPL barcode registry', () => {
         expect(buildBwipOptions(props)).toMatchObject({ bcid: 'code128', raw: true, scale: 5 });
         expect(measureBarcodeBounds(props).width).toBe(615);
         expect(barcodeTextZoneDots(props)).toBe(42);
+    });
+
+    test('shows generated Code 39 start/stop asterisks only in the interpretation line', () => {
+        const definition = barcodeRegistry.code39;
+        const props = { type: 'code39', content: 'abc123', rotation: 'N', ...definition.defaults,
+            printInterpretation: true } as unknown as BarcodeProps;
+
+        expect(barcodeInterpretationText(props)).toBe('*ABC123*');
+        expect(buildBwipOptions(props).text).toBe('ABC123');
+        expect(definition.emit(props).fieldData).toBe('abc123');
+        expect(barcodeShowsInterpretation(props)).toBe(true);
+        expect(barcodeTextAbove(props)).toBe(false);
+        expect(barcodeTextAbove({ ...props, printInterpretationAbove: true } as BarcodeProps)).toBe(true);
+        expect(barcodeShowsInterpretation({ ...props, printInterpretation: false } as BarcodeProps)).toBe(false);
+    });
+
+    test.each<[keyof typeof barcodeRegistry, string, string, number]>([
+        ['ean13', '590123412345', '5901234123457', 13],
+        ['ean8', '1234567', '12345670', 8],
+        ['upca', '01234567890', '012345678905', 12],
+        ['upce', '012345', '00123457', 8]
+    ])('%s uses printer-formatted, individually positioned HRI digits', (type, content, hri, count) => {
+        const definition = barcodeRegistry[type];
+        const props = { type, content, rotation: 'N', ...definition.defaults } as unknown as BarcodeProps;
+        const fragments = getEanUpcHriFragments(props);
+        expect(fragments).toHaveLength(count);
+        expect(fragments.map(fragment => fragment.char).join('')).toBe(hri);
+        expect(barcodeInterpretationText(props)).toBe(hri);
+        if (type === 'ean13' || type === 'upca' || type === 'upce')
+            expect(fragments[0].xModule).toBeLessThan(0);
+        if (type === 'upca' || type === 'upce')
+            expect(fragments.at(-1)!.xModule).toBeGreaterThan(fragments.at(-2)!.xModule);
+    });
+
+    test('uses Zebra EAN/UPC font-size steps instead of generic centered HRI sizing', () => {
+        expect(getEanUpcHriStyle(1)).toEqual({ fontSize: 8, gap: 4, fontFamily: 'ZplVeraMono' });
+        expect(getEanUpcHriStyle(2)).toEqual({ fontSize: 18, gap: 4, fontFamily: 'ZplVeraMono' });
+        expect(getEanUpcHriStyle(3)).toEqual({ fontSize: 28, gap: 5, fontFamily: 'ZplOCRB' });
+        expect(getEanUpcHriStyle(8)).toEqual({ fontSize: 56, gap: 7, fontFamily: 'ZplOCRB' });
     });
 
     test.each(barcodeTypes)('%s has a non-empty offline preview footprint', type => {

@@ -1,8 +1,9 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { getZplCoordinates } from '../zplHelper.js';
 import { BarcodeProps, BarcodeRotation, BarcodeType, barcodeObservedAttributes, getBarcodeDefinition, getBarcodeFieldOriginOffset, readBarcodeProps } from '../barcodes/barcodeRegistry.js';
-import { barcodeFieldOriginAboveOffset, barcodeHorizontalInsets, barcodeShowsInterpretation,
-    barcodeTextAbove, barcodeTextZoneDots, renderBarcode } from '../barcodes/bwipRenderer.js';
+import { barcodeFieldOriginAboveOffset, barcodeHorizontalInsets, barcodeInterpretationText, barcodeShowsInterpretation,
+    barcodeTextAbove, barcodeTextZoneDots, eanUpcTypes, getEanUpcHriFragments, getEanUpcHriStyle,
+    renderBarcode } from '../barcodes/bwipRenderer.js';
 
 export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
     static override readonly style = css`
@@ -12,6 +13,8 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
         canvas { display: block; image-rendering: pixelated; }
         #hri { position: absolute; left: 0; width: 100%; text-align: center; color: black;
             font-family: "ZplVeraMono", monospace; white-space: nowrap; }
+        #hri.ean-upc { text-align: left; overflow: visible; }
+        #hri.ean-upc > span { position: absolute; top: 0; text-align: center; }
         #error { width: 160px; min-height: 48px; padding: 6px; border: 1px dashed #c62828;
             color: #8e0000; background: #fff4f4; font: 11px sans-serif; overflow: hidden; }
     `;
@@ -102,7 +105,13 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
         const definition = getBarcodeDefinition(props.type);
         const result = renderBarcode(props);
         this._surface.replaceChildren();
+        this._hri.replaceChildren();
         this._hri.hidden = true;
+        this._hri.className = '';
+        this._hri.style.left = '';
+        this._hri.style.width = '';
+        this._hri.style.fontFamily = '';
+        this._hri.style.textAlign = '';
         this._error.hidden = true;
         this._frame.style.transform = '';
         this._frame.style.width = '';
@@ -124,8 +133,9 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
         let uprightHeight = result.height;
         if (definition.resizeKind === 'linear') {
             const linear = props as Extract<BarcodeProps, { barHeight: number }>;
+            const isEanUpc = eanUpcTypes.has(props.type);
             canvas.style.width = `${uprightWidth - horizontalInsets.left - horizontalInsets.right}px`;
-            canvas.style.height = `${linear.barHeight}px`;
+            canvas.style.height = `${linear.barHeight + (isEanUpc ? 13 : 0)}px`;
             uprightHeight = linear.barHeight;
             const showHri = barcodeShowsInterpretation(props);
             const textZone = barcodeTextZoneDots(props);
@@ -142,18 +152,35 @@ export class ZplBarcode extends BaseCustomWebComponentConstructorAppend {
             if (showHri) {
                 const genericHri = ['code128', 'code39', 'code93', 'code11', 'interleaved2of5',
                     'standard2of5', 'industrial2of5', 'codabar', 'msi'].includes(props.type);
-                const hriFontSize = genericHri ? 9.7 * Math.max(1, Math.round(linear.moduleWidth)) : 12;
-                this._hri.textContent = linear.content;
+                const eanStyle = isEanUpc ? getEanUpcHriStyle(linear.moduleWidth) : null;
+                const hriFontSize = eanStyle?.fontSize ?? (genericHri ? 9.7 * Math.max(1, Math.round(linear.moduleWidth)) : 12);
                 this._hri.style.height = `${textZone}px`;
                 this._hri.style.fontSize = `${hriFontSize}px`;
                 this._hri.style.lineHeight = `${hriFontSize}px`;
+                this._hri.style.fontFamily = eanStyle ? eanStyle.fontFamily : '';
                 this._hri.style.letterSpacing = genericHri ? '.6px' : 'normal';
                 this._hri.style.transform = genericHri ? 'translateX(-3px)' : '';
-                // Zebra keeps a roughly five-dot bar-to-cap gap. Vera Mono's
-                // cap top sits about .14em below its line-box top. The DOM
-                // rasterizer needs three extra dots to match the printer cap.
-                const belowTop = uprightHeight + 8 - hriFontSize * .14;
-                this._hri.style.top = textAbove ? '0' : `${belowTop}px`;
+                if (isEanUpc && !textAbove && eanStyle) {
+                    const barWidth = uprightWidth - horizontalInsets.left - horizontalInsets.right;
+                    this._hri.className = 'ean-upc';
+                    this._hri.style.left = `${horizontalInsets.left}px`;
+                    this._hri.style.width = `${barWidth}px`;
+                    this._hri.style.top = `${uprightHeight + eanStyle.gap}px`;
+                    for (const fragment of getEanUpcHriFragments(props)) {
+                        const digit = document.createElement('span');
+                        digit.textContent = fragment.char;
+                        digit.style.left = `${(fragment.xModule - 1) * linear.moduleWidth - hriFontSize / 2}px`;
+                        digit.style.width = `${hriFontSize}px`;
+                        this._hri.appendChild(digit);
+                    }
+                } else {
+                    this._hri.textContent = barcodeInterpretationText(props);
+                    // Zebra keeps a roughly five-dot bar-to-cap gap. Vera Mono's
+                    // cap top sits about .14em below its line-box top. The DOM
+                    // rasterizer needs three extra dots to match the printer cap.
+                    const belowTop = uprightHeight + 8 - hriFontSize * .14;
+                    this._hri.style.top = textAbove ? '0' : `${belowTop}px`;
+                }
                 this._hri.hidden = false;
             }
             uprightHeight += textZone;
