@@ -77,12 +77,8 @@ export class ZplGraphicBox extends BaseCustomWebComponentConstructorAppend {
         const elementWidth = parseInt(this.style.width.replace("px", "")) || this.clientWidth || 1;
         const elementHeight = parseInt(this.style.height.replace("px", "")) || this.clientHeight || 1;
         const x = filled ? 0 : this.strokeWidth / 2;
-        let width = filled ? elementWidth : elementWidth - this.strokeWidth;
-        if (!filled && width < this.strokeWidth)
-            width = this.strokeWidth;
-        let height = filled ? elementHeight : elementHeight - this.strokeWidth;
-        if (!filled && height < this.strokeWidth)
-            height = this.strokeWidth;
+        const width = filled ? elementWidth : Math.max(0, elementWidth - this.strokeWidth);
+        const height = filled ? elementHeight : Math.max(0, elementHeight - this.strokeWidth);
         let smallerLength = width;
         if(smallerLength > height)
         smallerLength = height;
@@ -90,11 +86,12 @@ export class ZplGraphicBox extends BaseCustomWebComponentConstructorAppend {
         let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         const paint = reverse || this.strokeColor == StrokeColor.white ? 'white' : 'black';
-        // Very thin filled ^GB fields (for example 700x3 with thickness 3)
-        // can lose their SVG paint when the browser clips the inline SVG line
-        // box. Paint the backing div too so horizontal/vertical rules remain
-        // visible at their exact ZPL dimensions.
-        this._box.style.backgroundColor = filled ? paint : 'transparent';
+        // Opposing strokes overlap when twice the thickness reaches the short
+        // side (for example ^GB300,7,5). Zebra therefore paints a solid rule.
+        // Back it with the same paint so a sub-line-height SVG cannot vanish
+        // when clipped by the designer, without changing the stored thickness.
+        const overlappingStroke = 2 * this.strokeWidth >= Math.min(elementWidth, elementHeight);
+        this._box.style.backgroundColor = filled || overlappingStroke ? paint : 'transparent';
         rect.setAttribute("stroke", filled ? "none" : paint);
         rect.setAttribute("fill", filled ? paint : "none");
         rect.setAttribute("stroke-width", filled ? "0" : this.strokeWidth.toString());
@@ -106,6 +103,7 @@ export class ZplGraphicBox extends BaseCustomWebComponentConstructorAppend {
         rect.setAttribute("height", height.toString());
         svg.setAttribute("width", "100%");
         svg.setAttribute("height", "100%");
+        svg.style.display = "block";
         svg.style.overflow = "visible";
         if (this._box.childElementCount > 0)
             this._box.removeChild(this._box.children[0]);
