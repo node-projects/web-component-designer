@@ -20,8 +20,6 @@ export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend
 
     blocklyDiv: HTMLDivElement;
     workspace: any;
-    static blocklyStyle1: CSSStyleSheet;
-    static blocklyStyle2: CSSStyleSheet;
     resizeObserver: ResizeObserver;
     private _toolbox: any;
 
@@ -84,18 +82,6 @@ export class BlocklyScriptEditor extends BaseCustomWebComponentConstructorAppend
             },
             maxInstances: { 'start_event': 1 },
         });
-
-        if (!BlocklyScriptEditor.blocklyStyle1) {
-          BlocklyScriptEditor.blocklyStyle1 = new CSSStyleSheet();
-            //@ts-ignore
-            BlocklyScriptEditor.blocklyStyle1.replaceSync(<HTMLStyleElement>document.getElementById('blockly-renderer-style-' + renderer + '-' + themename).innerText);
-            BlocklyScriptEditor.blocklyStyle2 = new CSSStyleSheet();
-            //@ts-ignore
-            BlocklyScriptEditor.blocklyStyle2.replaceSync(<HTMLStyleElement>document.getElementById('blockly-common-style').innerText);
-        }
-        this.shadowRoot.adoptedStyleSheets = [BlocklyScriptEditor.blocklyStyle1, BlocklyScriptEditor.blocklyStyle2, BlocklyScriptEditor.style];
-
-
 
         //@ts-ignore
         const zoomToFit = new ZoomToFitControl(this.workspace);
