@@ -534,8 +534,8 @@ export class BindingsHelper {
   applyAllBindings(rootElement: ParentNode, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler, skipChildrenFor?: (element: Element) => boolean): (() => void)[] {
     let retVal: (() => void)[] = [];
     const tw = document.createTreeWalker(rootElement, NodeFilter.SHOW_ELEMENT);
-    let e: Element;
-    while (e = <Element>tw.nextNode()) {
+    let e = <Element>tw.nextNode();
+    while (e) {
       const bindings = this.getBindings(e);
       for (let b of bindings) {
         try {
@@ -557,11 +557,19 @@ export class BindingsHelper {
           console.warn("error applying binding", e, b, err)
         }
       }
-      if (skipChildrenFor) {
-        if (skipChildrenFor(e)) {
-          e = <Element>tw.nextSibling();
-          continue;
+      if (skipChildrenFor && skipChildrenFor(e)) {
+        // Skip the whole subtree of e: advance to the next node that is NOT a descendant of e.
+        // nextSibling() returns null WITHOUT moving the walker when e is the last child, so we must
+        // walk up via parentNode() until a sibling exists, otherwise the following nextNode() would
+        // descend into the skipped subtree anyway.
+        let nn = <Element>tw.nextSibling();
+        while (!nn && e) {
+          e = <Element>tw.parentNode();
+          nn = <Element>tw.nextSibling();
         }
+        e = nn;
+      } else {
+        e = <Element>tw.nextNode();
       }
     }
     return retVal;
