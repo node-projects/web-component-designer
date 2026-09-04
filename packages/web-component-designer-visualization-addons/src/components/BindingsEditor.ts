@@ -14,7 +14,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                 <div id="full-width-col">
                     <div id="signals-area">
                         <div class="row">
-                            <span class="section-label" title="Add signals by name and path. The variable name is used in the formula (__0, __1,... or a custom name).&#010;Access signal objects in properties via ?propertyName, access the propertyValue via ??propertyName.&#010;Access signal objects in properties of the target via #propertyName, access a propertyValue of the target via ##propertyName.&#010;Bind to signal configurations via $objectId.&#010;Bind to special values via §name (if supported by your framework).&#010;You could also use signals inside of a Signal Name via {name}">objects</span>
+                            <span class="section-label" title="Add signals by name and path. The variable name is used in the formula (__0, __1,... or a custom name).&#010;Access signal names in properties via ?propertyName and #propertyName, property values via ??propertyName and ##propertyName, and signal objects stored in properties via ?$propertyName and #$propertyName.&#010;Access screen attributes via ?@attributeName and target attributes via #@attributeName.&#010;Resolve a named signal object via $objectId.&#010;Bind to special values via §name (if supported by your framework).&#010;You could also use signals inside of a Signal Name via {name}">objects</span>
                             <button id="helpBtn" class="info-btn" title="Help"><svg viewBox="0 0 512 512" width="16" height="16"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></button>
                         </div>
                         <div class="bordered-section">
@@ -481,7 +481,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
       signalInput.className = 'signal-path-input';
       signalInput.value = sig.signal;
       signalInput.placeholder = 'signal path';
-      signalInput.title = 'signal path (prefix: ? = signalProperty, ?? = property value, # = target property, ## = target property value)';
+      signalInput.title = 'signal path (prefix: ? = signal name in screen property, ?? = screen property value, ?$ = signal object in screen property, ?@ = screen attribute, # = signal name in target property, ## = target property value, #$ = signal object in target property, #@ = target attribute)';
       signalInput.oninput = () => {
         this._signals[i].signal = signalInput.value;
         this._syncSignals();

@@ -1,5 +1,22 @@
 import { IBinding, IDesignItem, IRefactoring, IRefactorService } from "@node-projects/web-component-designer";
 
+const sourcePrefixes = [
+    { prefix: '?@', itemType: 'attribute' },
+    { prefix: '#@', itemType: 'attribute' },
+    { prefix: '?$', itemType: 'signalObject' },
+    { prefix: '#$', itemType: 'signalObject' },
+    { prefix: '??', itemType: 'property' },
+    { prefix: '##', itemType: 'property' },
+    { prefix: '?', itemType: 'property' },
+    { prefix: '#', itemType: 'property' }
+];
+
+function parseSource(source: string) {
+    const match = sourcePrefixes.find(x => source.startsWith(x.prefix));
+    return match
+        ? { name: source.substring(match.prefix.length), ...match }
+        : { name: source, prefix: '', itemType: 'signal' };
+}
 
 export class VisualizationBindingsRefactorService implements IRefactorService {
     getRefactorings(designItems: IDesignItem[]): IRefactoring[] {
@@ -9,32 +26,13 @@ export class VisualizationBindingsRefactorService implements IRefactorService {
             if (bindings) {
                 for (let b of bindings) {
                     for (let s of b.bindableObjectNames) {
-                        let itemType = 'signal';
-                        let prefix = ""
                         if (s.includes(':')) {
                             let nm = s.split(':')[0];
-                            let sng = s.substring(nm.length + 1);
-                            if (sng.startsWith('?')) {
-                                sng = sng.substring(1);
-                                prefix = '?';
-                                itemType = 'property';
-                                if (sng.startsWith('?')) {
-                                    sng = sng.substring(1);
-                                    prefix = '??';
-                                }
-                            }
-                            refactorings.push({ service: this, name: sng, itemType: itemType, designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName + ' - ' + nm + ':', shortName: nm, prefix: prefix });
+                            const source = parseSource(s.substring(nm.length + 1));
+                            refactorings.push({ service: this, name: source.name, itemType: source.itemType, designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName + ' - ' + nm + ':', shortName: nm, prefix: source.prefix });
                         } else {
-                            if (s.startsWith('?')) {
-                                s = s.substring(1);
-                                prefix = '?';
-                                itemType = 'property';
-                                if (s.startsWith('?')) {
-                                    s = s.substring(1);
-                                    prefix = '??';
-                                }
-                            }
-                            refactorings.push({ service: this, name: s, itemType: itemType, designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName, prefix: prefix });
+                            const source = parseSource(s);
+                            refactorings.push({ service: this, name: source.name, itemType: source.itemType, designItem: d, type: 'binding', sourceObject: b, display: b.target + '/' + b.targetName, prefix: source.prefix });
                         }
                     }
                 }

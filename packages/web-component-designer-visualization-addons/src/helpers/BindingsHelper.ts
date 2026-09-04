@@ -22,28 +22,85 @@ export const bindingsInCssRegex = /{{(.*)}}/;
 
 export type namedBinding = [name: string, binding: VisualizationBinding];
 
+type Cleanup = () => void;
+type StateChangeCallback = (id: string, value: State) => void;
+
+interface SharedStateSubscription {
+  callbacks: Set<StateChangeCallback>;
+  callback: StateChangeCallback;
+  subscriptionResult: any;
+  revision: number;
+  hasValue: boolean;
+  value?: State;
+}
+
+interface CompiledConverterValue {
+  value: any;
+  evaluate?: (values: any[], previousResult: any, context: any) => any;
+}
+
+interface CompiledConverterCondition {
+  matches: (value: number) => boolean;
+  value: CompiledConverterValue;
+}
+
+interface CompiledConverter {
+  exactValues: Map<string, CompiledConverterValue>;
+  conditions: CompiledConverterCondition[];
+}
+
 export function isLit(element: Element) {
   //@ts-ignore
   return element.constructor?.elementProperties != null;
 }
 
 export function parseBindingString(id: string) {
-  let parts: string[] = [];
-  let signals: string[] = [];
-  let tx = '';
+  const parts: string[] = [];
+  const signals: string[] = [];
+  let start = 0;
   for (let n = 0; n < id.length; n++) {
     if (id[n] == '{') {
-      parts.push(tx);
-      tx = '';
+      parts.push(id.substring(start, n));
+      start = n + 1;
     } else if (id[n] == '}') {
-      signals.push(tx);
-      tx = '';
-    } else {
-      tx += id[n];
+      signals.push(id.substring(start, n));
+      start = n + 1;
     }
   }
-  parts.push(tx);
+  parts.push(id.substring(start));
   return { parts, signals };
+}
+
+function bindSpecialValue(handler: SpecialValueHandler, name: string, context: Parameters<SpecialValueHandler['valueProvider']>[1], valueChanged: (value: any) => void): Cleanup {
+  let active = true;
+  let revision = 0;
+  const loadValue = () => {
+    const currentRevision = ++revision;
+    const value = handler.valueProvider(name, context);
+    if (value instanceof Promise)
+      value.then(v => active && currentRevision === revision && valueChanged(v));
+    else if (active)
+      valueChanged(value);
+  };
+
+  loadValue();
+  if (!handler.valueChangedCallbacks)
+    handler.valueChangedCallbacks = new Map();
+  let callbacks = handler.valueChangedCallbacks.get(name);
+  if (!callbacks) {
+    callbacks = [];
+    handler.valueChangedCallbacks.set(name, callbacks);
+  }
+  callbacks.push(loadValue);
+
+  return () => {
+    active = false;
+    const index = callbacks.indexOf(loadValue);
+    if (index >= 0)
+      callbacks.splice(index, 1);
+    if (callbacks.length === 0 && handler.valueChangedCallbacks.get(name) === callbacks)
+      handler.valueChangedCallbacks.delete(name);
+  };
 }
 
 export function getNestedProperty(obj, path) {
@@ -58,96 +115,97 @@ export function getNestedProperty(obj, path) {
   return current;
 }
 
+function observeProperty(bindingsHelper: BindingsHelper, owner: Element, propertyName: string, valueChanged: (value: any) => void, supportsNestedPath = false): Cleanup {
+  const isNested = supportsNestedPath && propertyName.includes('.');
+  const readValue = isNested
+    ? () => getNestedProperty(owner, propertyName)
+    : () => owner[propertyName];
+  valueChanged(readValue());
+  if (isNested)
+    return () => { };
+
+  const callback = () => valueChanged(readValue());
+  const eventName = bindingsHelper.getChangedEventName(owner, propertyName);
+  owner.addEventListener(eventName, callback);
+  return () => owner.removeEventListener(eventName, callback);
+}
+
+function observeAttribute(owner: Element, attributeName: string, valueChanged: (value: string) => void): Cleanup {
+  valueChanged(owner.getAttribute(attributeName));
+  const observer = new MutationObserver(() => valueChanged(owner.getAttribute(attributeName)));
+  observer.observe(owner, { attributes: true, attributeFilter: [attributeName] });
+  return () => observer.disconnect();
+}
+
 class IndirectSignal {
+  private bindingsHelper: BindingsHelper;
   private parts: string[];
   private signals: string[];
   private values: string[];
-  private unsubscribeTargetValue: [((id: string, value: any) => void), any];
-  private cleanupCalls = [];
+  private unsubscribeTargetValue: Cleanup;
+  private cleanupCalls: Cleanup[] = [];
   private combinedName: string;
-  private disposed: boolean;
+  private disposed = false;
   private valueChangedCb: (value: any) => void
   private visualizationHandler: VisualizationHandler;
   private element: Element;
   private relativeSignalPath: string;
 
   constructor(bindingsHelper: BindingsHelper, visualizationHandler: VisualizationHandler, id: string, valueChangedCb: (value: State) => void, element: Element, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler) {
+    this.bindingsHelper = bindingsHelper;
     this.visualizationHandler = visualizationHandler;
     this.valueChangedCb = valueChangedCb;
     this.element = element;
     this.relativeSignalPath = relativeSignalPath;
     this.parseIndirectBinding(id);
     this.values = new Array(this.signals.length);
-    for (let i = 0; i < this.signals.length; i++) {
-      let nm = this.signals[i];
-      if (nm[0] === '?' && nm[1] === '?') {
-        const propNm = nm.substring(2);
-        if (!propNm.includes('.')) {
-          this.handleValueChanged(root[propNm], i);
 
-          const evtCallback = () => this.handleValueChanged(root[propNm], i);
-          const evtName = bindingsHelper.getChangedEventName(root, propNm);
-          root.addEventListener(evtName, (evtCallback));
-          this.cleanupCalls.push(() => root.removeEventListener(evtName, evtCallback));
+    const bindSignalFromProperty = (owner: Element, propertyName: string, index: number) => {
+      let currentSignalName: string;
+      let subscriptionCleanup: Cleanup = () => { };
+      const switchSignal = (propertyValue: any) => {
+        let signalName = propertyValue;
+        if (typeof signalName === 'string' && signalName[0] === '.')
+          signalName = visualizationHandler.getNormalizedSignalName(signalName, relativeSignalPath, element);
+        if (signalName === currentSignalName)
+          return;
+        subscriptionCleanup();
+        currentSignalName = signalName;
+        if (typeof signalName === 'string') {
+          const callback = (changedId: string, value: State) => this.handleValueChanged(value.val, index);
+          subscriptionCleanup = bindingsHelper.subscribeToState(signalName, callback);
         } else {
-          const val = getNestedProperty(root, propNm);
-          this.handleValueChanged(val, i);
+          subscriptionCleanup = () => { };
         }
-        continue;
-      } else if (nm[0] === '#' && nm[1] === '#') {
-        const propNm = nm.substring(2);
-        if (!propNm.includes('.')) {
-          this.handleValueChanged(element[propNm], i);
+      };
+      this.cleanupCalls.push(observeProperty(bindingsHelper, owner, propertyName, switchSignal, true));
+      this.cleanupCalls.push(() => subscriptionCleanup());
+    };
 
-          const evtCallback = () => this.handleValueChanged(element[propNm], i);
-          const evtName = bindingsHelper.getChangedEventName(element, propNm);
-          element.addEventListener(evtName, (evtCallback));
-          this.cleanupCalls.push(() => element.removeEventListener(evtName, evtCallback));
+    try {
+      for (let i = 0; i < this.signals.length; i++) {
+        const signal = this.signals[i];
+        if (signal.startsWith('?@') || signal.startsWith('#@')) {
+          const owner = signal[0] === '?' ? root : element;
+          this.cleanupCalls.push(observeAttribute(owner, signal.substring(2), value => this.handleValueChanged(value, i)));
+        } else if (signal.startsWith('??') || signal.startsWith('##') || signal.startsWith('?$') || signal.startsWith('#$')) {
+          const owner = signal[0] === '?' ? root : element;
+          this.cleanupCalls.push(observeProperty(bindingsHelper, owner, signal.substring(2), value => this.handleValueChanged(value, i), true));
+        } else if (signal[0] === '§') {
+          const name = signal.substring(1);
+          if (!specialValueHandler)
+            throw new Error(`No special value handler registered for "${signal}"`);
+          this.cleanupCalls.push(bindSpecialValue(specialValueHandler, name, { element, relativeSignalPath, root }, value => this.handleValueChanged(value, i)));
+        } else if (signal[0] === '?' || signal[0] === '#') {
+          bindSignalFromProperty(signal[0] === '?' ? root : element, signal.substring(1), i);
         } else {
-          const val = getNestedProperty(element, propNm);
-          this.handleValueChanged(val, i);
-        }
-        continue;
-      } else if (nm[0] === '§') {
-        const mS = nm.substring(1);
-        const value = specialValueHandler.valueProvider(mS, { element, relativeSignalPath, root });
-        if (value instanceof Promise)
-          value.then(v => this.handleValueChanged(v, i));
-        else
-          this.handleValueChanged(value, i);
-        if (!specialValueHandler.valueChangedCallbacks)
-          specialValueHandler.valueChangedCallbacks = new Map();
-        let changeList = specialValueHandler.valueChangedCallbacks.get(mS);
-        if (changeList == null) {
-          changeList = [];
-          specialValueHandler.valueChangedCallbacks.set(mS, changeList);
-        }
-        changeList.push(() => {
-          const value = specialValueHandler.valueProvider(mS, { element, relativeSignalPath, root })
-          if (value instanceof Promise)
-            value.then(v => this.handleValueChanged(v, i));
-          else
-            this.handleValueChanged(value, i);
-        });
-      } else if (nm[0] === '?') {
-        //TODO: react to changes of signal name in prop
-        if (!nm.includes('.')) {
-          nm = root[nm.substring(1)];
-        } else {
-          nm = getNestedProperty(root, nm.substring(1));
-        }
-      } else if (nm[0] === '#') {
-        //TODO: react to changes of signal name in prop
-        if (!nm.includes('.')) {
-          nm = root[nm.substring(1)];
-        } else {
-          nm = getNestedProperty(root, nm.substring(1));
+          const callback = (changedId: string, value: State) => this.handleValueChanged(value.val, i);
+          this.cleanupCalls.push(bindingsHelper.subscribeToState(signal, callback));
         }
       }
-
-      let cb = (id: string, value: any) => this.handleValueChanged(value.val, i);
-      const subscr = this.visualizationHandler.subscribeState(nm, cb);
-      this.cleanupCalls.push(() => this.visualizationHandler.unsubscribeState(this.signals[i], cb, subscr));
+    } catch (error) {
+      this.dispose();
+      throw error;
     }
   }
 
@@ -163,6 +221,8 @@ class IndirectSignal {
   }
 
   handleValueChanged(value: any, index: number) {
+    if (this.disposed)
+      return;
     this.values[index] = value;
     let nm = this.parts[0];
     for (let i = 0; i < this.parts.length - 1; i++) {
@@ -175,12 +235,12 @@ class IndirectSignal {
       nm = this.visualizationHandler.getNormalizedSignalName(nm, this.relativeSignalPath, this.element);
     if (this.combinedName != nm) {
       if (this.unsubscribeTargetValue) {
-        this.visualizationHandler.unsubscribeState(this.combinedName, this.unsubscribeTargetValue[0], this.unsubscribeTargetValue[1]);
+        this.unsubscribeTargetValue();
       }
       if (!this.disposed) {
         this.combinedName = nm;
-        let cb = (id: string, value: any) => this.valueChangedCb(value);
-        this.unsubscribeTargetValue = [cb, this.visualizationHandler.subscribeState(nm, cb)];
+        const cb = (id: string, value: State) => this.valueChangedCb(value);
+        this.unsubscribeTargetValue = this.bindingsHelper.subscribeToState(nm, cb);
       }
     }
   }
@@ -188,16 +248,16 @@ class IndirectSignal {
   dispose() {
     this.disposed = true;
     if (this.unsubscribeTargetValue) {
-      this.visualizationHandler.unsubscribeState(this.combinedName, this.unsubscribeTargetValue[0], this.unsubscribeTargetValue[1]);
+      this.unsubscribeTargetValue();
       this.unsubscribeTargetValue = null;
     }
-    for (let i = 0; i < this.signals.length; i++) {
-      this.cleanupCalls[i]();
-    }
+    for (const cleanup of this.cleanupCalls)
+      cleanup();
+    this.cleanupCalls.length = 0;
   }
 
   setState(value) {
-    if (!this.disposed) {
+    if (!this.disposed && this.combinedName) {
       this.visualizationHandler.setState(this.combinedName, value);
     }
   }
@@ -206,22 +266,45 @@ class IndirectSignal {
 export class BindingsHelper {
   _visualizationHandler: VisualizationHandler;
   namedConverterCallback: (converter: string, value: any, element: Element, binding: namedBinding) => any;
+  private _stateSubscriptions = new Map<string, SharedStateSubscription>();
+  private _scheduledUpdates = new Set<() => void>();
+  private _updateFlushScheduled = false;
+  private _compiledConverters = new WeakMap<VisualizationBinding, { converter: Record<string, any>, argumentsKey: string, compiled: CompiledConverter }>();
 
   constructor(visualizationHandler: VisualizationHandler) {
     this._visualizationHandler = visualizationHandler;
+  }
+
+  private scheduleUpdate(update: () => void) {
+    this._scheduledUpdates.add(update);
+    if (this._updateFlushScheduled)
+      return;
+    this._updateFlushScheduled = true;
+    queueMicrotask(() => {
+      this._updateFlushScheduled = false;
+      const updates = [...this._scheduledUpdates];
+      this._scheduledUpdates.clear();
+      for (const scheduledUpdate of updates)
+        scheduledUpdate();
+    });
   }
 
   getChangedEventName(element: Element, propertyName: string) {
     const posColon = propertyName.indexOf('::');
     if (posColon >= 0)
       return propertyName.substring(posColon + 2);
-    if (element instanceof HTMLInputElement)
+    if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
       return 'change';
-    if (element instanceof HTMLSelectElement)
-      return 'change';
-    if (isLit(element))
-      return PropertiesHelper.camelToDashCase(propertyName);
-    return PropertiesHelper.camelToDashCase(propertyName) + '-changed';
+    const eventName = PropertiesHelper.camelToDashCase(propertyName);
+    return isLit(element) ? eventName : eventName + '-changed';
+  }
+
+  private getParsedTargetName(propertyName: string, bindingTarget: BindingTarget) {
+    if (bindingTarget === BindingTarget.cssvar || bindingTarget === BindingTarget.class)
+      return BindingsHelper.dotToCamelCase(propertyName);
+    if (bindingTarget === BindingTarget.attribute)
+      return propertyName;
+    return PropertiesHelper.dashToCamelCase(propertyName);
   }
 
   //Not allowed chars in Var Names: |{}(),;:[]
@@ -252,19 +335,11 @@ export class BindingsHelper {
         }
         binding.twoWay = true;
         if (!binding.events) {
-          if (element instanceof HTMLInputElement)
-            binding.events = [this.getChangedEventName(element, propname)];
-          else if (element instanceof HTMLSelectElement)
-            binding.events = [this.getChangedEventName(element, propname)];
-          else {
-            if (isLit(element)) {
-              binding.events = [this.getChangedEventName(element, propname)];
-            } else {
-              binding.events = [this.getChangedEventName(element, propname)];
-              //Binding could be a lit elemnt but not yet loaded
-              binding.maybeLitElement = true;
-              binding.litEventNames = [this.getChangedEventName(element, propname)];
-            }
+          binding.events = [this.getChangedEventName(element, propname)];
+          if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLSelectElement) && !isLit(element)) {
+            //Binding could be a lit element but not yet loaded
+            binding.maybeLitElement = true;
+            binding.litEventNames = binding.events;
           }
         }
       }
@@ -280,30 +355,15 @@ export class BindingsHelper {
         binding.signal = parts.join(';');
       }
 
-      if (bindingTarget === BindingTarget.cssvar || bindingTarget === BindingTarget.class)
-        return [BindingsHelper.dotToCamelCase(propname), binding];
-      if (bindingTarget === BindingTarget.attribute)
-        return [propname, binding];
-      return [PropertiesHelper.dashToCamelCase(propname), binding];
+      return [this.getParsedTargetName(propname, bindingTarget), binding];
     }
 
     let binding: VisualizationBinding = JSON.parse(value);
     binding.target = bindingTarget;
 
-    if (binding.twoWay && (binding.events == null || binding.events.length == 0)) {
-      if (element instanceof HTMLInputElement)
-        binding.events = ['change'];
-      else if (element instanceof HTMLSelectElement)
-        binding.events = ['change'];
-      else {
-        binding.events = [this.getChangedEventName(element, propname)];
-      }
-    }
-    if (bindingTarget === BindingTarget.cssvar || bindingTarget === BindingTarget.class)
-      return [BindingsHelper.dotToCamelCase(propname), binding];
-    if (bindingTarget === BindingTarget.attribute)
-      return [propname, binding];
-    return [PropertiesHelper.dashToCamelCase(propname), binding];
+    if (binding.twoWay && (binding.events == null || binding.events.length == 0))
+      binding.events = [this.getChangedEventName(element, propname)];
+    return [this.getParsedTargetName(propname, bindingTarget), binding];
   }
 
   serializeBinding(element: Element, targetName: string, binding: VisualizationBinding): [name: string, value: string] {
@@ -313,9 +373,7 @@ export class BindingsHelper {
       delete bindingCopy.events;
       delete bindingCopy.expressionTwoWay;
     } else if ((binding.events != null && binding.events.length == 1)) {
-      if (element instanceof HTMLInputElement && binding.events?.[0] == "change")
-        delete bindingCopy.events;
-      else if (element instanceof HTMLSelectElement && binding.events?.[0] == "change")
+      if ((element instanceof HTMLInputElement || element instanceof HTMLSelectElement) && binding.events?.[0] == "change")
         delete bindingCopy.events;
       else if (isLit(element) && binding.events?.[0] == targetName)
         delete bindingCopy.events;
@@ -325,119 +383,30 @@ export class BindingsHelper {
 
     const eventsString = bindingCopy.twoWay && bindingCopy.events?.length > 0 ? '::' + bindingCopy.events.join(',') : '';
 
-    let needsJson = false;
-    if (eventsString && binding.expression?.includes('::') || binding.expressionTwoWay?.includes('::'))
-      needsJson = true;
-    if (binding.signal.trim()[0] == '{')
-      needsJson = true;
+    const needsJson = ((eventsString !== '') && !!binding.expression?.includes('::')) ||
+      !!binding.expressionTwoWay?.includes('::') || binding.signal.trim()[0] == '{';
+    const supportsShortForm = binding.target == BindingTarget.property ||
+      binding.target == BindingTarget.attribute || binding.target == BindingTarget.class ||
+      binding.target == BindingTarget.css || binding.target == BindingTarget.cssvar;
+    const hasOnlyShortFormOptions = !needsJson && supportsShortForm && !binding.expressionTwoWay &&
+      binding.converter == null && !binding.historic && !binding.writeBackSignal;
 
-    if (!needsJson && binding.target == BindingTarget.property &&
-      !binding.expression && !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      if (targetName == 'textContent')
-        return [bindingPrefixContent + 'text', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
-      if (targetName == 'innerHTML')
-        return [bindingPrefixContent + 'html', (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
-      return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
+    if (hasOnlyShortFormOptions && !binding.expression) {
+      const name = this.getShortBindingAttributeName(targetName, binding.target, false);
+      const supportsTwoWay = binding.target == BindingTarget.property || binding.target == BindingTarget.attribute;
+      const value = (supportsTwoWay && binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') +
+        binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString;
+      return [name, value];
     }
 
-    //Multi Var Expressions
-    if (!needsJson && binding.target == BindingTarget.property &&
-      binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
-      !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      if (targetName == 'textContent')
-        return [bindingPrefixContent + 'text', (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
-      if (targetName == 'innerHTML')
-        return [bindingPrefixContent + 'html', (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
-      return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
-    }
-
-    if (!needsJson && binding.target == BindingTarget.attribute &&
-      !binding.expression && !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
-    }
-
-    //Multi Var Expressions
-    if (!needsJson && binding.target == BindingTarget.attribute &&
-      binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
-      !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), (binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
-    }
-
-    if (!needsJson && binding.target == BindingTarget.class &&
-      !binding.expression && !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
-    }
-
-    //Multi Var Expressions
-    if (!needsJson && binding.target == BindingTarget.class &&
-      binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
-      !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
-    }
-
-    if (!needsJson && binding.target == BindingTarget.css &&
-      !binding.expression && !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
-    }
-
-
-    //Multi Var Expressions
-    if (!needsJson && binding.target == BindingTarget.css &&
-      binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
-      !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
-    }
-
-    if (!needsJson && binding.target == BindingTarget.cssvar &&
-      !binding.expression && !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), (binding.inverted ? '!' : '') + binding.signal + (!binding.twoWay && binding.signal.includes(';') ? ';' : '') + eventsString];
-    }
-
-    //Multi Var Expressions
-    if (!needsJson && binding.target == BindingTarget.cssvar &&
-      binding.expression && !binding.expression.includes("\n") && !binding.expression.includes(";") &&
-      !binding.expressionTwoWay &&
-      binding.converter == null &&
-      //!binding.type &&
-      !binding.historic &&
-      !binding.writeBackSignal) {
-      return [bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName), (binding.inverted ? '!' : '') + binding.signal + ';' + binding.expression + eventsString];
+    if (hasOnlyShortFormOptions && binding.expression &&
+      !binding.expression.includes("\n") && !binding.expression.includes(";")) {
+      const name = this.getShortBindingAttributeName(targetName, binding.target, true);
+      const supportsTwoWay = binding.target == BindingTarget.attribute ||
+        (binding.target == BindingTarget.property && targetName != 'textContent' && targetName != 'innerHTML');
+      const value = (supportsTwoWay && binding.twoWay ? '=' : '') + (binding.inverted ? '!' : '') +
+        binding.signal + ';' + binding.expression + eventsString;
+      return [name, value];
     }
 
     if (binding.inverted === null || binding.inverted === false) {
@@ -461,21 +430,41 @@ export class BindingsHelper {
       delete bindingCopy.historic;
     }
 
-    if (binding.target == BindingTarget.content)
-      return [bindingPrefixContent + 'html', JSON.stringify(bindingCopy)];
-    if (binding.target == BindingTarget.attribute)
-      return [bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName), JSON.stringify(bindingCopy)];
-    if (binding.target == BindingTarget.class)
-      return [bindingPrefixClass + BindingsHelper.camelToDotCase(targetName), JSON.stringify(bindingCopy)];
-    if (binding.target == BindingTarget.css)
-      return [bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName), JSON.stringify(bindingCopy)];
-    if (binding.target == BindingTarget.cssvar)
-      return [bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2)), JSON.stringify(bindingCopy)];
-    if (binding.target == BindingTarget.property && targetName == 'innerHTML')
-      return [bindingPrefixContent + 'html', JSON.stringify(bindingCopy)];
-    if (binding.target == BindingTarget.property && targetName == 'textContent')
-      return [bindingPrefixContent + 'text', JSON.stringify(bindingCopy)];
-    return [bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName), JSON.stringify(bindingCopy)];
+    return [this.getJsonBindingAttributeName(targetName, binding.target), JSON.stringify(bindingCopy)];
+  }
+
+  private getShortBindingAttributeName(targetName: string, target: BindingTarget, hasExpression: boolean) {
+    if (target == BindingTarget.property && targetName == 'textContent')
+      return bindingPrefixContent + 'text';
+    if (target == BindingTarget.property && targetName == 'innerHTML')
+      return bindingPrefixContent + 'html';
+    if (target == BindingTarget.attribute)
+      return bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName);
+    if (target == BindingTarget.class)
+      return bindingPrefixClass + PropertiesHelper.camelToDashCase(targetName);
+    if (target == BindingTarget.css)
+      return bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName);
+    if (target == BindingTarget.cssvar)
+      return hasExpression
+        ? bindingPrefixCssVar + PropertiesHelper.camelToDashCase(targetName)
+        : bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2));
+    return bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName);
+  }
+
+  private getJsonBindingAttributeName(targetName: string, target: BindingTarget) {
+    if (target == BindingTarget.content || (target == BindingTarget.property && targetName == 'innerHTML'))
+      return bindingPrefixContent + 'html';
+    if (target == BindingTarget.property && targetName == 'textContent')
+      return bindingPrefixContent + 'text';
+    if (target == BindingTarget.attribute)
+      return bindingPrefixAttribute + PropertiesHelper.camelToDashCase(targetName);
+    if (target == BindingTarget.class)
+      return bindingPrefixClass + BindingsHelper.camelToDotCase(targetName);
+    if (target == BindingTarget.css)
+      return bindingPrefixCss + PropertiesHelper.camelToDashCase(targetName);
+    if (target == BindingTarget.cssvar)
+      return bindingPrefixCssVar + BindingsHelper.camelToDotCase(targetName.substring(2));
+    return bindingPrefixProperty + PropertiesHelper.camelToDashCase(targetName);
   }
 
   getBindingAttributeName(element: Element, propertyName: string, propertyTarget: BindingTarget) {
@@ -540,13 +529,21 @@ export class BindingsHelper {
       for (let b of bindings) {
         try {
           let applied = this.applyBinding(e, b, relativeSignalPath, root, specialValueHandler);
-          retVal.push(applied);
+          let bindingDisposed = false;
+          const disposeBinding = () => {
+            if (!bindingDisposed) {
+              bindingDisposed = true;
+              applied();
+            }
+          };
+          retVal.push(disposeBinding);
 
           if (b[1].maybeLitElement && e.localName.includes('-') && !customElements.get(e.localName)) {
             const el = e;
             const bnd = b;
             customElements.whenDefined(e.localName).then(() => {
-              if (isLit(el)) {
+              if (!bindingDisposed && isLit(el)) {
+                bindingDisposed = true;
                 applied();
                 bnd[1].events = bnd[1].litEventNames;
                 retVal.push(this.applyBinding(el, bnd, relativeSignalPath, root, specialValueHandler));
@@ -578,10 +575,13 @@ export class BindingsHelper {
   static #cssBindingsVarId = 0;
 
   async parseCssBindings(sheet: string, element: Element, relativeSignalPath: string, root: HTMLElement): Promise<[stylesheet: CSSStyleSheet, unsub: (() => void)[]]> {
+    if (!sheet.includes(bindingPrefixInsideCss))
+      return [cssFromString(sheet), []];
+
     const parser = (await import("@node-projects/css-parser"));
     const ast = parser.parse(sheet);
 
-    let unsub: (() => void)[];
+    const unsub: (() => void)[] = [];
     for (let r of ast.stylesheet.rules) {
       if (r.type === parser.CssTypes.rule) {
         for (const d of r.declarations) {
@@ -589,11 +589,7 @@ export class BindingsHelper {
             if (d.value.includes(bindingPrefixInsideCss)) {
               const newValue = this.parseCssBinding(d.value, element, relativeSignalPath, root);
               d.value = newValue[0];
-              if (unsub) {
-                unsub.push(...newValue[1])
-              } else {
-                unsub = newValue[1];
-              }
+              unsub.push(...newValue[1]);
             }
           }
         }
@@ -616,9 +612,10 @@ export class BindingsHelper {
     for (let n = 0; n < value.length; n++) {
       const c = value[n];
       if (inBind) {
-        if (escape)
+        if (escape) {
           binding += c;
-        else if (quote && c === '\\')
+          escape = false;
+        } else if (quote && c === '\\')
           escape = true;
         else if (c === quote)
           quote = null;
@@ -659,251 +656,346 @@ export class BindingsHelper {
     return [res + tmp, unsub];
   }
 
-  /**
-   * ? = bind to signals in properties
-   * ?? = binding to a property
-   * $ = bind to a signal configuration
-   * § = bind to a special value 
-   * @param element 
-   * @param binding 
-   * @param relativeSignalPath 
-   * @param root 
-   * @returns 
-   */
-  applyBinding(element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler): () => void {
-    let unsubscribeList: [id: string, ((id: string, value: any) => void), any][] = [];
-    let cleanupCalls: (() => void)[];
-    const cleanUp = () => {
-      for (const u of unsubscribeList) {
-        this._visualizationHandler.unsubscribeState(u[0], u[1], u[2]);
+  /** @internal Shared fan-out avoids duplicate backend subscriptions and initial reads. */
+  subscribeToState(id: string, callback: StateChangeCallback): Cleanup {
+    let entry = this._stateSubscriptions.get(id);
+    if (entry) {
+      entry.callbacks.add(callback);
+      if (entry.hasValue) {
+        const value = entry.value;
+        queueMicrotask(() => entry.callbacks.has(callback) && callback(id, value));
       }
-      if (cleanupCalls) {
-        for (let e of cleanupCalls) {
-          e();
-        }
+    } else {
+      entry = {
+        callbacks: new Set([callback]),
+        callback: null,
+        subscriptionResult: null,
+        revision: 0,
+        hasValue: false
+      };
+      entry.callback = (changedId: string, value: State) => {
+        entry.revision++;
+        entry.hasValue = true;
+        entry.value = value;
+        for (const cb of entry.callbacks)
+          cb(changedId, value);
+      };
+      this._stateSubscriptions.set(id, entry);
+      try {
+        entry.subscriptionResult = this._visualizationHandler.subscribeState(id, entry.callback);
+        const initialRevision = entry.revision;
+        this._visualizationHandler.getState(id).then(value => {
+          if (this._stateSubscriptions.get(id) === entry && entry.revision === initialRevision)
+            entry.callback(id, value);
+        });
+      } catch (error) {
+        this._stateSubscriptions.delete(id);
+        if (entry.subscriptionResult != null)
+          this._visualizationHandler.unsubscribeState(id, entry.callback, entry.subscriptionResult);
+        throw error;
+      }
+    }
+
+    let active = true;
+    return () => {
+      if (!active)
+        return;
+      active = false;
+      entry.callbacks.delete(callback);
+      if (entry.callbacks.size === 0 && this._stateSubscriptions.get(id) === entry) {
+        this._stateSubscriptions.delete(id);
+        this._visualizationHandler.unsubscribeState(id, entry.callback, entry.subscriptionResult);
       }
     };
+  }
+
+  /**
+   * ? = signal name from a root property; ?? = a root property value
+   * # = signal name from a target property; ## = a target property value
+   * ?$ = signal object from a root property; #$ = signal object from a target property
+   * ?@ = a root attribute value; #@ = a target attribute value
+   * $ = a signal configuration; § = a special value
+  */
+  applyBinding(element: Element, binding: namedBinding, relativeSignalPath: string, root: HTMLElement, specialValueHandler?: SpecialValueHandler): Cleanup {
+    const cleanupCalls: Cleanup[] = [];
+    let active = true;
+    const cleanUp = () => {
+      if (!active)
+        return;
+      active = false;
+      this._scheduledUpdates.delete(evaluateAndApply);
+      for (let i = cleanupCalls.length - 1; i >= 0; i--)
+        cleanupCalls[i]();
+      cleanupCalls.length = 0;
+    };
+    const addCleanup = (cleanup: Cleanup) => cleanupCalls.push(cleanup);
 
     const signals = binding[1].signal.split(';');
     const signalVars: string[] = new Array(signals.length);
     for (let i = 0; i < signals.length; i++) {
-      let sng = signals[i];
+      let signal = signals[i];
       signalVars[i] = '__' + i;
-      if (sng.includes(':')) {
-        const spl = sng.split(':');
-        signalVars[i] = spl[0];
-        sng = spl[1];
-        signals[i] = sng;
-      }
-      if (sng[0] === '?') { //access object path in property in custom control, todo: bind direct to property value in local property
-        if (root) { //root is null when opened in designer, then do not apply property bindings
-          let s = sng.substring(1);
-          if (s[0] == '?') {
-            signals[i] = s;
-          } else {
-            signals[i] = root[s];
-            if (s[0] === '$') {
-              s = s.substring(1);
-              signals[i] = '$' + root[s];
-            }
-            let evtCallback = () => {
-              cleanUp();
-              this.applyBinding(element, binding, relativeSignalPath, root, specialValueHandler);
-            };
-            const evtNm = this.getChangedEventName(root, s);
-            root.addEventListener(evtNm, evtCallback);
-            if (!cleanupCalls)
-              cleanupCalls = [];
-            cleanupCalls.push(() => root.removeEventListener(evtNm, evtCallback));
-          }
-        }
-      }
-      else if (sng[0] === '#') { //access object path in target element        
-        let s = sng.substring(1);
-        if (s[0] == '#') {
-          signals[i] = s;
-        } else {
-          signals[i] = root[s];
-          if (s[0] === '$') {
-            s = s.substring(1);
-            signals[i] = '$' + root[s];
-          }
-          let evtCallback = () => {
-            cleanUp();
-            this.applyBinding(element, binding, relativeSignalPath, root, specialValueHandler);
-          };
-          const evtNm = this.getChangedEventName(element, s);
-          root.addEventListener(evtNm, evtCallback);
-          if (!cleanupCalls)
-            cleanupCalls = [];
-          cleanupCalls.push(() => root.removeEventListener(evtNm, evtCallback));
-        }
-      }
-      if (sng[0] === '.') {
-        signals[i] = this._visualizationHandler.getNormalizedSignalName(sng, relativeSignalPath, element);
+      const aliasSeparator = signal.indexOf(':');
+      if (aliasSeparator >= 0) {
+        signalVars[i] = signal.substring(0, aliasSeparator);
+        signal = signal.substring(aliasSeparator + 1);
+        signals[i] = signal;
       }
     }
 
-    let valuesObject = new Array(signals.length);
-    for (let i = 0; i < signals.length; i++) {
-      const s = signals[i];
-      if (s[0] === '?') {
-        if (root) {
-          const nm = s.substring(1);
-          let evtCallback = () => {
-            let disableValueChanged = false;
-            if (!disableValueChanged) {
-              disableValueChanged = true;
-              this.handleValueChanged(element, root, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
-              disableValueChanged = false;
-            }
-          };
-          root.addEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback);
-          if (!cleanupCalls)
-            cleanupCalls = [];
-          cleanupCalls.push(() => root.removeEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback));
-          try {
-            this.handleValueChanged(element, root, binding, root[nm], valuesObject, i, signalVars, false, relativeSignalPath);
-          } catch (err) {
-            console.error(err);
-          }
-          if (binding[1].twoWay && i == 0) {
-            this.addTwoWayBinding(binding, element, v => root[nm] = v);
-          }
-        }
-      } else if (s[0] === '#') { //Binding to element properties
-        const nm = s.substring(1);
-        let evtCallback = () => {
-          let disableValueChanged = false;
-          if (!disableValueChanged) {
-            disableValueChanged = true;
-            this.handleValueChanged(element, root, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
-            disableValueChanged = false;
-          }
-        };
-        element.addEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback);
-        if (!cleanupCalls)
-          cleanupCalls = [];
-        cleanupCalls.push(() => element.removeEventListener(PropertiesHelper.camelToDashCase(nm) + '-changed', evtCallback));
-        try {
-          this.handleValueChanged(element, root, binding, element[nm], valuesObject, i, signalVars, false, relativeSignalPath);
-        } catch (err) {
-          console.error(err);
-        }
-        if (binding[1].twoWay && i == 0) {
-          this.addTwoWayBinding(binding, element, v => element[nm] = v);
-        }
-      } else if (s[0] === '$') {
-        let mS = s.substring(1);
-        if (mS[0] === '.') {
-          mS = this._visualizationHandler.getNormalizedSignalName(mS, relativeSignalPath, element);
-        }
-        this._visualizationHandler.getObject(mS).then(x => {
-          this.handleValueChanged(element, root, binding, x, valuesObject, i, signalVars, true, relativeSignalPath);
-        });
-      } else if (s[0] === '§') {
-        const mS = s.substring(1);
-        const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root });
-        if (value instanceof Promise)
-          value.then(v => this.handleValueChanged(element, root, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
-        else
-          this.handleValueChanged(element, root, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
-        if (!specialValueHandler.valueChangedCallbacks)
-          specialValueHandler.valueChangedCallbacks = new Map();
-        let changeList = specialValueHandler.valueChangedCallbacks.get(mS);
-        if (changeList == null) {
-          changeList = [];
-          specialValueHandler.valueChangedCallbacks.set(mS, changeList);
-        }
-        changeList.push(() => {
-          const value = specialValueHandler.valueProvider(mS, { element, binding, relativeSignalPath, root })
-          if (value instanceof Promise)
-            value.then(v => this.handleValueChanged(element, root, binding, v, valuesObject, i, signalVars, true, relativeSignalPath));
-          else
-            this.handleValueChanged(element, root, binding, value, valuesObject, i, signalVars, true, relativeSignalPath);
-        });
-      } else {
-        if (s.includes('{')) {
-          let indirectSignal = new IndirectSignal(this, this._visualizationHandler, s, (value) => this.handleValueChanged(element, root, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath), element, relativeSignalPath, root, specialValueHandler);
-          if (!cleanupCalls)
-            cleanupCalls = [];
-          cleanupCalls.push(() => indirectSignal.dispose());
-          if (binding[1].twoWay && i == 0) {
-            this.addTwoWayBinding(binding, element, v => indirectSignal.setState(v));
-          }
-        } else {
-          if (binding[1].historic) {
-            if (binding[1].historic.reloadInterval) {
-              let myTimer = { timerId: <any>-1 };
-              const loadHistoric = async () => {
-                const res = await this._visualizationHandler.getHistoricData(s, binding[1].historic);
-                this.handleValueChanged(element, root, binding, res?.values, valuesObject, i, signalVars, true, relativeSignalPath);
-                if (myTimer.timerId !== null)
-                  myTimer.timerId = setTimeout(loadHistoric, binding[1].historic.reloadInterval);
-              }
-              loadHistoric();
-              if (!cleanupCalls)
-                cleanupCalls = [];
-              cleanupCalls.push(() => {
-                if (myTimer.timerId > 0)
-                  clearTimeout(myTimer.timerId);
-                myTimer.timerId = null;
-              });
-            } else
-              this._visualizationHandler.getHistoricData(s, binding[1].historic).then(x => this.handleValueChanged(element, root, binding, x?.values, valuesObject, i, signalVars, true, relativeSignalPath))
-          } else {
-            const cb = (id: string, value: State) => this.handleValueChanged(element, root, binding, value.val, valuesObject, i, signalVars, false, relativeSignalPath);
-            unsubscribeList.push([s, cb, this._visualizationHandler.subscribeState(s, cb)]);
-            this._visualizationHandler.getState(s).then(x => this.handleValueChanged(element, root, binding, x?.val, valuesObject, i, signalVars, false, relativeSignalPath));
-            if (binding[1].twoWay && i == 0) {
-              this.addTwoWayBinding(binding, element, v => this._visualizationHandler.setState(s, v));
-            }
-          }
-        }
+    const values = new Array(signals.length);
+    const expressionArguments = [...signalVars, '__res', '__ctx'];
+    if (binding[1].expression && !binding[1].compiledExpression) {
+      binding[1].compiledExpression = binding[1].expression.includes('return ')
+        ? new Function(<any>expressionArguments, binding[1].expression)
+        : new Function(<any>expressionArguments, 'return ' + binding[1].expression);
+    }
+    const compiledConverter = this.getCompiledConverter(binding[1], expressionArguments);
+    const context = { element, root, boundNames: binding[1].signal, boundTargetName: binding[0], boundTargetType: binding[1].target };
+    const writeTarget = this.createTargetWriter(element, binding);
+    let writeBackSignal = binding[1].writeBackSignal;
+    if (writeBackSignal?.[0] === '.')
+      writeBackSignal = relativeSignalPath + writeBackSignal;
+
+    let currentValue: any;
+    let previousResult: any;
+    let lastOutput: any;
+    let hasOutput = false;
+    let hasApplied = false;
+    let scheduled = false;
+
+    const evaluateAndApply = () => {
+      scheduled = false;
+      if (!active)
+        return;
+      let value = currentValue;
+      if (binding[1].compiledExpression) {
+        value = binding[1].compiledExpression(...values, previousResult, context);
+        previousResult = value;
       }
+      if (binding[1].converter) {
+        if (typeof binding[1].converter === 'string')
+          value = this.namedConverterCallback(<string><never>binding[1].converter, value, element, binding);
+        else
+          value = this.applyCompiledConverter(value, compiledConverter, values, previousResult, context, binding[1].converterDefault);
+      }
+      if (binding[1].inverted)
+        value = !value;
+
+      hasApplied = true;
+      const canCompareByValue = value === null || typeof value !== 'object';
+      if (hasOutput && canCompareByValue && Object.is(lastOutput, value))
+        return;
+      hasOutput = true;
+      lastOutput = value;
+
+      if (writeBackSignal)
+        this._visualizationHandler.setState(writeBackSignal, value, true);
+      writeTarget(value);
+    };
+
+    const updateValue = (value: any, index: number, noParse: boolean) => {
+      if (!active)
+        return;
+      if (!noParse && index === 0)
+        value = BindingsHelper.parseValueWithType(value, binding);
+      values[index] = value;
+      currentValue = value;
+
+      // Preserve immediate initialization for the common one-signal case, then
+      // collapse bursts and multi-signal initialization into one microtask.
+      if (!hasApplied && signals.length === 1) {
+        evaluateAndApply();
+      } else if (!scheduled) {
+        scheduled = true;
+        this.scheduleUpdate(evaluateAndApply);
+      }
+    };
+
+    const setters: ((value: any) => void)[] = new Array(signals.length);
+    const setSetter = (index: number, setter: (value: any) => void) => {
+      setters[index] = setter;
+      return () => {
+        if (setters[index] === setter)
+          setters[index] = null;
+      };
+    };
+
+    const bindPropertyValue = (owner: Element, propertyName: string, index: number): Cleanup => {
+      const setterCleanup = setSetter(index, value => owner[propertyName] = value);
+      const propertyCleanup = observeProperty(this, owner, propertyName, value => updateValue(value, index, false));
+      return () => {
+        propertyCleanup();
+        setterCleanup();
+      };
+    };
+
+    const bindAttributeValue = (owner: Element, attributeName: string, index: number): Cleanup => {
+      const setterCleanup = setSetter(index, value => value == null
+        ? owner.removeAttribute(attributeName)
+        : owner.setAttribute(attributeName, value));
+      const attributeCleanup = observeAttribute(owner, attributeName, value => updateValue(value, index, false));
+      return () => {
+        attributeCleanup();
+        setterCleanup();
+      };
+    };
+
+    const bindResolvedSource = (source: string, index: number): Cleanup => {
+      if (source.startsWith('?@') || source.startsWith('#@')) {
+        const owner = source[0] === '?' ? root : element;
+        return owner ? bindAttributeValue(owner, source.substring(2), index) : () => { };
+      }
+      if (source.startsWith('?$') || source.startsWith('#$')) {
+        const owner = source[0] === '?' ? root : element;
+        return owner ? bindPropertyValue(owner, source.substring(2), index) : () => { };
+      }
+      if (source[0] === '?' || source[0] === '#') {
+        const owner = source[0] === '?' ? root : element;
+        return owner ? bindPropertyValue(owner, source.substring(1), index) : () => { };
+      }
+      if (source[0] === '$') {
+        let objectName = source.substring(1);
+        if (objectName[0] === '.')
+          objectName = this._visualizationHandler.getNormalizedSignalName(objectName, relativeSignalPath, element);
+        let running = true;
+        this._visualizationHandler.getObject(objectName).then(value => {
+          if (running)
+            updateValue(value, index, true);
+        });
+        return () => running = false;
+      }
+      if (source[0] === '§') {
+        if (!specialValueHandler)
+          throw new Error(`No special value handler registered for "${source}"`);
+        return bindSpecialValue(specialValueHandler, source.substring(1), { element, binding, relativeSignalPath, root }, value => updateValue(value, index, true));
+      }
+      if (source.includes('{')) {
+        const indirectSignal = new IndirectSignal(this, this._visualizationHandler, source, value => updateValue(value.val, index, false), element, relativeSignalPath, root, specialValueHandler);
+        const setterCleanup = setSetter(index, value => indirectSignal.setState(value));
+        return () => {
+          indirectSignal.dispose();
+          setterCleanup();
+        };
+      }
+
+      let signalName = source;
+      if (signalName[0] === '.')
+        signalName = this._visualizationHandler.getNormalizedSignalName(signalName, relativeSignalPath, element);
+      if (binding[1].historic) {
+        const historic = binding[1].historic;
+        if (historic.reloadInterval) {
+          let running = true;
+          let timerId: ReturnType<typeof setTimeout> = null;
+          const loadHistoric = async () => {
+            const result = await this._visualizationHandler.getHistoricData(signalName, historic);
+            if (!active || !running)
+              return;
+            updateValue(result?.values, index, true);
+            timerId = setTimeout(loadHistoric, historic.reloadInterval);
+          };
+          loadHistoric();
+          return () => {
+            running = false;
+            if (timerId !== null)
+              clearTimeout(timerId);
+            timerId = null;
+          };
+        }
+        let running = true;
+        this._visualizationHandler.getHistoricData(signalName, historic).then(result => {
+          if (running)
+            updateValue(result?.values, index, true);
+        });
+        return () => running = false;
+      }
+
+      const callback = (id: string, value: State) => updateValue(value?.val, index, false);
+      const subscriptionCleanup = this.subscribeToState(signalName, callback);
+      const setterCleanup = setSetter(index, value => this._visualizationHandler.setState(signalName, value));
+      return () => {
+        subscriptionCleanup();
+        setterCleanup();
+      };
+    };
+
+    const bindSource = (source: string, index: number): Cleanup => {
+      if (source.startsWith('?@') || source.startsWith('#@') || source.startsWith('?$') || source.startsWith('#$'))
+        return bindResolvedSource(source, index);
+      const prefix = source[0];
+      if ((prefix !== '?' && prefix !== '#') || source[1] === prefix)
+        return bindResolvedSource(source[1] === prefix ? source.substring(1) : source, index);
+
+      const owner = prefix === '?' ? root : element;
+      if (!owner)
+        return () => { };
+      const propertyName = source.substring(1);
+
+      let sourceCleanup: Cleanup = () => { };
+      let currentSource: string;
+      const switchSource = (resolvedSource: any) => {
+        const nextSource = typeof resolvedSource === 'string' ? resolvedSource : null;
+        if (nextSource === currentSource)
+          return;
+        sourceCleanup();
+        currentSource = nextSource;
+        sourceCleanup = nextSource ? bindResolvedSource(nextSource, index) : () => { };
+      };
+      const propertyCleanup = observeProperty(this, owner, propertyName, switchSource);
+      return () => {
+        propertyCleanup();
+        sourceCleanup();
+      };
+    };
+
+    try {
+      if (binding[1].twoWay)
+        addCleanup(this.addTwoWayBinding(binding, element, value => setters[0]?.(value)));
+      for (let i = 0; i < signals.length; i++) {
+        if (typeof signals[i] === 'string')
+          addCleanup(bindSource(signals[i], i));
+      }
+    } catch (error) {
+      cleanUp();
+      throw error;
     }
 
     return cleanUp;
   }
 
-  private addTwoWayBinding(binding: namedBinding, element: Element, setter: (value) => void) {
-    if (binding[1].expressionTwoWay) {
-      if (!binding[1].compiledExpressionTwoWay) {
-        if (binding[1].expressionTwoWay.includes('return '))
-          binding[1].compiledExpressionTwoWay = new Function(<any>['value'], binding[1].expressionTwoWay);
-        else
-          binding[1].compiledExpressionTwoWay = new Function(<any>['value'], 'return ' + binding[1].expressionTwoWay);
-      }
+  private addTwoWayBinding(binding: namedBinding, element: Element, setter: (value: any) => void): Cleanup {
+    if (binding[1].expressionTwoWay && !binding[1].compiledExpressionTwoWay) {
+      binding[1].compiledExpressionTwoWay = binding[1].expressionTwoWay.includes('return ')
+        ? new Function(<any>['value'], binding[1].expressionTwoWay)
+        : new Function(<any>['value'], 'return ' + binding[1].expressionTwoWay);
     }
 
-    for (let e of binding[1].events) {
-      const evt = element[e];
-      if (evt instanceof TypedEvent) {
-        evt.on(() => {
-          let v;
-          if (binding[1].target == BindingTarget.attribute)
-            v = element.getAttribute(binding[0]);
-          else
-            v = element[binding[0]];
-          v = BindingsHelper.parseValueWithType(v, binding);
-          if (binding[1].compiledExpressionTwoWay)
-            v = binding[1].compiledExpressionTwoWay(v);
-          setter(v);
-        })
+    const cleanupCalls: Cleanup[] = [];
+    const callback = () => {
+      let value = binding[1].target == BindingTarget.attribute
+        ? element.getAttribute(binding[0])
+        : element[binding[0]];
+      value = BindingsHelper.parseValueWithType(value, binding);
+      if (binding[1].compiledExpressionTwoWay)
+        value = binding[1].compiledExpressionTwoWay(value);
+      setter(value);
+    };
+
+    for (const eventName of binding[1].events ?? []) {
+      const event = element[eventName];
+      if (event instanceof TypedEvent) {
+        const disposable = event.on(callback);
+        cleanupCalls.push(() => disposable.dispose());
       } else {
-        element.addEventListener(e, (evt) => {
-          let v;
-          if (binding[1].target == BindingTarget.attribute)
-            v = element.getAttribute(binding[0]);
-          else
-            v = element[binding[0]];
-          v = BindingsHelper.parseValueWithType(v, binding);
-          if (binding[1].compiledExpressionTwoWay)
-            v = binding[1].compiledExpressionTwoWay(v);
-          setter(v);
-        });
+        element.addEventListener(eventName, callback);
+        cleanupCalls.push(() => element.removeEventListener(eventName, callback));
       }
     }
+    return () => {
+      for (const cleanup of cleanupCalls)
+        cleanup();
+      cleanupCalls.length = 0;
+    };
   }
 
   private static parseValueWithType(value, binding: namedBinding) {
@@ -924,140 +1016,107 @@ export class BindingsHelper {
     return value;
   }
 
-  handleValueChanged(element: Element, root: Element, binding: namedBinding, value: any, valuesObject: any[], index: number, signalVarNames: string[], noParse: boolean, relativeSignalPath: string) {
-    let v: (number | boolean | string) = value;
-    //should this be done??
-    if (!noParse && index == 0)
-      v = BindingsHelper.parseValueWithType(v, binding);
-    valuesObject[index] = v;
-    if (binding[1].expression) {
-      if (!binding[1].compiledExpression) {
-        signalVarNames.push('__res')
-        signalVarNames.push('__ctx')
-        if (binding[1].expression.includes('return '))
-          binding[1].compiledExpression = new Function(<any>signalVarNames, binding[1].expression);
-        else
-          binding[1].compiledExpression = new Function(<any>signalVarNames, 'return ' + binding[1].expression);
-      }
-      valuesObject[signalVarNames.length - 1] = { element, root, boundNames: binding[1].signal, boundTargetName: binding[0], boundTargetType: binding[1].target };
-      v = binding[1].compiledExpression(...valuesObject);
-      valuesObject[signalVarNames.length - 1] = v;
-    }
-    if (binding[1].converter) {
-      if (typeof binding[1].converter === 'string') {
-        v = this.namedConverterCallback(<string><never>binding[1].converter, v, element, binding);
-      } else {
-        const stringValue = <string>(v != null ? v.toString() : v);
-        if (stringValue in binding[1].converter) {
-          const cvVal = binding[1].converter[stringValue];
-          if (typeof cvVal === 'string')
-            v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[stringValue] + '`')(...valuesObject);
-          else
-            v = cvVal;
-        } else {
-          let endedWithBreak = false;
-          //@ts-ignore
-          const nr = parseFloat(v);
-          for (let c in binding[1].converter) {
-            if (c.length > 2 && c[0] === '>' && c[1] === '=') {
-              const wr = parseFloat(c.substring(2));
-              if (nr >= wr) {
-                const cvVal = binding[1].converter[c];
-                if (typeof cvVal === 'string')
-                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-                else
-                  v = cvVal;
-                endedWithBreak = true;
-                break;
-              }
-            } else if (c.length > 2 && c[0] === '<' && c[1] === '=') {
-              const wr = parseFloat(c.substring(2));
-              if (nr <= wr) {
-                const cvVal = binding[1].converter[c];
-                if (typeof cvVal === 'string')
-                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-                else
-                  v = cvVal;
-                endedWithBreak = true;
-                break;
-              }
-            } else if (c.length > 1 && c[0] === '>') {
-              const wr = parseFloat(c.substring(1));
-              if (nr > wr) {
-                const cvVal = binding[1].converter[c];
-                if (typeof cvVal === 'string')
-                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-                else
-                  v = cvVal;
-                endedWithBreak = true;
-                break;
-              }
-            } else if (c.length > 1 && c[0] === '<') {
-              const wr = parseFloat(c.substring(1));
-              if (nr < wr) {
-                const cvVal = binding[1].converter[c];
-                if (typeof cvVal === 'string')
-                  v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-                else
-                  v = cvVal;
-                endedWithBreak = true;
-                break;
-              }
-            } else {
-              const sp = c.split('-');
-              if (sp.length > 1) {
-                if ((sp[0] === '' || nr >= parseFloat(sp[0])) && (sp[1] === '' || parseFloat(sp[1]) >= nr)) {
-                  const cvVal = binding[1].converter[c];
-                  if (typeof cvVal === 'string')
-                    v = new Function(<any>signalVarNames, 'return `' + binding[1].converter[c] + '`')(...valuesObject);
-                  else
-                    v = cvVal;
-                  endedWithBreak = true;
-                  break;
-                }
-              }
-            }
-          }
+  private compileConverter(converter: Record<string, any>, expressionArguments: string[]): CompiledConverter {
+    const exactValues = new Map<string, CompiledConverterValue>();
+    const conditions: CompiledConverterCondition[] = [];
+    const compileValue = (value: any): CompiledConverterValue => {
+      if (typeof value !== 'string')
+        return { value };
+      const fn = new Function(<any>expressionArguments, 'return `' + value + '`');
+      return { value, evaluate: (values, previousResult, context) => fn(...values, previousResult, context) };
+    };
 
-          if (!endedWithBreak && binding[1].converterDefault !== undefined)
-            v = binding[1].converterDefault;
+    for (const key in converter) {
+      const value = compileValue(converter[key]);
+      exactValues.set(key, value);
+
+      if (key.startsWith('>=')) {
+        const threshold = parseFloat(key.substring(2));
+        conditions.push({ matches: input => input >= threshold, value });
+      } else if (key.startsWith('<=')) {
+        const threshold = parseFloat(key.substring(2));
+        conditions.push({ matches: input => input <= threshold, value });
+      } else if (key[0] === '>') {
+        const threshold = parseFloat(key.substring(1));
+        conditions.push({ matches: input => input > threshold, value });
+      } else if (key[0] === '<') {
+        const threshold = parseFloat(key.substring(1));
+        conditions.push({ matches: input => input < threshold, value });
+      } else {
+        const range = key.split('-');
+        if (range.length > 1) {
+          const minimum = range[0] === '' ? null : parseFloat(range[0]);
+          const maximum = range[1] === '' ? null : parseFloat(range[1]);
+          conditions.push({
+            matches: input => (minimum === null || input >= minimum) && (maximum === null || maximum >= input),
+            value
+          });
         }
       }
     }
-    if (binding[1].inverted)
-      v = !v;
+    return { exactValues, conditions };
+  }
 
-    if (binding[1].writeBackSignal) {
-      let wb = binding[1].writeBackSignal;
-      if (wb[0] === '.') {
-        wb = relativeSignalPath + wb;
-      }
-      this._visualizationHandler.setState(wb, v, true);
-    }
+  private getCompiledConverter(binding: VisualizationBinding, expressionArguments: string[]) {
+    if (!binding.converter || typeof binding.converter !== 'object')
+      return null;
+    const argumentsKey = expressionArguments.join('\0');
+    const cached = this._compiledConverters.get(binding);
+    if (cached?.converter === binding.converter && cached.argumentsKey === argumentsKey)
+      return cached.compiled;
+    const compiled = this.compileConverter(binding.converter, expressionArguments);
+    this._compiledConverters.set(binding, { converter: binding.converter, argumentsKey, compiled });
+    return compiled;
+  }
 
-    if (binding[1].target == BindingTarget.property)
-      element[binding[0]] = v;
-    else if (binding[1].target == BindingTarget.attribute)
-      if (typeof v === 'boolean') {
-        if (v)
-          element.setAttribute(binding[0], '');
-        else
-          element.removeAttribute(binding[0]);
-      } else {
-        element.setAttribute(binding[0], <string>v);
+  private applyCompiledConverter(value: any, converter: CompiledConverter, values: any[], previousResult: any, context: any, defaultValue: any) {
+    const key = String(value);
+    let convertedValue = converter.exactValues.get(key);
+    let matched = converter.exactValues.has(key);
+    if (!matched) {
+      const numberValue = parseFloat(value);
+      for (const condition of converter.conditions) {
+        if (condition.matches(numberValue)) {
+          convertedValue = condition.value;
+          matched = true;
+          break;
+        }
       }
-    else if (binding[1].target == BindingTarget.css)
-      (<HTMLElement>element).style[binding[0]] = v;
-    else if (binding[1].target == BindingTarget.cssvar)
-      (<HTMLElement>element).style.setProperty(binding[0], <string>v);
-    else if (binding[1].target == BindingTarget.class) {
-      if (v)
-        (<HTMLElement>element).classList.add(binding[0]);
-      else
-        (<HTMLElement>element).classList.remove(binding[0]);
     }
-    else if (binding[1].target == BindingTarget.visible)
-      (<HTMLElement>element).style.visibility = v ? '' : 'collapse';
+    if (!matched)
+      return defaultValue !== undefined ? defaultValue : value;
+    return convertedValue.evaluate
+      ? convertedValue.evaluate(values, previousResult, context)
+      : convertedValue.value;
+  }
+
+  private createTargetWriter(element: Element, binding: namedBinding): (value: any) => void {
+    const name = binding[0];
+    switch (binding[1].target) {
+      case BindingTarget.property:
+        return value => element[name] = value;
+      case BindingTarget.attribute:
+        return value => {
+          if (typeof value === 'boolean') {
+            if (value)
+              element.setAttribute(name, '');
+            else
+              element.removeAttribute(name);
+          } else {
+            element.setAttribute(name, value);
+          }
+        };
+      case BindingTarget.css:
+        return value => (<HTMLElement>element).style[name] = value;
+      case BindingTarget.cssvar:
+        return value => (<HTMLElement>element).style.setProperty(name, value);
+      case BindingTarget.class:
+        return value => (<HTMLElement>element).classList.toggle(name, !!value);
+      case BindingTarget.visible:
+        return value => (<HTMLElement>element).style.visibility = value ? '' : 'collapse';
+      default:
+        return () => { };
+    }
   }
 
   public static camelToDotCase(text: string) {

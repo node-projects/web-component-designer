@@ -168,8 +168,12 @@ code {
             <tr><td>__name</td><td>Internal screen variable — local to the current screen, not connected to any external data source. Initial value is <code>null</code>. Useful for screen-local state like tab selection or panel visibility.</td></tr>
             <tr><td>?name</td><td>A signal in a screen property</td></tr>
             <tr><td>??name</td><td>The current value of a screen property</td></tr>
+            <tr><td>?$name</td><td>The signal object stored in a screen property</td></tr>
+            <tr><td>?@name</td><td>The current value of a screen attribute</td></tr>
             <tr><td>#name</td><td>A signal in a property of the bound target element</td></tr>
             <tr><td>##name</td><td>The current value of a property of the bound target element</td></tr>
+            <tr><td>#$name</td><td>The signal object stored in a property of the bound target element</td></tr>
+            <tr><td>#@name</td><td>The current value of an attribute of the bound target element</td></tr>
             <tr><td>$objectId</td><td>The entire signal object</td></tr>
             <tr><td>§name</td><td>A special framework-provided value (if supported)</td></tr>
             <tr><td>{name}</td><td>Dynamic signal path: embed another signal's value inside the path, e.g. <code>.Plant.{.ActiveLine}.Speed</code></td></tr>
