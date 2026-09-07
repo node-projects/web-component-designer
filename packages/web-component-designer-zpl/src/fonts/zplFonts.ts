@@ -1,3 +1,5 @@
+import { zplPackageUrl } from '../Constants.js';
+
 export type ZplFontName = '0' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
 
 export interface ZplDeviceFontMetrics {
@@ -78,7 +80,7 @@ export async function loadZplFonts(document: Document): Promise<void> {
             ['ZplOCRA', 'OCRA.ttf']
         ] as const;
         loading = Promise.all(sources.map(async ([family, file]) => {
-            const url = new URL(`../assets/fonts/${file}`, import.meta.url);
+            const url = zplPackageUrl(`assets/fonts/${file}`);
             const face = new FontFace(family, `url(${url})`);
             await face.load();
             document.fonts.add(face);

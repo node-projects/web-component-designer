@@ -24,3 +24,4 @@ export * from "./barcodes/bwipRenderer.js";
 export * from "./fonts/zplFonts.js";
 export * from "./setupZplServiceContainer.js";
 export * from "./zplHelper.js";
+export * from "./Constants.js";

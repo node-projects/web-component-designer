@@ -1,4 +1,5 @@
 import { DefaultPropertyEditorTypesService, DefaultEditorTypeService, ExtensionType, DefaultModelCommandService, DefaultHtmlParserService, JsonFileElementsService, ServiceContainer, PositionExtensionProvider, GrayOutExtensionProvider, AltToEnterContainerExtensionProvider, NamedTools, PointerTool, RectangleSelectorTool, ZoomTool, PanTool, MagicWandSelectorTool, ZMoveContextMenu, CopyPasteContextMenu, MultipleItemsSelectedContextMenu, ItemsBelowContextMenu, ElementDragTitleExtensionProvider, PointerToolButtonProvider, SeperatorToolProvider, SelectorToolButtonProvider, ZoomToolButtonProvider, HighlightElementExtensionProvider, IDesignerCanvas, SelectionService, UndoService, GrayOutDragOverContainerExtensionProvider, ElementAtPointService, SnaplinesProviderService, DefaultInstanceService, PropertyGroupsService, DesignItemDocumentPositionService, DragDropService, BaseCustomWebComponentPropertiesService, TransformToolButtonProvider, DesignItemService, DeletionService, ResizeExtensionProvider } from '@node-projects/web-component-designer';
+import { zplPackageUrl } from './Constants.js';
 import { ZplLayoutPlacementService } from './services/ZplLayoutPlacementService.js';
 import { ZplParserService } from './services/ZplParserService.js';
 import { ZplImageDrop } from './services/ZplImageDrop.js';
@@ -100,7 +101,7 @@ export function createZplDesignerServiceContainer() {
 
     serviceContainer.config.demoViewWidget = ZplDemoView;
 
-    serviceContainer.register('elementsService', new JsonFileElementsService('zpl', new URL("./widgets/elements.json", import.meta.url)));
+    serviceContainer.register('elementsService', new JsonFileElementsService('zpl', zplPackageUrl('widgets/elements.json')));
     serviceContainer.register('elementsService', new ZplBarcodeElementsService());
 
     return serviceContainer;

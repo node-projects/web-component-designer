@@ -240,8 +240,8 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this.designerView.instanceServiceContainer.collaborationService.disconnect();
       this.designerView.instanceServiceContainer.collaborationService.detachTransport();
     }
-    this.codeView.dispose();
-    this.demoView.dispose();
+    this.codeView?.dispose();
+    this.demoView?.dispose();
   }
 
   executeCommand(command: IUiCommand) {
