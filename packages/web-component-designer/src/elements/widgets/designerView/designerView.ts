@@ -63,32 +63,86 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       touch-action: none;
     }
     #lowertoolbar {
-      height: 16px;
+      height: var(--wcd-designer-view-statusbar-height, 28px);
+      box-sizing: border-box;
       background: var(--wcd-designer-view-statusbar-background, #787f82);
+      color: var(--wcd-designer-view-statusbar-color, #354348);
       display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 2px 6px;
       bottom: 0;
       position: absolute;
-      font-size: 12px;
       width: 100%;
     }
-    input {
-      width: 40px;
-      height: 16px;
-      padding: 0;
-      border: 0;
-      font-size: 12px;
+    #zoomInput {
+      flex: 0 0 52px;
+      box-sizing: border-box;
+      width: 52px;
+      height: 24px;
+      padding: 0 4px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      background: transparent;
+      color: inherit;
+      font-family: inherit;
+      font-size: 11px;
       text-align: center;
-      margin-right: 1px;
     }
     .toolbar-control {
-      min-width: 16px;
-      height: 16px;
-      display: block;
-      margin-right: 1px;
-      cursor: default;
+      box-sizing: border-box;
+      font: inherit;
+      flex: 0 0 24px;
+      width: 24px;
+      height: 24px;
+      padding: 4px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+    .toolbar-control-input {
+      flex-basis: 52px;
+      width: 52px;
+      padding: 0;
+    }
+    .toolbar-control-input input {
+      box-sizing: border-box;
+      width: 100%;
+      min-width: 0;
+      height: 24px;
+      padding: 0 4px;
+      border: 1px solid var(--wcd-color-border, #596c7a);
+      border-radius: 4px;
+      font: inherit;
+      color: inherit;
+      background: var(--wcd-input-background-color, white);
+    }
+    .toolbar-control svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+    #zoomInput:focus-visible, .toolbar-control:focus-visible, .toolbar-control-input input:focus-visible {
+      outline: 2px solid var(--wcd-color-focus, #47977c);
+      outline-offset: -2px;
+    }
+    .toolbar-separator {
+      height: 14px;
+      margin: 0 2px;
+      border-left: 1px solid var(--wcd-color-border, #596c7a);
     }
     .selected {
       background-color: var(--wcd-designer-view-tool-selected-background, deepskyblue);
@@ -106,39 +160,26 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     #canvas {
       left: 24px;
       width: calc(100% - 24px - 16px);
-      height: calc(100% - 32px);
+      height: calc(100% - var(--wcd-designer-view-statusbar-height, 28px) - 16px);
     }
 
     #tool-bar {
       width: 24px;
-      height: calc(100% - 32px);
+      height: calc(100% - var(--wcd-designer-view-statusbar-height, 28px) - 16px);
       position: absolute;
       background-color: var(--wcd-designer-view-toolbar-background, lightgray);      
     }
   
-    .zoom-in {
-      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAn9JREFUeNqkU11o01AUTtI06U/6tzHWbnNVS+k67FAG/gwfZEOcCrpNEBwEH2Q+Otqxh+5VEaHYV18UwQd9sk4Q+6CUKogbtSoM10qftJS2iGuT/iRpshvvDZu4DHHggY+TnHu+795zz7m4qqrYxfA6pjerlcHMZvMQQRCL8Hccoh+iBJECAMQEQci3Wk2MxP5iqgqmJUmIB3xkdTRoKgQG6Wr1JxBX1oTQx3UxCdcjMO2ZJiCK4g4y3HUIACV+bsL5dSRAWfwe636z0WBzWEFzn5vku5xyIZGsx2UF5AhEaDYbO8Dz3KLPi1X9B2iTy0pRiDx5/Z2bJgmGwDH8WMhuDxzEf6A8TYDneT3GR4JMzcVQThNlcCtANaM48pICutodxXTkkI1HeVslSPor6B/wWL7B3Z1n2KR3O3h05rkDOkd2eYoSxM025PVrAgAQeoFSuSLI3Q66jpJNRsIWPLvM5JJTTUkGGsqVtgJ5JU3AaLTqBVKZT9xh7yDT2Gh05G4bNQBzGETkBbkMVAxbzdadMJbSBDzCHXgKgKGZQJCp0IP32dnEaKhd6nOZAay7mXk6UUGeIHDDh88NKb0qumjaHiN391/1GjtrJ6ZPSb33H9eJYomuTJ601Qf7SKVYVlqplZblxRvOThrtEaC28qSOPAwncCYSWbzJsrO3XP4br9KZa1fTmcaOSTQYLDFFaeURh/yDfLynp/fCwkI0yrKX79ZqG49sUr2A44a3u+d08/fXVhfAeZ8vcDocjs6z7KV7xeL3JzBcwPZgmoAkScGlpdvzc3NXHuZyXxIwlMX2aJoAfFkvx8aGnRzH5WEpr7cXuerKPwVw1Lb/sV8CDACbf0U37X3NqwAAAABJRU5ErkJggg==);
-    }
-    .zoom-out {
-      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAmVJREFUeNqkU01oE0EUnv3Nf0xsS01jEzWUNCUplh7U4kEiVVEQqyBYWDxor5am5JBeFRGCuXpRBA8KHqIHMYISohdTYlQo2kguaghJUNvd/O1udjvr7NKWZHuw4IMHM/v9zHu8t5iiKCAYDAKi/xQ4MHEdbIXFYgUmk2kUx/EouoZRulGWUaYhhHGe5wutVhOQKtk3/RToQ1HgjCjyCb+PrE0GjEW/x1Cr/YFCdoUPffwqpBAeQbRnmoEgCD1i9OoohHLi7EnHt3E/bfb0m/pwDGBeF04P77Mpex1SMZliE5IMV3FV0Gw2erJe56I+L6iNHDQYnRaaVsXb5uh8JGS3+w9hv1SeVkG9Xtd3EB4PDBecVtplpAmHKMMesN2R2Ymg7fer9PfwZgui3sC932X+gV53nGZSXj2Yf36B5oWNNtK5NQMIcT2nXKnyUt8eA6uSUf1YNyhKsFmptmWkK2sGFGXRG6Rzn7jDXo+1sdboSBSJEd0gVABYzrMOpEtrBi7+DqoCAnUn1JTo0IP3+dnkZKhdHnKaIEUSXRPCiA+fG2JmWXAaDPY4uXP+ipfqrBybOSEO3n/M4qWyoXrmuE30DJHWUkVupbMt44u3nJ2k7BGotAqkTjyGNvBiJBK9yTCzt5wjN15ncteuZnKNnk0kCHNcllsFVUN2iY8ODAyeX1yMxRjm8t319bVHNpEtYhjxbseago3t0+YU4Dmfzz+9sBCbZ5hL90qln0/Q5yLYRWgGoigGlpZuz8/NXXm4uvolqY4a7DI0A/RnvZyaGnNwHFdArbzZArla9p8GmDq2/4m/AgwATHQSD48kJDUAAAAASUVORK5CYII=);
-    }
-    .snap-grid {
-      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAblJREFUeNqkUjtLA0EQnntFyKNKJdiFgIlGC5G0FlaaIsYgiKAgKIKdjbV/wM7GImBhI6JFMFWKK3yBimBAhJDuUEgimMSYS0hunbncHRtFjLjw7X7z7ezszM4KjDEQRRG+jnlEgvYAAgLAJpoT1tYdA9gzAAqLuC/DD4N1EZC87v1IYnZ0MBj0k/6Szw/nTs7GO+8f62gWBCuDHTRG+ABxgGScsd3JlYWlJogu9TSjkT41NzM0AEbr5uDocJmxLTv3CCJpgbRkAKcWpq14vP7scVqrVKsbBOKktayS7BL4RzB5uxvAo7++SfV6vYnmBenESaM9/qCESFt4pPUJJzrlLpe/vQ9pTeex8A0EQcggwILJo9EohMPhNVW9ZqFQaJvsWCzWozGuCxJ3gck1TYNGo+Hy+XxQKpXalUoFisUi1Go1RyM/uwtZLsADYkxRlGnMZLXT6QQkSSqglsIV0HY0XddTdgkqV4LD6YPJsgwYzLSJEygQraz70YDvRg9Hh3O8DdptM1uTEwzDMDnvTHVfWfy+D8592W4Jt1wJfXOnC0h8XMw/cbuEHOKZc/iNX9qC2cb/jE8BBgAvhdOb37HVsgAAAABJRU5ErkJggg==);
-    }
-    .snap-guide {
-      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAYVJREFUeNqkU7tKA1EQnbs3CnlVqbQNARMjFilS+AnZQhIbW0ER/AA/wlYbhXR2wUKx0iKNYGMKDViEdEIgieBujGvCPpyz7sK6iWLIwJk798zsuXsfIxzHoXksAqcoij+vMbYq7MoszGxaEB3wtODlH3i5E5uojck210RCgq7SJie4MC0TsdO1cim/lMmkwHdarZWni+t16/1jz/FElJBAGc5imLzyakXNG0IuVo+OnwHE4JCzgisG7BJu/I3CQjyRuq1dvWi6vg8gBofcOHgGAZO+AFv88/VNDofDEcd3IBCD43ycfhEowY28Sazfnzh1cKMggWsUQvi4waiqKuVyud16/d7JZrOHxWJxKudMuQV3C81mk3RdX0wmk9Tr9UxN06jb7dJgMPjBwQRUAu/AtWg0SpZl7TDSUso2/1UVNWHOMIwJARzWBhcQwMXu1oJb9Ufbtsk0zYktPLrvgD8E/mWeYoNxxlj2xoZ3qI2/YrePQs10PksjTRPozCog5m3nLwEGABrLzseuHT6IAAAAAElFTkSuQmCC);
-    }
-    
     .bottom-scroll {
       width: calc(100% - 16px);
       position: absolute;
-      bottom: 16px;
+      bottom: var(--wcd-designer-view-statusbar-height, 28px);
       height: 16px;
       box-sizing: border-box;
       z-index: 1;
     }
     .right-scroll {
-      height: calc(100% - 32px);
+      height: calc(100% - var(--wcd-designer-view-statusbar-height, 28px) - 16px);
       position: absolute;
       right: 0;
       top: 0;
@@ -149,7 +190,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     .bottom-right {
       width: 16px;
       height: 16px;
-      bottom: 16px;
+      bottom: var(--wcd-designer-view-statusbar-height, 28px);
       right: 0;
       position: absolute;
       background: var(--wcd-designer-view-corner-background, #f0f0f0);
@@ -161,18 +202,27 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
       </node-projects-plain-scrollbar>
       <div class="bottom-right"></div>
-      <div id="lowertoolbar">
-        <input id="zoomInput" type="text" value="100%">
-        <div title="decrease zoom" id="zoomIncrease" class="toolbar-control zoom-in"></div>
-        <div title="increase zoom" id="zoomDecrease" class="toolbar-control zoom-out"></div>
-        <div title="reset zoom" id="zoomReset" class="toolbar-control"
-          style="width: 16px; height: 16px; font-size: 14px; display: flex; align-items: center; justify-content: center;">1
-        </div>
-        <div title="zoom to fit" id="zoomFit" class="toolbar-control"
-          style="width: 16px; height: 16px; font-size: 8px; display: flex; align-items: center; justify-content: center;">
-          100%</div>
-        <div title="snap to grid" id="alignGrid" class="toolbar-control snap-grid"></div>
-        <div title="snap to elements" id="alignSnap" class="toolbar-control snap-guide"></div>
+      <div id="lowertoolbar" role="group" aria-label="Canvas controls">
+        <input id="zoomInput" type="text" value="100%" aria-label="Zoom percentage">
+        <button type="button" title="Zoom out" aria-label="Zoom out" id="zoomDecrease" class="toolbar-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+        </button>
+        <button type="button" title="Zoom in" aria-label="Zoom in" id="zoomIncrease" class="toolbar-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+        </button>
+        <button type="button" title="Reset zoom to 100%" aria-label="Reset zoom to 100%" id="zoomReset" class="toolbar-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l2-2v10M15 9l2-2v10"/><path d="M11 10h.01M11 14h.01" stroke-width="2.5"/></svg>
+        </button>
+        <button type="button" title="Zoom to fit" aria-label="Zoom to fit" id="zoomFit" class="toolbar-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+        </button>
+        <span class="toolbar-separator" aria-hidden="true"></span>
+        <button type="button" title="Snap to grid (right-click to set grid size)" aria-label="Snap to grid" aria-pressed="false" id="alignGrid" class="toolbar-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18m6-18v18M3 9h18M3 15h18"/></svg>
+        </button>
+        <button type="button" title="Snap to elements" aria-label="Snap to elements" aria-pressed="false" id="alignSnap" class="toolbar-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4v9a3 3 0 0 0 6 0V4h4v9a7 7 0 0 1-14 0V4Z"/><path d="M5 8h4m6 0h4"/></svg>
+        </button>
       </div>
     </div>`;
 
@@ -213,27 +263,37 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       this._zoomAroundViewportCenter(parseFloat(this._zoomInput.value) / 100);
     }
     this._zoomInput.onclick = this._zoomInput.select
-    let zoomIncrease = this._getDomElement<HTMLDivElement>('zoomIncrease');
+    let zoomIncrease = this._getDomElement<HTMLButtonElement>('zoomIncrease');
     this._configureZoomButton(zoomIncrease, 1);
-    let zoomDecrease = this._getDomElement<HTMLDivElement>('zoomDecrease');
+    let zoomDecrease = this._getDomElement<HTMLButtonElement>('zoomDecrease');
     this._configureZoomButton(zoomDecrease, -1);
-    let zoomReset = this._getDomElement<HTMLDivElement>('zoomReset');
+    let zoomReset = this._getDomElement<HTMLButtonElement>('zoomReset');
     zoomReset.onclick = () => {
       this.zoomReset();
     }
-    let zoomFit = this._getDomElement<HTMLDivElement>('zoomFit');
+    let zoomFit = this._getDomElement<HTMLButtonElement>('zoomFit');
     zoomFit.onclick = () => {
       this.zoomToFit();
     }
     this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
 
-    let alignSnap = this._getDomElement<HTMLDivElement>('alignSnap');
-    alignSnap.onclick = () => { this._designerCanvas.alignOnSnap = !this._designerCanvas.alignOnSnap; alignSnap.style.backgroundColor = this._designerCanvas.alignOnSnap ? 'deepskyblue' : ''; }
-    alignSnap.style.backgroundColor = this._designerCanvas.alignOnSnap ? 'deepskyblue' : '';
+    const updateSnapButton = (button: HTMLButtonElement, active: boolean) => {
+      button.classList.toggle('selected', active);
+      button.setAttribute('aria-pressed', String(active));
+    };
+    const alignSnap = this._getDomElement<HTMLButtonElement>('alignSnap');
+    alignSnap.onclick = () => {
+      this._designerCanvas.alignOnSnap = !this._designerCanvas.alignOnSnap;
+      updateSnapButton(alignSnap, this._designerCanvas.alignOnSnap);
+    };
+    updateSnapButton(alignSnap, this._designerCanvas.alignOnSnap);
     alignSnap.oncontextmenu = e => { e.preventDefault(); }
-    let alignGrid = this._getDomElement<HTMLDivElement>('alignGrid');
-    alignGrid.onclick = () => { this._designerCanvas.alignOnGrid = !this._designerCanvas.alignOnGrid; alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : ''; }
-    alignGrid.style.backgroundColor = this._designerCanvas.alignOnGrid ? 'deepskyblue' : '';
+    const alignGrid = this._getDomElement<HTMLButtonElement>('alignGrid');
+    alignGrid.onclick = () => {
+      this._designerCanvas.alignOnGrid = !this._designerCanvas.alignOnGrid;
+      updateSnapButton(alignGrid, this._designerCanvas.alignOnGrid);
+    };
+    updateSnapButton(alignGrid, this._designerCanvas.alignOnGrid);
     alignGrid.oncontextmenu = e => {
       e.preventDefault();
       let res = prompt("raster size", this.designerCanvas.gridSize.toString());
@@ -245,6 +305,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
 
     this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
+    this._lowertoolbar.onwheel = event => event.stopPropagation();
 
     this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
     this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
@@ -277,6 +338,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   private _configureZoomButton(button: HTMLElement, direction: 1 | -1) {
+    // Pointer presses already zoom on pointerdown; keyboard activation emits a click with detail 0.
+    button.onclick = event => {
+      if (event.detail === 0)
+        this._zoomStep(direction);
+    };
     button.onpointerdown = event => {
       if (!event.isPrimary || event.button != 0)
         return;

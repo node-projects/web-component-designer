@@ -85,7 +85,9 @@ them. Theme them through their own tokens (`--wcd-context-menu-*`,
 Named `--wcd-<component>-<part>-<property>`.
 
 **Tab control** — `tab-header-background`, `tab-header-hover-background`,
-`tab-selected-background`, `tab-selected-indicator-color`, `tab-panel-background`
+`tab-selected-background`, `tab-selected-indicator-color`, `tab-panel-background`,
+`tab-font-family`, `tab-font-size`, `tab-text-transform`, `tab-letter-spacing`,
+`tab-padding-inline`
 
 **Tree view** — `tree-view-background`, `tree-view-item-hover-background`,
 `tree-view-item-selected-background`, `tree-view-id-color`, `tree-view-connector-color`
@@ -94,15 +96,18 @@ Named `--wcd-<component>-<part>-<property>`.
 `property-grid-unset-value-color`, `property-grid-group-header-hover-color`,
 `property-grid-drop-target-color`, `property-grid-select-option-color`,
 `property-grid-header-highlight-color`, `property-grid-tab-indicator-color`,
-`property-grid-tab-indicator-inactive-color`
+`property-grid-tab-indicator-inactive-color`, `property-grid-columns`,
+`property-grid-row-gap`, `property-grid-label-font-size`,
+`property-grid-editor-height`, `property-grid-editor-border-radius`
 
 **Palette** — `palette-item-hover-background`
 
 **Designer view** — `designer-view-toolbar-background`, `designer-view-statusbar-background`,
+`designer-view-statusbar-color`, `designer-view-statusbar-height`,
 `designer-view-tool-selected-background`, `designer-view-tool-hover-background`,
 `designer-view-corner-background`
 
-**Canvas** — `canvas-background`, `screenshot-background`, `canvas-search-background`,
+**Canvas** — `canvas-background`, `canvas-shadow`, `screenshot-background`, `canvas-search-background`,
 `canvas-search-container-background`, `canvas-search-border-color`,
 `canvas-search-button-hover-background`, `canvas-drag-file-outline-color`,
 `canvas-loading-background`, `grid-stroke-color`, `grid-fill-color`
@@ -148,6 +153,33 @@ Named `--wcd-<component>-<part>-<property>`.
 `plain-scrollbar-track-border-color`, `plain-scrollbar-button-color`,
 `plain-scrollbar-button-color-hover`, `plain-scrollbar-button-color-active`,
 `plain-scrollbar-button-size`
+
+### Spacing and typography
+
+These optional tokens retain the existing dimensions and typography when unset:
+
+| Token (with `--wcd-` prefix) | Default |
+| --- | --- |
+| `tab-font-family` | `Arial` |
+| `tab-font-size` | `12px` |
+| `tab-text-transform` | `uppercase` |
+| `tab-letter-spacing` | `1px` |
+| `tab-padding-inline` | `5px` |
+| `property-grid-columns` | `11px minmax(80px, auto) minmax(120px, 1fr)` |
+| `property-grid-row-gap` | `0` |
+| `property-grid-label-font-size` | `13px` |
+| `property-grid-editor-height` | `24px` |
+| `property-grid-editor-border-radius` | `0` |
+| `canvas-shadow` | `none` |
+
+The canvas controls use SVG icons colored with `designer-view-statusbar-color`
+(default `#354348`). `designer-view-statusbar-height` defaults to `28px`; use at
+least `28px` to accommodate the buttons. Active snap controls use
+`designer-view-tool-selected-background`.
+
+Keep three columns in `property-grid-columns`: the value indicator, label, and editor.
+For a narrow inspector, use `11px minmax(0, 1fr) minmax(0, 1fr)` to let both text
+columns shrink. `canvas-shadow` outlines the design surface without changing its size.
 
 ## Legacy variable names
 

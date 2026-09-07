@@ -9,11 +9,12 @@ export class RoundPixelsDesignViewConfigButton implements IDesignViewConfigButto
   provideButtons(designerView: DesignerView, designerCanvas: IDesignerCanvas): HTMLElement[] {
 
     const btn = document.createElement('div');
-    btn.className = 'toolbar-control';
+    btn.className = 'toolbar-control toolbar-control-input';
     btn.title = 'round pixels to';
 
     const ip = document.createElement('input');
     ip.type = 'number';
+    ip.setAttribute('aria-label', 'Round pixels to decimal places');
     ip.step = '1';
     ip.min = '-1';
     ip.valueAsNumber = designerView.serviceContainer.options.roundPixelsToDecimalPlaces;

@@ -40,7 +40,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     .content-wrapper {
       padding: .5em;
       display: grid;
-      grid-template-columns: 11px minmax(80px, auto) minmax(120px, 1fr);
+      grid-template-columns: var(--wcd-property-grid-columns, 11px minmax(80px, auto) minmax(120px, 1fr));
+      row-gap: var(--wcd-property-grid-row-gap, 0);
       align-items: center;
       grid-auto-rows: minmax(24px, auto);
       align-items: center;
@@ -57,7 +58,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     label, .style-label {
       box-sizing: border-box;
       display: inline-block;
-      font-size: 13px;
+      font-size: var(--wcd-property-grid-label-font-size, 13px);
       width: auto;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -72,10 +73,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     }
     .editor-control, .content-wrapper > input, .content-wrapper > select {
       border: 1px solid var(--wcd-input-border-color, var(--input-border-color, var(--wcd-color-border, #596c7a)));
-      border-radius: 0;
+      border-radius: var(--wcd-property-grid-editor-border-radius, 0);
     }
     .editor-control, input, select {
-      height: 24px;
+      height: var(--wcd-property-grid-editor-height, 24px);
       box-sizing: border-box;
       font-size: 11px;
       width: 100%;

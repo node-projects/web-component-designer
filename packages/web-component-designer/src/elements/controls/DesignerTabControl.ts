@@ -74,19 +74,19 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
         }
         .tab-header {
             height: 30px;
-            font-family: Arial;
+            font-family: var(--wcd-tab-font-family, Arial);
             display: flex;
             justify-content: center;
             align-items: center;                
-            text-transform: uppercase;                
+            text-transform: var(--wcd-tab-text-transform, uppercase);
             box-sizing: content-box;                
-            padding-left: 5px;
-            padding-right: 5px;
+            padding-left: var(--wcd-tab-padding-inline, 5px);
+            padding-right: var(--wcd-tab-padding-inline, 5px);
             color: var(--wcd-color-text, white);
-            font-size: 12px;
+            font-size: var(--wcd-tab-font-size, 12px);
             font-weight: 500;
             line-height: 1.5;
-            letter-spacing: 1px;
+            letter-spacing: var(--wcd-tab-letter-spacing, 1px);
             white-space: nowrap;
         }
         .tab-header:hover {
