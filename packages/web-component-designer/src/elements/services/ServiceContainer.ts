@@ -107,7 +107,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   readonly config: {
     codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
-    demoViewWidget: new (...args: any[]) => IDemoView & HTMLElement;
+    /** Null removes the preview tab, which DocumentContainer already checks for. */
+    demoViewWidget: (new (...args: any[]) => IDemoView & HTMLElement) | null;
     openBindingsEditor?: (property: IProperty, designItems: IDesignItem[], binding: IBinding, bindingTarget: BindingTarget) => Promise<void>
   } = {
       codeViewWidget: CodeViewSimple,
