@@ -1,9 +1,29 @@
 import type { IDesignItem } from '../../../item/IDesignItem.js';
 import type { IProperty } from '../IProperty.js';
+import { createAngleUnitEditorAddon } from './AngleUnitEditorAddon.js';
 
 export type UnitPropertyType = 'css-length' | 'css-angle' | 'css-time' | 'css-frequency' | 'css-flex' | 'css-resolution' | 'css-scale' | 'svg-length';
 
 export type UnitConversionResult = string | number | null | undefined;
+
+/**
+ * Context supplied to an optional control hosted next to a numeric unit editor.
+ * An addon can use the callbacks to commit or preview values selected by its own popup.
+ */
+export type UnitEditorAddonContext = {
+  property: IProperty,
+  readonly value: string,
+  readonly designItems: IDesignItem[],
+  setValue: (value: string | null) => Promise<void>,
+  previewValue: (value: string | null) => Promise<void>,
+  removePreviewValue: () => Promise<void>
+};
+
+/**
+ * Creates a control, such as a button that opens a specialised unit picker,
+ * which is displayed beside the standard numeric unit controls.
+ */
+export type UnitEditorAddon = (context: UnitEditorAddonContext) => HTMLElement;
 
 export type UnitConversionContext = {
   property: IProperty,
@@ -21,7 +41,8 @@ export type UnitEditorConfig = {
   units: string[],
   fixedValues: string[],
   unitSteps: Record<string, number>,
-  convertValue: (context: Omit<UnitConversionContext, 'property' | 'numericType'>) => string
+  convertValue: (context: Omit<UnitConversionContext, 'property' | 'numericType'>) => string,
+  addon?: UnitEditorAddon
 };
 
 const cssNumericKeywordValues = ['initial', 'inherit', 'unset'];
@@ -542,6 +563,7 @@ export function getCssNumericEditorConfig(property: IProperty): UnitEditorConfig
     units: property.units?.length ? property.units : defaultCssNumericUnits[numericType],
     fixedValues: getCssNumericKeywordValues(property.values),
     unitSteps: { ...defaultUnitSteps, ...(property.unitSteps ?? {}) },
-    convertValue: context => convertNumericUnitValue({ ...context, property, numericType })
+    convertValue: context => convertNumericUnitValue({ ...context, property, numericType }),
+    addon: property.unitEditorAddon ?? (numericType === 'css-angle' ? createAngleUnitEditorAddon : undefined)
   };
 }

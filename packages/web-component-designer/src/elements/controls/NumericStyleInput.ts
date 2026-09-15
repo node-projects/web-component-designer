@@ -39,7 +39,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     #container {
       display: grid;
       gap: 0;
-      grid-template-columns: minmax(0, 1fr) auto 16px;
+      grid-template-columns: minmax(0, 1fr) auto 16px auto;
       width: 100%;
       height: 24px;
       align-items: stretch;
@@ -155,6 +155,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
         <button id="increase" type="button" aria-label="Increase value">+</button>
         <button id="decrease" type="button" aria-label="Decrease value">-</button>
       </div>
+      <div id="addon"></div>
       <span id="measure"></span>
     </div>
   `;
@@ -253,6 +254,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
 
   private _input: HTMLInputElement;
   private _select: HTMLSelectElement;
+  private _addonContainer: HTMLDivElement;
   private _measure: HTMLSpanElement;
   private _scrubberButton: HTMLButtonElement;
   private _increaseButton: HTMLButtonElement;
@@ -284,6 +286,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     this._restoreCachedInititalValues();
     this._input = this._getDomElement<HTMLInputElement>('input');
     this._select = this._getDomElement<HTMLSelectElement>('select');
+    this._addonContainer = this._getDomElement<HTMLDivElement>('addon');
     this._measure = this._getDomElement<HTMLSpanElement>('measure');
     this._scrubberButton = this._getDomElement<HTMLButtonElement>('scrubber');
     this._increaseButton = this._getDomElement<HTMLButtonElement>('increase');
@@ -294,6 +297,19 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     this._parseAttributesToProperties();
     this._wireEvents();
     this._updateValue();
+  }
+
+  private _addon: HTMLElement;
+  public get addon() {
+    return this._addon;
+  }
+  public set addon(value: HTMLElement) {
+    if (this._addon === value)
+      return;
+    this._addon?.remove();
+    this._addon = value ?? null;
+    if (this._addon)
+      this._addonContainer.appendChild(this._addon);
   }
 
   private _wireEvents() {
