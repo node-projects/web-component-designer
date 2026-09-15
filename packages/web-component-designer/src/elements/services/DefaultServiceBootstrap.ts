@@ -58,7 +58,6 @@ import { ZoomToElementContextMenu } from '../widgets/designerView/extensions/con
 import { RotateLeftAndRight } from '../widgets/designerView/extensions/contextMenu/RotateLeftAndRightContextMenu.js';
 import { SelectAllChildrenContextMenu } from '../widgets/designerView/extensions/contextMenu/SelectAllChildrenContextMenu.js';
 import { PointerToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/PointerToolButtonProvider.js';
-import { SeperatorToolProvider } from '../widgets/designerView/tools/toolBar/buttons/SeperatorToolProvider.js';
 import { ZoomToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/ZoomToolButtonProvider.js';
 import { DrawToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/DrawToolButtonProvider.js';
 import { TextToolButtonProvider } from '../widgets/designerView/tools/toolBar/buttons/TextToolButtonProvider.js';
@@ -266,19 +265,12 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designViewToolbarButtons.push(
     new PointerToolButtonProvider(),
-    new SeperatorToolProvider(22),
     new SelectorToolButtonProvider(),
-    new SeperatorToolProvider(22),
     new SimpleToolButtonProvider("Margin", assetsPath + 'images/tools/Margin.svg'),
-    new SeperatorToolProvider(22),
     new SimpleToolButtonProvider("Padding", assetsPath + 'images/tools/Padding.svg'),
-    new SeperatorToolProvider(22),
     new ZoomToolButtonProvider(),
-    new SeperatorToolProvider(22),
     new DrawToolButtonProvider(),
-    new SeperatorToolProvider(22),
     new TextToolButtonProvider(),
-    new SeperatorToolProvider(22),
     new TransformToolButtonProvider()
   );
 

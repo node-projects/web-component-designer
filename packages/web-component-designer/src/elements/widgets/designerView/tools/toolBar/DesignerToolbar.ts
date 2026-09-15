@@ -16,6 +16,12 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
           scrollbar-width: none; /* for Firefox */
           overflow-y: auto;
           height: 100%;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          padding: 6px 2px;
         }
         #toolButtons::-webkit-scrollbar {
           display: none; /* for Chrome, Safari, and Opera */
@@ -25,7 +31,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
             position: absolute;
             top: calc(0px + 10px);
             height: 100%;
-            left: calc(24px + 4px + 10px);
+            left: calc(100% + 10px);
         }`;
 
   static override readonly template = html`

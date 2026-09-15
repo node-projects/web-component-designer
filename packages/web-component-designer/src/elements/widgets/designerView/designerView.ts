@@ -158,16 +158,17 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       height: 100%;
     }
     #canvas {
-      left: 24px;
-      width: calc(100% - 24px - 16px);
+      left: 28px;
+      width: calc(100% - 28px - 16px);
       height: calc(100% - var(--wcd-designer-view-statusbar-height, 28px) - 16px);
     }
 
     #tool-bar {
-      width: 24px;
+      width: 28px;
       height: calc(100% - var(--wcd-designer-view-statusbar-height, 28px) - 16px);
       position: absolute;
-      background-color: var(--wcd-designer-view-toolbar-background, lightgray);      
+      background-color: var(--wcd-designer-view-toolbar-background, var(--wcd-designer-view-statusbar-background, #787f82));
+      color: var(--wcd-designer-view-statusbar-color, #354348);
     }
   
     .bottom-scroll {

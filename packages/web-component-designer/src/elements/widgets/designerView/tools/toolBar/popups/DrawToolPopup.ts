@@ -8,41 +8,58 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
 
   static override style = [<CSSStyleSheet>super.style, css`
       .container {
-          width: 220px;
-          min-height: 300px;
+          width: 232px;
       }
-      .inputs{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        margin: 5px;
-        align-items: center;
-        & span {
-          height: 100%;
-        }
+      .inputs {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          grid-auto-rows: 24px;
+          gap: 8px;
+          padding-top: 8px;
+          margin-top: 8px;
+          border-top: 1px solid var(--wcd-tool-popup-border-color, var(--wcd-color-border, #596c7a));
+          align-items: center;
+      }
+      .inputs > * {
+          min-width: 0;
+      }
+      .inputs > span:not(.text) {
+          height: 24px;
+          display: flex;
+          align-items: center;
+      }
+      .inputs node-projects-color-input {
+          padding: 0;
+      }
+      .inputs input {
+          box-sizing: border-box;
+          width: 100%;
+          height: 24px;
+          margin: 0;
+          accent-color: var(--wcd-designer-view-tool-selected-background, deepskyblue);
       }
       .text {
-        margin-left: 5px;
-        font-size: 14px;
+          font-size: 11px;
       }
       `]
 
   static override template = html`
         <div class="container">
-          <header><h2 id="title" style="margin: 0;">Draw</h2></header>
+          <header><h2 id="title">Draw</h2></header>
           <main id="content-area">
             <div class="tools">
-              <div class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" style="background-image: url('${assetsPath}images/tools/DrawLineTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Pointer Tool" style="background-image: url('${assetsPath}images/tools/DrawPathTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="background-image: url('${assetsPath}images/tools/DrawRectTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipsis" style="background-image: url('${assetsPath}images/tools/DrawEllipTool.svg');"></div>
-              <div class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" style="background-image: url('${assetsPath}images/tools/ColorPickerTool.svg');"></div>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" style="--tool-icon: url('${assetsPath}images/tools/DrawLineTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Draw Path" style="--tool-icon: url('${assetsPath}images/tools/DrawPathTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="--tool-icon: url('${assetsPath}images/tools/DrawRectTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipse" style="--tool-icon: url('${assetsPath}images/tools/DrawEllipTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" style="--tool-icon: url('${assetsPath}images/tools/ColorPickerTool.svg');"></button>
             </div>
             <div class="inputs">   
-                <text class="text">Stroke Color</text>
+                <span class="text">Stroke Color</span>
                 [[this.getEditor('setStrokeColor', 'color', {}, this.designerCanvas.serviceContainer.globalContext.strokeColor)]] 
-                <text class="text">Fill Brush</text>
+                <span class="text">Fill Brush</span>
                 [[this.getEditor('setFillBrush', 'color', {}, this.designerCanvas.serviceContainer.globalContext.fillBrush)]] 
-                <text class="text">Stroke Thickness</text>
+                <span class="text">Stroke Thickness</span>
                 [[this.getEditor('setStrokeThickness', 'range', { min: 1, max: 20, step: 1 }, this.designerCanvas.serviceContainer.globalContext.strokeThickness)]] 
             </div>
           </main>

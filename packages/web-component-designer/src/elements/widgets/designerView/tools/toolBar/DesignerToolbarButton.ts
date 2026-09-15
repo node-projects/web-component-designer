@@ -6,27 +6,50 @@ import { DesignerToolbar } from './DesignerToolbar.js';
 export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppend {
 
   static override style = css`
-    div {
+    :host {
+      display: block;
+      flex: 0 0 24px;
       width: 24px;
       height: 24px;
-      display: flex;
-      justify-content: center; 
-      align-items: center;
-      background-color: inherit;
     }
 
-    div:hover {
-      background-color: var(--wcd-toolbar-button-selected-background, darkgray);
+    button {
+      box-sizing: border-box;
+      width: 24px;
+      height: 24px;
+      padding: 4px;
+      border: 0;
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    button[aria-pressed="true"] {
+      background-color: var(--wcd-designer-view-tool-selected-background, deepskyblue);
+    }
+
+    button:hover {
+      background-color: var(--wcd-designer-view-tool-hover-background, rgba(164,206,249,.6));
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--wcd-color-focus, #47977c);
+      outline-offset: -2px;
     }
 
     img {
-      width: calc(100% - 4px);
-      height: calc(100% - 4px);
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
       -webkit-user-drag: none;
-    }    
+    }
     `;
 
-  static override template = html`<div id="div"><img id="img"></div>`;
+  static override template = html`<button id="div" type="button" aria-pressed="false"><img id="img" alt=""></button>`;
 
   public tools: Record<string | NamedTools, { icon: string }>;
 
@@ -34,7 +57,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
   public currentToolOnButton: string;
 
   private _img: HTMLImageElement;
-  private _div: HTMLImageElement;
+  private _div: HTMLButtonElement;
   private _longPress;
 
   constructor(designerCanvas: IDesignerCanvas, tools: Record<string | NamedTools, { icon: string }>) {
@@ -42,7 +65,16 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
 
     this.tools = tools;
     this._img = this._getDomElement<HTMLImageElement>('img');
-    this._div = this._getDomElement<HTMLImageElement>('div');
+    this._div = this._getDomElement<HTMLButtonElement>('div');
+    this._div.onclick = (e) => {
+      if (e.detail === 0) {
+        const toolbar = <DesignerToolbar>(<ShadowRoot>this.getRootNode()).host;
+        if (this.currentToolOnButton)
+          toolbar.setTool(this.currentToolOnButton);
+        else if (this.popup)
+          toolbar.showPopup(this);
+      }
+    };
     this._div.onpointerdown = () => {
       if (this.currentToolOnButton) {
         (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setTool(this.currentToolOnButton);
@@ -74,7 +106,8 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
   public showTool(name: string) {
     const tool = this.tools[name];
     if (tool) {
-      this._img.title = name
+      this._div.title = name || 'Transform';
+      this._div.setAttribute('aria-label', name || 'Transform');
       this._img.src = tool.icon;
       this.currentToolOnButton = name;
     }
@@ -83,11 +116,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
   public setActiveTool(name: string) {
     this.showTool(name);
     const tool = this.tools[name];
-    if (tool) {
-      this._div.style.backgroundColor = 'lightgreen';
-    } else {
-      this._div.style.backgroundColor = '';
-    }
+    this._div.setAttribute('aria-pressed', String(!!tool));
   }
 }
 

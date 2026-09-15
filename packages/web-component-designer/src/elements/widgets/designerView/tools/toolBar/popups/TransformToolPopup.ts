@@ -39,70 +39,117 @@ export class TransformToolPopup extends DraggableToolWindow {
 
   protected override get windowContentStyle(): CSSStyleSheet {
     return css`
-      .inputs{
-        float: left;
-        margin-top: 5px;
+      :host {
+        width: 232px;
+        font: 12px system-ui, sans-serif;
+        color: var(--wcd-designer-view-statusbar-color, #354348);
+      }
+      .window-frame {
+        background: var(--wcd-tool-popup-background, var(--wcd-designer-view-statusbar-background, #787f82));
+        border: 1px solid var(--wcd-tool-popup-border-color, var(--wcd-color-border, #596c7a));
+        border-radius: 6px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .25);
+      }
+      .title-bar {
+        height: 29px;
+        padding: 6px 8px;
+        background: var(--wcd-tool-popup-title-background, rgba(255, 255, 255, .08));
+        border-bottom: 1px solid var(--wcd-tool-popup-border-color, var(--wcd-color-border, #596c7a));
+      }
+      .title-text {
+        font: 600 11px/16px system-ui, sans-serif;
+        color: inherit;
+      }
+      .close-btn {
+        color: inherit;
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+      }
+      .window-content {
+        padding: 8px;
+      }
+      #input-div, #spacing-div {
+        display: grid;
+        gap: 6px 8px;
         align-items: center;
+        font-size: 11px;
       }
-      .input {
-        display: flex;
-        align-items: center; 
-        margin-top: 5px;
+      #input-div {
+        grid-template-columns: auto minmax(0, 1fr);
       }
-      .text {
-        margin-left: 5px;
-        font-size: 14px;
+      #spacing-div {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--wcd-tool-popup-border-color, var(--wcd-color-border, #596c7a));
       }
-      #input-div{
-        display: grid;
-        grid-template-columns: 1fr 9fr;
-        grid-template-rows: 25px 25px 25px;
-        grid-row-gap: 2px;
-        font-size: small;
-        margin: 10px;
-        color: var(--wcd-color-text, white);
-      }
-      #button-div{
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 25px;
-        font-size: small;
-        margin: 10px;
-        grid-column-gap: 5px
-      }
-      #apply-div{
-        font-size: small;
-        justify-content: center;
+      input[type="number"] {
+        box-sizing: border-box;
         width: 100%;
-        margin-top: 10px;
-        margin-bottom: 10px;
+        min-width: 0;
+        height: 24px;
+        padding: 0 4px;
+        border: 1px solid var(--wcd-color-border, #596c7a);
+        border-radius: 4px;
+        background: var(--wcd-input-background-color, white);
+        color: inherit;
+        font: inherit;
+      }
+      #button-div {
         display: flex;
+        gap: 4px;
+        margin-top: 8px;
       }
-      #cube{
+      #button-div button {
+        flex: 1;
+      }
+      .window-content button {
+        height: 24px;
+        border: 0;
+        border-radius: 4px;
+        padding: 0 8px;
+        font: inherit;
+        color: inherit;
+        background: rgba(255, 255, 255, .12);
+        cursor: pointer;
+      }
+      .window-content button[aria-pressed="true"], #transform-button-apply {
+        background: var(--wcd-designer-view-tool-selected-background, deepskyblue);
+      }
+      .window-content button:hover, .close-btn:hover {
+        background: var(--wcd-designer-view-tool-hover-background, rgba(164,206,249,.6));
+        color: inherit;
+      }
+      button:focus-visible, input:focus-visible {
+        outline: 2px solid var(--wcd-color-focus, #47977c);
+        outline-offset: -2px;
+      }
+      #origin-div {
         display: grid;
-        grid-template-columns: 20px 20px 20px;
-        grid-template-rows: 20px 20px 20px;
-        grid-gap: 10px;
-        padding: 10px;
-        top: -80px;
-        position: relative;
+        justify-items: center;
+        gap: 8px;
+        margin: 12px 0;
+        font-size: 11px;
       }
-      #cube-background{
-        width: 60px;
-        height: 60px;
-        background: var(--wcd-transform-tool-divider-color, gray);
-        margin-top: 20px;
-        margin-left: 20px;
+      #cube {
+        display: grid;
+        grid-template-columns: repeat(3, 16px);
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid var(--wcd-tool-popup-border-color, var(--wcd-color-border, #596c7a));
+        border-radius: 4px;
+        background: rgba(255, 255, 255, .08);
       }
-      #spacing-div{
-        display: inline-grid;
-        grid-template-rows: 20px 20px;
-        grid-template-columns: 95px 95px;
-        gap: 5px;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        color: var(--wcd-color-text, white);
+      #cube input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: var(--wcd-designer-view-tool-selected-background, deepskyblue);
+      }
+      #apply-div {
+        display: flex;
+        justify-content: flex-end;
       }
     `;
   }
@@ -110,42 +157,42 @@ export class TransformToolPopup extends DraggableToolWindow {
   protected override get windowTemplate(): string {
     return `
       <div id="input-div">
-        <span>X:</span>
+        <label for="transform-input-x">X</label>
         <input type="number" id="transform-input-x">
-        <span>Y:</span>
+        <label for="transform-input-y">Y</label>
         <input type="number" id="transform-input-y">
-        <span>R:</span>
+        <label for="transform-input-r">Rotation</label>
         <input type="number" id="transform-input-r">
       </div>
       <div id="button-div">
-        <button id="transform-button-absolute">absolute</button>
-        <button id="transform-button-relative">relative</button>
+        <button id="transform-button-absolute">Absolute</button>
+        <button id="transform-button-relative">Relative</button>
       </div>
 
       <div id="spacing-div">
-          <span>X spacing</span>
-          <span>Y spacing</span>
+          <label for="spacing-input-x">X spacing</label>
+          <label for="spacing-input-y">Y spacing</label>
           <input type="number" id="spacing-input-x">
           <input type="number" id="spacing-input-y">
       </div>
 
-      <div style="justify-content: center; display: grid; height: 100px">
-        <div id="cube-background"></div>
-          <div id="cube">
-            <input id="origin-top-left" type="radio" name="origin-radio">
-            <input id="origin-top-mid" type="radio" name="origin-radio">
-            <input id="origin-top-right" type="radio" name="origin-radio">
-            <input id="origin-mid-left" type="radio" name="origin-radio">
-            <input id="origin-mid-mid" type="radio" name="origin-radio" checked>
-            <input id="origin-mid-right" type="radio" name="origin-radio">
-            <input id="origin-bot-left" type="radio" name="origin-radio">
-            <input id="origin-bot-mid" type="radio" name="origin-radio">
-            <input id="origin-bot-right" type="radio" name="origin-radio">
+      <div id="origin-div">
+        <span id="origin-label">Transform origin</span>
+          <div id="cube" role="group" aria-labelledby="origin-label">
+            <input id="origin-top-left" aria-label="Top left" type="radio" name="origin-radio">
+            <input id="origin-top-mid" aria-label="Top center" type="radio" name="origin-radio">
+            <input id="origin-top-right" aria-label="Top right" type="radio" name="origin-radio">
+            <input id="origin-mid-left" aria-label="Middle left" type="radio" name="origin-radio">
+            <input id="origin-mid-mid" aria-label="Center" type="radio" name="origin-radio" checked>
+            <input id="origin-mid-right" aria-label="Middle right" type="radio" name="origin-radio">
+            <input id="origin-bot-left" aria-label="Bottom left" type="radio" name="origin-radio">
+            <input id="origin-bot-mid" aria-label="Bottom center" type="radio" name="origin-radio">
+            <input id="origin-bot-right" aria-label="Bottom right" type="radio" name="origin-radio">
           </div>
       </div>
 
       <div id="apply-div">
-        <button id="transform-button-apply" style="width:100px;">apply</button>
+        <button id="transform-button-apply" style="width:100px;">Apply</button>
       </div>`;
   }
 
@@ -182,18 +229,8 @@ export class TransformToolPopup extends DraggableToolWindow {
   }
 
   private _changePositionMode(mode: "relative" | "absolute") {
-    if (mode == "relative") {
-      this._relativeButton.style.backgroundColor = "#6F8A9D";
-      this._relativeButton.style.color = "black"
-      this._absoluteButton.style.backgroundColor = "#A4B5C1";
-      this._absoluteButton.style.color = "#77716E"
-    }
-    else {
-      this._absoluteButton.style.backgroundColor = "#6F8A9D";
-      this._absoluteButton.style.color = "black"
-      this._relativeButton.style.backgroundColor = "#A4B5C1";
-      this._relativeButton.style.color = "#77716E"
-    }
+    this._relativeButton.setAttribute('aria-pressed', String(mode === 'relative'));
+    this._absoluteButton.setAttribute('aria-pressed', String(mode === 'absolute'));
     this._transformMode = mode;
   }
 
