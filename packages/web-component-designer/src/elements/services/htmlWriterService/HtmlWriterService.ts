@@ -84,24 +84,26 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
 
       let contentSingleTextNode = false;
       if (designItem.hasChildren) {
-        const children = designItem.children();
+        const children = [...designItem.children()];
         contentSingleTextNode = designItem.childCount === 1 && designItem.firstChild.nodeType === NodeType.TextNode;
         if (contentSingleTextNode) {
           const notrim = DomConverter.isRawTextElementName(designItem.name) || designItem.name == 'pre';
           this.writeTextNode(indentedTextWriter, designItem, false, !notrim, currentPreserveInlineWhitespace);
         } else {
-          if (!currentPreserveInlineWhitespace && (designItem.element instanceof designItem.window.HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof designItem.window.SVGElement))) {
+          // Mixed text stays contiguous even when its container is block-level (e.g. a positioned button).
+          const preserveContentWhitespace = currentPreserveInlineWhitespace || children.some(c => c.nodeType === NodeType.TextNode && !isEmptyTextNode(c.element));
+          if (!preserveContentWhitespace && (designItem.element instanceof designItem.window.HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof designItem.window.SVGElement))) {
             indentedTextWriter.writeNewline();
             indentedTextWriter.levelRaise();
           }
           for (const c of children) {
-            this.internalWrite(indentedTextWriter, c, updatePositions, currentPreserveInlineWhitespace);
+            this.internalWrite(indentedTextWriter, c, updatePositions, preserveContentWhitespace);
             let childSingleTextNode = c.childCount === 1 && c.firstChild.nodeType === NodeType.TextNode;
             if (childSingleTextNode)
               if (!indentedTextWriter.isLastCharNewline())
-                this._conditionalyWriteNewline(indentedTextWriter, c, currentPreserveInlineWhitespace);
+                this._conditionalyWriteNewline(indentedTextWriter, c, preserveContentWhitespace);
           }
-          if (!currentPreserveInlineWhitespace && (designItem.element instanceof designItem.window.HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof designItem.window.SVGElement))) {
+          if (!preserveContentWhitespace && (designItem.element instanceof designItem.window.HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof designItem.window.SVGElement))) {
             indentedTextWriter.levelShrink();
             if (!indentedTextWriter.isLastCharNewline())
               indentedTextWriter.writeNewline();
