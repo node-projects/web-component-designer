@@ -102,7 +102,7 @@ interface ServiceNameMap {
   "designItemDocumentPositionService": (designerCanvas: IDesignerCanvas) => IDesignItemDocumentPositionService;
 }
 
-const isTouchUi = navigator.maxTouchPoints > 0;
+const isTouchUi = window.matchMedia('(pointer: coarse)').matches;
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   readonly config: {

@@ -1,3 +1,4 @@
+import { getMidpointHandleVisibility } from '../ResizeHandleHelper.js';
 import { EventNames } from "../../../../../enums/EventNames.js";
 import { IPoint } from "../../../../../interfaces/IPoint.js";
 import { calculateGridInformation, getGridColumnIndexFromLocalX, getGridColumnStartLineFromLocalX, getGridLocalPoint, getGridRowIndexFromLocalY, getGridRowStartLineFromLocalY } from "../../../../helper/GridHelper.js";
@@ -37,7 +38,8 @@ export class GridChildResizeExtension extends AbstractExtension {
       this.remove();
       return;
     }
-    if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y)) {
+    const radius = this.designerCanvas.serviceContainer.options.resizerPixelSize / this.designerCanvas.zoomFactor;
+    if (this._valuesHaveChanges(radius, !!this._initialPoint, this.designerCanvas.zoomFactor, transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y)) {
       this._circle1 = this._drawResizerOverlay(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, 'nw-resize', this._circle1);
       this._circle2 = this._drawResizerOverlay((transformedCornerPoints.p1.x + (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x) / 2), (transformedCornerPoints.p1.y + (transformedCornerPoints.p2.y - transformedCornerPoints.p1.y) / 2), 'n-resize', this._circle2);
       this._circle3 = this._drawResizerOverlay(transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, 'ne-resize', this._circle3);
@@ -49,6 +51,11 @@ export class GridChildResizeExtension extends AbstractExtension {
       this._circle8 = this._drawResizerOverlay((transformedCornerPoints.p2.x + (transformedCornerPoints.p3.x - transformedCornerPoints.p2.x) / 2), (transformedCornerPoints.p2.y + (transformedCornerPoints.p3.y - transformedCornerPoints.p2.y) / 2), 'e-resize', this._circle8);
 
       this._circle7 = this._drawResizerOverlay(transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, 'se-resize', this._circle7);
+      const midpointVisibility = getMidpointHandleVisibility(transformedCornerPoints, radius);
+      for (const circle of [this._circle2, this._circle4, this._circle6, this._circle8]) {
+        const active = this._initialPoint && circle.style.cursor === this._actionModeStarted;
+        circle.style.display = midpointVisibility[circle.style.cursor] || active ? '' : 'none';
+      }
     }
     //#endregion Circles
   }
@@ -137,6 +144,7 @@ export class GridChildResizeExtension extends AbstractExtension {
         this.extendedItem.setStyle("gridRowEnd", gridRowEnd);
         cg.commit();
         this._initialPoint = null;
+        this.refresh({});
         break;
     }
   }

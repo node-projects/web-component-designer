@@ -1,3 +1,4 @@
+import { getMidpointHandleVisibility } from './ResizeHandleHelper.js';
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from "../../../../interfaces/IPoint.js";
 import { ISize } from '../../../../interfaces/ISize.js';
@@ -70,7 +71,11 @@ export class ResizeExtension extends AbstractExtension {
       this.remove();
       return;
     }
-    if (this._valuesHaveChanges(this.designerCanvas.zoomFactor, transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y)) {
+    const radius = this.designerCanvas.serviceContainer.options.resizerPixelSize / this.designerCanvas.zoomFactor;
+    if (this._valuesHaveChanges(radius, !!this._initialPoint, this.designerCanvas.zoomFactor, transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, transformedCornerPoints.p2.x, transformedCornerPoints.p2.y, transformedCornerPoints.p3.x, transformedCornerPoints.p3.y, transformedCornerPoints.p4.x, transformedCornerPoints.p4.y)) {
+      const midpointVisibility = getMidpointHandleVisibility(transformedCornerPoints, radius);
+      const canUseCornerHandles = !this._resizeStrategy || this._resizeStrategy.getEnabledHandles(this.extendedItem)
+        .some(handle => ['nw-resize', 'ne-resize', 'sw-resize', 'se-resize'].includes(handle));
       const points: Record<ResizeHandle, IPoint> = {
         'nw-resize': transformedCornerPoints.p1,
         'n-resize': { x: (transformedCornerPoints.p1.x + transformedCornerPoints.p2.x) / 2, y: (transformedCornerPoints.p1.y + transformedCornerPoints.p2.y) / 2 },
@@ -104,6 +109,9 @@ export class ResizeExtension extends AbstractExtension {
             }
           }
         }
+        // Keep the captured handle visible until the current drag finishes.
+        if (canUseCornerHandles && midpointVisibility[pointHandle] === false && !(this._initialPoint && handle === originalHandle))
+          visibility = 'hide';
         const point = points[pointHandle];
         return this._drawResizerOverlay(point.x, point.y, handle, oldCircle, visibility);
       };
@@ -418,6 +426,7 @@ export class ResizeExtension extends AbstractExtension {
         this._initialFixedResizeAnchor = null;
         this._currentAnchorHandle = null;
         this._resizeStrategyState = undefined;
+        this.refresh({});
         break;
       case 'pointercancel':
         if (this._initialPoint && this._resizeStrategy && this._initialSizes) {
@@ -427,6 +436,7 @@ export class ResizeExtension extends AbstractExtension {
         this._initialPoint = null;
         this._resizeStrategyState = undefined;
         this._currentAnchorHandle = null;
+        this.refresh({});
         break;
     }
   }
