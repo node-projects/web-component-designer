@@ -3,17 +3,17 @@ const zoomThreshold = 10;
 //const rotateThreshold = 0;
 
 export class TouchGestureHelper {
-    public static addTouchEvents(element: HTMLElement) {
-        return new TouchGestureHelper(element);
+    public static addTouchEvents(element: HTMLElement, signal?: AbortSignal) {
+        return new TouchGestureHelper(element, signal);
     }
 
-    private constructor(element: HTMLElement) {
+    private constructor(element: HTMLElement, signal?: AbortSignal) {
         this._target = element;
 
-        element.addEventListener('touchstart', (e) => this._touchStart(e));
-        element.addEventListener('touchmove', (e) => this._touchMove(e));
-        element.addEventListener('touchend', (e) => this._touchEnd(e));
-        element.addEventListener('touchcancel', (e) => this._touchEnd(e));
+        element.addEventListener('touchstart', (e) => this._touchStart(e), { signal });
+        element.addEventListener('touchmove', (e) => this._touchMove(e), { signal });
+        element.addEventListener('touchend', (e) => this._touchEnd(e), { signal });
+        element.addEventListener('touchcancel', (e) => this._touchEnd(e), { signal });
     }
 
     private _target: HTMLElement;

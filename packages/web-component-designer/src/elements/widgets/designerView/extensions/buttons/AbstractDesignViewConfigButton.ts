@@ -21,19 +21,20 @@ export class AbstractDesignViewConfigButton implements IDesignViewConfigButtonsP
 
   provideButtons(designerView: DesignerView, designerCanvas: IDesignerCanvas): HTMLElement[] {
 
-    const btn = document.createElement('div');
+    const btn = document.createElement('div') as HTMLDivElement & { dispose(): void };
     if (typeof this.content == 'string')
       btn.innerHTML = this.content;
     else
       btn.appendChild(this.content);
     btn.title = this.tooltp;
     btn.className = 'toolbar-control';
-    designerCanvas.instanceServiceContainer.designContext.extensionOptionsChanged.on(() => {
+    const subscription = designerCanvas.instanceServiceContainer.designContext.extensionOptionsChanged.on(() => {
       if (extensionOptions[this.settingName] !== false)
         btn.classList.add('selected');
       else
         btn.classList.remove('selected');
     })
+    btn.dispose = () => subscription.dispose();
     const extensionOptions = designerCanvas.instanceServiceContainer.designContext.extensionOptions;
     if (extensionOptions[this.settingName] !== false)
       btn.classList.add('selected');

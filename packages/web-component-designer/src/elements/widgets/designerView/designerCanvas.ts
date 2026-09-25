@@ -1,7 +1,7 @@
+import { EditingDocument } from '../../EditingDocument.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
-import { SelectionService } from '../../services/selectionService/SelectionService.js';
 import { DesignItem, forceHoverAttributeName } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, cssFromString, DomHelper, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
@@ -29,9 +29,7 @@ import { ITool } from "./tools/ITool.js";
 import { IPlacementService } from "../../services/placementService/IPlacementService.js";
 import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 import { NodeType } from '../../item/NodeType.js';
-import { StylesheetChangedAction } from '../../services/undoService/transactionItems/StylesheetChangedAction.js';
 import { SetDesignItemsAction } from '../../services/undoService/transactionItems/SetDesignItemsAction.js';
-import { IDocumentStylesheet } from '../../services/stylesheetService/IStylesheetService.js';
 import { filterChildPlaceItems } from '../../helper/LayoutHelper.js';
 import { ChangeGroup } from '../../services/undoService/ChangeGroup.js';
 import { TouchGestureHelper } from '../../helper/TouchGestureHelper.js';
@@ -85,6 +83,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public alignOnSnap = true;
   public snapLines: Snaplines;
   public overlayLayer: OverlayLayerView;
+  private _documentSubscriptions: { dispose(): void }[] = [];
+
   public rootDesignItem: IDesignItem;
 
   private _currentPasteOffset = this.pasteOffset;
@@ -357,6 +357,23 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   private _lastCopiedPrimaryItem: IDesignItem;
   private _ignoreEvent: Event;
 
+  private _surfaceReady: Promise<void> = Promise.resolve();
+  private _resolveSurfaceReady: () => void;
+  private _backgroundFrame: number;
+  private _eventController: AbortController;
+
+  /** Resolves when the DOM surface can be parsed into (including legacy iframe mode). */
+  whenReady() { return this._surfaceReady; }
+
+  private _initializeIframe = () => {
+    if (!this._iframe?.contentDocument?.body) return;
+    this._window = this._iframe.contentWindow;
+    addBoxQuadsPolyfill(this._iframe.contentWindow as typeof window);
+    this._canvasShadowRoot = this._iframe.contentDocument;
+    this._resolveSurfaceReady?.();
+    if (this.instanceServiceContainer) this.applyAllStyles();
+  };
+
   private _useIframe = true;
   private _iframe: HTMLIFrameElement;
   private _window: Window;
@@ -389,12 +406,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       //TODO: add option to allow scripts in iframes...
       //this._iframe.setAttribute("sandbox", "allow-same-origin allow-scripts");
       this._canvas.appendChild(this._iframe);
-      requestAnimationFrame(() => {
-        this._window = this._iframe.contentWindow;
-        //@ts-ignore
-        addBoxQuadsPolyfill(this._iframe.contentWindow);
-        this._canvasShadowRoot = this._iframe.contentWindow.document;
-      })
+      this._surfaceReady = new Promise(resolve => this._resolveSurfaceReady = resolve);
+      this._iframe.addEventListener('load', this._initializeIframe);
     } else {
       this._window = window;
       this._canvasShadowRoot = this._canvas.attachShadow({ mode: 'open' });
@@ -422,7 +435,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this._resizeObserver = new ResizeObserver(() => {
       this.extensionManager?.refreshAllAppliedExtentions();
     });
-    this._resizeObserver.observe(this);
   }
 
   get designerWidth(): string {
@@ -491,8 +503,6 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       } else {
         this._canvasShadowRoot.adoptedStyleSheets = styles;
       }
-    } else {
-      requestAnimationFrame(() => this.applyAllStyles());
     }
   }
 
@@ -734,76 +744,36 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.instanceServiceContainer.selectionService.setSelectedElements(null);
   }
 
-  initialize(serviceContainer: ServiceContainer) {
+  initialize(serviceContainer: ServiceContainer, editingDocument?: EditingDocument) {
     this.serviceContainer = serviceContainer;
 
-    this.instanceServiceContainer = new InstanceServiceContainer(this);
-    const undoService = this.serviceContainer.getLastService('undoService')
-    if (undoService)
-      this.instanceServiceContainer.register("undoService", undoService(this));
-    const selectionService = this.serviceContainer.getLastService('selectionService')
-    if (selectionService) {
-      this.instanceServiceContainer.register("selectionService", selectionService(this));
-      this.instanceServiceContainer.selectionService.onSelectionChanged.on(() => {
-        this._lastCopiedPrimaryItem = null;
-        this._currentPasteOffset = this.pasteOffset;
-      });
+    editingDocument ??= new EditingDocument(serviceContainer, this._useIframe ? this._iframe : this._canvas, this);
+    editingDocument.assertAlive();
+    if (editingDocument.instanceServiceContainer.designerCanvas && editingDocument.instanceServiceContainer.designerCanvas !== this)
+      throw new Error('The document already has an attached view.');
+    if (this._useIframe && editingDocument.rootDesignItem.node !== this._iframe)
+      throw new Error('Use a non-iframe DesignerView to attach an existing document.');
+    editingDocument.instanceServiceContainer.designerCanvas = this;
+    if (editingDocument.rootDesignItem.node !== (this._useIframe ? this._iframe : this._canvas)) {
+      this._canvas.replaceWith(editingDocument.rootDesignItem.node);
+      this._canvas = editingDocument.rootDesignItem.element as HTMLDivElement;
+      this._canvas.id = 'node-projects-designer-canvas-canvas';
+      this._canvas.setAttribute('part', 'canvas');
+      this._canvasShadowRoot = this._canvas.shadowRoot;
     }
-    const designItemDocumentPositionService = this.serviceContainer.getLastService('designItemDocumentPositionService')
-    if (designItemDocumentPositionService) {
-      this.instanceServiceContainer.register("designItemDocumentPositionService", designItemDocumentPositionService(this));
-    }
-    if (this._useIframe) {
-      this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._iframe, this._iframe, this.serviceContainer, this.instanceServiceContainer);
-      requestAnimationFrame(() => {
-        this.rootDesignItem.updateChildrenFromNodesChildren();
-      });
-    } else {
-      this.rootDesignItem = DesignItem.GetOrCreateDesignItem(this._canvas, this._canvas, this.serviceContainer, this.instanceServiceContainer);
-    }
-
-    const stylesheetService = this.serviceContainer.getLastService('stylesheetService')
-    if (stylesheetService) {
-      const instance = stylesheetService(this);
-      this.instanceServiceContainer.register("stylesheetService", instance);
-      this.instanceServiceContainer.stylesheetService.stylesheetChanged.on((ss) => {
-        if (this.instanceServiceContainer.collaborationService?.isApplyingRemoteChanges) {
-          this.applyAllStyles();
-          return;
-        }
-
-        if (ss.changeSource != 'undo') {
-          const ssca = new StylesheetChangedAction(this.instanceServiceContainer.stylesheetService, ss.name, ss.newStyle, ss.oldStyle);
-          this.instanceServiceContainer.undoService.execute(ssca);
-          this.applyAllStyles();
-        } else {
-          this.applyAllStyles();
-        }
-      });
-      this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => {
-        this.applyAllStyles();
-      });
-    }
-
-    const collaborationService = this.serviceContainer.getLastService('collaborationService' as never) as ((designerCanvas: IDesignerCanvas) => any) | null
-    if (collaborationService) {
-      const instance = collaborationService(this);
-      this.instanceServiceContainer.collaborationService = instance;
-      (this.instanceServiceContainer as any).register("collaborationService", instance);
-    }
-
-    if (serviceContainer.instanceServiceContainerCreatedCallbacks?.length)
-      serviceContainer.instanceServiceContainerCreatedCallbacks.forEach(x => x(this.instanceServiceContainer));
+    this.instanceServiceContainer = editingDocument.instanceServiceContainer;
+    this.rootDesignItem = editingDocument.rootDesignItem;
+    this.instanceServiceContainer.detachView = () => this.detachDocument();
 
     this.extensionManager = new ExtensionManager(this);
     if (this.instanceServiceContainer.collaborationService) {
-      this.instanceServiceContainer.collaborationService.onPeersChanged.on(event => {
+      this._documentSubscriptions.push(this.instanceServiceContainer.collaborationService.onPeersChanged.on(event => {
         if (event.source === 'remote')
           this.extensionManager.refreshAllAppliedExtentions();
-      });
-      this.instanceServiceContainer.collaborationService.onCommentsChanged.on(() => {
+      }));
+      this._documentSubscriptions.push(this.instanceServiceContainer.collaborationService.onCommentsChanged.on(() => {
         this.extensionManager.refreshAllAppliedExtentions();
-      });
+      }));
     }
     this.overlayLayer = new OverlayLayerView(serviceContainer);
     this.overlayLayer.style.pointerEvents = 'none';
@@ -813,6 +783,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.clickOverlay.appendChild(this.overlayLayer);
     this.snapLines = new Snaplines(this.overlayLayer);
     this.snapLines.initialize(this.rootDesignItem);
+    this._documentSubscriptions.push(this.instanceServiceContainer.selectionService.onSelectionChanged.on(() => {
+      this._lastCopiedPrimaryItem = null;
+      this._currentPasteOffset = this.pasteOffset;
+    }));
+    if (this.instanceServiceContainer.stylesheetService) {
+      this._documentSubscriptions.push(this.instanceServiceContainer.stylesheetService.stylesheetChanged.on(() => this.applyAllStyles()));
+      this._documentSubscriptions.push(this.instanceServiceContainer.stylesheetService.stylesheetsChanged.on(() => this.applyAllStyles()));
+    }
+    this.applyAllStyles();
 
     if (this.serviceContainer.designerPointerExtensions)
       for (let pe of this.serviceContainer.designerPointerExtensions) {
@@ -833,51 +812,126 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     }
 
     if (!this.serviceContainer.options.zoomDesignerBackground) {
-      requestAnimationFrame(() => {
-        this._resizeBackgroundGrid();
+      this._backgroundFrame = requestAnimationFrame(() => {
+        if (this.isConnected && this.instanceServiceContainer) this._resizeBackgroundGrid();
       });
     }
 
-    if (this.isConnected)
+    if (this.isConnected) {
+      this._resizeObserver.observe(this);
       this.extensionManager.connected();
+    }
+  }
+
+  attachDocument(editingDocument: EditingDocument) {
+    editingDocument.assertAlive();
+    if (editingDocument.instanceServiceContainer.designerCanvas && editingDocument.instanceServiceContainer.designerCanvas !== this)
+      throw new Error('The document already has an attached view.');
+    if (this._useIframe && editingDocument.rootDesignItem.node !== this._iframe)
+      throw new Error('Use a non-iframe DesignerView to attach an existing document.');
+    if (this.instanceServiceContainer?.editingDocument === editingDocument) return;
+    this.detachDocument();
+    this.initialize(editingDocument.serviceContainer, editingDocument);
+  }
+
+  detachDocument(): EditingDocument {
+    const doc = this.instanceServiceContainer?.editingDocument;
+    if (!doc) return null;
+    this.extensionManager?.dispose?.();
+    this.extensionManager = null;
+    this._resizeObserver.disconnect();
+    clearTimeout(this.reparseTimeout);
+    cancelAnimationFrame(this._backgroundFrame);
+    this._activeTool?.dispose();
+    this._activeTool = null;
+    this._lastCopiedPrimaryItem = null;
+    this._ignoreEvent = null;
+    this._lastHoverDesignItem = null;
+    this._hoverElement = null;
+    this._lastDdElement = null;
+    this.snapLines = null;
+    for (const subscription of this._documentSubscriptions) subscription.dispose();
+    this._documentSubscriptions = [];
+    for (const extension of this._pointerextensions ?? []) extension.dispose();
+    this._pointerextensions = [];
+    this.overlayLayer?.remove();
+    if (this._useIframe) {
+      // Removing an iframe destroys its browsing context. Move its existing nodes
+      // to a portable root before removal, retaining the root DesignItem as well.
+      const root = this.ownerDocument.createElement('div');
+      const shadow = root.attachShadow({ mode: 'open' });
+      for (const item of doc.rootDesignItem.children()) shadow.appendChild(item.element);
+      doc.rootDesignItem.replaceNode(root);
+      this._iframe.removeEventListener('load', this._initializeIframe);
+      this._iframe = null;
+      this.iframes.length = 0;
+      this._useIframe = false;
+      this._window = this.ownerDocument.defaultView;
+      this._surfaceReady = Promise.resolve();
+    }
+    const placeholder = this.ownerDocument.createElement('div');
+    placeholder.id = 'node-projects-designer-canvas-canvas';
+    this._canvas.replaceWith(placeholder);
+    this._canvas = placeholder;
+    this._canvasShadowRoot = placeholder.attachShadow({ mode: 'open' });
+    doc.instanceServiceContainer.designerCanvas = null;
+    doc.instanceServiceContainer.detachView = null;
+    this.instanceServiceContainer = null;
+    this.rootDesignItem = null;
+    return doc;
+  }
+
+  dispose() {
+    this.detachDocument();
+    this._eventController?.abort();
+    this._firstConnect = false;
+    this._resizeObserver.disconnect();
+    this._iframe?.removeEventListener('load', this._initializeIframe);
   }
 
   connectedCallback() {
+    if (this._useIframe) this._initializeIframe();
     if (!this._firstConnect) {
       this._firstConnect = true;
-      this._touchGestureHelper = TouchGestureHelper.addTouchEvents(this.clickOverlay);
-      this.clickOverlay.addEventListener(EventNames.PointerDown, this._pointerEventHandler);
-      this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandler);
-      this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandlerCapture, true);
-      this.clickOverlay.addEventListener(EventNames.PointerUp, this._pointerEventHandler);
-      this.clickOverlay.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event));
-      this.clickOverlay.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event));
-      this.clickOverlay.addEventListener(EventNames.DragOver, event => this._onDragOver(event));
-      this.clickOverlay.addEventListener(EventNames.Drop, event => this._onDrop(event));
-      this.clickOverlay.addEventListener(EventNames.KeyDown, this.onKeyDown);
-      this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp);
-      this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, true);
-      this.clickOverlay.addEventListener(EventNames.Wheel, this._onWheel);
+      this._eventController = new AbortController();
+      const signal = this._eventController.signal;
+      this._touchGestureHelper = TouchGestureHelper.addTouchEvents(this.clickOverlay, signal);
+      this.clickOverlay.addEventListener(EventNames.PointerDown, this._pointerEventHandler, { signal });
+      this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandler, { signal });
+      this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandlerCapture, { capture: true, signal });
+      this.clickOverlay.addEventListener(EventNames.PointerUp, this._pointerEventHandler, { signal });
+      this.clickOverlay.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event), { signal });
+      this.clickOverlay.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event), { signal });
+      this.clickOverlay.addEventListener(EventNames.DragOver, event => this._onDragOver(event), { signal });
+      this.clickOverlay.addEventListener(EventNames.Drop, event => this._onDrop(event), { signal });
+      this.clickOverlay.addEventListener(EventNames.KeyDown, this.onKeyDown, { signal });
+      this.clickOverlay.addEventListener(EventNames.KeyUp, this.onKeyUp, { signal });
+      this.clickOverlay.addEventListener(EventNames.DblClick, this._onDblClick, { capture: true, signal });
+      this.clickOverlay.addEventListener(EventNames.Wheel, this._onWheel, { signal });
       //@ts-ignore
       this.clickOverlay.addEventListener('zoom', (e: CustomEvent) => {
+        if (!this.instanceServiceContainer) return;
         this.zoomFactor = this.zoomFactor + (e.detail.diff / 10);
-      });
+      }, { signal });
       //@ts-ignore
       this.clickOverlay.addEventListener('pan', (e: CustomEvent) => {
+        if (!this.instanceServiceContainer) return;
         const newCanvasOffset = {
           x: (this.canvasOffset.x) - e.detail.deltaX,
           y: (this.canvasOffset.y) - e.detail.deltaY
         }
         this.canvasOffset = newCanvasOffset
-      });
+      }, { signal });
     }
     if (this.extensionManager) {
+      this._resizeObserver.observe(this);
       this.extensionManager.connected();
     }
   }
 
   disconnectedCallback() {
-    this.extensionManager.disconnected();
+    this.extensionManager?.disconnected();
+    this._resizeObserver.disconnect();
   }
 
   private _zoomFactorChanged() {
@@ -919,44 +973,18 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public setDesignItems(designItems: IDesignItem[]) {
     this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
-    const setItemsAction = new SetDesignItemsAction(designItems, [...this.rootDesignItem.children()]);
+    const setItemsAction = new SetDesignItemsAction(designItems, [...this.rootDesignItem.children()], this.instanceServiceContainer);
     this.instanceServiceContainer.undoService.execute(setItemsAction);
   }
 
   public _internalSetDesignItems(designItems: IDesignItem[]) {
-    this.fillCalculationrects();
-    this.extensionManager.removeAllExtensions();
-    this.overlayLayer.removeAllOverlays();
-    DomHelper.removeAllChildnodes(this.overlayLayer);
-    for (let i of [...this.rootDesignItem.children()])
-      this.rootDesignItem._removeChildInternal(i);
-    this.addDesignItems(designItems);
-
+    this.instanceServiceContainer.editingDocument.replaceItems(designItems);
     this.lazyTriggerReparseDocumentStylesheets();
-
-    this.instanceServiceContainer.onContentChanged.emit([{ changeType: 'parsed' }]);
-    (<SelectionService>this.instanceServiceContainer.selectionService)._withoutUndoSetSelectedElements(null);
-    setTimeout(() => this.extensionManager.refreshAllAppliedExtentions(), 50);
   }
 
   reparseTimeout: NodeJS.Timeout | null;
   public lazyTriggerReparseDocumentStylesheets() {
-    if (this.reparseTimeout) {
-      clearTimeout(this.reparseTimeout);
-    }
-    this.reparseTimeout = setTimeout(async () => {
-      await this.reparseDocumentStylesheets();
-      clearTimeout(this.reparseTimeout);
-    }, 20);
-  }
-
-  private async reparseDocumentStylesheets() {
-    if (this.instanceServiceContainer.stylesheetService) {
-      const styleElements = this.rootDesignItem.querySelectorAll('style');
-      let i = 1;
-      const intStyleSheets: IDocumentStylesheet[] = [...styleElements].map(x => ({ name: '&lt;style&gt; #' + (x.id ? x.id + '(' + i++ + ')' : i++), content: DesignItem.GetDesignItem(x).content, designItem: DesignItem.GetDesignItem(x) }));
-      await this.instanceServiceContainer.stylesheetService.setDocumentStylesheets(intStyleSheets);
-    }
+    this.instanceServiceContainer?.editingDocument.requestStylesheetReparse();
   }
 
   public addDesignItems(designItems: IDesignItem[]) {
@@ -974,6 +1002,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onDragEnter(event: DragEvent) {
+    if (!this.instanceServiceContainer) return;
     this.fillCalculationrects();
     event.preventDefault();
 
@@ -1001,6 +1030,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onDragLeave(event: DragEvent) {
+    if (!this.instanceServiceContainer) return;
     this.fillCalculationrects();
     event.preventDefault();
     this._canvas.classList.remove('dragFileActive');
@@ -1013,6 +1043,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _lastDdElement = null;
   private _onDragOver(event: DragEvent) {
+    if (!this.instanceServiceContainer) return;
     event.preventDefault();
 
     this.fillCalculationrects();
@@ -1050,6 +1081,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
 
   private async _onDrop(event: DragEvent) {
+    if (!this.instanceServiceContainer) return;
     this.serviceContainer.globalContext.tool = <ITool>this.serviceContainer.designerTools.get(NamedTools.Pointer);
     this._lastDdElement = null;
     event.preventDefault();
@@ -1097,6 +1129,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onDblClick(event: MouseEvent) {
+    if (!this.instanceServiceContainer) return;
     event.preventDefault();
     if (event.target === this.overlayLayer)
       return;
@@ -1133,6 +1166,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private onKeyUp(event: KeyboardEvent) {
+    if (!this.instanceServiceContainer) return;
     if (this._ignoreEvent === event)
       return;
 
@@ -1151,6 +1185,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private onKeyDown(event: KeyboardEvent) {
+    if (!this.instanceServiceContainer) return;
     if (this._ignoreEvent === event)
       return;
 
@@ -1370,6 +1405,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onWheel(event: WheelEvent) {
+    if (!this.instanceServiceContainer) return;
     let el = this.getElementAtPoint({ x: event.clientX, y: event.clientY });
     while (el) {
       const cs = getComputedStyle(el);
@@ -1390,6 +1426,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _pointerEventHandlerCapture(event: PointerEvent, forceElement: Node = null) {
+    if (!this.instanceServiceContainer) return;
     this.fillCalculationrects();
     if (this._pointerextensions) {
       for (let pe of this._pointerextensions)
@@ -1398,6 +1435,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _pointerEventHandler(event: PointerEvent, forceElement: Node = null) {
+    if (!this.instanceServiceContainer) return;
     if (this._ignoreEvent === event)
       return;
 

@@ -46,8 +46,10 @@ export class CodeViewSimple extends BaseCustomWebComponentConstructorAppend impl
     return false;
   }
 
-  async ready() {
+  constructor() {
+    super();
     this._text = this._getDomElement<HTMLTextAreaElement>('text');
+    this._text.oninput = () => this.onTextChanged.emit(this._text.value);
   }
 
   focusEditor() {

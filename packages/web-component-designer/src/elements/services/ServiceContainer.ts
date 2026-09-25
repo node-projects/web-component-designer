@@ -105,6 +105,13 @@ interface ServiceNameMap {
 const isTouchUi = window.matchMedia('(pointer: coarse)').matches;
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
+  /** Register a document-owned service. Legacy canvas factories remain supported for standalone views. */
+  registerDocumentService<K extends 'undoService' | 'selectionService' | 'stylesheetService' | 'designItemDocumentPositionService' | 'collaborationService'>(
+    name: K, factory: (container: InstanceServiceContainer) => ReturnType<ServiceNameMap[K]>) {
+    const canvasFactory = Object.assign((canvas: IDesignerCanvas) => factory(canvas.instanceServiceContainer), { createForDocument: factory });
+    this.register(name, canvasFactory as ServiceNameMap[K]);
+  }
+
   readonly config: {
     codeViewWidget: new (...args: any[]) => ICodeView & HTMLElement;
     /** Null removes the preview tab, which DocumentContainer already checks for. */

@@ -7,7 +7,7 @@ export class DefaultConfiguredDesignerView extends DesignerView {
 
   async ready() {
     const createDefaultServiceContainer = await (await import('../../services/DefaultServiceBootstrap.js')).default;
-    this.initialize(createDefaultServiceContainer());
+    if (!this.instanceServiceContainer) this.initialize(createDefaultServiceContainer());
   }
 }
 

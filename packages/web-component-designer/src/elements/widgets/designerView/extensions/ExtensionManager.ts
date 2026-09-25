@@ -31,34 +31,51 @@ export class ExtensionManager implements IExtensionManager {
   _lastApplyEventPerType = new WeakMap<IDesignItem, Map<ExtensionType, Event>>
   _lastPrimarySelectionRefreshItem: WeakRef<IDesignItem>
 
+  private subscriptions: { dispose(): void }[] = [];
+  private frames = new Set<number>();
+  private active = false;
+
   constructor(designerCanvas: IDesignerCanvas) {
     useBoxQuadsCache();
 
     this.designerCanvas = designerCanvas;
 
-    designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this));
-    designerCanvas.instanceServiceContainer.selectionService.onSelectionRefresh.on(this._selectedElementsRefresh.bind(this));
-    designerCanvas.instanceServiceContainer.onContentChanged.on(this._contentChanged.bind(this));
+    this.subscriptions.push(designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(this._selectedElementsChanged.bind(this)));
+    this.subscriptions.push(designerCanvas.instanceServiceContainer.selectionService.onSelectionRefresh.on(this._selectedElementsRefresh.bind(this)));
+    this.subscriptions.push(designerCanvas.instanceServiceContainer.onContentChanged.on(this._contentChanged.bind(this)));
 
-    designerCanvas.serviceContainer.globalContext.onToolChanged.on(() => {
+    this.subscriptions.push(designerCanvas.serviceContainer.globalContext.onToolChanged.on(() => {
       this.removeExtension(designerCanvas.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
       this._lastPrimarySelectionRefreshItem = null;
-    });
+    }));
   }
 
   connected() {
+    this.active = true;
     this.ensurePermanentRootExtensionsApplied();
+    this.applyExtensions([...this.designerCanvas.rootDesignItem.children()], ExtensionType.Permanent, null, true);
+    this._selectedElementsChanged({ selectedElements: this.designerCanvas.instanceServiceContainer.selectionService.selectedElements } as ISelectionChangedEvent);
     if (!this._timeout)
       this._timeout = setTimeout(() => this.refreshAllExtensionsTimeout(), 20);
   }
 
   disconnected() {
+    this.active = false;
+    for (const frame of this.frames) cancelAnimationFrame(frame);
+    this.frames.clear();
     if (this._timeout)
       clearTimeout(this._timeout);
     this._timeout = null;
   }
 
 
+
+  dispose() {
+    this.disconnected();
+    this.removeAllExtensions();
+    for (const subscription of this.subscriptions) subscription.dispose();
+    this.subscriptions = [];
+  }
 
   private refreshAllExtensionsTimeout() {
     this.refreshAllAppliedExtentions();
@@ -77,7 +94,10 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   private _contentChanged(contentChanges: IContentChanged[]) {
-    requestAnimationFrame(() => {
+    if (!this.active) return;
+    const frame = requestAnimationFrame(() => {
+      this.frames.delete(frame);
+      if (!this.active) return;
       for (let contentChanged of contentChanges) {
         switch (contentChanged.changeType) {
           case 'added':
@@ -96,9 +116,11 @@ export class ExtensionManager implements IExtensionManager {
         }
       }
     });
+    this.frames.add(frame);
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
+    if (!this.active) return;
     this._lastPrimarySelectionRefreshItem = null;
 
     if (selectionChangedEvent.oldSelectedElements && selectionChangedEvent.oldSelectedElements.length) {
@@ -134,6 +156,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   private _selectedElementsRefresh(selectionChangedEvent: ISelectionRefreshEvent) {
+    if (!this.active) return;
     this.refreshAllAppliedExtentions(selectionChangedEvent.event);
 
     if (selectionChangedEvent.selectedElements && selectionChangedEvent.selectedElements.length && this._lastPrimarySelectionRefreshItem?.deref() === selectionChangedEvent.selectedElements[0]) {
@@ -484,6 +507,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension, event?: Event) {
+    if (!this.active) return;
     this.designerCanvas.overlayLayer.startBatch();
     if (designItems) {
       this.refreshExtensions(designItems, ExtensionType.Directly, event, ignoredExtension);
@@ -505,6 +529,7 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshAllAppliedExtentions(event?: Event) {
+    if (!this.active) return;
     (<DesignerCanvas>this.designerCanvas).fillCalculationrects();
     this.refreshAllExtensions([...this.designItemsWithExtentions], null, event)
   }

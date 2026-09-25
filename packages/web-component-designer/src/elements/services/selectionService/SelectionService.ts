@@ -1,3 +1,4 @@
+import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { ISelectionService } from './ISelectionService.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { ISelectionChangedEvent } from './ISelectionChangedEvent.js';
@@ -28,11 +29,11 @@ export class SelectionService implements ISelectionService {
   primarySelection: IDesignItem;
   selectedElements: IDesignItem[] = [];
   selectedPart: ISourcePart;
-  _designerCanvas: IDesignerCanvas;
+  _instanceServiceContainer: InstanceServiceContainer;
   _undoSelectionChanges: boolean;
 
-  constructor(designerCanvas: IDesignerCanvas, undoSelectionChanges: boolean) {
-    this._designerCanvas = designerCanvas;
+  constructor(designerCanvas: IDesignerCanvas | InstanceServiceContainer, undoSelectionChanges: boolean) {
+    this._instanceServiceContainer = designerCanvas instanceof InstanceServiceContainer ? designerCanvas : designerCanvas.instanceServiceContainer;
     this._undoSelectionChanges = undoSelectionChanges;
   }
 
@@ -42,7 +43,7 @@ export class SelectionService implements ISelectionService {
 
   private _setSelectedElements(designItems: IDesignItem[], event?: Event, selectedPart?: ISourcePart) {
     if (designItems === null || designItems.length === 0)
-      designItems = [this._designerCanvas.rootDesignItem];
+      designItems = [this._instanceServiceContainer.rootDesignItem];
 
     if (this.selectedElements != designItems && !(this.selectedElements.length === 0 && (designItems == null || designItems.length === 0))) {
       if (this.selectedElements?.length === 1 && designItems?.length === 1 && designItems[0] === this.selectedElements[0]) {
@@ -52,7 +53,7 @@ export class SelectionService implements ISelectionService {
       }
       if (this._undoSelectionChanges) {
         const action = new SelectionChangedAction(this.selectedElements, designItems, this);
-        this._designerCanvas.instanceServiceContainer.undoService.execute(action);
+        this._instanceServiceContainer.undoService.execute(action);
       } else {
         this._withoutUndoSetSelectedElements(designItems, event, selectedPart);
       }
@@ -74,8 +75,8 @@ export class SelectionService implements ISelectionService {
   }
 
   setSelectionByTextRange(positionStart: number, positionEnd: number) {
-    const sourcePart = this._designerCanvas.instanceServiceContainer.designItemDocumentPositionService?.getSourcePartAt(positionStart);
-    const item = findDesignItem(this._designerCanvas.rootDesignItem, positionStart);
+    const sourcePart = this._instanceServiceContainer.designItemDocumentPositionService?.getSourcePartAt(positionStart);
+    const item = findDesignItem(this._instanceServiceContainer.rootDesignItem, positionStart);
     if (item) {
       if (this.selectedElements.length != 1 || this.primarySelection != item)
         this._setSelectedElements([item], undefined, sourcePart);
@@ -94,7 +95,7 @@ export class SelectionService implements ISelectionService {
     } else {
       let newSelection: IDesignItem[] = []
       for (let d of designItems) {
-        if (d && (designItems.length == 1 || d !== d.instanceServiceContainer.designerCanvas.rootDesignItem))
+        if (d && (designItems.length == 1 || d !== d.instanceServiceContainer.rootDesignItem))
           newSelection.push(d)
       }
       this.selectedElements = newSelection;

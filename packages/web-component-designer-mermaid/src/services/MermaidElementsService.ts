@@ -15,6 +15,7 @@ export class MermaidElementsService implements IElementsService {
 
     private _allElements: MermaidElementDefinition[];
     private _instanceServiceContainer: InstanceServiceContainer;
+    private _contentSubscription: { dispose(): void };
     private _currentDiagramType: MermaidDocumentDiagramType = "flowchart";
     private _resolveStored: ((value: IElementDefinition[]) => void)[];
     private _rejectStored: ((errorCode: number) => void)[];
@@ -32,9 +33,25 @@ export class MermaidElementsService implements IElementsService {
     }
 
     setInstanceServiceContainer(instanceServiceContainer: InstanceServiceContainer) {
+        this._contentSubscription?.dispose();
         this._instanceServiceContainer = instanceServiceContainer;
         this._refreshCurrentDiagramType();
-        instanceServiceContainer.onContentChanged.on(() => this._refreshCurrentDiagramType());
+        const subscription = instanceServiceContainer?.onContentChanged.on(() => this._refreshCurrentDiagramType());
+        this._contentSubscription = subscription;
+        return { dispose: () => {
+            subscription?.dispose();
+            if (this._contentSubscription === subscription) {
+                this._contentSubscription = null;
+                this._instanceServiceContainer = null;
+                this._refreshCurrentDiagramType();
+            }
+        } };
+    }
+
+    dispose() {
+        this._contentSubscription?.dispose();
+        this._contentSubscription = null;
+        this._instanceServiceContainer = null;
     }
 
     getElements(): Promise<IElementDefinition[]> {

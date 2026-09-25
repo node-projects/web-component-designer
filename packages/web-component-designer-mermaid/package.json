@@ -1,7 +1,7 @@
 {
   "description": "web-component-designer addon: Widgets and Services for creating a Mermaid Designer",
   "name": "@node-projects/web-component-designer-mermaid",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@node-projects/base-custom-webcomponent": ">=0.27.8",
-    "@node-projects/web-component-designer": ">=0.2.0",
+    "@node-projects/web-component-designer": ">=0.3.0",
     "mermaid": "^11.12.0"
   },
   "repository": {

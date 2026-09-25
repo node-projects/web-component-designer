@@ -6,11 +6,17 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 
-  public code: string;
+  public code: string = '';
+  private _disposed = false;
+  private _focusFrame: number;
+  private _onChange = () => {
+    this.code = this._codeMirrorEditor.getValue();
+    this.onTextChanged.emit(this.code);
+  };
   public onTextChanged = new TypedEvent<string>();
   public mode: string = 'xml';
 
-  private _codeMirrorEditor: CodeMirror.Editor;
+  private _codeMirrorEditor: CodeMirror.EditorFromTextArea;
   private _editor: HTMLTextAreaElement;
 
   static override readonly style = css`
@@ -22,7 +28,7 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
 
   static override readonly template = html`
     <div  style="width: 100%; height: 100%; overflow: auto;">
-      <div id="textarea"></div>
+      <textarea id="textarea"></textarea>
     </div>`;
 
   constructor() {
@@ -30,18 +36,27 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
     this._restoreCachedInititalValues();
 
     //@ts-ignore
-    import("codemirror5/lib/codemirror.css", { with: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [cssFromString(x), ...this.shadowRoot.adoptedStyleSheets]);
+    import("codemirror5/lib/codemirror.css", { with: { type: 'css' } }).then(x => { if (!this._disposed) this.shadowRoot.adoptedStyleSheets = [cssFromString(x.default), ...this.shadowRoot.adoptedStyleSheets]; });
     //@ts-ignore
-    import("codemirror5/addon/fold/foldgutter.css", { with: { type: 'css' } }).then(x => this.shadowRoot.adoptedStyleSheets = [cssFromString(x), ...this.shadowRoot.adoptedStyleSheets]);
+    import("codemirror5/addon/fold/foldgutter.css", { with: { type: 'css' } }).then(x => { if (!this._disposed) this.shadowRoot.adoptedStyleSheets = [cssFromString(x.default), ...this.shadowRoot.adoptedStyleSheets]; });
 
     this.style.display = 'block';
-    this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');
+
   }
 
   dispose(): void {
+    if (this._disposed) return;
+    this._disposed = true;
+    cancelAnimationFrame(this._focusFrame);
+    if (this._codeMirrorEditor) {
+      this._codeMirrorEditor.off('change', this._onChange);
+      this._codeMirrorEditor.toTextArea();
+      this._codeMirrorEditor = null;
+    }
   }
 
   executeCommand(command: IUiCommand) {
+    if (!this._codeMirrorEditor) return;
     switch (command.type) {
       case CommandType.undo:
         this._codeMirrorEditor.undo();
@@ -55,7 +70,7 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
         break;
       case CommandType.paste:
         navigator.clipboard.readText().then(text => {
-          this._codeMirrorEditor.replaceSelection(text);
+          this._codeMirrorEditor?.replaceSelection(text);
         });
         break;
       case CommandType.cut:
@@ -70,6 +85,7 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
   }
 
   canExecuteCommand(command: IUiCommand) {
+    if (!this._codeMirrorEditor) return false;
     switch (command.type) {
       case CommandType.undo:
       case CommandType.redo:
@@ -83,13 +99,18 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
   }
 
   focusEditor() {
-    requestAnimationFrame(() => {
+    cancelAnimationFrame(this._focusFrame);
+    this._focusFrame = requestAnimationFrame(() => {
+      if (this._disposed) return;
       this.focus();
-      this._codeMirrorEditor.focus();
+      this._codeMirrorEditor?.focus();
     });
   }
 
   ready() {
+    if (this._disposed) return;
+    this._editor = this._getDomElement<HTMLTextAreaElement>('textarea');
+    this._editor.value = this.code ?? '';
     const config: CodeMirror.EditorConfiguration = {
       tabSize: 3,
       lineNumbers: true,
@@ -103,19 +124,22 @@ export class CodeViewCodeMirror5 extends BaseCustomWebComponentLazyAppend implem
       gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     };
 
-    this._codeMirrorEditor = CodeMirror(this._editor, config);
+    this._codeMirrorEditor = CodeMirror.fromTextArea(this._editor, config);
     this._codeMirrorEditor.setSize('100%', '100%');
-    this._codeMirrorEditor.on('change', () => this.onTextChanged.emit(this._codeMirrorEditor.getValue()))
+    this._codeMirrorEditor.on('change', this._onChange);
   }
 
   update(code) {
-    this._codeMirrorEditor.setValue(code);
+    if (this._disposed) return;
+    this.code = code;
+    this._codeMirrorEditor?.setValue(code);
   }
   getText() {
-    return this._codeMirrorEditor.getValue();
+    return this._codeMirrorEditor?.getValue() ?? this.code ?? '';
   }
 
   setSelection(position: IStringPosition) {
+    if (!this._codeMirrorEditor || !position) return;
     let point1 = this._codeMirrorEditor.posFromIndex(position.start);
     let point2 = this._codeMirrorEditor.posFromIndex(position.start + position.length);
     this._codeMirrorEditor.setSelection(point1, point2);

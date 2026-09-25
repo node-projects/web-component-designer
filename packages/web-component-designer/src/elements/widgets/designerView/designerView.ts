@@ -1,10 +1,10 @@
+import { EditingDocument } from '../../EditingDocument.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
-import { css, DomHelper, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
+import { css, html, BaseCustomWebComponentConstructorAppend } from '@node-projects/base-custom-webcomponent';
 import { IUiCommandHandler } from '../../../commandHandling/IUiCommandHandler.js';
 import { IUiCommand } from '../../../commandHandling/IUiCommand.js';
 import { DesignerCanvas } from "./designerCanvas.js";
-import { DomConverter } from './DomConverter.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { DefaultHtmlParserService } from '../../services/htmlParserService/DefaultHtmlParserService.js';
 import { EventNames } from '../../../enums/EventNames.js';
@@ -27,7 +27,9 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     return this._designerCanvas.instanceServiceContainer;
   }
   public set instanceServiceContainer(value: InstanceServiceContainer) {
-    this._designerCanvas.instanceServiceContainer = value;
+    if (!value.editingDocument) throw new Error('Attach a container owned by an EditingDocument.');
+    this._designerCanvas.attachDocument(value.editingDocument);
+    this.initializeToolbar();
   }
 
   private _designerCanvas: DesignerCanvas;
@@ -42,6 +44,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   set readOnly(v) {
     this._designerCanvas.readOnly = v;
   }
+
+  private _configButtons: HTMLElement[] = [];
 
   private _zoomInput: HTMLInputElement;
   private _lowertoolbar: HTMLDivElement;
@@ -325,6 +329,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   private _zoomAroundViewportCenter(newZoom: number) {
+    if (!this.instanceServiceContainer) return;
     if (!Number.isFinite(newZoom) || newZoom <= 0)
       return;
 
@@ -397,6 +402,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   private _onScrollbar(e) {
+    if (!this.instanceServiceContainer) return;
     if (e?.detail == 'incrementLarge')
       e.target.value += 0.25;
     else if (e?.detail == 'decrementLarge')
@@ -413,6 +419,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   private _onWheel(event: WheelEvent) {
+    if (!this.instanceServiceContainer) return;
     event.preventDefault();
     if (event.ctrlKey) {
       let zf = this._designerCanvas.zoomFactor;
@@ -468,43 +475,70 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   /* --- end IUiCommandHandler --- */
 
 
-  initialize(serviceContainer: ServiceContainer) {
+  get editingDocument(): EditingDocument { return this.instanceServiceContainer?.editingDocument; }
+
+  async attachDocument(document: EditingDocument) {
+    await document.commitPendingChanges();
+    if (!this.instanceServiceContainer) this.initialize(document.serviceContainer, document);
+    else {
+      this._designerCanvas.attachDocument(document);
+      this.initializeToolbar();
+    }
+  }
+
+  detachDocument(): EditingDocument {
+    this._stopZoomRepeat();
+    this._toolbar.dispose();
+    for (const button of this._configButtons) {
+      (button as HTMLElement & { dispose?(): void }).dispose?.();
+      button.remove();
+    }
+    this._configButtons = [];
+    return this._designerCanvas.detachDocument();
+  }
+
+  dispose() {
+    this.detachDocument();
+    this._designerCanvas.dispose();
+    this._toolbar.dispose();
+  }
+
+  disconnectedCallback() {
+    this._stopZoomRepeat();
+  }
+
+  initialize(serviceContainer: ServiceContainer, document?: EditingDocument) {
     this.serviceContainer = serviceContainer;
-    this._designerCanvas.initialize(serviceContainer);
+    this._designerCanvas.initialize(serviceContainer, document);
+    this.initializeToolbar();
+  }
+
+  private initializeToolbar() {
+    const serviceContainer = this.serviceContainer;
+    this.instanceServiceContainer.detachView = () => this.detachDocument();
+    for (const button of this._configButtons) {
+      (button as HTMLElement & { dispose?(): void }).dispose?.();
+      button.remove();
+    }
+    this._configButtons = [];
     if (serviceContainer.designViewConfigButtons) {
       for (let provider of serviceContainer.designViewConfigButtons) {
-        for (let btn of provider.provideButtons(this, this._designerCanvas))
+        for (let btn of provider.provideButtons(this, this._designerCanvas)) {
+          this._configButtons.push(btn);
           this._lowertoolbar.appendChild(btn);
+        }
       }
     }
     this._toolbar.initialize(this.serviceContainer, this);
   }
 
   public getDesignerHTML() {
-    if (this._designerCanvas.rootDesignItem.childCount > 0) {
-      return DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), true, true);
-    }
-    if (this.serviceContainer.htmlWriterService.supportsRootItemWrite) {
-      return DomConverter.ConvertToString([this._designerCanvas.rootDesignItem], true, true);
-    }
-    return '';
+    return this.editingDocument.getHtml();
   }
 
   public async parseDesignerHTML(html: string, disableUndo: boolean = false) {
-    const parserService = this.serviceContainer.htmlParserService;
-    if (!html) {
-      this._designerCanvas.overlayLayer.removeAllOverlays();
-      DomHelper.removeAllChildnodes(this._designerCanvas.overlayLayer);
-      this._designerCanvas.rootDesignItem.clearChildren();
-    }
-    else {
-      const designItems = await parserService.parse(html, this.serviceContainer, this.instanceServiceContainer, false);
-      if (disableUndo) {
-        this._designerCanvas._internalSetDesignItems(designItems);
-      } else {
-        this._designerCanvas.setDesignItems(designItems);
-      }
-    }
+    await this._designerCanvas.whenReady();
+    await this.editingDocument.loadHtml(html, disableUndo);
   }
 
   static wrapInDesigner(elements: HTMLCollection | HTMLElement[], serviceContainer: ServiceContainer): DesignerCanvas {

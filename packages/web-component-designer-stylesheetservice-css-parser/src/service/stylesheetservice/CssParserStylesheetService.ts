@@ -1,5 +1,5 @@
 import { CssAtRuleAST, CssDeclarationAST, CssRuleAST, CssStylesheetAST, CssWhitespaceAST, parse, stringify } from "@node-projects/css-parser";
-import { AbstractStylesheetService, IDocumentStylesheet, IStyleRule, IStylesheet, IStyleDeclaration, IDesignerCanvas, IDesignItem } from "@node-projects/web-component-designer";
+import { AbstractStylesheetService, IDocumentStylesheet, IStyleRule, IStylesheet, IStyleDeclaration, IDesignerCanvas, InstanceServiceContainer, IDesignItem } from "@node-projects/web-component-designer";
 import { Specificity } from "@node-projects/web-component-designer";
 
 interface IRuleWithAST extends IStyleRule {
@@ -17,7 +17,7 @@ interface IDeclarationWithAST extends IStyleDeclaration {
 export class CssParserStylesheetService extends AbstractStylesheetService {
     public keepFormatting: boolean;
 
-    constructor(designerCanvas: IDesignerCanvas, keepFormatting: boolean = true) {
+    constructor(designerCanvas: IDesignerCanvas | InstanceServiceContainer, keepFormatting: boolean = true) {
         super(designerCanvas);
         this.keepFormatting = keepFormatting;
     }

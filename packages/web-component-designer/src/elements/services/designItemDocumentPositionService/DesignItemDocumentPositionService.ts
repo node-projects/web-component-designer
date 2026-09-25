@@ -11,7 +11,7 @@ export class DesignItemDocumentPositionService implements IDesignItemDocumentPos
     private _sourcePartsByDesignItem: WeakMap<IDesignItem, ISourcePart[]> = new WeakMap();
     private _sourcePartsByDesignItemAndKey: WeakMap<IDesignItem, Map<string, ISourcePart>> = new WeakMap();
 
-    constructor(designerCanvas: IDesignerCanvas) { }
+    constructor(designerCanvas?: IDesignerCanvas) { }
 
     setPosition(designItem: IDesignItem, position: IStringPosition) {
         this._designItemsAssignmentList.set(designItem, position);

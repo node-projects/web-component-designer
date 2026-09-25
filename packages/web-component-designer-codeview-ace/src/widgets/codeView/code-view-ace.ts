@@ -20,7 +20,10 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   canvasElement: HTMLElement;
   elementsToPackages: Map<string, string>;
 
-  public code: string;
+  public code: string = '';
+  private _disposed = false;
+  private _observer: MutationObserver;
+  private _focusFrame: number;
   public onTextChanged = new TypedEvent<string>();
 
   private _aceEditor: Ace.Editor;
@@ -46,10 +49,16 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     this.shadowRoot.appendChild(this._editor)
   }
   dispose(): void {
+    if (this._disposed) return;
+    this._disposed = true;
+    cancelAnimationFrame(this._focusFrame);
+    this._observer?.disconnect();
     this._aceEditor?.destroy();
+    this._aceEditor = null;
   }
 
   executeCommand(command: IUiCommand) {
+    if (!this._aceEditor) return;
     switch (command.type) {
       case CommandType.undo:
         this._aceEditor.execCommand('undo');
@@ -64,7 +73,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
         break;
       case CommandType.paste:
         navigator.clipboard.readText().then(text => {
-          this._aceEditor.execCommand("paste", text)
+          this._aceEditor?.execCommand("paste", text)
         });
         break;
       case CommandType.cut:
@@ -79,6 +88,7 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   }
 
   canExecuteCommand(command: IUiCommand) {
+    if (!this._aceEditor) return false;
     switch (command.type) {
       case CommandType.undo:
       case CommandType.redo:
@@ -92,9 +102,11 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   }
 
   focusEditor() {
-    requestAnimationFrame(() => {
+    cancelAnimationFrame(this._focusFrame);
+    this._focusFrame = requestAnimationFrame(() => {
+      if (this._disposed) return;
       this.focus();
-      this._aceEditor.focus();
+      this._aceEditor?.focus();
     });
   }
 
@@ -105,11 +117,12 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
   }
 
   ready() {
+    if (this._disposed) return;
     //@ts-ignore
     this._aceEditor = ace.edit(this._editor, {
       theme: "ace/theme/chrome",
       mode: "ace/mode/html",
-      value: "",
+      value: this.code ?? '',
       autoScrollEditorIntoView: true,
       fontSize: "14px",
       showPrintMargin: false,
@@ -121,25 +134,31 @@ export class CodeViewAce extends BaseCustomWebComponentLazyAppend implements ICo
     //own snippet completer: http://plnkr.co/edit/6MVntVmXYUbjR0DI82Cr?p=preview
     this._aceEditor.renderer.attachToShadowRoot();
 
-    let observer = new MutationObserver((m) => {
+    this._observer = new MutationObserver((m) => {
       this._aceEditor.setAutoScrollEditorIntoView(false);
       this._aceEditor.setAutoScrollEditorIntoView(true);
     });
     let config = { attributes: true, childList: true, characterData: true };
-    observer.observe(this.shadowRoot.querySelector('.ace_content'), config);
+    this._observer.observe(this.shadowRoot.querySelector('.ace_content'), config);
 
-    this._aceEditor.on('change', () => this.onTextChanged.emit(this._aceEditor.getValue()));
+    this._aceEditor.on('change', () => {
+      this.code = this._aceEditor.getValue();
+      this.onTextChanged.emit(this.code);
+    });
   }
 
   update(code) {
-    this._aceEditor.setValue(code);
-    this._aceEditor.clearSelection();
+    if (this._disposed) return;
+    this.code = code;
+    this._aceEditor?.setValue(code);
+    this._aceEditor?.clearSelection();
   }
   getText() {
-    return this._aceEditor.getValue();
+    return this._aceEditor?.getValue() ?? this.code ?? '';
   }
 
   setSelection(position: IStringPosition) {
+    if (!this._aceEditor || !position) return;
     let point1 = this._aceEditor.session.getDocument().indexToPosition(position.start, 0);
     let point2 = this._aceEditor.session.getDocument().indexToPosition(position.start + position.length, 0);
     //@ts-ignore

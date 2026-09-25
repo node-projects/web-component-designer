@@ -34,12 +34,12 @@ export class NodeHtmlParserService implements IHtmlParserService {
       let element: Element;
       let manualCreatedElement = false;
       if (!namespace)
-        element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>', instanceServiceContainer.designerCanvas.rootDesignItem.document); // some custom elements only parse attributes during constructor call 
+        element = newElementFromString('<' + item.rawTagName + ' ' + item.rawAttrs + '></' + item.rawTagName + '>', instanceServiceContainer.rootDesignItem.document); // some custom elements only parse attributes during constructor call
       if (!element) {
         if (namespace)
-          element = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElementNS(namespace, item.rawTagName);
+          element = instanceServiceContainer.rootDesignItem.document.createElementNS(namespace, item.rawTagName);
         else
-          element = instanceServiceContainer.designerCanvas.rootDesignItem.document.createElement(item.rawTagName);
+          element = instanceServiceContainer.rootDesignItem.document.createElement(item.rawTagName);
         manualCreatedElement = true;
       }
       element = <Element>DesignItem.updateRenderedNode(serviceContainer, element);
@@ -101,7 +101,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
         }
       }
     } else if (item.nodeType == 3) {
-      const document = instanceServiceContainer.designerCanvas.rootDesignItem.document;
+      const document = instanceServiceContainer.rootDesignItem.document;
       const parentElementName = item.parentNode?.rawTagName?.toLowerCase();
       const text = DomConverter.isRawTextElementName(parentElementName) ? item.rawText : item.text;
       let element = DesignItem.updateRenderedNode(serviceContainer, document.createTextNode(text));
@@ -109,7 +109,7 @@ export class NodeHtmlParserService implements IHtmlParserService {
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });
     } else if (item.nodeType == 8) {
-      let element = DesignItem.updateRenderedNode(serviceContainer, document.createComment(item.rawText));
+      let element = DesignItem.updateRenderedNode(serviceContainer, instanceServiceContainer.rootDesignItem.document.createComment(item.rawText));
       designItem = DesignItem.GetOrCreateDesignItem(element, item, serviceContainer, instanceServiceContainer);
       if (!snippet && instanceServiceContainer.designItemDocumentPositionService)
         instanceServiceContainer.designItemDocumentPositionService.setPosition(designItem, { start: item.range[0] + positionOffset, length: item.range[1] - item.range[0] });

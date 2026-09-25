@@ -469,3 +469,7 @@ export type { IUiCommand } from "./commandHandling/IUiCommand.js"
 export type { IUiCommandHandler } from "./commandHandling/IUiCommandHandler.js"
 
 export * from './Constants.js'
+
+export { EditingDocument } from './elements/EditingDocument.js';
+
+export type { IDemoView } from "./elements/widgets/demoView/IDemoView.js";

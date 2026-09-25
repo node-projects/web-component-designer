@@ -13,4 +13,4 @@ This is a Stylesheetparser using @node-projects/css-parser
 ## Usage
 
     import { CssParserStylesheetService } from '@node-projects/web-component-designer-stylesheetservice-css-parser';
-    serviceContainer.register("stylesheetService", designerCanvas => new CssParserStylesheetService(designerCanvas));
+    serviceContainer.registerDocumentService("stylesheetService", container => new CssParserStylesheetService(container));

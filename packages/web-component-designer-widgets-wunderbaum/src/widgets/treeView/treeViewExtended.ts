@@ -11,8 +11,6 @@ type WunderbaumNode = {
 }
 type treeNode = { title: string, ref: IDesignItem, children?: treeNode[] };
 
-const wbNodeSymbol = Symbol.for('wunderbaumnode');
-
 export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend implements ITreeView {
 
   private _treeDiv: HTMLTableElement;
@@ -21,6 +19,12 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   private _instanceServiceContainer: InstanceServiceContainer;
   private _selectionChangedHandler: Disposable;
   private _contentChangedHandler: Disposable;
+  private _nodes = new WeakMap<IDesignItem, WunderbaumNode>();
+  private _disposed = false;
+  private _bindingVersion = 0;
+  private _recomputeTimer: ReturnType<typeof setTimeout>;
+  private _selectionTimer: ReturnType<typeof setTimeout>;
+  private _scrollFrame: number;
 
   static override readonly style = css`
       * {
@@ -176,6 +180,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
 
   public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
     event.preventDefault();
+    if (!designItem.instanceServiceContainer.designerCanvas?.isConnected) return null;
     const mnuItems: IContextMenuItem[] = [];
     for (let cme of designItem.serviceContainer.designerContextMenuExtensions) {
       if (cme.shouldProvideContextmenu(event, designItem.instanceServiceContainer.designerCanvas, designItem, 'treeView')) {
@@ -189,6 +194,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   selectedFromTree = false;
 
   async ready() {
+    if (this._disposed) return;
     this._initWunderbaum();
     if (this._instanceServiceContainer) {
       this.createTree(this._instanceServiceContainer.rootDesignItem);
@@ -206,7 +212,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           let designItem: IDesignItem = node.data.ref;
           if (designItem) {
             this.selectedFromTree = true;
-            setTimeout(() => {
+            clearTimeout(this._selectionTimer);
+            this._selectionTimer = setTimeout(() => {
               this.selectedFromTree = false;
             }, 50);
             if (hasCommandKey(e.event)) {
@@ -224,7 +231,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             }
           }
         }
-        const disableExpand = (<MouseEvent>e.event).ctrlKey || (<MouseEvent>e.event).shiftKey;
+        const disableExpand = (<MouseEvent>e.event)?.ctrlKey || (<MouseEvent>e.event)?.shiftKey;
         return !disableExpand;
       },
       dnd: {
@@ -233,11 +240,13 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         preventVoidMoves: false,
         serializeClipboardData: false,
         dragStart: (e) => {
+          if (!this._instanceServiceContainer?.designerCanvas?.isConnected) return false;
           e.event.dataTransfer.effectAllowed = "all";
           e.event.dataTransfer.dropEffect = "move";
           return true;
         },
         dragEnter: (e) => {
+          if (!this._instanceServiceContainer?.designerCanvas?.isConnected) return false;
           e.event.dataTransfer.dropEffect = e.event.ctrlKey ? 'copy' : 'move';
           return true;
         },
@@ -246,6 +255,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           //return true;
         },
         drop: async (e) => {
+          const container = this._instanceServiceContainer;
+          if (!container?.designerCanvas?.isConnected) return;
           let sourceDesignitems: IDesignItem[] = [e.sourceNode].map(x => x.data.ref);
           if (e.event.dataTransfer.dropEffect == 'copy') {
             let newSourceDesignitems: IDesignItem[] = [];
@@ -253,6 +264,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
               newSourceDesignitems.push(await d.clone());
             sourceDesignitems = newSourceDesignitems;
           }
+          if (this._disposed || this._instanceServiceContainer !== container || !container.designerCanvas?.isConnected) return;
           const targetDesignitem: IDesignItem = e.node.data.ref;
 
           let grp = targetDesignitem.openGroup("drag/drop in treeview");
@@ -291,8 +303,14 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
           let item: IDesignItem = node.data.ref;
 
           e.nodeElem.oncontextmenu = (e) => this.showDesignItemContextMenu(item, e);
-          e.nodeElem.onmouseenter = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(item.element, e);
-          e.nodeElem.onmouseleave = (e) => item.instanceServiceContainer.designerCanvas.showHoverExtension(null, e);
+          e.nodeElem.onmouseenter = (e) => {
+            const canvas = item.instanceServiceContainer.designerCanvas;
+            if (canvas?.isConnected) canvas.showHoverExtension(item.element, e);
+          };
+          e.nodeElem.onmouseleave = (e) => {
+            const canvas = item.instanceServiceContainer.designerCanvas;
+            if (canvas?.isConnected) canvas.showHoverExtension(null, e);
+          };
 
           let sp = document.createElement("span");
           sp.style.display = "inline-block";
@@ -327,6 +345,7 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             f.title = "has forced style";
             rowElem.appendChild(f);
             f.addEventListener('click', (event) => {
+              if (!item.instanceServiceContainer.designerCanvas?.isConnected) return;
               const items = new ForceCssContextMenu().provideContextMenuItems(event, item.instanceServiceContainer.designerCanvas, item);
               let ctxMenu = new ContextMenu(items, null);
               ctxMenu.display(event);
@@ -342,12 +361,10 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
     });
   }
 
-  _recomputeRunning;
-  _recomputeRequestedAgain;
-
   private async refreshNode(node: WunderbaumNode, item: IDesignItem) {
     const el = node.getColElem(0).parentElement;
-    const f = el.querySelector('.forced')
+    const f = el.querySelector('.forced');
+    if (!f) return;
     if (item.hasForcedCss)
       f.classList.add('isforced');
     else
@@ -355,27 +372,34 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   public async createTree(rootItem: IDesignItem) {
-    if (this._tree) {
-      if (!this._recomputeRunning) {
-        this._recomputeRunning = true;
-        setTimeout(async () => {
-          this._recomputeRequestedAgain = false;
-          await this._recomputeTree(rootItem);
-          this._recomputeRunning = false;
-          if (this._recomputeRequestedAgain) {
-            this._recomputeRequestedAgain = false;
-            this.createTree(rootItem);
-          }
-        }, 20);
-      } else {
-        this._recomputeRequestedAgain = true;
-      }
+    clearTimeout(this._recomputeTimer);
+    if (this._tree && !this._disposed) {
+      this._recomputeTimer = setTimeout(() => {
+        void this._recomputeTree(rootItem);
+      }, 20);
     }
   }
 
+  public dispose() {
+    if (this._disposed) return;
+    this.instanceServiceContainer = null;
+    this._disposed = true;
+    this._tree?.destroy();
+    this._tree = null;
+  }
+
   public set instanceServiceContainer(value: InstanceServiceContainer) {
+    if (this._disposed) return;
+    this._bindingVersion++;
+    clearTimeout(this._recomputeTimer);
+    clearTimeout(this._selectionTimer);
+    cancelAnimationFrame(this._scrollFrame);
+    this.selectedFromTree = false;
+    this._nodes = new WeakMap();
     this._selectionChangedHandler?.dispose();
     this._contentChangedHandler?.dispose();
+    this._selectionChangedHandler = null;
+    this._contentChangedHandler = null;
     this._instanceServiceContainer = value;
     if (this._instanceServiceContainer) {
       this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
@@ -385,21 +409,18 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
         for (let e of changes) {
           if (e.changeType === 'changed') {
             for (const d of e.designItems) {
-              if (d[wbNodeSymbol])
-                this.refreshNode(d[wbNodeSymbol], d);
+              const node = this._nodes.get(d);
+              if (node) this.refreshNode(node, d);
             }
           } else {
             this.createTree(value.rootDesignItem);
-            setTimeout(() => {
-              this._highlight(this._instanceServiceContainer.selectionService.selectedElements);
-            }, 20);
           }
         }
       });
       if (this._tree)
         this.createTree(value.rootDesignItem);
     } else {
-      this._tree.root.removeChildren();
+      this._tree?.root.removeChildren();
     }
   }
 
@@ -408,15 +429,19 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private async _recomputeTree(rootItem: IDesignItem) {
+    const version = this._bindingVersion;
     try {
+      this._nodes = new WeakMap();
       this._tree.root.removeChildren();
       const newTree = this._getChildren(rootItem);
       this._tree.root.addChildren(newTree);
       this._tree.root.visit(node => {
-        node.data.ref[wbNodeSymbol] = node;
+        this._nodes.set(node.data.ref, node);
       });
       await this._tree.expandAll();
+      if (this._disposed || this._bindingVersion !== version) return;
       this._filterNodes();
+      this._highlight(this._instanceServiceContainer?.selectionService.selectedElements);
     }
     catch (err) {
       console.error(err);
@@ -439,6 +464,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
   }
 
   private _highlight(activeElements: IDesignItem[]) {
+    if (!this._tree || this._disposed) return;
+    cancelAnimationFrame(this._scrollFrame);
     let scrolled = false;
     this._tree.runWithDeferredUpdate(() => {
       this._tree.visit((node) => {
@@ -452,8 +479,8 @@ export class TreeViewExtended extends BaseCustomWebComponentConstructorAppend im
             node.setFocus(true);
           if (flag && !scrolled) {
             scrolled = true;
-            requestAnimationFrame(() => {
-              node.scrollIntoView();
+            this._scrollFrame = requestAnimationFrame(() => {
+              if (!this._disposed && this.isConnected) node.scrollIntoView();
             });
           }
         }

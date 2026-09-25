@@ -20,8 +20,24 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   private _setSelectionTimeout: ReturnType<typeof setTimeout>;
   private _pendingSelectionKey: string;
 
+  private _disposed = false;
+  private _cleanup: (() => void)[] = [];
+  private _enableSelectionTimeout: ReturnType<typeof setTimeout>;
+  private _focusFrame: number;
+
   dispose(): void {
+    if (this._disposed) return;
+    this._disposed = true;
+    this.clearPendingSetSelection();
+    clearTimeout(this._enableSelectionTimeout);
+    cancelAnimationFrame(this._focusFrame);
+    for (const cleanup of this._cleanup) cleanup();
+    this._cleanup = [];
+    const model = this._monacoEditor?.getModel();
     this._monacoEditor?.dispose();
+    model?.dispose();
+    this._monacoEditor = null;
+    this._instanceServiceContainer = null;
   }
 
   canvasElement: HTMLElement;
@@ -37,14 +53,14 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
   public set theme(value: string) {
     this._theme = value;
-    CodeViewMonaco.getMonacoLib().then(monaco => monaco.editor.setTheme(value));
+    CodeViewMonaco.getMonacoLib().then(monaco => { if (!this._disposed) monaco.editor.setTheme(value); });
   }
 
   #code: string = null;
   get code() {
     if (this._monacoEditor)
       return this._monacoEditor.getModel().getValue();
-    return null;
+    return this.#code ?? '';
   }
   set code(v) {
     this.#code = v;
@@ -130,12 +146,13 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     this._parseAttributesToProperties();
 
     const monaco = await CodeViewMonaco.getMonacoLib();
+    if (this._disposed) return;
     this.shadowRoot.adoptedStyleSheets = [CodeViewMonaco._monacoStyle, (<any>this.constructor).style];
 
     this._editor = this._getDomElement<HTMLDivElement>('container');
 
     const resizeObserver = new ResizeObserver(() => {
-      if (this._editor.offsetWidth > 0) {
+      if (!this._disposed && this._editor.offsetWidth > 0) {
 
         let options: monacoType.editor.IStandaloneEditorConstructionOptions = {
           automaticLayout: true,
@@ -167,6 +184,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor = monaco.editor.create(this._editor, options);
 
         let selectionTimeout;
+        let cursorChangeTimeout;
         let disableCursorChange;
         let changeContentListener = this._monacoEditor.getModel().onDidChangeContent(e => {
           if (selectionTimeout) {
@@ -175,11 +193,17 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
             this._disableSelection = false;
           }
           disableCursorChange = true;
-          setTimeout(() => {
+          clearTimeout(cursorChangeTimeout);
+          cursorChangeTimeout = setTimeout(() => {
             disableCursorChange = false;
           }, 50);
           this.onTextChanged.emit(this._monacoEditor.getValue());
           this.dispatchEvent(new CustomEvent('code-changed'));
+        });
+        this._cleanup.push(() => {
+          changeContentListener.dispose();
+          clearTimeout(selectionTimeout);
+          clearTimeout(cursorChangeTimeout);
         });
         this._monacoEditor.onDidChangeModel(e => {
           changeContentListener.dispose();
@@ -190,7 +214,8 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
               this._disableSelection = false;
             }
             disableCursorChange = true;
-            setTimeout(() => {
+            clearTimeout(cursorChangeTimeout);
+            cursorChangeTimeout = setTimeout(() => {
               disableCursorChange = false;
             }, 50);
             this.onTextChanged.emit(this._monacoEditor.getValue());
@@ -219,11 +244,14 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
       };
     });
 
+    this._cleanup.push(() => resizeObserver.disconnect());
     resizeObserver.observe(this._editor);
   }
 
   focusEditor() {
-    requestAnimationFrame(() => {
+    cancelAnimationFrame(this._focusFrame);
+    this._focusFrame = requestAnimationFrame(() => {
+      if (this._disposed) return;
       this.focus();
       if (this._monacoEditor)
         this._monacoEditor.focus();
@@ -237,6 +265,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   update(code: string, instanceServiceContainer?: InstanceServiceContainer) {
+    if (this._disposed) return;
     this.#code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
@@ -246,6 +275,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor.setValue(code);
       this._disableSelectionAfterUpd = false;
       CodeViewMonaco.getMonacoLib().then(monaco => {
+        if (this._disposed) return;
         monaco.editor.setTheme(this._theme);
         monaco.editor.setModelLanguage(this._monacoEditor.getModel(), this.language);
       });
@@ -253,7 +283,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   getText() {
-    return this._monacoEditor.getValue();
+    return this._monacoEditor?.getValue() ?? this.#code ?? '';
   }
 
   setSelection(position: IStringPosition) {
@@ -272,9 +302,11 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._pendingSelectionKey = null;
         this._monacoEditor.setSelection({ startLineNumber: point1.lineNumber, startColumn: point1.column, endLineNumber: point2.lineNumber, endColumn: point2.column });
         CodeViewMonaco.getMonacoLib().then(monaco => {
+          if (this._disposed) return;
           this._monacoEditor.revealRangeInCenterIfOutsideViewport(new monaco.Range(point1.lineNumber, point1.column, point2.lineNumber, point2.column), 1);
         });
-        setTimeout(() => {
+        clearTimeout(this._enableSelectionTimeout);
+        this._enableSelectionTimeout = setTimeout(() => {
           this._disableSelectionAfterSel = false;
         }, 50);
       }, 50);

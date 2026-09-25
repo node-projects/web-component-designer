@@ -34,10 +34,10 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
       }
     }
 
+    const items = await this.htmlParser.parse(htmlCode, serviceContainer, instanceServiceContainer, parseSnippet, positionOffset);
     if (cssStyle)
-      instanceServiceContainer.stylesheetService.setStylesheets([{ name: 'css', content: cssStyle }]);
-
-    return this.htmlParser.parse(htmlCode, serviceContainer, instanceServiceContainer, parseSnippet, positionOffset);
+      await instanceServiceContainer.stylesheetService.setStylesheets([{ name: 'css', content: cssStyle }]);
+    return items;
   }
 
   public writeBack(code: string, html: string, css: string, newLineCrLf: boolean): string {
@@ -93,6 +93,9 @@ export class BaseCustomWebcomponentParserService implements IHtmlParserService {
     }, compilerHost);
 
     const sourceFile = program.getSourceFile(filename);
+    const errors = program.getSyntacticDiagnostics(sourceFile);
+    if (errors.length)
+      throw new SyntaxError(errors.map(error => ts.flattenDiagnosticMessageText(error.messageText, '\n')).join('\n'));
     return sourceFile;
   }
 }

@@ -49,7 +49,8 @@ export function rerouteConnectedMermaidEdges(instanceServiceContainer: InstanceS
         return;
 
     const designerCanvas = instanceServiceContainer.designerCanvas;
-    const rootItems = collectCanvasDesignItems(designerCanvas.rootDesignItem);
+    if (!designerCanvas?.isConnected) return;
+    const rootItems = collectCanvasDesignItems(instanceServiceContainer.rootDesignItem);
     const nodeItemsById = createNodeItemsById(rootItems);
     const affectedEdges = rootItems.filter(item => {
         if (!isEdgeItem(item))

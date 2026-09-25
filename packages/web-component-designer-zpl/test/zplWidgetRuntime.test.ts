@@ -19,6 +19,9 @@ let getZplDiagonalElementHeight: typeof import('../src/services/ZplDiagonalLineE
 let parseZplFontWidth: typeof import('../src/services/ZplParserService.js').parseZplFontWidth;
 
 beforeAll(async () => {
+    if (!window.matchMedia) {
+        Object.defineProperty(window, 'matchMedia', { value: () => ({ matches: false }) });
+    }
     for (const name of ['SVGPathElement', 'SVGRectElement', 'SVGCircleElement', 'SVGEllipseElement',
         'SVGLineElement', 'SVGPolylineElement', 'SVGPolygonElement', 'SVGGraphicsElement']) {
         if (!(globalThis as any)[name]) Object.defineProperty(globalThis, name, { value: SVGElement });

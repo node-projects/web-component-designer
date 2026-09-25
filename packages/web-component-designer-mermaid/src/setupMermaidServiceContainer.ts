@@ -1,4 +1,4 @@
-import { AbsolutePlacementService, AltToEnterContainerExtensionProvider, BaseCustomWebComponentPropertiesService, CopyPasteContextMenu, DefaultEditorTypeService, DefaultHtmlParserService, DefaultInstanceService, DefaultModelCommandService, DefaultPropertyEditorTypesService, DeletionService, DesignItemDocumentPositionService, DesignItemService, DragDropService, ElementAtPointService, ElementDragTitleExtensionProvider, ExtensionType, GrayOutDragOverContainerExtensionProvider, GrayOutExtensionProvider, HighlightElementExtensionProvider, IDesignerCanvas, ItemsBelowContextMenu, MagicWandSelectorTool, MultipleItemsSelectedContextMenu, NamedTools, PanTool, PointerTool, PointerToolButtonProvider, PositionExtensionProvider, RectangleSelectorTool, ResizeExtensionProvider, SelectionDefaultExtensionProvider, SelectionService, SelectorToolButtonProvider, SeperatorToolProvider, ServiceContainer, SimpleToolButtonProvider, SnaplinesProviderService, TransformToolButtonProvider, UndoService, ZMoveContextMenu, ZoomTool, ZoomToolButtonProvider } from "@node-projects/web-component-designer";
+import { AbsolutePlacementService, AltToEnterContainerExtensionProvider, BaseCustomWebComponentPropertiesService, CopyPasteContextMenu, DefaultEditorTypeService, DefaultHtmlParserService, DefaultInstanceService, DefaultModelCommandService, DefaultPropertyEditorTypesService, DeletionService, DesignItemDocumentPositionService, DesignItemService, DragDropService, ElementAtPointService, ElementDragTitleExtensionProvider, ExtensionType, GrayOutDragOverContainerExtensionProvider, GrayOutExtensionProvider, HighlightElementExtensionProvider, ItemsBelowContextMenu, MagicWandSelectorTool, MultipleItemsSelectedContextMenu, NamedTools, PanTool, PointerTool, PointerToolButtonProvider, PositionExtensionProvider, RectangleSelectorTool, ResizeExtensionProvider, SelectionDefaultExtensionProvider, SelectionService, SelectorToolButtonProvider, SeperatorToolProvider, ServiceContainer, SimpleToolButtonProvider, SnaplinesProviderService, TransformToolButtonProvider, UndoService, ZMoveContextMenu, ZoomTool, ZoomToolButtonProvider } from "@node-projects/web-component-designer";
 import { MermaidLayoutCopyPasteService } from "./services/MermaidLayoutCopyPasteService.js";
 import { MermaidLayoutPlacementService } from "./services/MermaidLayoutPlacementService.js";
 import { MermaidParserService } from "./services/MermaidParserService.js";
@@ -31,20 +31,30 @@ export function createMermaidDesignerServiceContainer() {
     serviceContainer.register("designItemService", new DesignItemService());
     serviceContainer.register("deletionService", new DeletionService());
 
-    serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
-    serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
-    serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
+    serviceContainer.registerDocumentService("undoService", container => new UndoService(container));
+    serviceContainer.registerDocumentService("selectionService", container => new SelectionService(container, false));
+    serviceContainer.registerDocumentService("designItemDocumentPositionService", () => new DesignItemDocumentPositionService());
 
     serviceContainer.instanceServiceContainerCreatedCallbacks.push(instanceServiceContainer => {
-        const designerCanvas = instanceServiceContainer.designerCanvas;
-        elementsService.setInstanceServiceContainer(instanceServiceContainer);
-        instanceServiceContainer.selectionService.setSelectedElements([designerCanvas.rootDesignItem]);
-        const previousRaiseDesignItemsChanged = designerCanvas.raiseDesignItemsChanged.bind(designerCanvas);
-        designerCanvas.raiseDesignItemsChanged = (designItems, action, operationFinished) => {
-            previousRaiseDesignItemsChanged(designItems, action, operationFinished);
-            if (action === "place" || action === "resize")
-                rerouteConnectedMermaidEdges(instanceServiceContainer, designItems, operationFinished);
+        instanceServiceContainer.selectionService.setSelectedElements([instanceServiceContainer.rootDesignItem]);
+        let restoreCanvas = () => {};
+        const attach = () => {
+            restoreCanvas();
+            restoreCanvas = () => {};
+            const canvas = instanceServiceContainer.designerCanvas;
+            if (!canvas) return;
+            const paletteBinding = elementsService.setInstanceServiceContainer(instanceServiceContainer);
+            const previous = canvas.raiseDesignItemsChanged;
+            canvas.raiseDesignItemsChanged = (items, action, finished) => {
+                previous.call(canvas, items, action, finished);
+                if (action === "place" || action === "resize")
+                    rerouteConnectedMermaidEdges(instanceServiceContainer, items, finished);
+            };
+            restoreCanvas = () => { canvas.raiseDesignItemsChanged = previous; paletteBinding.dispose(); };
         };
+        attach();
+        const subscription = instanceServiceContainer.onDesignerCanvasChanged.on(attach);
+        instanceServiceContainer.editingDocument.addDisposable({ dispose() { subscription.dispose(); restoreCanvas(); } });
     });
 
     serviceContainer.designerExtensions.set(ExtensionType.Permanent, []);

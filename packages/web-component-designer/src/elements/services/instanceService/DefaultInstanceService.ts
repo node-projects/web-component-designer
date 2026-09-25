@@ -55,7 +55,7 @@ export class DefaultInstanceService implements IInstanceService {
 
     const elementString = '<' + definition.tag + attr + '></' + definition.tag + '>';
 
-    const element = <HTMLElement>newElementFromString(elementString, instanceServiceContainer.designerCanvas.rootDesignItem.document);
+    const element = <HTMLElement>newElementFromString(elementString, instanceServiceContainer.rootDesignItem.document);
     (<IDesignerInstance><any>element)._inNodeProjectsDesignerView = true;
     if (definition.defaultWidth)
       element.style.width = definition.defaultWidth;
@@ -72,11 +72,11 @@ export class DefaultInstanceService implements IInstanceService {
       if (typeof definition.defaultContent === "string") {
         let doc: Document;
         //@ts-ignore
-        if (instanceServiceContainer.designerCanvas.rootDesignItem.window.Document.parseHTMLUnsafe && !isFirefox) {
+        if (instanceServiceContainer.rootDesignItem.window.Document.parseHTMLUnsafe && !isFirefox) {
           //@ts-ignore
-          doc = instanceServiceContainer.designerCanvas.rootDesignItem.window.Document.parseHTMLUnsafe(definition.defaultContent);
+          doc = instanceServiceContainer.rootDesignItem.window.Document.parseHTMLUnsafe(definition.defaultContent);
         } else {
-          const parser = new instanceServiceContainer.designerCanvas.rootDesignItem.window.DOMParser();
+          const parser = new instanceServiceContainer.rootDesignItem.window.DOMParser();
           //@ts-ignore
           doc = parser.parseFromString(definition.defaultContent, 'text/html', { includeShadowRoots: true });
         }

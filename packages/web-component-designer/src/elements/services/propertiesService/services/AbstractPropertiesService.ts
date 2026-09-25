@@ -319,7 +319,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       {
         title: 'clear', action: (e) => {
           property.service.clearValue(designItems, property, 'value');
-          designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+          designItems[0].instanceServiceContainer.refreshExtensions(designItems);
         }
       },
       {
@@ -331,7 +331,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
             if (value && value != oldValue) {
               await property.service.setValue(designItems, property, value);
             }
-            designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+            designItems[0].instanceServiceContainer.refreshExtensions(designItems);
           }, 10)
         }
       },
@@ -352,7 +352,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
           {
             title: 'clear binding', action: () => {
               property.service.clearValue(designItems, property, 'binding');
-              designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(designItems);
+              designItems[0].instanceServiceContainer.refreshExtensions(designItems);
             }
           }
         ]);

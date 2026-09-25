@@ -27,7 +27,7 @@ export class DesignItemService implements IDesignItemService {
     } else if (attributeName == lockAtDesignTimeAttributeName) {
       if (designItem.element instanceof (designItem.node.ownerDocument.defaultView ?? window).HTMLElement || designItem.element instanceof (designItem.node.ownerDocument.defaultView ?? window).SVGElement) {
         if (!designItem.hasAttribute(lockAtDesignTimeAttributeName))
-          requestAnimationFrame(() => ((<HTMLElement>designItem.element).style.pointerEvents = 'auto'));
+          (<HTMLElement>designItem.element).style.pointerEvents = 'auto';
         else
           designItem.element.style.pointerEvents = 'none';
       }

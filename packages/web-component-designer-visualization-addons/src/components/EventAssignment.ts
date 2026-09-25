@@ -105,10 +105,14 @@ export class EventAssignment extends BaseCustomWebComponentConstructorAppend {
     public set instanceServiceContainer(value: InstanceServiceContainer) {
         this._instanceServiceContainer = value;
         this._selectionChangedHandler?.dispose()
-        this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {
+        this._selectionChangedHandler = this._instanceServiceContainer?.selectionService.onSelectionChanged.on(e => {
             this.selectedItems = e.selectedElements;
         });
-        this.selectedItems = this._instanceServiceContainer.selectionService.selectedElements;
+        this.selectedItems = this._instanceServiceContainer?.selectionService.selectedElements ?? [];
+    }
+
+    dispose() {
+        this.instanceServiceContainer = null;
     }
 
     protected _createControlsForScript(eventItem: eventWithDesignItem) {

@@ -5,7 +5,6 @@ import { RefreshMode } from '../IPropertiesService.js';
 import { IPropertyGroup } from '../IPropertyGroup.js';
 import { ValueType } from '../ValueType.js';
 import { BindingTarget } from '../../../item/BindingTarget.js';
-import { DesignerCanvas } from '../../../widgets/designerView/designerCanvas.js';
 import { AbstractCssPropertiesService } from './AbstractCssPropertiesService.js';
 import { appendCssImportant } from '../../../helper/CssImportant.js';
 
@@ -36,7 +35,7 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
     if (designItem.nodeType != Node.ELEMENT_NODE)
       return [];
     if (designItem?.element?.computedStyleMap) {
-      let rootMap = Array.from((<DesignerCanvas>designItem.instanceServiceContainer.designerCanvas).computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
+      let rootMap = Array.from((designItem.instanceServiceContainer.designerCanvas ?? designItem.instanceServiceContainer.rootDesignItem.element).computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"));
       let props = Array.from(designItem.element.computedStyleMap()).map(x => x[0]).filter(key => key.startsWith("--"))
 
       if (this.removeInheritedCustomProperties)
@@ -50,7 +49,7 @@ export class CssCustomPropertiesService extends AbstractCssPropertiesService {
       return arr;
     }
 
-    let rootMap = Array.from(getComputedStyle(<DesignerCanvas>designItem.instanceServiceContainer.designerCanvas)).map(x => x[0]).filter(key => key.startsWith("--"));
+    let rootMap = Array.from(getComputedStyle(designItem.instanceServiceContainer.designerCanvas ?? designItem.instanceServiceContainer.rootDesignItem.element)).map(x => x[0]).filter(key => key.startsWith("--"));
     let props = Array.from(getComputedStyle(designItem.element)).map(x => x[0]).filter(key => key.startsWith("--"))
 
     if (this.removeInheritedCustomProperties)

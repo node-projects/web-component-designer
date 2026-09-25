@@ -15,6 +15,7 @@ export interface IExtensionManager {
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension, event?: Event);
   refreshAllAppliedExtentions(event?: Event);
   reapplyAllAppliedExtentions(filterDesignItems?: IDesignItem[], enabledExtensionTypes?: ExtensionType[]);
+  dispose?(): void;
   connected();
   disconnected();
 }

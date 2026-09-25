@@ -69,7 +69,6 @@ import { FlexboxExtensionProvider } from '../widgets/designerView/extensions/fle
 import { FlexboxExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/FlexboxExtensionDesignViewConfigButtons.js';
 import { InvisibleElementExtensionDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/InvisibleElementExtensionDesignViewConfigButtons.js';
 import { UndoService } from './undoService/UndoService.js';
-import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import { SelectionService } from './selectionService/SelectionService.js';
 import { StylesheetServiceDesignViewConfigButtons } from '../widgets/designerView/extensions/buttons/StylesheetServiceDesignViewConfigButtons.js';
 import { JumpToElementContextMenu } from '../widgets/designerView/extensions/contextMenu/JumpToElementContextMenu.js';
@@ -153,9 +152,9 @@ export function createDefaultServiceContainer() {
   serviceContainer.register("pngCreatorService", new DisplayMediaPngWriterService());
   serviceContainer.register("searchService", new SearchService());
 
-  serviceContainer.register("undoService", (designerCanvas: IDesignerCanvas) => new UndoService(designerCanvas));
-  serviceContainer.register("selectionService", (designerCanvas: IDesignerCanvas) => new SelectionService(designerCanvas, false));
-  serviceContainer.register("designItemDocumentPositionService", (designerCanvas: IDesignerCanvas) => new DesignItemDocumentPositionService(designerCanvas));
+  serviceContainer.registerDocumentService("undoService", (container) => new UndoService(container));
+  serviceContainer.registerDocumentService("selectionService", (container) => new SelectionService(container, false));
+  serviceContainer.registerDocumentService("designItemDocumentPositionService", () => new DesignItemDocumentPositionService());
   serviceContainer.sourceMapProviders.push(new SvgPathSourceMapProvider());
 
   serviceContainer.designerExtensions.set(ExtensionType.Permanent, [

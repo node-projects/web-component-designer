@@ -1,5 +1,5 @@
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
-import { CollaborationConnectionState, DomConverter, getCollaborationNodeIndex, getCollaborationNodeIndexes, getDesignItemByCollaborationNodeIndex, ICollaborationComment, ICollaborationCommentsChangedEvent, ICollaborationDocumentSnapshot, ICollaborationPeerPresence, ICollaborationPeersChangedEvent, ICollaborationRemoteChange, ICollaborationSelectionEvent, ICollaborationService, ICollaborationSession, ICollaborationStateChangedEvent, ICollaborationTransport, IDesignerCanvas, ITransactionItem, IUndoChangeEvent, UndoChangeSource } from '@node-projects/web-component-designer';
+import { CollaborationConnectionState, DomConverter, getCollaborationNodeIndex, getCollaborationNodeIndexes, getDesignItemByCollaborationNodeIndex, ICollaborationComment, ICollaborationCommentsChangedEvent, ICollaborationDocumentSnapshot, ICollaborationPeerPresence, ICollaborationPeersChangedEvent, ICollaborationRemoteChange, ICollaborationSelectionEvent, ICollaborationService, ICollaborationSession, ICollaborationStateChangedEvent, ICollaborationTransport, IDesignerCanvas, InstanceServiceContainer, ITransactionItem, IUndoChangeEvent, UndoChangeSource } from '@node-projects/web-component-designer';
 
 function createPeerColor(peerId: string) {
   let hash = 0;
@@ -30,23 +30,28 @@ export class DefaultCollaborationService implements ICollaborationService {
   private _lastLocalCursorUpdate = 0;
   private _refreshExtensionsHandle: number | null = null;
 
-  constructor(private _designerCanvas: IDesignerCanvas) {
-    this._designerCanvas.instanceServiceContainer.undoService.onTransaction.on(change => {
+  private _container: InstanceServiceContainer;
+  private _pointerCanvas: IDesignerCanvas;
+  private _subscriptions: { dispose(): void }[] = [];
+
+  constructor(canvasOrContainer: IDesignerCanvas | InstanceServiceContainer) {
+    this._container = canvasOrContainer instanceof InstanceServiceContainer ? canvasOrContainer : canvasOrContainer.instanceServiceContainer;
+    this._subscriptions.push(this._container.undoService.onTransaction.on(change => {
       if (this._applyingRemoteChanges)
         return;
 
       this.onChange.emit(change);
       if (change.source !== 'remote')
         void this._transport?.sendChange({ kind: change.kind, title: change.item?.title }, this.createSnapshot());
-    });
+    }));
 
-    this._designerCanvas.instanceServiceContainer.selectionService.onSelectionChanged.on(() => {
+    this._subscriptions.push(this._container.selectionService.onSelectionChanged.on(() => {
       if (!this._session || this._applyingRemoteChanges)
         return;
 
-      const selectedElements = this._designerCanvas.instanceServiceContainer.selectionService.selectedElements;
+      const selectedElements = this._container.selectionService.selectedElements;
       const selectedNodeIndexes = getCollaborationNodeIndexes(selectedElements);
-      const primaryDesignItem = this._designerCanvas.instanceServiceContainer.selectionService.primarySelection;
+      const primaryDesignItem = this._container.selectionService.primarySelection;
       const primaryNodeIndex = getCollaborationNodeIndex(primaryDesignItem);
       const selectedDesignItemIds = selectedElements
         .map(x => x?.id)
@@ -75,10 +80,33 @@ export class DefaultCollaborationService implements ICollaborationService {
 
       this.onSelectionChanged.emit(event);
       void this._transport?.sendSelection(event);
-    });
+    }));
 
-    this._designerCanvas.clickOverlay.addEventListener('pointermove', this._handlePointerMove);
-    this._designerCanvas.clickOverlay.addEventListener('pointerleave', this._handlePointerLeave);
+    this._subscriptions.push(this._container.onDesignerCanvasChanged.on(() => this.bindCanvas()));
+    this.bindCanvas();
+  }
+
+  private bindCanvas() {
+    this._pointerCanvas?.clickOverlay.removeEventListener('pointermove', this._handlePointerMove);
+    this._pointerCanvas?.clickOverlay.removeEventListener('pointerleave', this._handlePointerLeave);
+    if (this._refreshExtensionsHandle != null) cancelAnimationFrame(this._refreshExtensionsHandle);
+    this._refreshExtensionsHandle = null;
+    this._lastLocalCursorPosition = undefined;
+    this._pointerCanvas = this._container.designerCanvas;
+    this._pointerCanvas?.clickOverlay.addEventListener('pointermove', this._handlePointerMove);
+    this._pointerCanvas?.clickOverlay.addEventListener('pointerleave', this._handlePointerLeave);
+  }
+
+  dispose() {
+    for (const subscription of this._subscriptions) subscription.dispose();
+    this._subscriptions = [];
+    this._pointerCanvas?.clickOverlay.removeEventListener('pointermove', this._handlePointerMove);
+    this._pointerCanvas?.clickOverlay.removeEventListener('pointerleave', this._handlePointerLeave);
+    this._pointerCanvas = null;
+    if (this._refreshExtensionsHandle != null) cancelAnimationFrame(this._refreshExtensionsHandle);
+    this._refreshExtensionsHandle = null;
+    this.disconnect();
+    this.detachTransport();
   }
 
   get state(): CollaborationConnectionState {
@@ -156,10 +184,10 @@ export class DefaultCollaborationService implements ICollaborationService {
   }
 
   createSnapshot(): ICollaborationDocumentSnapshot {
-    const html = this._designerCanvas.rootDesignItem.childCount > 0
-      ? DomConverter.ConvertToString(Array.from(this._designerCanvas.rootDesignItem.children()), true, true)
+    const html = this._container.rootDesignItem.childCount > 0
+      ? DomConverter.ConvertToString(Array.from(this._container.rootDesignItem.children()), true, true)
       : '';
-    const stylesheets = this._designerCanvas.instanceServiceContainer.stylesheetService?.getStylesheets()?.map(x => ({ ...x })) ?? [];
+    const stylesheets = this._container.stylesheetService?.getStylesheets()?.map(x => ({ ...x })) ?? [];
     return { html, stylesheets, updatedAt: Date.now() };
   }
 
@@ -168,12 +196,17 @@ export class DefaultCollaborationService implements ICollaborationService {
       this._applyingRemoteChanges = true;
 
       const designItems = snapshot.html
-        ? await this._designerCanvas.serviceContainer.htmlParserService.parse(snapshot.html, this._designerCanvas.serviceContainer, this._designerCanvas.instanceServiceContainer, false)
+        ? await this._container.rootDesignItem.serviceContainer.htmlParserService.parse(snapshot.html, this._container.rootDesignItem.serviceContainer, this._container, false)
         : [];
 
-      this._designerCanvas._internalSetDesignItems(designItems);
-      if (this._designerCanvas.instanceServiceContainer.stylesheetService)
-        await this._designerCanvas.instanceServiceContainer.stylesheetService.setStylesheets(snapshot.stylesheets ?? []);
+      if (this._container.editingDocument) {
+        this._container.editingDocument.replaceItems(designItems);
+        await this._container.editingDocument.reparseDocumentStylesheets();
+      } else {
+        this._container.designerCanvas._internalSetDesignItems(designItems);
+      }
+      if (this._container.stylesheetService)
+        await this._container.stylesheetService.setStylesheets(snapshot.stylesheets ?? []);
     } finally {
       this._applyingRemoteChanges = false;
     }
@@ -191,7 +224,7 @@ export class DefaultCollaborationService implements ICollaborationService {
   }
 
   updateRemoteSelection(peerId: string, selectedNodeIndexes: number[], primaryNodeIndex?: number): void {
-    const rootDesignItem = this._designerCanvas.instanceServiceContainer.rootDesignItem;
+    const rootDesignItem = this._container.rootDesignItem;
     const selectedDesignItemIds = selectedNodeIndexes
       .map(x => getDesignItemByCollaborationNodeIndex(rootDesignItem, x)?.id)
       .filter(x => !!x);
@@ -282,21 +315,21 @@ export class DefaultCollaborationService implements ICollaborationService {
   }
 
   private requestExtensionRefresh() {
-    if (this._refreshExtensionsHandle != null)
+    if (!this._container.designerCanvas?.isConnected || this._refreshExtensionsHandle != null)
       return;
 
     this._refreshExtensionsHandle = requestAnimationFrame(() => {
       this._refreshExtensionsHandle = null;
-      this._designerCanvas.extensionManager?.refreshAllAppliedExtentions();
+      this._container.designerCanvas?.extensionManager?.refreshAllAppliedExtentions();
     });
   }
 
   private _handlePointerMove = (event: PointerEvent) => {
-    if (!this._session || this._applyingRemoteChanges)
+    if (!this._session || this._applyingRemoteChanges || !this._container.designerCanvas?.isConnected)
       return;
 
     const now = Date.now();
-    const cursorPosition = this._designerCanvas.getNormalizedEventCoordinates(event);
+    const cursorPosition = this._container.designerCanvas.getNormalizedEventCoordinates(event);
     const previousPosition = this._lastLocalCursorPosition;
     const hasMoved = !previousPosition
       || Math.abs(previousPosition.x - cursorPosition.x) >= 1
@@ -333,8 +366,8 @@ export class DefaultCollaborationService implements ICollaborationService {
   };
 
   private getCurrentSelectionState() {
-    const selectedElements = this._designerCanvas.instanceServiceContainer.selectionService.selectedElements ?? [];
-    const primarySelection = this._designerCanvas.instanceServiceContainer.selectionService.primarySelection;
+    const selectedElements = this._container.selectionService.selectedElements ?? [];
+    const primarySelection = this._container.selectionService.primarySelection;
     return {
       selectedDesignItemIds: selectedElements.map(x => x?.id).filter(x => !!x),
       selectedNodeIndexes: getCollaborationNodeIndexes(selectedElements),

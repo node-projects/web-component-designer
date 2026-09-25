@@ -12,7 +12,9 @@ export class StyleElementRenderedDesignItemService implements IRenderedDesignIte
     const patchedContent = this.patchStyleText([...styleDesignItem.children()].map(x => x.content).join(''));
     this.updateStyleElementText(styleDesignItem.element, patchedContent);
     this.updateDeclarativeShadowStyle(styleDesignItem, patchedContent);
-    styleDesignItem.instanceServiceContainer.designerCanvas.lazyTriggerReparseDocumentStylesheets();
+    const container = styleDesignItem.instanceServiceContainer;
+    if (container.editingDocument) container.editingDocument.requestStylesheetReparse();
+    else container.designerCanvas?.lazyTriggerReparseDocumentStylesheets();
   }
 
   updateRenderedNode(node: Node): Node {

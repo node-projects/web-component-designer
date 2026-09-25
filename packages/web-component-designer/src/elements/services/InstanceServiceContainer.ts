@@ -9,6 +9,7 @@ import { IDesignItemDocumentPositionService } from './designItemDocumentPosition
 import { DocumentContainer } from '../documentContainer.js';
 import { ICollaborationService } from './collaborationService/ICollaborationService.js';
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
+import type { EditingDocument } from '../EditingDocument.js';
 import { IDesignItem } from '../item/IDesignItem.js';
 
 interface InstanceServiceNameMap {
@@ -40,7 +41,19 @@ export type IContentChanged = IContentChangedParsed | IContentChangedWithDesignI
 
 export class InstanceServiceContainer extends BaseServiceContainer<InstanceServiceNameMap> {
   public designContext: IDesignContext = new DesignContext();
-  public readonly designerCanvas: IDesignerCanvas;
+  private _designerCanvas: IDesignerCanvas;
+  readonly onDesignerCanvasChanged = new TypedEvent<{ oldCanvas: IDesignerCanvas, newCanvas: IDesignerCanvas }>();
+  get designerCanvas() { return this._designerCanvas; }
+  set designerCanvas(value: IDesignerCanvas) {
+    if (value === this._designerCanvas) return;
+    const oldCanvas = this._designerCanvas;
+    this._designerCanvas = value;
+    this.onDesignerCanvasChanged.emit({ oldCanvas, newCanvas: value });
+  }
+  public editingDocument?: EditingDocument;
+  /** Internal attachment cleanup, including the owning view UI. */
+  public detachView?: () => void;
+  private _rootDesignItem: IDesignItem;
   public collaborationService?: ICollaborationService;
 
   public designer: any; //usable to assign designer from outside
@@ -49,13 +62,23 @@ export class InstanceServiceContainer extends BaseServiceContainer<InstanceServi
   /** Event fired when the content of the designer changes, but raised from UndoService, so it should not be used to modify the elements again */
   public readonly onContentChanged = new TypedEvent<IContentChanged[]>();
   
-  constructor(designerCanvas: IDesignerCanvas) {
+  constructor(designerCanvas?: IDesignerCanvas) {
     super();
     this.designerCanvas = designerCanvas;
   }
 
   get rootDesignItem(): IDesignItem {
-    return this.designerCanvas.rootDesignItem;
+    return this._rootDesignItem ?? this.designerCanvas?.rootDesignItem;
+  }
+
+  set rootDesignItem(value: IDesignItem) {
+    this._rootDesignItem = value;
+  }
+
+  /** Visual work is optional; document events must not depend on this. */
+  refreshExtensions(items: IDesignItem[]) {
+    if (this.designerCanvas?.isConnected)
+      this.designerCanvas.extensionManager?.refreshAllExtensions(items);
   }
 
   get undoService(): IUndoService {

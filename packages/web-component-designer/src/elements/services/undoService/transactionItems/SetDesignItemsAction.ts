@@ -1,10 +1,11 @@
 import { ITransactionItem } from '../ITransactionItem.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
+import { InstanceServiceContainer } from '../../InstanceServiceContainer.js';
 import { IContentChanged } from '../../InstanceServiceContainer.js';
 
 export class SetDesignItemsAction implements ITransactionItem {
 
-  constructor(newDesignItems: IDesignItem[], oldDesignItems: IDesignItem[]) {
+  constructor(newDesignItems: IDesignItem[], oldDesignItems: IDesignItem[], private container: InstanceServiceContainer = newDesignItems[0]?.instanceServiceContainer ?? oldDesignItems[0]?.instanceServiceContainer) {
     this.title = "Set all DesignItems";
 
     this.newDesignItems = newDesignItems;
@@ -18,13 +19,20 @@ export class SetDesignItemsAction implements ITransactionItem {
   }
 
   undo(): IContentChanged[] | null {
-    this.newDesignItems[0].instanceServiceContainer.designerCanvas._internalSetDesignItems(this.oldDesignItems);
+    this.setItems(this.oldDesignItems);
     return null;
   }
 
   do(): IContentChanged[] | null {
-    this.newDesignItems[0].instanceServiceContainer.designerCanvas._internalSetDesignItems(this.newDesignItems);
+    this.setItems(this.newDesignItems);
     return null;
+  }
+
+  private setItems(items: IDesignItem[]) {
+    if (this.container.editingDocument)
+      this.container.editingDocument.replaceItems(items);
+    else
+      this.container.designerCanvas._internalSetDesignItems(items);
   }
 
   public newDesignItems: IDesignItem[];

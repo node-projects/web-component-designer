@@ -1,4 +1,5 @@
-import { BaseCustomWebComponentLazyAppend, css, cssFromString, debounce, TypedEvent } from "@node-projects/base-custom-webcomponent"
+import { EditingDocument } from './EditingDocument.js';
+import { BaseCustomWebComponentLazyAppend, css, cssFromString, TypedEvent } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from './controls/DesignerTabControl.js';
 import { DesignerView } from './widgets/designerView/designerView.js';
 import { ServiceContainer } from './services/ServiceContainer.js';
@@ -13,8 +14,6 @@ import { ISelectionChangedEvent } from "./services/selectionService/ISelectionCh
 import { ISelectionRefreshEvent } from './services/selectionService/ISelectionRefreshEvent.js';
 import { SimpleSplitView } from './controls/SimpleSplitView.js';
 import { IStylesheet } from "./services/stylesheetService/IStylesheetService.js";
-import { sleep } from "./helper/Helper.js";
-import { ExtensionType } from "./widgets/designerView/extensions/ExtensionType.js";
 
 enum tabIndex {
   designer = 0,
@@ -30,7 +29,80 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   public additionalData: any;
 
-  private _firstLoad = true;
+  private _document: EditingDocument;
+  private _ownsDocument = false;
+  private _initialLoad: Promise<void>;
+  private _subscriptions: { dispose(): void }[] = [];
+  private _documentSubscriptions: { dispose(): void }[] = [];
+  private _refreshTimer: ReturnType<typeof setTimeout>;
+  private _selectionTimer: ReturnType<typeof setTimeout>;
+  private _readyCalled = false;
+  private _disposed = false;
+  public readonly onCommitError = new TypedEvent<unknown>();
+
+  get editingDocument() { return this._document; }
+
+  /** Ready for programmatic access, including code edits waiting for the debounce. */
+  async whenReady() { await this.commitPendingChanges(); }
+
+  async commitPendingChanges() {
+    try { await this._initialLoad; }
+    catch (error) {
+      if (!this._document?.hasPendingChanges) throw error;
+      this._initialLoad = Promise.resolve();
+    }
+    clearTimeout(this._refreshTimer);
+    if (!this._document) throw new Error('No document is attached.');
+    try {
+      this._contentChangeSource = 'code';
+      await this._document.commitPendingChanges();
+    } finally {
+      this._contentChangeSource = 'designer';
+      this._disableChangeNotificationEditor = this._document?.hasPendingChanges ?? false;
+    }
+  }
+
+  async attachDocument(document: EditingDocument) {
+    await document.commitPendingChanges();
+    if (this._document === document) return;
+    if (this._document) await this.detachDocument();
+    await this.designerView.attachDocument(document);
+    this._document = document;
+    this._ownsDocument = false;
+    this._initialLoad = Promise.resolve();
+    this.bindDocument();
+    this._content = document.getHtml();
+    this.codeView.update(this._content, this.instanceServiceContainer);
+  }
+
+  async detachDocument(): Promise<EditingDocument> {
+    if (!this._document) return null;
+    await this.commitPendingChanges();
+    const document = this._document;
+    for (const subscription of this._documentSubscriptions) subscription.dispose();
+    this._documentSubscriptions = [];
+    clearTimeout(this._selectionTimer);
+    document.instanceServiceContainer.documentContainer = null;
+    this.designerView.detachDocument();
+    this._document = null;
+    this._ownsDocument = false;
+    this._stylesheetChangedEventRegistered = false;
+    return document;
+  }
+
+  private bindDocument() {
+    const container = this._document.instanceServiceContainer;
+    container.documentContainer = this;
+    this._documentSubscriptions.push(container.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e)));
+    this._documentSubscriptions.push(container.selectionService.onSelectionRefresh.on(e => this.designerSelectionChanged(e)));
+    this._documentSubscriptions.push(container.onContentChanged.on(() => this.designerContentChanged()));
+    this._documentSubscriptions.push(this._document.onPendingChangesChanged.on(() => {
+      this._disableChangeNotificationEditor = this._document.hasPendingChanges;
+      this._contentChangeSource = this._document.hasPendingChanges ? 'code' : 'designer';
+      if (!this._document.hasPendingChanges) this.designerContentChanged(false);
+    }));
+    this._documentSubscriptions.push(this._document.onCommitError.on(error => this.onCommitError.emit(error)));
+  }
   private _stylesheetChangedEventRegistered: boolean;
 
   private _additionalStyle: string;
@@ -58,7 +130,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this.designerView.instanceServiceContainer.stylesheetService.setStylesheets(stylesheets);
       if (!this._stylesheetChangedEventRegistered) {
         this._stylesheetChangedEventRegistered = true;
-        this.designerView.instanceServiceContainer.stylesheetService.stylesheetChanged.on(e => this.additionalStylesheetChanged.emit({ name: e.name, newStyle: e.newStyle, oldStyle: e.oldStyle, changeSource: e.changeSource }));
+        this._documentSubscriptions.push(this.designerView.instanceServiceContainer.stylesheetService.stylesheetChanged.on(e => this.additionalStylesheetChanged.emit({ name: e.name, newStyle: e.newStyle, oldStyle: e.oldStyle, changeSource: e.changeSource })));
       }
     }
   };
@@ -107,12 +179,15 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       `;
   }
 
-  constructor(serviceContainer: ServiceContainer, content?: string, useIframe: boolean = false) {
+  constructor(serviceContainer: ServiceContainer, content?: string | EditingDocument, useIframe: boolean = false) {
     super();
 
-    this.refreshInSplitViewDebounced = debounce(this.refreshInSplitView, 200)
+    this.refreshInSplitViewDebounced = () => {
+      clearTimeout(this._refreshTimer);
+      this._refreshTimer = setTimeout(() => { void this.refreshInSplitView(); }, 200);
+    };
     this._serviceContainer = serviceContainer;
-    if (content != null)
+    if (typeof content === 'string')
       this._content = content;
 
     let div = document.createElement("div");
@@ -125,11 +200,13 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._tabControl.appendChild(this._designerDiv);
     this._designerDiv.appendChild(this.designerView);
     this._designerDiv.dataset.title = 'Designer';
-    this.designerView.initialize(this._serviceContainer);
-    this.designerView.instanceServiceContainer.documentContainer = this;
-    this.designerView.instanceServiceContainer.selectionService.onSelectionChanged.on(e => this.designerSelectionChanged(e))
-    this.designerView.instanceServiceContainer.selectionService.onSelectionRefresh.on(e => this.designerSelectionChanged(e))
-    this.designerView.instanceServiceContainer.onContentChanged.on(() => this.designerContentChanged())
+    this.designerView.initialize(this._serviceContainer, content instanceof EditingDocument ? content : undefined);
+    this._document = this.designerView.editingDocument;
+    this._ownsDocument = !(content instanceof EditingDocument);
+    this._initialLoad = this._ownsDocument ? this.designerView.parseDesignerHTML(this._content, true) : this._document.commitPendingChanges();
+    // Expose rejection through whenReady(), without an unhandled rejection before the caller awaits it.
+    this._initialLoad.catch(() => { });
+    this.bindDocument();
 
     this.codeView = new serviceContainer.config.codeViewWidget();
     this.codeView.slot = 'bottom';
@@ -139,15 +216,16 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._codeDiv.style.position = 'relative';
     this._codeDiv.appendChild(this.codeView);
     this._codeDiv.dataset.title = 'Code';
-    this.codeView.onTextChanged.on(text => {
+    this._subscriptions.push(this.codeView.onTextChanged.on(text => {
       if (!this._disableChangeNotificationDesigner) {
         if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
           this._disableChangeNotificationEditor = true;
           this._content = text;
+          this._document?.setPendingHtml(text);
           this.refreshInSplitViewDebounced();
         }
       }
-    })
+    }));
 
     this._splitDiv = new SimpleSplitView();
     this._splitDiv.style.height = '100%';
@@ -159,6 +237,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this._tabControl.appendChild(this.demoView);
     }
     queueMicrotask(() => {
+      if (this._disposed) return;
       this.shadowRoot.appendChild(div);
       this._tabControl.selectedIndex = tabIndex.designer;
     });
@@ -170,7 +249,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     } catch (err) {
       console.error(err);
     }
-    this._disableChangeNotificationEditor = false;
+    this._disableChangeNotificationEditor = this._document?.hasPendingChanges ?? false;
   }
 
   get currentView(): 'designer' | 'split' | 'code' | 'preview' {
@@ -210,15 +289,16 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     }
   }
 
-  designerContentChanged() {
+  designerContentChanged(notify = true) {
+    if (!this._document) return;
     //event wenn text geändert......
-    this.onContentChanged.emit({ source: this._contentChangeSource });
+    if (notify) this.onContentChanged.emit({ source: this._contentChangeSource });
 
     if (!this._disableChangeNotificationEditor) {
       this._disableChangeNotificationDesigner = true;
       if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        this._content = this.designerView.getDesignerHTML();
+        this._content = this._document.pendingHtml ?? this.designerView.getDesignerHTML();
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         this._lastCodeSelectionKey = null;
         if (primarySelection) {
@@ -235,13 +315,18 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     }
   }
 
-  dispose(): void {
-    if (this.designerView?.instanceServiceContainer?.collaborationService) {
-      this.designerView.instanceServiceContainer.collaborationService.disconnect();
-      this.designerView.instanceServiceContainer.collaborationService.detachTransport();
-    }
+  async dispose(): Promise<void> {
+    if (this._disposed) return;
+    const ownedDocument = this._ownsDocument ? this._document : null;
+    await this.detachDocument();
+    this._disposed = true;
+    clearTimeout(this._refreshTimer);
+    for (const subscription of this._subscriptions) subscription.dispose();
+    this._subscriptions = [];
     this.codeView?.dispose();
     this.demoView?.dispose();
+    this.designerView.dispose();
+    if (ownedDocument) await ownedDocument.dispose();
   }
 
   executeCommand(command: IUiCommand) {
@@ -269,27 +354,21 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
 
   async setContentAsync(value: string) {
     this._content = value;
-
-    if (this._tabControl) {
-      if (this._tabControl.selectedIndex === tabIndex.designer)
-        await this.updateDesignerHtml();
-      else if (this._tabControl.selectedIndex === tabIndex.code)
-        this.codeView.update(this._content, this.designerView.instanceServiceContainer);
-      else if (this._tabControl.selectedIndex === tabIndex.split) {
-
-      }
-      else if (this._tabControl.selectedIndex === tabIndex.preview)
-        this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
-    }
+    this._document.setPendingHtml(value);
+    await this.commitPendingChanges();
+    if (this.currentView === 'code' || this.currentView === 'split')
+      this.codeView.update(value, this.instanceServiceContainer);
+    else if (this.currentView === 'preview')
+      this.demoView.display(this._serviceContainer, this.instanceServiceContainer, value, this.additionalStyleString);
   }
 
   set content(value: string) {
-    this.setContentAsync(value);
+    void this.setContentAsync(value).catch(error => this.onCommitError.emit(error));
   }
   get content() {
     if (this._tabControl) {
       if (this._tabControl.selectedIndex === tabIndex.designer)
-        this._content = this.designerView.getDesignerHTML();
+        this._content = this._document.pendingHtml ?? this.designerView.getDesignerHTML();
       else if (this._tabControl.selectedIndex === tabIndex.code)
         this._content = this.codeView.getText();
       return this._content;
@@ -298,10 +377,13 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
   }
 
   ready() {
-    this._tabControl.onSelectedTabChanged.on(i => {
+    if (this._readyCalled) return;
+    this._readyCalled = true;
+    this._subscriptions.push(this._tabControl.onSelectedTabChanged.on(i => {
+      if (!this._document) return;
       if (i.oldIndex === tabIndex.designer) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        this._content = this.designerView.getDesignerHTML();
+        this._content = this._document.pendingHtml ?? this.designerView.getDesignerHTML();
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
           this._selectionPosition = this.instanceServiceContainer.selectionService.selectedPart?.textRange
             ?? this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);
@@ -317,17 +399,18 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       }
 
       if (i.newIndex === tabIndex.designer || i.newIndex === tabIndex.split)
-        this.updateDesignerHtml();
+        void this.refreshInSplitView();
       if (i.newIndex === tabIndex.code || i.newIndex === tabIndex.split) {
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         this._lastCodeSelectionKey = null;
         if (this._selectionPosition) {
           this.setCodeViewSelection(this._selectionPosition);
-          sleep(20).then(x => {
+          clearTimeout(this._selectionTimer);
+          this._selectionTimer = setTimeout(() => {
             if (this._selectionPosition)
               this.setCodeViewSelection(this._selectionPosition);
             this._selectionPosition = null;
-          });
+          }, 20);
         }
         if (i.changedViaClick) {
           this.codeView.focusEditor();
@@ -341,34 +424,14 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
         this.demoView.display(this._serviceContainer, this.designerView.instanceServiceContainer, this._content, this.additionalStyleString);
       }
 
-      if (this._content) {
-        this._firstLoad = false;
-      }
 
       this.onTabChanged.emit({ oldTab: <any>tabIndex[i.oldIndex], newTab: <any>tabIndex[i.newIndex] });
-    });
-    if (this._content) {
-      this.content = this._content;
-      this._firstLoad = false;
-    }
+    }));
   }
 
   private async updateDesignerHtml() {
-    if (this._firstLoad)
-      return this.designerView.parseDesignerHTML(this._content, this._firstLoad);
-    else {
-      const html = this.designerView.getDesignerHTML();
-      if (html != this._content) {
-        this._contentChangeSource = 'code';
-        await this.designerView.parseDesignerHTML(this._content, this._firstLoad);
-        this._contentChangeSource = 'designer';
-        return;
-      } else {
-        this.instanceServiceContainer.undoService.clearTransactionstackIfNotEmpty();
-        this.designerView.designerCanvas.overlayLayer.removeAllOverlays();
-        this.designerView.designerCanvas.extensionManager.reapplyAllAppliedExtentions(null, [ExtensionType.Permanent, ExtensionType.Selection, ExtensionType.PrimarySelection, ExtensionType.PrimarySelectionContainer, ExtensionType.OnlyOneItemSelected, ExtensionType.MultipleItemsSelected]);
-      }
-    }
+    if (!this._document || this._disposed) return;
+    await this.commitPendingChanges();
   }
 
   private setCodeViewSelection(position: IStringPosition) {

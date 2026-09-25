@@ -1,3 +1,4 @@
+import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { ITransactionItem } from './ITransactionItem.js';
 import { ChangeGroup } from "./ChangeGroup.js";
 import { IUndoService } from './IUndoService.js';
@@ -13,15 +14,16 @@ export class UndoService implements IUndoService {
   private _undoStack: ITransactionItem[] = [];
   private _redoStack: ITransactionItem[] = [];
   private _transactionStack: ChangeGroup[] = [];
-  private _designerCanvas: IDesignerCanvas;
+  private _instanceServiceContainer: InstanceServiceContainer;
   private _storeRedoBranches: boolean;
 
-  constructor(designerCanvas: IDesignerCanvas, storeRedoBranches: boolean = false) {
-    this._designerCanvas = designerCanvas;
+  constructor(designerCanvas: IDesignerCanvas | InstanceServiceContainer, storeRedoBranches: boolean = false) {
+    this._instanceServiceContainer = designerCanvas instanceof InstanceServiceContainer ? designerCanvas : designerCanvas.instanceServiceContainer;
     this._storeRedoBranches = storeRedoBranches;
   }
 
   openGroup(title: string, source: UndoChangeSource = 'local'): ChangeGroup {
+    this._instanceServiceContainer.editingDocument?.assertAlive();
     let t = new ChangeGroup(title, (t) => this.commitTransactionItem(t), (t) => this.abortTransactionItem(t), source);
     this._transactionStack.push(t);
     return t;
@@ -47,10 +49,10 @@ export class UndoService implements IUndoService {
       }
     }
     if (this._transactionStack.length == 0) {
-      this._designerCanvas.extensionManager.refreshAllExtensions(transactionItem.affectedItems);
+      this._instanceServiceContainer.refreshExtensions(transactionItem.affectedItems);
       this.emitTransaction(transactionItem, 'execute', (<ChangeGroup>transactionItem).source ?? 'local');
       if (transactionItem.contentChanges)
-        this._designerCanvas.instanceServiceContainer.onContentChanged.emit(transactionItem.contentChanges);
+        this._instanceServiceContainer.onContentChanged.emit(transactionItem.contentChanges);
     }
   }
 
@@ -66,6 +68,7 @@ export class UndoService implements IUndoService {
   }
 
   execute(item: ITransactionItem, source: UndoChangeSource = 'local') {
+    this._instanceServiceContainer.editingDocument?.assertAlive();
     let changeItems: IContentChanged[] | null = null;
     if (this._transactionStack.length == 0) {
       changeItems = item.do();
@@ -80,10 +83,10 @@ export class UndoService implements IUndoService {
       changeItems = this._transactionStack[this._transactionStack.length - 1].execute(item);
     }
     if (this._transactionStack.length == 0) {
-      this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
+      this._instanceServiceContainer.refreshExtensions(item.affectedItems);
       this.emitTransaction(item, 'execute', source);
       if (changeItems)
-        this._designerCanvas.instanceServiceContainer.onContentChanged.emit(changeItems);
+        this._instanceServiceContainer.onContentChanged.emit(changeItems);
     }
   }
 
@@ -101,6 +104,7 @@ export class UndoService implements IUndoService {
   }
 
   undo(source: UndoChangeSource = 'local') {
+    this._instanceServiceContainer.editingDocument?.assertAlive();
     if (!this.canUndo())
       return;
     if (this._transactionStack.length != 0)
@@ -115,13 +119,14 @@ export class UndoService implements IUndoService {
       this.clear();
       throw err;
     }
-    this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
+    this._instanceServiceContainer.refreshExtensions(item.affectedItems);
     this.emitTransaction(item, 'undo', source);
     if (changeItems)
-      this._designerCanvas.instanceServiceContainer.onContentChanged.emit(changeItems);
+      this._instanceServiceContainer.onContentChanged.emit(changeItems);
   }
 
   redo(source: UndoChangeSource = 'local') {
+    this._instanceServiceContainer.editingDocument?.assertAlive();
     if (!this.canRedo())
       return;
     if (this._transactionStack.length != 0)
@@ -136,10 +141,10 @@ export class UndoService implements IUndoService {
       this.clear();
       throw err;
     }
-    this._designerCanvas.extensionManager.refreshAllExtensions(item.affectedItems);
+    this._instanceServiceContainer.refreshExtensions(item.affectedItems);
     this.emitTransaction(item, 'redo', source);
     if (changeItems)
-      this._designerCanvas.instanceServiceContainer.onContentChanged.emit(changeItems);
+      this._instanceServiceContainer.onContentChanged.emit(changeItems);
   }
 
   redoTo(transactionItems: ITransactionItem[]) {

@@ -2047,7 +2047,7 @@ function isRequirementDirection(value: string): value is FlowchartDirection {
 }
 
 function setMermaidDocumentAttributes(instanceServiceContainer: InstanceServiceContainer, diagramType: MermaidDocumentDiagramType, direction?: FlowchartDirection, title?: string, frontmatter?: string) {
-    const rootDesignItem = instanceServiceContainer?.designerCanvas?.rootDesignItem;
+    const rootDesignItem = instanceServiceContainer?.rootDesignItem;
     rootDesignItem?._withoutUndoSetAttribute(mermaidDiagramTypeAttribute, diagramType);
     if (direction)
         rootDesignItem?._withoutUndoSetAttribute(mermaidFlowchartDirectionAttribute, direction);
@@ -2105,7 +2105,7 @@ function getWritableDocumentDiagramType(designItems: IDesignItem[]): MermaidDocu
 }
 
 function getRootDesignItem(designItems: IDesignItem[]) {
-    return designItems[0]?.isRootItem ? designItems[0] : designItems[0]?.instanceServiceContainer?.designerCanvas?.rootDesignItem;
+    return designItems[0]?.isRootItem ? designItems[0] : designItems[0]?.instanceServiceContainer?.rootDesignItem;
 }
 
 function getMermaidDesignItems(designItems: IDesignItem[]) {

@@ -38,6 +38,14 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
         <div id="popup"></div>
         <div id="toolButtons"></div>`;
 
+  private _toolSubscription: { dispose(): void };
+
+  dispose() {
+    this._toolSubscription?.dispose();
+    this._toolButtonsElem.replaceChildren();
+    this._popupContainer.replaceChildren();
+  }
+
   private _toolButtonsElem: HTMLDivElement;
   private _serviceContainer: ServiceContainer;
   private _popupContainer: HTMLDivElement;
@@ -51,6 +59,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
   }
 
   public initialize(serviceContainer: ServiceContainer, designerView: DesignerView) {
+    this.dispose();
     this._serviceContainer = serviceContainer;
     this.designerView = designerView;
 
@@ -58,7 +67,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
       this._toolButtonsElem.appendChild(tb.provideButton(designerView.designerCanvas));
     }
 
-    this._serviceContainer.globalContext.onToolChanged.on((e) => {
+    this._toolSubscription = this._serviceContainer.globalContext.onToolChanged.on((e) => {
       for (const el of this._toolButtonsElem.children) {
         if (el instanceof DesignerToolbarButton) {
           el.setActiveTool(e.newValue.name);

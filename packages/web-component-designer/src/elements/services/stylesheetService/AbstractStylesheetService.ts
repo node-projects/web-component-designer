@@ -14,8 +14,8 @@ export abstract class AbstractStylesheetService implements IStylesheetService {
 
     protected _instanceServiceContainer: InstanceServiceContainer;
 
-    constructor(designerCanvas: IDesignerCanvas) {
-        this._instanceServiceContainer = designerCanvas.instanceServiceContainer;
+    constructor(designerCanvas: IDesignerCanvas | InstanceServiceContainer) {
+        this._instanceServiceContainer = designerCanvas instanceof InstanceServiceContainer ? designerCanvas : designerCanvas.instanceServiceContainer;
     }
 
     abstract getRules(rule: string): IStyleRule[];

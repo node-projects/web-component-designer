@@ -254,7 +254,7 @@ export class DesignItem implements IDesignItem {
   }
 
   public get isRootItem(): boolean {
-    return this.instanceServiceContainer.designerCanvas.rootDesignItem === this;
+    return this.instanceServiceContainer.rootDesignItem === this;
   }
 
   *childrenRect(selectors: string) {
@@ -789,8 +789,8 @@ export class DesignItem implements IDesignItem {
     let beforeDs: IDesignItem = null;
     for (let designItem of designItems) {
       if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
-        designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
-        designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
+        designItem.instanceServiceContainer.designerCanvas?.extensionManager?.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+        designItem.instanceServiceContainer.designerCanvas?.extensionManager?.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
       }
       if (designItem.parent) {
         designItem.parent._removeChildInternal(designItem);
@@ -830,9 +830,9 @@ export class DesignItem implements IDesignItem {
     //TODO: is this still needed???
     /*
     if (this.instanceServiceContainer.selectionService.primarySelection == designItem) {
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+      designItem.instanceServiceContainer.designerCanvas?.extensionManager?.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
       if (designItem.getPlacementService().isEnterableContainer(this))
-        designItem.instanceServiceContainer.designerCanvas.extensionManager.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
+        designItem.instanceServiceContainer.designerCanvas?.extensionManager?.applyExtension(designItem.parent, ExtensionType.PrimarySelectionContainerAndCanBeEntered);
     }
     */
 
@@ -840,11 +840,11 @@ export class DesignItem implements IDesignItem {
   }
   public _removeChildInternal(designItem: IDesignItem) {
     if (designItem.parent && this.instanceServiceContainer.selectionService.primarySelection == designItem) {
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
-      designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtension(designItem.parent, ExtensionType.PrimarySelectionAndCanBeEntered);
+      designItem.instanceServiceContainer.designerCanvas?.extensionManager?.removeExtension(designItem.parent, ExtensionType.PrimarySelectionContainer);
+      designItem.instanceServiceContainer.designerCanvas?.extensionManager?.removeExtension(designItem.parent, ExtensionType.PrimarySelectionAndCanBeEntered);
     }
 
-    designItem.instanceServiceContainer.designerCanvas.extensionManager.removeExtensions([designItem], true);
+    designItem.instanceServiceContainer.designerCanvas?.extensionManager?.removeExtensions([designItem], true);
 
     const index = this._childArray.indexOf(designItem);
     if (index > -1) {
