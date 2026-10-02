@@ -18,6 +18,7 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
 
   static override readonly style = css`
     :host { display: block; grid-column: 1 / -1; min-width: 0; color: var(--wcd-color-text, white); }
+    :host([hidden]) { display: none !important; }
     .header, .row { display: flex; align-items: center; gap: 8px; min-height: 28px; }
     .row { padding-left: 16px; }
     button { font: inherit; color: inherit; background: transparent; border: none; cursor: pointer; padding: 4px; }
@@ -39,6 +40,45 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
     .actions { display: flex; justify-content: flex-end; gap: 8px; }
     .actions button { border: 1px solid var(--wcd-color-border, #596c7a); padding: 6px 12px; }
     [hidden] { display: none !important; }
+    :host([appearance="modern"]) { color: var(--_wcd-pg-text); font-size: 13px; }
+    :host([appearance="modern"]) .header {
+      padding: 5px 12px;
+      min-height: 38px;
+      background: var(--_wcd-pg-raised);
+      border-bottom: 1px solid var(--_wcd-pg-border);
+    }
+    :host([appearance="modern"]) .toggle { font-weight: 600; }
+    :host([appearance="modern"]) .row {
+      display: grid;
+      grid-template-columns: minmax(0, .85fr) minmax(0, 1fr) 28px;
+      padding: 5px 12px 5px 24px;
+      min-height: 38px;
+      border-bottom: 1px solid var(--_wcd-pg-border);
+    }
+    :host([appearance="modern"]) .row:hover,
+    :host([appearance="modern"]) .row:focus-within { background: var(--_wcd-pg-hover); }
+    :host([appearance="modern"]) .summary { color: var(--_wcd-pg-muted); }
+    :host([appearance="modern"]) button { border-radius: 4px; }
+    :host([appearance="modern"]) button:hover { background: var(--_wcd-pg-hover); }
+    :host([appearance="modern"]) button:focus-visible { outline-color: var(--wcd-color-focus, var(--_wcd-pg-accent)); }
+    :host([appearance="modern"]) dialog {
+      padding: 24px;
+      border-radius: 10px;
+      color: var(--_wcd-pg-text);
+      background: var(--_wcd-pg-surface);
+      border-color: var(--_wcd-pg-border);
+      box-shadow: 0 16px 64px #0003;
+    }
+    :host([appearance="modern"]) h3 { font-size: 16px; }
+    :host([appearance="modern"]) input { border-radius: 5px; border-color: var(--_wcd-pg-border); padding: 8px; }
+    :host([appearance="modern"]) input:focus-visible { outline: 2px solid var(--wcd-color-focus, var(--_wcd-pg-accent)); outline-offset: 1px; }
+    :host([appearance="modern"]) .help { color: var(--_wcd-pg-muted); }
+    :host([appearance="modern"]) .actions button { border-color: var(--_wcd-pg-border); }
+    :host([appearance="modern"]) .actions button[type="submit"] {
+      background: var(--_wcd-pg-accent);
+      color: var(--wcd-color-accent-text, light-dark(white, #162b48));
+      border-color: transparent;
+    }
   `;
 
   constructor() {
@@ -47,6 +87,7 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
     header.className = 'header';
     this._toggle = document.createElement('button');
     this._toggle.type = 'button';
+    this._toggle.className = 'toggle';
     this._toggle.textContent = '▾ Class bindings';
     this._toggle.setAttribute('aria-expanded', 'true');
     this._toggle.onclick = () => {
@@ -67,12 +108,14 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
 
   refresh(items: IDesignItem[]) {
     const selectionChanged = this._items[0] !== items?.[0] || this._items.length !== items?.length;
+    if (selectionChanged)
+      this.shadowRoot.querySelector('dialog')?.close();
     this._items = items ?? [];
     const item = this._items.length === 1 ? this._items[0] : null;
     const bindings = item ? this._service.getBindings(item) : [];
     const defaultService = item?.serviceContainer.getServices('bindingService').find(service => service instanceof BaseCustomWebcomponentBindingsService);
     this._add.disabled = !item || (!item.serviceContainer.config.openBindingsEditor && !defaultService);
-    const signature = JSON.stringify(bindings.map(binding => [binding.targetName, binding.expression, binding.bindableObjectNames, binding.rawValue]));
+    const signature = JSON.stringify(bindings.map(({ service, ...binding }) => binding));
     if (!selectionChanged && signature === this._signature)
       return;
     this._signature = signature;
@@ -145,7 +188,7 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
     const dialog = document.createElement('dialog');
     const form = document.createElement('form');
     const title = document.createElement('h3');
-    title.textContent = expressionEditor ? 'Edit class binding' : binding ? 'Rename class' : 'Add class binding';
+    title.textContent = binding ? expressionEditor ? 'Edit class binding' : 'Rename class' : 'Add class binding';
     const nameLabel = document.createElement('label');
     nameLabel.textContent = 'Class name';
     const input = document.createElement('input');

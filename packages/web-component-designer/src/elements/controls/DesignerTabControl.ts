@@ -101,6 +101,38 @@ export class DesignerTabControl extends BaseCustomWebComponentLazyAppend {
             background: var(--wcd-tab-panel-background, var(--medium-grey, var(--wcd-color-surface-raised, #2f3545)));
             height: calc(100% - 30px);
         }
+        :host([appearance="modern"]) .header {
+            height: 36px;
+            background: var(--wcd-tab-header-background, var(--_wcd-pg-raised));
+            color: var(--_wcd-pg-text);
+        }
+        :host([appearance="modern"]) .tab-header {
+            height: 36px;
+            font-family: var(--wcd-tab-font-family, inherit);
+            text-transform: var(--wcd-tab-text-transform, none);
+            letter-spacing: var(--wcd-tab-letter-spacing, 0);
+            padding-inline: var(--wcd-tab-padding-inline, 12px);
+            color: var(--_wcd-pg-muted);
+        }
+        :host([appearance="modern"]) .tab-header:hover,
+        :host([appearance="modern"]) .header-more:hover {
+            background: var(--wcd-tab-header-hover-background, var(--_wcd-pg-hover));
+        }
+        :host([appearance="modern"]) .selected {
+            color: var(--_wcd-pg-text);
+            background: var(--wcd-tab-selected-background, var(--_wcd-pg-surface));
+            box-shadow: inset 0 -2px 0 var(--wcd-tab-selected-indicator-color, var(--_wcd-pg-accent));
+        }
+        :host([appearance="modern"]) .more-container {
+            top: 36px;
+            background: var(--wcd-tab-header-background, var(--_wcd-pg-raised));
+            color: var(--_wcd-pg-text);
+            border: 1px solid var(--_wcd-pg-border);
+        }
+        :host([appearance="modern"]) .panels {
+            height: calc(100% - 36px);
+            background: var(--wcd-tab-panel-background, var(--_wcd-pg-surface));
+        }
         `;
 
   constructor() {

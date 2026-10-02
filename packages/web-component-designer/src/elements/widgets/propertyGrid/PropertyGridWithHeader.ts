@@ -14,6 +14,19 @@ import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
 
 export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
 
+  static readonly observedAttributes = ['appearance'];
+  static readonly properties = { appearance: String };
+  public get appearance(): 'classic' | 'modern' {
+    return this.getAttribute('appearance') === 'modern' ? 'modern' : 'classic';
+  }
+  public set appearance(value: 'classic' | 'modern') {
+    this.setAttribute('appearance', value);
+  }
+  attributeChangedCallback() {
+    if (this.propertyGrid)
+      this.propertyGrid.appearance = this.appearance;
+  }
+
   static override readonly style = css`
     :host {
       display: block;
@@ -52,9 +65,64 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     #pg {
       height: calc(100% - 64px);
     }
+    .inspector-heading { display: none; }
+    :host([appearance="modern"]) {
+      color-scheme: light dark;
+      display: flex;
+      flex-direction: column;
+      font-family: var(--wcd-property-grid-font-family, system-ui, sans-serif);
+      background: var(--wcd-property-grid-background, var(--wcd-color-surface, light-dark(#ffffff, #20242b)));
+      color: var(--wcd-property-grid-text-color, var(--wcd-color-text, light-dark(#283344, #e8edf4)));
+    }
+    :host([appearance="modern"]) .inspector-heading {
+      display: block;
+      padding: 14px 16px 4px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    :host([appearance="modern"]) .root {
+      flex: none;
+      padding: 8px 16px 14px;
+      gap: 5px 3px;
+      font-family: inherit;
+      border-bottom: 1px solid var(--wcd-color-border, light-dark(#e0e6ed, #3b4452));
+    }
+    :host([appearance="modern"]) .desc { font-size: 12px; font-weight: 400; }
+    :host([appearance="modern"]) input {
+      box-sizing: border-box;
+      min-width: 0;
+      width: 100%;
+      padding: 5px 8px;
+      font: inherit;
+      font-size: 13px;
+      border-radius: 4px;
+      color: inherit;
+      background: transparent;
+      border-color: var(--wcd-color-border, light-dark(#e0e6ed, #3b4452));
+    }
+    :host([appearance="modern"]) #type { height: auto; color: inherit; padding-left: 0; }
+    :host([appearance="modern"]) #idRect,
+    :host([appearance="modern"]) #innerRect,
+    :host([appearance="modern"]) #contentRect {
+      border: none !important;
+      border-radius: 50%;
+      width: 5px !important;
+      height: 5px !important;
+      background: var(--wcd-color-text-muted, light-dark(#677489, #a6b3c5)) !important;
+      opacity: .5;
+      cursor: pointer;
+    }
+    :host([appearance="modern"]) .root [data-value-type="none"] { visibility: hidden; }
+    :host([appearance="modern"]) .root [data-value-type="bound"] {
+      background: var(--wcd-color-accent, #2168cc) !important;
+      opacity: 1;
+    }
+    :host([appearance="modern"]) input:focus-visible { outline: 2px solid var(--wcd-color-focus, var(--wcd-color-accent, #2168cc)); outline-offset: 1px; }
+    :host([appearance="modern"]) #pg { flex: 1; min-height: 0; height: auto; }
     `;
 
   static override readonly template = html`
+  <div class="inspector-heading">Properties</div>
   <div class="root">
     <span style="grid-column: span 3;" class="desc">Type:</span><input type="text" readonly id="type">
     <button id="config" style="display: none; grid-column: 5; grid-row: span 3; height: calc(100% - 10px); margin-left: 10px;">config</button>
@@ -87,6 +155,7 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     this._id = this._getDomElement<HTMLInputElement>('id');
     this._content = this._getDomElement<HTMLInputElement>('content');
     this.propertyGrid = this._getDomElement<PropertyGrid>('pg');
+    this.propertyGrid.appearance = this.appearance;
     this._idRect = this._getDomElement<HTMLDivElement>('idRect');
     this._contentRect = this._getDomElement<HTMLDivElement>('contentRect');
     this._innerRect = this._getDomElement<HTMLDivElement>('innerRect');

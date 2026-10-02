@@ -11,6 +11,21 @@ import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
 
 export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
+  static readonly observedAttributes = ['appearance'];
+
+  /** Modern is opt-in; existing hosts retain the classic layout. */
+  public get appearance(): 'classic' | 'modern' {
+    return this.getAttribute('appearance') === 'modern' ? 'modern' : 'classic';
+  }
+  public set appearance(value: 'classic' | 'modern') {
+    this.setAttribute('appearance', value);
+  }
+  attributeChangedCallback() {
+    this._designerTabControl?.setAttribute('appearance', this.appearance);
+    for (const list of this._propertyGridPropertyLists ?? [])
+      list.setAttribute('appearance', this.appearance);
+  }
+
   private _serviceContainer: ServiceContainer;
   private _designerTabControl: DesignerTabControl;
   private _selectedItems: IDesignItem[];
@@ -38,9 +53,24 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     button:focus {
       box-shadow: inset 0 3px 0 var(--wcd-property-grid-tab-indicator-color, var(--highlight-pink, var(--wcd-color-accent, #e91e63)));
     }
+    :host([appearance="modern"]) {
+      color-scheme: light dark;
+      font-family: var(--wcd-property-grid-font-family, system-ui, sans-serif);
+      font-size: 13px;
+      --_wcd-pg-surface: var(--wcd-property-grid-background, var(--wcd-color-surface, light-dark(#ffffff, #20242b)));
+      --_wcd-pg-raised: var(--wcd-color-surface-raised, light-dark(#f6f8fb, #292e37));
+      --_wcd-pg-hover: var(--wcd-color-surface-hover, light-dark(#edf3fb, #303c4d));
+      --_wcd-pg-text: var(--wcd-property-grid-text-color, var(--wcd-color-text, light-dark(#283344, #e8edf4)));
+      --_wcd-pg-muted: var(--wcd-color-text-muted, light-dark(#677489, #a6b3c5));
+      --_wcd-pg-border: var(--wcd-color-border, light-dark(#e0e6ed, #3b4452));
+      --_wcd-pg-accent: var(--wcd-color-accent, light-dark(#2168cc, #88b6ff));
+      background: var(--_wcd-pg-surface);
+      color: var(--_wcd-pg-text);
+    }
     `;
 
   static readonly properties = {
+    appearance: String,
     serviceContainer: Object,
     instanceServiceContainer: Object,
     selectedItems: Array,
@@ -54,6 +84,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._designerTabControl = new DesignerTabControl();
     this.shadowRoot.appendChild(this._designerTabControl);
     this._restoreCachedInititalValues();
+    this._designerTabControl.setAttribute('appearance', this.appearance);
     this.addEventListener('contextmenu', (e) => {
       if ((<HTMLElement>e.composedPath()[0]).localName != 'input')
         e.preventDefault()
@@ -103,6 +134,7 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
       let lst = this._propertyGridPropertyListsDict[p.name];
       if (!lst) {
         lst = new PropertyGridPropertyList(this.serviceContainer);
+        lst.setAttribute('appearance', this.appearance);
         lst.title = p.name;
         lst.propertyGroupHover = this.propertyGroupHover;
         lst.propertyGroupClick = this.propertyGroupClick;

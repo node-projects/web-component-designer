@@ -14,8 +14,13 @@ import { PropertyGridClassBindings } from './PropertyGridClassBindings.js';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
+  static readonly observedAttributes = ['appearance'];
+  attributeChangedCallback() {
+    this._classBindings?.setAttribute('appearance', this.getAttribute('appearance') ?? 'classic');
+  }
+
   private _div: HTMLDivElement;
-  private _propertyMap: Map<IProperty, { isSetElement: HTMLElement, labelElement: HTMLElement, editor: IPropertyEditor }> = new Map();
+  private _propertyMap: Map<IProperty, { isSetElement: HTMLElement, labelElement: HTMLElement, editor: IPropertyEditor, rowElement: HTMLElement }> = new Map();
   private _serviceContainer: ServiceContainer;
   private _propertiesService: IPropertiesService;
   private _designItems: IDesignItem[];
@@ -48,6 +53,9 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       grid-auto-rows: minmax(24px, auto);
       align-items: center;
     }
+    .property-row { display: contents; }
+    .property-row[hidden] { display: none; }
+    .property-status { padding: 0; margin: 0; font-size: 0; }
     label, input, select {
       display: inline-block;
       color: var(--wcd-color-text, white);
@@ -73,7 +81,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     input, select {
       border: none;
     }
-    .editor-control, .content-wrapper > input, .content-wrapper > select {
+    .editor-control, .property-row > input, .property-row > select {
       border: 1px solid var(--wcd-input-border-color, var(--input-border-color, var(--wcd-color-border, #596c7a)));
       border-radius: var(--wcd-property-grid-editor-border-radius, 0);
     }
@@ -143,6 +151,94 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       outline: 2px dashed var(--wcd-property-grid-drop-target-color, orange);
       outline-offset: -2px;
     }
+    :host([appearance="modern"]) {
+      font-family: var(--wcd-property-grid-font-family, system-ui, sans-serif);
+      color: var(--_wcd-pg-text);
+    }
+    :host([appearance="modern"]) .content-wrapper {
+      padding: 0;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-auto-rows: auto;
+    }
+    :host([appearance="modern"]) .property-row {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, .85fr) minmax(0, 1fr) 28px;
+      align-items: center;
+      min-height: var(--wcd-property-grid-row-height, 40px);
+      padding: 5px 12px;
+      gap: 8px;
+      border-bottom: 1px solid var(--_wcd-pg-border);
+    }
+    :host([appearance="modern"]) .property-row[hidden] { display: none; }
+    :host([appearance="modern"]) .property-row:hover,
+    :host([appearance="modern"]) .property-row:focus-within { background: var(--_wcd-pg-hover); }
+    :host([appearance="modern"]) .property-row > * { min-width: 0; }
+    :host([appearance="modern"]) .property-label { grid-column: 1; grid-row: 1; color: inherit; }
+    :host([appearance="modern"]) .editor-control { grid-column: 2; grid-row: 1; }
+    :host([appearance="modern"]) .property-row.hide-label .editor-control { grid-column: 1 / 3 !important; }
+    :host([appearance="modern"]) .property-actions {
+      grid-column: 3;
+      grid-row: 1;
+      justify-content: center;
+      width: 28px !important;
+      height: 28px !important;
+      margin-left: 0 !important;
+    }
+    :host([appearance="modern"]) .property-status {
+      position: relative;
+      width: 26px !important;
+      height: 26px !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 4px;
+      color: var(--_wcd-pg-muted);
+      font-size: 18px;
+    }
+    :host([appearance="modern"]) .property-status:hover { background: var(--_wcd-pg-raised) !important; }
+    :host([appearance="modern"]) .property-status::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      right: 1px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+    }
+    :host([appearance="modern"]) .property-status[data-value-type="all"]::after { background: var(--_wcd-pg-muted); }
+    :host([appearance="modern"]) .property-status[data-value-type="some"]::after { background: var(--_wcd-pg-muted); }
+    :host([appearance="modern"]) .property-status[data-value-type="bound"]::after { background: var(--_wcd-pg-accent); }
+    :host([appearance="modern"]) .property-status[data-value-type="fromStylesheet"]::after { background: var(--wcd-property-grid-stylesheet-indicator-color, #b79735); }
+    :host([appearance="modern"]) input,
+    :host([appearance="modern"]) select,
+    :host([appearance="modern"]) .editor-control {
+      color: inherit;
+      font-size: 13px;
+      height: var(--wcd-property-grid-editor-height, 28px);
+      border-color: var(--wcd-input-border-color, transparent);
+      border-radius: var(--wcd-property-grid-editor-border-radius, 4px);
+    }
+    :host([appearance="modern"]) input:not([type="checkbox"]),
+    :host([appearance="modern"]) select { padding-inline: 6px; }
+    :host([appearance="modern"]) input:hover,
+    :host([appearance="modern"]) select:hover { border-color: var(--wcd-input-border-color, var(--_wcd-pg-border)); }
+    :host([appearance="modern"]) input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--_wcd-pg-accent); }
+    :host([appearance="modern"]) input:focus-visible,
+    :host([appearance="modern"]) select:focus-visible,
+    :host([appearance="modern"]) button:focus-visible {
+      outline: 2px solid var(--wcd-color-focus, var(--_wcd-pg-accent));
+      outline-offset: 1px;
+    }
+    :host([appearance="modern"]) .unset-value { color: var(--wcd-property-grid-unset-value-color, var(--_wcd-pg-muted)); }
+    :host([appearance="modern"]) .group-header {
+      grid-column: 1;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 600;
+      color: var(--_wcd-pg-text);
+      background: var(--_wcd-pg-raised);
+    }
+    :host([appearance="modern"]) .group-desc { padding-right: 12px; font-size: 12px; }
     `;
   }
 
@@ -242,15 +338,9 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private expandOrCollapsePropertyGroups(propertyGroup: IPropertyGroup) {
     for (let p of propertyGroup.properties) {
       const property = this._propertyMap.get(p);
-      const displayStyle = property.labelElement.style.display == 'none' ? 'flex' : 'none';
-      if (property.editor.element)
-        (<HTMLElement>property.editor.element).style.display = displayStyle;
-      if (property.labelElement)
-        property.labelElement.style.display = displayStyle;
-      if (property.isSetElement.parentElement)
-        property.isSetElement.parentElement.style.display = displayStyle;
+      property.rowElement.hidden = !property.rowElement.hidden;
       if ((p.name === 'class' || p.name === 'className') && this._classBindings)
-        this._classBindings.style.display = displayStyle;
+        this._classBindings.hidden = property.rowElement.hidden;
     }
   }
 
@@ -263,21 +353,31 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       editor = this._serviceContainer.forSomeServicesTillResult("propertyEditorTypesService", x => x.getEditorForProperty(property));
     }
     if (editor) {
+      const row = document.createElement('div');
+      row.className = 'property-row';
+      if (property.hideLabel)
+        row.classList.add('hide-label');
       let rectContainer = document.createElement("div")
+      rectContainer.className = 'property-actions';
       if (isInGroup)
         rectContainer.style.marginLeft = '10px';
       rectContainer.style.width = '20px';
       rectContainer.style.height = '20px';
       rectContainer.style.display = 'flex';
       rectContainer.style.alignItems = 'center';
-      let rect = document.createElement("div")
+      let rect = document.createElement('button');
+      rect.type = 'button';
+      rect.className = 'property-status';
+      rect.textContent = '⋯';
+      rect.setAttribute('aria-label', `Actions for ${property.displayName ?? property.name}`);
+      rect.disabled = property.readonly === true;
       rect.style.width = '7px';
       rect.style.height = '7px';
       rect.style.border = '1px white solid';
       rect.style.cursor = 'pointer';
       if (property.propertyType != PropertyType.complex)
         rectContainer.appendChild(rect);
-      this._div.appendChild(rectContainer);
+      row.appendChild(rectContainer);
       if (property.readonly !== true) {
         rect.oncontextmenu = (event) => {
           event.preventDefault();
@@ -318,10 +418,10 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             op.value = s;
             dl.append(op);
           }
-          this._div.appendChild(dl);
+          row.appendChild(dl);
           label.setAttribute('list', dl.id);
         }
-        this._div.appendChild(label);
+        row.appendChild(label);
       } else {
         if (property.hideLabel) {
           labelHolder = document.createElement("span");
@@ -336,7 +436,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
           label.ondragleave = (e) => this._onDragLeave(e, property, label);
           label.ondragover = (e) => this._onDragOver(e, property, label);
           label.ondrop = (e) => this._onDrop(e, property, label);
-          this._div.appendChild(label);
+          row.appendChild(label);
         } else {
           let label = document.createElement("input");
           labelHolder = label;
@@ -357,7 +457,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
               this._designItems[0].instanceServiceContainer.designerCanvas.extensionManager.refreshAllExtensions(this._designItems);
             }
           }
-          this._div.appendChild(label);
+          row.appendChild(label);
         }
       }
       if (property.name)
@@ -366,14 +466,17 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         editor.element.classList.add('editor-control');
       if (property.hideLabel)
         (<HTMLElement>editor.element).style.gridColumn = '2 / 4';
-      this._div.appendChild(editor.element);
+      labelHolder.classList.add('property-label');
+      row.appendChild(editor.element);
+      this._div.appendChild(row);
 
       if (!this._classBindings && (property.name === 'class' || property.name === 'className') && property.propertyType !== PropertyType.cssValue) {
         this._classBindings = new PropertyGridClassBindings();
+        this._classBindings.setAttribute('appearance', this.getAttribute('appearance') ?? 'classic');
         this._div.appendChild(this._classBindings);
       }
 
-      this._propertyMap.set(property, { isSetElement: rect, labelElement: labelHolder, editor: editor });
+      this._propertyMap.set(property, { isSetElement: rect, labelElement: labelHolder, editor: editor, rowElement: row });
     }
   }
 
@@ -464,6 +567,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   public static refreshIsSetElementAndEditorForDesignItems(isSetElement: HTMLElement, property: IProperty, items: IDesignItem[], propertiesService: IPropertiesService, editor?: IPropertyEditor) {
     if (items && items.length) {
       let s = propertiesService.isSet(items, property);
+      isSetElement.dataset.valueType = s;
       let v = propertiesService.getValue(items, property);
       isSetElement.title = property.name + ': ' + s;
       if (s == ValueType.none) {

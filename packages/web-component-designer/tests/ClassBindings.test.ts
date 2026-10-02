@@ -7,6 +7,7 @@ Object.defineProperty(window, 'matchMedia', { value: () => ({ matches: false }) 
 CSSStyleSheet.prototype.replaceSync = function () { };
 Object.defineProperty(ShadowRoot.prototype, 'adoptedStyleSheets', { writable: true, value: [] });
 Object.defineProperty(globalThis, 'ResizeObserver', { value: class { observe() { } disconnect() { } unobserve() { } } });
+Element.prototype.scrollTo = function () { };
 HTMLDialogElement.prototype.showModal = function () { this.open = true; };
 HTMLDialogElement.prototype.close = function () { this.open = false; this.dispatchEvent(new Event('close')); };
 
@@ -21,6 +22,8 @@ let ClassGrid: typeof import('../src/elements/widgets/propertyGrid/PropertyGridC
 let PropertyList: typeof import('../src/elements/widgets/propertyGrid/PropertyGridPropertyList').PropertyGridPropertyList;
 let CommonPropertiesService: typeof import('../src/elements/services/propertiesService/services/CommonPropertiesService').CommonPropertiesService;
 let DefaultPropertyEditorTypesService: typeof import('../src/elements/services/propertiesService/DefaultPropertyEditorTypesService').DefaultPropertyEditorTypesService;
+let PropertyGrid: typeof import('../src/elements/widgets/propertyGrid/PropertyGrid').PropertyGrid;
+let PropertyGridWithHeader: typeof import('../src/elements/widgets/propertyGrid/PropertyGridWithHeader').PropertyGridWithHeader;
 
 beforeAll(async () => {
   ({ EditingDocument } = await import('../src/elements/EditingDocument'));
@@ -34,6 +37,8 @@ beforeAll(async () => {
   ({ PropertyGridPropertyList: PropertyList } = await import('../src/elements/widgets/propertyGrid/PropertyGridPropertyList'));
   ({ CommonPropertiesService } = await import('../src/elements/services/propertiesService/services/CommonPropertiesService'));
   ({ DefaultPropertyEditorTypesService } = await import('../src/elements/services/propertiesService/DefaultPropertyEditorTypesService'));
+  ({ PropertyGrid } = await import('../src/elements/widgets/propertyGrid/PropertyGrid'));
+  ({ PropertyGridWithHeader } = await import('../src/elements/widgets/propertyGrid/PropertyGridWithHeader'));
 });
 
 afterEach(() => document.body.replaceChildren());
@@ -105,7 +110,7 @@ test('source-created bindings appear under class and open the host editor with a
   await list.createElements(item);
   list.designItemsChanged([item]);
   const section = list.shadowRoot.querySelector('node-projects-property-grid-class-bindings') as InstanceType<typeof ClassGrid>;
-  expect(section.previousElementSibling.id).toBe('class');
+  expect(section.previousElementSibling.querySelector('.editor-control').id).toBe('class');
   expect(section.shadowRoot.textContent).toContain('is-active');
   (section.shadowRoot.querySelector('.name') as HTMLButtonElement).click();
   await Promise.resolve();
@@ -158,5 +163,65 @@ test('failed renames roll back the new attribute instead of leaving two bindings
   expect(item.hasAttribute('class:is-ready')).toBe(false);
   expect(item.getAttribute('class:is-active')).toBe('[[isActive]]');
   clear.mockRestore();
+  await doc.dispose();
+});
+
+test('appearance propagates from the header to existing lists without recreating editors or losing input', async () => {
+  const { services, doc, item } = await fixture();
+  services.register('propertyGroupsService', { getPropertygroups: () => [{ name: 'common', propertiesService: new CommonPropertiesService() }] });
+  const header = new PropertyGridWithHeader();
+  document.body.appendChild(header);
+  header.serviceContainer = services;
+  await Promise.resolve(); // Attach the lazy template and upgrade its nested grid.
+  header.propertyGrid.selectedItems = [item];
+  await header.propertyGrid._selectedItemsSet();
+  const tabs = header.propertyGrid.shadowRoot.querySelector('node-projects-designer-tab-control');
+  const list = tabs.querySelector('node-projects-property-grid-property-list');
+  const input = list.shadowRoot.querySelector('input#class') as HTMLInputElement;
+  input.value = 'unsaved typed value';
+  header.appearance = 'modern';
+  expect(header.propertyGrid.appearance).toBe('modern');
+  expect(tabs.getAttribute('appearance')).toBe('modern');
+  expect(list.getAttribute('appearance')).toBe('modern');
+  expect(list.shadowRoot.querySelector('node-projects-property-grid-class-bindings').getAttribute('appearance')).toBe('modern');
+  expect(list.shadowRoot.querySelector('input#class')).toBe(input);
+  expect(input.value).toBe('unsaved typed value');
+  header.setAttribute('appearance', 'classic');
+  expect(list.getAttribute('appearance')).toBe('classic');
+  expect(list.shadowRoot.querySelector('input#class')).toBe(input);
+  await doc.dispose();
+});
+
+test('plain grids accept modern appearance before properties are created', async () => {
+  const { services, doc, item } = await fixture();
+  services.register('propertyGroupsService', { getPropertygroups: () => [{ name: 'common', propertiesService: new CommonPropertiesService() }] });
+  const grid = new PropertyGrid();
+  grid.serviceContainer = services;
+  grid.setAttribute('appearance', 'modern');
+  document.body.appendChild(grid);
+  grid.selectedItems = [item];
+  await grid._selectedItemsSet();
+  const list = grid.shadowRoot.querySelector('node-projects-designer-tab-control').querySelector('node-projects-property-grid-property-list');
+  expect(list.getAttribute('appearance')).toBe('modern');
+  expect(list.shadowRoot.querySelectorAll('button.property-status')).toHaveLength(4);
+  await doc.dispose();
+});
+
+test('editing after a source refresh uses changed binding options even if the summary is unchanged', async () => {
+  const { services, doc, item, bindingService } = await fixture();
+  const binding = bindingService.getBindings(item)[0];
+  let invert = false;
+  const read = jest.spyOn(bindingService, 'getBindings').mockImplementation(() => [{ ...binding, invert }]);
+  const openEditor = jest.fn(async () => { });
+  services.config.openBindingsEditor = openEditor;
+  const grid = new ClassGrid();
+  document.body.appendChild(grid);
+  grid.refresh([item]);
+  invert = true;
+  grid.refresh([item]);
+  (grid.shadowRoot.querySelector('.name') as HTMLButtonElement).click();
+  await Promise.resolve();
+  expect(openEditor).toHaveBeenCalledWith(expect.anything(), [item], expect.objectContaining({ invert: true }), BindingTarget.class);
+  read.mockRestore();
   await doc.dispose();
 });
