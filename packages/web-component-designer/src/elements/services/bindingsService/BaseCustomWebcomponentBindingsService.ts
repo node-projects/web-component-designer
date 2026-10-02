@@ -27,7 +27,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
           bnd.target = BindingTarget.css;
           bnd.expression = value.substring(2, value.length - 2);
         } else if (a[0].startsWith('class:')) {
-          bnd.targetName = name.substring(4);
+          bnd.targetName = name.substring(6);
           bnd.target = BindingTarget.class;
           bnd.expression = value.substring(2, value.length - 2);
         } else if (a[0].startsWith('$')) {
@@ -48,6 +48,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
           bnd.expression = value.substring(2, value.length - 2);
         }
         bnd.type = BaseCustomWebcomponentBindingsService.type;
+        bnd.mode = value.startsWith('[[') ? BindingMode.oneWay : BindingMode.twoWay;
         bnd.targetName = bnd.targetName;
         bnd.bindableObjectNames = [value.substring(2, value.length - 2)];
         bindings.push(bnd);
@@ -69,7 +70,7 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
         nm += 'css:';
         break;
       case BindingTarget.class:
-        nm += 'class';
+        nm += 'class:';
         break;
       case BindingTarget.attribute:
         nm += '$';
@@ -85,6 +86,10 @@ export class BaseCustomWebcomponentBindingsService implements IBindingService {
   }
 
   clearBinding(designItem: IDesignItem, propertyName: string, propertyTarget: BindingTarget): boolean {
+    const binding = this.getBindings(designItem)?.find(binding => binding.targetName === propertyName && binding.target === propertyTarget);
+    if (!binding)
+      return false;
+    designItem.removeAttribute(binding.rawName);
     return true;
   }
 }

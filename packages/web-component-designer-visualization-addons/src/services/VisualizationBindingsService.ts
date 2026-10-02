@@ -22,6 +22,7 @@ export class VisualizationBindingsService implements IBindingService {
       expression: x[1].expression,
       expressionTwoWay: x[1].expressionTwoWay,
       converter: x[1].converter,
+      converters: x[1].converter,
       //type: x[1].type,
       type: VisualizationBindingsService.type,
       service: this,
@@ -49,6 +50,8 @@ export class VisualizationBindingsService implements IBindingService {
     }
     bnd.target = binding.target;
     bnd.events = binding.changedEvents;
+    //@ts-ignore
+    bnd.writeBackSignal = binding.writeBackSignal;
 
     let serializedBnd = this._bindingsHelper.serializeBinding(designItem.element, binding.targetName, bnd);
     let group = designItem.openGroup('edit_binding');

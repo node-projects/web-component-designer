@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-import { beforeAll, describe, expect, test } from '@jest/globals';
+import { beforeAll, describe, expect, jest, test } from '@jest/globals';
 import type { SpecialValueHandler } from '../src/helpers/BindingsHelper.js';
 import type { VisualizationHandler, State } from '../src/interfaces/VisualizationHandler.js';
 import { BindingTarget } from '@node-projects/web-component-designer/dist/elements/item/BindingTarget.js';
@@ -314,6 +314,33 @@ describe('BindingsHelper runtime', () => {
       converter: { true: 'yes' },
       target: BindingTarget.property
     })).toEqual(['bind-prop:value', '{"signal":"source","converter":{"true":"yes"}}']);
+  });
+
+  test('binding service preserves converters and write-back settings when a class binding is renamed', async () => {
+    const { BindingMode } = await import('@node-projects/web-component-designer/dist/elements/item/BindingMode.js');
+    const { PropertiesHelper } = await import('@node-projects/web-component-designer/dist/elements/services/propertiesService/services/PropertiesHelper.js');
+    jest.unstable_mockModule('@node-projects/web-component-designer', () => ({ BindingMode, BindingTarget, PropertiesHelper }));
+    const { VisualizationBindingsService } = await import('../src/services/VisualizationBindingsService.js');
+    const helper = new BindingsHelper(new TestVisualizationHandler());
+    const service = new VisualizationBindingsService(helper);
+    const element = document.createElement('div');
+    element.setAttribute('bind-class:is-active', JSON.stringify({ signal: 'source', converter: { true: true, false: false }, writeBackSignal: 'other', inverted: true }));
+    const item: any = {
+      element,
+      openGroup: () => ({ commit() { } }),
+      setAttribute: (name: string, value: string) => element.setAttribute(name, value),
+      removeAttribute: (name: string) => element.removeAttribute(name)
+    };
+    const binding = service.getBindings(item)[0];
+    expect(binding.converters).toEqual({ true: true, false: false });
+    service.setBinding(item, { ...binding, targetName: 'is-ready' });
+    service.clearBinding(item, 'is-active', BindingTarget.class);
+    const renamed = service.getBindings(item)[0];
+    expect(renamed.targetName).toBe('is-ready');
+    expect(renamed.converter).toEqual(binding.converter);
+    expect((renamed as any).writeBackSignal).toBe('other');
+    expect(renamed.invert).toBe(true);
+    expect(element.hasAttribute('bind-class:is-active')).toBe(false);
   });
 
   test('coalesces bursts and skips identical primitive DOM and write-back updates', async () => {

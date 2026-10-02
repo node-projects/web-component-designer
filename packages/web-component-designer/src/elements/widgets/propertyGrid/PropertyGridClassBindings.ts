@@ -1,0 +1,227 @@
+import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
+import { BindingMode } from '../../item/BindingMode.js';
+import { BindingTarget } from '../../item/BindingTarget.js';
+import { IBinding } from '../../item/IBinding.js';
+import { IDesignItem } from '../../item/IDesignItem.js';
+import { BaseCustomWebcomponentBindingsService } from '../../services/bindingsService/BaseCustomWebcomponentBindingsService.js';
+import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+import { ClassBindingsPropertiesService } from './ClassBindingsPropertiesService.js';
+
+export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend {
+  private _items: IDesignItem[] = [];
+  private _service = new ClassBindingsPropertiesService();
+  private _rows: HTMLDivElement;
+  private _add: HTMLButtonElement;
+  private _toggle: HTMLButtonElement;
+  private _signature: string;
+  private _editing = false;
+
+  static override readonly style = css`
+    :host { display: block; grid-column: 1 / -1; min-width: 0; color: var(--wcd-color-text, white); }
+    .header, .row { display: flex; align-items: center; gap: 8px; min-height: 28px; }
+    .row { padding-left: 16px; }
+    button { font: inherit; color: inherit; background: transparent; border: none; cursor: pointer; padding: 4px; }
+    button:focus-visible { outline: 2px solid var(--wcd-color-accent, #e91e63); outline-offset: -2px; }
+    button:disabled { opacity: .5; cursor: default; }
+    .toggle, .name { text-align: left; }
+    .toggle { flex: 1; }
+    .name { flex: 0 1 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .summary { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--wcd-color-text-muted, #bdbdbd); }
+    .message { padding: 4px 16px; font-size: 12px; color: var(--wcd-color-text-muted, #bdbdbd); }
+    dialog { box-sizing: border-box; width: min(420px, calc(100vw - 32px)); color: inherit; background: var(--wcd-property-grid-background, var(--wcd-color-surface-raised, #2f3545)); border: 1px solid var(--wcd-color-border, #596c7a); padding: 16px; }
+    dialog::backdrop { background: #0006; }
+    form, label { display: grid; gap: 8px; }
+    form { gap: 16px; }
+    h3 { font: inherit; font-weight: 600; margin: 0; }
+    input { box-sizing: border-box; width: 100%; padding: 6px; font: inherit; color: inherit; background: transparent; border: 1px solid var(--wcd-color-border, #596c7a); }
+    .help { font-size: 12px; color: var(--wcd-color-text-muted, #bdbdbd); }
+    .error { color: var(--wcd-color-error, #ff8a80); font-size: 12px; }
+    .actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .actions button { border: 1px solid var(--wcd-color-border, #596c7a); padding: 6px 12px; }
+    [hidden] { display: none !important; }
+  `;
+
+  constructor() {
+    super();
+    const header = document.createElement('div');
+    header.className = 'header';
+    this._toggle = document.createElement('button');
+    this._toggle.type = 'button';
+    this._toggle.textContent = '▾ Class bindings';
+    this._toggle.setAttribute('aria-expanded', 'true');
+    this._toggle.onclick = () => {
+      this._rows.hidden = !this._rows.hidden;
+      this._toggle.textContent = (this._rows.hidden ? '▸' : '▾') + ' Class bindings';
+      this._toggle.setAttribute('aria-expanded', String(!this._rows.hidden));
+    };
+    this._add = document.createElement('button');
+    this._add.type = 'button';
+    this._add.textContent = '+';
+    this._add.title = 'Add class binding…';
+    this._add.setAttribute('aria-label', 'Add class binding');
+    this._add.onclick = () => this.addBinding();
+    header.append(this._toggle, this._add);
+    this._rows = document.createElement('div');
+    this.shadowRoot.append(header, this._rows);
+  }
+
+  refresh(items: IDesignItem[]) {
+    const selectionChanged = this._items[0] !== items?.[0] || this._items.length !== items?.length;
+    this._items = items ?? [];
+    const item = this._items.length === 1 ? this._items[0] : null;
+    const bindings = item ? this._service.getBindings(item) : [];
+    const defaultService = item?.serviceContainer.getServices('bindingService').find(service => service instanceof BaseCustomWebcomponentBindingsService);
+    this._add.disabled = !item || (!item.serviceContainer.config.openBindingsEditor && !defaultService);
+    const signature = JSON.stringify(bindings.map(binding => [binding.targetName, binding.expression, binding.bindableObjectNames, binding.rawValue]));
+    if (!selectionChanged && signature === this._signature)
+      return;
+    this._signature = signature;
+    this._rows.replaceChildren();
+    if (!item) {
+      const message = document.createElement('div');
+      message.className = 'message';
+      message.textContent = 'Select one element to edit class bindings.';
+      this._rows.appendChild(message);
+      return;
+    }
+    for (const binding of bindings) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const name = document.createElement('button');
+      name.type = 'button';
+      name.className = 'name';
+      name.textContent = binding.targetName;
+      name.title = `Edit class binding: ${binding.targetName}`;
+      name.onclick = () => this.editBinding(item, binding);
+      const summary = document.createElement('span');
+      summary.className = 'summary';
+      summary.textContent = '← ' + (binding.expression || binding.bindableObjectNames?.join(';') || binding.rawValue || 'binding');
+      summary.title = summary.textContent;
+      summary.ondblclick = () => this.editBinding(item, binding);
+      const menu = document.createElement('button');
+      menu.type = 'button';
+      menu.textContent = '⋯';
+      menu.setAttribute('aria-label', `Actions for class binding ${binding.targetName}`);
+      const openMenu = (event: MouseEvent) => {
+        event.preventDefault();
+        ContextMenu.show([
+          { title: 'Edit binding…', action: () => this.editBinding(item, binding) },
+          { title: 'Rename class…', action: () => this.showNameDialog(item, binding) },
+          { title: 'Remove binding', action: () => { this._service.remove(item, binding); this.refresh(this._items); } }
+        ], event);
+      };
+      menu.onclick = openMenu;
+      row.oncontextmenu = openMenu;
+      row.append(name, summary, menu);
+      this._rows.appendChild(row);
+    }
+  }
+
+  public addBinding() {
+    if (!this._add.disabled)
+      this.showNameDialog(this._items[0], undefined, '', !this._items[0].serviceContainer.config.openBindingsEditor);
+  }
+
+  private async editBinding(item: IDesignItem, binding?: IBinding, name = binding?.targetName) {
+    if (this._editing)
+      return;
+    const editor = item.serviceContainer.config.openBindingsEditor;
+    if (editor) {
+      this._editing = true;
+      try {
+        await editor(this._service.createProperty(name), [item], binding, BindingTarget.class);
+        this.refresh(this._items);
+      } finally {
+        this._editing = false;
+      }
+    } else {
+      this.showNameDialog(item, binding, name, true);
+    }
+  }
+
+  private showNameDialog(item: IDesignItem, binding?: IBinding, name = binding?.targetName ?? '', expressionEditor = false) {
+    if (this.shadowRoot.querySelector('dialog'))
+      return;
+    const dialog = document.createElement('dialog');
+    const form = document.createElement('form');
+    const title = document.createElement('h3');
+    title.textContent = expressionEditor ? 'Edit class binding' : binding ? 'Rename class' : 'Add class binding';
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = 'Class name';
+    const input = document.createElement('input');
+    input.value = name;
+    input.required = true;
+    const help = document.createElement('span');
+    help.className = 'help';
+    help.textContent = 'Use lowercase names, e.g. is-active.';
+    nameLabel.append(input, help);
+    const error = document.createElement('div');
+    error.className = 'error';
+    error.setAttribute('role', 'alert');
+    error.hidden = true;
+    const expressionLabel = document.createElement('label');
+    expressionLabel.textContent = 'Expression';
+    const expression = document.createElement('input');
+    expression.value = binding?.expression ?? '';
+    expression.placeholder = 'isActive';
+    expression.required = true;
+    expressionLabel.appendChild(expression);
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.textContent = 'Cancel';
+    cancel.onclick = () => dialog.close();
+    const save = document.createElement('button');
+    save.type = 'submit';
+    save.textContent = expressionEditor || binding ? 'Save' : 'Next…';
+    actions.append(cancel, save);
+    form.append(title, nameLabel);
+    if (expressionEditor)
+      form.appendChild(expressionLabel);
+    form.append(error, actions);
+    dialog.appendChild(form);
+    this.shadowRoot.appendChild(dialog);
+    dialog.onclose = () => dialog.remove();
+    form.onsubmit = async event => {
+      event.preventDefault();
+      const newName = input.value.trim();
+      const validation = this._service.validateName(item, newName, binding?.targetName);
+      try {
+        if (validation)
+          throw new Error(validation);
+        if (expressionEditor) {
+          const service = binding?.service ?? item.serviceContainer.getServices('bindingService').find(service => service instanceof BaseCustomWebcomponentBindingsService);
+          const newBinding: IBinding = binding ? { ...binding, targetName: newName, expression: expression.value } : {
+            target: BindingTarget.class, targetName: newName, expression: expression.value,
+            mode: BindingMode.oneWay, type: BaseCustomWebcomponentBindingsService.type, service
+          };
+          const group = item.openGroup(`edit class binding: ${newName}`);
+          try {
+            if (!service.setBinding(item, newBinding))
+              throw new Error('The binding service could not save this binding.');
+            if (binding && binding.targetName !== newName && !service.clearBinding(item, binding.targetName, BindingTarget.class))
+              throw new Error('The binding service could not remove the previous binding.');
+            group.commit();
+          } catch (error) {
+            group.abort();
+            throw error;
+          }
+        } else if (binding) {
+          this._service.rename(item, binding, newName);
+        }
+        dialog.close();
+        if (!expressionEditor && !binding)
+          await this.editBinding(item, undefined, newName);
+        this.refresh(this._items);
+      } catch (exception) {
+        error.textContent = exception.message;
+        error.hidden = false;
+      }
+    };
+    dialog.showModal();
+    input.focus();
+  }
+}
+
+customElements.define('node-projects-property-grid-class-bindings', PropertyGridClassBindings);
