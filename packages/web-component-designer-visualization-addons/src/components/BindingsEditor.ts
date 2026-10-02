@@ -63,7 +63,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
                 <input id="namedConverterInput" value="{{?this.convertersString::change}}">
                 <button id="namedConverterBrowse" class="signal-select-btn" @click="[[this._selectNamedConverter()]]">...</button>
             </div>
-            <div class="bordered-section">
+            <div id="converterSection" class="bordered-section">
                 <div class="signal-row signal-header">
                     <span class="converter-header-col">condition</span>
                     <span class="converter-header-col">value</span>
@@ -90,8 +90,13 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
         }
 
         #converterListContainer {
-            max-height: 72px;
             overflow-y: auto;
+        }
+
+        #converterSection {
+            display: grid;
+            grid-template-rows: min-content minmax(22px, 1fr) min-content;
+            min-height: 0;
         }
 
         .input-headline {
@@ -111,7 +116,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
         #root {
             padding: 2px 10px;
             display: grid;
-            grid-template-rows: min-content min-content;
+            grid-template-rows: min-content min-content minmax(0, 1fr);
             overflow: auto;
             height: calc(100% - 4px)
         }
@@ -289,6 +294,7 @@ export class BindingsEditor extends BaseCustomWebComponentConstructorAppend {
 
         .add-signal-btn {
             align-self: flex-start;
+            justify-self: start;
             margin-top: 4px;
             height: 22px;
             cursor: pointer;
