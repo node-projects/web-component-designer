@@ -9,7 +9,7 @@ export class InsertChildAction implements ITransactionItem {
 
     this.designItem = designItem;
     this.newParent = newParent;
-    this.newIndex = newParent.getPlacementService()?.getInsertionIndex?.(newParent, designItem, newIndex) ?? newIndex;
+    this.newIndex = newIndex;
   }
 
   title?: string;

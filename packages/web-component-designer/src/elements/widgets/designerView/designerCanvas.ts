@@ -6,7 +6,6 @@ import { DesignItem, forceHoverAttributeName } from '../../item/DesignItem.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
 import { BaseCustomWebComponentLazyAppend, css, cssFromString, DomHelper, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { dragDropFormatNameBindingObject } from '../../../Constants.js';
-import { InsertAction } from '../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from './IDesignerCanvas.js';
 import { Snaplines } from './Snaplines.js';
 import { CommandType } from '../../../commandHandling/CommandType.js';
@@ -717,7 +716,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       for (let i = 0; i < designItems.length; i++) {
         let di = designItems[i];
         let pos = positions ? positions[i] : null;
-        this.instanceServiceContainer.undoService.execute(new InsertAction(pasteContainer, pasteContainer.childCount, di));
+        pasteContainer.insertChild(di, pasteContainer.childCount);
         if (!disableRestoreOfPositions && pos && di.nodeType == NodeType.Element) {
           di.setStyle('left', (pos.x - containerPos.x + this._currentPasteOffset) + 'px');
           di.setStyle('top', (pos.y - containerPos.y + this._currentPasteOffset) + 'px');

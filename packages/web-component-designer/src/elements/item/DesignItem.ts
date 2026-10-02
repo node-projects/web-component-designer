@@ -297,20 +297,19 @@ export class DesignItem implements IDesignItem {
   }
 
   public insertAdjacentElement(designItem: IDesignItem, where: InsertPosition) {
-    let action: InsertChildAction;
     if (where == 'afterbegin') {
-      action = new InsertChildAction(designItem, this, 0);
+      this.insertChild(designItem, 0);
     } else if (where == 'beforeend') {
-      action = new InsertChildAction(designItem, this, this._childArray.length);
+      this.insertChild(designItem, this._childArray.length);
     } else if (where == 'beforebegin') {
-      action = new InsertChildAction(designItem, this.parent, this.parent.indexOf(this));
+      this.parent.insertChild(designItem, this.parent.indexOf(this));
     } else if (where == 'afterend') {
-      action = new InsertChildAction(designItem, this.parent, this.parent.indexOf(this) + 1);
+      this.parent.insertChild(designItem, this.parent.indexOf(this) + 1);
     }
-    this.instanceServiceContainer.undoService.execute(action);
   }
 
   public insertChild(designItem: IDesignItem, index?: number) {
+    index = this.getPlacementService()?.getInsertionIndex?.(this, designItem, index) ?? index;
     const action = new InsertChildAction(designItem, this, index);
     this.instanceServiceContainer.undoService.execute(action);
   }

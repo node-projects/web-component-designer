@@ -1,7 +1,6 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { DesignItem } from '../../../item/DesignItem.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
-import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { EditTextExtension, handlesPointerEvent } from '../extensions/EditText/EditTextExtension.js';
 import { IDesignerExtension } from '../extensions/IDesignerExtension.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -40,7 +39,7 @@ export class TextTool implements ITool {
           di.setStyle('position', 'absolute');
           di.setStyle('left', currentPoint.x + 'px');
           di.setStyle('top', currentPoint.y + 'px');
-          designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
+          designerCanvas.rootDesignItem.insertChild(di, designerCanvas.rootDesignItem.childCount);
           designerCanvas.extensionManager.applyExtensionInstance(di, new EditTextExtension(designerCanvas.extensionManager, designerCanvas, di));
           designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
           setTimeout(() => { span.focus(); }, 50);
