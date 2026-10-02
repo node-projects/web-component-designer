@@ -5,7 +5,6 @@ import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { calculateNormLegth } from '../../../helper/PathDataPolyfill.js';
 import { DesignItem } from '../../../item/DesignItem.js';
-import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 import { roundValueToDecimalPlaces } from '../extensions/svg/geometry/GeometryWriteHelper.js';
@@ -115,7 +114,7 @@ export class DrawEllipsisTool implements ITool {
         svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
         this._path = null;
         const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-        designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
+        designerCanvas.rootDesignItem.insertChild(di, designerCanvas.rootDesignItem.childCount);
         designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
         break;
     }

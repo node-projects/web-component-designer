@@ -1,7 +1,6 @@
 import { IDesignerCanvas } from "../../widgets/designerView/IDesignerCanvas.js";
 import { IExternalDragDropService } from "./IExternalDragDropService.js";
 import { DesignItem } from '../../item/DesignItem.js';
-import { InsertAction } from "../undoService/transactionItems/InsertAction.js";
 
 export class ExternalDragDropService implements IExternalDragDropService {
 
@@ -21,7 +20,7 @@ export class ExternalDragDropService implements IExternalDragDropService {
       const coord = designerCanvas.getNormalizedEventCoordinates(event);
       di.setStyle('top', coord.y + 'px')
       di.setStyle('left', coord.x + 'px')
-      designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
+      designerCanvas.rootDesignItem.insertChild(di, designerCanvas.rootDesignItem.childCount);
       grp.commit();
       requestAnimationFrame(() => designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di]));
     }

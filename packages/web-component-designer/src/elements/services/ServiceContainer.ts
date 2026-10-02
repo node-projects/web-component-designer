@@ -49,6 +49,7 @@ import { IConfigUiService } from './configUiService/IConfigUiService.js';
 import { IRefactorService } from './refactorService/IRefactorService.js';
 import { InstanceServiceContainer } from './InstanceServiceContainer.js';
 import { IDeletionService } from './deletionService/IDeletionService.js';
+import type { ICopyPreparationService } from './copyPreparationService/ICopyPreparationService.js';
 import { IReferencesChangedService } from './referencesChangedService/IReferencesChangedService.js';
 import { IMiniatureViewService } from './miniatureViewService/IMiniatureViewService.js';
 import { IPngCreatorService } from './pngCreatorService/IPngCreatorService.js';
@@ -87,6 +88,7 @@ interface ServiceNameMap {
   "configUiService": IConfigUiService;
   "refactorService": IRefactorService;
   "deletionService": IDeletionService;
+  "copyPreparationService": ICopyPreparationService;
   "referencesChangedService": IReferencesChangedService;
   "miniatureViewService": IMiniatureViewService;
   "pngCreatorService": IPngCreatorService;
@@ -241,6 +243,10 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   get externalDragDropService(): IExternalDragDropService {
     return this.getLastService('externalDragDropService');
+  }
+
+  get copyPreparationService(): ICopyPreparationService {
+    return this.getLastService('copyPreparationService');
   }
 
   get copyPasteService(): ICopyPasteService {

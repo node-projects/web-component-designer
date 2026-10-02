@@ -1,6 +1,5 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { interpolateLinePoints, moveSVGPath, straightenLine } from '../../../helper/PathDataPolyfill.js';
-import { InsertAction } from '../../../services/undoService/transactionItems/InsertAction.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
 import { ITool } from './ITool.js';
 import { DesignItem } from '../../../item/DesignItem.js';
@@ -193,7 +192,7 @@ export class DrawPathTool implements ITool {
     this._lastPoint = undefined;
 
     const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-    designerCanvas.instanceServiceContainer.undoService.execute(new InsertAction(designerCanvas.rootDesignItem, designerCanvas.rootDesignItem.childCount, di));
+    designerCanvas.rootDesignItem.insertChild(di, designerCanvas.rootDesignItem.childCount);
     designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
   }
 
