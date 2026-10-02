@@ -1,10 +1,8 @@
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
-import { BindingMode } from '../../item/BindingMode.js';
-import { BindingTarget } from '../../item/BindingTarget.js';
-import { IBinding } from '../../item/IBinding.js';
-import { IDesignItem } from '../../item/IDesignItem.js';
-import { BaseCustomWebcomponentBindingsService } from '../../services/bindingsService/BaseCustomWebcomponentBindingsService.js';
-import { ContextMenu } from '../../helper/contextMenu/ContextMenu.js';
+import { BindingTarget } from '@node-projects/web-component-designer/dist/elements/item/BindingTarget.js';
+import { IBinding } from '@node-projects/web-component-designer/dist/elements/item/IBinding.js';
+import { IDesignItem } from '@node-projects/web-component-designer/dist/elements/item/IDesignItem.js';
+import { ContextMenu } from '@node-projects/web-component-designer/dist/elements/helper/contextMenu/ContextMenu.js';
 import { ClassBindingsPropertiesService } from './ClassBindingsPropertiesService.js';
 
 export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend {
@@ -113,8 +111,7 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
     this._items = items ?? [];
     const item = this._items.length === 1 ? this._items[0] : null;
     const bindings = item ? this._service.getBindings(item) : [];
-    const defaultService = item?.serviceContainer.getServices('bindingService').find(service => service instanceof BaseCustomWebcomponentBindingsService);
-    this._add.disabled = !item || (!item.serviceContainer.config.openBindingsEditor && !defaultService);
+    this._add.disabled = !item || !item.serviceContainer.config.openBindingsEditor;
     const signature = JSON.stringify(bindings.map(({ service, ...binding }) => binding));
     if (!selectionChanged && signature === this._signature)
       return;
@@ -162,7 +159,7 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
 
   public addBinding() {
     if (!this._add.disabled)
-      this.showNameDialog(this._items[0], undefined, '', !this._items[0].serviceContainer.config.openBindingsEditor);
+      this.showNameDialog(this._items[0]);
   }
 
   private async editBinding(item: IDesignItem, binding?: IBinding, name = binding?.targetName) {
@@ -177,18 +174,16 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
       } finally {
         this._editing = false;
       }
-    } else {
-      this.showNameDialog(item, binding, name, true);
     }
   }
 
-  private showNameDialog(item: IDesignItem, binding?: IBinding, name = binding?.targetName ?? '', expressionEditor = false) {
+  private showNameDialog(item: IDesignItem, binding?: IBinding, name = binding?.targetName ?? '') {
     if (this.shadowRoot.querySelector('dialog'))
       return;
     const dialog = document.createElement('dialog');
     const form = document.createElement('form');
     const title = document.createElement('h3');
-    title.textContent = binding ? expressionEditor ? 'Edit class binding' : 'Rename class' : 'Add class binding';
+    title.textContent = binding ? 'Rename class' : 'Add class binding';
     const nameLabel = document.createElement('label');
     nameLabel.textContent = 'Class name';
     const input = document.createElement('input');
@@ -202,13 +197,6 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
     error.className = 'error';
     error.setAttribute('role', 'alert');
     error.hidden = true;
-    const expressionLabel = document.createElement('label');
-    expressionLabel.textContent = 'Expression';
-    const expression = document.createElement('input');
-    expression.value = binding?.expression ?? '';
-    expression.placeholder = 'isActive';
-    expression.required = true;
-    expressionLabel.appendChild(expression);
     const actions = document.createElement('div');
     actions.className = 'actions';
     const cancel = document.createElement('button');
@@ -217,11 +205,9 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
     cancel.onclick = () => dialog.close();
     const save = document.createElement('button');
     save.type = 'submit';
-    save.textContent = expressionEditor || binding ? 'Save' : 'Next…';
+    save.textContent = binding ? 'Save' : 'Next…';
     actions.append(cancel, save);
     form.append(title, nameLabel);
-    if (expressionEditor)
-      form.appendChild(expressionLabel);
     form.append(error, actions);
     dialog.appendChild(form);
     this.shadowRoot.appendChild(dialog);
@@ -233,28 +219,11 @@ export class PropertyGridClassBindings extends BaseCustomWebComponentLazyAppend 
       try {
         if (validation)
           throw new Error(validation);
-        if (expressionEditor) {
-          const service = binding?.service ?? item.serviceContainer.getServices('bindingService').find(service => service instanceof BaseCustomWebcomponentBindingsService);
-          const newBinding: IBinding = binding ? { ...binding, targetName: newName, expression: expression.value } : {
-            target: BindingTarget.class, targetName: newName, expression: expression.value,
-            mode: BindingMode.oneWay, type: BaseCustomWebcomponentBindingsService.type, service
-          };
-          const group = item.openGroup(`edit class binding: ${newName}`);
-          try {
-            if (!service.setBinding(item, newBinding))
-              throw new Error('The binding service could not save this binding.');
-            if (binding && binding.targetName !== newName && !service.clearBinding(item, binding.targetName, BindingTarget.class))
-              throw new Error('The binding service could not remove the previous binding.');
-            group.commit();
-          } catch (error) {
-            group.abort();
-            throw error;
-          }
-        } else if (binding) {
+        if (binding) {
           this._service.rename(item, binding, newName);
         }
         dialog.close();
-        if (!expressionEditor && !binding)
+        if (!binding)
           await this.editBinding(item, undefined, newName);
         this.refresh(this._items);
       } catch (exception) {

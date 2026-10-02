@@ -1,36 +1,38 @@
 # Property grid
 
-## Individual class bindings
+## Addon extensions
 
-The `class` / `className` row includes an expandable **Class bindings** section.
-It lists bindings returned by the registered binding services, including bindings
-created in source code. The ordinary class editor still edits the complete static
-class string.
+The default grid has no class-binding controls. Addons can register providers in
+`serviceContainer.propertyGridExtensions`. A provider's `createExtension(property)`
+returns content for that property or `undefined`. The returned extension contains:
 
-- **+**, or **Add class binding…** in the class row's menu, adds a conditional class.
-- Selecting a binding name or double-clicking its summary edits the binding.
-- The row's **⋯** menu offers editing, renaming the target class and removal.
-- Names must be lowercase, without spaces or HTML attribute delimiters, because
-  attribute-based binding syntax cannot preserve uppercase class names.
-- Class-binding management requires a single selected element. Renaming and
-  removal each form one undoable operation and leave the static class string alone.
+- `element`: content inserted below the property row.
+- `refresh(items)`: updates for selection and value changes.
+- Optional `getContextMenuItems(items)`: extra property-row actions.
+- Optional `dispose()`: cleanup when the list rebuilds.
 
-Hosts that configure `serviceContainer.config.openBindingsEditor` receive a
-boolean property adapter, the selected element, the existing binding (or
-`undefined` for a new one), and `BindingTarget.class`. The host continues to save
-bindings through its binding service, as for ordinary property bindings.
+Extensions follow group visibility and receive the grid's `appearance` attribute.
 
-Without a host editor, the built-in expression dialog can create one-way
-`class:is-active="[[isActive]]"` bindings through a registered
-`BaseCustomWebcomponentBindingsService`. Existing bindings use their owning service
-for saving, renaming and removal. Adding is disabled if neither a host editor nor
-the built-in service is available.
+## Visualization class bindings
 
-The binding runtime still determines how target names are interpreted. The current
-`base-custom-webcomponent` dependency converts `class:is-active` to the runtime
-class `isActive`; use a token such as `active` if that runtime must toggle an exact
-lowercase class. Visualization `bind-class:is-active` bindings preserve the
-hyphenated token. The grid does not change either runtime's naming convention.
+Register `ClassBindingsPropertyGridExtensionProvider` from the visualization addon:
+
+```ts
+serviceContainer.propertyGridExtensions.push(new ClassBindingsPropertyGridExtensionProvider());
+```
+
+The addon places **Class bindings** below `class` / `className`. **+** asks only for
+a lowercase class name, then calls the host's existing
+`serviceContainer.config.openBindingsEditor` with a boolean property,
+`BindingTarget.class`, the selection, and the existing binding (or `undefined`).
+The demo connects this callback to the visualization addon's `BindingsEditor`.
+There is no fallback expression editor; adding is disabled without a host editor.
+
+Click a class name to edit it. The **⋯** menu offers edit, rename and removal.
+Names must be lowercase without whitespace or HTML attribute delimiters.
+Renaming and removal preserve binding options and are undoable. Management
+requires one selected element. Source-created bindings appear automatically;
+the ordinary class input continues to edit the static class string.
 
 ## Modern appearance
 

@@ -35,3 +35,4 @@ export * from './services/SignalPropertyEditor.js';
 export * from './services/VisualizationEventsService.js';
 
 //export * from './setupVisuService.js';
+export * from "./components/ClassBindingsPropertyGridExtensionProvider.js";

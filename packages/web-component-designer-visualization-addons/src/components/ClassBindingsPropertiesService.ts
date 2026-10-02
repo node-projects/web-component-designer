@@ -1,11 +1,11 @@
-import { BindingTarget } from '../../item/BindingTarget.js';
-import { IBinding } from '../../item/IBinding.js';
-import { IDesignItem } from '../../item/IDesignItem.js';
-import { RefreshMode } from '../../services/propertiesService/IPropertiesService.js';
-import { IProperty } from '../../services/propertiesService/IProperty.js';
-import { PropertyType } from '../../services/propertiesService/PropertyType.js';
-import { ValueType } from '../../services/propertiesService/ValueType.js';
-import { AbstractPropertiesService } from '../../services/propertiesService/services/AbstractPropertiesService.js';
+import { BindingTarget } from '@node-projects/web-component-designer/dist/elements/item/BindingTarget.js';
+import { IBinding } from '@node-projects/web-component-designer/dist/elements/item/IBinding.js';
+import { IDesignItem } from '@node-projects/web-component-designer/dist/elements/item/IDesignItem.js';
+import { RefreshMode } from '@node-projects/web-component-designer/dist/elements/services/propertiesService/IPropertiesService.js';
+import { IProperty } from '@node-projects/web-component-designer/dist/elements/services/propertiesService/IProperty.js';
+import { PropertyType } from '@node-projects/web-component-designer/dist/elements/services/propertiesService/PropertyType.js';
+import { ValueType } from '@node-projects/web-component-designer/dist/elements/services/propertiesService/ValueType.js';
+import { AbstractPropertiesService } from '@node-projects/web-component-designer/dist/elements/services/propertiesService/services/AbstractPropertiesService.js';
 
 /** Adapter for host binding editors: a class token is a boolean binding target. */
 export class ClassBindingsPropertiesService extends AbstractPropertiesService {

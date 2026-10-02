@@ -1,3 +1,4 @@
+import type { IPropertyGridExtensionProvider } from '../widgets/propertyGrid/IPropertyGridExtensionProvider.js';
 import { IPropertiesService } from './propertiesService/IPropertiesService.js';
 import { IPlacementService } from './placementService/IPlacementService.js';
 import { IElementsService } from './elementsService/IElementsService.js';
@@ -123,6 +124,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
     };
 
   public readonly designerExtensions: Map<(ExtensionType | string), IDesignerExtensionProvider[]> = new Map();
+  public readonly propertyGridExtensions: IPropertyGridExtensionProvider[] = [];
+
   public readonly sourceMapProviders: ISourceMapProvider[] = [];
 
   removeDesignerExtensionOfType(container: (ExtensionType | string), lambda: new (...args: any[]) => IDesignerExtensionProvider): void {

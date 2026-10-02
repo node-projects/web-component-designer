@@ -10,13 +10,14 @@ import { PropertyType } from '../../services/propertiesService/PropertyType.js';
 import { IPropertyGroup } from '../../services/propertiesService/IPropertyGroup.js';
 import { dragDropFormatNameBindingObject, dragDropFormatNamePropertyGrid } from '../../../Constants.js';
 import { IContextMenuItem } from '../../helper/contextMenu/IContextMenuItem.js';
-import { PropertyGridClassBindings } from './PropertyGridClassBindings.js';
+import type { IPropertyGridExtension } from './IPropertyGridExtensionProvider.js';
 
 export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
 
   static readonly observedAttributes = ['appearance'];
   attributeChangedCallback() {
-    this._classBindings?.setAttribute('appearance', this.getAttribute('appearance') ?? 'classic');
+    for (const { extension } of this._extensions)
+      extension.element.setAttribute('appearance', this.getAttribute('appearance') ?? 'classic');
   }
 
   private _div: HTMLDivElement;
@@ -26,7 +27,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   private _designItems: IDesignItem[];
   private _lastClassType: any;
   private _addCounter: number = 0;
-  private _classBindings: PropertyGridClassBindings;
+  private _extensions: { property: IProperty, extension: IPropertyGridExtension }[] = [];
 
   public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
   public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
@@ -258,7 +259,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       this._propertiesService = propertiesService;
       DomHelper.removeAllChildnodes(this._div);
       this._propertyMap.clear();
-      this._classBindings = null;
+      for (const { extension } of this._extensions) extension.dispose?.();
+      this._extensions = [];
     }
   }
 
@@ -284,7 +286,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     this._lastClassType = designItem.element.constructor;
     DomHelper.removeAllChildnodes(this._div);
     this._propertyMap.clear();
-    this._classBindings = null;
+    for (const { extension } of this._extensions) extension.dispose?.();
+    this._extensions = [];
 
     if (properties?.length) {
       for (let p of properties) {
@@ -339,8 +342,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     for (let p of propertyGroup.properties) {
       const property = this._propertyMap.get(p);
       property.rowElement.hidden = !property.rowElement.hidden;
-      if ((p.name === 'class' || p.name === 'className') && this._classBindings)
-        this._classBindings.hidden = property.rowElement.hidden;
+      for (const { property: extensionProperty, extension } of this._extensions)
+        if (extensionProperty === p) extension.element.hidden = property.rowElement.hidden;
     }
   }
 
@@ -470,10 +473,14 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       row.appendChild(editor.element);
       this._div.appendChild(row);
 
-      if (!this._classBindings && (property.name === 'class' || property.name === 'className') && property.propertyType !== PropertyType.cssValue) {
-        this._classBindings = new PropertyGridClassBindings();
-        this._classBindings.setAttribute('appearance', this.getAttribute('appearance') ?? 'classic');
-        this._div.appendChild(this._classBindings);
+      for (const provider of this._serviceContainer.propertyGridExtensions) {
+        const extension = provider.createExtension(property);
+        if (extension) {
+          extension.element.setAttribute('appearance', this.getAttribute('appearance') ?? 'classic');
+          extension.element.style.gridColumn = '1 / -1';
+          this._extensions.push({ property, extension });
+          this._div.appendChild(extension.element);
+        }
       }
 
       this._propertyMap.set(property, { isSetElement: rect, labelElement: labelHolder, editor: editor, rowElement: row });
@@ -544,21 +551,22 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       ctxMenuItems = this.propertyContextMenuProvider(this._designItems, property)
     if (!ctxMenuItems)
       ctxMenuItems = property.service.getContextMenu(this._designItems, property);
-    if ((property.name === 'class' || property.name === 'className') && this._classBindings)
-      ctxMenuItems = [...ctxMenuItems, { title: 'Add class binding…', disabled: this._designItems?.length !== 1, action: () => this._classBindings.addBinding() }];
+    for (const { property: extensionProperty, extension } of this._extensions)
+      if (extensionProperty === property)
+        ctxMenuItems = [...(ctxMenuItems ?? []), ...(extension.getContextMenuItems?.(this._designItems) ?? [])];
     ContextMenu.show(ctxMenuItems, event);
   }
 
   public designItemsChanged(designItems: IDesignItem[]) {
     this._designItems = designItems;
-    this._classBindings?.refresh(designItems);
+    for (const { extension } of this._extensions) extension.refresh(designItems);
     for (let m of this._propertyMap) {
       m[1].editor.designItemsChanged(designItems);
     }
   }
 
   public refreshForDesignItems(items: IDesignItem[]) {
-    this._classBindings?.refresh(items);
+    for (const { extension } of this._extensions) extension.refresh(items);
     for (let m of this._propertyMap) {
       PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(m[1].isSetElement, m[0], items, this._propertiesService, m[1].editor);
     }

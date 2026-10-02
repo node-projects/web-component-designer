@@ -473,3 +473,5 @@ export * from './Constants.js'
 export { EditingDocument } from './elements/EditingDocument.js';
 
 export type { IDemoView } from "./elements/widgets/demoView/IDemoView.js";
+
+export type { IPropertyGridExtension, IPropertyGridExtensionProvider } from "./elements/widgets/propertyGrid/IPropertyGridExtensionProvider.js";
