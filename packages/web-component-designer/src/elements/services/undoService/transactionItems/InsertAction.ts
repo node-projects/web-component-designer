@@ -8,7 +8,7 @@ export class InsertAction implements ITransactionItem {
     this.title = "Insert Item";
 
     this.containerItem = containerItem;
-    this.index = index;
+    this.index = containerItem.getPlacementService()?.getInsertionIndex?.(containerItem, newItem, index) ?? index;
     this.newItem = newItem;
   }
 

@@ -9,6 +9,8 @@ export interface IPlacementService extends IService {
   isEnterableContainer(container: IDesignItem): boolean;
   canEnter(container: IDesignItem, items: IDesignItem[]): boolean;
   canLeave(container: IDesignItem, items: IDesignItem[]): boolean;
+  /** Resolve an insertion index before an action is recorded. Exclude item from the container's children when calculating the index. */
+  getInsertionIndex?(container: IDesignItem, item: IDesignItem, index?: number): number | undefined;
   enterContainer(container: IDesignItem, items: IDesignItem[], mode: 'normal' | 'drop');
   leaveContainer(container: IDesignItem, items: IDesignItem[]);
   getElementOffset(container: IDesignItem, designItem?: IDesignItem): IPoint;
