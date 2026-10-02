@@ -10,6 +10,7 @@ import { ITool } from './ITool.js';
 import { NamedTools } from './NamedTools.js';
 import { ServiceContainer } from "../../../services/ServiceContainer.js";
 import { ChangeGroup } from '../../../services/undoService/ChangeGroup.js';
+import { filterChildPlaceItems } from '../../../helper/LayoutHelper.js';
 import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 
 export class PointerTool implements ITool {
@@ -261,6 +262,7 @@ export class PointerTool implements ITool {
           // *** Copy Items via Ctrl Drag ***
 
           if (!this._clonedItems) {
+            this._actionStartedDesignItems = filterChildPlaceItems(this._actionStartedDesignItems);
             this._clonedItems = [];
             for (let d of this._actionStartedDesignItems) {
               const clone = await d.clone();
@@ -278,6 +280,7 @@ export class PointerTool implements ITool {
           }
 
           if (hasCommandKey(event) && !this._copiedItemsInserted) {
+            designerCanvas.serviceContainer.copyPreparationService?.prepareCopies(this._clonedItems, designerCanvas.rootDesignItem);
             this._changeGroup.title = "Copy Elements";
             this._copiedItemsInserted = true;
             for (let i = 0; i < this._clonedItems.length; i++) {

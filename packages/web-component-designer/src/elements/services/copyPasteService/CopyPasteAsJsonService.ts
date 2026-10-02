@@ -32,11 +32,14 @@ export class CopyPasteAsJsonService implements ICopyPasteService {
     const pasteData = await this._readClipboardPasteData();
     if (pasteData.imageData) {
       let di = await DesignItem.createDesignItemFromImageBlob(serviceContainer, instanceServiceContainer, pasteData.imageData);
+      serviceContainer.copyPreparationService?.prepareCopies([di], instanceServiceContainer.rootDesignItem);
       return [[di]];
     }
 
     const parserService = serviceContainer.htmlParserService;
-    return [await parserService.parse(pasteData.html, serviceContainer, instanceServiceContainer, true), pasteData.positions ?? undefined];
+    const designItems = await parserService.parse(pasteData.html, serviceContainer, instanceServiceContainer, true);
+    serviceContainer.copyPreparationService?.prepareCopies(designItems, instanceServiceContainer.rootDesignItem);
+    return [designItems, pasteData.positions ?? undefined];
   }
 
   private async _readClipboardPasteData(): Promise<IClipboardPasteData> {

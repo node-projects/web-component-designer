@@ -200,6 +200,7 @@ export * from "./elements/services/refactorService/TextRefactorService.js";
 export type { IRefactorService } from "./elements/services/refactorService/IRefactorService.js";
 export type { IRefactoring } from "./elements/services/refactorService/IRefactoring.js";
 
+export type { ICopyPreparationService } from "./elements/services/copyPreparationService/ICopyPreparationService.js";
 export type { IReferencesChangedService } from "./elements/services/referencesChangedService/IReferencesChangedService.js";
 
 export * from "./elements/services/collaborationService/CollaborationNodeIndex.js";
