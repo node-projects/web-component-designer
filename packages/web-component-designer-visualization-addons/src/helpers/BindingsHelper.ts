@@ -418,6 +418,9 @@ export class BindingsHelper {
     if (binding.expressionTwoWay === null || binding.expressionTwoWay === '') {
       delete bindingCopy.expressionTwoWay;
     }
+    if (!binding.writeBackSignal) {
+      delete bindingCopy.writeBackSignal;
+    }
     if (binding.twoWay === null || binding.twoWay === false) {
       delete bindingCopy.twoWay;
     }
