@@ -1,4 +1,5 @@
 import { BaseCustomWebComponentConstructorAppend, css, html } from '@node-projects/base-custom-webcomponent';
+import { IDesignerCanvas } from '../../../IDesignerCanvas.js';
 
 /**
  * A reusable draggable tool window with a title bar and close button.
@@ -104,8 +105,12 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
   private _closeBtn: HTMLButtonElement;
   private _contentArea: HTMLElement;
 
-  constructor() {
+  protected _designerCanvas: IDesignerCanvas;
+  private _visibilityObserver: IntersectionObserver;
+
+  constructor(designerCanvas?: IDesignerCanvas) {
     super();
+    this._designerCanvas = designerCanvas;
 
     this._titleBar = this._getDomElement<HTMLElement>('title-bar');
     this._titleText = this._getDomElement<HTMLElement>('title-text');
@@ -144,6 +149,21 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
       this.style.left = '100px';
       this.style.top = '100px';
     }
+
+    // Auto-close once the owning canvas is no longer visible (e.g. the host
+    // switched away to another tab/panel, or the designer's own code/preview tab).
+    if (this._designerCanvas && !this._visibilityObserver) {
+      this._visibilityObserver = new IntersectionObserver(entries => {
+        if (!entries[entries.length - 1].isIntersecting)
+          this._close();
+      });
+      this._visibilityObserver.observe(this._designerCanvas);
+    }
+  }
+
+  disconnectedCallback() {
+    this._visibilityObserver?.disconnect();
+    this._visibilityObserver = null;
   }
 
   private _close() {

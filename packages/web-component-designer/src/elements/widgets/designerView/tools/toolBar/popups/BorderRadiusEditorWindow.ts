@@ -202,7 +202,6 @@ function expandQuadTokens<T>(tokens: T[]): [T | undefined, T | undefined, T | un
 }
 
 export class BorderRadiusEditorWindow extends DraggableToolWindow {
-  private _designerCanvas: IDesignerCanvas;
   private _config: BorderConfig = defaultConfig();
 
   private _previewBox: HTMLDivElement;
@@ -745,8 +744,7 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
   }
 
   constructor(designerCanvas?: IDesignerCanvas) {
-    super();
-    this._designerCanvas = designerCanvas;
+    super(designerCanvas);
 
     this._previewBox = this._getDomElement<HTMLDivElement>('bre-preview');
     this._uniformCheck = this._getDomElement<HTMLInputElement>('bre-uniform');

@@ -8,7 +8,6 @@ import { calculateOuterRect } from '../../../../../helper/ElementHelper.js';
 import { IDesignItem } from '../../../../../item/IDesignItem.js';
 
 export class TransformToolPopup extends DraggableToolWindow {
-  private _designerCanvas: IDesignerCanvas;
   private _previousSelectionRect: IRect;
   private _selectionChanged: boolean;
 
@@ -197,8 +196,7 @@ export class TransformToolPopup extends DraggableToolWindow {
   }
 
   constructor(designerCanvas?: IDesignerCanvas) {
-    super();
-    this._designerCanvas = designerCanvas;
+    super(designerCanvas);
 
     this._relativeButton = this._getDomElement<HTMLButtonElement>("transform-button-relative");
     this._absoluteButton = this._getDomElement<HTMLButtonElement>("transform-button-absolute");
