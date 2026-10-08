@@ -64,7 +64,10 @@ export class CssAttributeParser {
       }
     }
 
-    if (name.trim() !== '') {
+    // A trailing fragment that never reached a ':' (e.g. mid-typing a property
+    // name) is not a valid declaration yet - ignore it instead of turning it
+    // into a bogus "name:;" entry.
+    if (token === Token.Value && name.trim() !== '') {
       this.entries.push(this.createEntry(name, value));
     }
   }

@@ -25,12 +25,8 @@ export class CssCombiner {
   private static applyStylesToHelper(styles: Map<string, string>) {
     let e = CssCombiner._helperElement;
     e.setAttribute('style', '');
-    for (let s of styles) {
-      if (s[0].startsWith('--') || s[0].includes('-'))
-        e.style.setProperty(s[0], s[1]);
-      else
-        (<any>e.style)[s[0]] = s[1];
-    }
+    for (let s of styles)
+      e.style.setProperty(s[0], s[1]);
     return e;
   }
 
@@ -111,10 +107,7 @@ export class CssCombiner {
   }
 
   private static readStyleValue(style: CSSStyleDeclaration, name: string) {
-    if (name.startsWith('--') || name.includes('-'))
-      return style.getPropertyValue(name).trim();
-
-    return String((<any>style)[name] ?? '').trim();
+    return style.getPropertyValue(name).trim();
   }
 
   private static getSerializedSize(styles: Map<string, string>) {

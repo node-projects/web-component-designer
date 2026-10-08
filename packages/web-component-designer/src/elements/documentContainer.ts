@@ -99,7 +99,6 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._documentSubscriptions.push(this._document.onPendingChangesChanged.on(() => {
       this._disableChangeNotificationEditor = this._document.hasPendingChanges;
       this._contentChangeSource = this._document.hasPendingChanges ? 'code' : 'designer';
-      if (!this._document.hasPendingChanges) this.designerContentChanged(false);
     }));
     this._documentSubscriptions.push(this._document.onCommitError.on(error => this.onCommitError.emit(error)));
   }
