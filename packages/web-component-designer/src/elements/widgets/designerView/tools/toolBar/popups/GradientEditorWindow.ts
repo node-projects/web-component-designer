@@ -208,7 +208,6 @@ function parseGradientCss(value: string): GradientConfig {
 // ─── Window class ──────────────────────────────────────────────────────────
 
 export class GradientEditorWindow extends DraggableToolWindow {
-  private _designerCanvas: IDesignerCanvas;
   private _config: GradientConfig = defaultConfig();
   private _selectedStopIndex = 0;
 
@@ -510,8 +509,7 @@ export class GradientEditorWindow extends DraggableToolWindow {
   }
 
   constructor(designerCanvas?: IDesignerCanvas) {
-    super();
-    this._designerCanvas = designerCanvas;
+    super(designerCanvas);
 
     this._previewStrip = this._getDomElement<HTMLDivElement>('ge-preview-strip');
     this._stopTrack = this._getDomElement<HTMLDivElement>('ge-stop-track');

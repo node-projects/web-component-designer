@@ -89,7 +89,6 @@ function parseOneLayer(token: string): TextShadowLayer | null {
 }
 
 export class TextShadowEditorWindow extends DraggableToolWindow {
-  private _designerCanvas: IDesignerCanvas;
   private _layers: TextShadowLayer[] = [defaultLayer()];
   private _selectedIndex = 0;
 
@@ -308,8 +307,7 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
   }
 
   constructor(designerCanvas?: IDesignerCanvas) {
-    super();
-    this._designerCanvas = designerCanvas;
+    super(designerCanvas);
 
     this._layerList = this._getDomElement<HTMLUListElement>('tse-layer-list');
     this._removeBtn = this._getDomElement<HTMLButtonElement>('tse-remove-btn');

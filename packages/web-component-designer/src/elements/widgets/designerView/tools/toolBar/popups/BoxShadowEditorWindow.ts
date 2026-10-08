@@ -118,7 +118,6 @@ function hexToRgb(hex: string): string {
 }
 
 export class BoxShadowEditorWindow extends DraggableToolWindow {
-  private _designerCanvas: IDesignerCanvas;
   private _layers: BoxShadowLayer[] = [defaultLayer()];
   private _selectedIndex = 0;
 
@@ -369,8 +368,7 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
   }
 
   constructor(designerCanvas?: IDesignerCanvas) {
-    super();
-    this._designerCanvas = designerCanvas;
+    super(designerCanvas);
 
     this._layerList = this._getDomElement<HTMLUListElement>('bse-layer-list');
     this._removeBtn = this._getDomElement<HTMLButtonElement>('bse-remove-btn');
