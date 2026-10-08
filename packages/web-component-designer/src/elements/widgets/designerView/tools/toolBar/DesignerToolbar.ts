@@ -39,6 +39,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
         <div id="toolButtons"></div>`;
 
   private _toolSubscription: { dispose(): void };
+  private _toolWindows = new WeakMap<DesignerToolbarButton, DraggableToolWindow>();
 
   dispose() {
     this._toolSubscription?.dispose();
@@ -77,6 +78,14 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
   }
 
   public showPopup(designerToolbarButton: DesignerToolbarButton) {
+    const existingWindow = this._toolWindows.get(designerToolbarButton);
+    if (existingWindow?.isConnected) {
+      existingWindow.remove();
+      this._toolWindows.delete(designerToolbarButton);
+      return;
+    }
+    this._toolWindows.delete(designerToolbarButton);
+
     if (this._popupContainer.children.length) {
       this._popupContainer.innerHTML = '';
     }
@@ -88,6 +97,11 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
         instance = new designerToolbarButton.popup(this.designerView.designerCanvas);
       if (instance instanceof DraggableToolWindow) {
         DraggableToolWindow.showWindow(instance, designerToolbarButton);
+        this._toolWindows.set(designerToolbarButton, instance);
+        instance.addEventListener('close', () => {
+          if (this._toolWindows.get(designerToolbarButton) === instance)
+            this._toolWindows.delete(designerToolbarButton);
+        }, { once: true });
       } else {
         this._popupContainer.appendChild(instance);
       }
