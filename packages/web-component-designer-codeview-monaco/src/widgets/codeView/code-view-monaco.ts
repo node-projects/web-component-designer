@@ -271,8 +271,27 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
     if (this._monacoEditor) {
       this.clearPendingSetSelection();
       this._disableSelectionAfterUpd = true;
-      if (this._monacoEditor)
-        this._monacoEditor.setValue(code);
+      const model = this._monacoEditor.getModel();
+      const old = model.getValue();
+      if (old !== code) {
+        let start = 0;
+        const max = Math.min(old.length, code.length);
+        while (start < max && old.charCodeAt(start) === code.charCodeAt(start))
+          start++;
+        let endOld = old.length, endNew = code.length;
+        while (endOld > start && endNew > start && old.charCodeAt(endOld - 1) === code.charCodeAt(endNew - 1)) {
+          endOld--;
+          endNew--;
+        }
+        const a = model.getPositionAt(start);
+        const b = model.getPositionAt(endOld);
+        //minimal edit keeps the caret position (setValue would reset it)
+        this._monacoEditor.executeEdits('update', [{
+          range: { startLineNumber: a.lineNumber, startColumn: a.column, endLineNumber: b.lineNumber, endColumn: b.column },
+          text: code.substring(start, endNew),
+          forceMoveMarkers: false
+        }]);
+      }
       this._disableSelectionAfterUpd = false;
       CodeViewMonaco.getMonacoLib().then(monaco => {
         if (this._disposed) return;
