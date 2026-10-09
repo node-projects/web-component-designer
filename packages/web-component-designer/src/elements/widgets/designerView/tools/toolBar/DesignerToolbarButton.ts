@@ -46,6 +46,7 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
       height: 16px;
       pointer-events: none;
       -webkit-user-drag: none;
+      filter: var(--wcd-designer-view-toolbar-icon-filter, none);
     }
     `;
 
