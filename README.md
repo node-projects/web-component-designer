@@ -11,6 +11,30 @@ There is also a preview VSCode addon using the designer: https://github.com/node
 
 https://www.npmjs.com/package/@node-projects/web-component-designer
 
+## Publishing releases
+
+Publish a GitHub release with a tag such as `v1.2.3` or `1.2.3-rc.1`.
+The `release.yml` workflow checks out that tag, sets every public workspace's
+`package.json` version and internal dependencies to the release version, and
+updates the lockfile in the build checkout. These version edits are not pushed
+back to the repository.
+
+All packages run their existing `prepublishOnly` preparation, including bundles
+and asset copies. The workflow attaches every npm `.tgz` archive to the GitHub
+release, then publishes those same archives publicly to npm. Stable releases use
+the `latest` npm tag; prerelease versions and GitHub prereleases use `next`.
+The private monorepo root is not published. Use a new, unpublished version for
+each release; npm does not allow overwriting a published package version.
+
+Before the first release, configure each npm package's trusted publisher for
+GitHub Actions: owner `node-projects`, repository `web-component-designer`, and
+workflow `release.yml` (no environment). See the
+[npm trusted publishing instructions](https://docs.npmjs.com/trusted-publishers/).
+Alternatively, add a repository Actions secret named `NPM_TOKEN` with publishing
+access to all packages. The workflow uses it when present.
+
+To check the version preparation locally, run `node --test scripts/prepare-release.test.mjs`.
+
 ## Comparison
 
 [Comparison of Designer Frameworks](COMPARISON.md)

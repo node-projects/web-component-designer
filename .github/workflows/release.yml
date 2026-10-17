@@ -1,0 +1,65 @@
+name: Publish release packages
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: npm-release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set package versions from release tag
+        id: version
+        run: node scripts/prepare-release.mjs
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+
+      - name: Build packages and run publishing preparation
+        run: |
+          # Visualization addons import Wunderbaum, which sorts after them in workspace order.
+          npx --no-install tsc --build packages/web-component-designer-widgets-wunderbaum
+          npm run prepublishOnly --workspaces --if-present
+
+      - name: Pack all public workspaces
+        run: |
+          mkdir release-packages
+          npm pack --workspaces --pack-destination "$PWD/release-packages"
+
+      - name: Attach npm packages to the release
+        run: gh release upload "$RELEASE_TAG" release-packages/*.tgz --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+
+      - name: Publish packaged files to npm
+        run: |
+          for package in release-packages/*.tgz; do
+            npm publish "$package" --access public --tag "$NPM_TAG"
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TAG: ${{ steps.version.outputs.dist_tag }}
