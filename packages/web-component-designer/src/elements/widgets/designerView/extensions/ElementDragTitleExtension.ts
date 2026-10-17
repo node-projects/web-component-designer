@@ -1,4 +1,3 @@
-import { getBoundingClientRectAlsoForDisplayContents } from '../../../helper/ElementHelper.js';
 import { getTextWidth } from '../../../helper/TextHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -27,7 +26,6 @@ export class ElementDragTitleExtension extends AbstractExtension {
       return;
 
     if (!isNaN(transformedCornerPoints.p1.x)) {
-      const boundRect = getBoundingClientRectAlsoForDisplayContents(this.extendedItem.element);
       let w = getTextWidth(this.extendedItem.name, '10px monospace');
       let elementWidth = Math.sqrt(Math.pow(transformedCornerPoints.p2.x - transformedCornerPoints.p1.x, 2) + Math.pow(transformedCornerPoints.p2.y - transformedCornerPoints.p1.y, 2));
       let text = this.extendedItem.name;
@@ -39,7 +37,7 @@ export class ElementDragTitleExtension extends AbstractExtension {
       this._rect = this._drawRect(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, this._width, 15, 'svg-primary-selection-move', this._rect);
       this._clickRect = this._drawRect(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, this._width, 18, 'svg-invisible', this._clickRect);
       this._clickRect.style.background = 'transparent';
-      this._text = this._drawHTML('<div style="position:relative; pointer-events: none;"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0; padding-left: 2px;">' + text + '</span></div>', (boundRect.x - this.designerCanvas.containerBoundingRect.x) / this.designerCanvas.scaleFactor, transformedCornerPoints.p1.y - 16, this._width, 15, 'svg-text-primary', this._text);
+      this._text = this._drawHTML('<div style="position:relative; pointer-events: none;"><span style="width: 100%; position: absolute; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transform-origin: 0 0; padding-left: 2px;">' + text + '</span></div>', transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, this._width, 15, 'svg-text-primary', this._text);
       this._text.style.overflow = 'visible';
 
       this._clickRect.addEventListener('pointerdown', (e) => this._pointerEvent(e));
@@ -59,37 +57,26 @@ export class ElementDragTitleExtension extends AbstractExtension {
   override refresh(cache: Record<string | symbol, any>, event?: Event) {
     const transformedCornerPoints = this.extendedItem.element.getBoxQuads({ relativeTo: this.designerCanvas.canvas })[0];
     if (!isNaN(transformedCornerPoints.p1.x)) {
-      const angle = Math.atan2((transformedCornerPoints.p2.y - transformedCornerPoints.p1.y), (transformedCornerPoints.p2.x - transformedCornerPoints.p1.x)) * 180 / Math.PI;
-      if (this._valuesHaveChanges(transformedCornerPoints.p1.x, transformedCornerPoints.p1.y, angle, this.designerCanvas.scaleFactor)) {
+      let { p1, p2, p4 } = transformedCornerPoints;
+      // Reflections reverse the winding. Reverse the top edge so the title stays outside the element.
+      if ((p2.x - p1.x) * (p4.y - p1.y) - (p2.y - p1.y) * (p4.x - p1.x) < 0)
+        [p1, p2] = [p2, p1];
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+      if (this._valuesHaveChanges(p1.x, p1.y, angle, this.designerCanvas.scaleFactor)) {
         const h = (15 / this.designerCanvas.scaleFactor);
         const o = -(16 / this.designerCanvas.scaleFactor);
         const w = (this._width / this.designerCanvas.scaleFactor);
-        this._rect.setAttribute('x', '' + transformedCornerPoints.p1.x);
-        this._rect.setAttribute('y', '' + transformedCornerPoints.p1.y);
-        this._rect.style.rotate = angle + 'deg';
-        this._rect.style.translate = '0 ' + o + 'px';
-        this._rect.style.transformOrigin = '0 100%';
-        this._rect.style.transformBox = 'fill-box';
-        this._rect.setAttribute('height', '' + h);
-        this._rect.setAttribute('width', '' + w);
+        for (const overlay of [this._rect, this._clickRect, this._text]) {
+          overlay.setAttribute('x', '0');
+          overlay.setAttribute('y', '0');
+          overlay.setAttribute('transform', `translate(${p1.x} ${p1.y}) rotate(${angle}) translate(0 ${o})`);
+          overlay.setAttribute('height', '' + h);
+          overlay.setAttribute('width', '' + w);
+        }
         this._rect.style.strokeWidth = (1 / this.designerCanvas.scaleFactor).toString();
-        this._clickRect.setAttribute('x', '' + transformedCornerPoints.p1.x);
-        this._clickRect.setAttribute('y', '' + transformedCornerPoints.p1.y);
-        this._clickRect.style.rotate = angle + 'deg';
-        this._clickRect.style.translate = '0 ' + o + 'px';
-        this._clickRect.style.transformOrigin = '0 100%';
-        this._clickRect.style.transformBox = 'fill-box';
-        this._clickRect.setAttribute('height', '' + (h + 3));
-        this._clickRect.setAttribute('width', '' + w);
+        this._clickRect.setAttribute('height', '' + (18 / this.designerCanvas.scaleFactor));
         this._clickRect.style.strokeWidth = (1 / this.designerCanvas.scaleFactor).toString();
-        this._text.setAttribute('x', '' + transformedCornerPoints.p1.x);
-        this._text.setAttribute('y', '' + transformedCornerPoints.p1.y);
         this._text.style.fontSize = (10 / this.designerCanvas.scaleFactor) + 'px';
-        this._text.setAttribute('height', '' + h);
-        this._text.setAttribute('width', '' + w);
-        (<HTMLElement>this._text.children[0].children[0]).style.rotate = angle + 'deg';
-        (<HTMLElement>this._text.children[0].children[0]).style.translate = '0 ' + o + 'px';
-        (<HTMLElement>this._text.children[0].children[0]).style.transformOrigin = '0 100%';
       }
     }
   }
