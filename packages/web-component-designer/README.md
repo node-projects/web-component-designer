@@ -1,78 +1,78 @@
 # web-component-designer
 
-```It's now considered beta. It works, we use it in production, but there are many more features to come```
+[![npm version](https://img.shields.io/npm/v/%40node-projects%2Fweb-component-designer)](https://www.npmjs.com/package/@node-projects/web-component-designer)
+[![npm downloads](https://img.shields.io/npm/dm/%40node-projects%2Fweb-component-designer)](https://www.npmjs.com/package/@node-projects/web-component-designer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/node-projects/web-component-designer/blob/master/LICENSE)
+[![Publish release packages](https://github.com/node-projects/web-component-designer/actions/workflows/release.yml/badge.svg)](https://github.com/node-projects/web-component-designer/actions/workflows/release.yml)
+[![Try the demo](https://img.shields.io/badge/demo-live-536dfe)](https://node-projects.github.io/web-component-designer-demo/index.html)
 
-A HTML web component for designing web components and HTML pages based on PolymerLabs wizzywid which can easily be integrated in your own software.
-Meanwhile polymer is not used anymore.
+An embeddable visual editor for HTML pages and web components. Build an editor into your own application with a design canvas, HTML source editing, a component palette, a document tree, and property inspectors.
 
-![image](https://user-images.githubusercontent.com/364896/117482820-358e2d80-af65-11eb-97fd-9d15ebf1966f.png)
+Originally based on PolymerLabs' wizzywid, the designer now uses standard web components and TypeScript without a Polymer runtime.
 
+![Designer showing a sample HTML layout with a selected button and property inspector](https://raw.githubusercontent.com/node-projects/web-component-designer/master/packages/web-component-designer/docs/images/designer-dark.jpg)
 
-## NPM Package
+## Installation and integration
 
-https://www.npmjs.com/package/@node-projects/web-component-designer
-
-     npm i @node-projects/web-component-designer
-
-## Browser support
-
-  - Chrome/Firefox & Safari
-
-## Developing
-
-  * Install dependencies
-```
-  $ npm install
+```sh
+npm install @node-projects/web-component-designer
 ```
 
-  * Compile typescript after doing changes
-```
-  $ npm run build (if you use Visual Studio Code, you can also run the build task via Ctrl + Shift + B > tsc:build - tsconfig.json)
+Use a browser application with a bundler that resolves npm imports. Create the default services, then mount a document container:
+
+```ts
+import {
+  createDefaultServiceContainer,
+  DocumentContainer,
+} from '@node-projects/web-component-designer';
+
+const services = createDefaultServiceContainer();
+const designer = new DocumentContainer(
+  services,
+  '<button style="padding: 12px 20px">Hello, designer!</button>',
+);
+designer.style.cssText = 'display: block; height: 600px;';
+document.body.appendChild(designer);
+await designer.whenReady();
+
+// Commit pending source edits before reading the current HTML.
+async function getHtml() {
+  await designer.commitPendingChanges();
+  return designer.content;
+}
 ```
 
-  * *Link node module*<br/>
-```
-  $ npm link 
-```
+This mounts the document editor with its Designer, Code, Split, and Preview tabs. The default services include a simple code editor. Add palette, tree, and property widgets to build a full editor shell; the [simple demo source](https://github.com/node-projects/web-component-designer-simple-demo) and [full demo source](https://github.com/node-projects/web-component-designer-demo) show how to connect them.
 
-## Using
+The core package depends on `@node-projects/base-custom-webcomponent`. Rich code editors and other integrations live in optional packages, so you can choose the dependencies your application needs.
 
-At first you have to setup a service container providing services for history, properties, elements, ...
+## Features
+
+- Visual selection, drag-and-drop, resizing, rotation, snapping, and layout tools.
+- HTML source, split, and preview views alongside the design canvas.
+- Undo/redo, copy/paste, custom element palettes, document trees, and property inspectors.
+- Configurable services for parsing, placement, properties, and other editor behavior.
+- Optional Ace, CodeMirror 5/6, Monaco, Wunderbaum, collaboration, Mermaid, and ZPL integrations.
 
 ## Theming
 
-The designer chrome is styled with CSS custom properties, so it can be restyled from the
-outside without patching component styles. See [THEMING.md](THEMING.md) for the token
-reference.
+Style the designer UI with CSS custom properties on an ancestor, such as `--wcd-color-surface`, `--wcd-color-text`, and `--wcd-color-accent`. See [THEMING.md](THEMING.md) for the token reference. Style the document itself through `designer.additionalStyles` or `designer.additionalStylesheets`.
 
-## Code Editor
+## Pointer shortcuts
 
-You can select to use one of 3 code editors available (ACE, CodeMirrow, Monaco).
-If you use one of the widgets, you need to include the JS lib in your index.html and then use the specific widget.
+| Shortcut | Action |
+| --- | --- |
+| Alt | Select an element behind another element. |
+| Shift | Draw a selection rectangle. |
+| Ctrl | Add or remove an element from the selection. |
+| Ctrl + Shift | Pan the canvas. |
 
-## TreeView
+## Documentation and development
 
-We have 2 tree components. One independent and one feature rich which uses FancyTree (and cause of this it needs JQuery and JqueryUI).
+See the [repository README](https://github.com/node-projects/web-component-designer#readme) for optional package descriptions, browser and touch support, development commands, and release instructions.
 
-## DragDrop
+[Full demo](https://node-projects.github.io/web-component-designer-demo/index.html) · [Simple demo](https://node-projects.github.io/web-component-designer-simple-demo/index.html) · [Issues](https://github.com/node-projects/web-component-designer/issues)
 
-If you'd like to use the designer on mobile, you need the mobile-drag-drop npm library.
-Your index.html should be extended as follows:
+## License
 
-    <link rel="stylesheet" href="/node_modules/mobile-drag-drop/default.css">
-    <script src="/node_modules/mobile-drag-drop/index.js"></script>
-
-## Keys
-
-Pointer Tool:
-alt:   select element behind
-shift:  draw selection rect
-ctrl:  add/remove from selection
-ctrl+shift: pan
-
-## Copyright notice
-
-The Library uses Images from the Chrome Dev Tools, see
-https://github.com/ChromeDevTools/devtools-frontend/tree/main/front_end/Images/src
-and
-https://github.com/ChromeDevTools/devtools-frontend/blob/main/LICENSE
+[MIT](https://github.com/node-projects/web-component-designer/blob/master/LICENSE). Some icons originate from [Chrome DevTools](https://github.com/ChromeDevTools/devtools-frontend/blob/main/LICENSE).
