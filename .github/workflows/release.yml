@@ -3,22 +3,31 @@ name: Publish release packages
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing GitHub release tag to publish
+        required: true
+        type: string
 
 permissions:
   contents: write
   id-token: write
 
 concurrency:
-  group: npm-release-${{ github.event.release.tag_name }}
+  group: npm-release-${{ github.event.release.tag_name || inputs.release_tag }}
   cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ env.RELEASE_TAG }}
           persist-credentials: false
 
       - uses: actions/setup-node@v7
@@ -32,10 +41,12 @@ jobs:
 
       - name: Set package versions from release tag
         id: version
-        run: node scripts/prepare-release.mjs
+        run: |
+          RELEASE_PRERELEASE=$(gh release view "$RELEASE_TAG" --json isPrerelease --jq .isPrerelease)
+          export RELEASE_PRERELEASE
+          node scripts/prepare-release.mjs
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+          GH_TOKEN: ${{ github.token }}
 
       - name: Build packages and run publishing preparation
         run: |
@@ -52,12 +63,10 @@ jobs:
         run: gh release upload "$RELEASE_TAG" release-packages/*.tgz --clobber
         env:
           GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
 
       - name: Publish packaged files to npm
         run: |
-          for package in release-packages/*.tgz; do
+          for package in ./release-packages/*.tgz; do
             npm publish "$package" --access public --tag "$NPM_TAG"
           done
         env:

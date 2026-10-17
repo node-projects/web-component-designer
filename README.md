@@ -35,6 +35,12 @@ access to all packages. The workflow uses it when present.
 
 To check the version preparation locally, run `node --test scripts/prepare-release.test.mjs`.
 
+To publish an existing release using the latest workflow (for example, after
+fixing a workflow failure), run
+`gh workflow run release.yml --ref master -f release_tag=1.2.3`.
+The workflow still builds the source at the specified release tag. Retry only
+when that version has not yet been published to npm.
+
 ## Comparison
 
 [Comparison of Designer Frameworks](COMPARISON.md)
