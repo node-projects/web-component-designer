@@ -7,7 +7,7 @@ import { CssCombiner } from '../../helper/CssCombiner.js';
 import { NodeType } from '../../item/NodeType.js';
 import { IStringPosition } from './IStringPosition.js';
 import { PropertiesHelper } from '../propertiesService/services/PropertiesHelper.js';
-import { ElementDisplayType, getElementDisplaytype } from '../../helper/ElementHelper.js';
+import { ElementDisplayType, getElementDisplaytype, preservesWhitespace } from '../../helper/ElementHelper.js';
 import { appendCssImportant } from '../../helper/CssImportant.js';
 
 enum ElementContainerType {
@@ -77,7 +77,7 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
     writeContext.lastElementDisplayType = ElementDisplayType.inline;
     const parentElementName = designItem.parent?.name;
     let content = DomConverter.normalizeContentValue(designItem.content, parentElementName);
-    if (!DomConverter.isRawTextElementName(parentElementName)) {
+    if (!DomConverter.isRawTextElementName(parentElementName) && !preservesWhitespace(designItem.element.parentElement)) {
       if (writeContext.containerDisplayType === ElementContainerType.inline)
         content = this._normalizeInlineTextContent(content);
       else
@@ -104,11 +104,6 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
   }
 
   private _writeElementNode(writeContext: IWriteContext, designItem: IDesignItem) {
-//    const cs = getComputedStyle(designItem.element);
-//cs.whiteSpace === 'pre'
-//isInPre
-//is in inline?
-
     const currentElementDisplayType = getElementDisplaytype(<HTMLElement>designItem.element);
     writeContext.lastElementDisplayType = currentElementDisplayType;
     writeContext.indentedTextWriter.write('<' + designItem.name);
@@ -139,7 +134,7 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
     }
 
     if (!DomConverter.IsSelfClosingElement(designItem.name)) {
-      if (currentElementDisplayType === ElementDisplayType.block && designItem.hasChildren && !contentSingleTextNode) {
+      if (currentElementDisplayType === ElementDisplayType.block && designItem.hasChildren && !contentSingleTextNode && !preservesWhitespace(designItem.element as Element)) {
         this._writeNewlineAndIntend(writeContext);
       }
       //write newline & intend ???
@@ -187,6 +182,8 @@ export class FormatingHtmlWriterService implements IHtmlWriterService {
   }
 
   getContainerType(element: HTMLElement): ElementContainerType {
+    if (preservesWhitespace(element))
+      return ElementContainerType.inline;
     const display = (element.ownerDocument.defaultView ?? window).getComputedStyle(element).display;
     if (display === 'inline')
       return ElementContainerType.inline;

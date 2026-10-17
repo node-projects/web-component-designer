@@ -66,6 +66,16 @@ export function isEmptyTextNode(node: Node): boolean {
   return node.textContent.trim() == '' && node.textContent.indexOf('\xa0' /* &nbsp; */) < 0;
 }
 
+export function preservesWhitespace(element: Element | null): boolean {
+  // Resolve inheritance explicitly for DOM implementations without computed inheritance.
+  for (let current = element; current; current = current.parentElement) {
+    const whiteSpace = (current.ownerDocument.defaultView ?? window).getComputedStyle(current).whiteSpace;
+    if (whiteSpace && whiteSpace !== 'inherit' && whiteSpace !== 'unset')
+      return ['pre', 'pre-wrap', 'pre-line', 'break-spaces'].includes(whiteSpace);
+  }
+  return false;
+}
+
 export function getActiveElement(): Element {
   let activeElement = document.activeElement;
   let lastActive = null;

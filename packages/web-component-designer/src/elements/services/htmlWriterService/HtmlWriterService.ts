@@ -2,7 +2,7 @@ import { IDesignItem } from '../../item/IDesignItem.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
 import { ITextWriter } from '../../helper/ITextWriter.js';
 import { NodeType } from '../../item/NodeType.js';
-import { isEmptyTextNode, isInline, isInlineAfter } from '../../helper/ElementHelper.js';
+import { isEmptyTextNode, isInline, isInlineAfter, preservesWhitespace } from '../../helper/ElementHelper.js';
 import { AbstractHtmlWriterService } from './AbstractHtmlWriterService.js';
 import { IHtmlWriterOptions } from './IHtmlWriterOptions.js';
 
@@ -60,7 +60,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
     const currentPreserveInlineWhitespace = preserveInlineWhitespace || this._isInlineContainer(designItem);
 
     if (designItem.nodeType == NodeType.TextNode) {
-      if (isEmptyTextNode(designItem.element) &&
+      if (!preservesWhitespace(designItem.element.parentElement) && isEmptyTextNode(designItem.element) &&
         ((designItem.element.previousSibling instanceof designItem.window.HTMLElement && !isInlineAfter(designItem.element.previousSibling)) ||
           (designItem.element.nextSibling instanceof designItem.window.HTMLElement && !isInline(designItem.element.nextSibling)))) {
       } else
@@ -91,7 +91,7 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
           this.writeTextNode(indentedTextWriter, designItem, false, !notrim, currentPreserveInlineWhitespace);
         } else {
           // Mixed text stays contiguous even when its container is block-level (e.g. a positioned button).
-          const preserveContentWhitespace = currentPreserveInlineWhitespace || children.some(c => c.nodeType === NodeType.TextNode && !isEmptyTextNode(c.element));
+          const preserveContentWhitespace = currentPreserveInlineWhitespace || preservesWhitespace(designItem.element as Element) || children.some(c => c.nodeType === NodeType.TextNode && !isEmptyTextNode(c.element));
           if (!preserveContentWhitespace && (designItem.element instanceof designItem.window.HTMLElement && !isInlineAfter(designItem.element) || (designItem.element instanceof designItem.window.SVGElement))) {
             indentedTextWriter.writeNewline();
             indentedTextWriter.levelRaise();
@@ -135,7 +135,8 @@ export class HtmlWriterService extends AbstractHtmlWriterService {
 
     const parentElementName = designItem.nodeType === NodeType.Element ? designItem.name : designItem.parent?.name;
     let content = DomConverter.normalizeContentValue(designItem.content, parentElementName);
-    if (!DomConverter.isRawTextElementName(parentElementName)) {
+    const contentElement = designItem.nodeType === NodeType.Element ? designItem.element as Element : designItem.element?.parentElement;
+    if (!DomConverter.isRawTextElementName(parentElementName) && !preservesWhitespace(contentElement)) {
       if (preserveInlineWhitespace || this._hasInlineParent(designItem))
         content = this._normalizeInlineTextContent(content);
       else if (trim)
