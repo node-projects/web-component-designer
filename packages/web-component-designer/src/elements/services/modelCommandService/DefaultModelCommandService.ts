@@ -8,6 +8,10 @@ import { IDesignItem } from "../../item/IDesignItem.js";
 
 export class DefaultModelCommandService implements IModelCommandService {
   canExecuteCommand(designerCanvas: IDesignerCanvas, command: IUiCommand, designItems?: IDesignItem[]): boolean {
+    if (command.type == CommandType.distributeHorizontal || command.type == CommandType.distributeVertical) {
+      const items = designItems ?? designerCanvas.instanceServiceContainer.selectionService.selectedElements;
+      return items.length >= 3 && items.every(x => !x.isRootItem);
+    }
     if (command.type == CommandType.moveBackward ||
       command.type == CommandType.moveForward ||
       command.type == CommandType.moveToBack ||
@@ -34,7 +38,11 @@ export class DefaultModelCommandService implements IModelCommandService {
     designItems = designItems ?? [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
     const primary = designItems[0]  ;
     
-    if (command.type == CommandType.moveBackward) {
+    if (command.type == CommandType.distributeHorizontal || command.type == CommandType.distributeVertical) {
+      if (!this.canExecuteCommand(designerCanvas, command, designItems))
+        return false;
+      ArrangeHelper.distributeElements(command.type == CommandType.distributeHorizontal, designerCanvas, designItems);
+    } else if (command.type == CommandType.moveBackward) {
       let idx = primary.parent.indexOf(primary) - 1;
       if (idx >= 0)
         primary.parent.insertChild(primary, idx);

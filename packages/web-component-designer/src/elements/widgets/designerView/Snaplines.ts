@@ -4,6 +4,7 @@ import type { ISize } from '../../../interfaces/ISize.js';
 import { OverlayLayerView } from './overlayLayerView.js';
 import { OverlayLayer } from "./extensions/OverlayLayer.js";
 import { IRect } from "../../../interfaces/IRect.js";
+import { EqualSpacingSnap, getEqualSpacingSnap } from '../../helper/EqualSpacingHelper.js';
 
 const overlayLayer = OverlayLayer.Normal;
 
@@ -91,6 +92,7 @@ export class Snaplines {
       }
     }
 
+    const minDiffH = minDiff;
     minDiff = this.snapOffset + 1;
     let pV = undefined;
     let posV = undefined;
@@ -135,13 +137,75 @@ export class Snaplines {
 
     this._overlayLayerView.removeAllNodesWithClass('svg-snapline');
 
-    if (pH !== undefined || pV !== undefined) {
-      let pos = { x: pH !== undefined ? posH : position.x, y: pV !== undefined ? posV : position.y };
+    let spacingH: EqualSpacingSnap;
+    let spacingV: EqualSpacingSnap;
+    if (size && size.width > 0 && size.height > 0) {
+      const neighbours = [...new Set(this._positionsMiddleH.map(x => x[1]))].map(r => ({
+        x: r.x - this._outerRect.x, y: r.y - this._outerRect.y, width: r.width, height: r.height
+      }));
+      const rect = { ...position, ...size };
+      spacingH = getEqualSpacingSnap(rect, neighbours, true, this.snapOffset);
+      spacingV = getEqualSpacingSnap(rect, neighbours, false, this.snapOffset);
+      if (spacingH && (Math.abs(spacingH.position - position.x) < minDiffH || spacingH.position === posH)) {
+        posH = spacingH.position;
+        if (Math.abs(spacingH.position - position.x) < minDiffH) pH = undefined;
+      } else
+        spacingH = undefined;
+      if (spacingV && (Math.abs(spacingV.position - position.y) < minDiff || spacingV.position === posV)) {
+        posV = spacingV.position;
+        if (Math.abs(spacingV.position - position.y) < minDiff) pV = undefined;
+      } else
+        spacingV = undefined;
+    }
+
+    if (posH !== undefined || posV !== undefined) {
+      let pos = { x: posH ?? position.x, y: posV ?? position.y };
       this.drawSnaplines(pos, size, pH, pV);
-      return { x: pH !== undefined ? posH : null, y: pV !== undefined ? posV : null };
+      if (spacingH) this._drawSpacing(spacingH, true);
+      if (spacingV) this._drawSpacing(spacingV, false);
+      return { x: posH ?? null, y: posV ?? null };
     }
 
     return { x: null, y: null };
+  }
+
+  private _drawSpacing(spacing: EqualSpacingSnap, horizontal: boolean) {
+    const scale = this._containerItem.instanceServiceContainer.designerCanvas.scaleFactor;
+    const cap = 4 / scale;
+    for (const [start, end] of spacing.gaps) {
+      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      group.setAttribute('class', 'svg-snapline svg-spacing-guide');
+      const label = `${Number((end - start).toFixed(2))} px`;
+      group.setAttribute('aria-label', `Equal spacing: ${label}`);
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const cross = spacing.crossPosition;
+      line.setAttribute('d', horizontal
+        ? `M ${start} ${cross} H ${end} M ${start} ${cross - cap} v ${cap * 2} M ${end} ${cross - cap} v ${cap * 2}`
+        : `M ${cross} ${start} V ${end} M ${cross - cap} ${start} h ${cap * 2} M ${cross - cap} ${end} h ${cap * 2}`);
+      line.setAttribute('class', 'svg-spacing-line');
+      line.setAttribute('vector-effect', 'non-scaling-stroke');
+      group.appendChild(line);
+
+      const badge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      const width = label.length * 7 + 10;
+      const middle = (start + end) / 2;
+      const x = horizontal ? middle : cross + (width / 2 + 8) / scale;
+      const y = horizontal ? cross - 13 / scale : middle;
+      badge.setAttribute('transform', `translate(${x} ${y}) scale(${1 / scale})`);
+      const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      background.setAttribute('class', 'svg-spacing-label-background');
+      background.setAttribute('x', String(-width / 2));
+      background.setAttribute('y', '-9');
+      background.setAttribute('width', String(width));
+      background.setAttribute('height', '18');
+      background.setAttribute('rx', '3');
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('class', 'svg-spacing-label');
+      text.textContent = label;
+      badge.append(background, text);
+      group.appendChild(badge);
+      this._overlayLayerView.addOverlay(this.constructor.name, group, OverlayLayer.Foreground);
+    }
   }
 
   drawSnaplines(position: IPoint, size: ISize, rectsH: IRect[], rectsV: IRect[]) {

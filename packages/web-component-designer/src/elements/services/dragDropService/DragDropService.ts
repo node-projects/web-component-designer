@@ -8,6 +8,7 @@ import { ExtensionType } from "../../widgets/designerView/extensions/ExtensionTy
 import { dragDropFormatNameElementDefinition } from "../../../Constants.js";
 import { NpmPackageLoader } from "../../helper/NpmPackageLoader.js";
 import { getPossiblePlacementTarget } from "../../helper/PlacementTargetHelper.js";
+import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 
 interface IPlacementEnsureAncestor {
   selector: string;
@@ -37,6 +38,7 @@ export class DragDropService implements IDragDropService {
       };
     }, true); // <-- use capture phase!
     window.addEventListener("dragend", (e) => {
+      this._dragOverExtensionItem?.instanceServiceContainer.designerCanvas.snapLines.clearSnaplines();
       this._currentDragDropFormatNameElementDefinition = null;
     }, true); // <-- use capture phase!
   }
@@ -45,6 +47,7 @@ export class DragDropService implements IDragDropService {
   }
 
   public dragLeave(designerCanvas: IDesignerCanvas, event: DragEvent) {
+    designerCanvas.snapLines.clearSnaplines();
     if (this._dragOverExtensionItem) {
       designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOverAndCanBeEntered);
       this._dragOverExtensionItem = null;
@@ -53,6 +56,7 @@ export class DragDropService implements IDragDropService {
 
   public async dragOver(designerCanvas: IDesignerCanvas, event: DragEvent) {
     if (designerCanvas.readOnly) {
+      designerCanvas.snapLines.clearSnaplines();
       event.dataTransfer.dropEffect = 'none';
       return;
     }
@@ -71,6 +75,9 @@ export class DragDropService implements IDragDropService {
     let [newContainer] = this.getPossibleContainerForDragDrop(designerCanvas, event, di ? [di] : null);
     if (!newContainer)
       newContainer = designerCanvas.rootDesignItem;
+
+    if (di)
+      this.snapPaletteItem(designerCanvas, event, newContainer, di, JSON.parse(transferData).mouseOffset);
 
     if (this._dragOverExtensionItem != newContainer) {
       designerCanvas.extensionManager.removeExtension(this._dragOverExtensionItem, ExtensionType.ContainerExternalDragOverAndCanBeEntered);
@@ -108,7 +115,8 @@ export class DragDropService implements IDragDropService {
     containerService.enterContainer(newContainer, [placedItem], 'drop');
 
     const containerPos = designerCanvas.getNormalizedElementCoordinates(newContainer.element);
-    const evCoord = designerCanvas.getNormalizedEventCoordinates(event);
+    const evCoord = this.snapPaletteItem(designerCanvas, event, newContainer, placedItem, elementDefinition.mouseOffset);
+    designerCanvas.snapLines.clearSnaplines();
     const pos = { x: evCoord.x - containerPos.x, y: evCoord.y - containerPos.y };
 
     let offset = { x: 0, y: 0 };
@@ -120,6 +128,38 @@ export class DragDropService implements IDragDropService {
       designerCanvas.instanceServiceContainer.selectionService.setSelectedElements([di], event);
       grp.commit();
     });
+  }
+
+  private snapPaletteItem(designerCanvas: IDesignerCanvas, event: DragEvent, container: IDesignItem, item: IDesignItem, offset = { x: 0, y: 0 }) {
+    const point = designerCanvas.getNormalizedEventCoordinates(event);
+    designerCanvas.snapLines.clearSnaplines();
+    const display = container.getComputedStyle().display;
+    if (!designerCanvas.alignOnSnap || designerCanvas.alignOnGrid || hasCommandKey(event) ||
+        display === 'flex' || display === 'inline-flex' || display === 'grid' || display === 'inline-grid')
+      return point;
+
+    designerCanvas.snapLines.calculateSnaplines([item]);
+    const element = item.element as HTMLElement;
+    const detached = !element.isConnected;
+    const oldStyle = element.style.cssText;
+    let rect: DOMRect;
+    try {
+      if (detached) {
+        // Measure intrinsic sizes in the target container without inserting a model item.
+        element.style.position = 'absolute';
+        element.style.visibility = 'hidden';
+        container.usableContainer.appendChild(element);
+      }
+      rect = element.getBoundingClientRect();
+    } finally {
+      if (detached) {
+        element.remove();
+        element.style.cssText = oldStyle;
+      }
+    }
+    const snapped = designerCanvas.snapLines.snapToPosition({ x: point.x - offset.x, y: point.y - offset.y },
+      { width: rect.width / designerCanvas.scaleFactor, height: rect.height / designerCanvas.scaleFactor }, { x: 1, y: 1 });
+    return { x: snapped.x == null ? point.x : snapped.x + offset.x, y: snapped.y == null ? point.y : snapped.y + offset.y };
   }
 
   private applyPlacementRules(designerCanvas: IDesignerCanvas, container: IDesignItem, item: IDesignItem, elementDefinition: IElementDefinition): { container: IDesignItem, placedItem: IDesignItem } {

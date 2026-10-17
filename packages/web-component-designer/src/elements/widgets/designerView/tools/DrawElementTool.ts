@@ -1,6 +1,7 @@
 import { EventNames } from '../../../../enums/EventNames.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { roundValue } from '../../../helper/LayoutHelper.js';
+import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 import { getPossiblePlacementTarget } from '../../../helper/PlacementTargetHelper.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { IElementDefinition } from '../../../services/elementsService/IElementDefinition.js';
@@ -27,6 +28,7 @@ export class DrawElementTool implements ITool {
   }
 
   dispose(): void {
+    this._createdItem?.instanceServiceContainer.designerCanvas.snapLines.clearSnaplines();
     if (this._createdItem)
       this._createdItem.element.parentElement.removeChild(this._createdItem.element);
   }
@@ -72,6 +74,9 @@ export class DrawElementTool implements ITool {
     this._createdItem.setStyle('width', '0');
     this._createdItem.setStyle('height', '0');
 
+    if (designerCanvas.alignOnSnap)
+      designerCanvas.snapLines.calculateSnaplines([this._createdItem]);
+
     designerCanvas.instanceServiceContainer.selectionService.clearSelectedElements();
   }
 
@@ -89,6 +94,18 @@ export class DrawElementTool implements ITool {
 
       const w = roundValue(this._createdItem, evPos.x - this._startPosition.x);
       const h = roundValue(this._createdItem, evPos.y - this._startPosition.y);
+      let position = this._startPosition;
+      if (designerCanvas.alignOnSnap && !designerCanvas.alignOnGrid && !hasCommandKey(event)) {
+        const snapped = designerCanvas.snapLines.snapToPosition(position, { width: Math.max(0, +w), height: Math.max(0, +h) }, { x: 1, y: 1 });
+        position = { x: snapped.x ?? position.x, y: snapped.y ?? position.y };
+      } else {
+        designerCanvas.overlayLayer.removeAllNodesWithClass('svg-snapline');
+      }
+      const parent = designerCanvas.getNormalizedElementCoordinates(this._createdItem.parent.element);
+      this._createdItem.setStyle('left', roundValue(this._createdItem, position.x - parent.x) + 'px');
+      this._createdItem.setStyle('top', roundValue(this._createdItem, position.y - parent.y) + 'px');
+      this._rect.setAttribute('x', position.x);
+      this._rect.setAttribute('y', position.y);
       if (parseFloat('' + w) >= 0) {
         this._rect.setAttribute('width', w);
         this._createdItem.setStyle('width', w + 'px');
@@ -104,6 +121,7 @@ export class DrawElementTool implements ITool {
   }
 
   private async _onPointerUp(designerView: IDesignerCanvas, event: PointerEvent) {
+    designerView.snapLines.clearSnaplines();
     if (this.sizeOverlapThreshold) {
       this._changeGroup.commit();
       designerView.instanceServiceContainer.selectionService.setSelectedElements([this._createdItem], event);

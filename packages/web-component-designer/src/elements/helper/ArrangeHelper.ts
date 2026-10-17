@@ -4,6 +4,31 @@ import { ChangeGroup } from '../services/undoService/ChangeGroup.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 
 export abstract class ArrangeHelper {
+    public static distributeElements(horizontal: boolean, designerCanvas: IDesignerCanvas, elements: IDesignItem[]) {
+        if (elements.length < 3 || elements.some(x => x.isRootItem))
+            return;
+        const axis = horizontal ? 'x' : 'y';
+        const size = horizontal ? 'width' : 'height';
+        const items = elements.map(item => ({ item, rect: designerCanvas.getNormalizedElementCoordinates(item.element) }))
+            .sort((a, b) => a.rect[axis] - b.rect[axis]);
+        const first = items[0].rect;
+        const last = items[items.length - 1].rect;
+        const gap = (last[axis] + last[size] - first[axis] - items.reduce((sum, x) => sum + x.rect[size], 0)) / (items.length - 1);
+        const group = elements[0].openGroup(horizontal ? 'distributeHorizontal' : 'distributeVertical');
+        let position = first[axis] + first[size] + gap;
+        for (const { item, rect } of items.slice(1, -1)) {
+            const parent = designerCanvas.getNormalizedElementCoordinates(item.parent.element);
+            const start = horizontal ? 'left' : 'top';
+            const end = horizontal ? 'right' : 'bottom';
+            if (item.hasStyle(end) && !item.hasStyle(start))
+                this.arrange(item, end, (parent[axis] + parent[size] - position - rect[size]) + 'px');
+            else
+                this.arrange(item, start, (position - parent[axis]) + 'px');
+            position += rect[size] + gap;
+        }
+        group.commit();
+    }
+
     public static arrangeElements(orientation: Orientation, designerCanvas: IDesignerCanvas, arrangeElements: IDesignItem[]) {
         switch (orientation) {
             case Orientation.TOP: {

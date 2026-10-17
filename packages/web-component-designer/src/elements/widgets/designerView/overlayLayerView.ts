@@ -22,6 +22,10 @@ export class OverlayLayerView extends BaseCustomWebComponentConstructorAppend {
 
     .svg-invisible { stroke: transparent; fill: transparent; pointer-events: auto; }
     .svg-snapline { stroke: var(--wcd-color-snapline, purple); stroke-dasharray: 4; fill: transparent; }
+    .svg-spacing-guide { pointer-events: none; }
+    .svg-spacing-line { stroke-dasharray: none; stroke-width: 1; }
+    .svg-spacing-label-background { fill: var(--wcd-color-snapline, purple); stroke: none; }
+    .svg-spacing-label { fill: white; stroke: none; font: 11px sans-serif; text-anchor: middle; dominant-baseline: central; }
     .svg-selector { stroke: black; fill: var(--wcd-color-selection-fill, #3899ec55); stroke-width: 1; stroke-dasharray: 2; }
     .svg-primary-selection-move { stroke: var(--wcd-color-selection, #3899ec); fill: var(--wcd-color-selection, #3899ec); cursor: move; pointer-events: auto; }
     .svg-position  { stroke: black; stroke-dasharray: 2; }
