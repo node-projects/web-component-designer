@@ -152,12 +152,30 @@ export class ContextMenu implements IContextMenu {
   static count = 0;
 
   private static _openedContextMenus = new Set<ContextMenu>();
+  private static _documentStyles = new WeakMap<Document, CSSStyleSheet>();
 
   menu: IContextMenuItem[];
   public options?: IContextMenuOptions;
   public context: any
   private num: number;
   private _menuElement!: HTMLDivElement;
+  private _contextMenuTimer?: number;
+
+  private get menuDocument(): Document {
+    const root = this.options?.shadowRoot;
+    return root?.nodeType === 9 ? root as Document : root?.ownerDocument ?? this._menuElement?.ownerDocument ?? document;
+  }
+
+  private static styleForDocument(owner: Document): CSSStyleSheet {
+    if (owner === document) return this._contextMenuCss;
+    let sheet = this._documentStyles.get(owner);
+    if (!sheet) {
+      sheet = new (owner.defaultView as Window & typeof globalThis).CSSStyleSheet();
+      sheet.replaceSync(Array.from(this._contextMenuCss.cssRules, rule => rule.cssText).join('\n'));
+      this._documentStyles.set(owner, sheet);
+    }
+    return sheet;
+  }
 
   constructor(menu: IContextMenuItem[], options?: IContextMenuOptions, context?: any) {
     this.num = ContextMenu.count++;
@@ -173,44 +191,45 @@ export class ContextMenu implements IContextMenu {
   }
 
   reload() {
-    let shadowRoot = this.options?.shadowRoot ?? document;
+    let shadowRoot = this.options?.shadowRoot ?? this.menuDocument;
 
     if (this._menuElement == null) {
-      this._menuElement = document.createElement("div");
+      this._menuElement = this.menuDocument.createElement("div");
       this._menuElement.className = "context_menu";
       this._menuElement.id = "context_menu_" + this.num;
       this._menuElement.setAttribute('popover', 'manual');
 
-      if (shadowRoot === document)
-        document.body.appendChild(this._menuElement);
+      if (shadowRoot.nodeType === 9)
+        (shadowRoot as Document).body.appendChild(this._menuElement);
       else
         shadowRoot.appendChild(this._menuElement);
     }
 
     this._menuElement.innerHTML = "";
 
-    if (shadowRoot.adoptedStyleSheets.indexOf(ContextMenu._contextMenuCss) < 0) {
-      shadowRoot.adoptedStyleSheets = [...shadowRoot.adoptedStyleSheets, ContextMenu._contextMenuCss];
+    const sheet = ContextMenu.styleForDocument(this.menuDocument);
+    if (shadowRoot.adoptedStyleSheets.indexOf(sheet) < 0) {
+      shadowRoot.adoptedStyleSheets = [...shadowRoot.adoptedStyleSheets, sheet];
     }
 
     this._menuElement.appendChild(this.renderLevel(this.menu));
   }
 
   renderLevel(level: IContextMenuItem[]) {
-    let ul_outer = document.createElement("ul");
+    let ul_outer = this.menuDocument.createElement("ul");
 
     let addDivider = false;
     level.forEach((item) => {
       if (item.title !== '-') {
         if (addDivider) {
-          let li = document.createElement("li");
+          let li = this.menuDocument.createElement("li");
           li.className = "context_menu_divider";
           addDivider = false;
           ul_outer.appendChild(li);
         }
 
-        let li = document.createElement("li");
-        let icon_span = document.createElement("span");
+        let li = this.menuDocument.createElement("li");
+        let icon_span = this.menuDocument.createElement("span");
         icon_span.className = 'context_menu_icon_span';
 
         if (item.checked === true) {
@@ -223,12 +242,12 @@ export class ContextMenu implements IContextMenu {
 
 
 
-        let text_span = document.createElement("span");
+        let text_span = this.menuDocument.createElement("span");
         text_span.className = 'context_menu_text';
 
         text_span.innerHTML = item.title ?? '';
 
-        let sub_span = document.createElement("span");
+        let sub_span = this.menuDocument.createElement("span");
         sub_span.className = 'context_menu_sub_span';
 
         if (item.children != null) {
@@ -292,6 +311,14 @@ export class ContextMenu implements IContextMenu {
   }
 
   public display(event: MouseEvent) {
+    const owner = event.view?.document ?? (event.target as Node)?.ownerDocument;
+    if (!this.options?.shadowRoot && owner && owner !== this.menuDocument) {
+      this._menuElement.remove();
+      this._menuElement = undefined;
+      this.options = { ...this.options, shadowRoot: owner };
+      this.reload();
+    }
+    const view = this.menuDocument.defaultView;
     let menu = this._menuElement;
 
     let mouseOffset = this.options?.mouseOffset != null ? this.options.mouseOffset : 2;
@@ -305,13 +332,14 @@ export class ContextMenu implements IContextMenu {
 
     ContextMenu._openedContextMenus.add(this);
 
-    window.addEventListener("keyup", this._windowKeyUp);
-    window.addEventListener("resize", this._windowResize);
-    window.addEventListener("mousedown", this._windowDown);
-    setTimeout(() => {
+    view.addEventListener("keyup", this._windowKeyUp);
+    view.addEventListener("resize", this._windowResize);
+    view.addEventListener("mousedown", this._windowDown);
+    view.addEventListener("pagehide", this._windowResize);
+    this._contextMenuTimer = view.setTimeout(() => {
       if (!ContextMenu._openedContextMenus.has(this))
         return;
-      window.addEventListener("contextmenu", this._windowDown);
+      view.addEventListener("contextmenu", this._windowDown);
     }, 150);
   }
 
@@ -321,7 +349,7 @@ export class ContextMenu implements IContextMenu {
 
   _windowDown(e: MouseEvent) {
     e.preventDefault();
-    if (!(e.target instanceof Node) || !this._menuElement.contains(e.target))
+    if (!e.composedPath().includes(this._menuElement))
       this.close();
     return false;
   }
@@ -339,13 +367,16 @@ export class ContextMenu implements IContextMenu {
   }
 
   close() {
+    const view = this.menuDocument.defaultView;
     this.hideDescendantSubmenus(this._menuElement);
     this.hidePopover(this._menuElement);
     this._menuElement.remove();
-    window.removeEventListener("mousedown", this._windowDown);
-    window.removeEventListener("resize", this._windowResize);
-    window.removeEventListener("keyup", this._windowKeyUp);
-    setTimeout(() => window.removeEventListener("contextmenu", this._windowDown), 10);
+    view.clearTimeout(this._contextMenuTimer);
+    view.removeEventListener("mousedown", this._windowDown);
+    view.removeEventListener("resize", this._windowResize);
+    view.removeEventListener("keyup", this._windowKeyUp);
+    view.removeEventListener("contextmenu", this._windowDown);
+    view.removeEventListener("pagehide", this._windowResize);
     ContextMenu._openedContextMenus.delete(this);
   }
 
@@ -419,9 +450,9 @@ export class ContextMenu implements IContextMenu {
     const menuWidth = menu.offsetWidth + 4;
     const menuHeight = menu.offsetHeight + 4;
 
-    const spaceRight = window.innerWidth - clickCoordsX;
+    const spaceRight = this.menuDocument.defaultView.innerWidth - clickCoordsX;
     const spaceLeft = clickCoordsX;
-    const spaceBelow = window.innerHeight - clickCoordsY;
+    const spaceBelow = this.menuDocument.defaultView.innerHeight - clickCoordsY;
     const spaceAbove = clickCoordsY;
 
     let left = clickCoordsX + mouseOffset;
@@ -434,8 +465,8 @@ export class ContextMenu implements IContextMenu {
       top = clickCoordsY - menuHeight - mouseOffset;
     }
 
-    menu.style.left = `${Math.max(0, Math.min(left, window.innerWidth - menuWidth))}px`;
-    menu.style.top = `${Math.max(0, Math.min(top, window.innerHeight - menuHeight))}px`;
+    menu.style.left = `${Math.max(0, Math.min(left, this.menuDocument.defaultView.innerWidth - menuWidth))}px`;
+    menu.style.top = `${Math.max(0, Math.min(top, this.menuDocument.defaultView.innerHeight - menuHeight))}px`;
   }
 
   private positionSubmenuPopover(li: HTMLLIElement, childmenu: HTMLUListElement) {
@@ -444,22 +475,22 @@ export class ContextMenu implements IContextMenu {
     const menuWidth = childmenu.offsetWidth || childRect.width;
     const menuHeight = childmenu.offsetHeight || childRect.height;
 
-    const spaceRight = window.innerWidth - parentRect.right;
+    const spaceRight = this.menuDocument.defaultView.innerWidth - parentRect.right;
     const spaceLeft = parentRect.left;
     let left = parentRect.right;
     if (spaceRight < menuWidth && spaceLeft > spaceRight) {
       left = parentRect.left - menuWidth;
     }
 
-    const spaceBelow = window.innerHeight - parentRect.top;
+    const spaceBelow = this.menuDocument.defaultView.innerHeight - parentRect.top;
     const spaceAbove = parentRect.bottom;
     let top = parentRect.top;
     if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
       top = parentRect.bottom - menuHeight;
     }
 
-    childmenu.style.left = `${Math.max(0, Math.min(left, window.innerWidth - menuWidth))}px`;
-    childmenu.style.top = `${Math.max(0, Math.min(top, window.innerHeight - menuHeight))}px`;
+    childmenu.style.left = `${Math.max(0, Math.min(left, this.menuDocument.defaultView.innerWidth - menuWidth))}px`;
+    childmenu.style.top = `${Math.max(0, Math.min(top, this.menuDocument.defaultView.innerHeight - menuHeight))}px`;
     childmenu.style.right = 'auto';
     childmenu.style.bottom = 'auto';
   }

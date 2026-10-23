@@ -30,6 +30,7 @@ beforeAll(async () => {
   Object.defineProperty(globalThis, 'CSSStyleSheet', {
     configurable: true,
     value: class {
+      cssRules = [];
       replaceSync() {
       }
     }
@@ -130,4 +131,56 @@ test('closeAll removes the menu from the document', () => {
   ContextMenu.closeAll();
 
   expect(document.querySelector('.context_menu')).toBeNull();
+});
+
+test('uses the event window for menu creation, styles, actions and dismissal', () => {
+  const frame = document.createElement('iframe');
+  document.body.append(frame);
+  const view = frame.contentWindow as Window & typeof globalThis;
+  const owner = view.document;
+  Object.defineProperty(view, 'CSSStyleSheet', { configurable: true, value: globalThis.CSSStyleSheet });
+  Object.defineProperty(owner, 'adoptedStyleSheets', { configurable: true, writable: true, value: [] });
+  view.HTMLElement.prototype.showPopover = HTMLElement.prototype.showPopover;
+  view.HTMLElement.prototype.hidePopover = HTMLElement.prototype.hidePopover;
+  view.HTMLElement.prototype.matches = HTMLElement.prototype.matches;
+  let clicked = false;
+  const event = () => new view.MouseEvent('contextmenu', { view, clientX: 20, clientY: 30 });
+  const menu = ContextMenu.show([{ title: 'Action', action: () => { clicked = true; } }], event());
+  expect(document.querySelector('.context_menu')).toBeNull();
+  const root = owner.querySelector('.context_menu');
+  expect(root.ownerDocument).toBe(owner);
+  expect(owner.adoptedStyleSheets.length).toBe(1);
+  const row = root.querySelector('li');
+  expect(row.ownerDocument).toBe(owner);
+  row.dispatchEvent(new view.MouseEvent('mousedown', { bubbles: true, composed: true }));
+  expect(root.isConnected).toBe(true);
+  row.dispatchEvent(new view.MouseEvent('click', { bubbles: true, composed: true }));
+  expect(clicked).toBe(true);
+  expect(root.isConnected).toBe(false);
+  ContextMenu.show([{ title: 'Dismiss' }], event());
+  view.dispatchEvent(new view.KeyboardEvent('keyup', { key: 'Escape' }));
+  expect(owner.querySelector('.context_menu')).toBeNull();
+  ContextMenu.show([{ title: 'Outside' }], event());
+  owner.body.dispatchEvent(new view.MouseEvent('mousedown', { bubbles: true, composed: true }));
+  expect(owner.querySelector('.context_menu')).toBeNull();
+  menu.close();
+
+  Object.defineProperty(view, 'innerWidth', { configurable: true, value: 100 });
+  Object.defineProperty(view, 'innerHeight', { configurable: true, value: 80 });
+  const positioned = new ContextMenu([{ title: 'Parent', children: [{ title: 'Child' }] }], { shadowRoot: owner });
+  const positionedRoot = owner.querySelector('.context_menu') as HTMLElement;
+  Object.defineProperty(positionedRoot, 'offsetWidth', { configurable: true, value: 80 });
+  Object.defineProperty(positionedRoot, 'offsetHeight', { configurable: true, value: 60 });
+  positioned.display(new view.MouseEvent('contextmenu', { view, clientX: 90, clientY: 70 }));
+  expect(positionedRoot.style.left).toBe('4px');
+  expect(positionedRoot.style.top).toBe('4px');
+  const parent = positionedRoot.querySelector('li');
+  const child = parent.querySelector('ul');
+  Object.defineProperty(parent, 'getBoundingClientRect', { configurable: true, value: () => makeRect(65, 70, 30, 20) });
+  Object.defineProperty(child, 'offsetWidth', { configurable: true, value: 70 });
+  Object.defineProperty(child, 'offsetHeight', { configurable: true, value: 50 });
+  parent.dispatchEvent(new view.MouseEvent('mouseenter'));
+  expect(child.style.left).toBe('0px');
+  expect(child.style.top).toBe('30px');
+  positioned.close();
 });
