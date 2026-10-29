@@ -248,6 +248,13 @@ function _createMarkerOverlayPathData(element: Element, designerCanvas: IDesigne
   const tempGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   tempGroup.setAttribute('visibility', 'hidden');
   tempGroup.setAttribute('pointer-events', 'none');
+  // Marker placements are in the source geometry's user space, not its SVG viewport's.
+  const sourceMatrix = element.getScreenCTM();
+  const viewportMatrix = ownerSvg.getScreenCTM();
+  if (sourceMatrix && viewportMatrix) {
+    const matrix = viewportMatrix.inverse().multiply(sourceMatrix);
+    tempGroup.setAttribute('transform', `matrix(${matrix.a} ${matrix.b} ${matrix.c} ${matrix.d} ${matrix.e} ${matrix.f})`);
+  }
   ownerSvg.appendChild(tempGroup);
 
   try {
