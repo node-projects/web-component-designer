@@ -187,7 +187,7 @@ export class NpmPackageLoader {
     //TODO: remove paletteTree form params. elements should be added to serviceconatiner, and the container should notify
     async loadNpmPackage(pkg: string, serviceContainer?: ServiceContainer, paletteTree?: any, loadAllImports?: boolean, reportState?: (state: string) => void): Promise<{ html: string, style: string }> {
         if (!NpmPackageLoader.packageHacks) {
-            NpmPackageLoader.packageHacks = (await import("./NpmPackageHacks.json", { assert: { type: 'json' } })).default;
+            NpmPackageLoader.packageHacks = (await import("./NpmPackageHacks.json", { with: { type: 'json' } })).default;
         }
 
         const baseUrl = window.location.protocol + this._packageSource + pkg + '/';
