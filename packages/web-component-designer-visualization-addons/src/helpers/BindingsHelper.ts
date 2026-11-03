@@ -927,7 +927,7 @@ export class BindingsHelper {
         return bindResolvedSource(source, index);
       const prefix = source[0];
       if ((prefix !== '?' && prefix !== '#') || source[1] === prefix)
-        return bindResolvedSource(source[1] === prefix ? source.substring(1) : source, index);
+        return bindResolvedSource((prefix === '?' || prefix === '#') && source[1] === prefix ? source.substring(1) : source, index);
 
       const owner = prefix === '?' ? root : element;
       if (!owner)
