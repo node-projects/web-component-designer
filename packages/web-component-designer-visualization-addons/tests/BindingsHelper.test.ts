@@ -88,6 +88,69 @@ const flushMicrotasks = async () => {
 };
 
 describe('BindingsHelper runtime', () => {
+  test('preserves local signal names for class and two-way checkbox bindings', async () => {
+    const handler = new TestVisualizationHandler();
+    handler.values.set('__expandedPkSupply', false);
+    handler.values.set('__confirmed', false);
+    const helper = new BindingsHelper(handler);
+    const element = document.createElement('div');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    const disposeClass = helper.applyBinding(element, ['expanded', {
+      signal: '__expandedPkSupply',
+      target: BindingTarget.class
+    }], '', null);
+    const disposeCheckbox = helper.applyBinding(checkbox, ['checked', {
+      signal: '__confirmed',
+      twoWay: true,
+      events: ['change'],
+      target: BindingTarget.property
+    }], '', null);
+    await flushMicrotasks();
+
+    expect(handler.subscribeCalls).toEqual(['__expandedPkSupply', '__confirmed']);
+    expect(handler.getStateCalls).toEqual(['__expandedPkSupply', '__confirmed']);
+    expect(element.classList.contains('expanded')).toBe(false);
+    expect(checkbox.checked).toBe(false);
+
+    handler.emit('__expandedPkSupply', true);
+    handler.emit('__confirmed', true);
+    await flushMicrotasks();
+    expect(element.classList.contains('expanded')).toBe(true);
+    expect(checkbox.checked).toBe(true);
+
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
+    expect(handler.setStateCalls).toEqual([{ id: '__confirmed', value: false, ack: undefined }]);
+
+    disposeClass();
+    disposeCheckbox();
+    expect(handler.unsubscribeCalls).toEqual(['__expandedPkSupply', '__confirmed']);
+  });
+
+  test('still resolves doubled question-mark and hash prefixes as direct property bindings', () => {
+    const handler = new TestVisualizationHandler();
+    const helper = new BindingsHelper(handler);
+    const root = document.createElement('div');
+    const element = document.createElement('div');
+    root['screenValue'] = 7;
+    element['targetValue'] = 9;
+    const disposeScreen = helper.applyBinding(element, ['fromScreen', {
+      signal: '??screenValue',
+      target: BindingTarget.property
+    }], '', root);
+    const disposeTarget = helper.applyBinding(element, ['fromTarget', {
+      signal: '##targetValue',
+      target: BindingTarget.property
+    }], '', root);
+
+    expect(element['fromScreen']).toBe(7);
+    expect(element['fromTarget']).toBe(9);
+    expect(handler.subscribeCalls).toEqual([]);
+    disposeScreen();
+    disposeTarget();
+  });
+
   test('shares subscriptions and initial reads for the same signal', async () => {
     const handler = new TestVisualizationHandler();
     handler.values.set('shared', 7);
