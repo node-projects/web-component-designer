@@ -8,7 +8,6 @@ import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
 import { straightenLine } from '../../helper/PathDataPolyfill.js';
 import { IDesignerCanvas } from '../../widgets/designerView/IDesignerCanvas.js';
-import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 import { filterNonElementItems } from './DefaultPlacementService.js';
 import { getBoundingClientRectAlsoForDisplayContents, getElementZoomFactor } from '../../helper/ElementHelper.js';
 import { getGeometryReader } from '../../widgets/designerView/extensions/svg/geometry/GeometryReaderFactory.js';
@@ -61,7 +60,7 @@ export class AbsolutePlacementService implements IPlacementService {
     let trackX = newPoint.x - startPoint.x;
     let trackY = newPoint.y - startPoint.y;
 
-    if (!hasCommandKey(event)) {
+    if (!event.altKey) {
       if (designerCanvas.alignOnGrid) {
         let p = getDesignItemCurrentPos(item, 'position');
         p.x = p.x % designerCanvas.gridSize;
@@ -91,7 +90,7 @@ export class AbsolutePlacementService implements IPlacementService {
     let trackX = newPoint.x;
     let trackY = newPoint.y;
 
-    if (!hasCommandKey(event)) {
+    if (!event.altKey) {
       if (designerCanvas.alignOnGrid) {
         trackX = Math.round(trackX / designerCanvas.gridSize) * designerCanvas.gridSize;
         trackY = Math.round(trackY / designerCanvas.gridSize) * designerCanvas.gridSize;
