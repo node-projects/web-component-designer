@@ -296,13 +296,13 @@ function getElementTransformWithZoom(element, iframes, includeZoom = true) {
     if (!includeZoom || !isElementNode(element)) {
         return transform;
     }
-    const zoomTransform = getElementZoomScaleTransform(element);
-    if (zoomTransform.isIdentity) {
+    const zoom = getElementZoom(element);
+    if (zoom === 1) {
         return transform;
     }
     // `zoom` scales transform translations as well as the element's local axes,
     // so it needs to wrap the transform matrix instead of being appended to it.
-    return zoomTransform.multiply(transform);
+    return new DOMMatrix().scaleSelf(zoom).multiplySelf(transform);
 }
 /**
 * @param {Node} node
@@ -310,10 +310,28 @@ function getElementTransformWithZoom(element, iframes, includeZoom = true) {
 * @returns {DOMQuad[]}
 */
 export function getBoxQuads(node, options) {
+    if (computedStyleCache) {
+        return getBoxQuadsInternal(node, options);
+    }
+    // Share style reads within this synchronous measurement only. Calls after a
+    // DOM mutation still get fresh styles unless useCache() was explicitly used.
+    computedStyleCache = new WeakMap();
+    try {
+        return getBoxQuadsInternal(node, options);
+    } finally {
+        computedStyleCache = undefined;
+    }
+}
+
+/**
+* @param {Node} node
+* @param {{box?: 'margin'|'border'|'padding'|'content', relativeTo?: Element, iframes?: HTMLIFrameElement[]}=} options
+* @returns {DOMQuad[]}
+*/
+function getBoxQuadsInternal(node, options) {
     const defaultRelativeTo = node.ownerDocument.documentElement ?? node.ownerDocument.body;
     const relativeTo = options?.relativeTo ?? defaultRelativeTo;
     const viewportRoot = node.ownerDocument.documentElement ?? node.ownerDocument.body;
-    const resolveFixedThroughViewport = relativeTo !== viewportRoot && shouldResolveFixedPositionThroughViewport(node, relativeTo, options?.iframes);
     let key;
     if (boxQuadsCache) {
         let i1 = hash.get(node);
@@ -327,6 +345,8 @@ export function getBoxQuads(node, options) {
         if (q)
             return q;
     }
+
+    const resolveFixedThroughViewport = relativeTo !== viewportRoot && shouldResolveFixedPositionThroughViewport(node, relativeTo, options?.iframes);
 
     /** @type {DOMMatrix} */
     let originalElementAndAllParentsMultipliedMatrix = getResultingTransformationBetweenElementAndAllAncestors(
@@ -880,14 +900,13 @@ function toViewportRelativeDocumentElementQuad(quad, node, relativeTo, iframes) 
     if (relativeTo !== node.ownerDocument.documentElement) {
         return quad;
     }
-    if (isViewportFixedAnchoredNode(node, iframes)) {
-        return quad;
-    }
-
     const win = node.ownerDocument.defaultView ?? window;
     const scrollX = win.scrollX ?? node.ownerDocument.documentElement.scrollLeft ?? 0;
     const scrollY = win.scrollY ?? node.ownerDocument.documentElement.scrollTop ?? 0;
     if (scrollX === 0 && scrollY === 0) {
+        return quad;
+    }
+    if (isViewportFixedAnchoredNode(node, iframes)) {
         return quad;
     }
 
@@ -1191,6 +1210,22 @@ function getElementOffsetsInContainer(node, includeScroll, iframes) {
     }
 }
 /**
+ * Apply a layout translation in the parent coordinate space. The common 2D
+ * case only changes e/f; 3D matrices still need the full homogeneous product.
+ * @param {DOMMatrix} matrix
+ * @param {number} x
+ * @param {number} y
+ */
+function preTranslateSelf(matrix, x, y) {
+    if (matrix.is2D && Number.isFinite(x) && Number.isFinite(y)) {
+        matrix.e += x;
+        matrix.f += y;
+    } else {
+        matrix.preMultiplySelf(new DOMMatrix().translateSelf(x, y));
+    }
+}
+
+/**
 * @param {Node} node
 * @param {Element} ancestor
 * @param {HTMLIFrameElement[]} iframes
@@ -1229,17 +1264,13 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
         : getElementTransformWithZoom(actualElement, iframes, !excludeSelfZoom);
 
     /** @type {DOMMatrix } */
-    // FIX 2: Only use a non-identity starting matrix when the element itself has
-    //        a CSS transform. Most plain elements have identity, avoiding a multiply.
-    let originalElementAndAllParentsMultipliedMatrix = currentElementTransform.isIdentity
-        ? new DOMMatrix()
-        : currentElementTransform;
+    // The self-transform is already a fresh matrix, including the identity case.
+    let originalElementAndAllParentsMultipliedMatrix = currentElementTransform;
 
-    let perspectiveParentElement = getParentElementIncludingSlots(actualElement, iframes);
-    if (perspectiveParentElement) {
-        // FIX 5: Guard transformStyle read behind is2D — on a standard 2D page
-        //        the matrix is always 2D here so we skip the style read entirely.
-        if (!originalElementAndAllParentsMultipliedMatrix.is2D) {
+    // A 2D matrix needs no perspective-parent lookup or flattening.
+    if (!originalElementAndAllParentsMultipliedMatrix.is2D) {
+        const perspectiveParentElement = getParentElementIncludingSlots(actualElement, iframes);
+        if (perspectiveParentElement) {
             const s = getCachedComputedStyle(perspectiveParentElement);
             if (s.transformStyle !== 'preserve-3d') {
                 projectTo2D(originalElementAndAllParentsMultipliedMatrix);
@@ -1269,8 +1300,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                     const t = offsetTopLeftPolyfill(actualElement, 'offsetTop');
                     // FIX 3: Skip zero-translation matrix allocations.
                     if (l !== 0 || t !== 0) {
-                        const mvMat = new DOMMatrix().translateSelf(l, t);
-                        originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                        preTranslateSelf(originalElementAndAllParentsMultipliedMatrix, l, t);
                     }
                     lastOffsetParent = slotOffsetParent;
                 }
@@ -1280,8 +1310,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 const offsets = getElementOffsetsInContainer(actualElement, actualElement !== node, iframes);
                 // FIX 3
                 if (offsets.x !== 0 || offsets.y !== 0) {
-                    const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
-                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                    preTranslateSelf(originalElementAndAllParentsMultipliedMatrix, offsets.x, offsets.y);
                 }
             }
             /*
@@ -1311,8 +1340,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 const bb = actualElement.getBBox();
                 // FIX 3
                 if (bb.x !== 0 || bb.y !== 0) {
-                    const mvMat = new DOMMatrix().translateSelf(bb.x, bb.y);
-                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                    preTranslateSelf(originalElementAndAllParentsMultipliedMatrix, bb.x, bb.y);
                 }
                 originalElementAndAllParentsMultipliedMatrix = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, ctm.e, ctm.f]).multiplySelf(originalElementAndAllParentsMultipliedMatrix);
                 parentElement = actualElement.ownerSVGElement;
@@ -1326,8 +1354,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                     lastOffsetParent = actualElement.offsetParent;
                     // FIX 3
                     if (offsets.x !== 0 || offsets.y !== 0) {
-                        const mvMat = new DOMMatrix().translateSelf(offsets.x * zoom, offsets.y * zoom);
-                        originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                        preTranslateSelf(originalElementAndAllParentsMultipliedMatrix, offsets.x * zoom, offsets.y * zoom);
                     }
                 }
             } else {
@@ -1335,8 +1362,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 lastOffsetParent = null;
                 // FIX 3
                 if (offsets.x !== 0 || offsets.y !== 0) {
-                    const mvMat = new DOMMatrix().translateSelf(offsets.x, offsets.y);
-                    originalElementAndAllParentsMultipliedMatrix = mvMat.multiplySelf(originalElementAndAllParentsMultipliedMatrix);
+                    preTranslateSelf(originalElementAndAllParentsMultipliedMatrix, offsets.x, offsets.y);
                 }
             }
         }
@@ -1351,7 +1377,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                     const ancOff = getElementOffsetsInContainer(parentElement, false, iframes);
                     // FIX 3
                     if (ancOff.x !== 0 || ancOff.y !== 0) {
-                        originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-ancOff.x, -ancOff.y).multiply(originalElementAndAllParentsMultipliedMatrix);
+                        preTranslateSelf(originalElementAndAllParentsMultipliedMatrix, -ancOff.x, -ancOff.y);
                     }
                 }
                 // FIX 15: Do NOT subtract the scroll of documentElement (the viewport/window
@@ -1362,7 +1388,7 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
                 //         scroll container (e.g. an overflow:scroll div used as relativeTo).
                 const isViewportScrollContainer = parentElement === parentElement.ownerDocument.documentElement;
                 if (!isViewportScrollContainer && (parentElement.scrollTop || parentElement.scrollLeft))
-                    originalElementAndAllParentsMultipliedMatrix = new DOMMatrix().translate(-parentElement.scrollLeft, -parentElement.scrollTop).multiply(originalElementAndAllParentsMultipliedMatrix);
+                    preTranslateSelf(originalElementAndAllParentsMultipliedMatrix, -parentElement.scrollLeft, -parentElement.scrollTop);
 
                 const ancestorZoom = getElementZoomScaleTransform(parentElement);
                 if (!ancestorZoom.isIdentity)
@@ -1384,12 +1410,11 @@ export function getResultingTransformationBetweenElementAndAllAncestors(node, an
             parentElementMatrix = getElementTransformWithZoom(parentElement, iframes);
 
             if (!parentElementMatrix.isIdentity)
-                originalElementAndAllParentsMultipliedMatrix = parentElementMatrix.multiply(originalElementAndAllParentsMultipliedMatrix);
+                originalElementAndAllParentsMultipliedMatrix.preMultiplySelf(parentElementMatrix);
 
-            perspectiveParentElement = getParentElementIncludingSlots(parentElement, iframes);
-            if (perspectiveParentElement) {
-                // FIX 5: Skip transformStyle read when matrix is already 2D.
-                if (!originalElementAndAllParentsMultipliedMatrix.is2D) {
+            if (!originalElementAndAllParentsMultipliedMatrix.is2D) {
+                const perspectiveParentElement = getParentElementIncludingSlots(parentElement, iframes);
+                if (perspectiveParentElement) {
                     const s = getCachedComputedStyle(perspectiveParentElement);
                     if (s.transformStyle !== 'preserve-3d') {
                         projectTo2D(originalElementAndAllParentsMultipliedMatrix);
@@ -1568,13 +1593,17 @@ export function getElementCombinedTransform(element, iframes) {
     //https://www.w3.org/TR/css-transforms-2/#ctm
     let s = getCachedComputedStyle(actualElement);
 
-    // FIX 10: Check hasTransform first — it's the most common non-identity case.
-    //         Reordering so the most frequent hit is evaluated first.
-    const hasTransform  = s.transform !== 'none' && !!s.transform;
-    const hasTranslate  = s.translate !== 'none' && !!s.translate;
-    const hasRotate     = s.rotate    !== 'none' && !!s.rotate;
-    const hasScale      = s.scale     !== 'none' && !!s.scale;
-    const hasOffsetPath = !!s.offsetPath && s.offsetPath !== 'none';
+    // Read each native computed-style property once on this hot path.
+    const transform = s.transform;
+    const translate = s.translate;
+    const rotate = s.rotate;
+    const scale = s.scale;
+    const offsetPath = s.offsetPath;
+    const hasTransform  = transform !== 'none' && !!transform;
+    const hasTranslate  = translate !== 'none' && !!translate;
+    const hasRotate     = rotate    !== 'none' && !!rotate;
+    const hasScale      = scale     !== 'none' && !!scale;
+    const hasOffsetPath = !!offsetPath && offsetPath !== 'none';
 
     if (!hasTransform && !hasTranslate && !hasRotate && !hasScale && !hasOffsetPath) {
         // FIX 1: Check parent perspective right here in the fast-path, so identity
@@ -1590,7 +1619,9 @@ export function getElementCombinedTransform(element, iframes) {
         return pt != null ? pt : new DOMMatrix();
     }
 
-    let m = new DOMMatrix();
+    // A plain CSS transform needs no identity matrix or initial multiply.
+    const onlyTransform = hasTransform && !hasTranslate && !hasRotate && !hasScale && !hasOffsetPath;
+    let m = onlyTransform ? new DOMMatrix(transform) : new DOMMatrix();
     const origin = s.transformOrigin.split(' ');
     const originX = parseFloat(origin[0]);
     const originY = parseFloat(origin[1]);
@@ -1599,10 +1630,9 @@ export function getElementCombinedTransform(element, iframes) {
     // FIX 11: Skip the origin wrap/unwrap entirely when origin is (0,0,0).
     //         Saves two DOMMatrix allocations and two multiply calls per element.
     const hasNonZeroOrigin = (originX !== 0 || originY !== 0 || originZ !== 0);
-    const mOri = hasNonZeroOrigin ? new DOMMatrix().translateSelf(originX, originY, originZ) : null;
 
     if (hasTranslate) {
-        let tr = s.translate;
+        let tr = translate;
         if (tr.includes('%')) {
             const v = tr.split(' ');
             const r = actualElement.getBoundingClientRect();
@@ -1615,21 +1645,28 @@ export function getElementCombinedTransform(element, iframes) {
         m.multiplySelf(new DOMMatrix('translate(' + tr.replaceAll(' ', ',') + ')'));
     }
     if (hasRotate) {
-        m.multiplySelf(new DOMMatrix('rotate(' + s.rotate.replaceAll(' ', ',') + ')'));
+        m.multiplySelf(new DOMMatrix('rotate(' + rotate.replaceAll(' ', ',') + ')'));
     }
     if (hasScale) {
-        m.multiplySelf(new DOMMatrix('scale(' + s.scale.replaceAll(' ', ',') + ')'));
+        m.multiplySelf(new DOMMatrix('scale(' + scale.replaceAll(' ', ',') + ')'));
     }
     if (hasOffsetPath) {
         m.multiplySelf(computeOffsetTransformMatrix(element));
     }
-    if (hasTransform) {
-        m.multiplySelf(new DOMMatrix(s.transform));
+    if (hasTransform && !onlyTransform) {
+        m.multiplySelf(new DOMMatrix(transform));
     }
 
     // FIX 11 (continued): Only wrap with origin if non-zero.
     if (hasNonZeroOrigin) {
-        m = mOri.multiply(m.multiplySelf(mOri.inverse()));
+        if (m.is2D && originZ === 0 && Number.isFinite(originX) && Number.isFinite(originY)) {
+            // T(origin) * M * T(-origin) changes only the 2D translation.
+            m.e += originX - m.a * originX - m.c * originY;
+            m.f += originY - m.b * originX - m.d * originY;
+        } else {
+            m = new DOMMatrix().translateSelf(originX, originY, originZ)
+                .multiplySelf(m).translateSelf(-originX, -originY, -originZ);
+        }
     }
 
     //@ts-ignore
