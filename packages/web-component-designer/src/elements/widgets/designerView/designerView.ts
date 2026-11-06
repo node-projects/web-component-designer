@@ -53,6 +53,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   private _zoomHoldRepeater = new ZoomHoldRepeater();
   private _zoomPointerId: number;
   private _zoomPointerTarget: HTMLElement;
+  private _wheelTarget: { zoom: number, x: number, y: number, direct: boolean };
+  private _wheelFrame: number;
+  private _wheelTime: number;
+  private _applyingWheel = false;
+  private _viewportResizeObserver: ResizeObserver;
 
   static override readonly style = css`
     :host {
@@ -249,15 +254,11 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._sVert.insertAdjacentElement('afterend', this._toolbar);
 
     this._designerCanvas.onZoomFactorChanged.on(() => {
+      if (!this._applyingWheel) this._stopWheelAnimation();
       this._zoomInput.value = Math.round(this._designerCanvas.zoomFactor * 100) + '%';
-
-      const pos = this.designerCanvas.canvasOffset;
-
-      const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
-      const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
-      this._sHor.value = (pos.x / (-2 * w)) + 0.5;
-      this._sVert.value = (pos.y / (-2 * h)) + 0.5;
+      this._updateScrollbars();
     });
+    this._viewportResizeObserver = new ResizeObserver(() => this._updateScrollbars());
 
     this._zoomInput = this._getDomElement<HTMLInputElement>('zoomInput');
     this._zoomInput.onkeydown = (e) => {
@@ -280,7 +281,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     zoomFit.onclick = () => {
       this.zoomToFit();
     }
-    this.addEventListener(EventNames.Wheel, event => this._onWheel(event));
+    this.addEventListener(EventNames.Wheel, event => this._onWheel(event), { passive: false });
+    this.addEventListener(EventNames.PointerDown, () => this._stopWheelAnimation(), { capture: true });
 
     const updateSnapButton = (button: HTMLButtonElement, active: boolean) => {
       button.classList.toggle('selected', active);
@@ -312,8 +314,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._lowertoolbar = this._getDomElement<HTMLDivElement>('lowertoolbar');
     this._lowertoolbar.onwheel = event => event.stopPropagation();
 
-    this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
-    this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e));
+    this._sVert.addEventListener('scrollbar-input', (e) => this._onScrollbar(e as CustomEvent));
+    this._sHor.addEventListener('scrollbar-input', (e) => this._onScrollbar(e as CustomEvent));
   }
 
   public zoomReset() {
@@ -362,7 +364,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       }
       this._zoomHoldRepeater.start(
         () => this._zoomStep(direction),
-        () => this._zoomStep(direction, 4)
+        () => this._zoomStep(direction, 12)
       );
       event.preventDefault();
     };
@@ -374,13 +376,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   private _zoomStep(direction: 1 | -1, stepDivisor = 1) {
     const currentZoom = this._designerCanvas.zoomFactor;
-    if (direction > 0) {
-      const zoomStep = (currentZoom > 0.1 ? 0.1 : 0.01) / stepDivisor;
-      this._zoomAroundViewportCenter(currentZoom + zoomStep);
-    } else {
-      const zoomStep = (currentZoom > 0.11 ? 0.1 : 0.01) / stepDivisor;
-      this._zoomAroundViewportCenter(Math.max(currentZoom - zoomStep, 0.001));
-    }
+    this._zoomAroundViewportCenter(Math.max(currentZoom * Math.pow(1.2, direction / stepDivisor), 0.001));
   }
 
   private _stopZoomRepeat(pointerId?: number) {
@@ -401,45 +397,119 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     }
   }
 
-  private _onScrollbar(e) {
+  private _scrollRange(horizontal: boolean, zoom = this.designerCanvas.zoomFactor) {
+    const canvas = this.designerCanvas;
+    const viewport = horizontal ? canvas.clientWidth : canvas.clientHeight;
+    const surface = horizontal ? canvas.designerOffsetWidth : canvas.designerOffsetHeight;
+    return Math.max(surface, viewport / zoom, 1);
+  }
+
+  private _updateScrollbars() {
+    const canvas = this.designerCanvas;
+    for (const horizontal of [true, false]) {
+      const scrollbar = horizontal ? this._sHor : this._sVert;
+      const viewport = horizontal ? canvas.clientWidth : canvas.clientHeight;
+      const range = this._scrollRange(horizontal);
+      scrollbar.thumbSize = viewport / (viewport + 2 * range * canvas.zoomFactor);
+      scrollbar.value = 0.5 - (horizontal ? canvas.canvasOffset.x : canvas.canvasOffset.y) / (2 * range);
+    }
+  }
+
+  private _onScrollbar(e: CustomEvent) {
     if (!this.instanceServiceContainer) return;
-    if (e?.detail == 'incrementLarge')
-      e.target.value += 0.25;
-    else if (e?.detail == 'decrementLarge')
-      e.target.value -= 0.25;
-    else if (e?.detail == 'incrementSmall')
-      e.target.value += 0.05;
-    else if (e?.detail == 'decrementSmall')
-      e.target.value -= 0.05;
-    const w = this.designerCanvas.designerOffsetWidth > this.designerCanvas.offsetWidth ? this.designerCanvas.designerOffsetWidth : this.designerCanvas.offsetWidth;
-    const h = this.designerCanvas.designerOffsetHeight > this.designerCanvas.offsetHeight ? this.designerCanvas.designerOffsetHeight : this.designerCanvas.offsetHeight;
-    const x = w * (this._sHor.value - 0.5) * -2;
-    const y = h * (this._sVert.value - 0.5) * -2;
-    this.designerCanvas.canvasOffset = { x, y };
+    this._stopWheelAnimation();
+    const horizontal = e.target === this._sHor;
+    const scrollbar = horizontal ? this._sHor : this._sVert;
+    const canvas = this.designerCanvas;
+    const range = this._scrollRange(horizontal);
+    const viewport = horizontal ? canvas.clientWidth : canvas.clientHeight;
+    const step = e.detail.endsWith('Large') ? viewport * 0.9 : 40;
+    if (e.detail.startsWith('increment'))
+      scrollbar.value += step / (2 * range * canvas.zoomFactor);
+    else if (e.detail.startsWith('decrement'))
+      scrollbar.value -= step / (2 * range * canvas.zoomFactor);
+    const offset = (0.5 - scrollbar.value) * 2 * range;
+    canvas.canvasOffset = horizontal ? { x: offset, y: canvas.canvasOffset.y } : { x: canvas.canvasOffset.x, y: offset };
   }
 
   private _onWheel(event: WheelEvent) {
-    if (!this.instanceServiceContainer) return;
+    if (!this.instanceServiceContainer || event.defaultPrevented) return;
     event.preventDefault();
+    const canvas = this.designerCanvas;
+    // Wheel units describe screen movement, never a fraction of the design surface.
+    const mode = event.deltaMode;
+    const dx = event.deltaX * (mode === 1 ? 16 : mode === 2 ? canvas.clientWidth : 1);
+    const dy = event.deltaY * (mode === 1 ? 16 : mode === 2 ? canvas.clientHeight : 1);
+    if (!dx && !dy) return;
+    // A pinch starts from the painted view, not an unfinished scroll animation.
+    if (event.ctrlKey && this._wheelTarget && !this._wheelTarget.direct)
+      this._stopWheelAnimation();
+    const target = this._wheelTarget ??= {
+      zoom: canvas.zoomFactor,
+      x: canvas.canvasOffset.x * canvas.zoomFactor,
+      y: canvas.canvasOffset.y * canvas.zoomFactor,
+      direct: false
+    };
     if (event.ctrlKey) {
-      let zf = this._designerCanvas.zoomFactor;
-      const wheel = event.deltaY < 0 ? 1 : (-1);
-      zf *= Math.exp(wheel * 0.2);
-      if (zf < 0.02)
-        zf = 0.02;
-      const vp = this.designerCanvas.getNormalizedEventCoordinates(event)
-      this.designerCanvas.zoomTowardsPoint(vp, zf);
-    }
-    else if (event.shiftKey) {
-      this._sHor.value += event.deltaY / 10000;
-      this._onScrollbar(null);
+      target.direct = true;
+      // Browser touchpad pinch deltas encode -100 * log(scale).
+      // Limit coarse wheel steps without reducing ordinary pinch precision.
+      const zoomDelta = Math.max(-20, Math.min(20, dy));
+      const zoom = Math.max(0.02, Math.min(100, target.zoom * Math.exp(-zoomDelta / 100)));
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      target.x = x - (x - target.x) * zoom / target.zoom;
+      target.y = y - (y - target.y) * zoom / target.zoom;
+      target.zoom = zoom;
     }
     else {
-      this._sVert.value += event.deltaY / 10000;
-      this._onScrollbar(null);
-      this._sHor.value += event.deltaX / 10000;
-      this._onScrollbar(null);
+      // Shift redirects a vertical wheel; already-horizontal trackpad input stays horizontal.
+      const x = dx || (event.shiftKey ? dy : 0);
+      const y = event.shiftKey ? 0 : dy;
+      if (x) {
+        const range = this._scrollRange(true, target.zoom) * target.zoom;
+        target.x = Math.max(-range, Math.min(range, target.x - x));
+      }
+      if (y) {
+        const range = this._scrollRange(false, target.zoom) * target.zoom;
+        target.y = Math.max(-range, Math.min(range, target.y - y));
+      }
     }
+    if (this._wheelFrame == null)
+      this._wheelFrame = requestAnimationFrame(time => this._animateWheel(time));
+  }
+
+  private _animateWheel(time: number) {
+    this._wheelFrame = null;
+    const target = this._wheelTarget;
+    if (!target || !this.instanceServiceContainer) return;
+    const canvas = this.designerCanvas;
+    // Pinch is direct manipulation: easing makes reversals lag and keeps zooming
+    // after the fingers stop. Only ordinary wheel panning needs an animation tail.
+    const fraction = target.direct || this.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 1 : 1 - Math.exp(-Math.min(time - (this._wheelTime ?? time - 1000 / 60), 64) / 45);
+    this._wheelTime = time;
+    let zoom = canvas.zoomFactor + (target.zoom - canvas.zoomFactor) * fraction;
+    let x = canvas.canvasOffset.x * canvas.zoomFactor + (target.x - canvas.canvasOffset.x * canvas.zoomFactor) * fraction;
+    let y = canvas.canvasOffset.y * canvas.zoomFactor + (target.y - canvas.canvasOffset.y * canvas.zoomFactor) * fraction;
+    const finished = Math.abs(x - target.x) < 0.1 && Math.abs(y - target.y) < 0.1 && Math.abs(zoom - target.zoom) < 0.00001;
+    if (finished) ({ zoom, x, y } = target);
+    this._applyingWheel = true;
+    try {
+      canvas.setViewport(zoom, { x: x / zoom, y: y / zoom });
+    } finally {
+      this._applyingWheel = false;
+    }
+    if (finished) this._stopWheelAnimation();
+    else this._wheelFrame = requestAnimationFrame(time => this._animateWheel(time));
+  }
+
+  private _stopWheelAnimation() {
+    if (this._wheelFrame != null) cancelAnimationFrame(this._wheelFrame);
+    this._wheelFrame = null;
+    this._wheelTarget = null;
+    this._wheelTime = null;
   }
 
   get designerWidth(): string {
@@ -487,6 +557,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   detachDocument(): EditingDocument {
+    this._stopWheelAnimation();
     this._stopZoomRepeat();
     this._toolbar.dispose();
     for (const button of this._configButtons) {
@@ -498,12 +569,19 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   dispose() {
+    this._viewportResizeObserver.disconnect();
     this.detachDocument();
     this._designerCanvas.dispose();
     this._toolbar.dispose();
   }
 
+  connectedCallback() {
+    this._viewportResizeObserver.observe(this._designerCanvas);
+  }
+
   disconnectedCallback() {
+    this._viewportResizeObserver.disconnect();
+    this._stopWheelAnimation();
     this._stopZoomRepeat();
   }
 

@@ -1404,7 +1404,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   private _onWheel(event: WheelEvent) {
-    if (!this.instanceServiceContainer) return;
+    if (!this.instanceServiceContainer || event.ctrlKey) return;
     let el = this.getElementAtPoint({ x: event.clientX, y: event.clientY });
     while (el) {
       const cs = getComputedStyle(el);
@@ -1529,14 +1529,12 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public zoomPoint(canvasPoint: IPoint, newZoom: number) {
-    this.zoomFactor = newZoom;
-
     const newCanvasOffset = {
-      x: -(canvasPoint.x) + this.outerRect.width / this.zoomFactor / 2,
-      y: -(canvasPoint.y) + this.outerRect.height / this.zoomFactor / 2
+      x: -(canvasPoint.x) + this.outerRect.width / newZoom / 2,
+      y: -(canvasPoint.y) + this.outerRect.height / newZoom / 2
     }
 
-    this.canvasOffset = newCanvasOffset;
+    this.setViewport(newZoom, newCanvasOffset);
   }
 
   private zoomConvertEventToViewPortCoordinates(point: IPoint): IPoint {
@@ -1559,8 +1557,13 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       y: -(point.y * (scaleChange - 1) + scaleChange * -this.canvasOffsetUnzoomed.y)
     }
 
-    this.zoomFactor = newZoom;
-    this.canvasOffsetUnzoomed = newCanvasOffset;
+    this.setViewport(newZoom, { x: newCanvasOffset.x / newZoom, y: newCanvasOffset.y / newZoom });
+  }
+
+  public setViewport(zoomFactor: number, canvasOffset: IPoint) {
+    this._zoomFactor = zoomFactor;
+    this._canvasOffset = canvasOffset;
+    this._zoomFactorChanged();
   }
 }
 
