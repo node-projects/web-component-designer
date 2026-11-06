@@ -17,21 +17,23 @@ export class FontPropertyEditor extends BasePropertyEditor<HTMLSelectElement> {
     this.element.onchange = (e) => this._valueChanged(this.element.value);
   }
 
-  static addFontsToSelect(select: HTMLSelectElement) {
-    if (FontPropertyEditor.fontList) {
-      FontPropertyEditor.parseFontList(select);
-      //@ts-ignore
-    } else if (window.queryLocalFonts) {
-      //@ts-ignore
-      window.queryLocalFonts().then(x => {
+  static async addFontsToSelect(select: HTMLSelectElement) {
+    if (!FontPropertyEditor.fontList) {
+      try {
         //@ts-ignore
-        FontPropertyEditor.fontList = [...new Set(x.map(y => y.family))];
-        FontPropertyEditor.parseFontList(select);
-      })
-    } else {
-      FontPropertyEditor.fontList = ["Verdana", "Arial", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"];
-      FontPropertyEditor.parseFontList(select);
+        if (window.queryLocalFonts) {
+          //@ts-ignore
+          const fonts = await window.queryLocalFonts();
+          //@ts-ignore
+          FontPropertyEditor.fontList = [...new Set(fonts.map(y => y.family))];
+        }
+      } catch {
+        // Use the default fonts when local font access is denied or blocked.
+      }
+      if (!FontPropertyEditor.fontList?.length)
+        FontPropertyEditor.fontList = ["Verdana", "Arial", "Tahoma", "Trebuchet MS", "Times New Roman", "Georgia", "Garamond", "Courier New", "Brush Script MT"];
     }
+    FontPropertyEditor.parseFontList(select);
   }
 
   private static parseFontList(select: HTMLSelectElement) {

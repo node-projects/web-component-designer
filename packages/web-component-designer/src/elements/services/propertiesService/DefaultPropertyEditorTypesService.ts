@@ -41,6 +41,7 @@ export class DefaultPropertyEditorTypesService implements IPropertyEditorTypesSe
         {
           return new ColorPropertyEditor(property);
         }
+      case "css-font":
       case "font":
         {
           return new FontPropertyEditor(property);
