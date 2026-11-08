@@ -1015,7 +1015,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.QuadraticBezier) {
         conversionItems.push({
-          title: 'quadratic bÃ©zier', action: () => {
+          title: 'quadratic bézier', action: () => {
             this._convertToQuadratic(segIndex);
             this._commitGeometryChange();
           }
@@ -1024,7 +1024,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.CubicBezier) {
         conversionItems.push({
-          title: 'cubic bÃ©zier', action: () => {
+          title: 'cubic bézier', action: () => {
             this._convertToCubic(segIndex);
             this._commitGeometryChange();
           }
