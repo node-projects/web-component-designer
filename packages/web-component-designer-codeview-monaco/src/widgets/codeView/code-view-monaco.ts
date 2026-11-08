@@ -19,6 +19,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   private _disableSelectionAfterSel: boolean;
   private _setSelectionTimeout: ReturnType<typeof setTimeout>;
   private _pendingSelectionKey: string;
+  private _initialSelection?: IStringPosition;
 
   private _disposed = false;
   private _cleanup: (() => void)[] = [];
@@ -28,6 +29,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   dispose(): void {
     if (this._disposed) return;
     this._disposed = true;
+    this._initialSelection = undefined;
     this.clearPendingSetSelection();
     clearTimeout(this._enableSelectionTimeout);
     cancelAnimationFrame(this._focusFrame);
@@ -241,6 +243,9 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
         this._monacoEditor.focus();
 
         resizeObserver.disconnect();
+        const selection = this._initialSelection;
+        this._initialSelection = undefined;
+        if (selection) this.setSelection(selection);
       };
     });
 
@@ -266,6 +271,7 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
 
   update(code: string, instanceServiceContainer?: InstanceServiceContainer) {
     if (this._disposed) return;
+    if (this.#code !== code) this._initialSelection = undefined;
     this.#code = code;
     this._instanceServiceContainer = instanceServiceContainer;
     if (this._monacoEditor) {
@@ -306,6 +312,11 @@ export class CodeViewMonaco extends BaseCustomWebComponentLazyAppend implements 
   }
 
   setSelection(position: IStringPosition) {
+    if (this._disposed || !position) return;
+    if (!this._monacoEditor) {
+      this._initialSelection = { ...position };
+      return;
+    }
     if (this._monacoEditor && !this._disableSelection && !this._disableSelectionAfterSel && position) {
       const selectionKey = `${position.start}:${position.length}`;
       if (this._pendingSelectionKey === selectionKey)
