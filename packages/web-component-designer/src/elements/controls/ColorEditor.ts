@@ -353,11 +353,19 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
     });
     this._channels.addEventListener('input', () => this._applyChannelInputs(true));
     this._channels.addEventListener('change', () => this._commitCurrentValue());
+    this._channels.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.isComposing) {
+        event.preventDefault();
+        event.stopPropagation();
+        (event.target as HTMLElement).blur();
+      }
+    });
     this._textInput.addEventListener('input', () => this._validateTextInput());
     this._textInput.addEventListener('change', () => this._applyText());
     this._textInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        this._applyText();
+      if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        e.stopPropagation();
         this._textInput.blur();
       }
     });
@@ -624,7 +632,7 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
     if (this.readOnly || this.disabled)
       return;
     if (this._popup)
-      this._closePopup();
+      this._closePopup(true);
     else
       this._openPopup();
   }
@@ -702,7 +710,7 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
     const path = event.composedPath();
     if (path.includes(this) || (this._popup && path.includes(this._popup)))
       return;
-    this._closePopup();
+    this._closePopup(true);
   }
 
   private _handleWindowKey(event: KeyboardEvent) {
@@ -710,7 +718,12 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
       this._closePopup();
   }
 
-  private _closePopup() {
+  private _closePopup(commitPending = false) {
+    if (commitPending) {
+      // Removing the focused input skips its native blur/change commit.
+      const active = this._editor?.shadowRoot.activeElement;
+      if (active instanceof HTMLElement) active.blur();
+    }
     window.removeEventListener('pointerdown', this._outsidePointerHandler, true);
     window.removeEventListener('keydown', this._windowKeyHandler);
     this._popup?.remove();

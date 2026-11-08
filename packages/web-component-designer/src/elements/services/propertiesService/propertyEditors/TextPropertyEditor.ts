@@ -30,6 +30,13 @@ export class TextPropertyEditor extends BasePropertyEditor<HTMLInputElement> {
     }
 
     element.onchange = (e) => this._valueChanged(element.value);
+    element.onkeydown = event => {
+      if (event.key === 'Enter' && !event.isComposing) {
+        event.preventDefault();
+        event.stopPropagation();
+        element.blur();
+      }
+    };
     element.onfocus = (e) => {
       element.selectionStart = 0;
       element.selectionEnd = element.value?.length;

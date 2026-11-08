@@ -7,6 +7,7 @@ import { JsonPropertyEditor } from './propertyEditors/JsonPropertyEditor.js';
 import { NumberPropertyEditor } from './propertyEditors/NumberPropertyEditor.js';
 import { SelectPropertyEditor } from './propertyEditors/SelectPropertyEditor.js';
 import { TextPropertyEditor } from './propertyEditors/TextPropertyEditor.js';
+import { SuggestedPropertyEditor } from './propertyEditors/SuggestedPropertyEditor.js';
 import { BooleanPropertyEditor } from './propertyEditors/BooleanPropertyEditor.js';
 import { ImageButtonListPropertyEditor } from './propertyEditors/ImageButtonListPropertyEditor.js';
 import { ThicknessPropertyEditor } from "./propertyEditors/ThicknessPropertyEditor.js";
@@ -81,7 +82,7 @@ export class DefaultPropertyEditorTypesService implements IPropertyEditorTypesSe
       case "css-list":
       default:
         {
-          return new TextPropertyEditor(property);
+          return property.values?.length ? new SuggestedPropertyEditor(property) : new TextPropertyEditor(property);
         }
     }
   }

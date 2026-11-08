@@ -404,12 +404,50 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
         label.value = property.name;
         label.type = "text";
         label.id = "addNew_label_" + this._addCounter;
-        label.onkeyup = e => {
-          if (e.key == 'Enter' && label.value) {
-            property.name = label.value;
-            label.disabled = true;
-            input.disabled = false;
-            input.focus();
+        label.onkeyup = async e => {
+          if (e.key == 'Enter' && label.value.trim() && this._designItems?.length) {
+            const items = this._designItems;
+            const name = label.value.trim();
+            const definition = await property.service.getProperty(items[0], name);
+            if (!definition || items !== this._designItems || !row.isConnected) return;
+            // Keep the originating style rule while resolving the editor metadata.
+            for (const { property: extensionProperty, extension } of this._extensions) {
+              if (extensionProperty === property) {
+                extension.dispose?.();
+                extension.element.remove();
+              }
+            }
+            this._extensions = this._extensions.filter(entry => entry.property !== property);
+            // Groups retain this property object for collapse/expand handling.
+            Object.assign(property, definition, { name, service: property.service, renamable: true });
+            this.createPropertyEditors(property, isInGroup);
+            const replacement = this._propertyMap.get(property);
+            if (!replacement || replacement.rowElement === row) return;
+            row.replaceWith(replacement.rowElement);
+            let extensionAnchor: Element = replacement.rowElement;
+            for (const { property: extensionProperty, extension } of this._extensions) {
+              if (extensionProperty === property) {
+                extensionAnchor.after(extension.element);
+                extensionAnchor = extension.element;
+              }
+            }
+            (replacement.labelElement as HTMLInputElement).disabled = true;
+            replacement.editor.designItemsChanged(items);
+            PropertyGridPropertyList.refreshIsSetElementAndEditorForDesignItems(replacement.isSetElement, property, items, this._propertiesService, replacement.editor);
+            const findInput = (root: Element | ShadowRoot): HTMLElement => {
+              for (const control of root.querySelectorAll<HTMLElement>('input:not([disabled]),select:not([disabled]),textarea:not([disabled])'))
+                if (control.getClientRects().length) return control;
+              for (const child of root.querySelectorAll<HTMLElement>('*')) {
+                const target = child.shadowRoot && findInput(child.shadowRoot);
+                if (target) return target;
+              }
+              for (const button of root.querySelectorAll<HTMLButtonElement>('button:not([disabled])'))
+                if (button.getClientRects().length) return button;
+              return null;
+            };
+            const element = replacement.editor.element;
+            if (element instanceof HTMLElement && element.matches('input,select,textarea')) element.focus();
+            else findInput(element)?.focus();
           }
         }
         if (property.service.getPropertyNameSuggestions) {

@@ -299,8 +299,9 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   private _wireEvents() {
     this._input.addEventListener('change', () => this._applyTypedValue());
     this._input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        this._applyTypedValue();
+      if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        e.stopPropagation();
         this._input.blur();
       }
     });

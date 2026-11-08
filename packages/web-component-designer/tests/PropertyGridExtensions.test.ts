@@ -39,6 +39,45 @@ beforeAll(async () => {
 
 afterEach(() => document.body.replaceChildren());
 
+test('confirming a new style name resolves its editor and retains the originating stylesheet rule', async () => {
+  const { services, doc, item } = await fixture();
+  const { CssCurrentPropertiesService } = await import('../src/elements/services/propertiesService/services/CssCurrentPropertiesService');
+  const { PropertyType } = await import('../src/elements/services/propertiesService/PropertyType');
+  const { ValueType } = await import('../src/elements/services/propertiesService/ValueType');
+  const service = new CssCurrentPropertiesService();
+  const rule = { selector: '.button', declarations: [] };
+  service.getProperties = async () => [{ name: 'Rule', properties: [
+    { name: '', type: 'addNew', service, propertyType: PropertyType.complex, styleRule: rule }
+  ] }];
+  service.isSet = () => ValueType.none;
+  service.getValue = () => '';
+  service.getUnsetValue = () => 'normal';
+  const setValue = jest.fn(async () => { });
+  service.setValue = setValue;
+  const list = new PropertyList(services);
+  document.body.appendChild(list);
+  list.setPropertiesService(service);
+  await list.createElements(item);
+  list.designItemsChanged([item]);
+  const label = list.shadowRoot.querySelector<HTMLInputElement>('input[id^="addNew_label_"]');
+  label.value = 'align-items';
+  label.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+  await Promise.resolve();
+  const dropdown = list.shadowRoot.querySelector<HTMLSelectElement>('select[aria-label="align-items suggestions"]');
+  expect(dropdown).not.toBeNull();
+  const header = list.shadowRoot.querySelector<HTMLElement>('.group-header');
+  header.click();
+  expect(dropdown.closest<HTMLElement>('.property-row').hidden).toBe(true);
+  header.click();
+  expect(dropdown.closest<HTMLElement>('.property-row').hidden).toBe(false);
+  dropdown.value = 'safe center';
+  dropdown.dispatchEvent(new Event('change'));
+  expect(setValue).toHaveBeenCalledWith([item], expect.objectContaining({
+    name: 'align-items', type: 'css-list', propertyType: PropertyType.cssValue, styleRule: rule
+  }), 'safe center');
+  await doc.dispose();
+});
+
 async function fixture(html = '<button class="button primary" class:is-active="[[isActive]]">Submit</button>') {
   const services = new ServiceContainer();
   services.register('designItemService', new DesignItemService());

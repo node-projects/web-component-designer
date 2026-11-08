@@ -74,8 +74,13 @@ test('CSS keyword suggestions allow custom values and preserve important when ed
     const input = editor.element.querySelector('input');
     expect(input.type).toBe('text');
     expect(input.value).toBe('var(--display)');
-    expect(Array.from(input.querySelectorAll('option'), option => option.value)).toContain('grid');
+    expect(Array.from(editor.element.querySelectorAll('option'), option => option.value)).toContain('grid');
     input.value = 'inline grid';
     input.dispatchEvent(new Event('change'));
     expect(setValue).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'inline grid !important');
+    const dropdown = editor.element.querySelector('select');
+    dropdown.value = 'grid';
+    dropdown.dispatchEvent(new Event('change'));
+    expect(input.value).toBe('grid');
+    expect(setValue).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), 'grid !important');
 });
