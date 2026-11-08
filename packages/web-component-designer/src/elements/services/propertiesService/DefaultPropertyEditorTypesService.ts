@@ -75,6 +75,10 @@ export class DefaultPropertyEditorTypesService implements IPropertyEditorTypesSe
           return new ThicknessPropertyEditor(property);
         }
       case "string":
+      case "css-string":
+      case "css-position":
+      // CSS keywords are suggestions: var(), expressions and future values stay editable.
+      case "css-list":
       default:
         {
           return new TextPropertyEditor(property);

@@ -1,5 +1,6 @@
 /** @jest-environment jsdom */
 import { afterEach, beforeAll, expect, jest, test } from '@jest/globals';
+import type {} from '../../web-component-designer-htmlparserservice-base-custom-webcomponent/src/service/htmlParserService/Typescript';
 
 Object.defineProperty(window, 'matchMedia', { value: () => ({ matches: false }) });
 CSSStyleSheet.prototype.replaceSync = function () { };

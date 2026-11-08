@@ -195,7 +195,7 @@ test('abstract css properties service fills css numeric metadata', () => {
 
   expect(property.units).toEqual(defaultCssNumericUnits['css-length']);
   expect(property.unitSteps).toEqual(defaultCssNumericUnitSteps['css-length']);
-  expect(property.values).toEqual(['auto', 'initial', 'inherit', 'unset']);
+  expect(property.values).toEqual(['auto', 'initial', 'inherit', 'unset', 'revert', 'revert-layer']);
 
   const originalGetComputedStyle = globalThis.getComputedStyle;
   const hostElement = {

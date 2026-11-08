@@ -13,7 +13,9 @@ export default {
       {
         "useESM": true,
         "tsconfig": {
-          "allowJs": true
+          "allowJs": true,
+          // Integration tests import source from sibling workspace packages.
+          "rootDir": "../.."
         }
       }
     ]

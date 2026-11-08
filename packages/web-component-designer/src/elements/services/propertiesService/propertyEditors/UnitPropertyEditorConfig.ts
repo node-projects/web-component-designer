@@ -1,7 +1,7 @@
 import type { IDesignItem } from '../../../item/IDesignItem.js';
 import type { IProperty } from '../IProperty.js';
 
-export type UnitPropertyType = 'css-length' | 'css-angle' | 'css-time' | 'css-frequency' | 'css-flex' | 'css-resolution' | 'css-scale' | 'svg-length';
+export type UnitPropertyType = 'css-length' | 'css-angle' | 'css-time' | 'css-frequency' | 'css-flex' | 'css-resolution' | 'css-scale' | 'css-number' | 'css-integer' | 'css-percentage' | 'svg-length';
 
 export type UnitConversionResult = string | number | null | undefined;
 
@@ -24,7 +24,7 @@ export type UnitEditorConfig = {
   convertValue: (context: Omit<UnitConversionContext, 'property' | 'numericType'>) => string
 };
 
-const cssNumericKeywordValues = ['initial', 'inherit', 'unset'];
+const cssNumericKeywordValues = ['initial', 'inherit', 'unset', 'revert', 'revert-layer'];
 
 export const defaultCssNumericUnits: Record<UnitPropertyType, string[]> = {
   "css-length": ['px', '%', 'em', 'rem', 'vw', 'vh', 'vmin', 'vmax', 'pt', 'pc', 'in', 'cm', 'mm', 'q', 'ch', 'ex'],
@@ -34,6 +34,9 @@ export const defaultCssNumericUnits: Record<UnitPropertyType, string[]> = {
   "css-flex": ['fr'],
   "css-resolution": ['dpi', 'dpcm', 'dppx', 'x'],
   "css-scale": ['', '%'],
+  "css-number": [''],
+  "css-integer": [''],
+  "css-percentage": ['%'],
   "svg-length": ['', '%']
 };
 
@@ -47,6 +50,9 @@ export const defaultCssNumericUnitSteps: Record<UnitPropertyType, Record<string,
   "css-flex": { fr: 0.1 },
   "css-resolution": { dppx: 0.1, x: 0.1 },
   "css-scale": { '': 0.1, '%': 10 },
+  "css-number": { '': 0.1 },
+  "css-integer": { '': 1 },
+  "css-percentage": { '%': 1 },
   "svg-length": { '': 1, '%': 10 }
 };
 
@@ -423,6 +429,9 @@ export function defaultConvertCssNumericUnitValue(context: UnitConversionContext
       convertedValue = convertUsingUnitTable(convertibleContext.value, convertibleContext.fromUnit, convertibleContext.toUnit, resolutionUnitInDpi);
       break;
     case 'css-flex':
+    case 'css-number':
+    case 'css-integer':
+    case 'css-percentage':
       convertedValue = convertibleContext.value;
       break;
     case 'css-scale':
