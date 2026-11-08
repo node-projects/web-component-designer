@@ -37,7 +37,8 @@ import { AbstractStylesheetService } from '../../services/stylesheetService/Abst
 import { addPolyfill as addBoxQuadsPolyfill } from '../../helper/getBoxQuads.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/ElementHelper.js';
-import { beginSvgPointEditing, endSvgPointEditing } from './extensions/svg/SvgEditingContext.js';
+import { beginSvgPointEditing, endSvgPointEditing, isEditingSvgPoints } from './extensions/svg/SvgEditingContext.js';
+import { findSvgPathPointInsertion, insertSvgPathPoint, SvgPathPointInsertion } from './extensions/svg/SvgPathPointInsertion.js';
 import { getGeometryReader } from './extensions/svg/geometry/GeometryReaderFactory.js';
 
 const disableAnimationsSheet = cssFromString`
@@ -54,6 +55,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   public clickOverlay: HTMLDivElement;
 
   private _activeTool: ITool;
+  private _pathInsertionContexts = new WeakMap<MouseEvent, { element: SVGPathElement, hit: SvgPathPointInsertion }>();
 
   // IPlacementView
   private _gridSize = 10;
@@ -1120,6 +1122,16 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   public showDesignItemContextMenu(designItem: IDesignItem, event: MouseEvent) {
     const mnuItems: IContextMenuItem[] = [];
+    const captured = this._pathInsertionContexts.get(event);
+    const element = captured?.element ?? this.getElementAtPoint({ x: event.clientX, y: event.clientY });
+    if (!this.readOnly && element instanceof SVGPathElement) {
+      const hit = captured?.hit ?? findSvgPathPointInsertion(element, { x: event.clientX, y: event.clientY });
+      if (hit) mnuItems.push({ title: 'Add point here', action: () => {
+        const item = DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer);
+        beginSvgPointEditing(this, item);
+        this._insertSvgPathPoint(item, hit);
+      } });
+    }
     for (let cme of this.serviceContainer.designerContextMenuExtensions) {
       if (cme.shouldProvideContextmenu(event, this, designItem, 'designer')) {
         mnuItems.push(...cme.provideContextMenuItems(event, this, designItem, 'designer'));
@@ -1140,19 +1152,31 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       return;
     }
     event.preventDefault();
-    if (event.target === this.overlayLayer)
-      return;
     if (event.altKey)
       return;
     if (this.serviceContainer.globalContext.tool == null || this.serviceContainer.globalContext.tool === this.serviceContainer.designerTools.get(NamedTools.Pointer)) {
       const element = this.getElementAtPoint({ x: event.clientX, y: event.clientY });
       if (!this.readOnly && element instanceof SVGElement && getGeometryReader(element)) {
-        beginSvgPointEditing(this, DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer));
+        const item = DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer);
+        const editing = isEditingSvgPoints(this, item);
+        if (editing && element instanceof SVGPathElement) {
+          const hit = findSvgPathPointInsertion(element, { x: event.clientX, y: event.clientY });
+          if (hit) this._insertSvgPathPoint(item, hit);
+        } else beginSvgPointEditing(this, item);
         return;
       }
+      if (event.target === this.overlayLayer) return;
       this.extensionManager.removeExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
       this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);
     }
+  }
+
+  private _insertSvgPathPoint(item: IDesignItem, hit: SvgPathPointInsertion) {
+    const index = insertSvgPathPoint(item, hit);
+    if (index !== undefined) item.element.dispatchEvent(new CustomEvent('svg-geometry-command', {
+      detail: { command: 'select', index, handleType: 'anchor' }
+    }));
+    this.clickOverlay.focus();
   }
 
   private _searchShowOverlay() {
@@ -1461,6 +1485,14 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (!this.serviceContainer)
       return;
 
+    if (!this.readOnly && event.type === EventNames.PointerDown && event.button === 2) {
+      // Selection can open a dock and move the viewport before the menu is built.
+      const element = this.getElementAtPoint({ x: event.clientX, y: event.clientY });
+      if (element instanceof SVGPathElement) {
+        const hit = findSvgPathPointInsertion(element, { x: event.clientX, y: event.clientY });
+        if (hit) this._pathInsertionContexts.set(event, { element, hit });
+      }
+    }
     if (this._touchGestureHelper.multitouchEventActive)
       return;
 

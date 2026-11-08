@@ -13,6 +13,7 @@ before(async () => {
       import { DesignerView } from './src/elements/widgets/designerView/designerView.ts';
       import { createDefaultServiceContainer } from './src/elements/services/DefaultServiceBootstrap.ts';
       import { beginSvgPointEditing } from './src/elements/widgets/designerView/extensions/svg/SvgEditingContext.ts';
+      import { DesignItem } from './src/elements/item/DesignItem.ts';
       import { NamedTools } from './src/elements/widgets/designerView/tools/NamedTools.ts';
       import { CommandType } from './src/commandHandling/CommandType.ts';
       window.createDesigner = async () => {
@@ -28,7 +29,10 @@ before(async () => {
         canvas.alignOnGrid = false; canvas.alignOnSnap = true;
         window.setTool = name => canvas.executeCommand({type:CommandType.setTool, parameter:NamedTools[name]});
         window.command = name => canvas.executeCommand({type:CommandType[name]});
-        window.edit = selector => beginSvgPointEditing(canvas, canvas.rootDesignItem.querySelectorAll(selector)[0].__designItem);
+        window.edit = selector => {
+          const element = canvas.rootDesignItem.querySelectorAll(selector)[0];
+          beginSvgPointEditing(canvas, DesignItem.GetOrCreateDesignItem(element, element, canvas.serviceContainer, canvas.instanceServiceContainer));
+        };
         window.toScreen = point => {
           const origin = canvas.getNormalizedEventCoordinates({clientX:0,clientY:0});
           return {x:(point.x-origin.x)*canvas.zoomFactor, y:(point.y-origin.y)*canvas.zoomFactor};
@@ -65,6 +69,91 @@ async function point(page,x,y) {return page.evaluate(p=>toScreen(p),{x,y});}
 async function click(page,x,y,options) {const p=await point(page,x,y);await page.mouse.click(p.x,p.y,options);}
 async function paths(page) {return page.evaluate(()=>[...canvas.rootDesignItem.querySelectorAll('svg path')].map(p=>({d:p.getAttribute('d'),data:p.getPathData({normalize:true}),svg:p.ownerSVGElement.outerHTML})));}
 const fixture='<svg style="position:absolute;left:100px;top:150px;width:300px;height:250px;stroke:black;fill:none" viewBox="0 0 300 250"><path id="path" d="M 10 10 L 100 10 L 100 100"/></svg>';
+
+test('right-click inserts at the clicked segment position, selects the node and undoes once',async t=>{
+  const page=await setup(t,fixture);
+  const original=(await paths(page))[0].d;
+  await page.evaluate(()=>{
+    const selection=canvas.instanceServiceContainer.selectionService;
+    const originalSelect=selection.setSelectedElements.bind(selection);
+    selection.setSelectedElements=(...args)=>{
+      originalSelect(...args);
+      canvas.setViewport(1,{x:20,y:35});
+    };
+  });
+  await click(page,143,160,{button:'right'});
+  await page.getByText('Add point here',{exact:true}).click();
+  const inserted=(await paths(page))[0];
+  assert.equal(inserted.data.length,4);
+  assert.ok(Math.abs(inserted.data[1].values[0]-43)<0.001);
+  assert.equal(await page.getByLabel('Path node',{exact:true}).inputValue(),'1');
+  await page.evaluate(()=>command('undo'));
+  assert.equal((await paths(page))[0].d,original);
+  await page.evaluate(()=>command('redo'));
+  assert.equal((await paths(page))[0].d,inserted.d);
+});
+
+test('double-click enters object editing first, then inserts without duplicating existing anchors',async t=>{
+  const page=await setup(t,fixture);
+  await click(page,143,160,{clickCount:2});
+  assert.equal((await paths(page))[0].data.length,3);
+  await click(page,163,160,{clickCount:2});
+  assert.equal((await paths(page))[0].data.length,4);
+  await click(page,163,160,{clickCount:2});
+  assert.equal((await paths(page))[0].data.length,4);
+});
+
+test('insertion preserves curved, smooth, arc and closing segments under zoom and transforms',async t=>{
+  const page=await setup(t);
+  const cases=[
+    ['M10 80 C40 0 90 160 140 80 S220 0 260 80',0.23],
+    ['M10 80 C40 0 90 160 140 80 S220 0 260 80',0.73],
+    ['M10 80 Q80 0 140 80 T260 80',0.23],
+    ['M10 80 Q80 0 140 80 T260 80',0.73],
+    ['M20 90 A70 40 25 1 0 180 90',0.31],
+    ['M20 90 A100 60 15 1 1 180 90',0.71],
+    ['M10 10 H150 V150 Z m200 0 l30 0 l0 30 z',0.38],
+    ['M10 10 H150 V150 Z m200 0 l30 0 l0 30 z',0.7],
+    ['M10 10 H150 V150 Z m200 0 l30 0 l0 30 z',0.96],
+  ];
+  for(const [d,fraction] of cases){
+    const before=await page.evaluate(async ({d,fraction})=>{
+      await view.parseDesignerHTML(`<svg style="position:absolute;left:80px;top:160px;width:400px;height:300px;stroke:black;stroke-width:3;fill:none" viewBox="0 0 400 300"><g transform="translate(20 10) scale(1.2 .85)"><path id="path" d="${d}"/></g></svg>`);
+      canvas.setViewport(1.82,{x:0,y:0});
+      edit('#path');
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const p=canvas.rootDesignItem.querySelectorAll('#path')[0],len=p.getTotalLength();
+      const samples=Array.from({length:101},(_,i)=>{const q=p.getPointAtLength(len*i/100);return{x:q.x,y:q.y};});
+      const target=p.getPointAtLength(len*fraction),screen=target.matrixTransform(p.getScreenCTM());
+      return{samples,len,screen:{x:screen.x,y:screen.y},count:p.getPathData({normalize:false}).length};
+    },{d,fraction});
+    await page.mouse.click(before.screen.x,before.screen.y,{clickCount:2});
+    const after=await page.evaluate(()=>{
+      const p=canvas.rootDesignItem.querySelectorAll('#path')[0],len=p.getTotalLength();
+      return{len,count:p.getPathData({normalize:false}).length,samples:Array.from({length:101},(_,i)=>{const q=p.getPointAtLength(len*i/100);return{x:q.x,y:q.y};})};
+    });
+    assert.equal(after.count,before.count+1,d);
+    assert.ok(Math.abs(after.len-before.len)<0.03,`length changed: ${d}`);
+    for(let i=0;i<101;i++)assert.ok(Math.hypot(after.samples[i].x-before.samples[i].x,after.samples[i].y-before.samples[i].y)<0.06,`curve changed: ${d} at ${i}`);
+    await page.evaluate(()=>command('undo'));
+    assert.equal((await paths(page))[0].d,d);
+  }
+});
+
+test('content-mode insertion works without a toolbar, on long segments and wide strokes',async t=>{
+  const page=await setup(t);
+  await page.evaluate(async()=>{
+    canvas.serviceContainer.options.svgEditingMode='content';
+    canvas.setSvgEditingToolbarVisible(false);
+    await view.parseDesignerHTML('<svg style="position:absolute;left:0;top:0;width:100%;height:100%;fill:none;stroke:black;stroke-width:20"><path id="path" d="M10 100 L20000 100"/></svg>');
+  });
+  await click(page,60,108,{clickCount:2});
+  const data=(await paths(page))[0].data;
+  assert.equal(data.length,3);
+  assert.ok(Math.abs(data[1].values[0]-60)<0.001);
+  assert.equal(data[1].values[1],100);
+  assert.equal(await page.getByRole('toolbar',{name:'SVG editing'}).count(),0);
+});
 
 test('native double-click finishes a horizontal/vertical path once; drawing is one undo step',async t=>{
   const page=await setup(t);

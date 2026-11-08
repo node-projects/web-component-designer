@@ -204,6 +204,7 @@ export class SvgPathGeometryReader implements IGeometryReader {
         }
         case SegmentType.Close: {
           pathData.push({ type: rel ? 'z' : 'Z', values: [] } as any);
+          lastPos = { ...seg.point };
           break;
         }
       }
