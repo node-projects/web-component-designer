@@ -13,9 +13,11 @@ import { applyGeometryWritesToDesignItem, applyGeometryWritesToElement } from '.
 import { fromOverlayPointToSvgUserSpace, toOverlayPointFromSvgUserSpace } from '../../../../helper/SvgHelper.js';
 import { ISourcePart, ISvgPathHandleSourcePartData } from '../../../../services/sourceMapService/ISourcePart.js';
 import { createSvgPathHandleSourcePartKey } from '../../../../services/sourceMapService/SvgPathSourceMapProvider.js';
+import { SvgPointSnapping } from './SvgPointSnapping.js';
 
 interface DragState {
   startCursorPos: IPoint;
+  currentCursorPos: IPoint;
   segmentIndex: number;
   handleType: 'anchor' | 'cp1' | 'cp2';
   originalPoint: IPoint;
@@ -40,6 +42,31 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   private _overlayCircles: Map<string, SVGCircleElement> = new Map();
   /** Lines for control point connections */
   private _overlayLines: SVGLineElement[] = [];
+  private _snapping: SvgPointSnapping;
+  private _originalGeometry: IGeometry;
+  private _restorePreview?: () => void;
+  private _selectedIndex = 0;
+  private _selectedHandleType: 'anchor' | 'cp1' | 'cp2' = 'anchor';
+  private _commandHandler = (event: CustomEvent) => this._executeCommand(event.detail);
+  private _keyHandler = (event: KeyboardEvent) => {
+    if (event.composedPath().some(node => node instanceof HTMLElement && (node.hasAttribute('data-svg-toolbar') || node.matches('input,textarea,select,[contenteditable=true]')))) return;
+    if (this._dragState && ['Control', 'Alt', 'Shift', 'Meta'].includes(event.key)) {
+      this._updateDrag(this._dragState.currentCursorPos, event);
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    if (event.type !== 'keydown') return;
+    if (event.key === 'Escape' && this._dragState) {
+      this._cancelDrag();
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    } else if ((event.key === 'Delete' || event.key === 'Backspace') && this.extendedItem.element instanceof SVGPathElement) {
+      this._executeCommand({ command: 'delete', index: this._selectedIndex });
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  };
 
   constructor(extensionManager: IExtensionManager, designerView: IDesignerCanvas, extendedItem: IDesignItem, reader?: IGeometryReader, options?: UnifiedGeometryExtensionOptions) {
     super(extensionManager, designerView, extendedItem);
@@ -48,6 +75,9 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   }
 
   override extend() {
+    this.extendedItem.element.addEventListener('svg-geometry-command', this._commandHandler);
+    this.designerCanvas.clickOverlay.addEventListener('keydown', this._keyHandler, true);
+    this.designerCanvas.clickOverlay.addEventListener('keyup', this._keyHandler, true);
     this.refresh();
   }
 
@@ -82,6 +112,10 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   }
 
   override dispose() {
+    this._cancelDrag();
+    this.extendedItem.element.removeEventListener('svg-geometry-command', this._commandHandler);
+    this.designerCanvas.clickOverlay.removeEventListener('keydown', this._keyHandler, true);
+    this.designerCanvas.clickOverlay.removeEventListener('keyup', this._keyHandler, true);
     this._cleanupAll();
     this._geometry = null;
     this._dragState = null;
@@ -174,7 +208,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     const selectedPart = this.extendedItem.instanceServiceContainer.selectionService.selectedPart;
     const data = selectedPart?.data as ISvgPathHandleSourcePartData;
     if (selectedPart?.designItem !== this.extendedItem || selectedPart.kind !== 'svg-path-handle') {
-      return 'selected:none';
+      return `selected:${this._selectedIndex}:${this._selectedHandleType}`;
     }
     return `selected:${data?.segmentIndex}:${data?.handleType}`;
   }
@@ -279,6 +313,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     this._addTrackedListener(circle, EventNames.PointerDown, onDown);
     this._addTrackedListener(circle, EventNames.PointerMove, onMove);
     this._addTrackedListener(circle, EventNames.PointerUp, onUp);
+    this._addTrackedListener(circle, 'pointercancel', () => this._cancelDrag());
     this._addTrackedListener(circle, EventNames.ContextMenu, onCtx);
   }
 
@@ -296,6 +331,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     this._addTrackedListener(circle, EventNames.PointerDown, onDown);
     this._addTrackedListener(circle, EventNames.PointerMove, onMove);
     this._addTrackedListener(circle, EventNames.PointerUp, onUp);
+    this._addTrackedListener(circle, 'pointercancel', () => this._cancelDrag());
   }
 
   // -- Pointer event handlers --
@@ -303,11 +339,30 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   private _onPointerDown(event: PointerEvent, circle: SVGCircleElement, segIndex: number, handleType: 'anchor' | 'cp1' | 'cp2') {
     event.stopPropagation();
     event.preventDefault();
+    this.designerCanvas.clickOverlay.focus();
     this._selectSourcePart(segIndex, handleType, event);
     (event.target as Element).setPointerCapture(event.pointerId);
     const cursorPos = this.designerCanvas.getNormalizedEventCoordinates(event);
 
     if (!this._geometry) return;
+
+    this._originalGeometry = structuredClone(this._geometry);
+    const element = this.extendedItem.element as HTMLElement;
+    const originals = this._reader.serialize(this._geometry).map(write => ({
+      ...write, value: write.target === 'style' ? element.style.getPropertyValue(write.attribute) : element.getAttribute(write.attribute),
+      priority: write.target === 'style' ? element.style.getPropertyPriority(write.attribute) : ''
+    }));
+    this._restorePreview = () => {
+      for (const write of originals) {
+        if (write.target === 'style') {
+          if (write.value) element.style.setProperty(write.attribute, write.value, write.priority);
+          else element.style.removeProperty(write.attribute);
+        } else if (write.value === null) element.removeAttribute(write.attribute);
+        else element.setAttribute(write.attribute, write.value);
+      }
+    };
+    this._snapping?.clear();
+    this._snapping = new SvgPointSnapping(this.designerCanvas, this.extendedItem.element);
 
     const seg = this._geometry.segments[segIndex];
     let originalPoint: IPoint;
@@ -328,6 +383,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
     this._dragState = {
       startCursorPos: cursorPos,
+      currentCursorPos: cursorPos,
       segmentIndex: segIndex,
       handleType,
       originalPoint,
@@ -338,6 +394,8 @@ export class UnifiedGeometryExtension extends AbstractExtension {
   }
 
   private _selectSourcePart(segIndex: number, handleType: 'anchor' | 'cp1' | 'cp2', event: Event) {
+    this._selectedIndex = segIndex;
+    this._selectedHandleType = handleType;
     const selectionService = this.extendedItem.instanceServiceContainer.selectionService;
     const sourcePart = this._getSourcePart(segIndex, handleType);
     if (selectionService.primarySelection !== this.extendedItem)
@@ -345,6 +403,8 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
     else if (sourcePart)
       selectionService.setSelectedPart(sourcePart, event);
+    this._updateOverlayAppearance();
+    this.extendedItem.element.dispatchEvent(new CustomEvent('svg-handle-selected', { detail: { index: segIndex, handleType } }));
   }
 
   private _getSourcePart(segIndex: number, handleType: 'anchor' | 'cp1' | 'cp2'): ISourcePart<ISvgPathHandleSourcePartData> {
@@ -358,6 +418,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     const [handleType, segmentIndexText] = circleKey.split('-') as ['anchor' | 'cp1' | 'cp2', string];
     const selectedPart = this.extendedItem.instanceServiceContainer.selectionService.selectedPart;
     const data = selectedPart?.data as ISvgPathHandleSourcePartData;
+    if (!selectedPart || selectedPart.kind !== 'svg-path-handle') return Number(segmentIndexText) === this._selectedIndex && handleType === this._selectedHandleType;
     return selectedPart?.designItem === this.extendedItem
       && selectedPart.kind === 'svg-path-handle'
       && data?.segmentIndex === Number(segmentIndexText)
@@ -370,11 +431,18 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     if (!this._dragState || !this._geometry || event.buttons === 0) return;
     if (this._dragState.segmentIndex !== segIndex || this._dragState.handleType !== handleType) return;
 
-    const cursorPos = this.designerCanvas.getNormalizedEventCoordinates(event);
+    this._dragState.currentCursorPos = this.designerCanvas.getNormalizedEventCoordinates(event);
+    this._updateDrag(this._dragState.currentCursorPos, event);
+  }
+
+  private _updateDrag(cursorPos: IPoint, event: Pick<KeyboardEvent, 'shiftKey' | 'altKey' | 'ctrlKey'>) {
+    if (!this._dragState) return;
+    const { segmentIndex: segIndex, handleType } = this._dragState;
     let dx = cursorPos.x - this._dragState.startCursorPos.x;
     let dy = cursorPos.y - this._dragState.startCursorPos.y;
-    if (dx === 0 && dy === 0) return;
-
+    // Recompute every preview from the same snapshot, including releasing a modifier
+    // or returning to the original point after moving other anchors with Ctrl+Alt.
+    this._geometry = structuredClone(this._originalGeometry);
     // Shift key: constrain to axis
     if (event.shiftKey) {
       if (Math.abs(dx) >= Math.abs(dy)) {
@@ -383,10 +451,29 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         dx = 0;
       }
     }
-    if (dx === 0 && dy === 0) return;
+    const original = this._toOverlay(this._dragState.originalPoint);
+    const references = this._dragState.originalSegments.filter((_, index) => index !== segIndex).map(segment => this._toOverlay(segment.point));
+    for (let i = 1; i < this._dragState.originalSegments.length; i++) {
+      const edge = this._dragState.originalSegments[i];
+      if (i === segIndex || i - 1 === segIndex || ![SegmentType.Line, SegmentType.HorizontalLine, SegmentType.VerticalLine].includes(this._originalGeometry.segments[i].type)) continue;
+      const previous = this._dragState.originalSegments[i - 1].point;
+      references.push(this._toOverlay({ x: (previous.x + edge.point.x) / 2, y: (previous.y + edge.point.y) / 2 }));
+    }
+    if (references.length > 1) references.push({
+      x: (Math.min(...references.map(p => p.x)) + Math.max(...references.map(p => p.x))) / 2,
+      y: (Math.min(...references.map(p => p.y)) + Math.max(...references.map(p => p.y))) / 2
+    });
+    const snapped = this._snapping.snap({ x: original.x + dx, y: original.y + dy }, references, event.altKey, {
+      x: !(event.shiftKey && dx === 0) && this._geometry.segments[segIndex].type !== SegmentType.VerticalLine,
+      y: !(event.shiftKey && dy === 0) && this._geometry.segments[segIndex].type !== SegmentType.HorizontalLine
+    });
+    dx = snapped.x - original.x;
+    dy = snapped.y - original.y;
 
-    // Alt key + anchor drag: move entire shape
-    if (event.altKey && handleType === 'anchor' && this._options.allowShapeDrag !== false) {
+    if (dx === 0 && dy === 0 && !this._dragState.geometryChanged) return;
+
+    // Ctrl+Alt + anchor drag: move entire shape
+    if (event.ctrlKey && event.altKey && handleType === 'anchor' && this._options.allowShapeDrag !== false) {
       this._dragWholeShape(dx, dy);
     } else {
       this._dragSingleHandle(segIndex, handleType, dx, dy);
@@ -431,6 +518,15 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       } else {
         seg.point.x = newLocal.x;
         seg.point.y = newLocal.y;
+      }
+      const original = this._dragState!.originalSegments[segIndex];
+      const anchorDx = seg.point.x - original.point.x, anchorDy = seg.point.y - original.point.y;
+      if (seg.cp2 && original.cp2) seg.cp2 = { x: original.cp2.x + anchorDx, y: original.cp2.y + anchorDy };
+      const nextIndex = this._findNextNonCloseSegment(segIndex);
+      if (nextIndex !== null) {
+        const next = this._geometry!.segments[nextIndex];
+        const nextOriginal = this._dragState!.originalSegments[nextIndex];
+        if (next.cp1 && nextOriginal.cp1) next.cp1 = { x: nextOriginal.cp1.x + anchorDx, y: nextOriginal.cp1.y + anchorDy };
       }
     } else if (handleType === 'cp1') {
       seg.cp1!.x = newLocal.x;
@@ -773,11 +869,73 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     event.stopPropagation();
     (event.target as Element).releasePointerCapture(event.pointerId);
 
-    if (this._dragState?.geometryChanged && this._geometry) {
+    const changed = this._dragState?.geometryChanged;
+    this._dragState = null;
+    this._snapping?.clear();
+    if (changed && this._geometry) {
+      this._restorePreview?.();
       // Commit via designItem for undo support (follows PathExtension pattern)
       this._commitGeometryChange();
     }
+    this._restorePreview = undefined;
+  }
+
+  private _cancelDrag() {
+    if (this._dragState && this._originalGeometry) {
+      this._geometry = this._originalGeometry;
+      this._restorePreview?.();
+      this._updateOverlayPositions();
+    }
     this._dragState = null;
+    this._restorePreview = undefined;
+    this._snapping?.clear();
+  }
+
+  private _executeCommand(detail: { command: string, index: number, handleType?: 'anchor' | 'cp1' | 'cp2', axis?: 'x' | 'y', value?: number }) {
+    if (!this._geometry) return;
+    const index = detail.index;
+    const segment = this._geometry.segments[index];
+    if (!segment || segment.type === SegmentType.Close) return;
+    let start = index, end = index + 1;
+    while (start > 0 && this._geometry.segments[start].type !== SegmentType.Move) start--;
+    while (end < this._geometry.segments.length && this._geometry.segments[end].type !== SegmentType.Move) end++;
+    const closed = this._geometry.segments[end - 1].type === SegmentType.Close;
+    const count = end - start - (closed ? 1 : 0);
+    if (detail.command === 'select') {
+      this._selectSourcePart(index, detail.handleType ?? 'anchor', new Event('svg-node-selection'));
+      this._updateOverlayAppearance();
+      return;
+    }
+    if (detail.command === 'delete' && count > 2) {
+      this._geometry.segments.splice(index, 1);
+      if (index === start) this._convertToMove(start);
+    } else if (detail.command === 'insert') this._insertPointAfter(index);
+    else if (detail.command === 'close' && count >= 3) {
+      if (closed) this._geometry.segments.splice(end - 1, 1);
+      else this._geometry.segments.splice(end, 0, { type: SegmentType.Close, relative: false, point: { ...this._geometry.segments[start].point } });
+      this._geometry.closed = this._geometry.segments.some(segment => segment.type === SegmentType.Close);
+    } else if (detail.command === 'coordinate' && detail.axis && Number.isFinite(detail.value)) {
+      const point = detail.handleType && detail.handleType !== 'anchor' ? segment[detail.handleType] : segment.point;
+      if (!point) return;
+      const diff = detail.value - point[detail.axis];
+      point[detail.axis] = detail.value;
+      if (!detail.handleType || detail.handleType === 'anchor') {
+        if (segment.cp2) segment.cp2[detail.axis] += diff;
+        const next = this._findNextNonCloseSegment(index);
+        if (next !== null && this._geometry.segments[next].cp1) this._geometry.segments[next].cp1[detail.axis] += diff;
+      }
+    } else if (index > 0) {
+      if (detail.command === 'L') this._convertToLine(index);
+      else if (detail.command === 'H') this._convertToHorizontalLine(index);
+      else if (detail.command === 'V') this._convertToVerticalLine(index);
+      else if (detail.command === 'Q') this._convertToQuadratic(index);
+      else if (detail.command === 'C') this._convertToCubic(index);
+      else if (detail.command === 'A') this._convertToArc(index, false);
+      else return;
+    } else return;
+    this._normalizeAxisLineSegments();
+    this._commitGeometryChange();
+    this.refresh();
   }
 
   // -- Geometry manipulation --
@@ -805,65 +963,13 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     if (!this._geometry) return;
     const items: IContextMenuItem[] = [];
     const isPath = this.extendedItem.element instanceof SVGPathElement;
-    const nonCloseSegments = this._geometry.segments.filter(s => s.type !== SegmentType.Close);
 
-    // Delete point (only if not the only point)
-    if (nonCloseSegments.length > 2) {
-      items.push({
-        title: 'Delete point', action: () => {
-          if (!this._geometry) return;
-          this._geometry.segments.splice(segIndex, 1);
-          if (segIndex === 0 && this._geometry.segments.length > 0 && this._geometry.segments[0].type !== SegmentType.Close) {
-            this._geometry.segments[0].type = SegmentType.Move;
-          }
-          this._applyGeometryToElement();
-          this._commitGeometryChange();
-        }
-      });
-    }
-
-    // Insert point after
     if (isPath) {
-      const nextSeg = this._findNextNonCloseSegment(segIndex);
-      if (nextSeg !== null) {
-        items.push({
-          title: 'Insert point after', action: () => {
-            this._insertPointAfter(segIndex);
-            this._applyGeometryToElement();
-            this._commitGeometryChange();
-          }
-        });
-      }
-    }
-
-    // Close / Open path
-    if (isPath && this._geometry.segments.length > 0) {
-      const hasClose = this._geometry.segments.some(s => s.type === SegmentType.Close);
-      const lastNonCloseIdx = this._findLastNonCloseIndex();
-      if (segIndex === lastNonCloseIdx || (hasClose && seg.type !== SegmentType.Close)) {
-        items.push({ title: '---' });
-        if (hasClose) {
-          items.push({
-            title: 'Open path', action: () => {
-              if (!this._geometry) return;
-              this._geometry.segments = this._geometry.segments.filter(s => s.type !== SegmentType.Close);
-              this._geometry.closed = false;
-              this._applyGeometryToElement();
-              this._commitGeometryChange();
-            }
-          });
-        } else {
-          items.push({
-            title: 'Close path', action: () => {
-              if (!this._geometry) return;
-              this._geometry.segments.push({ type: SegmentType.Close, relative: false, point: this._geometry.segments[0].point });
-              this._geometry.closed = true;
-              this._applyGeometryToElement();
-              this._commitGeometryChange();
-            }
-          });
-        }
-      }
+      items.push({ title: 'Delete point', action: () => this._executeCommand({ command: 'delete', index: segIndex }) });
+      const next = this._findNextNonCloseSegment(segIndex);
+      if (next !== null && [SegmentType.Line, SegmentType.HorizontalLine, SegmentType.VerticalLine, SegmentType.CubicBezier, SegmentType.QuadraticBezier].includes(this._geometry.segments[next].type))
+        items.push({ title: 'Insert point after', action: () => this._executeCommand({ command: 'insert', index: segIndex }) });
+      items.push({ title: 'Open / close subpath', action: () => this._executeCommand({ command: 'close', index: segIndex }) });
     }
 
     // Segment type conversion (only for path elements)
@@ -875,7 +981,6 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         conversionItems.push({
           title: 'moveto', action: () => {
             this._convertToMove(segIndex);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -885,7 +990,6 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         conversionItems.push({
           title: 'line', action: () => {
             this._convertToLine(segIndex);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -895,7 +999,6 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         conversionItems.push({
           title: 'horizontal line', action: () => {
             this._convertToHorizontalLine(segIndex);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -905,7 +1008,6 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         conversionItems.push({
           title: 'vertical line', action: () => {
             this._convertToVerticalLine(segIndex);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -913,9 +1015,8 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.QuadraticBezier) {
         conversionItems.push({
-          title: 'quadratic bézier', action: () => {
+          title: 'quadratic bÃ©zier', action: () => {
             this._convertToQuadratic(segIndex);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -923,9 +1024,8 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.CubicBezier) {
         conversionItems.push({
-          title: 'cubic bézier', action: () => {
+          title: 'cubic bÃ©zier', action: () => {
             this._convertToCubic(segIndex);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -935,14 +1035,12 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         conversionItems.push({
           title: 'arc', action: () => {
             this._convertToArc(segIndex, false);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
         conversionItems.push({
           title: 'inverted arc', action: () => {
             this._convertToArc(segIndex, true);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -956,7 +1054,6 @@ export class UnifiedGeometryExtension extends AbstractExtension {
         items.push({
           title: 'Invert arc', action: () => {
             this._invertArc(segIndex);
-            this._applyGeometryToElement();
             this._commitGeometryChange();
           }
         });
@@ -968,13 +1065,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     }
   }
 
-  private _findLastNonCloseIndex(): number {
-    if (!this._geometry) return -1;
-    for (let i = this._geometry.segments.length - 1; i >= 0; i--) {
-      if (this._geometry.segments[i].type !== SegmentType.Close) return i;
-    }
-    return -1;
-  }
+
 
   private _findNextNonCloseSegment(segIndex: number): number | null {
     if (!this._geometry) return null;
@@ -1000,41 +1091,23 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     if (nextIdx === null) return;
 
     const nextSeg = this._geometry.segments[nextIdx];
-    let newPoint: IPoint;
-
-    switch (nextSeg.type) {
-      case SegmentType.CubicBezier: {
-        // Evaluate cubic bezier at t=0.5 using De Casteljau
-        const p0 = seg.point;
-        const p1 = <IPoint>nextSeg.cp1;
-        const p2 = <IPoint>nextSeg.cp2;
-        const p3 = nextSeg.point;
-        newPoint = this._evalCubicBezier(p0, p1, p2, p3, 0.5);
-        break;
-      }
-      case SegmentType.QuadraticBezier: {
-        // Evaluate quadratic bezier at t=0.5
-        const p0 = seg.point;
-        const p1 = <IPoint>nextSeg.cp1;
-        const p2 = nextSeg.point;
-        newPoint = this._evalQuadraticBezier(p0, p1, p2, 0.5);
-        break;
-      }
-      default: {
-        // Linear midpoint
-        newPoint = {
-          x: (seg.point.x + nextSeg.point.x) / 2,
-          y: (seg.point.y + nextSeg.point.y) / 2,
-        };
-        break;
-      }
+    if (![SegmentType.Line, SegmentType.HorizontalLine, SegmentType.VerticalLine, SegmentType.CubicBezier, SegmentType.QuadraticBezier].includes(nextSeg.type)) return;
+    const middle = (a: IPoint, b: IPoint): IPoint => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+    const newSeg: IGeometrySegment = { type: nextSeg.type, relative: false, point: middle(seg.point, nextSeg.point) };
+    if (nextSeg.type === SegmentType.CubicBezier) {
+      const a = middle(seg.point, nextSeg.cp1!), b = middle(nextSeg.cp1!, nextSeg.cp2!), c = middle(nextSeg.cp2!, nextSeg.point);
+      const d = middle(a, b), e = middle(b, c);
+      newSeg.point = middle(d, e);
+      newSeg.cp1 = a;
+      newSeg.cp2 = d;
+      nextSeg.cp1 = e;
+      nextSeg.cp2 = c;
+    } else if (nextSeg.type === SegmentType.QuadraticBezier) {
+      const a = middle(seg.point, nextSeg.cp1!), b = middle(nextSeg.cp1!, nextSeg.point);
+      newSeg.point = middle(a, b);
+      newSeg.cp1 = a;
+      nextSeg.cp1 = b;
     }
-
-    const newSeg: IGeometrySegment = {
-      type: SegmentType.Line,
-      relative: seg.relative,
-      point: newPoint,
-    };
     this._geometry.segments.splice(segIndex + 1, 0, newSeg);
   }
 
@@ -1174,19 +1247,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
   // -- Bezier evaluation --
 
-  private _evalCubicBezier(p0: IPoint, p1: IPoint, p2: IPoint, p3: IPoint, t: number): IPoint {
-    const mt = 1 - t;
-    return {
-      x: mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x,
-      y: mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y,
-    };
-  }
 
-  private _evalQuadraticBezier(p0: IPoint, p1: IPoint, p2: IPoint, t: number): IPoint {
-    const mt = 1 - t;
-    return {
-      x: mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x,
-      y: mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y,
-    };
-  }
+
+
 }

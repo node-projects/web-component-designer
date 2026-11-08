@@ -12,6 +12,7 @@ import { ServiceContainer } from "../../../services/ServiceContainer.js";
 import { ChangeGroup } from '../../../services/undoService/ChangeGroup.js';
 import { filterChildPlaceItems } from '../../../helper/LayoutHelper.js';
 import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
+import { getSvgObjectItem, isEditingSvgPoints } from '../extensions/svg/SvgEditingContext.js';
 
 export class PointerTool implements ITool {
 
@@ -198,7 +199,8 @@ export class PointerTool implements ITool {
       this._holdTimeout = null;
     }
 
-    let clickDesignItem = currentDesignItem;
+    let clickDesignItem = currentDesignItem.element instanceof SVGElement && !event.altKey && !isEditingSvgPoints(designerCanvas, currentDesignItem)
+      ? getSvgObjectItem(currentDesignItem) : currentDesignItem;
 
     if (event.altKey) {
       if (event.type == EventNames.PointerDown) {

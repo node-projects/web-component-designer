@@ -57,6 +57,7 @@ export interface IDesignerCanvas extends IUiCommandHandler, HTMLElement {
   getNormalizedElementCoordinatesAndRealSizes(element: Element): IRect & { realWidth: number, realHeight: number }
   getNormalizedElementCoordinates(element: Element, ignoreScalefactor?: boolean): IRect;
 
+  setSvgEditingToolbarVisible(visible: boolean): void;
   captureActiveTool(tool: ITool);
   releaseActiveTool();
   readonly activeTool: ITool;

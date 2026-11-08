@@ -12,6 +12,9 @@ export class GlobalContext {
   private _strokeColor: string = 'black';
   private _strokeThickness: string = '3';
   private _fillBrush: string = 'none';
+  public strokeDasharray = 'none';
+  public strokeLinecap: 'butt' | 'round' | 'square' = 'butt';
+  public strokeLinejoin: 'miter' | 'round' | 'bevel' = 'miter';
 
   constructor(serviceContainer: ServiceContainer) {
     this._serviceContainer = serviceContainer;

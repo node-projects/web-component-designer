@@ -155,6 +155,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
 
   public readonly options = {
     zoomDesignerBackground: true,
+    svgEditingMode: 'object' as 'object' | 'content',
+    svgEditingToolbar: true,
     roundPixelsToDecimalPlaces: 0,
     resizerPixelSize: isTouchUi ? 8 : 3
   };

@@ -399,7 +399,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
 
   private _scrollRange(horizontal: boolean, zoom = this.designerCanvas.zoomFactor) {
     const canvas = this.designerCanvas;
-    const viewport = horizontal ? canvas.clientWidth : canvas.clientHeight;
+    const viewport = horizontal ? canvas.outercanvas2.clientWidth : canvas.outercanvas2.clientHeight;
     const surface = horizontal ? canvas.designerOffsetWidth : canvas.designerOffsetHeight;
     return Math.max(surface, viewport / zoom, 1);
   }
@@ -408,7 +408,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     const canvas = this.designerCanvas;
     for (const horizontal of [true, false]) {
       const scrollbar = horizontal ? this._sHor : this._sVert;
-      const viewport = horizontal ? canvas.clientWidth : canvas.clientHeight;
+      const viewport = horizontal ? canvas.outercanvas2.clientWidth : canvas.outercanvas2.clientHeight;
       const range = this._scrollRange(horizontal);
       scrollbar.thumbSize = viewport / (viewport + 2 * range * canvas.zoomFactor);
       scrollbar.value = 0.5 - (horizontal ? canvas.canvasOffset.x : canvas.canvasOffset.y) / (2 * range);
@@ -422,7 +422,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     const scrollbar = horizontal ? this._sHor : this._sVert;
     const canvas = this.designerCanvas;
     const range = this._scrollRange(horizontal);
-    const viewport = horizontal ? canvas.clientWidth : canvas.clientHeight;
+    const viewport = horizontal ? canvas.outercanvas2.clientWidth : canvas.outercanvas2.clientHeight;
     const step = e.detail.endsWith('Large') ? viewport * 0.9 : 40;
     if (e.detail.startsWith('increment'))
       scrollbar.value += step / (2 * range * canvas.zoomFactor);
@@ -438,8 +438,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     const canvas = this.designerCanvas;
     // Wheel units describe screen movement, never a fraction of the design surface.
     const mode = event.deltaMode;
-    const dx = event.deltaX * (mode === 1 ? 16 : mode === 2 ? canvas.clientWidth : 1);
-    const dy = event.deltaY * (mode === 1 ? 16 : mode === 2 ? canvas.clientHeight : 1);
+    const dx = event.deltaX * (mode === 1 ? 16 : mode === 2 ? canvas.outercanvas2.clientWidth : 1);
+    const dy = event.deltaY * (mode === 1 ? 16 : mode === 2 ? canvas.outercanvas2.clientHeight : 1);
     if (!dx && !dy) return;
     // A pinch starts from the painted view, not an unfinished scroll animation.
     if (event.ctrlKey && this._wheelTarget && !this._wheelTarget.direct)

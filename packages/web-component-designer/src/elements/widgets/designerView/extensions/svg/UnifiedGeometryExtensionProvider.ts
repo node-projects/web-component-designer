@@ -7,6 +7,7 @@ import { UnifiedGeometryExtension } from './UnifiedGeometryExtension.js';
 import { isVisualSvgElement } from '../../../../helper/SvgHelper.js';
 import { IGeometryReader } from './geometry/IGeometry.js';
 import { css } from '@node-projects/base-custom-webcomponent';
+import { isEditingSvgPoints } from './SvgEditingContext.js';
 
 export class UnifiedGeometryExtensionProvider implements IDesignerExtensionProvider {
 
@@ -27,7 +28,7 @@ export class UnifiedGeometryExtensionProvider implements IDesignerExtensionProvi
       node instanceof SVGCircleElement ||
       node instanceof SVGPolygonElement ||
       node instanceof SVGPolylineElement) {
-      return isVisualSvgElement(node);
+      return isVisualSvgElement(node) && isEditingSvgPoints(designerView, designItem);
     }
     return false;
   }
@@ -51,7 +52,7 @@ export class UnifiedGeometryExtensionProvider implements IDesignerExtensionProvi
       pointer-events: auto;
     }
 
-    .svg-path-selected-part {
+    circle.svg-path-selected-part {
       stroke: var(--wcd-color-handle-stroke, black);
       fill: var(--wcd-color-handle-active, lime);
     }

@@ -296,6 +296,8 @@ export * from "./elements/widgets/designerView/tools/toolBar/DesignerToolbar.js"
 export * from "./elements/widgets/designerView/tools/NamedTools.js";
 export * from "./elements/widgets/designerView/tools/DrawElementTool.js";
 export * from "./elements/widgets/designerView/tools/DrawPathTool.js";
+export * from "./elements/widgets/designerView/tools/DrawShapeTool.js";
+export * from "./elements/widgets/designerView/extensions/svg/SvgEditingToolbarExtensionProvider.js";
 export * from "./elements/widgets/designerView/tools/DrawRectTool.js";
 export * from "./elements/widgets/designerView/tools/DrawEllipsisTool.js";
 export * from "./elements/widgets/designerView/tools/DrawLineTool.js";

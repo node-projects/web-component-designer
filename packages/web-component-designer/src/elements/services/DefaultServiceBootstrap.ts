@@ -24,6 +24,8 @@ import { RotateExtensionProvider } from '../widgets/designerView/extensions/tran
 import { RotateGroupExtensionProvider } from '../widgets/designerView/extensions/transforms/RotateGroupExtensionProvider.js';
 import { ZoomTool } from '../widgets/designerView/tools/ZoomTool.js';
 import { PanTool } from '../widgets/designerView/tools/PanTool.js';
+import { DrawShapeTool } from '../widgets/designerView/tools/DrawShapeTool.js';
+import { SvgEditingToolbarExtensionProvider } from '../widgets/designerView/extensions/svg/SvgEditingToolbarExtensionProvider.js';
 import { CopyPasteContextMenu } from '../widgets/designerView/extensions/contextMenu/CopyPasteContextMenu.js';
 import { PasteFormatContextMenu } from '../widgets/designerView/extensions/contextMenu/PasteFormatContextMenu.js';
 import { ToolWindowsContextMenu } from '../widgets/designerView/extensions/contextMenu/ToolWindowsContextMenu.js';
@@ -173,6 +175,7 @@ export function createDefaultServiceContainer() {
     new ConditionExtensionProvider(new PaddingExtensionProvider, (_, c) => c.activeTool instanceof MarginTool || c.activeTool instanceof PaddingTool, true),
     new PositionExtensionProvider(),
     new UnifiedGeometryExtensionProvider(),
+    new SvgEditingToolbarExtensionProvider(),
     new ApplyFirstMachingExtensionProvider(new GridChildResizeExtensionProvider(), new ResizeExtensionProvider(true)),
     new TransformOriginExtensionProvider(true),
     new RotateExtensionProvider(),
@@ -232,6 +235,7 @@ export function createDefaultServiceContainer() {
 
   serviceContainer.designerTools.set(NamedTools.Pointer, new PointerTool());
   serviceContainer.designerTools.set(NamedTools.DrawSelection, new RectangleSelectorTool());
+  serviceContainer.designerTools.set(NamedTools.DrawShape, new DrawShapeTool());
   serviceContainer.designerTools.set(NamedTools.DrawPath, new DrawPathTool({ interpolatePoints: true }));
   serviceContainer.designerTools.set(NamedTools.DrawRect, new DrawRectTool());
   serviceContainer.designerTools.set(NamedTools.DrawEllipsis, new DrawEllipsisTool());
@@ -269,6 +273,7 @@ export function createDefaultServiceContainer() {
     new SimpleToolButtonProvider("Padding", assetsPath + 'images/tools/Padding.svg'),
     new ZoomToolButtonProvider(),
     new DrawToolButtonProvider(),
+
     new TextToolButtonProvider(),
     new TransformToolButtonProvider()
   );

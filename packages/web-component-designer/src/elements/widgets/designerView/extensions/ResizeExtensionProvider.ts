@@ -17,8 +17,9 @@ export class ResizeExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerCanvas: IDesignerCanvas, designItem: IDesignItem): boolean {
     if (designerCanvas.readOnly)
       return false;
-    if (designItem.element instanceof SVGElement || designItem.element instanceof HTMLTemplateElement)
+    if ((designItem.element instanceof SVGElement && !(designItem.element instanceof SVGSVGElement)) || designItem.element instanceof HTMLTemplateElement)
       return false;
+    if (designItem.element instanceof SVGSVGElement && !designItem.element.hasAttribute('viewBox') && designItem.element.style.width === '100%' && designItem.element.style.height === '100%') return false;
     const strategy = designerCanvas.serviceContainer.getLastServiceWhere('elementResizeStrategy', current => current.isHandledElement(designItem));
     if (strategy && strategy.getEnabledHandles(designItem).length === 0)
       return false;

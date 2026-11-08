@@ -68,6 +68,7 @@ export abstract class AbstractBaseToolPopup extends BaseCustomWebComponentConstr
 
   constructor() {
     super();
+    this.addEventListener('wheel', event => event.stopPropagation(), { passive: true });
 
     for (let e of [...this.shadowRoot.querySelectorAll<HTMLButtonElement>("button.tool")]) {
       e.setAttribute('aria-label', e.title);

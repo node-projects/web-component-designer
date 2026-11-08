@@ -37,6 +37,8 @@ import { AbstractStylesheetService } from '../../services/stylesheetService/Abst
 import { addPolyfill as addBoxQuadsPolyfill } from '../../helper/getBoxQuads.js';
 import { hasCommandKey } from '../../helper/KeyboardHelper.js';
 import { getBoundingClientRectAlsoForDisplayContents } from '../../helper/ElementHelper.js';
+import { beginSvgPointEditing, endSvgPointEditing } from './extensions/svg/SvgEditingContext.js';
+import { getGeometryReader } from './extensions/svg/geometry/GeometryReaderFactory.js';
 
 const disableAnimationsSheet = cssFromString`
   * {
@@ -329,7 +331,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   static override readonly template = html`
     <div style="display: flex;flex-direction: column;width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
-      <div style="width: 100%;height: 100%; margin: 0 !important; padding: 0 !important; border: none !important;">
+      <div id="node-projects-designer-svg-toolbar" style="flex:none;position:relative;z-index:1"></div>
+      <div style="position:relative;isolation:isolate;z-index:0;flex:1;min-height:0;width:100%; margin:0!important;padding:0!important;border:none!important">
         <div id="node-projects-designer-canvas-outercanvas2" style="width:100%;height:100%;position:relative; margin: 0 !important; padding: 0 !important; border: none !important; isolation: isolate !important;">
           <div id="node-projects-designer-canvas-canvasContainer"
           style="width: 100%;height: 100%;position: absolute;top: 0;left: 0;user-select: none; margin: 0 !important; padding: 0 !important; border: none !important;">
@@ -899,6 +902,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandler, { signal });
       this.clickOverlay.addEventListener(EventNames.PointerMove, this._pointerEventHandlerCapture, { capture: true, signal });
       this.clickOverlay.addEventListener(EventNames.PointerUp, this._pointerEventHandler, { signal });
+      this.clickOverlay.addEventListener('pointercancel', this._pointerEventHandler, { signal });
       this.clickOverlay.addEventListener(EventNames.DragEnter, event => this._onDragEnter(event), { signal });
       this.clickOverlay.addEventListener(EventNames.DragLeave, event => this._onDragLeave(event), { signal });
       this.clickOverlay.addEventListener(EventNames.DragOver, event => this._onDragOver(event), { signal });
@@ -1129,12 +1133,23 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
   private _onDblClick(event: MouseEvent) {
     if (!this.instanceServiceContainer) return;
+    if (event.composedPath().some(node => node instanceof HTMLElement && node.hasAttribute('data-svg-toolbar'))) return;
+    const tool = this._activeTool ?? this.activeTool;
+    if (tool?.doubleClickEventHandler) {
+      tool.doubleClickEventHandler(this, event);
+      return;
+    }
     event.preventDefault();
     if (event.target === this.overlayLayer)
       return;
     if (event.altKey)
       return;
     if (this.serviceContainer.globalContext.tool == null || this.serviceContainer.globalContext.tool === this.serviceContainer.designerTools.get(NamedTools.Pointer)) {
+      const element = this.getElementAtPoint({ x: event.clientX, y: event.clientY });
+      if (!this.readOnly && element instanceof SVGElement && getGeometryReader(element)) {
+        beginSvgPointEditing(this, DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer));
+        return;
+      }
       this.extensionManager.removeExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.PrimarySelectionRefreshed);
       this.extensionManager.applyExtension(this.instanceServiceContainer.selectionService.primarySelection, ExtensionType.Doubleclick, event);
     }
@@ -1192,6 +1207,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
       this.activeTool.keyboardEventHandler(this, event, null);
       if (event.defaultPrevented)
         return;
+    }
+
+    if (event.key === 'Escape' && endSvgPointEditing(this)) {
+      event.preventDefault();
+      return;
     }
 
     if (hasCommandKey(event) && event.key === 'z' && !event.shiftKey)
@@ -1484,6 +1504,11 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
 
     tool.pointerEventHandler(this, event, <Element>currentElement);
     this._canvas.style.cursor = tool.cursor;
+  }
+
+  public setSvgEditingToolbarVisible(visible: boolean) {
+    this.serviceContainer.options.svgEditingToolbar = visible;
+    this.dispatchEvent(new Event('svg-toolbar-visibility-changed'));
   }
 
   public captureActiveTool(tool: ITool) {

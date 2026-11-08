@@ -249,6 +249,7 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
         <option value="oklch">OKLCH</option>
       </select>
       <div id="channels"></div>
+      <button id="no-paint" type="button" hidden>No paint</button>
       <input id="text" type="text" spellcheck="false" aria-label="Color text">
     </div>
   `;
@@ -326,6 +327,9 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
 
   ready() {
     this._wireEvents();
+    const noPaint = this._getDomElement<HTMLButtonElement>('no-paint');
+    noPaint.hidden = !this.hasAttribute('allow-none');
+    noPaint.onclick = () => this._setNoPaint();
     const attributeValue = this.getAttribute('value');
     if (attributeValue != null)
       this.value = attributeValue;
@@ -429,10 +433,20 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
 
   private _validateTextInput() {
     const text = this._textInput.value.trim();
-    this._textInput.classList.toggle('invalid', text.length > 0 && !parseColor(text));
+    this._textInput.classList.toggle('invalid', text.length > 0 && !(this.hasAttribute('allow-none') && text.toLowerCase() === 'none') && !parseColor(text));
+  }
+
+  private _setNoPaint() {
+    if (!this.hasAttribute('allow-none') || this.readOnly || this.disabled) return;
+    const oldValue = this._value;
+    this._value = 'none';
+    this._render();
+    this._validateTextInput();
+    this.valueChanged.emit({ newValue: 'none', oldValue });
   }
 
   private _applyText() {
+    if (this.hasAttribute('allow-none') && this._textInput.value.trim().toLowerCase() === 'none') { this._setNoPaint(); return; }
     const parsed = parseColor(this._textInput.value);
     this._textInput.classList.toggle('invalid', !parsed);
     if (!parsed)
@@ -649,6 +663,7 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
     this._popup.style.width = '280px';
 
     this._editor = document.createElement('node-projects-color-editor') as ColorEditor;
+    this._editor.toggleAttribute('allow-none', this.hasAttribute('allow-none'));
     this._editor.value = this._value;
     this._editor.valuePreviewChanged.on(e => {
       this._setValue(e.newValue, true);
@@ -711,7 +726,9 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
   }
 
   private _renderSwatch() {
-    const parsed = parseColor(this._value) ?? { r: 0, g: 0, b: 0, a: 1 };
+    this._button.setAttribute('aria-label', this.getAttribute('aria-label') || 'Edit color');
+    this._button.title = this._value === 'none' ? 'No paint' : this._value;
+    const parsed = this._value === 'none' ? { r: 0, g: 0, b: 0, a: 0 } : parseColor(this._value) ?? { r: 0, g: 0, b: 0, a: 1 };
     this.style.setProperty('--color', toCssRgb(parsed));
   }
 }

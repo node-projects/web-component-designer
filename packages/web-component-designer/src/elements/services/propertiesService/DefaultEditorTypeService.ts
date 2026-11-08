@@ -5,6 +5,7 @@ export class DefaultEditorTypeService implements IEditorTypeService {
     getEditor(type: string, additional: { changedCallback: (newValue: any) => void, [key: string]: any }): { element: HTMLElement, getValue: () => any, setValue: (value: any) => void } {
         if (type === 'color' || type === 'css-color') {
             const input = document.createElement('node-projects-color-input') as ColorInput;
+            input.toggleAttribute('allow-none', additional.allowNone === true);
             input.addEventListener('change', () => additional.changedCallback(input.value));
             return {
                 element: input,

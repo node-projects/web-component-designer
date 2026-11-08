@@ -1,14 +1,16 @@
+import { createSvgStrokeStyleControl } from '../../../../../controls/SvgStrokeStyleControl.js';
 import { html, css } from '@node-projects/base-custom-webcomponent';
 import { assetsPath } from "../../../../../../Constants.js";
 import { AbstractBaseToolPopup } from './AbstractBaseToolPopup.js';
 import { IDesignerCanvas } from '../../../IDesignerCanvas.js';
 import { CommandType } from '../../../../../../commandHandling/CommandType.js';
+import { SvgShapeLibraryPopup } from './SvgShapeLibraryPopup.js';
 
 export class DrawToolPopup extends AbstractBaseToolPopup {
 
   static override style = [<CSSStyleSheet>super.style, css`
       .container {
-          width: 232px;
+          width: 280px;
       }
       .inputs {
           display: grid;
@@ -45,7 +47,7 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
 
   static override template = html`
         <div class="container">
-          <header><h2 id="title">Draw</h2></header>
+          <header><h2 id="title">Drawing tools</h2></header>
           <main id="content-area">
             <div class="tools">
               <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" style="--tool-icon: url('${assetsPath}images/tools/DrawLineTool.svg');"></button>
@@ -54,14 +56,19 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
               <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipse" style="--tool-icon: url('${assetsPath}images/tools/DrawEllipTool.svg');"></button>
               <button type="button" class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" style="--tool-icon: url('${assetsPath}images/tools/ColorPickerTool.svg');"></button>
             </div>
+            <button type="button" id="shapes" style="margin-top:8px;width:100%;height:28px">Shape library…</button>
             <div class="inputs">   
                 <span class="text">Stroke Color</span>
-                [[this.getEditor('setStrokeColor', 'color', {}, this.designerCanvas.serviceContainer.globalContext.strokeColor)]] 
+                [[this.getEditor('setStrokeColor', 'color', { allowNone: true }, this.designerCanvas.serviceContainer.globalContext.strokeColor)]]
                 <span class="text">Fill Brush</span>
-                [[this.getEditor('setFillBrush', 'color', {}, this.designerCanvas.serviceContainer.globalContext.fillBrush)]] 
+                [[this.getEditor('setFillBrush', 'color', { allowNone: true }, this.designerCanvas.serviceContainer.globalContext.fillBrush)]]
                 <span class="text">Stroke Thickness</span>
-                [[this.getEditor('setStrokeThickness', 'range', { min: 1, max: 20, step: 1 }, this.designerCanvas.serviceContainer.globalContext.strokeThickness)]] 
+                [[this.getEditor('setStrokeThickness', 'number', { min: 0, step: 0.5 }, parseFloat(this.designerCanvas.serviceContainer.globalContext.strokeThickness))]]
+                <span>Stroke style</span><span id="dash"></span>
+                <span>Line cap</span><span id="cap"></span>
+                <span>Line join</span><span id="join"></span>
             </div>
+            <p style="font-size:11px;line-height:1.5">Path: click nodes or drag to sketch. Double-click or Enter finishes; click the first node to close. Escape cancels. Shift constrains angles; Alt bypasses snapping.</p>
           </main>
         </div>`;
 
@@ -71,7 +78,16 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
 
   ready() {
     this._bindingsParse();
-    this.designerCanvas.serviceContainer.globalContext.strokeColor
+    this._getDomElement<HTMLButtonElement>('shapes').onclick = () => this.replaceWith(new SvgShapeLibraryPopup(this.designerCanvas));
+    const context = this.designerCanvas.serviceContainer.globalContext;
+    for (const [id, property, style] of [['dash', 'strokeDasharray', 'stroke-dasharray'], ['cap', 'strokeLinecap', 'stroke-linecap'], ['join', 'strokeLinejoin', 'stroke-linejoin']] as const) {
+      const control = createSvgStrokeStyleControl(style, value => {
+        (context as unknown as Record<string, string>)[property] = value;
+        control.setValue(value);
+      });
+      control.setValue(context[property]);
+      this._getDomElement(id).append(control.element);
+    }
   }
 
   //todo currentvalue

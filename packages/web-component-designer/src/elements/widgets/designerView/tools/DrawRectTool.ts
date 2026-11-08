@@ -4,7 +4,7 @@ import { ITool } from './ITool.js';
 import { OverlayLayer } from '../extensions/OverlayLayer.js';
 import { ServiceContainer } from '../../../services/ServiceContainer.js';
 import { calculateNormLegth } from '../../../helper/PathDataPolyfill.js';
-import { DesignItem } from '../../../item/DesignItem.js';
+import { applySvgDrawingStyle, insertSvgDrawing } from './SvgDrawingHelper.js';
 import { IPoint } from '../../../../interfaces/IPoint.js';
 import { hasCommandKey } from '../../../helper/KeyboardHelper.js';
 import { roundValueToDecimalPlaces } from '../extensions/svg/geometry/GeometryWriteHelper.js';
@@ -15,6 +15,9 @@ export class DrawRectTool implements ITool {
 
   private _path: SVGRectElement;
   private _startPoint: IPoint;
+  private _canvas: IDesignerCanvas;
+  private _capture: Element;
+  private _pointerId: number;
   private _minX: number;
   private _minY: number;
   private _maxX: number;
@@ -29,6 +32,12 @@ export class DrawRectTool implements ITool {
   }
 
   dispose(): void {
+    if (this._path) this._canvas?.overlayLayer.removeOverlay(this._path);
+    if (this._capture?.hasPointerCapture(this._pointerId)) this._capture.releasePointerCapture(this._pointerId);
+    this._canvas?.releaseActiveTool();
+    this._path = null;
+    this._capture = null;
+    this._canvas = null;
   }
 
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element) {
@@ -38,6 +47,10 @@ export class DrawRectTool implements ITool {
 
     switch (event.type) {
       case EventNames.PointerDown:
+        if (event.button !== 0) return;
+        this._canvas = designerCanvas;
+        this._capture = event.target as Element;
+        this._pointerId = event.pointerId;
         this._startPoint = currentPoint;
         (<Element>event.target).setPointerCapture(event.pointerId);
         designerCanvas.captureActiveTool(this);
@@ -51,6 +64,7 @@ export class DrawRectTool implements ITool {
         this._path.setAttribute("width", "0");
         this._path.setAttribute("height", "0");
 
+        applySvgDrawingStyle(this._path, designerCanvas.serviceContainer.globalContext);
         designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foreground);
         break;
 
@@ -102,7 +116,17 @@ export class DrawRectTool implements ITool {
         break;
 
 
+      case 'pointercancel':
+        this.dispose();
+        designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
+        return;
       case EventNames.PointerUp:
+        if (!this._path) return;
+        if (!this._path.getBBox().width && !this._path.getBBox().height) {
+          this.dispose();
+          designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
+          return;
+        }
         (<Element>event.target).releasePointerCapture(event.pointerId);
         designerCanvas.releaseActiveTool();
 
@@ -119,6 +143,8 @@ export class DrawRectTool implements ITool {
         this._path.removeAttribute("stroke");
         this._path.removeAttribute("stroke-width");
         this._path.removeAttribute("overlay-source");
+        this._path.removeAttribute("style");
+        this._path.removeAttribute("fill");
         svg.appendChild(this._path);
         svg.style.left = roundValueToDecimalPlaces(mvX, decimalPlaces) + 'px';
         svg.style.top = roundValueToDecimalPlaces(mvY, decimalPlaces) + 'px';
@@ -129,12 +155,18 @@ export class DrawRectTool implements ITool {
         svg.style.stroke = designerCanvas.serviceContainer.globalContext.strokeColor;
         svg.style.strokeWidth = designerCanvas.serviceContainer.globalContext.strokeThickness;
         this._path = null;
-        const di = DesignItem.createDesignItemFromInstance(svg, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
-        designerCanvas.rootDesignItem.insertChild(di, designerCanvas.rootDesignItem.childCount);
-        designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
+        applySvgDrawingStyle(svg, designerCanvas.serviceContainer.globalContext);
+        insertSvgDrawing(designerCanvas, svg);
+        this.dispose();
         break;
     }
   }
 
-  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
+  keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) {
+    if (event.type === 'keydown' && event.key === 'Escape') {
+      this.dispose();
+      designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
+      event.preventDefault();
+    }
+  }
 }

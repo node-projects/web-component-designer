@@ -11,6 +11,7 @@ export class DrawToolButtonProvider implements IDesignViewToolbarButtonProvider 
     const button = new DesignerToolbarButton(designerCanvas, {
       'DrawLine': { icon: assetsPath + 'images/tools/DrawLineTool.svg' },
       'DrawPath': { icon: assetsPath + 'images/tools/DrawPathTool.svg' },
+      'DrawShape': { icon: assetsPath + 'images/tools/ShapesTool.svg' },
       'DrawRect': { icon: assetsPath + 'images/tools/DrawRectTool.svg' },
       'DrawEllipsis': { icon: assetsPath + 'images/tools/DrawEllipTool.svg' },
       'PickColor': { icon: assetsPath + 'images/tools/ColorPickerTool.svg' }
