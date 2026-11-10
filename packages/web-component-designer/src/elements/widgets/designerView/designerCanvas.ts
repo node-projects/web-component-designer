@@ -1556,7 +1556,15 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   public fillCalculationrects() {
-    this.containerBoundingRect = this._canvasContainer.getBoundingClientRect();
+    const containerRect = this._canvasContainer.getBoundingClientRect();
+    this.containerBoundingRect = this._useIframe ? containerRect : this._canvas.getBoundingClientRect();
+    // Quads are relative to the canvas border box. :root/:host margins can move
+    // that box independently of the viewport transform shared with the overlay.
+    if (this.overlayLayer) {
+      const translate = `${this.containerBoundingRect.x - containerRect.x}px ${this.containerBoundingRect.y - containerRect.y}px`;
+      if (this.overlayLayer.style.translate !== translate)
+        this.overlayLayer.style.translate = translate;
+    }
     this.outerRect = this._outercanvas2.getBoundingClientRect();
   }
 

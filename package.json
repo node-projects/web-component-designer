@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "test:canvas-root-margin": "node --test packages/web-component-designer/tests/CanvasRootMargin.browser.mjs",
     "test:svg-markers": "node --test packages/web-component-designer/tests/SvgMarkerHover.browser.mjs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "develop": "npm i && npm run link && npm run build",

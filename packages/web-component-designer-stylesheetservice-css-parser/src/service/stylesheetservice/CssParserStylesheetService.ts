@@ -81,9 +81,16 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
     private *getRulesFromAst(cssAtRuleAst: (CssDeclarationAST | CssAtRuleAST | CssWhitespaceAST)[], stylesheet: IStylesheet, designItem: IDesignItem, parentSelectors?: string[]): IterableIterator<[CssRuleAST, Specificity, string[]]> {
         for (const atRule of cssAtRuleAst) {
             if (atRule.type == 'media') {
-                yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem, parentSelectors);
+                if (!designItem || designItem.element.ownerDocument.defaultView?.matchMedia(atRule.media).matches)
+                    yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem, parentSelectors);
             } else if (atRule.type == 'supports') {
-                yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem, parentSelectors);
+                if (!designItem || designItem.element.ownerDocument.defaultView?.CSS?.supports(atRule.supports))
+                    yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem, parentSelectors);
+            } else if (atRule.type == 'container') {
+                // Use the inspected element: the browser selects its eligible ancestor container.
+                const element = designItem?.element as Element & { matchContainer?: (query: string) => { matches: boolean } };
+                if (!designItem || element.matchContainer?.(atRule.container).matches)
+                    yield* this.getRulesFromAst(atRule.rules, stylesheet, designItem, parentSelectors);
             } else if (atRule.type == 'rule') {
                 const resolvedSelectors = parentSelectors
                     ? this.resolveNestedSelectors(parentSelectors, atRule.selectors)

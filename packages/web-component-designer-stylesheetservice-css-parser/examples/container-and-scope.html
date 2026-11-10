@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Container and scope rule matching</title>
+<style>
+  body { font: 16px system-ui; margin: 24px; }
+  .container {
+    container: layout / inline-size;
+    resize: horizontal;
+    overflow: auto;
+    padding: 12px;
+    border: 2px solid #888;
+    margin-block: 16px;
+    min-width: 180px;
+    --theme: light;
+  }
+  .card { padding: 16px; background: #eee; color: #222; }
+  @container layout (width >= 400px) {
+    .card { background: #c8f7d1; }
+  }
+  @container layout (width < 400px) {
+    .card { background: #ffe3aa; }
+  }
+  @container layout style(--theme: dark) {
+    .card { color: #663399; border: 3px solid #663399; }
+  }
+  @media (min-width: 700px) {
+    @container layout (width >= 400px) {
+      .card { font-weight: 700; }
+    }
+  }
+
+  /* Scope rendering examples. The addon does not yet report these rules. */
+  @scope (.scoped) to (.excluded) {
+    :scope { border: 2px solid royalblue; padding: 12px; }
+    .scope-label { color: royalblue; }
+  }
+</style>
+<body>
+  <h1>Container query test</h1>
+  <p>Select each card in the designer. Resize its parent or change its width
+    across 400px, then reselect the card to refresh matching rules.</p>
+  <div class="container" style="width: 520px">
+    <div class="card" id="wide">Wide: green background; bold above a 700px viewport.</div>
+  </div>
+  <div class="container" style="width: 280px; --theme: dark">
+    <div class="card" id="narrow">Narrow: orange background, purple text and border.</div>
+  </div>
+  <p>The backgrounds render with ordinary CSS container support. Reporting the
+    container rules in the designer requires Element.matchContainer().</p>
+
+  <h2>Scope rendering tests (inspector support still missing)</h2>
+  <section class="scoped">
+    <p class="scope-label">Blue within the explicit scope.</p>
+    <div class="excluded">
+      <p class="scope-label">Default text color beyond the scope limit.</p>
+    </div>
+  </section>
+  <section>
+    <style>
+      @scope {
+        :scope { border: 2px dashed seagreen; padding: 12px; }
+        .inline-label { color: seagreen; }
+      }
+    </style>
+    <p class="inline-label">Green within an inline implicit scope.</p>
+  </section>
+  <p class="inline-label">Default text color outside the inline scope.</p>
+</body>
+</html>
