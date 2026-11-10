@@ -4,6 +4,8 @@ import { Specificity } from "./SpecificityCalculator.js";
 
 export interface IStyleRule {
     selector: string;
+    /** Complete rule text, including enclosing rules when available. */
+    readonly cssText?: string;
     declarations: IStyleDeclaration[];
     specificity: Specificity;
     stylesheetName?: string;

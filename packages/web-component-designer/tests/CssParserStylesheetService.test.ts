@@ -102,3 +102,35 @@ test('all enclosing container conditions must match', async () => {
   inner = true;
   expect(values()).toEqual(['green']);
 });
+
+test('rule text includes enclosing at-rules and nested selectors without unrelated siblings', async () => {
+  const { service } = await setup(`
+    @media (min-width: 500px) {
+      @supports (display: grid) {
+        @container layout (width >= 400px) {
+          .wrapper {
+            & .card { color: green !important; }
+            & .other { color: red; }
+          }
+          .unrelated { display: none; }
+        }
+      }
+    }
+  `);
+  const rule = service.getRules('.wrapper .card')[0];
+  expect(rule.cssText).toBe(`@media (min-width: 500px) {
+  @supports (display: grid) {
+    @container layout (width >= 400px) {
+      .wrapper {
+        & .card {
+          color: green !important;
+        }
+      }
+    }
+  }
+}`);
+  service.updateDeclarationValue(rule.declarations[0], 'blue', false);
+  expect(rule.cssText).toContain('color: blue;');
+  expect(rule.cssText).not.toContain('!important');
+  expect(service.getStylesheets()[0].content).toContain('.unrelated');
+});

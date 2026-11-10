@@ -33,6 +33,7 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
             let rs = Array.from(this.getRulesFromAst(item[1].ast?.stylesheet?.rules, item[1].stylesheet, designItem))
                 .map(x => (<IRuleWithAST>{
                     selector: x[2].join(', '),
+                    get cssText() { return CssParserStylesheetService.getRuleCssText(x[0]); },
                     declarations: x[0].declarations.filter(y => y.type == 'declaration').map(y => ({
                         name: (<CssDeclarationAST>y).property,
                         value: (<CssDeclarationAST>y).value.endsWith('!important') ? (<CssDeclarationAST>y).value.substring(0, (<CssDeclarationAST>y).value.length - 10).trimEnd() : (<CssDeclarationAST>y).value,
@@ -50,6 +51,21 @@ export class CssParserStylesheetService extends AbstractStylesheetService {
             rules.push(...rs);
         }
         return rules;
+    }
+
+    private static getRuleCssText(rule: CssRuleAST): string {
+        let ast: CssAtRuleAST = rule;
+        let parent = rule.parent as CssAtRuleAST;
+        while (parent) {
+            if (parent.type == 'rule')
+                ast = { ...parent, declarations: [ast] };
+            else if ('rules' in parent)
+                ast = { ...parent, rules: [ast] };
+            else
+                break;
+            parent = parent.parent as CssAtRuleAST;
+        }
+        return stringify({ type: 'stylesheet', stylesheet: { rules: [ast] } } as CssStylesheetAST, { indent: '  ', compress: false });
     }
 
     getRules(selector: string): IStyleRule[] {

@@ -119,27 +119,39 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
     .unset-value:focus {
       color: var(--wcd-color-text, white)
     }
+    .group-heading {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: 8px;
+    }
     .group-header {
-      grid-column: 1 / 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
       font-size: 10px;
       font-family: monospace;
-    }
-    .group-header[clickable]:hover {
-      cursor:pointer;
-      color: var(--wcd-property-grid-group-header-hover-color, orange);
-      text-decoration: underline;
+      cursor: pointer;
     }
     .group-header::after{
       content: " ▾";
       font-size: 14px;
+      flex-shrink: 0;
     }
     .group-header.expanded::after{
       content: " ▴";
       font-size: 14px;
     }
     .group-desc {
-      display: inline-flex;
-      flex-direction: row-reverse;
+      display: block;
+      margin-left: auto;
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       font-size: 10px;
       text-decoration: underline;
     }
@@ -303,25 +315,22 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
   }
 
   private createPropertyGroups(group: IPropertyGroup) {
+    const heading = document.createElement('div');
+    heading.className = 'group-heading';
     let header = document.createElement('span');
     header.addEventListener('click', () => { this.expandOrCollapsePropertyGroups(group); header.classList.toggle('expanded') });
-    header.innerHTML = group.name.replaceAll("\n", "<br>");
+    const name = document.createElement('span');
+    name.innerHTML = group.name.replaceAll("\n", "<br>");
+    header.appendChild(name);
     header.className = 'group-header';
-    this._div.appendChild(header);
+    if (group.tooltip)
+      header.title = group.tooltip;
+    heading.appendChild(header);
+    this._div.appendChild(heading);
     let desc = document.createElement('span');
     desc.innerHTML = group.description ?? '';
     desc.className = 'group-desc';
     if (this.propertyGroupHover) {
-      header.onmouseenter = () => {
-        if (this.propertyGroupHover(group, 'name'))
-          header.setAttribute('clickable', '')
-        else
-          header.removeAttribute('clickable')
-      }
-      header.onclick = () => {
-        if (this.propertyGroupClick)
-          this.propertyGroupClick(group, 'name');
-      }
       desc.onmouseenter = () => {
         if (this.propertyGroupHover(group, 'desc'))
           desc.setAttribute('clickable', '')
@@ -333,7 +342,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
           this.propertyGroupClick(group, 'desc');
       }
     }
-    this._div.appendChild(desc);
+    heading.appendChild(desc);
     for (const p of group.properties)
       this.createPropertyEditors(p, true);
   }

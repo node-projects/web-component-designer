@@ -65,6 +65,9 @@ export class CssCurrentPropertiesService extends CssPropertiesService {
     }
 
     let arr = styles.map(x => ({
+      tooltip: x.cssText ?? (x.selector == null
+        ? designItem.element.getAttribute('style') ?? ''
+        : x.selector + ' {\n' + x.declarations.map(d => '  ' + d.name + ': ' + d.value + (d.important ? ' !important' : '') + ';').join('\n') + '\n}'),
       name: (x.selector ?? localName) + (x.specificity ? ' (' + x.specificity.A + '-' + x.specificity.B + '-' + x.specificity.C + ')' : ''), description: x.stylesheetName ?? '', properties: [
         ...x.declarations.map(y => {
           const camelName = PropertiesHelper.dashToCamelCase(y.name);

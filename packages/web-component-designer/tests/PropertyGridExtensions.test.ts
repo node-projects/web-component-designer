@@ -46,7 +46,8 @@ test('confirming a new style name resolves its editor and retains the originatin
   const { ValueType } = await import('../src/elements/services/propertiesService/ValueType');
   const service = new CssCurrentPropertiesService();
   const rule = { selector: '.button', declarations: [] };
-  service.getProperties = async () => [{ name: 'Rule', properties: [
+  const tooltip = '@container (width > 400px) { .button { color: red; } }';
+  service.getProperties = async () => [{ name: 'Rule', description: 'stylesheet.css', tooltip, properties: [
     { name: '', type: 'addNew', service, propertyType: PropertyType.complex, styleRule: rule }
   ] }];
   service.isSet = () => ValueType.none;
@@ -55,6 +56,9 @@ test('confirming a new style name resolves its editor and retains the originatin
   const setValue = jest.fn(async () => { });
   service.setValue = setValue;
   const list = new PropertyList(services);
+  list.propertyGroupHover = () => true;
+  const navigate = jest.fn();
+  list.propertyGroupClick = navigate;
   document.body.appendChild(list);
   list.setPropertiesService(service);
   await list.createElements(item);
@@ -66,10 +70,15 @@ test('confirming a new style name resolves its editor and retains the originatin
   const dropdown = list.shadowRoot.querySelector<HTMLSelectElement>('select[aria-label="align-items suggestions"]');
   expect(dropdown).not.toBeNull();
   const header = list.shadowRoot.querySelector<HTMLElement>('.group-header');
+  expect(header.title).toBe(tooltip);
   header.click();
   expect(dropdown.closest<HTMLElement>('.property-row').hidden).toBe(true);
   header.click();
   expect(dropdown.closest<HTMLElement>('.property-row').hidden).toBe(false);
+  expect(navigate).not.toHaveBeenCalled();
+  list.shadowRoot.querySelector<HTMLElement>('.group-desc').click();
+  expect(navigate).toHaveBeenCalledTimes(1);
+  expect(navigate).toHaveBeenCalledWith(expect.objectContaining({ name: 'Rule' }), 'desc');
   dropdown.value = 'safe center';
   dropdown.dispatchEvent(new Event('change'));
   expect(setValue).toHaveBeenCalledWith([item], expect.objectContaining({
