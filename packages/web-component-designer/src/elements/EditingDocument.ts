@@ -196,12 +196,12 @@ export class EditingDocument {
     return update;
   }
 
-  /** Synchronous writer for existing UI code. Programmatic consumers should await serialize(). */
-  getHtml() {
+  /** Synchronous writer. Update positions only when the returned HTML replaces the displayed source. */
+  getHtml(updatePositions = false) {
     this.assertAlive();
     const items = [...this.rootDesignItem.children()];
-    if (items.length) return DomConverter.ConvertToString(items, true, true);
-    return this.serviceContainer.htmlWriterService.supportsRootItemWrite ? DomConverter.ConvertToString([this.rootDesignItem], true, true) : '';
+    if (items.length) return DomConverter.ConvertToString(items, true, updatePositions);
+    return this.serviceContainer.htmlWriterService.supportsRootItemWrite ? DomConverter.ConvertToString([this.rootDesignItem], true, updatePositions) : '';
   }
 
   async serialize(): Promise<string> {

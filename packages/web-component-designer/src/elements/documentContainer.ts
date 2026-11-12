@@ -71,7 +71,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._ownsDocument = false;
     this._initialLoad = Promise.resolve();
     this.bindDocument();
-    this._content = document.getHtml();
+    this._content = document.getHtml(true);
     this.codeView.update(this._content, this.instanceServiceContainer);
   }
 
@@ -297,7 +297,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this._disableChangeNotificationDesigner = true;
       if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        this._content = this._document.pendingHtml ?? this.designerView.getDesignerHTML();
+        this._content = this._document.pendingHtml ?? this.designerView.getDesignerHTML(true);
         this.codeView.update(this._content, this.designerView.instanceServiceContainer);
         this._lastCodeSelectionKey = null;
         if (primarySelection) {
@@ -382,7 +382,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       if (!this._document) return;
       if (i.oldIndex === tabIndex.designer) {
         let primarySelection = this.instanceServiceContainer.selectionService.primarySelection;
-        this._content = this._document.pendingHtml ?? this.designerView.getDesignerHTML();
+        this._content = this._document.pendingHtml ?? this.designerView.getDesignerHTML(true);
         if (this.designerView.instanceServiceContainer.designItemDocumentPositionService) {
           this._selectionPosition = this.instanceServiceContainer.selectionService.selectedPart?.textRange
             ?? this.designerView.instanceServiceContainer.designItemDocumentPositionService.getPosition(primarySelection);

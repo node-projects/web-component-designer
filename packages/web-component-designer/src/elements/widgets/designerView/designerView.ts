@@ -610,8 +610,8 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this._toolbar.initialize(this.serviceContainer, this);
   }
 
-  public getDesignerHTML() {
-    return this.editingDocument.getHtml();
+  public getDesignerHTML(updatePositions = false) {
+    return this.editingDocument.getHtml(updatePositions);
   }
 
   public async parseDesignerHTML(html: string, disableUndo: boolean = false) {

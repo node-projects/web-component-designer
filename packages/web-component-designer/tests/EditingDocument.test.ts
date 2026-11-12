@@ -297,7 +297,7 @@ test('legacy canvas undo factories still work in standalone editors and require 
   await doc.dispose();
 });
 
-test('the node HTML parser uses the document DOM while detached', async () => {
+async function nodeParserServices() {
   const { newElementFromString } = await import('../src/elements/helper/ElementHelper');
   const { CssAttributeParser } = await import('../src/elements/helper/CssAttributeParser');
   const { DomConverter } = await import('../src/elements/widgets/designerView/DomConverter');
@@ -312,6 +312,11 @@ test('the node HTML parser uses the document DOM while detached', async () => {
   const service = services();
   // The package types resolve to dist; the mock above deliberately supplies the source classes.
   service.register('htmlParserService', new NodeHtmlParserService() as unknown as import('../src/elements/services/htmlParserService/IHtmlParserService').IHtmlParserService);
+  return service;
+}
+
+test('the node HTML parser uses the document DOM while detached', async () => {
+  const service = await nodeParserServices();
   const doc = new EditingDocument(service);
   await doc.loadHtml('<!--page--><div id="node-parser" style="color: red">text</div>');
   const item = DesignItem.GetDesignItem(doc.rootDesignItem.querySelectorAll('#node-parser')[0]);
@@ -320,6 +325,51 @@ test('the node HTML parser uses the document DOM while detached', async () => {
   expect(await doc.serialize()).toContain('title="detached"');
   doc.instanceServiceContainer.undoService.undo();
   expect(item.hasAttribute('title')).toBe(false);
+  await doc.dispose();
+});
+
+test('serialization preserves split-view element and attribute selections until the displayed code changes', async () => {
+  const service = await nodeParserServices();
+  const doc = new EditingDocument(service);
+  await doc.loadHtml('<div id="a">A</div><div id="b" title="original">B</div>');
+  const container = new DocumentContainer(service, doc);
+  document.body.appendChild(container);
+  await container.whenReady();
+  container.currentView = 'split';
+  const input = container.codeView.shadowRoot.querySelector('textarea');
+  const raw = '<div id="a">A</div>' + '\n'.repeat(30) + '<div id="b" title="original">B</div>';
+  input.value = raw;
+  input.dispatchEvent(new Event('input'));
+  await container.commitPendingChanges();
+  const item = [...doc.rootDesignItem.allMatching('#b')][0];
+  const selection = doc.instanceServiceContainer.selectionService;
+  const positions = doc.instanceServiceContainer.designItemDocumentPositionService;
+  const selectedText = () => input.value.slice(input.selectionStart, input.selectionEnd);
+  selection.setSelectedElements([item]);
+  expect(selectedText()).toBe('<div id="b" title="original">B</div>');
+  const originalPart = positions.getSourceParts(item).find(part => part.key === 'attribute:title/value');
+  selection.setSelectedElements([item], undefined, originalPart);
+  expect(selectedText()).toBe('original');
+  expect(await doc.serialize()).not.toBe(raw);
+  doc.getHtml();
+  container.designerView.getDesignerHTML();
+  expect(input.value).toBe(raw);
+  expect(positions.getSourceParts(item).includes(originalPart)).toBe(true);
+  selection.setSelectionByTextRange(raw.indexOf('original'), raw.indexOf('original') + 1);
+  expect(selection.primarySelection === item).toBe(true);
+  expect(selection.selectedPart?.key).toBe('attribute:title/value');
+  selection.setSelectedElements([doc.rootDesignItem.firstChild]);
+  selection.setSelectedElements([item]);
+  expect(selectedText()).toBe('<div id="b" title="original">B</div>');
+  selection.setSelectedElements([item], undefined, originalPart);
+  expect(selectedText()).toBe('original');
+  selection.setSelectedElements([item]);
+  item.setAttribute('title', 'edited');
+  expect(input.value).toContain('title="edited"');
+  selection.setSelectedElements([doc.rootDesignItem.firstChild]);
+  selection.setSelectedElements([item]);
+  expect(selectedText()).toContain('<div id="b" title="edited">B</div>');
+  await container.dispose();
   await doc.dispose();
 });
 
