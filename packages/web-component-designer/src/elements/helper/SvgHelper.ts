@@ -2,6 +2,7 @@ import { IPoint } from '../../interfaces/IPoint.js';
 import { IDesignerCanvas } from '../widgets/designerView/IDesignerCanvas.js';
 import './PathDataPolyfill.js';
 import { createPathD, PathData } from './PathDataPolyfill.js';
+import { clearCache as clearBoxQuadsCache } from './getBoxQuads.js';
 
 type ProjectiveMatrix = [number, number, number, number, number, number, number, number, number];
 
@@ -80,15 +81,21 @@ export function isSupportedSvgGeometryElement(element: Element): element is SVGG
 }
 
 export function toOverlayPointFromSvgUserSpace(element: Element, designerCanvas: IDesignerCanvas, point: IPoint): IPoint {
+  return _createOverlayPointMapper(element, designerCanvas)(point);
+}
+
+function _createOverlayPointMapper(element: Element, designerCanvas: IDesignerCanvas): (point: IPoint) => IPoint {
   const transform = _getSvgOverlayTransform(element, designerCanvas);
+  const offset = transform?.bbox ?? _getSvgGeometryBBoxOffset(element);
   if (transform) {
-    const local = _toElementReferenceBoxPoint(element, point);
-    return _applyProjectiveMatrix(transform.matrix, local.x / transform.bbox.width, local.y / transform.bbox.height);
+    return point => _applyProjectiveMatrix(transform.matrix,
+      (point.x - offset.x) / transform.bbox.width, (point.y - offset.y) / transform.bbox.height);
   }
 
-  const fallbackLocalPoint = _toElementReferenceBoxPoint(element, point);
-  const tp = designerCanvas.canvas.convertPointFromNode(fallbackLocalPoint, element, { iframes: designerCanvas.iframes });
-  return { x: tp.x, y: tp.y };
+  return point => {
+    const tp = designerCanvas.canvas.convertPointFromNode({ x: point.x - offset.x, y: point.y - offset.y }, element, { iframes: designerCanvas.iframes });
+    return { x: tp.x, y: tp.y };
+  };
 }
 
 export function fromOverlayPointToSvgUserSpace(element: Element, designerCanvas: IDesignerCanvas, point: IPoint): IPoint {
@@ -137,6 +144,7 @@ function _createOverlayPathDataWithoutMarkers(element: Element, designerCanvas: 
   }
 
   const transformedPathData: PathData[] = [];
+  const toOverlayPoint = _createOverlayPointMapper(element, designerCanvas);
   let currentPoint: IPoint = { x: 0, y: 0 };
   let subPathStart: IPoint = { x: 0, y: 0 };
 
@@ -154,7 +162,7 @@ function _createOverlayPathDataWithoutMarkers(element: Element, designerCanvas: 
 
     const toOverlay = (x: number, y: number): IPoint => {
       const absolutePoint = toAbsolute(x, y);
-      return toOverlayPointFromSvgUserSpace(element, designerCanvas, absolutePoint);
+      return toOverlayPoint(absolutePoint);
     };
 
     switch (type) {
@@ -173,14 +181,14 @@ function _createOverlayPathDataWithoutMarkers(element: Element, designerCanvas: 
       }
       case 'H': {
         const target = isRelative ? { x: currentPoint.x + values[0], y: currentPoint.y } : { x: values[0], y: currentPoint.y };
-        const overlayPoint = toOverlayPointFromSvgUserSpace(element, designerCanvas, target);
+        const overlayPoint = toOverlayPoint(target);
         transformedPathData.push({ type: 'L', values: [overlayPoint.x, overlayPoint.y] } as any);
         currentPoint = target;
         break;
       }
       case 'V': {
         const target = isRelative ? { x: currentPoint.x, y: currentPoint.y + values[0] } : { x: currentPoint.x, y: values[0] };
-        const overlayPoint = toOverlayPointFromSvgUserSpace(element, designerCanvas, target);
+        const overlayPoint = toOverlayPoint(target);
         transformedPathData.push({ type: 'L', values: [overlayPoint.x, overlayPoint.y] } as any);
         currentPoint = target;
         break;
@@ -256,6 +264,7 @@ function _createMarkerOverlayPathData(element: Element, designerCanvas: IDesigne
     tempGroup.setAttribute('transform', `matrix(${matrix.a} ${matrix.b} ${matrix.c} ${matrix.d} ${matrix.e} ${matrix.f})`);
   }
   ownerSvg.appendChild(tempGroup);
+  clearBoxQuadsCache();
 
   try {
     const pathParts: string[] = [];
@@ -267,6 +276,7 @@ function _createMarkerOverlayPathData(element: Element, designerCanvas: IDesigne
       }
 
       tempGroup.appendChild(markerInstance);
+      clearBoxQuadsCache();
       const markerGraphics = markerInstance.querySelectorAll('path, rect, line, circle, ellipse, polygon, polyline');
       for (const markerGraphic of markerGraphics) {
         const pathData = _createOverlayPathDataWithoutMarkers(markerGraphic, designerCanvas);
@@ -279,6 +289,7 @@ function _createMarkerOverlayPathData(element: Element, designerCanvas: IDesigne
     return pathParts.length ? pathParts.join(' ') : null;
   } finally {
     tempGroup.remove();
+    clearBoxQuadsCache();
   }
 }
 
@@ -603,11 +614,6 @@ function _pointsEqual(a: IPoint, b: IPoint): boolean {
 
 function _getAnimatedLengthValue(length: SVGAnimatedLength): number {
   return length?.baseVal?.value ?? 0;
-}
-
-function _toElementReferenceBoxPoint(element: Element, point: IPoint): IPoint {
-  const bbox = _getSvgGeometryBBoxOffset(element);
-  return { x: point.x - bbox.x, y: point.y - bbox.y };
 }
 
 function _fromElementReferenceBoxPoint(element: Element, point: IPoint): IPoint {

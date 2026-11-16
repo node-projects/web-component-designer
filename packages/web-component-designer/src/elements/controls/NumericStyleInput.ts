@@ -254,6 +254,7 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   private _input: HTMLInputElement;
   private _select: HTMLSelectElement;
   private _measure: HTMLSpanElement;
+  private _measureObserver: ResizeObserver;
   private _scrubberButton: HTMLButtonElement;
   private _increaseButton: HTMLButtonElement;
   private _decreaseButton: HTMLButtonElement;
@@ -295,6 +296,19 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     this._wireEvents();
     this._updateValue();
   }
+
+  connectedCallback() {
+    this._measureObserver ??= new ResizeObserver(entries => {
+      const width = Math.ceil(entries[0]?.contentRect.width ?? 0);
+      if (width > 0) {
+        const value = (width + 17) + 'px';
+        if (this._select.style.width !== value) this._select.style.width = value;
+      }
+    });
+    this._measureObserver.observe(this._measure);
+  }
+
+  disconnectedCallback() { this._measureObserver?.disconnect(); }
 
   private _wireEvents() {
     this._input.addEventListener('change', () => this._applyTypedValue());
@@ -633,15 +647,10 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
     if (!this._measure || !this._select)
       return;
     const selectedOption = this._select.selectedOptions.item(0);
-    this._measure.textContent = selectedOption?.text ?? '';
-    const textWidth = this._measure.offsetWidth;
-    if (textWidth > 0) {
-      // 14px accounts for the custom dropdown arrow + padding
-      this._select.style.width = (textWidth + 17) + 'px';
-    } else {
-      // Element not yet laid out, defer measurement
-      requestAnimationFrame(() => this._autoSizeSelect());
-    }
+    const text = selectedOption?.text ?? '';
+    // Resize notifications handle initial layout, font changes and hidden tabs
+    // becoming visible, without synchronous layout reads or frame polling.
+    if (this._measure.textContent !== text) this._measure.textContent = text;
   }
 
   private _applyReadonlyState() {

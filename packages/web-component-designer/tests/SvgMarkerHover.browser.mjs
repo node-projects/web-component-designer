@@ -24,6 +24,36 @@ before(async () => {
 
 after(async () => { await browser?.close(); });
 
+test('path conversion reuses geometry reads within a path and refreshes them after a transform edit', async () => {
+  const page = await browser.newPage();
+  try {
+    await page.setContent('<div id="canvas"><svg width="500" height="300"><path id="path" d="M0 0L100 100"/></svg></div>');
+    await page.addScriptTag({ content: helperBundle });
+    const result = await page.evaluate(() => {
+      const canvas = document.getElementById('canvas'), path = document.getElementById('path');
+      const getBBox = path.getBBox.bind(path), getScreenCTM = path.getScreenCTM.bind(path);
+      let boxes = 0, transforms = 0;
+      path.getBBox = (...args) => { boxes++; return getBBox(...args); };
+      path.getScreenCTM = () => { transforms++; return getScreenCTM(); };
+      const convert = () => {
+        boxes = transforms = 0;
+        const outline = window.createOutline(path, { canvas, iframes: [] }, { includeMarkers: false });
+        return { boxes, transforms, outline };
+      };
+      const short = convert();
+      path.setAttribute('d', 'M0 0' + Array.from({ length: 128 }, (_, i) => `L${(i + 1) * 100 / 128} ${i % 2 ? 0 : 100}`).join(''));
+      const long = convert();
+      path.setAttribute('transform', 'translate(30 40)');
+      const moved = convert();
+      return { short, long, moved };
+    });
+    assert.ok(result.short.boxes > 0);
+    assert.equal(result.long.boxes, result.short.boxes);
+    assert.equal(result.long.transforms, result.short.transforms);
+    assert.notEqual(result.long.outline, result.moved.outline);
+  } finally { await page.close(); }
+});
+
 for (const zoom of [0.5, 1, 2]) {
   for (const transform of ['', 'translate(160 120)', 'translate(250 120) rotate(35)', 'translate(220 100) rotate(-20) scale(1.4 .7)']) {
     test(`marker hover tip follows its shaft at zoom ${zoom} with ${transform || 'no ancestor transform'}`, async () => {

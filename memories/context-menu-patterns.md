@@ -2,6 +2,7 @@
 
 - Shared localization belongs to the basic designer's `ITranslationService`, registered as `translationService` on each `ServiceContainer`. The default service keeps English text and replaces named parameters once. Resolve the service when displaying UI so host language changes and replacement translators take effect; never translate user-written parameter values.
 - Built-in menus/prompts call the service directly. Persistent UI and tooltips use explicit `data-wcd-i18n-*` markers with `bindDesignerUiTranslation`; dispose bindings with their views/popups. `languageChanged.on` is optional for host translators. Never mark input values, CSS command values, reactive document values or authored canvas/preview content. Keep option values explicit when translating option labels. `DesignerUiTranslation` avoids document and third-party code-editor subtrees.
+- Translation mutation observers process added branches and changed marker targets only. Refresh the whole bound UI only on initial binding or language/service changes, respect nested bindings as ownership boundaries, and ignore mutations inside document/preview/code-editor subtrees. Selection and property previews must not trigger repeated scans of unchanged UI labels.
 
 - Designer context menus are registered centrally in `DefaultServiceBootstrap` and grouped with `ChildContextMenu` and `SeperatorContextMenu`.
 - `ContextMenu` treats an item with title `-` as a divider.

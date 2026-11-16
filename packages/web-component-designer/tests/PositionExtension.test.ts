@@ -3,6 +3,8 @@ import { expect, jest, test } from '@jest/globals';
 import { PositionExtension } from '../src/elements/widgets/designerView/extensions/PositionExtension';
 
 function setup(options: { allowDocking?: boolean } = {}) {
+  (globalThis as any).DOMPoint = class { constructor(public x: number, public y: number) {} };
+  (globalThis as any).DOMQuad = class { constructor(public p1: unknown, public p2: unknown, public p3: unknown, public p4: unknown) {} };
   const container = document.createElement('div');
   container.style.cssText = 'width:400px;height:300px';
   const parent = document.createElement('div');
@@ -49,7 +51,8 @@ function setup(options: { allowDocking?: boolean } = {}) {
   // Rotation and skew: local (x,y) -> (500-y, 20+x+y/2).
   const canvas = {
     overlayLayer, scaleFactor: 2, iframes: [],
-    canvas: { convertPointFromNode: jest.fn((p: { x: number, y: number }, _container: Element, _options: any) => ({ x: 500 - p.y, y: 20 + p.x + p.y / 2, w: 1 })) },
+    canvas: { convertQuadFromNode: jest.fn((quad: any, _container: Element, _options: any) => Object.fromEntries(
+      ['p1', 'p2', 'p3', 'p4'].map(key => { const p = quad[key]; return [key, { x: 500 - p.y, y: 20 + p.x + p.y / 2, w: 1 }]; }))) },
     ignoreEvent: jest.fn()
   };
   const manager = { refreshAllExtensions: jest.fn() };
@@ -67,7 +70,7 @@ test('projects guides from the actual containing block through rotation and skew
   expect(lines[0].style.strokeDasharray).toBe('none');
   expect(lines[1].style.strokeDasharray).toBe('2');
   expect(lines[0].style.strokeWidth).toBe('0.5');
-  expect(canvas.canvas.convertPointFromNode.mock.calls.every(call => call[1] === container)).toBe(true);
+  expect(canvas.canvas.convertQuadFromNode.mock.calls.every(call => call[1] === container)).toBe(true);
   expect([...svg.querySelectorAll('text')].map(n => n.textContent)).toEqual(['40', '40', '260', '260', '30', '30', '220', '220']);
 });
 

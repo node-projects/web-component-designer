@@ -34,6 +34,13 @@ export class ExtensionManager implements IExtensionManager {
   private subscriptions: { dispose(): void }[] = [];
   private frames = new Set<number>();
   private active = false;
+  private _geometryBatchDepth = 0;
+
+  private _withGeometryCache(operation: () => void) {
+    if (this._geometryBatchDepth++ === 0) clearBoxQuadsCache();
+    try { operation(); }
+    finally { if (--this._geometryBatchDepth === 0) clearBoxQuadsCache(); }
+  }
 
   constructor(designerCanvas: IDesignerCanvas) {
     useBoxQuadsCache();
@@ -95,6 +102,7 @@ export class ExtensionManager implements IExtensionManager {
 
   private _contentChanged(contentChanges: IContentChanged[]) {
     if (!this.active) return;
+    clearBoxQuadsCache();
     const frame = requestAnimationFrame(() => {
       this.frames.delete(frame);
       if (!this.active) return;
@@ -120,6 +128,10 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   private _selectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
+    this._withGeometryCache(() => this._applySelectedElementsChanged(selectionChangedEvent));
+  }
+
+  private _applySelectedElementsChanged(selectionChangedEvent: ISelectionChangedEvent) {
     if (!this.active) return;
     this._lastPrimarySelectionRefreshItem = null;
 
@@ -172,7 +184,7 @@ export class ExtensionManager implements IExtensionManager {
       let extensions: IDesignerExtension[] = [];
       if (extProv) {
         const cache = {};
-        clearBoxQuadsCache();
+        if (!this._geometryBatchDepth) clearBoxQuadsCache();
         for (let e of extProv) {
           let shouldAppE = wmGet(designItem, this._shouldAppliedDesignerExtensions).get(extensionType);
           if (!shouldAppE)
@@ -219,7 +231,7 @@ export class ExtensionManager implements IExtensionManager {
       const extProv = this.designerCanvas.serviceContainer.designerExtensions.get(extensionType);
       if (extProv) {
         const cache = {};
-        clearBoxQuadsCache();
+        if (!this._geometryBatchDepth) clearBoxQuadsCache();
         for (let e of extProv) {
           for (let i of designItems) {
             let shouldAppE = wmGet(i, this._shouldAppliedDesignerExtensions).get(extensionType);
@@ -409,7 +421,7 @@ export class ExtensionManager implements IExtensionManager {
           let exts = wmGet(designItem, this._appliedDesignerExtensions).get(extensionType);
           if (exts) {
             const cache = {};
-            clearBoxQuadsCache();
+            if (!this._geometryBatchDepth) clearBoxQuadsCache();
             for (let e of exts) {
               try {
                 e.refresh(cache, event);
@@ -424,7 +436,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         const cache = {};
-        clearBoxQuadsCache();
+        if (!this._geometryBatchDepth) clearBoxQuadsCache();
         for (let appE of wmGet(designItem, this._appliedDesignerExtensions)) {
           for (let e of appE[1]) {
             try {
@@ -447,7 +459,7 @@ export class ExtensionManager implements IExtensionManager {
     if (designItems) {
       if (extensionType) {
         const cache = {};
-        clearBoxQuadsCache();
+        if (!this._geometryBatchDepth) clearBoxQuadsCache();
         outer1:
         for (let i of designItems) {
           if (!i.element.isConnected) {
@@ -476,7 +488,7 @@ export class ExtensionManager implements IExtensionManager {
         }
       } else {
         const cache = {};
-        clearBoxQuadsCache();
+        if (!this._geometryBatchDepth) clearBoxQuadsCache();
         outer2:
         for (let i of designItems) {
           for (let appE of wmGet(i, this._appliedDesignerExtensions)) {
@@ -507,6 +519,10 @@ export class ExtensionManager implements IExtensionManager {
   }
 
   refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension, event?: Event) {
+    this._withGeometryCache(() => this._refreshAllExtensions(designItems, ignoredExtension, event));
+  }
+
+  private _refreshAllExtensions(designItems: IDesignItem[], ignoredExtension?: IDesignerExtension, event?: Event) {
     if (!this.active) return;
     this.designerCanvas.overlayLayer.startBatch();
     if (designItems) {
@@ -538,15 +554,13 @@ export class ExtensionManager implements IExtensionManager {
   //maybe store the "shouldAppliedExtensions??"
   reapplyAllAppliedExtentions(filterDesignItems?: IDesignItem[], enabledExtensionTypes?: ExtensionType[]) {
     this.designerCanvas.overlayLayer.startBatch();
-    for (let d of ExtensionManager.getAllChildElements(this.designerCanvas.rootDesignItem)) {
-      if (!filterDesignItems || filterDesignItems.includes(d)) {
-        const keys = [...wmGet(d, this._shouldAppliedDesignerExtensions).keys()];
-        for (let t of keys) {
-          const evt = wmGet(d, this._lastApplyEventPerType).get(t);
-          this.removeExtension(d, t);
-          if (enabledExtensionTypes == null || enabledExtensionTypes.includes(t))
-            this.applyExtension(d, t, evt);
-        }
+    for (let d of filterDesignItems ?? ExtensionManager.getAllChildElements(this.designerCanvas.rootDesignItem)) {
+      const keys = [...wmGet(d, this._shouldAppliedDesignerExtensions).keys()];
+      for (let t of keys) {
+        const evt = wmGet(d, this._lastApplyEventPerType).get(t);
+        this.removeExtension(d, t);
+        if (enabledExtensionTypes == null || enabledExtensionTypes.includes(t))
+          this.applyExtension(d, t, evt);
       }
     }
     this.designerCanvas.overlayLayer.endBatch();

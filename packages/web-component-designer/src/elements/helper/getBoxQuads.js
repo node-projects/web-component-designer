@@ -212,9 +212,9 @@ let computedStyleCache;
 let hashId = 0;
 
 export function clearCache() {
-    boxQuadsCache.clear();
-    transformCache.clear();
-    computedStyleCache = new WeakMap();
+    boxQuadsCache?.clear();
+    transformCache?.clear();
+    if (computedStyleCache) computedStyleCache = new WeakMap();
 }
 
 export function useCache() {

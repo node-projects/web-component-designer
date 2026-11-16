@@ -52,6 +52,15 @@ export class PointerTool implements ITool {
   dispose(): void {
   }
 
+  getElementForPointerEvent(event: PointerEvent): Element | undefined {
+    if (event.type === EventNames.PointerUp && this._previousEventName === EventNames.PointerDown
+      && !hasCommandKey(event) && !this._movedSinceStartedAction) {
+      const element = this._actionStartedClickDesignItem?.element;
+      if (element?.isConnected) return element;
+    }
+    return undefined;
+  }
+
   private _showContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
     event.preventDefault();
     if (!hasCommandKey(event)) {
@@ -232,9 +241,6 @@ export class PointerTool implements ITool {
 
           this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
 
-          if (designerCanvas.alignOnSnap)
-            designerCanvas.snapLines.calculateSnaplines(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
-
           break;
         }
       case EventNames.PointerMove:
@@ -252,14 +258,15 @@ export class PointerTool implements ITool {
               else
                 dragDesignItem.instanceServiceContainer.selectionService.setSelectedElements([dragDesignItem], event);
               this._actionStartedDesignItems = [...designerCanvas.instanceServiceContainer.selectionService.selectedElements];
-              if (designerCanvas.alignOnSnap)
-                designerCanvas.snapLines.calculateSnaplines(designerCanvas.instanceServiceContainer.selectionService.selectedElements);
             }
           }
 
           if (designerCanvas.readOnly) {
             return;
           }
+
+          if (this._firstTimeInMove && designerCanvas.alignOnSnap)
+            designerCanvas.snapLines.calculateSnaplines(this._actionStartedDesignItems);
 
           // *** Copy Items via Ctrl Drag ***
 

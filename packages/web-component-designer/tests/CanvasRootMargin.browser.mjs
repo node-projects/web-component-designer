@@ -24,6 +24,46 @@ before(async () => {
 });
 after(async () => { await Promise.all(browsers.map(browser => browser.close())); });
 
+test('selection extensions share geometry reads and later selections observe layout changes', async () => {
+  const page = await browsers[0].newPage();
+  try {
+    await page.setContent('<!doctype html><body></body>');
+    await page.addScriptTag({ content: bundle });
+    const result = await page.evaluate(async () => {
+      const { core } = window.fixture;
+      const services = core.createDefaultServiceContainer(); services.designerExtensions.clear();
+      const positions = [];
+      const provider = { shouldExtend: () => true, getExtension: (_manager, canvas, item) => ({
+        extend() { positions.push(item.element.getBoxQuads({ relativeTo: canvas.canvas })[0].p1.x); }, refresh() {}, dispose() {},
+      }) };
+      services.designerExtensions.set(core.ExtensionType.Selection, [provider]);
+      const doc = new core.EditingDocument(services);
+      await doc.loadHtml('<div id="target" style="position:absolute;left:20px;top:40px;width:100px;height:80px"></div>');
+      const view = new core.DesignerView(); view.style.cssText = 'width:800px;height:600px'; document.body.append(view);
+      await view.attachDocument(doc);
+      const target = doc.rootDesignItem.querySelectorAll('#target')[0], item = core.DesignItem.GetDesignItem(target);
+      const getStyle = window.getComputedStyle.bind(window); let reads = 0;
+      window.getComputedStyle = (...args) => { if (args[0] === target) reads++; return getStyle(...args); };
+      const select = multiple => {
+        doc.instanceServiceContainer.selectionService.setSelectedElements([]);
+        services.designerExtensions.set(core.ExtensionType.PrimarySelection, multiple ? [provider] : []);
+        reads = 0; positions.length = 0;
+        doc.instanceServiceContainer.selectionService.setSelectedElements([item]);
+        return { reads, positions: [...positions] };
+      };
+      const single = select(false), multiple = select(true);
+      target.style.left = '100px'; const changed = select(true);
+      window.getComputedStyle = getStyle;
+      return { single, multiple, changed };
+    });
+    assert.ok(result.single.reads > 0);
+    assert.equal(result.multiple.reads, result.single.reads);
+    assert.equal(result.multiple.positions.length, 2);
+    assert.equal(result.multiple.positions[0], result.multiple.positions[1]);
+    assert.ok(Math.abs(result.changed.positions[0] - result.multiple.positions[0] - 80) < .01);
+  } finally { await page.close(); }
+});
+
 for (const [browserIndex, name] of ['Chromium polyfill', 'Firefox native'].entries()) {
   for (const zoom of [0.5, 1, 2]) {
     test(`${name}: root style edits keep selection and pointer coordinates aligned at zoom ${zoom}`, async () => {

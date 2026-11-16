@@ -50,13 +50,14 @@ export class PositionExtension extends AbstractExtension {
     const ends = [midpoint(quad.p1, quad.p4), midpoint(quad.p2, quad.p3), midpoint(quad.p1, quad.p2), midpoint(quad.p4, quad.p3)];
     const starts = [{ x: left, y: ends[0].y }, { x: right, y: ends[1].y }, { x: ends[2].x, y: top }, { x: ends[3].x, y: bottom }];
     const distances = [ends[0].x - left, right - ends[1].x, ends[2].y - top, bottom - ends[3].y];
-    const toCanvas = (point: { x: number, y: number }) => {
-      const p = this.designerCanvas.canvas.convertPointFromNode(point, container, { iframes: this.designerCanvas.iframes });
-      return { x: p.x / p.w, y: p.y / p.w };
+    const toCanvas = (points: { x: number, y: number }[]) => {
+      const source = new DOMQuad(...points.map(point => new DOMPoint(point.x, point.y)));
+      const projected = this.designerCanvas.canvas.convertQuadFromNode(source, container, { iframes: this.designerCanvas.iframes });
+      return [projected.p1, projected.p2, projected.p3, projected.p4].map(p => ({ x: p.x / p.w, y: p.y / p.w }));
     };
-    const canvasStarts = starts.map(toCanvas);
-    const canvasEnds = ends.map(toCanvas);
-    const centers = starts.map((p, i) => toCanvas({ x: (p.x + ends[i].x) / 2, y: (p.y + ends[i].y) / 2 }));
+    const canvasStarts = toCanvas(starts);
+    const canvasEnds = toCanvas(ends);
+    const centers = toCanvas(starts.map((p, i) => ({ x: (p.x + ends[i].x) / 2, y: (p.y + ends[i].y) / 2 })));
     const anchored = sides.map(side => this._getSpecifiedStyle(side) !== 'auto');
     const editable = absolute && this._options.allowDocking !== false;
     const scale = this.designerCanvas.scaleFactor;

@@ -32,41 +32,74 @@ export function bindDesignerUiTranslation(root: Node & ParentNode, container: Se
   let language: { dispose(): void };
   const observers = new Map<Node, MutationObserver>();
   owners.set(root, container);
+  const excluded = (element: Element) => element.id === 'placeholder' || element.id === 'node-projects-designer-canvas-canvas'
+    || element.localName === 'node-projects-designer-canvas' || /code-view|codeview/.test(element.localName);
+  const ignoredMutation = (node: Node) => {
+    for (let current = node; current; current = current.parentNode ?? (current as ShadowRoot).host) {
+      if (current !== root && owners.has(current) || current.nodeType === 1 && excluded(current as Element)) return true;
+      if (current === root) break;
+    }
+    return false;
+  };
+  const translate = (element: Element) => {
+    for (const attribute of ['text', 'title', 'placeholder', 'aria-label']) {
+      const key = element.getAttribute('data-wcd-i18n-' + attribute);
+      if (key == null) continue;
+      const params = element.getAttribute('data-wcd-i18n-params');
+      const value = container.translationService.translate(key, params ? JSON.parse(params) : undefined);
+      if (attribute === 'text') {
+        if (element.textContent !== value) element.textContent = value;
+      } else if (element.getAttribute(attribute) !== value) element.setAttribute(attribute, value);
+    }
+  };
+  const cleanup = () => {
+    for (const [scope, observer] of observers) {
+      if (scope !== root && (owners.has(scope) || root.isConnected && !(scope as ShadowRoot).host?.isConnected)) {
+        observer.disconnect(); observers.delete(scope);
+      }
+    }
+  };
+  const changed = (records: MutationRecord[]) => {
+    if (disposed) return;
+    const added = new Set<Element>();
+    for (const record of records) {
+      if (ignoredMutation(record.target)) continue;
+      if (record.target.nodeType === 1) translate(record.target as Element);
+      if (record.type === 'childList')
+        for (const node of record.addedNodes) if (node.nodeType === 1) added.add(node as Element);
+    }
+    // A batch may contain both a new subtree and additions inside that subtree.
+    // Walk each new branch once, never the unchanged designer UI on selection.
+    for (const element of added) {
+      let parent = element.parentElement;
+      while (parent && !added.has(parent)) parent = parent.parentElement;
+      if (!parent && !ignoredMutation(element)) walk(element);
+    }
+    cleanup();
+  };
+  const visit = (scope: Node & ParentNode) => {
+    if (scope !== root && owners.has(scope)) return;
+    if (!observers.has(scope)) {
+      const Observer = scope.ownerDocument?.defaultView?.MutationObserver ?? MutationObserver;
+      const observer = new Observer(changed);
+      observer.observe(scope, { childList: true, subtree: true, attributes: true,
+        attributeFilter: ['data-wcd-i18n-text', 'data-wcd-i18n-title', 'data-wcd-i18n-placeholder', 'data-wcd-i18n-aria-label', 'data-wcd-i18n-params'] });
+      observers.set(scope, observer);
+    }
+    if (scope.nodeType === 1) walk(scope as Element);
+    else for (const child of [...scope.children]) walk(child);
+  };
+  const walk = (element: Element) => {
+    // Document/preview and third-party editor contents own their text and lifecycle.
+    if (excluded(element) || element !== root && owners.has(element)) return;
+    translate(element);
+    if (element.shadowRoot) visit(element.shadowRoot);
+    for (const child of [...element.children]) walk(child);
+  };
   const refresh = () => {
     if (disposed) return;
-    const visit = (scope: Node & ParentNode) => {
-      const owner = owners.get(scope);
-      if (owner && owner !== container) return;
-      if (!observers.has(scope)) {
-        const Observer = scope.ownerDocument?.defaultView?.MutationObserver ?? MutationObserver;
-        const observer = new Observer(refresh);
-        observer.observe(scope, { childList: true, subtree: true, attributes: true,
-          attributeFilter: ['data-wcd-i18n-text', 'data-wcd-i18n-title', 'data-wcd-i18n-placeholder', 'data-wcd-i18n-aria-label', 'data-wcd-i18n-params'] });
-        observers.set(scope, observer);
-      }
-      const walk = (element: Element) => {
-        // Document and third-party editor contents have their own text and lifecycle.
-        if (element.id === 'placeholder' || element.id === 'node-projects-designer-canvas-canvas'
-          || element.localName === 'node-projects-designer-canvas' || /code-view|codeview/.test(element.localName)) return;
-        for (const attribute of ['text', 'title', 'placeholder', 'aria-label']) {
-          const key = element.getAttribute('data-wcd-i18n-' + attribute);
-          if (key == null) continue;
-          const params = element.getAttribute('data-wcd-i18n-params');
-          const value = container.translationService.translate(key, params ? JSON.parse(params) : undefined);
-          if (attribute === 'text') {
-            if (element.textContent !== value) element.textContent = value;
-          } else if (element.getAttribute(attribute) !== value) element.setAttribute(attribute, value);
-        }
-        if (element.shadowRoot) visit(element.shadowRoot);
-        for (const child of [...element.children]) walk(child);
-      };
-      if (scope.nodeType === 1) walk(scope as Element);
-      else for (const child of [...scope.children]) walk(child);
-    };
     visit(root);
-    for (const [scope, observer] of observers) {
-      if (root.isConnected && scope !== root && !(scope as ShadowRoot).host?.isConnected) { observer.disconnect(); observers.delete(scope); }
-    }
+    cleanup();
   };
   const subscribe = () => {
     language?.dispose();

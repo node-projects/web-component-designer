@@ -23,6 +23,64 @@ test('standalone containers use English fallback text without reinterpreting par
     .toBe('User {count}: 2; {missing}');
 });
 
+test('UI mutations translate new labels without revisiting unchanged labels or editable previews', async () => {
+  const container = new core.ServiceContainer();
+  const translate = jest.fn((text: string) => 'Translated ' + text);
+  container.register('translationService', { translate });
+  const root = document.createElement('div');
+  root.innerHTML = '<section>' + '<button data-wcd-i18n-text="Stable"></button>'.repeat(100) + '</section><div id="placeholder"></div>';
+  document.body.append(root);
+  const binding = core.bindDesignerUiTranslation(root, container);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  translate.mockClear();
+  root.querySelector('#placeholder').innerHTML = '<div data-wcd-i18n-text="Authored canvas text"></div>'.repeat(2000);
+  root.querySelector('section').append(document.createElement('span'));
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(translate).not.toHaveBeenCalled();
+  const button = document.createElement('button');
+  button.setAttribute('data-wcd-i18n-text', 'Dynamic');
+  root.querySelector('section').append(button);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(button.textContent).toBe('Translated Dynamic');
+  expect(translate.mock.calls.every(([text]) => text === 'Dynamic')).toBe(true);
+  translate.mockClear();
+  button.setAttribute('data-wcd-i18n-text', 'Changed');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(button.textContent).toBe('Translated Changed');
+  expect(translate.mock.calls.every(([text]) => text === 'Changed')).toBe(true);
+  binding.dispose(); root.remove();
+});
+
+test('nested UI bindings own their mutations and language refreshes exactly once', async () => {
+  const container = new core.ServiceContainer();
+  const listeners = new Set<() => void>();
+  let german = false;
+  const translate = jest.fn((text: string) => (german ? 'DE ' : '') + text);
+  container.register('translationService', { translate, languageChanged: { on(listener) {
+    listeners.add(listener); return { dispose: () => listeners.delete(listener) };
+  } } });
+  const root = document.createElement('div'), host = document.createElement('div');
+  root.innerHTML = '<button data-wcd-i18n-text="Outer"></button>';
+  root.append(host); document.body.append(root);
+  const shadow = host.attachShadow({ mode: 'open' });
+  shadow.innerHTML = '<button data-wcd-i18n-text="Inner"></button>';
+  const outer = core.bindDesignerUiTranslation(root, container);
+  const inner = core.bindDesignerUiTranslation(shadow, container);
+  await new Promise(resolve => setTimeout(resolve, 0));
+  translate.mockClear(); german = true;
+  for (const listener of listeners) listener();
+  expect(translate.mock.calls.filter(([text]) => text === 'Inner')).toHaveLength(1);
+  expect(shadow.querySelector('button').textContent).toBe('DE Inner');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  translate.mockClear();
+  shadow.querySelector('button').setAttribute('data-wcd-i18n-text', 'Nested change');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  expect(translate.mock.calls.every(([text]) => text === 'Nested change')).toBe(true);
+  expect(shadow.querySelector('button').textContent).toBe('DE Nested change');
+  inner.dispose(); outer.dispose(); root.remove();
+  expect(listeners.size).toBe(0);
+});
+
 test('collaboration menus use the shared container translator and follow language and service changes', async () => {
   const { setupCollaborationService } = await import('../../web-component-designer-collaboration-service/src/setupCollaborationService');
   const { CollaborationCommentsContextMenu } = await import('../../web-component-designer-collaboration-service/src/extensions/CollaborationCommentsContextMenu');

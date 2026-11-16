@@ -7,6 +7,8 @@ export interface ITool extends IDisposable {
   readonly cursor: string;
   activated(serviceContainer: ServiceContainer);
   pointerEventHandler(designerCanvas: IDesignerCanvas, event: PointerEvent, currentElement: Element);
+  /** Return a known gesture target, or undefined to request normal hit testing. */
+  getElementForPointerEvent?(event: PointerEvent): Element | undefined;
   keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement?: Element);
   doubleClickEventHandler?(designerCanvas: IDesignerCanvas, event: MouseEvent): void;
 }

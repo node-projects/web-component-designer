@@ -36,6 +36,8 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   private _instanceServiceContainer: InstanceServiceContainer;
   private _selectionChangedHandler: Disposable;
   private _contentChangedHandler: Disposable;
+  private _selectionPending = false;
+  private _visibilityObserver: ResizeObserver;
 
   public propertyGroupHover: (group: IPropertyGroup, part: 'name' | 'desc') => boolean;
   public propertyGroupClick: (group: IPropertyGroup, part: 'name' | 'desc') => void;
@@ -97,8 +99,13 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     this._uiTranslation?.dispose();
     const container = this._serviceContainer;
     if (container) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, container);
+    this._visibilityObserver ??= new ResizeObserver(() => {
+      if (this._selectionPending) this._refreshSelection();
+    });
+    this._visibilityObserver.observe(this);
+    if (this._selectionPending) this._refreshSelection();
   }
-  disconnectedCallback() { this._uiTranslation?.dispose(); }
+  disconnectedCallback() { this._uiTranslation?.dispose(); this._visibilityObserver?.disconnect(); }
 
   public set serviceContainer(value: ServiceContainer) {
     this._uiTranslation?.dispose();
@@ -134,8 +141,15 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
   set selectedItems(items: IDesignItem[]) {
     if (this._selectedItems != items) {
       this._selectedItems = items;
-      this._selectedItemsSet();
+      this._selectionPending = true;
+      this._refreshSelection();
     }
+  }
+
+  private _refreshSelection() {
+    if (this.isConnected && this.checkVisibility?.() === false) return;
+    this._selectionPending = false;
+    void this._selectedItemsSet();
   }
 
   async _selectedItemsSet() {
@@ -204,6 +218,10 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
 
   _blockDoubleRun = false;
   async _changeOccured(change: IContentChanged, forceRecreate = false) {
+    if (this.isConnected && this.checkVisibility?.() === false) {
+      this._selectionPending = true;
+      return;
+    }
     if (!this._blockDoubleRun) {
       this._blockDoubleRun = true;
       const selItem = this._selectedItems[0];

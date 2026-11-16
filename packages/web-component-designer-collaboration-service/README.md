@@ -18,10 +18,15 @@ It provides:
 - comment context menu integration
 - a WebRTC transport with `broadcast-channel` and manual copy/paste signaling
 - `mergeCollaborationHtml(base, incoming, accepted)` for independently changed properties, with the incoming edit winning overlaps in a coordinator-defined order
-- `applyCollaborationHtml(document, html, attributesChanged?)` for applying shared HTML while retaining live design items and selections
+- `applyCollaborationHtml(document, html, attributesChanged?, currentHtml?)` for applying shared HTML while retaining live design items and selections
 - `collaborationHtmlSignature(html)` for comparisons that ignore attribute and independent CSS declaration ordering
 
 The package is an addon. It does not patch the default designer bootstrap automatically. You enable it explicitly on your `ServiceContainer`.
+
+Hosts that already retain an authoritative, flushed HTML snapshot may pass it as
+`currentHtml` to avoid serializing the whole document before a small remote update.
+Do not pass a stale snapshot. Edits that occur while parsing still trigger the
+normal concurrent-edit reconciliation path.
 
 ## Quick Start
 

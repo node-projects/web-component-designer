@@ -67,7 +67,10 @@ test('large canvases keep cursor updates independent of document size and retain
       const tag = beforeHtml.match(/<div\b[^>]*id="item-101"[^>]*>/)[0];
       const updatedTag = tag.replace('id="item-101"', 'id="item-101" data-note="Remote > value"')
         .replace(/style="([^"]*)"/, (_, css) => `style="${css};color:red !important"`);
-      await applyCollaborationHtml(doc, beforeHtml.replace(tag, updatedTag));
+      const getHtml = doc.getHtml.bind(doc);
+      doc.getHtml = () => { throw new Error('A supplied current snapshot must avoid whole-document serialization'); };
+      try { await applyCollaborationHtml(doc, beforeHtml.replace(tag, updatedTag), undefined, beforeHtml); }
+      finally { doc.getHtml = getHtml; }
       const propertyUpdate = { parsed: [...parsed], retained: doc.instanceServiceContainer.selectionService.primarySelection === target,
         note: target.getAttribute('data-note'), color: target.getStyle('color'), important: target.isStyleImportant('color') };
       const other = [...root.children()].find(item => item.id === 'item-102');

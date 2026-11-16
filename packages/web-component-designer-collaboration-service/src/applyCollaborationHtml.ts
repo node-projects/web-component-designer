@@ -85,10 +85,12 @@ async function applySingleElementProperties(document: EditingDocument, before: s
   return true;
 }
 
-/** Apply shared HTML without replacing unchanged items, active selections or an in-progress drag. */
-export async function applyCollaborationHtml(document: EditingDocument, html: string, attributesChanged?: (item: IDesignItem) => void): Promise<void> {
+/** Apply shared HTML without replacing unchanged items, active selections or an in-progress drag.
+ * currentHtml may provide an authoritative, already-flushed snapshot of this document.
+ */
+export async function applyCollaborationHtml(document: EditingDocument, html: string, attributesChanged?: (item: IDesignItem) => void, currentHtml?: string): Promise<void> {
   const container = document.instanceServiceContainer;
-  let before = document.getHtml();
+  let before = currentHtml ?? document.getHtml();
   if (before === html || await applySingleElementProperties(document, before, html, attributesChanged)) return;
   let items = await document.serviceContainer.htmlParserService.parse(html, document.serviceContainer, container, false);
   // Parsing may yield while the local user continues typing or dragging.

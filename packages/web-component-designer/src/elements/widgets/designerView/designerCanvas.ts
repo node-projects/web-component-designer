@@ -1508,7 +1508,8 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     if (forceElement)
       currentElement = forceElement;
     else {
-      currentElement = this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
+      currentElement = this._activeTool?.getElementForPointerEvent?.(event)
+        ?? this.serviceContainer.elementAtPointService.getElementAtPoint(this, { x: event.x, y: event.y });
       if (!currentElement) {
         currentElement = this._canvas;
       } else if (this._enableSelectTextNodesOnClick) {
