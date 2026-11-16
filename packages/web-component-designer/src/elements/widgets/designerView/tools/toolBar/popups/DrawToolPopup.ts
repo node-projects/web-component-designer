@@ -47,28 +47,28 @@ export class DrawToolPopup extends AbstractBaseToolPopup {
 
   static override template = html`
         <div class="container">
-          <header><h2 id="title">Drawing tools</h2></header>
+          <header><h2 id="title" data-wcd-i18n-text="Drawing tools">Drawing tools</h2></header>
           <main id="content-area">
             <div class="tools">
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" style="--tool-icon: url('${assetsPath}images/tools/DrawLineTool.svg');"></button>
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Draw Path" style="--tool-icon: url('${assetsPath}images/tools/DrawPathTool.svg');"></button>
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" style="--tool-icon: url('${assetsPath}images/tools/DrawRectTool.svg');"></button>
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipse" style="--tool-icon: url('${assetsPath}images/tools/DrawEllipTool.svg');"></button>
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" style="--tool-icon: url('${assetsPath}images/tools/ColorPickerTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawLine" title="Draw Line" data-wcd-i18n-title="Draw Line" style="--tool-icon: url('${assetsPath}images/tools/DrawLineTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawPath" title="Draw Path" data-wcd-i18n-title="Draw Path" style="--tool-icon: url('${assetsPath}images/tools/DrawPathTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawRect" title="Draw Rectangle" data-wcd-i18n-title="Draw Rectangle" style="--tool-icon: url('${assetsPath}images/tools/DrawRectTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="DrawEllipsis" title="Draw Ellipse" data-wcd-i18n-title="Draw Ellipse" style="--tool-icon: url('${assetsPath}images/tools/DrawEllipTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="PickColor" title="Pick Color" data-wcd-i18n-title="Pick Color" style="--tool-icon: url('${assetsPath}images/tools/ColorPickerTool.svg');"></button>
             </div>
-            <button type="button" id="shapes" style="margin-top:8px;width:100%;height:28px">Shape library…</button>
+            <button type="button" id="shapes" style="margin-top:8px;width:100%;height:28px" data-wcd-i18n-text="Shape library…">Shape library…</button>
             <div class="inputs">   
-                <span class="text">Stroke Color</span>
+                <span class="text" data-wcd-i18n-text="Stroke Color">Stroke Color</span>
                 [[this.getEditor('setStrokeColor', 'color', { allowNone: true }, this.designerCanvas.serviceContainer.globalContext.strokeColor)]]
-                <span class="text">Fill Brush</span>
+                <span class="text" data-wcd-i18n-text="Fill Brush">Fill Brush</span>
                 [[this.getEditor('setFillBrush', 'color', { allowNone: true }, this.designerCanvas.serviceContainer.globalContext.fillBrush)]]
-                <span class="text">Stroke Thickness</span>
+                <span class="text" data-wcd-i18n-text="Stroke Thickness">Stroke Thickness</span>
                 [[this.getEditor('setStrokeThickness', 'number', { min: 0, step: 0.5 }, parseFloat(this.designerCanvas.serviceContainer.globalContext.strokeThickness))]]
-                <span>Stroke style</span><span id="dash"></span>
-                <span>Line cap</span><span id="cap"></span>
-                <span>Line join</span><span id="join"></span>
+                <span data-wcd-i18n-text="Stroke style">Stroke style</span><span id="dash"></span>
+                <span data-wcd-i18n-text="Line cap">Line cap</span><span id="cap"></span>
+                <span data-wcd-i18n-text="Line join">Line join</span><span id="join"></span>
             </div>
-            <p style="font-size:11px;line-height:1.5">Path: click nodes or drag to sketch. Double-click or Enter finishes; click the first node to close. Escape cancels. Shift constrains angles; Alt bypasses snapping.</p>
+            <p style="font-size:11px;line-height:1.5" data-wcd-i18n-text="Path: click nodes or drag to sketch. Double-click or Enter finishes; click the first node to close. Escape cancels. Shift constrains angles; Alt bypasses snapping.">Path: click nodes or drag to sketch. Double-click or Enter finishes; click the first node to close. Escape cancels. Shift constrains angles; Alt bypasses snapping.</p>
           </main>
         </div>`;
 

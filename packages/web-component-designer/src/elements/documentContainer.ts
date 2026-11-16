@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from './services/translationService/DesignerUiTranslation.js';
 import { EditingDocument } from './EditingDocument.js';
 import { BaseCustomWebComponentLazyAppend, css, cssFromString, TypedEvent } from "@node-projects/base-custom-webcomponent"
 import { DesignerTabControl } from './controls/DesignerTabControl.js';
@@ -186,6 +187,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
       this._refreshTimer = setTimeout(() => { void this.refreshInSplitView(); }, 200);
     };
     this._serviceContainer = serviceContainer;
+    this._subscriptions.push(bindDesignerUiTranslation(this.shadowRoot, serviceContainer));
     if (typeof content === 'string')
       this._content = content;
 
@@ -199,6 +201,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._tabControl.appendChild(this._designerDiv);
     this._designerDiv.appendChild(this.designerView);
     this._designerDiv.dataset.title = 'Designer';
+    this._designerDiv.dataset.wcdI18nTab = 'Designer';
     this.designerView.initialize(this._serviceContainer, content instanceof EditingDocument ? content : undefined);
     this._document = this.designerView.editingDocument;
     this._ownsDocument = !(content instanceof EditingDocument);
@@ -215,6 +218,7 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._codeDiv.style.position = 'relative';
     this._codeDiv.appendChild(this.codeView);
     this._codeDiv.dataset.title = 'Code';
+    this._codeDiv.dataset.wcdI18nTab = 'Code';
     this._subscriptions.push(this.codeView.onTextChanged.on(text => {
       if (!this._disableChangeNotificationDesigner) {
         if (this._tabControl.selectedIndex === tabIndex.code || this._tabControl.selectedIndex === tabIndex.split) {
@@ -229,10 +233,12 @@ export class DocumentContainer extends BaseCustomWebComponentLazyAppend implemen
     this._splitDiv = new SimpleSplitView();
     this._splitDiv.style.height = '100%';
     this._splitDiv.dataset.title = 'Split';
+    this._splitDiv.dataset.wcdI18nTab = 'Split';
     this._tabControl.appendChild(this._splitDiv);
     if (serviceContainer.config.demoViewWidget) {
       this.demoView = new serviceContainer.config.demoViewWidget();
       this.demoView.dataset.title = 'Preview';
+      this.demoView.dataset.wcdI18nTab = 'Preview';
       this._tabControl.appendChild(this.demoView);
     }
     queueMicrotask(() => {

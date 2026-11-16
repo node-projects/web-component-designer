@@ -59,8 +59,11 @@ import { IEditorTypeService } from './propertiesService/IEditorTypeService.js';
 import { ISourceMapProvider } from './sourceMapService/ISourceMapProvider.js';
 import { IRenderedDesignItemService } from './renderedDesignItemService/IRenderedDesignItemService.js';
 import { IElementResizeStrategy } from './resizeService/IElementResizeStrategy.js';
+import type { ITranslationService } from './translationService/ITranslationService.js';
+import { DefaultTranslationService } from './translationService/DefaultTranslationService.js';
 
 interface ServiceNameMap {
+  "translationService": ITranslationService;
   "propertyService": IPropertiesService;
   "attachedPropertyService": IPropertiesService;
   "containerService": IPlacementService;
@@ -107,6 +110,15 @@ interface ServiceNameMap {
 
 const isTouchUi = window.matchMedia('(pointer: coarse)').matches;
 export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
+
+  constructor() {
+    super();
+    this.register('translationService', new DefaultTranslationService());
+  }
+
+  get translationService(): ITranslationService {
+    return this.getLastService('translationService');
+  }
 
   /** Register a document-owned service. Legacy canvas factories remain supported for standalone views. */
   registerDocumentService<K extends 'undoService' | 'selectionService' | 'stylesheetService' | 'designItemDocumentPositionService' | 'collaborationService'>(

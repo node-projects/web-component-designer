@@ -317,17 +317,17 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
   public getContextMenu(designItems: IDesignItem[], property: IProperty): IContextMenuItem[] {
     const ctxMenuItems: IContextMenuItem[] = [
       {
-        title: 'clear', action: (e) => {
+        title: designItems[0].serviceContainer.translationService.translate('clear'), action: (e) => {
           property.service.clearValue(designItems, property, 'value');
           designItems[0].instanceServiceContainer.refreshExtensions(designItems);
         }
       },
       {
-        title: 'edit as text', action: (e, _1, _2, menu) => {
+        title: designItems[0].serviceContainer.translationService.translate('edit as text'), action: (e, _1, _2, menu) => {
           menu.close();
           setTimeout(async () => {
             const oldValue = property.service.getValue(designItems, property);
-            let value = prompt(`edit value of '${property.name}' as string:`, oldValue);
+            let value = prompt(designItems[0].serviceContainer.translationService.translate("edit value of '{name}' as string:", { name: property.name }), oldValue);
             if (value && value != oldValue) {
               await property.service.setValue(designItems, property, value);
             }
@@ -340,7 +340,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       ctxMenuItems.push(...[
         { title: '-' },
         {
-          title: 'edit binding', action: () => {
+          title: designItems[0].serviceContainer.translationService.translate('edit binding'), action: () => {
             let target = property.service.getPropertyTarget(designItems[0], property);
             let binding = property.service.getBinding(designItems, property);
             designItems[0].serviceContainer.config.openBindingsEditor(property, designItems, binding, target);
@@ -350,7 +350,7 @@ export abstract class AbstractPropertiesService implements IPropertiesService {
       if (property.service.isSet(designItems, property) == ValueType.bound) {
         ctxMenuItems.push(...[
           {
-            title: 'clear binding', action: () => {
+            title: designItems[0].serviceContainer.translationService.translate('clear binding'), action: () => {
               property.service.clearValue(designItems, property, 'binding');
               designItems[0].instanceServiceContainer.refreshExtensions(designItems);
             }

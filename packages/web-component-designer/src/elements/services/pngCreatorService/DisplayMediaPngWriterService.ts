@@ -17,7 +17,7 @@ export class DisplayMediaPngWriterService implements IPngCreatorService {
         const oldSelected = selectionService.selectedElements;
 
         try {
-            await Screenshot.enableScreenshots();
+            await Screenshot.enableScreenshots(document.body, designItems[0].serviceContainer.translationService);
 
             (<DesignerCanvas>designerCanvas).disableBackgroud();
             designerCanvas.zoomFactor = 1;

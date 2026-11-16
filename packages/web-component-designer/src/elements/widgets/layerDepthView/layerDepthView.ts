@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { BaseCustomWebComponentConstructorAppend, css, html, Disposable } from "@node-projects/base-custom-webcomponent";
 import { InstanceServiceContainer } from "../../services/InstanceServiceContainer.js";
 import { IDesignItem } from "../../item/IDesignItem.js";
@@ -96,7 +97,7 @@ export class LayerDepthView extends BaseCustomWebComponentConstructorAppend impl
 
   static override readonly template = html`
         <div id="controls">
-          <span>Depth</span>
+          <span data-wcd-i18n-text="Depth">Depth</span>
           <input id="depthSlider" type="range" min="0" max="120" step="1" value="36">
           <span id="depthValue">36px</span>
         </div>
@@ -104,7 +105,7 @@ export class LayerDepthView extends BaseCustomWebComponentConstructorAppend impl
           <div id="scene">
             <div id="content"></div>
           </div>
-          <div id="empty">No layers</div>
+          <div id="empty" data-wcd-i18n-text="No layers">No layers</div>
         </div>`;
 
   private _viewport: HTMLDivElement;
@@ -374,7 +375,15 @@ export class LayerDepthView extends BaseCustomWebComponentConstructorAppend impl
     event.preventDefault();
   }
 
+  private _uiTranslation: { dispose(): void };
+  connectedCallback() {
+    this._uiTranslation?.dispose();
+    if (this._instanceServiceContainer) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, this._instanceServiceContainer.rootDesignItem.serviceContainer);
+  }
+  disconnectedCallback() { this._uiTranslation?.dispose(); }
   public set instanceServiceContainer(value: InstanceServiceContainer) {
+    this._uiTranslation?.dispose();
+    if (value) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, value.rootDesignItem.serviceContainer);
     this._contentChangedHandler?.dispose();
     this._zoomFactorChangedHandler?.dispose();
     this._instanceServiceContainer = value;

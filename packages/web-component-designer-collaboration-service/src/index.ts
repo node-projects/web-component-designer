@@ -1,4 +1,7 @@
 export * from './setupCollaborationService.js';
+export * from './mergeCollaborationHtml.js';
+export * from './applyCollaborationHtml.js';
+export * from './collaborationHtmlSignature.js';
 
 export * from "./extensions/CollaborationCommentsContextMenu.js";
 export * from "./extensions/CollaborationOverlayExtensionProvider.js";

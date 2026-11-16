@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { PropertyGridPropertyList } from './PropertyGridPropertyList.js';
 import { DesignerTabControl } from '../../controls/DesignerTabControl.js';
@@ -91,7 +92,17 @@ export class PropertyGrid extends BaseCustomWebComponentLazyAppend {
     });
   }
 
+  private _uiTranslation: { dispose(): void };
+  connectedCallback() {
+    this._uiTranslation?.dispose();
+    const container = this._serviceContainer;
+    if (container) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, container);
+  }
+  disconnectedCallback() { this._uiTranslation?.dispose(); }
+
   public set serviceContainer(value: ServiceContainer) {
+    this._uiTranslation?.dispose();
+    if (value) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, value);
     this._serviceContainer = value;
     this._propertyGridPropertyLists = [];
     this._propertyGridPropertyListsDict = {}

@@ -12,7 +12,7 @@ export class SelectAllChildrenContextMenu implements IContextMenuExtension {
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [{
-      title: 'select all Children', action: () => {
+      title: designerCanvas.serviceContainer.translationService.translate('select all Children'), action: () => {
         designerCanvas.instanceServiceContainer.selectionService.setSelectedElements(Array.from(designItem.children()).filter(x => x.nodeType == NodeType.Element));
       }
     }];

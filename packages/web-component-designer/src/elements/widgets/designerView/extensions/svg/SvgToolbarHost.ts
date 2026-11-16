@@ -1,4 +1,5 @@
 import type { IDesignerCanvas } from '../../IDesignerCanvas.js';
+import { bindDesignerUiTranslation } from '../../../../services/translationService/DesignerUiTranslation.js';
 
 /** Dock outside canvas overlays, keeping authored geometry at the same screen position. */
 export function mountSvgToolbar(canvas: IDesignerCanvas, toolbar: HTMLElement): () => void {
@@ -24,11 +25,13 @@ export function mountSvgToolbar(canvas: IDesignerCanvas, toolbar: HTMLElement): 
   toolbar.style.top = toolbar.style.left = '0';
   toolbar.style.maxWidth = '100%';
   host.append(toolbar);
+  const translation = bindDesignerUiTranslation(toolbar, canvas.serviceContainer);
   visibility();
   const observer = new ResizeObserver(preserveAnchor);
   observer.observe(host);
   canvas.addEventListener('svg-toolbar-visibility-changed', visibility);
   return () => {
+    translation.dispose();
     observer.disconnect();
     canvas.removeEventListener('svg-toolbar-visibility-changed', visibility);
     toolbar.remove();

@@ -13,7 +13,7 @@ export class ItemsBelowContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     const lstItems = designerCanvas.elementsFromPoint(event.x, event.y);
     if (lstItems.length > 0) {
-      return [{ title: 'items below', children: [...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (#' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))] }];
+      return [{ title: designerCanvas.serviceContainer.translationService.translate('items below'), children: [...lstItems.map(x => ({ title: designerCanvas.serviceContainer.translationService.translate('select: {name}', { name: x.localName + (x.id ? ' (#' + x.id + ')' : '') }), action: () => this._select(designerCanvas, x) }))] }];
     }
     return [];
   }

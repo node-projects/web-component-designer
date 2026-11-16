@@ -6,11 +6,11 @@ export class SelectionToolPopup extends AbstractBaseToolPopup {
 
   static override template = html`
         <div class="container">
-          <header><h2 id="title">Selection</h2></header>
+          <header><h2 id="title" data-wcd-i18n-text="Selection">Selection</h2></header>
           <main id="content-area">
             <div class="tools">
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="RectangleSelector" title="Rectangle Selector" style="--tool-icon: url('${assetsPath}images/tools/SelectRectTool.svg');"></button>
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="MagicWandSelector" title="Magic Wand Selector" style="--tool-icon: url('${assetsPath}images/tools/MagicWandTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="RectangleSelector" title="Rectangle Selector" data-wcd-i18n-title="Rectangle Selector" style="--tool-icon: url('${assetsPath}images/tools/SelectRectTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="MagicWandSelector" title="Magic Wand Selector" data-wcd-i18n-title="Magic Wand Selector" style="--tool-icon: url('${assetsPath}images/tools/MagicWandTool.svg');"></button>
             </div>
           </main>
         </div>`;

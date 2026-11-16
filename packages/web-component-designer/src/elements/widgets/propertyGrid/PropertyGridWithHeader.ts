@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { BaseCustomWebComponentLazyAppend, css, Disposable, html } from '@node-projects/base-custom-webcomponent';
 import { PropertyGrid } from './PropertyGrid.js';
@@ -122,15 +123,15 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     `;
 
   static override readonly template = html`
-  <div class="inspector-heading">Properties</div>
+  <div class="inspector-heading" data-wcd-i18n-text="Properties">Properties</div>
   <div class="root">
-    <span style="grid-column: span 3;" class="desc">Type:</span><input type="text" readonly id="type">
-    <button id="config" style="display: none; grid-column: 5; grid-row: span 3; height: calc(100% - 10px); margin-left: 10px;">config</button>
-    <div title="id" id="idRect" style="grid-column: 1; width: 7px; height: 7px; border: 1px solid white;"></div>
-    <span id="idSpan" style="grid-column: span 2;" class="desc">Id:</span><input type="text" id="id">
-    <div title="innerHTML" id="innerRect" style="grid-column: 1; width: 7px; height: 7px; border: 1px solid white;"></div>
-    <div title="textContent" id="contentRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
-    <span id="contentSpan" class="desc">Content:</span><input type="text" id="content">
+    <span style="grid-column: span 3;" class="desc" data-wcd-i18n-text="Type:">Type:</span><input type="text" readonly id="type">
+    <button id="config" style="display: none; grid-column: 5; grid-row: span 3; height: calc(100% - 10px); margin-left: 10px;" data-wcd-i18n-text="config">config</button>
+    <div title="id" data-wcd-i18n-title="id" id="idRect" style="grid-column: 1; width: 7px; height: 7px; border: 1px solid white;"></div>
+    <span id="idSpan" style="grid-column: span 2;" class="desc" data-wcd-i18n-text="Id:">Id:</span><input type="text" id="id">
+    <div title="innerHTML" data-wcd-i18n-title="innerHTML" id="innerRect" style="grid-column: 1; width: 7px; height: 7px; border: 1px solid white;"></div>
+    <div title="textContent" data-wcd-i18n-title="textContent" id="contentRect" style="width: 7px; height: 7px; border: 1px solid white;"></div>
+    <span id="contentSpan" class="desc" data-wcd-i18n-text="Content:">Content:</span><input type="text" id="content">
   </div>
   <node-projects-web-component-designer-property-grid id="pg"></node-projects-web-component-designer-property-grid>`
 
@@ -218,7 +219,17 @@ export class PropertyGridWithHeader extends BaseCustomWebComponentLazyAppend {
     }
   }
 
+  private _uiTranslation: { dispose(): void };
+  connectedCallback() {
+    this._uiTranslation?.dispose();
+    const container = this.propertyGrid?.serviceContainer;
+    if (container) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, container);
+  }
+  disconnectedCallback() { this._uiTranslation?.dispose(); }
+
   public set serviceContainer(value: ServiceContainer) {
+    this._uiTranslation?.dispose();
+    if (value) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, value);
     this.propertyGrid.serviceContainer = value;
   }
 

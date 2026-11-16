@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { EditingDocument } from '../../EditingDocument.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
@@ -212,25 +213,25 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
       <node-projects-plain-scrollbar id="s-vert" value="0.5" orientation="vertical" class="right-scroll">
       </node-projects-plain-scrollbar>
       <div class="bottom-right"></div>
-      <div id="lowertoolbar" role="group" aria-label="Canvas controls">
-        <input id="zoomInput" type="text" value="100%" aria-label="Zoom percentage">
-        <button type="button" title="Zoom out" aria-label="Zoom out" id="zoomDecrease" class="toolbar-control">
+      <div id="lowertoolbar" role="group" aria-label="Canvas controls" data-wcd-i18n-aria-label="Canvas controls">
+        <input id="zoomInput" type="text" value="100%" aria-label="Zoom percentage" data-wcd-i18n-aria-label="Zoom percentage">
+        <button type="button" title="Zoom out" data-wcd-i18n-title="Zoom out" aria-label="Zoom out" data-wcd-i18n-aria-label="Zoom out" id="zoomDecrease" class="toolbar-control">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
         </button>
-        <button type="button" title="Zoom in" aria-label="Zoom in" id="zoomIncrease" class="toolbar-control">
+        <button type="button" title="Zoom in" data-wcd-i18n-title="Zoom in" aria-label="Zoom in" data-wcd-i18n-aria-label="Zoom in" id="zoomIncrease" class="toolbar-control">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
         </button>
-        <button type="button" title="Reset zoom to 100%" aria-label="Reset zoom to 100%" id="zoomReset" class="toolbar-control">
+        <button type="button" title="Reset zoom to 100%" data-wcd-i18n-title="Reset zoom to 100%" aria-label="Reset zoom to 100%" data-wcd-i18n-aria-label="Reset zoom to 100%" id="zoomReset" class="toolbar-control">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l2-2v10M15 9l2-2v10"/><path d="M11 10h.01M11 14h.01" stroke-width="2.5"/></svg>
         </button>
-        <button type="button" title="Zoom to fit" aria-label="Zoom to fit" id="zoomFit" class="toolbar-control">
+        <button type="button" title="Zoom to fit" data-wcd-i18n-title="Zoom to fit" aria-label="Zoom to fit" data-wcd-i18n-aria-label="Zoom to fit" id="zoomFit" class="toolbar-control">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
         </button>
         <span class="toolbar-separator" aria-hidden="true"></span>
-        <button type="button" title="Snap to grid (right-click to set grid size)" aria-label="Snap to grid" aria-pressed="false" id="alignGrid" class="toolbar-control">
+        <button type="button" title="Snap to grid (right-click to set grid size)" data-wcd-i18n-title="Snap to grid (right-click to set grid size)" aria-label="Snap to grid" data-wcd-i18n-aria-label="Snap to grid" aria-pressed="false" id="alignGrid" class="toolbar-control">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18m6-18v18M3 9h18M3 15h18"/></svg>
         </button>
-        <button type="button" title="Snap to elements" aria-label="Snap to elements" aria-pressed="false" id="alignSnap" class="toolbar-control">
+        <button type="button" title="Snap to elements" data-wcd-i18n-title="Snap to elements" aria-label="Snap to elements" data-wcd-i18n-aria-label="Snap to elements" aria-pressed="false" id="alignSnap" class="toolbar-control">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4v9a3 3 0 0 0 6 0V4h4v9a7 7 0 0 1-14 0V4Z"/><path d="M5 8h4m6 0h4"/></svg>
         </button>
       </div>
@@ -303,7 +304,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     updateSnapButton(alignGrid, this._designerCanvas.alignOnGrid);
     alignGrid.oncontextmenu = e => {
       e.preventDefault();
-      let res = prompt("raster size", this.designerCanvas.gridSize.toString());
+      let res = prompt(this.serviceContainer.translationService.translate('raster size'), this.designerCanvas.gridSize.toString());
       if (res) {
         let r = parseInt(res);
         if (r > 0)
@@ -557,6 +558,7 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
   }
 
   detachDocument(): EditingDocument {
+    this._uiTranslation?.dispose(); this._overlayTranslation?.dispose();
     this._stopWheelAnimation();
     this._stopZoomRepeat();
     this._toolbar.dispose();
@@ -591,7 +593,13 @@ export class DesignerView extends BaseCustomWebComponentConstructorAppend implem
     this.initializeToolbar();
   }
 
+  private _uiTranslation: { dispose(): void };
+  private _overlayTranslation: { dispose(): void };
+
   private initializeToolbar() {
+    this._uiTranslation?.dispose(); this._overlayTranslation?.dispose();
+    this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, this.serviceContainer);
+    this._overlayTranslation = bindDesignerUiTranslation(this.designerCanvas.overlayLayer.shadowRoot, this.serviceContainer);
     const serviceContainer = this.serviceContainer;
     this.instanceServiceContainer.detachView = () => this.detachDocument();
     for (const button of this._configButtons) {

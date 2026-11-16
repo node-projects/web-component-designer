@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation, setDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { EditingDocument } from '../../EditingDocument.js';
 import { EventNames } from '../../../enums/EventNames.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
@@ -349,7 +350,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
           <input id="node-projects-designer-search-input">
           <button id="node-projects-designer-search-start">&darr;</button>
         </div>
-        <span id="node-projects-designer-search-result">0 selected</span>
+        <span id="node-projects-designer-search-result" >0 selected</span>
         <button id="node-projects-designer-search-close"></button>
       </div>
     </div>
@@ -564,7 +565,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     switch (command.type) {
       case CommandType.screenshot: {
         if (!Screenshot.screenshotsEnabled) {
-          alert("you need to select current tab in next browser dialog, or screenshots will not work correctly");
+          alert(this.serviceContainer.translationService.translate('you need to select current tab in next browser dialog, or screenshots will not work correctly'));
         }
         let items = this.instanceServiceContainer.selectionService.selectedElements;
         if (!items?.length) {
@@ -599,7 +600,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         break;
       case CommandType.holdUndo:
         let undoEntries = this.instanceServiceContainer.undoService.getUndoEntryNames(20);
-        let undoMnu: IContextMenuItem[] = Array.from(undoEntries).map((x, idx) => ({ title: 'undo: ' + x, action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.undo() } }));
+        let undoMnu: IContextMenuItem[] = Array.from(undoEntries).map((x, idx) => ({ title: this.serviceContainer.translationService.translate('undo: {action}', { action: x }), action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.undo() } }));
         if (undoMnu.length > 0)
           ContextMenu.show(undoMnu, <MouseEvent>command.event, { mode: 'undo' });
         break;
@@ -608,7 +609,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         break;
       case CommandType.holdRedo:
         let redoEntries = this.instanceServiceContainer.undoService.getRedoEntryNames(20);
-        let redoMnu: IContextMenuItem[] = Array.from(redoEntries).map((x, idx) => ({ title: 'redo: ' + x, action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.redo() } }));
+        let redoMnu: IContextMenuItem[] = Array.from(redoEntries).map((x, idx) => ({ title: this.serviceContainer.translationService.translate('redo: {action}', { action: x }), action: () => { for (let i = 0; i <= idx; i++) this.instanceServiceContainer.undoService.redo() } }));
         if (redoMnu.length > 0)
           ContextMenu.show(redoMnu, <MouseEvent>command.event, { mode: 'undo' });
         break;
@@ -886,6 +887,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
   }
 
   dispose() {
+    this._searchTranslation?.dispose();
     this.detachDocument();
     this._eventController?.abort();
     this._firstConnect = false;
@@ -1126,7 +1128,7 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     const element = captured?.element ?? this.getElementAtPoint({ x: event.clientX, y: event.clientY });
     if (!this.readOnly && element instanceof SVGPathElement) {
       const hit = captured?.hit ?? findSvgPathPointInsertion(element, { x: event.clientX, y: event.clientY });
-      if (hit) mnuItems.push({ title: 'Add point here', action: () => {
+      if (hit) mnuItems.push({ title: this.serviceContainer.translationService.translate('Add point here'), action: () => {
         const item = DesignItem.GetOrCreateDesignItem(element, element, this.serviceContainer, this.instanceServiceContainer);
         beginSvgPointEditing(this, item);
         this._insertSvgPathPoint(item, hit);
@@ -1179,26 +1181,32 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     this.clickOverlay.focus();
   }
 
+  private _searchTranslation: { dispose(): void };
   private _searchShowOverlay() {
     if (this.serviceContainer.searchService) {
       let divElement = this._getDomElement('node-projects-designer-search-container') as HTMLDivElement;
+      this._searchTranslation?.dispose();
+      this._searchTranslation = bindDesignerUiTranslation(divElement, this.serviceContainer);
+      const status = this._getDomElement('node-projects-designer-search-result');
+      if (!status.hasAttribute('data-wcd-i18n-params')) setDesignerUiTranslation(status, '{count} selected', 'text', { count: '0' });
       divElement.style.display = '';
       this._getDomElement<HTMLInputElement>('node-projects-designer-search-input').focus();
     }
   }
   private _searchHideOverlay() {
+    this._searchTranslation?.dispose();
     let divElement = this._getDomElement('node-projects-designer-search-container') as HTMLDivElement;
     divElement.style.display = 'none';
   }
 
   private async _searchRun() {
     let input = this._getDomElement<HTMLInputElement>('node-projects-designer-search-input');
-    this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = "0 selected";
+    setDesignerUiTranslation(this._getDomElement('node-projects-designer-search-result'), '{count} selected', 'text', { count: '0' });
     if (input.value != "") {
       const result = await this.serviceContainer.searchService.search(this, input.value);
       if (result?.length > 0) {
         this.instanceServiceContainer.selectionService.setSelectedElements(result.map(r => r.designItem));
-        this._getDomElement<HTMLSpanElement>('node-projects-designer-search-result').innerHTML = result.length.toString() + " selected";
+        setDesignerUiTranslation(this._getDomElement('node-projects-designer-search-result'), '{count} selected', 'text', { count: String(result.length) });
       }
     }
   }

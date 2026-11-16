@@ -11,20 +11,20 @@ export const basicStackedToolbarExtensionOverlayOptionName = 'basicStackedToolba
 export class BasicStackedToolbarExtension extends AbstractExtension {
 
   protected static basicTemplate = htmlAsString`
-      <select title="position" id="position" style="pointer-events: auto; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
-        <option>static</option>
-        <option>relative</option>
-        <option>absolute</option>
-        <option>fixed</option>
+      <select title="position" data-wcd-i18n-title="position" id="position" style="pointer-events: auto; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
+        <option data-wcd-i18n-text="static" value="static">static</option>
+        <option data-wcd-i18n-text="relative" value="relative">relative</option>
+        <option data-wcd-i18n-text="absolute" value="absolute">absolute</option>
+        <option data-wcd-i18n-text="fixed" value="fixed">fixed</option>
       </select>
       <node-projects-image-button-list-selector id="inline" no-value-in-header property="inline">
-        <img data-value="block" title="block" src="${assetsPath}images/display/block.svg">
-        <img data-value="inline" title="inline" src="${assetsPath}images/display/inline.svg">
+        <img data-value="block" title="block" data-wcd-i18n-title="block" src="${assetsPath}images/display/block.svg">
+        <img data-value="inline" title="inline" data-wcd-i18n-title="inline" src="${assetsPath}images/display/inline.svg">
       </node-projects-image-button-list-selector>
-      <select title="display" id="displayType" style="pointer-events: auto; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
-        <option>block</option>
-        <option>flex</option>
-        <option>grid</option>
+      <select title="display" data-wcd-i18n-title="display" id="displayType" style="pointer-events: auto; height: 24px; width: 80px; padding: 0; font-weight: 900; text-transform: uppercase; margin-left: 5px; margin-right: 10px;">
+        <option data-wcd-i18n-text="block" value="block">block</option>
+        <option data-wcd-i18n-text="flex" value="flex">flex</option>
+        <option data-wcd-i18n-text="grid" value="grid">grid</option>
       </select>
   `;
 

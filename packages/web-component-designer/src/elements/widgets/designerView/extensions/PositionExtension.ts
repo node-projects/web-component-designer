@@ -1,3 +1,4 @@
+import { setDesignerUiTranslation } from '../../../services/translationService/DesignerUiTranslation.js';
 import { IDesignItem } from '../../../item/IDesignItem.js';
 import { getElementSize } from '../../../helper/getBoxQuads.js';
 import { IDesignerCanvas } from '../IDesignerCanvas.js';
@@ -107,9 +108,10 @@ export class PositionExtension extends AbstractExtension {
     lock.setAttribute('tabindex', editable ? '0' : '-1');
     lock.setAttribute('aria-disabled', '' + !editable);
     lock.setAttribute('aria-pressed', '' + anchored);
-    const label = `${sides[index]}: ${anchored ? 'anchored' : 'not anchored'}${editable ? `. Anchor to ${target}` : ''}`;
-    lock.setAttribute('aria-label', label);
-    lock.querySelector('title').textContent = label;
+    const key = editable ? anchored ? '{side}: anchored. Anchor to {target}' : '{side}: not anchored. Anchor to {target}' : anchored ? '{side}: anchored' : '{side}: not anchored';
+    const params = { side: sides[index], target };
+    setDesignerUiTranslation(lock, key, 'aria-label', params);
+    setDesignerUiTranslation(lock.querySelector('title'), key, 'text', params);
     lock.querySelector('path').setAttribute('d', (anchored ? 'M-3 -1 V-4 A3 3 0 0 1 3 -4 V-1' : 'M1 -1 V-5 A3 3 0 0 1 7 -5 V-3') + ' M-5 -1 H5 V6 H-5 Z M0 1 V4');
   }
 

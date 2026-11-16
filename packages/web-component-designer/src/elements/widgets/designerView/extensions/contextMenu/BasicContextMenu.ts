@@ -18,6 +18,6 @@ export class BasicContextMenu implements IContextMenuExtension {
     }
 
     public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator): IContextMenuItem[] {
-        return [{ ...this._item, action: (e) => this._item.action?.(e, designerCanvas, designItem, initiator)}];
+        return [{ ...this._item, title: this._item.title == null ? this._item.title : designerCanvas.serviceContainer.translationService.translate(this._item.title), action: (e) => this._item.action?.(e, designerCanvas, designItem, initiator)}];
     }
 }

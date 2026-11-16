@@ -16,10 +16,10 @@ export class ZMoveContextMenu implements IContextMenuExtension {
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
-      { title: 'to front', icon: `<img style="rotate: 90deg" src="${assetsPath + 'icons/moveFirst.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveToFront }); } },
-      { title: 'move forward', icon: `<img style="rotate: 90deg" src="${assetsPath + 'icons/moveLeft.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveForward }); } },
-      { title: 'move backward', icon: `<img style="rotate: 270deg" src="${assetsPath + 'icons/moveLeft.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveBackward }); } },
-      { title: 'to back', icon: `<img style="rotate: 270deg" src="${assetsPath + 'icons/moveFirst.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveToBack }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('to front'), icon: `<img style="rotate: 90deg" src="${assetsPath + 'icons/moveFirst.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveToFront }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('move forward'), icon: `<img style="rotate: 90deg" src="${assetsPath + 'icons/moveLeft.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveForward }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('move backward'), icon: `<img style="rotate: 270deg" src="${assetsPath + 'icons/moveLeft.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveBackward }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('to back'), icon: `<img style="rotate: 270deg" src="${assetsPath + 'icons/moveFirst.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.moveToBack }); } },
     ]
   }
 }

@@ -6,11 +6,11 @@ export class PointerToolPopup extends AbstractBaseToolPopup {
 
   static override template = html`
         <div class="container">
-          <header><h2 id="title">Pointer &amp; Pan</h2></header>
+          <header><h2 id="title" data-wcd-i18n-text="Pointer &amp; Pan">Pointer &amp; Pan</h2></header>
           <main id="content-area">
             <div class="tools">
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="Pointer" title="Pointer" style="--tool-icon: url('${assetsPath}images/tools/PointerTool.svg');"></button>
-              <button type="button" class="tool" data-command="setTool" data-command-parameter="Pan" title="Pan" style="--tool-icon: url('${assetsPath}images/tools/PanTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="Pointer" title="Pointer" data-wcd-i18n-title="Pointer" style="--tool-icon: url('${assetsPath}images/tools/PointerTool.svg');"></button>
+              <button type="button" class="tool" data-command="setTool" data-command-parameter="Pan" title="Pan" data-wcd-i18n-title="Pan" style="--tool-icon: url('${assetsPath}images/tools/PanTool.svg');"></button>
             </div>
           </main>
         </div>`;

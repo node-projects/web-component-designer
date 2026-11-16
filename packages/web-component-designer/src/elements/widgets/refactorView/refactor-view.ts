@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { BaseCustomWebComponentConstructorAppend, css, html, Disposable } from '@node-projects/base-custom-webcomponent';
 import { InstanceServiceContainer } from '../../services/InstanceServiceContainer.js';
 import { IDesignItem } from '../../item/IDesignItem.js';
@@ -9,11 +10,11 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
   static override readonly template = html`
     <div id="root">
       <div class="search">
-        <span>search</span>
+        <span data-wcd-i18n-text="search">search</span>
         <input style="flex-grow: 1; min-width: 0" value="{{this.searchText}}">
-        <span>replace</span>
+        <span data-wcd-i18n-text="replace">replace</span>
         <input style="flex-grow: 1; min-width: 0"value="{{this.replaceText}}">
-        <button @click="[[this.replace()]]" style="grid-column: 2;">replace</button>
+        <button @click="[[this.replace()]]" style="grid-column: 2;" data-wcd-i18n-text="replace">replace</button>
       </div>
       <hr>
       <template repeat:item="[[this.refactorings]]">
@@ -92,7 +93,15 @@ export class RefactorView extends BaseCustomWebComponentConstructorAppend {
     this._bindingsParse();
   }
 
+  private _uiTranslation: { dispose(): void };
+  connectedCallback() {
+    this._uiTranslation?.dispose();
+    if (this._instanceServiceContainer) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, this._instanceServiceContainer.rootDesignItem.serviceContainer);
+  }
+  disconnectedCallback() { this._uiTranslation?.dispose(); }
   public set instanceServiceContainer(value: InstanceServiceContainer) {
+    this._uiTranslation?.dispose();
+    if (value) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, value.rootDesignItem.serviceContainer);
     this._instanceServiceContainer = value;
     this._selectionChangedHandler?.dispose()
     this._selectionChangedHandler = this._instanceServiceContainer.selectionService.onSelectionChanged.on(e => {

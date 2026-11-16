@@ -474,122 +474,122 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
 
         <div class="editors-row">
           <div class="section-column">
-            <div class="section-header">Corners</div>
+            <div class="section-header" data-wcd-i18n-text="Corners">Corners</div>
             <div class="uniform-row">
               <label><input type="checkbox" id="bre-uniform"> Separate corners</label>
             </div>
 
             <div id="bre-corners-uniform" class="corner-section">
               <div class="corner-row">
-                <label>X</label>
+                <label data-wcd-i18n-text="X">X</label>
                 <input type="range" id="bre-uniform-x" min="0" max="100" step="1">
                 <span class="val-label" id="bre-uniform-x-val">0%</span>
               </div>
               <div class="corner-row">
-                <label>Y</label>
+                <label data-wcd-i18n-text="Y">Y</label>
                 <input type="range" id="bre-uniform-y" min="0" max="100" step="1">
                 <span class="val-label" id="bre-uniform-y-val">0%</span>
               </div>
               <select id="bre-uniform-shape">
-                <option value="round">Round</option>
-                <option value="bevel">Bevel</option>
-                <option value="scoop">Scoop</option>
-                <option value="inset">Inset</option>
-                <option value="notch">Notch</option>
+                <option value="round" data-wcd-i18n-text="Round">Round</option>
+                <option value="bevel" data-wcd-i18n-text="Bevel">Bevel</option>
+                <option value="scoop" data-wcd-i18n-text="Scoop">Scoop</option>
+                <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                <option value="notch" data-wcd-i18n-text="Notch">Notch</option>
               </select>
             </div>
 
             <div id="bre-corners-perside" class="corner-grid separate-grid" style="display: none;">
               <div class="corner-section">
-                <div class="corner-header">Top-left</div>
+                <div class="corner-header" data-wcd-i18n-text="Top-left">Top-left</div>
                 <div class="corner-row">
-                  <label>X</label>
+                  <label data-wcd-i18n-text="X">X</label>
                   <input type="range" id="bre-tl-x" min="0" max="100" step="1">
                   <span class="val-label" id="bre-tl-x-val">0%</span>
                 </div>
                 <div class="corner-row">
-                  <label>Y</label>
+                  <label data-wcd-i18n-text="Y">Y</label>
                   <input type="range" id="bre-tl-y" min="0" max="100" step="1">
                   <span class="val-label" id="bre-tl-y-val">0%</span>
                 </div>
                 <select id="bre-tl-shape">
-                  <option value="round">Round</option>
-                  <option value="bevel">Bevel</option>
-                  <option value="scoop">Scoop</option>
-                  <option value="inset">Inset</option>
-                  <option value="notch">Notch</option>
+                  <option value="round" data-wcd-i18n-text="Round">Round</option>
+                  <option value="bevel" data-wcd-i18n-text="Bevel">Bevel</option>
+                  <option value="scoop" data-wcd-i18n-text="Scoop">Scoop</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="notch" data-wcd-i18n-text="Notch">Notch</option>
                 </select>
               </div>
 
               <div class="corner-section">
-                <div class="corner-header">Top-right</div>
+                <div class="corner-header" data-wcd-i18n-text="Top-right">Top-right</div>
                 <div class="corner-row">
-                  <label>X</label>
+                  <label data-wcd-i18n-text="X">X</label>
                   <input type="range" id="bre-tr-x" min="0" max="100" step="1">
                   <span class="val-label" id="bre-tr-x-val">0%</span>
                 </div>
                 <div class="corner-row">
-                  <label>Y</label>
+                  <label data-wcd-i18n-text="Y">Y</label>
                   <input type="range" id="bre-tr-y" min="0" max="100" step="1">
                   <span class="val-label" id="bre-tr-y-val">0%</span>
                 </div>
                 <select id="bre-tr-shape">
-                  <option value="round">Round</option>
-                  <option value="bevel">Bevel</option>
-                  <option value="scoop">Scoop</option>
-                  <option value="inset">Inset</option>
-                  <option value="notch">Notch</option>
+                  <option value="round" data-wcd-i18n-text="Round">Round</option>
+                  <option value="bevel" data-wcd-i18n-text="Bevel">Bevel</option>
+                  <option value="scoop" data-wcd-i18n-text="Scoop">Scoop</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="notch" data-wcd-i18n-text="Notch">Notch</option>
                 </select>
               </div>
 
               <div class="corner-section">
-                <div class="corner-header">Bottom-right</div>
+                <div class="corner-header" data-wcd-i18n-text="Bottom-right">Bottom-right</div>
                 <div class="corner-row">
-                  <label>X</label>
+                  <label data-wcd-i18n-text="X">X</label>
                   <input type="range" id="bre-br-x" min="0" max="100" step="1">
                   <span class="val-label" id="bre-br-x-val">0%</span>
                 </div>
                 <div class="corner-row">
-                  <label>Y</label>
+                  <label data-wcd-i18n-text="Y">Y</label>
                   <input type="range" id="bre-br-y" min="0" max="100" step="1">
                   <span class="val-label" id="bre-br-y-val">0%</span>
                 </div>
                 <select id="bre-br-shape">
-                  <option value="round">Round</option>
-                  <option value="bevel">Bevel</option>
-                  <option value="scoop">Scoop</option>
-                  <option value="inset">Inset</option>
-                  <option value="notch">Notch</option>
+                  <option value="round" data-wcd-i18n-text="Round">Round</option>
+                  <option value="bevel" data-wcd-i18n-text="Bevel">Bevel</option>
+                  <option value="scoop" data-wcd-i18n-text="Scoop">Scoop</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="notch" data-wcd-i18n-text="Notch">Notch</option>
                 </select>
               </div>
 
               <div class="corner-section">
-                <div class="corner-header">Bottom-left</div>
+                <div class="corner-header" data-wcd-i18n-text="Bottom-left">Bottom-left</div>
                 <div class="corner-row">
-                  <label>X</label>
+                  <label data-wcd-i18n-text="X">X</label>
                   <input type="range" id="bre-bl-x" min="0" max="100" step="1">
                   <span class="val-label" id="bre-bl-x-val">0%</span>
                 </div>
                 <div class="corner-row">
-                  <label>Y</label>
+                  <label data-wcd-i18n-text="Y">Y</label>
                   <input type="range" id="bre-bl-y" min="0" max="100" step="1">
                   <span class="val-label" id="bre-bl-y-val">0%</span>
                 </div>
                 <select id="bre-bl-shape">
-                  <option value="round">Round</option>
-                  <option value="bevel">Bevel</option>
-                  <option value="scoop">Scoop</option>
-                  <option value="inset">Inset</option>
-                  <option value="notch">Notch</option>
+                  <option value="round" data-wcd-i18n-text="Round">Round</option>
+                  <option value="bevel" data-wcd-i18n-text="Bevel">Bevel</option>
+                  <option value="scoop" data-wcd-i18n-text="Scoop">Scoop</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="notch" data-wcd-i18n-text="Notch">Notch</option>
                 </select>
               </div>
             </div>
           </div>
 
           <div class="section-column">
-            <div class="section-header">Border</div>
+            <div class="section-header" data-wcd-i18n-text="Border">Border</div>
             <div class="corner-row">
-              <label>Width</label>
+              <label data-wcd-i18n-text="Width">Width</label>
               <input type="range" id="bre-width" min="0" max="50" step="1">
               <span class="val-label" id="bre-width-val">0px</span>
             </div>
@@ -599,25 +599,25 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
 
             <div id="bre-border-uniform-editor" class="corner-section">
               <div class="corner-row">
-                <label>Style</label>
+                <label data-wcd-i18n-text="Style">Style</label>
                 <select id="bre-style">
-                  <option value="solid">Solid</option>
-                  <option value="dashed">Dashed</option>
-                  <option value="dotted">Dotted</option>
-                  <option value="double">Double</option>
-                  <option value="groove">Groove</option>
-                  <option value="ridge">Ridge</option>
-                  <option value="inset">Inset</option>
-                  <option value="outset">Outset</option>
-                  <option value="none">None</option>
+                  <option value="solid" data-wcd-i18n-text="Solid">Solid</option>
+                  <option value="dashed" data-wcd-i18n-text="Dashed">Dashed</option>
+                  <option value="dotted" data-wcd-i18n-text="Dotted">Dotted</option>
+                  <option value="double" data-wcd-i18n-text="Double">Double</option>
+                  <option value="groove" data-wcd-i18n-text="Groove">Groove</option>
+                  <option value="ridge" data-wcd-i18n-text="Ridge">Ridge</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="outset" data-wcd-i18n-text="Outset">Outset</option>
+                  <option value="none" data-wcd-i18n-text="None">None</option>
                 </select>
               </div>
               <div class="corner-row">
-                <label>Color</label>
+                <label data-wcd-i18n-text="Color">Color</label>
                 <input type="color" id="bre-color" value="#000000">
               </div>
               <div class="corner-row">
-                <label>Opacity</label>
+                <label data-wcd-i18n-text="Opacity">Opacity</label>
                 <input type="range" id="bre-opacity" min="0" max="100" step="1">
                 <span class="val-label" id="bre-opacity-val">100%</span>
               </div>
@@ -625,104 +625,104 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
 
             <div id="bre-border-perside" class="corner-grid separate-grid" style="display: none;">
               <div class="corner-section">
-                <div class="corner-header">Top</div>
+                <div class="corner-header" data-wcd-i18n-text="Top">Top</div>
                 <select id="bre-top-style">
-                  <option value="solid">Solid</option>
-                  <option value="dashed">Dashed</option>
-                  <option value="dotted">Dotted</option>
-                  <option value="double">Double</option>
-                  <option value="groove">Groove</option>
-                  <option value="ridge">Ridge</option>
-                  <option value="inset">Inset</option>
-                  <option value="outset">Outset</option>
-                  <option value="none">None</option>
+                  <option value="solid" data-wcd-i18n-text="Solid">Solid</option>
+                  <option value="dashed" data-wcd-i18n-text="Dashed">Dashed</option>
+                  <option value="dotted" data-wcd-i18n-text="Dotted">Dotted</option>
+                  <option value="double" data-wcd-i18n-text="Double">Double</option>
+                  <option value="groove" data-wcd-i18n-text="Groove">Groove</option>
+                  <option value="ridge" data-wcd-i18n-text="Ridge">Ridge</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="outset" data-wcd-i18n-text="Outset">Outset</option>
+                  <option value="none" data-wcd-i18n-text="None">None</option>
                 </select>
                 <div class="corner-row">
-                  <label>Width</label>
+                  <label data-wcd-i18n-text="Width">Width</label>
                   <input type="range" id="bre-top-width" min="0" max="50" step="1">
                   <span class="val-label" id="bre-top-width-val">0px</span>
                 </div>
                 <input type="color" id="bre-top-color" value="#000000" style="width: 100%; height: 20px; margin: 2px 0;">
                 <div class="corner-row" style="grid-template-columns: 1fr;">
-                  <label style="grid-column: 1;">Opacity</label>
+                  <label style="grid-column: 1;" data-wcd-i18n-text="Opacity">Opacity</label>
                   <input type="range" id="bre-top-opacity" min="0" max="100" step="1">
                   <span class="val-label" id="bre-top-opacity-val">100%</span>
                 </div>
               </div>
 
               <div class="corner-section">
-                <div class="corner-header">Right</div>
+                <div class="corner-header" data-wcd-i18n-text="Right">Right</div>
                 <select id="bre-right-style">
-                  <option value="solid">Solid</option>
-                  <option value="dashed">Dashed</option>
-                  <option value="dotted">Dotted</option>
-                  <option value="double">Double</option>
-                  <option value="groove">Groove</option>
-                  <option value="ridge">Ridge</option>
-                  <option value="inset">Inset</option>
-                  <option value="outset">Outset</option>
-                  <option value="none">None</option>
+                  <option value="solid" data-wcd-i18n-text="Solid">Solid</option>
+                  <option value="dashed" data-wcd-i18n-text="Dashed">Dashed</option>
+                  <option value="dotted" data-wcd-i18n-text="Dotted">Dotted</option>
+                  <option value="double" data-wcd-i18n-text="Double">Double</option>
+                  <option value="groove" data-wcd-i18n-text="Groove">Groove</option>
+                  <option value="ridge" data-wcd-i18n-text="Ridge">Ridge</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="outset" data-wcd-i18n-text="Outset">Outset</option>
+                  <option value="none" data-wcd-i18n-text="None">None</option>
                 </select>
                 <div class="corner-row">
-                  <label>Width</label>
+                  <label data-wcd-i18n-text="Width">Width</label>
                   <input type="range" id="bre-right-width" min="0" max="50" step="1">
                   <span class="val-label" id="bre-right-width-val">0px</span>
                 </div>
                 <input type="color" id="bre-right-color" value="#000000" style="width: 100%; height: 20px; margin: 2px 0;">
                 <div class="corner-row" style="grid-template-columns: 1fr;">
-                  <label style="grid-column: 1;">Opacity</label>
+                  <label style="grid-column: 1;" data-wcd-i18n-text="Opacity">Opacity</label>
                   <input type="range" id="bre-right-opacity" min="0" max="100" step="1">
                   <span class="val-label" id="bre-right-opacity-val">100%</span>
                 </div>
               </div>
 
               <div class="corner-section">
-                <div class="corner-header">Bottom</div>
+                <div class="corner-header" data-wcd-i18n-text="Bottom">Bottom</div>
                 <select id="bre-bottom-style">
-                  <option value="solid">Solid</option>
-                  <option value="dashed">Dashed</option>
-                  <option value="dotted">Dotted</option>
-                  <option value="double">Double</option>
-                  <option value="groove">Groove</option>
-                  <option value="ridge">Ridge</option>
-                  <option value="inset">Inset</option>
-                  <option value="outset">Outset</option>
-                  <option value="none">None</option>
+                  <option value="solid" data-wcd-i18n-text="Solid">Solid</option>
+                  <option value="dashed" data-wcd-i18n-text="Dashed">Dashed</option>
+                  <option value="dotted" data-wcd-i18n-text="Dotted">Dotted</option>
+                  <option value="double" data-wcd-i18n-text="Double">Double</option>
+                  <option value="groove" data-wcd-i18n-text="Groove">Groove</option>
+                  <option value="ridge" data-wcd-i18n-text="Ridge">Ridge</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="outset" data-wcd-i18n-text="Outset">Outset</option>
+                  <option value="none" data-wcd-i18n-text="None">None</option>
                 </select>
                 <div class="corner-row">
-                  <label>Width</label>
+                  <label data-wcd-i18n-text="Width">Width</label>
                   <input type="range" id="bre-bottom-width" min="0" max="50" step="1">
                   <span class="val-label" id="bre-bottom-width-val">0px</span>
                 </div>
                 <input type="color" id="bre-bottom-color" value="#000000" style="width: 100%; height: 20px; margin: 2px 0;">
                 <div class="corner-row" style="grid-template-columns: 1fr;">
-                  <label style="grid-column: 1;">Opacity</label>
+                  <label style="grid-column: 1;" data-wcd-i18n-text="Opacity">Opacity</label>
                   <input type="range" id="bre-bottom-opacity" min="0" max="100" step="1">
                   <span class="val-label" id="bre-bottom-opacity-val">100%</span>
                 </div>
               </div>
 
               <div class="corner-section">
-                <div class="corner-header">Left</div>
+                <div class="corner-header" data-wcd-i18n-text="Left">Left</div>
                 <select id="bre-left-style">
-                  <option value="solid">Solid</option>
-                  <option value="dashed">Dashed</option>
-                  <option value="dotted">Dotted</option>
-                  <option value="double">Double</option>
-                  <option value="groove">Groove</option>
-                  <option value="ridge">Ridge</option>
-                  <option value="inset">Inset</option>
-                  <option value="outset">Outset</option>
-                  <option value="none">None</option>
+                  <option value="solid" data-wcd-i18n-text="Solid">Solid</option>
+                  <option value="dashed" data-wcd-i18n-text="Dashed">Dashed</option>
+                  <option value="dotted" data-wcd-i18n-text="Dotted">Dotted</option>
+                  <option value="double" data-wcd-i18n-text="Double">Double</option>
+                  <option value="groove" data-wcd-i18n-text="Groove">Groove</option>
+                  <option value="ridge" data-wcd-i18n-text="Ridge">Ridge</option>
+                  <option value="inset" data-wcd-i18n-text="Inset">Inset</option>
+                  <option value="outset" data-wcd-i18n-text="Outset">Outset</option>
+                  <option value="none" data-wcd-i18n-text="None">None</option>
                 </select>
                 <div class="corner-row">
-                  <label>Width</label>
+                  <label data-wcd-i18n-text="Width">Width</label>
                   <input type="range" id="bre-left-width" min="0" max="50" step="1">
                   <span class="val-label" id="bre-left-width-val">0px</span>
                 </div>
                 <input type="color" id="bre-left-color" value="#000000" style="width: 100%; height: 20px; margin: 2px 0;">
                 <div class="corner-row" style="grid-template-columns: 1fr;">
-                  <label style="grid-column: 1;">Opacity</label>
+                  <label style="grid-column: 1;" data-wcd-i18n-text="Opacity">Opacity</label>
                   <input type="range" id="bre-left-opacity" min="0" max="100" step="1">
                   <span class="val-label" id="bre-left-opacity-val">100%</span>
                 </div>
@@ -736,9 +736,9 @@ export class BorderRadiusEditorWindow extends DraggableToolWindow {
         <textarea class="css-out" id="bre-css-out"></textarea>
 
         <div class="actions">
-          <button class="load-btn" id="bre-load-btn">Load</button>
-          <button id="bre-copy-btn">Copy CSS</button>
-          <button class="apply-btn" id="bre-apply-btn">Apply to selection</button>
+          <button class="load-btn" id="bre-load-btn" data-wcd-i18n-text="Load">Load</button>
+          <button id="bre-copy-btn" data-wcd-i18n-text="Copy CSS">Copy CSS</button>
+          <button class="apply-btn" id="bre-apply-btn" data-wcd-i18n-text="Apply to selection">Apply to selection</button>
         </div>
       </div>`;
   }

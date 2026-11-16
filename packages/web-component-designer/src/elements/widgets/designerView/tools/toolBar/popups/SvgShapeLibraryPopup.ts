@@ -1,3 +1,4 @@
+import { setDesignerUiTranslation } from '../../../../../services/translationService/DesignerUiTranslation.js';
 import { css, html } from '@node-projects/base-custom-webcomponent';
 import { assetsPath } from '../../../../../../Constants.js';
 import type { IDesignerCanvas } from '../../../IDesignerCanvas.js';
@@ -21,12 +22,12 @@ export class SvgShapeLibraryPopup extends AbstractBaseToolPopup {
     #grid svg {width:100%;height:100%;pointer-events:none;fill:currentColor;stroke:currentColor;stroke-width:1}
     small {line-height:1.4}
   `];
-  static override template = html`<div class="container"><header><h2>Shape library</h2></header><main>
-    <input id="search" type="search" placeholder="Search all shapes…" aria-label="Search shapes">
-    <select id="category" aria-label="Shape category"></select>
-    <div id="grid" role="group" aria-label="Predefined shapes"></div>
-    <small id="status" role="status">Loading local shapes…</small>
-    <small id="drawing-help">Choose a shape, then drag on the canvas. Shift preserves its proportions.</small>
+  static override template = html`<div class="container"><header><h2 data-wcd-i18n-text="Shape library">Shape library</h2></header><main>
+    <input id="search" type="search" placeholder="Search all shapes…" data-wcd-i18n-placeholder="Search all shapes…" aria-label="Search shapes" data-wcd-i18n-aria-label="Search shapes">
+    <select id="category" aria-label="Shape category" data-wcd-i18n-aria-label="Shape category"></select>
+    <div id="grid" role="group" aria-label="Predefined shapes" data-wcd-i18n-aria-label="Predefined shapes"></div>
+    <small id="status" role="status" data-wcd-i18n-text="Loading local shapes…">Loading local shapes…</small>
+    <small id="drawing-help" data-wcd-i18n-text="Choose a shape, then drag on the canvas. Shift preserves its proportions.">Choose a shape, then drag on the canvas. Shift preserves its proportions.</small>
   </main></div>`;
   private library: ShapeLibrary;
   private bounds = new Map<string, { x: number, y: number, width: number, height: number }>();
@@ -34,7 +35,7 @@ export class SvgShapeLibraryPopup extends AbstractBaseToolPopup {
   constructor(private canvas: IDesignerCanvas) { super(); }
 
   async ready() {
-    if (this.canvas.serviceContainer.options.svgEditingMode === 'object') this._getDomElement('drawing-help').textContent += ' Resize the selected object using its handles; double-click to edit nodes.';
+    if (this.canvas.serviceContainer.options.svgEditingMode === 'object') setDesignerUiTranslation(this._getDomElement('drawing-help'), 'Choose a shape, then drag on the canvas. Shift preserves its proportions. Resize the selected object using its handles; double-click to edit nodes.');
     this._getDomElement<HTMLInputElement>('search').oninput = () => this.renderShapes();
     this._getDomElement<HTMLSelectElement>('category').onchange = () => this.renderShapes();
     try {
@@ -45,10 +46,11 @@ export class SvgShapeLibraryPopup extends AbstractBaseToolPopup {
       this.library = await libraryPromise;
       if (!this.isConnected) return;
       const select = this._getDomElement<HTMLSelectElement>('category');
-      select.replaceChildren(new Option('All categories', ''), ...this.library.categories.map(category => new Option(`${category.name} (${category.shapes.length})`, category.name)));
+      const all = new Option('All categories', ''); all.setAttribute('data-wcd-i18n-text', 'All categories');
+      select.replaceChildren(all, ...this.library.categories.map(category => new Option(`${category.name} (${category.shapes.length})`, category.name)));
       select.value = 'Basic';
       this.renderShapes();
-    } catch (error) { this._getDomElement('status').textContent = error.message; }
+    } catch (error) { setDesignerUiTranslation(this._getDomElement('status'), error.message); }
   }
 
   private renderShapes() {
@@ -63,7 +65,7 @@ export class SvgShapeLibraryPopup extends AbstractBaseToolPopup {
       const button = document.createElement('button');
       button.type = 'button';
       button.title = shape.name;
-      button.setAttribute('aria-label', `Draw ${shape.name}`);
+      setDesignerUiTranslation(button, 'Draw {name}', 'aria-label', { name: shape.name });
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', shape.path);
@@ -91,7 +93,7 @@ export class SvgShapeLibraryPopup extends AbstractBaseToolPopup {
       const margin = Math.max(box.width, box.height) * 0.08;
       preview.svg.setAttribute('viewBox', `${box.x - margin} ${box.y - margin} ${box.width + margin * 2} ${box.height + margin * 2}`);
     }
-    this._getDomElement('status').textContent = `${shapes.length} shapes`;
+    setDesignerUiTranslation(this._getDomElement('status'), '{count} shapes', 'text', { count: String(shapes.length) });
   }
 }
 

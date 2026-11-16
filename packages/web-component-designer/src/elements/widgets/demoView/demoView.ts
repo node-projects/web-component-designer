@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { IDemoView } from './IDemoView.js';
 import { BaseCustomWebComponentLazyAppend, css } from '@node-projects/base-custom-webcomponent';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
@@ -68,17 +69,23 @@ export class DemoView extends BaseCustomWebComponentLazyAppend implements IDemoV
     div.id = "left"
     const span = document.createElement("span");
     span.innerText = "PREVIEW";
+    span.setAttribute('data-wcd-i18n-text', 'PREVIEW');
     div.appendChild(span);
     this.shadowRoot.appendChild(div);
   }
 
+  private _uiTranslation: { dispose(): void };
   dispose(): void {
+    this._uiTranslation?.dispose();
   }
 
   executeCommand: (command: IUiCommand) => void;
   canExecuteCommand: (command: IUiCommand) => boolean;
 
   async display(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer, code: string, style: string) {
+    this._uiTranslation?.dispose();
+    this._loading.setAttribute('data-wcd-i18n-text', '🛀 Hold on, loading...');
+    this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, serviceContainer);
     this._loading.hidden = false;
     await serviceContainer.demoProviderService.provideDemo(this._placeholder, serviceContainer, instanceServiceContainer, code, style);
     this._loading.hidden = true;

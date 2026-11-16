@@ -13,7 +13,7 @@ export class PasteFormatContextMenu implements IContextMenuExtension {
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [{
-      title: 'paste format',
+      title: designerCanvas.serviceContainer.translationService.translate('paste format'),
       children: [
         this._createPasteFormatItem(designerCanvas, 'all'),
         { title: '-' },
@@ -27,7 +27,7 @@ export class PasteFormatContextMenu implements IContextMenuExtension {
 
   private _createPasteFormatItem(designerCanvas: IDesignerCanvas, kind: PasteFormatKind): IContextMenuItem {
     return {
-      title: kind,
+      title: designerCanvas.serviceContainer.translationService.translate(kind),
       action: () => {
         void this._pasteFormat(designerCanvas, kind);
       }

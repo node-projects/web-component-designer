@@ -253,6 +253,9 @@ export * from "./elements/services/InstanceServiceContainer.js";
 export type { IService } from "./elements/services/IService.js";
 export type { IServiceContainer } from "./elements/services/IServiceContainer.js";
 export * from "./elements/services/ServiceContainer.js";
+export type { ITranslationService } from "./elements/services/translationService/ITranslationService.js";
+export * from "./elements/services/translationService/DefaultTranslationService.js";
+export * from "./elements/services/translationService/DesignerUiTranslation.js";
 
 export type { IBindableObjectsBrowser } from "./elements/widgets/bindableObjectsBrowser/IBindableObjectsBrowser.js";
 

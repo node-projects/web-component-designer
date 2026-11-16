@@ -1,3 +1,4 @@
+import { setDesignerUiTranslation } from '../../../../services/translationService/DesignerUiTranslation.js';
 import { ColorInput } from '../../../../controls/ColorEditor.js';
 import { createSvgStrokeStyleControl, type SvgStrokeStyleControl, type SvgStrokeStyle } from '../../../../controls/SvgStrokeStyleControl.js';
 import { mountSvgToolbar } from './SvgToolbarHost.js';
@@ -40,6 +41,7 @@ class SvgEditingToolbarExtension extends AbstractExtension {
     const toolbar = this.toolbar = document.createElement('div');
     toolbar.setAttribute('role', 'toolbar');
     toolbar.setAttribute('aria-label', 'SVG editing');
+    toolbar.setAttribute('data-wcd-i18n-aria-label', 'SVG editing');
     toolbar.setAttribute('data-svg-toolbar', '');
     toolbar.style.cssText = 'position:absolute;top:8px;left:8px;max-width:calc(100% - 16px);box-sizing:border-box;z-index:9;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px;background:var(--wcd-tool-popup-background,#fff);color:var(--wcd-color-foreground,#222);border:1px solid var(--wcd-color-border,#888);font:12px sans-serif;pointer-events:auto';
     toolbar.innerHTML = `<style>
@@ -50,26 +52,26 @@ class SvgEditingToolbarExtension extends AbstractExtension {
       [data-svg-toolbar] .node-controls {display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex-basis:100%}
       [data-svg-toolbar] [hidden] {display:none!important}
     </style>
-    <button data-action="edit">Edit points</button>
-    <label>Fill <span data-color="fill"></span></label>
-    <label>Stroke <span data-color="stroke"></span></label>
-    <label>Width <input type="number" min="0" step="0.5" data-style="stroke-width" aria-label="Stroke width"></label>
-    <label>Dash <span data-stroke="stroke-dasharray"></span></label>
-    <label>Cap <span data-stroke="stroke-linecap"></span></label>
-    <label>Join <span data-stroke="stroke-linejoin"></span></label>
-    <label>Opacity <input type="number" min="0" max="100" step="5" data-style="opacity" aria-label="SVG opacity"></label>
+    <button data-action="edit" data-wcd-i18n-text="Edit points">Edit points</button>
+    <label><span data-wcd-i18n-text="Fill">Fill </span><span data-color="fill"></span></label>
+    <label><span data-wcd-i18n-text="Stroke">Stroke </span><span data-color="stroke"></span></label>
+    <label><span data-wcd-i18n-text="Width">Width </span><input type="number" min="0" step="0.5" data-style="stroke-width" aria-label="Stroke width" data-wcd-i18n-aria-label="Stroke width"></label>
+    <label><span data-wcd-i18n-text="Dash">Dash </span><span data-stroke="stroke-dasharray"></span></label>
+    <label><span data-wcd-i18n-text="Cap">Cap </span><span data-stroke="stroke-linecap"></span></label>
+    <label><span data-wcd-i18n-text="Join">Join </span><span data-stroke="stroke-linejoin"></span></label>
+    <label><span data-wcd-i18n-text="Opacity">Opacity </span><input type="number" min="0" max="100" step="5" data-style="opacity" aria-label="SVG opacity" data-wcd-i18n-aria-label="SVG opacity"></label>
     <div class="node-controls" hidden>
-      <select data-node="index" aria-label="Path node"></select>
-      <label>X <input type="number" step="1" data-node="x" aria-label="Node X"></label>
-      <label>Y <input type="number" step="1" data-node="y" aria-label="Node Y"></label>
-      <select data-node="segment" aria-label="Segment type"><option value="M" disabled>Start point</option><option value="S" disabled>Smooth cubic</option><option value="T" disabled>Smooth quadratic</option><option value="L">Line</option><option value="H">Horizontal</option><option value="V">Vertical</option><option value="Q">Quadratic curve</option><option value="C">Cubic curve</option><option value="A">Arc</option></select>
-      <button data-action="insert">Add node</button><button data-action="delete">Delete node</button><button data-action="close">Close path</button>
-      <span>Drag nodes · Shift: axis lock · Alt: no snapping</span>
+      <select data-node="index" aria-label="Path node" data-wcd-i18n-aria-label="Path node"></select>
+      <label><span data-wcd-i18n-text="X">X </span><input type="number" step="1" data-node="x" aria-label="Node X" data-wcd-i18n-aria-label="Node X"></label>
+      <label><span data-wcd-i18n-text="Y">Y </span><input type="number" step="1" data-node="y" aria-label="Node Y" data-wcd-i18n-aria-label="Node Y"></label>
+      <select data-node="segment" aria-label="Segment type" data-wcd-i18n-aria-label="Segment type"><option value="M" disabled data-wcd-i18n-text="Start point">Start point</option><option value="S" disabled data-wcd-i18n-text="Smooth cubic">Smooth cubic</option><option value="T" disabled data-wcd-i18n-text="Smooth quadratic">Smooth quadratic</option><option value="L" data-wcd-i18n-text="Line">Line</option><option value="H" data-wcd-i18n-text="Horizontal">Horizontal</option><option value="V" data-wcd-i18n-text="Vertical">Vertical</option><option value="Q" data-wcd-i18n-text="Quadratic curve">Quadratic curve</option><option value="C" data-wcd-i18n-text="Cubic curve">Cubic curve</option><option value="A" data-wcd-i18n-text="Arc">Arc</option></select>
+      <button data-action="insert" data-wcd-i18n-text="Add node">Add node</button><button data-action="delete" data-wcd-i18n-text="Delete node">Delete node</button><button data-action="close" data-wcd-i18n-text="Close path">Close path</button>
+      <span data-wcd-i18n-text="Drag nodes · Shift: axis lock · Alt: no snapping">Drag nodes · Shift: axis lock · Alt: no snapping</span>
     </div>`;
     for (const property of ['fill', 'stroke']) {
       const input = new ColorInput();
       input.setAttribute('allow-none', '');
-      input.setAttribute('aria-label', property === 'fill' ? 'Fill color' : 'Stroke color');
+      setDesignerUiTranslation(input, property === 'fill' ? 'Fill color' : 'Stroke color', 'aria-label');
       input.addEventListener('change', () => this.paint(property, input.value));
       toolbar.querySelector(`[data-color="${property}"]`).append(input);
       this.colors.set(property, input);

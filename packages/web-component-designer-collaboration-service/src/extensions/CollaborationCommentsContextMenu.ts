@@ -11,8 +11,11 @@ function createCommentId() {
 }
 
 export class CollaborationCommentsContextMenu implements IContextMenuExtension {
+  constructor(private readonly requireConnection = false) { }
+
   public shouldProvideContextmenu(event: MouseEvent, designerView: IDesignerCanvas, designItem: IDesignItem, initiator: ContextmenuInitiator) {
-    return !!designerView.instanceServiceContainer.collaborationService && !!designItem && !designItem.isRootItem;
+    const service = designerView.instanceServiceContainer.collaborationService;
+    return !!service && (!this.requireConnection || service.state === 'connected') && !!designItem && !designItem.isRootItem;
   }
 
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
@@ -23,12 +26,13 @@ export class CollaborationCommentsContextMenu implements IContextMenuExtension {
 
     const comments = collaborationService!.comments.filter(x => x.targetNodeIndex === targetNodeIndex);
     const localPeerId = collaborationService!.session?.peerId ?? 'local';
+    const translationService = designerCanvas.serviceContainer.getLastService('translationService');
 
     const items: IContextMenuItem[] = [
       {
-        title: 'add comment',
+        title: translationService.translate('add comment'),
         action: () => {
-          const value = globalThis.prompt?.('Add comment', '')?.trim();
+          const value = globalThis.prompt?.(designerCanvas.serviceContainer.getLastService('translationService').translate('Add comment'), '')?.trim();
           if (!value)
             return;
 
@@ -50,7 +54,7 @@ export class CollaborationCommentsContextMenu implements IContextMenuExtension {
     if (comments.length) {
       items.push({ title: '-' });
       items.push({
-        title: `comments (${comments.length})`,
+        title: translationService.translate('comments ({count})', { count: String(comments.length) }),
         children: comments.map(comment => this.createCommentMenuItem(comment, collaborationService!, designItem))
       });
     }
@@ -59,11 +63,12 @@ export class CollaborationCommentsContextMenu implements IContextMenuExtension {
   }
 
   private createCommentMenuItem(comment: ICollaborationComment, collaborationService: ICollaborationService, designItem: IDesignItem): IContextMenuItem {
+    const translationService = designItem.serviceContainer.getLastService('translationService');
     return {
-      title: `${comment.resolved ? 'resolved' : 'open'}: ${truncateText(comment.text, 36)}`,
+      title: `${translationService.translate(comment.resolved ? 'resolved' : 'open')}: ${truncateText(comment.text, 36)}`,
       children: [
         {
-          title: comment.resolved ? 'reopen' : 'resolve',
+          title: translationService.translate(comment.resolved ? 'reopen' : 'resolve'),
           action: () => collaborationService.upsertComment({
             ...comment,
             targetDesignItemId: designItem.id,
@@ -72,7 +77,7 @@ export class CollaborationCommentsContextMenu implements IContextMenuExtension {
           })
         },
         {
-          title: 'remove',
+          title: translationService.translate('remove'),
           action: () => collaborationService.removeComment(comment.id)
         }
       ]

@@ -228,38 +228,38 @@ export class MetricsEditor extends BaseCustomWebComponentConstructorAppend {
 
   public static override readonly template = html`
     <div id="box-model">
-      <span id="position-label" class="label" title="position">position</span>
-      <input data-area="position" data-side="top" title="top" spellcheck="false">
-      <input data-area="position" data-side="right" title="right" spellcheck="false">
-      <input data-area="position" data-side="bottom" title="bottom" spellcheck="false">
-      <input data-area="position" data-side="left" title="left" spellcheck="false">
+      <span id="position-label" class="label" title="position" data-wcd-i18n-title="position" data-wcd-i18n-text="position">position</span>
+      <input data-area="position" data-side="top" title="top" data-wcd-i18n-title="top" spellcheck="false">
+      <input data-area="position" data-side="right" title="right" data-wcd-i18n-title="right" spellcheck="false">
+      <input data-area="position" data-side="bottom" title="bottom" data-wcd-i18n-title="bottom" spellcheck="false">
+      <input data-area="position" data-side="left" title="left" data-wcd-i18n-title="left" spellcheck="false">
 
       <div id="margin" class="ring">
-        <span class="label" title="margin">margin</span>
-        <input data-area="margin" data-side="top" title="margin-top" spellcheck="false">
-        <input data-area="margin" data-side="right" title="margin-right" spellcheck="false">
-        <input data-area="margin" data-side="bottom" title="margin-bottom" spellcheck="false">
-        <input data-area="margin" data-side="left" title="margin-left" spellcheck="false">
+        <span class="label" title="margin" data-wcd-i18n-title="margin" data-wcd-i18n-text="margin">margin</span>
+        <input data-area="margin" data-side="top" title="margin-top" data-wcd-i18n-title="margin-top" spellcheck="false">
+        <input data-area="margin" data-side="right" title="margin-right" data-wcd-i18n-title="margin-right" spellcheck="false">
+        <input data-area="margin" data-side="bottom" title="margin-bottom" data-wcd-i18n-title="margin-bottom" spellcheck="false">
+        <input data-area="margin" data-side="left" title="margin-left" data-wcd-i18n-title="margin-left" spellcheck="false">
 
         <div id="border" class="ring">
-          <span class="label" title="border">border</span>
-          <input data-area="border" data-side="top" title="border-top-width" spellcheck="false">
-          <input data-area="border" data-side="right" title="border-right-width" spellcheck="false">
-          <input data-area="border" data-side="bottom" title="border-bottom-width" spellcheck="false">
-          <input data-area="border" data-side="left" title="border-left-width" spellcheck="false">
+          <span class="label" title="border" data-wcd-i18n-title="border" data-wcd-i18n-text="border">border</span>
+          <input data-area="border" data-side="top" title="border-top-width" data-wcd-i18n-title="border-top-width" spellcheck="false">
+          <input data-area="border" data-side="right" title="border-right-width" data-wcd-i18n-title="border-right-width" spellcheck="false">
+          <input data-area="border" data-side="bottom" title="border-bottom-width" data-wcd-i18n-title="border-bottom-width" spellcheck="false">
+          <input data-area="border" data-side="left" title="border-left-width" data-wcd-i18n-title="border-left-width" spellcheck="false">
 
           <div id="padding" class="ring">
-            <span class="label" title="padding">padding</span>
-            <input data-area="padding" data-side="top" title="padding-top" spellcheck="false">
-            <input data-area="padding" data-side="right" title="padding-right" spellcheck="false">
-            <input data-area="padding" data-side="bottom" title="padding-bottom" spellcheck="false">
-            <input data-area="padding" data-side="left" title="padding-left" spellcheck="false">
+            <span class="label" title="padding" data-wcd-i18n-title="padding" data-wcd-i18n-text="padding">padding</span>
+            <input data-area="padding" data-side="top" title="padding-top" data-wcd-i18n-title="padding-top" spellcheck="false">
+            <input data-area="padding" data-side="right" title="padding-right" data-wcd-i18n-title="padding-right" spellcheck="false">
+            <input data-area="padding" data-side="bottom" title="padding-bottom" data-wcd-i18n-title="padding-bottom" spellcheck="false">
+            <input data-area="padding" data-side="left" title="padding-left" data-wcd-i18n-title="padding-left" spellcheck="false">
 
             <div id="content">
-              <span id="content-label" class="label" title="content">content</span>
-              <input data-area="content" data-side="width" title="width" spellcheck="false">
-              <span id="content-separator">x</span>
-              <input data-area="content" data-side="height" title="height" spellcheck="false">
+              <span id="content-label" class="label" title="content" data-wcd-i18n-title="content" data-wcd-i18n-text="content">content</span>
+              <input data-area="content" data-side="width" title="width" data-wcd-i18n-title="width" spellcheck="false">
+              <span id="content-separator" data-wcd-i18n-text="x">x</span>
+              <input data-area="content" data-side="height" title="height" data-wcd-i18n-title="height" spellcheck="false">
             </div>
           </div>
         </div>

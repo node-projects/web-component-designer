@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation, designerUiServiceContainer, designerTranslation } from '../services/translationService/DesignerUiTranslation.js';
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { w3color } from '../helper/w3color.js';
 
@@ -232,25 +233,25 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
     <div id="editor">
       <div id="plane"><div id="plane-handle"></div></div>
       <div class="slider-row">
-        <span>Hue</span>
+        Hue
         <input id="hue" type="range" min="0" max="360" step="1">
         <div id="preview" class="swatch"></div>
       </div>
       <div class="slider-row">
-        <span>Alpha</span>
+        <span data-wcd-i18n-text="Alpha">Alpha</span>
         <input id="alpha" type="range" min="0" max="100" step="1">
         <span id="alpha-label"></span>
       </div>
-      <select id="mode" aria-label="Color mode">
-        <option value="rgb">RGB</option>
-        <option value="hsl">HSL</option>
-        <option value="cmyk">CMYK</option>
-        <option value="oklab">OKLab</option>
-        <option value="oklch">OKLCH</option>
+      <select id="mode" aria-label="Color mode" data-wcd-i18n-aria-label="Color mode">
+        <option value="rgb" data-wcd-i18n-text="RGB">RGB</option>
+        <option value="hsl" data-wcd-i18n-text="HSL">HSL</option>
+        <option value="cmyk" data-wcd-i18n-text="CMYK">CMYK</option>
+        <option value="oklab" data-wcd-i18n-text="OKLab">OKLab</option>
+        <option value="oklch" data-wcd-i18n-text="OKLCH">OKLCH</option>
       </select>
       <div id="channels"></div>
-      <button id="no-paint" type="button" hidden>No paint</button>
-      <input id="text" type="text" spellcheck="false" aria-label="Color text">
+      <button id="no-paint" type="button" hidden data-wcd-i18n-text="No paint">No paint</button>
+      <input id="text" type="text" spellcheck="false" aria-label="Color text" data-wcd-i18n-aria-label="Color text">
     </div>
   `;
 
@@ -574,12 +575,13 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
   `;
 
   public static override readonly template = html`
-    <button id="button" type="button" aria-label="Edit color"><span id="swatch"></span></button>
+    <button id="button" type="button" aria-label="Edit color" data-wcd-i18n-aria-label="Edit color"><span id="swatch"></span></button>
   `;
 
   private _value = '#000000';
   private _button: HTMLButtonElement;
   private _popup: HTMLDivElement;
+  private _popupTranslation: { dispose(): void };
   private _editor: ColorEditor;
   private _ignoreNextClick = false;
   private _outsidePointerHandler = (event: PointerEvent) => this._handleOutsidePointer(event);
@@ -682,6 +684,8 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
       this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     });
     this._popup.appendChild(this._editor);
+    const container = designerUiServiceContainer(this);
+    if (container) this._popupTranslation = bindDesignerUiTranslation(this._editor.shadowRoot, container);
     document.body.appendChild(this._popup);
     this._positionPopup();
     window.addEventListener('resize', () => this._positionPopup(), { once: true });
@@ -726,6 +730,7 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
     }
     window.removeEventListener('pointerdown', this._outsidePointerHandler, true);
     window.removeEventListener('keydown', this._windowKeyHandler);
+    this._popupTranslation?.dispose();
     this._popup?.remove();
     this._popup = null;
     this._editor = null;
@@ -740,7 +745,10 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
 
   private _renderSwatch() {
     this._button.setAttribute('aria-label', this.getAttribute('aria-label') || 'Edit color');
-    this._button.title = this._value === 'none' ? 'No paint' : this._value;
+    this._button.setAttribute('data-wcd-i18n-aria-label', this.getAttribute('data-wcd-i18n-aria-label') || this.getAttribute('aria-label') || 'Edit color');
+    this._button.title = this._value === 'none' ? designerTranslation(this).translate('No paint') : this._value;
+    if (this._value === 'none') this._button.setAttribute('data-wcd-i18n-title', 'No paint');
+    else this._button.removeAttribute('data-wcd-i18n-title');
     const parsed = this._value === 'none' ? { r: 0, g: 0, b: 0, a: 0 } : parseColor(this._value) ?? { r: 0, g: 0, b: 0, a: 1 };
     this.style.setProperty('--color', toCssRgb(parsed));
   }

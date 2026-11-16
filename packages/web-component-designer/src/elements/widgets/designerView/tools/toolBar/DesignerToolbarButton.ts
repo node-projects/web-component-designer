@@ -108,6 +108,8 @@ export class DesignerToolbarButton extends BaseCustomWebComponentConstructorAppe
     const tool = this.tools[name];
     if (tool) {
       this._div.title = name || 'Transform';
+      this._div.setAttribute('data-wcd-i18n-title', name || 'Transform');
+      this._div.setAttribute('data-wcd-i18n-aria-label', name || 'Transform');
       this._div.setAttribute('aria-label', name || 'Transform');
       this._img.src = tool.icon;
       this.currentToolOnButton = name;

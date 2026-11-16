@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../../../../services/translationService/DesignerUiTranslation.js';
 import { BaseCustomWebComponentConstructorAppend, css, html } from '@node-projects/base-custom-webcomponent';
 import { IDesignerCanvas } from '../../../IDesignerCanvas.js';
 
@@ -81,7 +82,7 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
     <div class="window-frame">
       <div class="title-bar" id="title-bar">
         <span class="title-text" id="title-text"></span>
-        <button class="close-btn" id="close-btn" title="Close">&#x2715;</button>
+        <button class="close-btn" id="close-btn" title="Close" data-wcd-i18n-title="Close">&#x2715;</button>
       </div>
       <div class="window-content" id="window-content"></div>
     </div>
@@ -119,6 +120,7 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
 
     //@ts-ignore
     this._titleText.textContent = this.windowTitle;
+    this._titleText.setAttribute('data-wcd-i18n-text', this._titleText.textContent);
 
     // Inject content
     //@ts-ignore
@@ -143,7 +145,11 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
     this._titleBar.addEventListener('pointerdown', (e: PointerEvent) => this._onPointerDown(e));
   }
 
+  private _uiTranslation: { dispose(): void };
+
   connectedCallback() {
+    this._uiTranslation?.dispose();
+    if (this._designerCanvas) this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, this._designerCanvas.serviceContainer);
     // Default position near top-left if not already placed
     if (!this.style.left && !this.style.top) {
       this.style.left = '100px';
@@ -162,6 +168,7 @@ export abstract class DraggableToolWindow extends BaseCustomWebComponentConstruc
   }
 
   disconnectedCallback() {
+    this._uiTranslation?.dispose();
     this._visibilityObserver?.disconnect();
     this._visibilityObserver = null;
   }

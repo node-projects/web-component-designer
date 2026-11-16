@@ -20,14 +20,14 @@ export class AlignItemsContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     const canDistribute = designerCanvas.instanceServiceContainer.selectionService.selectedElements.length >= 3;
     return [
-      { title: 'align left', icon: `<img src="${assetsPath + 'icons/alignHorizontalLeft.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeLeft }); } },
-      { title: 'align center', icon: `<img src="${assetsPath + 'icons/alignHorizontalCenter.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeCenter }); } },
-      { title: 'align right', icon: `<img src="${assetsPath + 'icons/alignHorizontalRight.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeRight }); } },
-      { title: 'distribute horizontal', disabled: !canDistribute, icon: `<img src="${assetsPath + 'icons/horizontalDistribute.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.distributeHorizontal }); } },
-      { title: 'align top', icon: `<img src="${assetsPath + 'icons/alignVerticalTop.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeTop }); } },
-      { title: 'align middle', icon: `<img src="${assetsPath + 'icons/alignVerticalCenter.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeMiddle }); } },
-      { title: 'align bottom', icon: `<img src="${assetsPath + 'icons/alignVerticalBottom.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeBottom }); } },
-      { title: 'distribute vertical', disabled: !canDistribute, icon: `<img src="${assetsPath + 'icons/verticalDistribute.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.distributeVertical }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('align left'), icon: `<img src="${assetsPath + 'icons/alignHorizontalLeft.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeLeft }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('align center'), icon: `<img src="${assetsPath + 'icons/alignHorizontalCenter.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeCenter }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('align right'), icon: `<img src="${assetsPath + 'icons/alignHorizontalRight.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeRight }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('distribute horizontal'), disabled: !canDistribute, icon: `<img src="${assetsPath + 'icons/horizontalDistribute.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.distributeHorizontal }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('align top'), icon: `<img src="${assetsPath + 'icons/alignVerticalTop.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeTop }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('align middle'), icon: `<img src="${assetsPath + 'icons/alignVerticalCenter.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeMiddle }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('align bottom'), icon: `<img src="${assetsPath + 'icons/alignVerticalBottom.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.arrangeBottom }); } },
+      { title: designerCanvas.serviceContainer.translationService.translate('distribute vertical'), disabled: !canDistribute, icon: `<img src="${assetsPath + 'icons/verticalDistribute.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.distributeVertical }); } },
     ]
   }
 }

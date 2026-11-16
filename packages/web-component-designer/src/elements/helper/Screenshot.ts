@@ -1,4 +1,6 @@
 import { getBoundingClientRectAlsoForDisplayContents } from "./ElementHelper.js";
+import type { ITranslationService } from '../services/translationService/ITranslationService.js';
+import { DefaultTranslationService } from '../services/translationService/DefaultTranslationService.js';
 
 // for screenshots to be genrated properly, you need to select the current tab only in media source selector
 export class Screenshot {
@@ -16,7 +18,7 @@ export class Screenshot {
     return Screenshot._captureStream && Screenshot._captureStream.active;
   }
 
-  static async enableScreenshots(elementHostForVideo: Element = document.body) {
+  static async enableScreenshots(elementHostForVideo: Element = document.body, translationService: ITranslationService = new DefaultTranslationService()) {
     if (Screenshot._captureStream && !Screenshot._captureStream.active) {
       Screenshot._disableStream();
     }
@@ -46,7 +48,7 @@ export class Screenshot {
       const captureType = Screenshot._captureStream.getVideoTracks()[0].getSettings().displaySurface
       if (captureType != 'browser') {
         Screenshot._disableStream();
-        alert('You need to share the current Tab, for the screenshot API to work');
+        alert(translationService.translate('You need to share the current Tab, for the screenshot API to work'));
         throw 'You need to share the current Tab, for the screenshot API to work';
       }
       Screenshot._video.srcObject = Screenshot._captureStream;

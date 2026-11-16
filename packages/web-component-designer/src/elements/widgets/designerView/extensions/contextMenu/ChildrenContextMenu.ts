@@ -14,7 +14,7 @@ export class ChildrenContextMenu implements IContextMenuExtension {
     if (designItem) {
       const lstItems = [...designItem.element.children];
       if (lstItems.length > 0) {
-        return [{ title: 'children', children: [...lstItems.map(x => ({ title: 'select: ' + x.localName + (x.id ? ' (#' + x.id + ')' : ''), action: () => this._select(designerCanvas, x) }))] }];
+        return [{ title: designerCanvas.serviceContainer.translationService.translate('children'), children: [...lstItems.map(x => ({ title: designerCanvas.serviceContainer.translationService.translate('select: {name}', { name: x.localName + (x.id ? ' (#' + x.id + ')' : '') }), action: () => this._select(designerCanvas, x) }))] }];
       }
     }
     return [];

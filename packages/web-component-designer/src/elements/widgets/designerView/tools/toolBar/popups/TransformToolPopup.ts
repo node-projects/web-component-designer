@@ -156,42 +156,42 @@ export class TransformToolPopup extends DraggableToolWindow {
   protected override get windowTemplate(): string {
     return `
       <div id="input-div">
-        <label for="transform-input-x">X</label>
+        <label for="transform-input-x" data-wcd-i18n-text="X">X</label>
         <input type="number" id="transform-input-x">
-        <label for="transform-input-y">Y</label>
+        <label for="transform-input-y" data-wcd-i18n-text="Y">Y</label>
         <input type="number" id="transform-input-y">
-        <label for="transform-input-r">Rotation</label>
+        <label for="transform-input-r" data-wcd-i18n-text="Rotation">Rotation</label>
         <input type="number" id="transform-input-r">
       </div>
       <div id="button-div">
-        <button id="transform-button-absolute">Absolute</button>
-        <button id="transform-button-relative">Relative</button>
+        <button id="transform-button-absolute" data-wcd-i18n-text="Absolute">Absolute</button>
+        <button id="transform-button-relative" data-wcd-i18n-text="Relative">Relative</button>
       </div>
 
       <div id="spacing-div">
-          <label for="spacing-input-x">X spacing</label>
-          <label for="spacing-input-y">Y spacing</label>
+          <label for="spacing-input-x" data-wcd-i18n-text="X spacing">X spacing</label>
+          <label for="spacing-input-y" data-wcd-i18n-text="Y spacing">Y spacing</label>
           <input type="number" id="spacing-input-x">
           <input type="number" id="spacing-input-y">
       </div>
 
       <div id="origin-div">
-        <span id="origin-label">Transform origin</span>
+        <span id="origin-label" data-wcd-i18n-text="Transform origin">Transform origin</span>
           <div id="cube" role="group" aria-labelledby="origin-label">
-            <input id="origin-top-left" aria-label="Top left" type="radio" name="origin-radio">
-            <input id="origin-top-mid" aria-label="Top center" type="radio" name="origin-radio">
-            <input id="origin-top-right" aria-label="Top right" type="radio" name="origin-radio">
-            <input id="origin-mid-left" aria-label="Middle left" type="radio" name="origin-radio">
-            <input id="origin-mid-mid" aria-label="Center" type="radio" name="origin-radio" checked>
-            <input id="origin-mid-right" aria-label="Middle right" type="radio" name="origin-radio">
-            <input id="origin-bot-left" aria-label="Bottom left" type="radio" name="origin-radio">
-            <input id="origin-bot-mid" aria-label="Bottom center" type="radio" name="origin-radio">
-            <input id="origin-bot-right" aria-label="Bottom right" type="radio" name="origin-radio">
+            <input id="origin-top-left" aria-label="Top left" data-wcd-i18n-aria-label="Top left" type="radio" name="origin-radio">
+            <input id="origin-top-mid" aria-label="Top center" data-wcd-i18n-aria-label="Top center" type="radio" name="origin-radio">
+            <input id="origin-top-right" aria-label="Top right" data-wcd-i18n-aria-label="Top right" type="radio" name="origin-radio">
+            <input id="origin-mid-left" aria-label="Middle left" data-wcd-i18n-aria-label="Middle left" type="radio" name="origin-radio">
+            <input id="origin-mid-mid" aria-label="Center" data-wcd-i18n-aria-label="Center" type="radio" name="origin-radio" checked>
+            <input id="origin-mid-right" aria-label="Middle right" data-wcd-i18n-aria-label="Middle right" type="radio" name="origin-radio">
+            <input id="origin-bot-left" aria-label="Bottom left" data-wcd-i18n-aria-label="Bottom left" type="radio" name="origin-radio">
+            <input id="origin-bot-mid" aria-label="Bottom center" data-wcd-i18n-aria-label="Bottom center" type="radio" name="origin-radio">
+            <input id="origin-bot-right" aria-label="Bottom right" data-wcd-i18n-aria-label="Bottom right" type="radio" name="origin-radio">
           </div>
       </div>
 
       <div id="apply-div">
-        <button id="transform-button-apply" style="width:100px;">Apply</button>
+        <button id="transform-button-apply" style="width:100px;" data-wcd-i18n-text="Apply">Apply</button>
       </div>`;
   }
 

@@ -15,6 +15,8 @@ export function createSvgStrokeStyleControl(property: SvgStrokeStyle, changed: (
   const buttons = choices.map(([value, label]) => {
     const button = document.createElement('button');
     button.type = 'button'; button.title = label;
+    button.setAttribute('data-wcd-i18n-title', label);
+    button.setAttribute('data-wcd-i18n-aria-label', label);
     button.setAttribute('aria-label', label); button.setAttribute('aria-pressed', 'false');
     button.style.cssText = 'width:29px;height:26px;padding:2px;border:1px solid var(--wcd-color-border,#888);border-radius:3px;color:inherit;cursor:pointer';
     const path = property === 'stroke-dasharray'

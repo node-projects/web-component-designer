@@ -14,25 +14,25 @@ export class EditTextExtension extends AbstractExtension implements handlesPoint
 
   private static template = html`
     <div style="height: 100%; display: flex; gap: 2px; width: 100%;">
-      <button data-command="font-weight" data-command-parameter="800" style="pointer-events: auto; height: 24px; width: 24px; padding: 0; font-weight: 900;">b</button>
-      <button data-command="font-style" data-command-parameter="italic" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><em>i</em></button>
-      <button data-command="text-decoration" data-command-parameter="underline" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><ins>u</ins></button>
-      <button data-command="text-decoration" data-command-parameter="line-through" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><del>s</del></button>
-      <button data-command="text-decoration" data-command-parameter="overline" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><span style="text-decoration: overline">o</span></button>
+      <button data-command="font-weight" data-command-parameter="800" style="pointer-events: auto; height: 24px; width: 24px; padding: 0; font-weight: 900;" data-wcd-i18n-text="b">b</button>
+      <button data-command="font-style" data-command-parameter="italic" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><em data-wcd-i18n-text="i">i</em></button>
+      <button data-command="text-decoration" data-command-parameter="underline" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><ins data-wcd-i18n-text="u">u</ins></button>
+      <button data-command="text-decoration" data-command-parameter="line-through" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><del data-wcd-i18n-text="s">s</del></button>
+      <button data-command="text-decoration" data-command-parameter="overline" style="pointer-events: auto; height: 24px; width: 24px; padding: 0;"><span style="text-decoration: overline" data-wcd-i18n-text="o">o</span></button>
       <select data-command="fontSize" style="pointer-events: auto; height: 24px; width: 60px; padding: 0;">
-        <option>8px</option>
-        <option>9px</option>
-        <option>10px</option>
-        <option>11px</option>
-        <option>12px</option>
-        <option>14px</option>
-        <option>16px</option>
-        <option>18px</option>
-        <option>20px</option>
-        <option>24px</option>
-        <option>28px</option>
-        <option>32px</option>
-        <option>36px</option>
+        <option value="8px">8px</option>
+        <option value="9px">9px</option>
+        <option value="10px">10px</option>
+        <option value="11px">11px</option>
+        <option value="12px">12px</option>
+        <option value="14px">14px</option>
+        <option value="16px">16px</option>
+        <option value="18px">18px</option>
+        <option value="20px">20px</option>
+        <option value="24px">24px</option>
+        <option value="28px">28px</option>
+        <option value="32px">32px</option>
+        <option value="36px">36px</option>
       </select>
       <select id="fontFamily" data-command="font-family" style="pointer-events: auto; height: 24px; width: 90px; padding: 0;">
         

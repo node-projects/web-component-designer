@@ -17,6 +17,9 @@ It provides:
 - remote cursor overlays
 - comment context menu integration
 - a WebRTC transport with `broadcast-channel` and manual copy/paste signaling
+- `mergeCollaborationHtml(base, incoming, accepted)` for independently changed properties, with the incoming edit winning overlaps in a coordinator-defined order
+- `applyCollaborationHtml(document, html, attributesChanged?)` for applying shared HTML while retaining live design items and selections
+- `collaborationHtmlSignature(html)` for comparisons that ignore attribute and independent CSS declaration ordering
 
 The package is an addon. It does not patch the default designer bootstrap automatically. You enable it explicitly on your `ServiceContainer`.
 
@@ -34,6 +37,10 @@ setupCollaborationService(serviceContainer);
 ```
 
 After that, each `DocumentContainer` gets a collaboration service instance on its `instanceServiceContainer`.
+
+Pass `{ requireConnectionForComments: true }` as the second argument to
+`setupCollaborationService` when comments should only be offered during a connected
+session. The default retains standalone/local commenting.
 
 ```ts
 const collaborationService = documentContainer.instanceServiceContainer.collaborationService;
@@ -70,6 +77,12 @@ If you want more control, the package also exports the individual classes:
 - `WebRtcTabCollaborationTransport`
 - `CollaborationOverlayExtensionProvider`
 - `CollaborationCursorOverlayExtensionProvider`
+
+Comment menus and prompts use the basic designer's registered `translationService`.
+Register an `ITranslationService` on the shared service container to localize them;
+the basic designer supplies English text and named-parameter substitution by default.
+The service is looked up when the menu opens, so language and service changes do
+not require recreating collaboration. User-written comments remain unchanged.
 - `CollaborationCommentsContextMenu`
 
 ## Signaling Modes

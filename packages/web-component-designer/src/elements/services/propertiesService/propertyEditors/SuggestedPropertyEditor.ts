@@ -1,3 +1,4 @@
+import { setDesignerUiTranslation } from '../../translationService/DesignerUiTranslation.js';
 import { IProperty } from '../IProperty.js';
 import { BasePropertyEditor } from './BasePropertyEditor.js';
 import { ValueType } from '../ValueType.js';
@@ -29,13 +30,15 @@ export class SuggestedPropertyEditor extends BasePropertyEditor<HTMLDivElement> 
       void this._valueChanged(this._input.value);
     };
     this._select = document.createElement('select');
-    this._select.setAttribute('aria-label', (property.displayName || property.name) + ' suggestions');
+    setDesignerUiTranslation(this._select, '{name} suggestions', 'aria-label', { name: property.displayName || property.name });
     this._select.title = 'Choose a suggested value';
+    this._select.setAttribute('data-wcd-i18n-title', 'Choose a suggested value');
     this._select.disabled = !!property.readonly;
     this._select.style.cssText = 'width:22px;min-width:0;padding:0;border:0;background:transparent;height:100%;text-indent:-9999px;cursor:pointer';
     const custom = document.createElement('option');
     custom.value = '';
     custom.textContent = 'Custom value';
+    custom.setAttribute('data-wcd-i18n-text', 'Custom value');
     custom.disabled = true;
     this._select.append(custom);
     for (const value of property.values ?? []) {

@@ -149,8 +149,9 @@ export class DrawPathTool implements ITool {
     toolbar.setAttribute('role', 'toolbar');
     toolbar.setAttribute('data-svg-toolbar', '');
     toolbar.setAttribute('aria-label', 'Path drawing');
+    toolbar.setAttribute('data-wcd-i18n-aria-label', 'Path drawing');
     toolbar.style.cssText = 'position:absolute;top:8px;left:8px;z-index:10;display:flex;align-items:center;gap:6px;padding:6px;background:var(--wcd-tool-popup-background,#fff);color:var(--wcd-color-foreground,#222);border:1px solid var(--wcd-color-border,#888);font:12px sans-serif;pointer-events:auto';
-    toolbar.innerHTML = '<span>Click nodes or drag to sketch · Shift: 45° · Alt: no snapping</span><button data-action="finish">Finish (Enter)</button><button data-action="close">Close path</button><button data-action="cancel">Cancel (Esc)</button>';
+    toolbar.innerHTML = '<span data-wcd-i18n-text="Click nodes or drag to sketch · Shift: 45° · Alt: no snapping">Click nodes or drag to sketch · Shift: 45° · Alt: no snapping</span><button data-wcd-i18n-text="Finish (Enter)" data-action="finish">Finish (Enter)</button><button data-wcd-i18n-text="Close path" data-action="close">Close path</button><button data-wcd-i18n-text="Cancel (Esc)" data-action="cancel">Cancel (Esc)</button>';
     toolbar.onpointerdown = event => { this._canvas!.ignoreEvent(event); event.stopPropagation(); };
     toolbar.ondblclick = event => event.stopPropagation();
     toolbar.onclick = event => {

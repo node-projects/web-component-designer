@@ -256,17 +256,17 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
     return `
       <div class="tse-root">
         <div class="preview-area">
-          <div class="preview-text" id="tse-preview">Sample Text</div>
+          <div class="preview-text" id="tse-preview" data-wcd-i18n-text="Sample Text">Sample Text</div>
         </div>
 
         <div class="layers-row">
           <ul class="layer-list" id="tse-layer-list"></ul>
           <div class="layer-buttons">
-            <button id="tse-add-btn" title="Add layer">+</button>
-            <button id="tse-dup-btn" title="Duplicate layer">⧉</button>
-            <button id="tse-up-btn" title="Move up">↑</button>
-            <button id="tse-down-btn" title="Move down">↓</button>
-            <button id="tse-remove-btn" title="Remove layer">−</button>
+            <button id="tse-add-btn" title="Add layer" data-wcd-i18n-title="Add layer">+</button>
+            <button id="tse-dup-btn" title="Duplicate layer" data-wcd-i18n-title="Duplicate layer">⧉</button>
+            <button id="tse-up-btn" title="Move up" data-wcd-i18n-title="Move up">↑</button>
+            <button id="tse-down-btn" title="Move down" data-wcd-i18n-title="Move down">↓</button>
+            <button id="tse-remove-btn" title="Remove layer" data-wcd-i18n-title="Remove layer">−</button>
           </div>
         </div>
 
@@ -275,23 +275,23 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
         </div>
 
         <div class="controls">
-          <label>Offset X</label>
+          <label data-wcd-i18n-text="Offset X">Offset X</label>
           <input type="range" id="tse-x" min="-50" max="50" step="1">
           <span class="val-label" id="tse-x-val">0px</span>
 
-          <label>Offset Y</label>
+          <label data-wcd-i18n-text="Offset Y">Offset Y</label>
           <input type="range" id="tse-y" min="-50" max="50" step="1">
           <span class="val-label" id="tse-y-val">0px</span>
 
-          <label>Blur</label>
+          <label data-wcd-i18n-text="Blur">Blur</label>
           <input type="range" id="tse-blur" min="0" max="100" step="1">
           <span class="val-label" id="tse-blur-val">0px</span>
 
-          <label>Color</label>
+          <label data-wcd-i18n-text="Color">Color</label>
           <input type="color" id="tse-color" value="#000000">
           <span></span>
 
-          <label>Opacity</label>
+          <label data-wcd-i18n-text="Opacity">Opacity</label>
           <input type="range" id="tse-opacity" min="0" max="100" step="1">
           <span class="val-label" id="tse-opacity-val">100%</span>
         </div>
@@ -299,9 +299,9 @@ export class TextShadowEditorWindow extends DraggableToolWindow {
         <textarea class="css-out" id="tse-css-out"></textarea>
 
         <div class="actions">
-          <button class="load-btn" id="tse-load-btn">Load</button>
-          <button id="tse-copy-btn">Copy CSS</button>
-          <button class="apply-btn" id="tse-apply-btn">Apply to selection</button>
+          <button class="load-btn" id="tse-load-btn" data-wcd-i18n-text="Load">Load</button>
+          <button id="tse-copy-btn" data-wcd-i18n-text="Copy CSS">Copy CSS</button>
+          <button class="apply-btn" id="tse-apply-btn" data-wcd-i18n-text="Apply to selection">Apply to selection</button>
         </div>
       </div>`;
   }

@@ -4,6 +4,7 @@ import { ServiceContainer } from "../../../../services/ServiceContainer.js";
 import { DesignerView } from "../../designerView.js";
 import { DesignerToolbarButton } from './DesignerToolbarButton.js';
 import { DraggableToolWindow } from './popups/DraggableToolWindow.js';
+import { AbstractBaseToolPopup } from './popups/AbstractBaseToolPopup.js';
 
 export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
   static override readonly style = css`
@@ -104,6 +105,7 @@ export class DesignerToolbar extends BaseCustomWebComponentConstructorAppend {
         }, { once: true });
       } else {
         this._popupContainer.appendChild(instance);
+        if (instance instanceof AbstractBaseToolPopup) instance.initializeTranslation(this._serviceContainer);
       }
     }
   }

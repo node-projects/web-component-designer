@@ -318,11 +318,11 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         <div class="layers-row">
           <ul class="layer-list" id="bse-layer-list"></ul>
           <div class="layer-buttons">
-            <button id="bse-add-btn" title="Add layer">+</button>
-            <button id="bse-dup-btn" title="Duplicate layer">⧉</button>
-            <button id="bse-up-btn" title="Move up">↑</button>
-            <button id="bse-down-btn" title="Move down">↓</button>
-            <button id="bse-remove-btn" title="Remove layer">−</button>
+            <button id="bse-add-btn" title="Add layer" data-wcd-i18n-title="Add layer">+</button>
+            <button id="bse-dup-btn" title="Duplicate layer" data-wcd-i18n-title="Duplicate layer">⧉</button>
+            <button id="bse-up-btn" title="Move up" data-wcd-i18n-title="Move up">↑</button>
+            <button id="bse-down-btn" title="Move down" data-wcd-i18n-title="Move down">↓</button>
+            <button id="bse-remove-btn" title="Remove layer" data-wcd-i18n-title="Remove layer">−</button>
           </div>
         </div>
 
@@ -332,27 +332,27 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         </div>
 
         <div class="controls">
-          <label>Offset X</label>
+          <label data-wcd-i18n-text="Offset X">Offset X</label>
           <input type="range" id="bse-x" min="-100" max="100" step="1">
           <span class="val-label" id="bse-x-val">0px</span>
 
-          <label>Offset Y</label>
+          <label data-wcd-i18n-text="Offset Y">Offset Y</label>
           <input type="range" id="bse-y" min="-100" max="100" step="1">
           <span class="val-label" id="bse-y-val">0px</span>
 
-          <label>Blur</label>
+          <label data-wcd-i18n-text="Blur">Blur</label>
           <input type="range" id="bse-blur" min="0" max="200" step="1">
           <span class="val-label" id="bse-blur-val">0px</span>
 
-          <label>Spread</label>
+          <label data-wcd-i18n-text="Spread">Spread</label>
           <input type="range" id="bse-spread" min="-50" max="100" step="1">
           <span class="val-label" id="bse-spread-val">0px</span>
 
-          <label>Color</label>
+          <label data-wcd-i18n-text="Color">Color</label>
           <input type="color" id="bse-color" value="#000000">
           <span></span>
 
-          <label>Opacity</label>
+          <label data-wcd-i18n-text="Opacity">Opacity</label>
           <input type="range" id="bse-opacity" min="0" max="100" step="1">
           <span class="val-label" id="bse-opacity-val">100%</span>
         </div>
@@ -360,9 +360,9 @@ export class BoxShadowEditorWindow extends DraggableToolWindow {
         <textarea class="css-out" id="bse-css-out"></textarea>
 
         <div class="actions">
-          <button class="load-btn" id="bse-load-btn">Load</button>
-          <button id="bse-copy-btn">Copy CSS</button>
-          <button class="apply-btn" id="bse-apply-btn">Apply to selection</button>
+          <button class="load-btn" id="bse-load-btn" data-wcd-i18n-text="Load">Load</button>
+          <button id="bse-copy-btn" data-wcd-i18n-text="Copy CSS">Copy CSS</button>
+          <button class="apply-btn" id="bse-apply-btn" data-wcd-i18n-text="Apply to selection">Apply to selection</button>
         </div>
       </div>`;
   }

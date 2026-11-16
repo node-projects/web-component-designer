@@ -10,42 +10,42 @@ export class GridToolbarExtension extends BasicStackedToolbarExtension {
   protected static template = html`
     <div style="height: 100%; width: 100%;">
       ${BasicStackedToolbarExtension.basicTemplate}
-      <select title="display" id="gridType" style="pointer-events: auto; height: 24px; width: 60px; padding: 0; margin-right: 10px">
-        <option>1x1</option>
-        <option>1x16</option>
-        <option>2x8</option>
-        <option>4x4</option>
-        <option>8x2</option>
-        <option>16x1</option>
-        <option>custom</option>
+      <select title="display" data-wcd-i18n-title="display" id="gridType" style="pointer-events: auto; height: 24px; width: 60px; padding: 0; margin-right: 10px">
+        <option data-wcd-i18n-text="1x1" value="1x1">1x1</option>
+        <option data-wcd-i18n-text="1x16" value="1x16">1x16</option>
+        <option data-wcd-i18n-text="2x8" value="2x8">2x8</option>
+        <option data-wcd-i18n-text="4x4" value="4x4">4x4</option>
+        <option data-wcd-i18n-text="8x2" value="8x2">8x2</option>
+        <option data-wcd-i18n-text="16x1" value="16x1">16x1</option>
+        <option data-wcd-i18n-text="custom" value="custom">custom</option>
       </select>
       <node-projects-image-button-list-selector property="align-content" no-value-in-header id="align-content">
-        <img title="center" data-value="center" src="${assetsPath}images/chromeDevtools/align-content-center-icon.svg">
-        <img title="space-around" data-value="space-around" src="${assetsPath}images/chromeDevtools/align-content-space-around-icon.svg">
-        <img title="space-evenly" data-value="space-evenly" src="${assetsPath}images/chromeDevtools/align-content-space-evenly-icon.svg">
-        <img title="space-between" data-value="space-between" src="${assetsPath}images/chromeDevtools/align-content-space-between-icon.svg">
-        <img title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/align-content-stretch-icon.svg">
+        <img title="center" data-wcd-i18n-title="center" data-value="center" src="${assetsPath}images/chromeDevtools/align-content-center-icon.svg">
+        <img title="space-around" data-wcd-i18n-title="space-around" data-value="space-around" src="${assetsPath}images/chromeDevtools/align-content-space-around-icon.svg">
+        <img title="space-evenly" data-wcd-i18n-title="space-evenly" data-value="space-evenly" src="${assetsPath}images/chromeDevtools/align-content-space-evenly-icon.svg">
+        <img title="space-between" data-wcd-i18n-title="space-between" data-value="space-between" src="${assetsPath}images/chromeDevtools/align-content-space-between-icon.svg">
+        <img title="stretch" data-wcd-i18n-title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/align-content-stretch-icon.svg">
       </node-projects-image-button-list-selector>
       <node-projects-image-button-list-selector property="justify-content" no-value-in-header id="justify-content">
-        <img title="start" data-value="start" src="${assetsPath}images/chromeDevtools/justify-content-start-icon.svg">
-        <img title="center" data-value="center" src="${assetsPath}images/chromeDevtools/justify-content-center-icon.svg">
-        <img title="end" data-value="end" src="${assetsPath}images/chromeDevtools/justify-content-end-icon.svg">
-        <img title="space-around" data-value="space-around" src="${assetsPath}images/chromeDevtools/justify-content-space-around-icon.svg">
-        <img title="space-evenly" data-value="space-evenly" src="${assetsPath}images/chromeDevtools/justify-content-space-evenly-icon.svg">
-        <img title="space-between" data-value="space-between" src="${assetsPath}images/chromeDevtools/justify-content-space-between-icon.svg">
+        <img title="start" data-wcd-i18n-title="start" data-value="start" src="${assetsPath}images/chromeDevtools/justify-content-start-icon.svg">
+        <img title="center" data-wcd-i18n-title="center" data-value="center" src="${assetsPath}images/chromeDevtools/justify-content-center-icon.svg">
+        <img title="end" data-wcd-i18n-title="end" data-value="end" src="${assetsPath}images/chromeDevtools/justify-content-end-icon.svg">
+        <img title="space-around" data-wcd-i18n-title="space-around" data-value="space-around" src="${assetsPath}images/chromeDevtools/justify-content-space-around-icon.svg">
+        <img title="space-evenly" data-wcd-i18n-title="space-evenly" data-value="space-evenly" src="${assetsPath}images/chromeDevtools/justify-content-space-evenly-icon.svg">
+        <img title="space-between" data-wcd-i18n-title="space-between" data-value="space-between" src="${assetsPath}images/chromeDevtools/justify-content-space-between-icon.svg">
       </node-projects-image-button-list-selector>
       <node-projects-image-button-list-selector property="align-items" no-value-in-header id="align-items">
-        <img title="start" data-value="start" src="${assetsPath}images/chromeDevtools/align-items-start-icon.svg">
-        <img title="center" data-value="center" src="${assetsPath}images/chromeDevtools/align-items-center-icon.svg">
-        <img title="end" data-value="end" src="${assetsPath}images/chromeDevtools/align-items-end-icon.svg">
-        <img title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/align-items-stretch-icon.svg">
-        <img title="space-evenly" data-value="space-evenly" src="${assetsPath}images/chromeDevtools/align-items-baseline-icon.svg">
+        <img title="start" data-wcd-i18n-title="start" data-value="start" src="${assetsPath}images/chromeDevtools/align-items-start-icon.svg">
+        <img title="center" data-wcd-i18n-title="center" data-value="center" src="${assetsPath}images/chromeDevtools/align-items-center-icon.svg">
+        <img title="end" data-wcd-i18n-title="end" data-value="end" src="${assetsPath}images/chromeDevtools/align-items-end-icon.svg">
+        <img title="stretch" data-wcd-i18n-title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/align-items-stretch-icon.svg">
+        <img title="space-evenly" data-wcd-i18n-title="space-evenly" data-value="space-evenly" src="${assetsPath}images/chromeDevtools/align-items-baseline-icon.svg">
       </node-projects-image-button-list-selector>
       <node-projects-image-button-list-selector property="justify-items" no-value-in-header id="justify-items">
-        <img title="start" data-value="start" src="${assetsPath}images/chromeDevtools/justify-items-start-icon.svg">
-        <img title="center" data-value="center" src="${assetsPath}images/chromeDevtools/justify-items-center-icon.svg">
-        <img title="end" data-value="end" src="${assetsPath}images/chromeDevtools/justify-items-end-icon.svg">
-        <img title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/justify-items-stretch-icon.svg">
+        <img title="start" data-wcd-i18n-title="start" data-value="start" src="${assetsPath}images/chromeDevtools/justify-items-start-icon.svg">
+        <img title="center" data-wcd-i18n-title="center" data-value="center" src="${assetsPath}images/chromeDevtools/justify-items-center-icon.svg">
+        <img title="end" data-wcd-i18n-title="end" data-value="end" src="${assetsPath}images/chromeDevtools/justify-items-end-icon.svg">
+        <img title="stretch" data-wcd-i18n-title="stretch" data-value="stretch" src="${assetsPath}images/chromeDevtools/justify-items-stretch-icon.svg">
       </node-projects-image-button-list-selector>
     </div>
   `;
@@ -67,9 +67,9 @@ export class GridToolbarExtension extends BasicStackedToolbarExtension {
     gridTypeEl.selectedIndex = 0;
     gridTypeEl.onchange = async () => {
       if (gridTypeEl.value == 'custom') {
-        const columns = prompt("Number of columns?", '4');
+        const columns = prompt(this.designerCanvas.serviceContainer.translationService.translate('Number of columns?'), '4');
         if (!columns) return;
-        const rows = prompt("Number of rows?", '4');
+        const rows = prompt(this.designerCanvas.serviceContainer.translationService.translate('Number of rows?'), '4');
         if (!rows) return;
         const cg = this.extendedItem.openGroup('change grid type');
         await this.extendedItem.updateStyleInSheetOrLocalAsync('grid-template-columns', 'repeat(' + columns + ', 1fr)');

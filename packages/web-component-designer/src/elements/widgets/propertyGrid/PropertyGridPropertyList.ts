@@ -1,3 +1,4 @@
+import { setDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { IProperty } from '../../services/propertiesService/IProperty.js';
 import { ServiceContainer } from '../../services/ServiceContainer.js';
 import { BaseCustomWebComponentLazyAppend, css, DomHelper } from '@node-projects/base-custom-webcomponent';
@@ -381,7 +382,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       rect.type = 'button';
       rect.className = 'property-status';
       rect.textContent = '⋯';
-      rect.setAttribute('aria-label', `Actions for ${property.displayName ?? property.name}`);
+      setDesignerUiTranslation(rect, 'Actions for {name}', 'aria-label', { name: property.displayName ?? property.name });
       rect.disabled = property.readonly === true;
       rect.style.width = '7px';
       rect.style.height = '7px';
@@ -482,7 +483,8 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
             label.style.marginLeft = '10px';
           label.htmlFor = property.name;
           label.textContent = property.displayName ?? property.name;
-          label.title = property.description ?? ((property.displayName ?? property.name) + ' (type: ' + property.type + (property.defaultValue ? ', default: ' + property.defaultValue : '') + ', propertytype: ' + property.propertyType + ')');
+          if (property.description) label.title = property.description;
+          else setDesignerUiTranslation(label, property.defaultValue ? '{name} (type: {type}, default: {default}, propertytype: {kind})' : '{name} (type: {type}, propertytype: {kind})', 'title', { name: property.displayName ?? property.name, type: String(property.type), default: String(property.defaultValue), kind: String(property.propertyType) });
           label.ondragleave = (e) => this._onDragLeave(e, property, label);
           label.ondragover = (e) => this._onDragOver(e, property, label);
           label.ondrop = (e) => this._onDrop(e, property, label);
@@ -624,7 +626,7 @@ export class PropertyGridPropertyList extends BaseCustomWebComponentLazyAppend {
       let s = propertiesService.isSet(items, property);
       isSetElement.dataset.valueType = s;
       let v = propertiesService.getValue(items, property);
-      isSetElement.title = property.name + ': ' + s;
+      setDesignerUiTranslation(isSetElement, `{name}: ${s}`, 'title', { name: property.name });
       if (s == ValueType.none) {
         isSetElement.style.background = '';
         v = propertiesService.getUnsetValue(items, property);

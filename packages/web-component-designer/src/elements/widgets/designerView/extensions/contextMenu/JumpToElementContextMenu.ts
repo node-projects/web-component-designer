@@ -13,7 +13,7 @@ export class JumpToElementContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
       {
-        title: 'jump to', icon: `<img src="${assetsPath + 'icons/jump.svg'}">`, action: () => {
+        title: designerCanvas.serviceContainer.translationService.translate('jump to'), icon: `<img src="${assetsPath + 'icons/jump.svg'}">`, action: () => {
           const coord = designerCanvas.getNormalizedElementCoordinates(designItem.element);
 
           designerCanvas.zoomPoint({ x: coord.x + coord.width / 2, y: coord.y + coord.height / 2 }, designerCanvas.zoomFactor);

@@ -16,38 +16,38 @@ export class ToolWindowsContextMenu implements IContextMenuExtension {
 
   provideContextMenuItems(_event: MouseEvent, designerCanvas: IDesignerCanvas, _designItem: IDesignItem, _initiator: ContextmenuInitiator): IContextMenuItem[] {
     return [{
-      title: 'tool windows',
+      title: designerCanvas.serviceContainer.translationService.translate('tool windows'),
       children: [
         {
-          title: 'transform',
+          title: designerCanvas.serviceContainer.translationService.translate('transform'),
           action: () => {
             const win = new TransformToolPopup(designerCanvas);
             DraggableToolWindow.showWindow(win);
           }
         },
         {
-          title: 'box shadow editor',
+          title: designerCanvas.serviceContainer.translationService.translate('box shadow editor'),
           action: () => {
             const win = new BoxShadowEditorWindow(designerCanvas);
             DraggableToolWindow.showWindow(win);
           }
         },
         {
-          title: 'text shadow editor',
+          title: designerCanvas.serviceContainer.translationService.translate('text shadow editor'),
           action: () => {
             const win = new TextShadowEditorWindow(designerCanvas);
             DraggableToolWindow.showWindow(win);
           }
         },
         {
-          title: 'gradient editor',
+          title: designerCanvas.serviceContainer.translationService.translate('gradient editor'),
           action: () => {
             const win = new GradientEditorWindow(designerCanvas);
             DraggableToolWindow.showWindow(win);
           }
         },
         {
-          title: 'border radius editor',
+          title: designerCanvas.serviceContainer.translationService.translate('border radius editor'),
           action: () => {
             const win = new BorderRadiusEditorWindow(designerCanvas);
             DraggableToolWindow.showWindow(win);

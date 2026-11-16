@@ -4,7 +4,7 @@ import { CollaborationOverlayExtensionProvider } from "./extensions/Collaboratio
 import { CollaborationCursorOverlayExtensionProvider } from "./extensions/CollaborationCursorOverlayExtensionProvider.js";
 import { DefaultCollaborationService } from "./services/DefaultCollaborationService.js";
 
-export function setupCollaborationService(serviceContainer: ServiceContainer) {
+export function setupCollaborationService(serviceContainer: ServiceContainer, options?: { requireConnectionForComments?: boolean }) {
     serviceContainer.registerDocumentService("collaborationService", container => new DefaultCollaborationService(container));
 
     serviceContainer.designerExtensions.set(ExtensionType.Permanent, [
@@ -16,6 +16,6 @@ export function setupCollaborationService(serviceContainer: ServiceContainer) {
     serviceContainer.designerContextMenuExtensions = [
         ...serviceContainer.designerContextMenuExtensions,
         new SeperatorContextMenu(),
-        new CollaborationCommentsContextMenu(),
+        new CollaborationCommentsContextMenu(options?.requireConnectionForComments),
     ];
 }

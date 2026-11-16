@@ -176,7 +176,7 @@ export class Snaplines {
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.setAttribute('class', 'svg-snapline svg-spacing-guide');
       const label = `${Number((end - start).toFixed(2))} px`;
-      group.setAttribute('aria-label', `Equal spacing: ${label}`);
+      group.setAttribute('aria-label', this._containerItem.serviceContainer.translationService.translate('Equal spacing: {distance}', { distance: label }));
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       const cross = spacing.crossPosition;
       line.setAttribute('d', horizontal

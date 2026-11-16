@@ -19,7 +19,7 @@ export class MultipleItemsSelectedContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     return [
       {
-        title: 'wrap in',
+        title: designerCanvas.serviceContainer.translationService.translate('wrap in'),
         children: [
           {
             title: 'div',

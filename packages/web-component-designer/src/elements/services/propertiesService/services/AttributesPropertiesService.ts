@@ -116,7 +116,7 @@ export class AttributesPropertiesService extends AbstractPropertiesService {
 
     if (sourcePart) {
       ctxMenuItems.splice(1, 0, {
-        title: 'jump to definition',
+        title: designItems[0].serviceContainer.translationService.translate('jump to definition'),
         action: () => {
           const selectionService = designItems[0].instanceServiceContainer.selectionService;
           if (selectionService.primarySelection !== designItems[0])

@@ -965,11 +965,11 @@ export class UnifiedGeometryExtension extends AbstractExtension {
     const isPath = this.extendedItem.element instanceof SVGPathElement;
 
     if (isPath) {
-      items.push({ title: 'Delete point', action: () => this._executeCommand({ command: 'delete', index: segIndex }) });
+      items.push({ title: this.designerCanvas.serviceContainer.translationService.translate('Delete point'), action: () => this._executeCommand({ command: 'delete', index: segIndex }) });
       const next = this._findNextNonCloseSegment(segIndex);
       if (next !== null && [SegmentType.Line, SegmentType.HorizontalLine, SegmentType.VerticalLine, SegmentType.CubicBezier, SegmentType.QuadraticBezier].includes(this._geometry.segments[next].type))
-        items.push({ title: 'Insert point after', action: () => this._executeCommand({ command: 'insert', index: segIndex }) });
-      items.push({ title: 'Open / close subpath', action: () => this._executeCommand({ command: 'close', index: segIndex }) });
+        items.push({ title: this.designerCanvas.serviceContainer.translationService.translate('Insert point after'), action: () => this._executeCommand({ command: 'insert', index: segIndex }) });
+      items.push({ title: this.designerCanvas.serviceContainer.translationService.translate('Open / close subpath'), action: () => this._executeCommand({ command: 'close', index: segIndex }) });
     }
 
     // Segment type conversion (only for path elements)
@@ -979,7 +979,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.Move) {
         conversionItems.push({
-          title: 'moveto', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('moveto'), action: () => {
             this._convertToMove(segIndex);
             this._commitGeometryChange();
           }
@@ -988,7 +988,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.Line && seg.type !== SegmentType.HorizontalLine && seg.type !== SegmentType.VerticalLine) {
         conversionItems.push({
-          title: 'line', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('line'), action: () => {
             this._convertToLine(segIndex);
             this._commitGeometryChange();
           }
@@ -997,7 +997,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.HorizontalLine) {
         conversionItems.push({
-          title: 'horizontal line', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('horizontal line'), action: () => {
             this._convertToHorizontalLine(segIndex);
             this._commitGeometryChange();
           }
@@ -1006,7 +1006,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.VerticalLine) {
         conversionItems.push({
-          title: 'vertical line', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('vertical line'), action: () => {
             this._convertToVerticalLine(segIndex);
             this._commitGeometryChange();
           }
@@ -1015,7 +1015,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.QuadraticBezier) {
         conversionItems.push({
-          title: 'quadratic bézier', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('quadratic bézier'), action: () => {
             this._convertToQuadratic(segIndex);
             this._commitGeometryChange();
           }
@@ -1024,7 +1024,7 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.CubicBezier) {
         conversionItems.push({
-          title: 'cubic bézier', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('cubic bézier'), action: () => {
             this._convertToCubic(segIndex);
             this._commitGeometryChange();
           }
@@ -1033,13 +1033,13 @@ export class UnifiedGeometryExtension extends AbstractExtension {
 
       if (seg.type !== SegmentType.Arc) {
         conversionItems.push({
-          title: 'arc', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('arc'), action: () => {
             this._convertToArc(segIndex, false);
             this._commitGeometryChange();
           }
         });
         conversionItems.push({
-          title: 'inverted arc', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('inverted arc'), action: () => {
             this._convertToArc(segIndex, true);
             this._commitGeometryChange();
           }
@@ -1047,12 +1047,12 @@ export class UnifiedGeometryExtension extends AbstractExtension {
       }
 
       if (conversionItems.length > 0) {
-        items.push({ title: 'Convert to', children: conversionItems });
+        items.push({ title: this.designerCanvas.serviceContainer.translationService.translate('Convert to'), children: conversionItems });
       }
 
       if (seg.type === SegmentType.Arc) {
         items.push({
-          title: 'Invert arc', action: () => {
+          title: this.designerCanvas.serviceContainer.translationService.translate('Invert arc'), action: () => {
             this._invertArc(segIndex);
             this._commitGeometryChange();
           }

@@ -54,6 +54,38 @@ The core package depends on `@node-projects/base-custom-webcomponent`. Rich code
 - Configurable services for parsing, placement, properties, and other editor behavior.
 - Optional Ace, CodeMirror 5/6, Monaco, Wunderbaum, collaboration, Mermaid, and ZPL integrations.
 
+## Translation service
+
+All designer services and extensions can use the container's shared
+`translationService`, implementing `ITranslationService`:
+
+```ts
+services.register('translationService', {
+  translate(text, params) {
+    return applicationTranslations.translate(text, params);
+  },
+});
+
+const label = services.translationService.translate('comments ({count})', { count: '2' });
+```
+
+Each container starts with `DefaultTranslationService`, which keeps English
+fallback text and substitutes named parameters. Hosts can register their own
+service; look it up when displaying UI so language changes and replacement
+services take effect. Parameter values, including user-written comments, must
+remain unchanged. Built-in canvas/property menus, tool windows, toolbar tooltips,
+SVG controls and property-editor prompts use this service.
+
+Translators may expose `languageChanged.on(listener)`, returning a disposable
+subscription, to refresh open UI. `bindDesignerUiTranslation(root, services)`
+updates explicitly marked designer UI (`data-wcd-i18n-text`, `-title`,
+`-placeholder`, `-aria-label`) and returns a binding that the owning widget must
+dispose. It preserves input/option values and excludes authored canvas content,
+preview content and third-party code editors. Dynamic labels can use
+`setDesignerUiTranslation(element, text, attribute, params)` without inserting
+user values into translation keys. These markers belong only to editor UI,
+never to the edited document.
+
 ## Theming
 
 Style the designer UI with CSS custom properties on an ancestor, such as `--wcd-color-surface`, `--wcd-color-text`, and `--wcd-color-accent`. See [THEMING.md](THEMING.md) for the token reference. Style the document itself through `designer.additionalStyles` or `designer.additionalStylesheets`.

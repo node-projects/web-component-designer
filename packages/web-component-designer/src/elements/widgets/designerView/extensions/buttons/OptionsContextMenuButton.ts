@@ -11,7 +11,8 @@ export class OptionsContextMenuButton implements IDesignViewConfigButtonsProvide
   provideButtons(designerView: DesignerView, designerCanvas: IDesignerCanvas): HTMLElement[] {
     const btn = document.createElement('div');
     btn.innerHTML = 'O';
-    btn.title = 'options';
+    btn.title = designerCanvas.serviceContainer.translationService.translate('options');
+    btn.setAttribute('data-wcd-i18n-title', 'options');
     btn.className = 'toolbar-control';
     btn.onclick = (e) => {
       this.showCtxMenu(e, designerCanvas);
@@ -27,22 +28,22 @@ export class OptionsContextMenuButton implements IDesignViewConfigButtonsProvide
   protected prepareContextMenu(event: MouseEvent, designerCanvas: IDesignerCanvas) {
     const ctxMenu = [
       {
-        title: 'simulate hover on hover', checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover, action: () => {
+        title: designerCanvas.serviceContainer.translationService.translate('simulate hover on hover'), checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover, action: () => {
           designerCanvas.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover = !designerCanvas.instanceServiceContainer.designContext.extensionOptions.simulateHoverOnHover;
         }
       },
       {
-        title: 'select unhitable elements', checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements, action: () => {
+        title: designerCanvas.serviceContainer.translationService.translate('select unhitable elements'), checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements, action: () => {
           designerCanvas.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements = !designerCanvas.instanceServiceContainer.designContext.extensionOptions.selectUnhitableElements;
         }
       },
       {
-        title: 'pause animations', checked: designerCanvas.pauseAnimations, action: () => {
+        title: designerCanvas.serviceContainer.translationService.translate('pause animations'), checked: designerCanvas.pauseAnimations, action: () => {
           designerCanvas.pauseAnimations = !designerCanvas.pauseAnimations;
         }
       },
       {
-        title: 'hide overflowing content', checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent, action: () => {
+        title: designerCanvas.serviceContainer.translationService.translate('hide overflowing content'), checked: designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent, action: () => {
           designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent = !designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent;
           if (designerCanvas.instanceServiceContainer.designContext.extensionOptions.hideOverflowingContent) {
             for (let c of designerCanvas.rootDesignItem.children(true)) {

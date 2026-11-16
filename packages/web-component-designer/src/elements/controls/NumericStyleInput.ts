@@ -147,13 +147,13 @@ export class NumericStyleInput extends BaseCustomWebComponentConstructorAppend {
   public static override readonly template = html`
     <div id="container">
       <div id="value-wrapper">
-        <button id="scrubber" type="button" aria-label="Drag to change value">${dragHandleGlyph}</button>
+        <button id="scrubber" type="button" aria-label="Drag to change value" data-wcd-i18n-aria-label="Drag to change value">${dragHandleGlyph}</button>
         <input id="input" type="text" spellcheck="false">
       </div>
       <select id="select"></select>
       <div id="stepper">
-        <button id="increase" type="button" aria-label="Increase value">+</button>
-        <button id="decrease" type="button" aria-label="Decrease value">-</button>
+        <button id="increase" type="button" aria-label="Increase value" data-wcd-i18n-aria-label="Increase value">+</button>
+        <button id="decrease" type="button" aria-label="Decrease value" data-wcd-i18n-aria-label="Decrease value">-</button>
       </div>
       <span id="measure"></span>
     </div>

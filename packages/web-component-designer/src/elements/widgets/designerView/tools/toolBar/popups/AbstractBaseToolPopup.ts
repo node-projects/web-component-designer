@@ -1,3 +1,5 @@
+import { bindDesignerUiTranslation } from '../../../../../services/translationService/DesignerUiTranslation.js';
+import type { ServiceContainer } from '../../../../../services/ServiceContainer.js';
 import { BaseCustomWebComponentConstructorAppend, css } from '@node-projects/base-custom-webcomponent';
 import { DesignerToolbar } from '../DesignerToolbar.js';
 
@@ -66,12 +68,22 @@ export abstract class AbstractBaseToolPopup extends BaseCustomWebComponentConstr
           gap: 4px;
       }`
 
+  private _uiTranslation: { dispose(): void };
+
+  initializeTranslation(container: ServiceContainer) {
+    this._uiTranslation?.dispose();
+    this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, container);
+  }
+
+  disconnectedCallback() { this._uiTranslation?.dispose(); }
+
   constructor() {
     super();
     this.addEventListener('wheel', event => event.stopPropagation(), { passive: true });
 
     for (let e of [...this.shadowRoot.querySelectorAll<HTMLButtonElement>("button.tool")]) {
       e.setAttribute('aria-label', e.title);
+      e.setAttribute('data-wcd-i18n-aria-label', e.getAttribute('data-wcd-i18n-title') ?? e.title);
       e.onclick = () => (<DesignerToolbar>(<ShadowRoot>this.getRootNode()).host).setTool(e.dataset['commandParameter']);
     }
   }

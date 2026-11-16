@@ -1,3 +1,4 @@
+import { bindDesignerUiTranslation } from '../../services/translationService/DesignerUiTranslation.js';
 import { BaseCustomWebComponentConstructorAppend, css, html } from "@node-projects/base-custom-webcomponent";
 import { IDesignItem } from "../../item/IDesignItem.js";
 import { DesignItem } from "../../item/DesignItem.js";
@@ -155,17 +156,17 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
     public static override readonly template = html`
         <div>
             <table>
-                    <tr><th colspan="2">Styling</th></tr>
-                    <tr><td>display</td><td>[[?this.computedStyle?.display]]</td></tr>
-                    <tr><td>position</td><td>[[?this.computedStyle?.position]]</td></tr>
-                    <tr><td>visibility</td><td>[[?this.computedStyle?.visibility]]</td></tr>
-                    <tr><td>pointerEvents</td><td>[[?this.computedStyle?.pointerEvents]]</td></tr>
-                    <tr><td>zIndex</td><td>[[?this.computedStyle?.zIndex]]</td></tr>
-                    <tr><th colspan="2">Context</th></tr>
-                    <tr><td>offsetParent</td><td class="lnk" @click="[[this._clickLink(event, 'offsetParent')]]">[[?this.selectedElementOffsetParentText]]</td></tr>
-                    <tr><td>createsStackingContext</td><td>[[this.createsStackingContext]]</td></tr>
-                    <tr><td>stackingContextReason</td><td>[[this.createsStackingContextReason]]</td></tr>
-                    <tr><td>stackingContextParent</td><td class="lnk" @click="[[this._clickLink(event, 'stackingContextParent')]]">[[?this.parentStackingContextText]]</td></tr>
+                    <tr><th colspan="2" data-wcd-i18n-text="Styling">Styling</th></tr>
+                    <tr><td data-wcd-i18n-text="display">display</td><td>[[?this.computedStyle?.display]]</td></tr>
+                    <tr><td data-wcd-i18n-text="position">position</td><td>[[?this.computedStyle?.position]]</td></tr>
+                    <tr><td data-wcd-i18n-text="visibility">visibility</td><td>[[?this.computedStyle?.visibility]]</td></tr>
+                    <tr><td data-wcd-i18n-text="pointerEvents">pointerEvents</td><td>[[?this.computedStyle?.pointerEvents]]</td></tr>
+                    <tr><td data-wcd-i18n-text="zIndex">zIndex</td><td>[[?this.computedStyle?.zIndex]]</td></tr>
+                    <tr><th colspan="2" data-wcd-i18n-text="Context">Context</th></tr>
+                    <tr><td data-wcd-i18n-text="offsetParent">offsetParent</td><td class="lnk" @click="[[this._clickLink(event, 'offsetParent')]]">[[?this.selectedElementOffsetParentText]]</td></tr>
+                    <tr><td data-wcd-i18n-text="createsStackingContext">createsStackingContext</td><td>[[this.createsStackingContext]]</td></tr>
+                    <tr><td data-wcd-i18n-text="stackingContextReason">stackingContextReason</td><td>[[this.createsStackingContextReason]]</td></tr>
+                    <tr><td data-wcd-i18n-text="stackingContextParent">stackingContextParent</td><td class="lnk" @click="[[this._clickLink(event, 'stackingContextParent')]]">[[?this.parentStackingContextText]]</td></tr>
             </table>
         </div> 
     `;
@@ -241,7 +242,16 @@ export class DebugView extends BaseCustomWebComponentConstructorAppend {
         }
     }
 
+    private _uiTranslation: { dispose(): void };
+    private _translationContainer: IDesignItem['serviceContainer'];
+    disconnectedCallback() { this._uiTranslation?.dispose(); this._translationContainer = undefined; }
+
     update(designItem: IDesignItem) {
+        if (designItem && this._translationContainer !== designItem.serviceContainer) {
+            this._uiTranslation?.dispose();
+            this._translationContainer = designItem.serviceContainer;
+            this._uiTranslation = bindDesignerUiTranslation(this.shadowRoot, designItem.serviceContainer);
+        }
         if (this._ready) {
             requestAnimationFrame(() => {
                 let element = designItem?.element;

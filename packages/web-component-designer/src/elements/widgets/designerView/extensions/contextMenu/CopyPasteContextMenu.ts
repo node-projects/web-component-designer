@@ -13,14 +13,14 @@ export class CopyPasteContextMenu implements IContextMenuExtension {
   public provideContextMenuItems(event: MouseEvent, designerCanvas: IDesignerCanvas, designItem: IDesignItem): IContextMenuItem[] {
     if (designerCanvas.readOnly)
       return [
-        { title: 'copy', icon: `<img src="${assetsPath + 'icons/copy.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C', disabled: designItem === null }
+        { title: designerCanvas.serviceContainer.translationService.translate('copy'), icon: `<img src="${assetsPath + 'icons/copy.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C', disabled: designItem === null }
       ]
 
     return [
-      { title: 'copy', icon: `<img src="${assetsPath + 'icons/copy.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C', disabled: designItem === null },
-      { title: 'cut', icon: `<img src="${assetsPath + 'icons/cut.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.cut }); }, shortCut: 'Ctrl + X', disabled: designItem === null },
-      { title: 'paste', icon: `<img src="${assetsPath + 'icons/paste.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.paste }); }, shortCut: 'Ctrl + V' },
-      { title: 'delete', icon: `<img src="${assetsPath + 'icons/delete.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.delete }); }, shortCut: 'Del', disabled: designItem === null },
+      { title: designerCanvas.serviceContainer.translationService.translate('copy'), icon: `<img src="${assetsPath + 'icons/copy.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.copy }); }, shortCut: 'Ctrl + C', disabled: designItem === null },
+      { title: designerCanvas.serviceContainer.translationService.translate('cut'), icon: `<img src="${assetsPath + 'icons/cut.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.cut }); }, shortCut: 'Ctrl + X', disabled: designItem === null },
+      { title: designerCanvas.serviceContainer.translationService.translate('paste'), icon: `<img src="${assetsPath + 'icons/paste.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.paste }); }, shortCut: 'Ctrl + V' },
+      { title: designerCanvas.serviceContainer.translationService.translate('delete'), icon: `<img src="${assetsPath + 'icons/delete.svg'}">`, action: () => { designerCanvas.executeCommand({ type: CommandType.delete }); }, shortCut: 'Del', disabled: designItem === null },
     ]
   }
 }

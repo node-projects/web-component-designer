@@ -26,7 +26,8 @@ export class AbstractDesignViewConfigButton implements IDesignViewConfigButtonsP
       btn.innerHTML = this.content;
     else
       btn.appendChild(this.content);
-    btn.title = this.tooltp;
+    btn.title = designerCanvas.serviceContainer.translationService.translate(this.tooltp);
+    btn.setAttribute('data-wcd-i18n-title', this.tooltp);
     btn.className = 'toolbar-control';
     const subscription = designerCanvas.instanceServiceContainer.designContext.extensionOptionsChanged.on(() => {
       if (extensionOptions[this.settingName] !== false)

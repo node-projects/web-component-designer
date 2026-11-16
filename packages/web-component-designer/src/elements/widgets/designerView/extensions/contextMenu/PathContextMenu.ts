@@ -19,7 +19,7 @@ export class PathContextMenu implements IContextMenuExtension {
     items.push({ title: '-' });
     if (lastType == 'z' || lastType == 'Z') {
       items.push({
-        title: 'open path ', action: () => {
+        title: designerCanvas.serviceContainer.translationService.translate('open path '), action: () => {
           pathdata.splice(pathdata.length - 1, 1);
           designItem.setAttribute('d', createPathD(pathdata));
         }
@@ -27,7 +27,7 @@ export class PathContextMenu implements IContextMenuExtension {
     }
     else {
       items.push({
-        title: 'close path ', action: () => {
+        title: designerCanvas.serviceContainer.translationService.translate('close path '), action: () => {
           pathdata.push(<any>{ type: 'Z' });
           designItem.setAttribute('d', createPathD(pathdata));
         }

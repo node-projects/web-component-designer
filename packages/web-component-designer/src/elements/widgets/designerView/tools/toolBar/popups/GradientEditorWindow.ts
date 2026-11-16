@@ -393,11 +393,11 @@ export class GradientEditorWindow extends DraggableToolWindow {
         <div class="stop-track" id="ge-stop-track"></div>
 
         <div class="row">
-          <label>Type</label>
+          <label data-wcd-i18n-text="Type">Type</label>
           <select id="ge-type">
-            <option value="linear">Linear</option>
-            <option value="radial">Radial</option>
-            <option value="conic">Conic</option>
+            <option value="linear" data-wcd-i18n-text="Linear">Linear</option>
+            <option value="radial" data-wcd-i18n-text="Radial">Radial</option>
+            <option value="conic" data-wcd-i18n-text="Conic">Conic</option>
           </select>
           <span></span>
         </div>
@@ -409,7 +409,7 @@ export class GradientEditorWindow extends DraggableToolWindow {
         <!-- Linear controls -->
         <div id="ge-linear-group">
           <div class="row">
-            <label>Angle</label>
+            <label data-wcd-i18n-text="Angle">Angle</label>
             <input type="range" id="ge-angle" min="0" max="360" step="1">
             <span class="val-label" id="ge-angle-val">135°</span>
           </div>
@@ -418,26 +418,26 @@ export class GradientEditorWindow extends DraggableToolWindow {
         <!-- Radial controls -->
         <div id="ge-radial-group" style="display:none">
           <div class="row multi">
-            <label>Shape</label>
+            <label data-wcd-i18n-text="Shape">Shape</label>
             <select id="ge-shape">
-              <option value="ellipse">Ellipse</option>
-              <option value="circle">Circle</option>
+              <option value="ellipse" data-wcd-i18n-text="Ellipse">Ellipse</option>
+              <option value="circle" data-wcd-i18n-text="Circle">Circle</option>
             </select>
-            <label>Size</label>
+            <label data-wcd-i18n-text="Size">Size</label>
             <select id="ge-size">
-              <option value="farthest-corner">Farthest Corner</option>
-              <option value="farthest-side">Farthest Side</option>
-              <option value="closest-corner">Closest Corner</option>
-              <option value="closest-side">Closest Side</option>
+              <option value="farthest-corner" data-wcd-i18n-text="Farthest Corner">Farthest Corner</option>
+              <option value="farthest-side" data-wcd-i18n-text="Farthest Side">Farthest Side</option>
+              <option value="closest-corner" data-wcd-i18n-text="Closest Corner">Closest Corner</option>
+              <option value="closest-side" data-wcd-i18n-text="Closest Side">Closest Side</option>
             </select>
           </div>
           <div class="row">
-            <label>Position X</label>
+            <label data-wcd-i18n-text="Position X">Position X</label>
             <input type="range" id="ge-pos-x" min="0" max="100" step="1">
             <span class="val-label" id="ge-pos-x-val">50%</span>
           </div>
           <div class="row">
-            <label>Position Y</label>
+            <label data-wcd-i18n-text="Position Y">Position Y</label>
             <input type="range" id="ge-pos-y" min="0" max="100" step="1">
             <span class="val-label" id="ge-pos-y-val">50%</span>
           </div>
@@ -446,17 +446,17 @@ export class GradientEditorWindow extends DraggableToolWindow {
         <!-- Conic controls -->
         <div id="ge-conic-group" style="display:none">
           <div class="row">
-            <label>Angle</label>
+            <label data-wcd-i18n-text="Angle">Angle</label>
             <input type="range" id="ge-conic-angle" min="0" max="360" step="1">
             <span class="val-label" id="ge-conic-angle-val">0°</span>
           </div>
           <div class="row">
-            <label>Position X</label>
+            <label data-wcd-i18n-text="Position X">Position X</label>
             <input type="range" id="ge-conic-pos-x" min="0" max="100" step="1">
             <span class="val-label" id="ge-conic-pos-x-val">50%</span>
           </div>
           <div class="row">
-            <label>Position Y</label>
+            <label data-wcd-i18n-text="Position Y">Position Y</label>
             <input type="range" id="ge-conic-pos-y" min="0" max="100" step="1">
             <span class="val-label" id="ge-conic-pos-y-val">50%</span>
           </div>
@@ -465,25 +465,25 @@ export class GradientEditorWindow extends DraggableToolWindow {
         <div class="separator"></div>
 
         <div class="stop-header">
-          <span>Selected Stop</span>
+          <span data-wcd-i18n-text="Selected Stop">Selected Stop</span>
           <div class="stop-actions">
-            <button id="ge-add-stop-btn" title="Add stop at 50%">+ Add</button>
-            <button id="ge-remove-stop-btn" title="Remove selected stop">− Remove</button>
+            <button id="ge-add-stop-btn" title="Add stop at 50%" data-wcd-i18n-title="Add stop at 50%" data-wcd-i18n-text="+ Add">+ Add</button>
+            <button id="ge-remove-stop-btn" title="Remove selected stop" data-wcd-i18n-title="Remove selected stop" data-wcd-i18n-text="− Remove">− Remove</button>
           </div>
         </div>
 
         <div class="row">
-          <label>Color</label>
+          <label data-wcd-i18n-text="Color">Color</label>
           <input type="color" id="ge-stop-color" value="#667eea">
           <span></span>
         </div>
         <div class="row">
-          <label>Opacity</label>
+          <label data-wcd-i18n-text="Opacity">Opacity</label>
           <input type="range" id="ge-stop-opacity" min="0" max="100" step="1">
           <span class="val-label" id="ge-stop-opacity-val">100%</span>
         </div>
         <div class="row">
-          <label>Position</label>
+          <label data-wcd-i18n-text="Position">Position</label>
           <input type="range" id="ge-stop-pos" min="0" max="100" step="1">
           <span class="val-label" id="ge-stop-pos-val">0%</span>
         </div>
@@ -491,19 +491,19 @@ export class GradientEditorWindow extends DraggableToolWindow {
         <div class="separator"></div>
 
         <div class="row two-col">
-          <label>Apply to</label>
+          <label data-wcd-i18n-text="Apply to">Apply to</label>
           <select id="ge-property">
-            <option value="background-image">background-image</option>
-            <option value="background">background</option>
+            <option value="background-image" data-wcd-i18n-text="background-image">background-image</option>
+            <option value="background" data-wcd-i18n-text="background">background</option>
           </select>
         </div>
 
         <textarea class="css-out" id="ge-css-out"></textarea>
 
         <div class="actions">
-          <button class="load-btn" id="ge-load-btn">Load</button>
-          <button id="ge-copy-btn">Copy CSS</button>
-          <button class="apply-btn" id="ge-apply-btn">Apply to selection</button>
+          <button class="load-btn" id="ge-load-btn" data-wcd-i18n-text="Load">Load</button>
+          <button id="ge-copy-btn" data-wcd-i18n-text="Copy CSS">Copy CSS</button>
+          <button class="apply-btn" id="ge-apply-btn" data-wcd-i18n-text="Apply to selection">Apply to selection</button>
         </div>
       </div>`;
   }
