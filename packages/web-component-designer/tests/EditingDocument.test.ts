@@ -305,8 +305,9 @@ async function nodeParserServices() {
   const { AbstractStylesheetService } = await import('../src/elements/services/stylesheetService/AbstractStylesheetService');
   const collaborationIndexes = await import('../src/elements/services/collaborationService/CollaborationNodeIndex');
   const { CommandType } = await import('../src/commandHandling/CommandType');
+  const { ExtensionType } = await import('../src/elements/widgets/designerView/extensions/ExtensionType');
   jest.unstable_mockModule('@node-projects/web-component-designer', () => ({
-    DesignItem, newElementFromString, CssAttributeParser, DomConverter, InstanceServiceContainer, AbstractStylesheetService, CommandType, ...collaborationIndexes
+    DesignItem, newElementFromString, CssAttributeParser, DomConverter, InstanceServiceContainer, AbstractStylesheetService, CommandType, ExtensionType, ...collaborationIndexes
   }));
   const { NodeHtmlParserService } = await import('../../web-component-designer-htmlparserservice-nodehtmlparser/src/service/htmlParserService/NodeHtmlParserService');
   const service = services();

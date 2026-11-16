@@ -11,6 +11,7 @@ import { appendCssImportant } from '../../helper/CssImportant.js';
 export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
 
   public options: IHtmlWriterOptions;
+  private readonly _compressedStyles = new WeakMap<IDesignItem, { signature: string; styles: [string, string][] }>();
 
   constructor(options?: IHtmlWriterOptions) {
     this.options = options ?? {};
@@ -114,8 +115,17 @@ export abstract class AbstractHtmlWriterService implements IHtmlWriterService {
       const styleEntries = [...designItem.styles()];
       const hasImportantStyle = styleEntries.some(x => designItem.isStyleImportant(x[0]));
       let styles: Iterable<[name: string, value: string]> = styleEntries;
-      if (this.options.compressCssToShorthandProperties && !hasImportantStyle)
-        styles = CssCombiner.combine(new Map(styleEntries));
+      if (this.options.compressCssToShorthandProperties && !hasImportantStyle) {
+        // Most snapshots change one item. Browser CSS normalization is expensive;
+        // unchanged ordered declarations have the same shorthand result.
+        const signature = JSON.stringify(styleEntries);
+        let cached = this._compressedStyles.get(designItem);
+        if (cached?.signature !== signature) {
+          cached = { signature, styles: [...CssCombiner.combine(new Map(styleEntries))] };
+          this._compressedStyles.set(designItem, cached);
+        }
+        styles = cached.styles;
+      }
       for (const s of styles) {
         if (s[0]) {
           const value = DomConverter.normalizeAttributeValue(appendCssImportant(s[1], designItem.isStyleImportant(s[0])));

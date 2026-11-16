@@ -1,4 +1,4 @@
-import { IDesignItem } from '../../item/IDesignItem.js';
+import type { IDesignItem } from '../../item/IDesignItem.js';
 import { NodeType } from '../../item/NodeType.js';
 
 type CollaborationNodeIndexCache = {
@@ -7,6 +7,7 @@ type CollaborationNodeIndexCache = {
 };
 
 const collaborationNodeIndexCacheKey = Symbol('collaborationNodeIndexCache');
+const documentCaches = new WeakMap<IDesignItem, { value?: CollaborationNodeIndexCache }>();
 
 function buildCache(rootDesignItem: IDesignItem): CollaborationNodeIndexCache {
   const orderedItems: IDesignItem[] = [];
@@ -37,7 +38,17 @@ function getCache(rootDesignItem: IDesignItem, cache?: Record<string | symbol, a
   if (cache?.[collaborationNodeIndexCacheKey])
     return cache[collaborationNodeIndexCacheKey];
 
-  const nodeIndexCache = buildCache(rootDesignItem);
+  let documentCache = documentCaches.get(rootDesignItem);
+  if (!documentCache) {
+    documentCache = {};
+    documentCaches.set(rootDesignItem, documentCache);
+    const subscription = rootDesignItem.instanceServiceContainer.onContentChanged.on(changes => {
+      if (changes.some(change => ['added', 'removed', 'moved', 'parsed'].includes(change.changeType)))
+        documentCache.value = undefined;
+    });
+    rootDesignItem.instanceServiceContainer.editingDocument?.addDisposable(subscription);
+  }
+  const nodeIndexCache = documentCache.value ??= buildCache(rootDesignItem);
   if (cache)
     cache[collaborationNodeIndexCacheKey] = nodeIndexCache;
   return nodeIndexCache;

@@ -2,13 +2,14 @@ import { ITextWriter } from './ITextWriter.js';
 
 export class SimpleTextWriter implements ITextWriter {
   private _textHolder: string = ''
+  private _lastCharNewline = false;
 
   public get position(): number {
     return this._textHolder.length;
   }
 
   public isLastCharNewline() {
-    return this._textHolder[this._textHolder.length - 1] === '\n';
+    return this._lastCharNewline;
   }
 
   public levelRaise() {
@@ -19,10 +20,11 @@ export class SimpleTextWriter implements ITextWriter {
 
   public write(text: string) {
     this._textHolder += text;
+    if (text.length) this._lastCharNewline = text[text.length - 1] === '\n';
   }
 
   public writeLine(text: string) {
-    this._textHolder += text;
+    this.write(text);
   }
 
   public writeIndent() {

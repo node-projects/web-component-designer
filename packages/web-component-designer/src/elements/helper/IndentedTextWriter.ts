@@ -2,6 +2,7 @@ import { ITextWriter } from './ITextWriter.js';
 
 export class IndentedTextWriter implements ITextWriter  {
   private _textHolder: string = ''
+  private _lastCharNewline = false;
   public readonly indent: number = 4;
   public level: number = 0;
 
@@ -10,7 +11,7 @@ export class IndentedTextWriter implements ITextWriter  {
   }
 
   public isLastCharNewline() {
-    return this._textHolder[this._textHolder.length - 1] === '\n';
+    return this._lastCharNewline;
   }
 
   public levelRaise() {
@@ -23,20 +24,22 @@ export class IndentedTextWriter implements ITextWriter  {
 
   public write(text: string) {
     this._textHolder += text;
+    if (text.length) this._lastCharNewline = text[text.length - 1] === '\n';
   }
 
   public writeLine(text: string) {
     this.writeIndent();
-    this._textHolder += text;
+    this.write(text);
     this.writeNewline();
   }
 
   public writeIndent() {
-    this._textHolder += ''.padEnd(this.level * this.indent, ' ');
+    this.write(''.padEnd(this.level * this.indent, ' '));
   }
 
   public writeNewline() {
     this._textHolder += '\n';
+    this._lastCharNewline = true;
   }
 
   public getString() {

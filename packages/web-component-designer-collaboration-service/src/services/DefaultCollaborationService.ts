@@ -1,4 +1,5 @@
 import { TypedEvent } from '@node-projects/base-custom-webcomponent';
+import { ExtensionType } from '@node-projects/web-component-designer';
 import { CollaborationConnectionState, DomConverter, getCollaborationNodeIndex, getCollaborationNodeIndexes, getDesignItemByCollaborationNodeIndex, ICollaborationComment, ICollaborationCommentsChangedEvent, ICollaborationDocumentSnapshot, ICollaborationPeerPresence, ICollaborationPeersChangedEvent, ICollaborationRemoteChange, ICollaborationSelectionEvent, ICollaborationService, ICollaborationSession, ICollaborationStateChangedEvent, ICollaborationTransport, IDesignerCanvas, InstanceServiceContainer, ITransactionItem, IUndoChangeEvent, UndoChangeSource } from '@node-projects/web-component-designer';
 
 function createPeerColor(peerId: string) {
@@ -320,7 +321,7 @@ export class DefaultCollaborationService implements ICollaborationService {
 
     this._refreshExtensionsHandle = requestAnimationFrame(() => {
       this._refreshExtensionsHandle = null;
-      this._container.designerCanvas?.extensionManager?.refreshAllAppliedExtentions();
+      this._container.designerCanvas?.extensionManager?.refreshExtension(this._container.rootDesignItem, ExtensionType.Permanent);
     });
   }
 
@@ -335,7 +336,7 @@ export class DefaultCollaborationService implements ICollaborationService {
       || Math.abs(previousPosition.x - cursorPosition.x) >= 1
       || Math.abs(previousPosition.y - cursorPosition.y) >= 1;
 
-    if (!hasMoved && now - this._lastLocalCursorUpdate < 40)
+    if (!hasMoved || previousPosition && now - this._lastLocalCursorUpdate < 40)
       return;
 
     this._lastLocalCursorPosition = cursorPosition;

@@ -1,14 +1,14 @@
 import { css } from '@node-projects/base-custom-webcomponent';
 import { IDesignerExtensionProvider, IExtensionManager, IDesignerCanvas, IDesignItem, IDesignerExtension } from '@node-projects/web-component-designer';
-import { CollaborationOverlayExtension } from './CollaborationOverlayExtension.js';
+import { CollaborationSelectionOverlayExtension } from './CollaborationSelectionOverlayExtension.js';
 
 export class CollaborationOverlayExtensionProvider implements IDesignerExtensionProvider {
   shouldExtend(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): boolean {
-    return !designItem.isRootItem && !(designItem.element instanceof HTMLTemplateElement);
+    return designItem.isRootItem;
   }
 
   getExtension(extensionManager: IExtensionManager, designerView: IDesignerCanvas, designItem: IDesignItem): IDesignerExtension {
-    return new CollaborationOverlayExtension(extensionManager, designerView, designItem);
+    return new CollaborationSelectionOverlayExtension(extensionManager, designerView, designItem);
   }
 
   static readonly style = css`

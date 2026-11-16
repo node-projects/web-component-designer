@@ -1,10 +1,95 @@
-import { EditingDocument, IContentChanged, IDesignItem, NodeType, TextContentChangeAction } from '@node-projects/web-component-designer';
+import { getDesignItemByCollaborationNodeIndex, NodeType, TextContentChangeAction } from '@node-projects/web-component-designer';
+import type { EditingDocument, IContentChanged, IDesignItem } from '@node-projects/web-component-designer';
 import { mergeCollaborationHtml } from './mergeCollaborationHtml.js';
+
+function syncProperties(target: IDesignItem, source: IDesignItem, changes: IContentChanged[], attributesChanged?: (item: IDesignItem) => void) {
+  let changed = false;
+  const oldAttributes = new Map(target.attributes());
+  const newAttributes = new Map(source.attributes());
+  for (const name of oldAttributes.keys()) if (!newAttributes.has(name)) {
+    target._withoutUndoRemoveAttribute(name); changed = true;
+    changes.push({ changeType: 'changed', designItems: [target], type: 'attribute', name });
+  }
+  for (const [name, value] of newAttributes) if (target.getAttribute(name) !== value) {
+    target._withoutUndoSetAttribute(name, value); changed = true;
+    changes.push({ changeType: 'changed', designItems: [target], type: 'attribute', name });
+  }
+  if (changed) attributesChanged?.(target);
+  const newStyles = new Map(source.styles());
+  for (const [name] of [...target.styles()]) if (!newStyles.has(name)) {
+    target._withoutUndoRemoveStyle(name);
+    changes.push({ changeType: 'changed', designItems: [target], type: 'css', name });
+  }
+  for (const [name, value] of newStyles)
+    if (target.getStyle(name) !== value || target.isStyleImportant(name) !== source.isStyleImportant(name)) {
+      target._withoutUndoSetStyle(name, value, source.isStyleImportant(name));
+      changes.push({ changeType: 'changed', designItems: [target], type: 'css', name });
+    }
+}
+
+// Only optimize one changed opening tag with byte-identical surrounding markup.
+async function applySingleElementProperties(document: EditingDocument, before: string, html: string, attributesChanged?: (item: IDesignItem) => void): Promise<boolean> {
+  // Raw-text elements and comments may contain opening-tag-like text rather than nodes.
+  if (/<!--|<(?:script|style|textarea|title|xmp|iframe|noembed|noframes|plaintext)\b/i.test(before)) return false;
+  let first = 0;
+  while (first < before.length && before[first] === html[first]) first++;
+  const start = before.lastIndexOf('<', first);
+  if (start < 0 || html.lastIndexOf('<', first) !== start) return false;
+  const endOfTag = (text: string, tagStart = start) => {
+    let quote = '';
+    for (let index = tagStart + 1; index < text.length; index++) {
+      const char = text[index];
+      if (quote) { if (char === quote) quote = ''; }
+      else if (char === '"' || char === "'") quote = char;
+      else if (char === '>') return index + 1;
+    }
+    return -1;
+  };
+  const endBefore = endOfTag(before), endAfter = endOfTag(html);
+  if (endBefore < first || endAfter < first || before.slice(endBefore) !== html.slice(endAfter)) return false;
+  const oldTag = before.slice(start, endBefore), newTag = html.slice(start, endAfter);
+  const oldName = /^<([a-z][\w:-]*)\b/i.exec(oldTag)?.[1];
+  const newName = /^<([a-z][\w:-]*)\b/i.exec(newTag)?.[1];
+  if (!oldName || oldName !== newName || /^(style|script|template|textarea)$/i.test(oldName)) return false;
+  // The unchanged prefix/suffix prove that structure is identical. Count opening
+  // tags in that exact revision and resolve the same preorder position on the model.
+  let nodeIndex = 0;
+  for (let offset = 0; offset < start;) {
+    const tagStart = before.indexOf('<', offset);
+    if (tagStart < 0 || tagStart >= start) break;
+    const end = endOfTag(before, tagStart);
+    if (end < 0 || end > start) return false;
+    if (/^<[a-z][\w:-]*\b/i.test(before.slice(tagStart, end))) nodeIndex++;
+    offset = end;
+  }
+  const target = getDesignItemByCollaborationNodeIndex(document.rootDesignItem, nodeIndex);
+  if (!target || target.name.toLowerCase() !== oldName.toLowerCase()) return false;
+  const svg = target.element.namespaceURI === 'http://www.w3.org/2000/svg';
+  if (!svg && target.element.namespaceURI !== 'http://www.w3.org/1999/xhtml') return false;
+  const snippet = newTag + '</' + newName + '>';
+  // Watch authoritative document edits while parsing yields, rather than writing
+  // the entire unchanged document a second time just to detect a concurrent edit.
+  let changedWhileParsing = false;
+  const subscription = document.instanceServiceContainer.onContentChanged.on(() => { changedWhileParsing = true; });
+  let items: IDesignItem[];
+  try { items = await document.serviceContainer.htmlParserService.parse(svg ? '<svg>' + snippet + '</svg>' : snippet, document.serviceContainer, document.instanceServiceContainer, false); }
+  finally { subscription.dispose(); }
+  const source = svg ? items[0]?.firstChild : items[0];
+  if (items.length !== 1 || !source || source.name !== target.name || changedWhileParsing) return false;
+  const changes: IContentChanged[] = [];
+  syncProperties(target, source, changes, attributesChanged);
+  if (changes.length) {
+    document.instanceServiceContainer.onContentChanged.emit(changes);
+    document.instanceServiceContainer.designerCanvas?.extensionManager?.refreshExtension(target);
+  }
+  return true;
+}
 
 /** Apply shared HTML without replacing unchanged items, active selections or an in-progress drag. */
 export async function applyCollaborationHtml(document: EditingDocument, html: string, attributesChanged?: (item: IDesignItem) => void): Promise<void> {
   const container = document.instanceServiceContainer;
   let before = document.getHtml();
+  if (before === html || await applySingleElementProperties(document, before, html, attributesChanged)) return;
   let items = await document.serviceContainer.htmlParserService.parse(html, document.serviceContainer, container, false);
   // Parsing may yield while the local user continues typing or dragging.
   while (before !== document.getHtml()) {
@@ -29,28 +114,7 @@ export async function applyCollaborationHtml(document: EditingDocument, html: st
       if (target.content !== source.content) changes.push(...(new TextContentChangeAction(target, source.content, target.content).do() ?? []));
       return;
     }
-    let changed = false;
-    const oldAttributes = new Map(target.attributes());
-    const newAttributes = new Map(source.attributes());
-    for (const name of oldAttributes.keys()) if (!newAttributes.has(name)) {
-      target._withoutUndoRemoveAttribute(name); changed = true;
-      changes.push({ changeType: 'changed', designItems: [target], type: 'attribute', name });
-    }
-    for (const [name, value] of newAttributes) if (target.getAttribute(name) !== value) {
-      target._withoutUndoSetAttribute(name, value); changed = true;
-      changes.push({ changeType: 'changed', designItems: [target], type: 'attribute', name });
-    }
-    if (changed) attributesChanged?.(target);
-    const newStyles = new Map(source.styles());
-    for (const [name] of [...target.styles()]) if (!newStyles.has(name)) {
-      target._withoutUndoRemoveStyle(name);
-      changes.push({ changeType: 'changed', designItems: [target], type: 'css', name });
-    }
-    for (const [name, value] of newStyles)
-      if (target.getStyle(name) !== value || target.isStyleImportant(name) !== source.isStyleImportant(name)) {
-        target._withoutUndoSetStyle(name, value, source.isStyleImportant(name));
-        changes.push({ changeType: 'changed', designItems: [target], type: 'css', name });
-      }
+    syncProperties(target, source, changes, attributesChanged);
     syncChildren(target, [...source.children()]);
   };
   const syncChildren = (parent: IDesignItem, sources: IDesignItem[]) => {
