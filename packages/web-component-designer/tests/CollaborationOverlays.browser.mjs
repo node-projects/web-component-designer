@@ -67,12 +67,15 @@ test('large canvases keep cursor updates independent of document size and retain
       const tag = beforeHtml.match(/<div\b[^>]*id="item-101"[^>]*>/)[0];
       const updatedTag = tag.replace('id="item-101"', 'id="item-101" data-note="Remote > value"')
         .replace(/style="([^"]*)"/, (_, css) => `style="${css};color:red !important"`);
+      const undoCount = doc.instanceServiceContainer.undoService.undoCount;
       const getHtml = doc.getHtml.bind(doc);
       doc.getHtml = () => { throw new Error('A supplied current snapshot must avoid whole-document serialization'); };
       try { await applyCollaborationHtml(doc, beforeHtml.replace(tag, updatedTag), undefined, beforeHtml); }
       finally { doc.getHtml = getHtml; }
       const propertyUpdate = { parsed: [...parsed], retained: doc.instanceServiceContainer.selectionService.primarySelection === target,
-        note: target.getAttribute('data-note'), color: target.getStyle('color'), important: target.isStyleImportant('color') };
+        note: target.getAttribute('data-note'), color: target.getStyle('color'), important: target.isStyleImportant('color'),
+        renderedColor: target.element.style.color, renderedPriority: target.element.style.getPropertyPriority('color'),
+        retainedUndo: doc.instanceServiceContainer.undoService.undoCount === undoCount };
       const other = [...root.children()].find(item => item.id === 'item-102');
       let raced = false;
       services.htmlParserService.parse = async (html, ...args) => {
@@ -111,9 +114,16 @@ test('large canvases keep cursor updates independent of document size and retain
       await applyCollaborationHtml(edge, edge.getHtml().replace('x="1"', 'x="3"'));
       const svg = rect === edge.rootDesignItem.firstChild.firstChild && rect.getAttribute('x') === '3'
         && rect.element.namespaceURI === 'http://www.w3.org/2000/svg';
+      await edge.loadHtml('<div style="left:10px;color:red !important;--note:old"></div><div style="left:10px"></div>');
+      // Two opening tags force full reconciliation, including style removal.
+      await applyCollaborationHtml(edge, edge.getHtml().replaceAll('left:10px', 'left:30px')
+        .replace(/color:red\s*!important;?/, '').replace('--note:old', '--note:new'));
+      const renderedStyles = [...edge.rootDesignItem.children()].filter(item => item.nodeType === core.NodeType.Element)
+        .map(item => ({ left: item.element.style.left, modelLeft: item.getStyle('left'), color: item.element.style.color,
+          note: item.element.style.getPropertyValue('--note') }));
       await edge.dispose();
       view.dispose(); await doc.dispose();
-      return { cursorWork, before, comments, selected, remaining, propertyUpdate, styleCache, concurrent, commentSafe, commentDetails, duplicateTitles, positional, svg };
+      return { cursorWork, before, comments, selected, remaining, propertyUpdate, styleCache, concurrent, commentSafe, commentDetails, duplicateTitles, positional, svg, renderedStyles };
     });
     assert.ok(observed.cursorWork < 100, `Pointer-only updates traversed the drawing: ${observed.cursorWork} items`);
     assert.equal(observed.before, 1);
@@ -124,6 +134,13 @@ test('large canvases keep cursor updates independent of document size and retain
     assert.equal(observed.propertyUpdate.note, 'Remote > value');
     assert.equal(observed.propertyUpdate.color, 'red');
     assert.equal(observed.propertyUpdate.important, true);
+    assert.equal(observed.propertyUpdate.renderedColor, 'red');
+    assert.equal(observed.propertyUpdate.renderedPriority, 'important');
+    assert.equal(observed.propertyUpdate.retainedUndo, true);
+    assert.deepEqual(observed.renderedStyles, [
+      { left: '30px', modelLeft: '30px', color: '', note: 'new' },
+      { left: '30px', modelLeft: '30px', color: '', note: '' }
+    ]);
     assert.equal(observed.propertyUpdate.parsed.length, 1);
     assert.ok(observed.propertyUpdate.parsed[0] < 300, 'A property update must not parse the whole drawing');
     assert.deepEqual(observed.styleCache, { stable: true, changed: true, repeat: true, restored: true });

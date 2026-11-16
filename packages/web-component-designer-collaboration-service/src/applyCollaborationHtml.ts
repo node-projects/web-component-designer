@@ -1,4 +1,4 @@
-import { getDesignItemByCollaborationNodeIndex, NodeType, TextContentChangeAction } from '@node-projects/web-component-designer';
+import { CssStyleChangeAction, getDesignItemByCollaborationNodeIndex, NodeType, TextContentChangeAction } from '@node-projects/web-component-designer';
 import type { EditingDocument, IContentChanged, IDesignItem } from '@node-projects/web-component-designer';
 import { mergeCollaborationHtml } from './mergeCollaborationHtml.js';
 
@@ -17,13 +17,12 @@ function syncProperties(target: IDesignItem, source: IDesignItem, changes: ICont
   if (changed) attributesChanged?.(target);
   const newStyles = new Map(source.styles());
   for (const [name] of [...target.styles()]) if (!newStyles.has(name)) {
-    target._withoutUndoRemoveStyle(name);
-    changes.push({ changeType: 'changed', designItems: [target], type: 'css', name });
+    changes.push(...new CssStyleChangeAction(target, name, null, target.getStyle(name), false, target.isStyleImportant(name)).do());
   }
   for (const [name, value] of newStyles)
     if (target.getStyle(name) !== value || target.isStyleImportant(name) !== source.isStyleImportant(name)) {
-      target._withoutUndoSetStyle(name, value, source.isStyleImportant(name));
-      changes.push({ changeType: 'changed', designItems: [target], type: 'css', name });
+      // Apply to the live element as well as the model, without adding local undo history.
+      changes.push(...new CssStyleChangeAction(target, name, value, target.getStyle(name), source.isStyleImportant(name), target.isStyleImportant(name)).do());
     }
 }
 
