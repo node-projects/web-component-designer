@@ -1,5 +1,8 @@
 # Jest testing notes
 
+- Root Jest discovery is scoped to `packages/`. Release-script tests under `scripts/` use Node's runner: `node --test scripts/prepare-release.test.mjs`.
+- Popup canvas mocks need a `serviceContainer` (use `ServiceContainer`) so UI translation bindings can subscribe and dispose alongside visibility observers.
+
 - `npm run test:svg-markers` runs the real-browser SVG marker hover regression separately from Jest. Install its Chromium once with `npx playwright install chromium`. It bundles the source helper in memory and checks marker/shaft alignment under ancestor and element transforms at several canvas zoom levels; ordinary Jest runs do not require a browser.
 
 - Tests in `packages/web-component-designer/tests` import source modules without a `.js` suffix; the package's ts-jest ESM configuration maps runtime `.js` imports back to source paths.

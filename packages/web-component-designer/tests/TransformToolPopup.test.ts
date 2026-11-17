@@ -5,12 +5,14 @@ import { beforeAll, beforeEach, expect, jest, test } from '@jest/globals';
 let DesignerToolbar: typeof import('../src/elements/widgets/designerView/tools/toolBar/DesignerToolbar').DesignerToolbar;
 let DesignerToolbarButton: typeof import('../src/elements/widgets/designerView/tools/toolBar/DesignerToolbarButton').DesignerToolbarButton;
 let DraggableToolWindow: typeof import('../src/elements/widgets/designerView/tools/toolBar/popups/DraggableToolWindow').DraggableToolWindow;
+let ServiceContainer: typeof import('../src/elements/services/ServiceContainer').ServiceContainer;
 let TestToolWindow: any;
 let visibilityChanged: IntersectionObserverCallback;
 const observe = jest.fn();
 const disconnect = jest.fn();
 
 beforeAll(async () => {
+  Object.defineProperty(window, 'matchMedia', { configurable: true, value: () => ({ matches: false }) });
   Object.defineProperty(globalThis, 'IntersectionObserver', {
     configurable: true,
     value: class {
@@ -35,6 +37,7 @@ beforeAll(async () => {
   ({ DesignerToolbar } = await import('../src/elements/widgets/designerView/tools/toolBar/DesignerToolbar'));
   ({ DesignerToolbarButton } = await import('../src/elements/widgets/designerView/tools/toolBar/DesignerToolbarButton'));
   ({ DraggableToolWindow } = await import('../src/elements/widgets/designerView/tools/toolBar/popups/DraggableToolWindow'));
+  ({ ServiceContainer } = await import('../src/elements/services/ServiceContainer'));
   TestToolWindow = class extends DraggableToolWindow {
     protected get windowTitle() { return 'Test'; }
     protected get windowTemplate() { return '<div></div>'; }
@@ -50,7 +53,7 @@ beforeEach(() => {
 
 test('closes the popup when its canvas is hidden and disconnects the observer', () => {
   const toolbar = new DesignerToolbar();
-  const canvas = document.createElement('div');
+  const canvas = Object.assign(document.createElement('div'), { serviceContainer: new ServiceContainer() });
   toolbar.designerView = { designerCanvas: canvas } as any;
   const button = new DesignerToolbarButton({} as any, { '': { icon: '' } });
   button.popup = TestToolWindow;
@@ -71,7 +74,7 @@ test('closes the popup when its canvas is hidden and disconnects the observer', 
 
 test('toggles the transform popup and can reopen it after closing', () => {
   const toolbar = new DesignerToolbar();
-  toolbar.designerView = { designerCanvas: document.createElement('div') } as any;
+  toolbar.designerView = { designerCanvas: Object.assign(document.createElement('div'), { serviceContainer: new ServiceContainer() }) } as any;
   const button = new DesignerToolbarButton({} as any, { '': { icon: '' } });
   button.popup = TestToolWindow;
 

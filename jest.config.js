@@ -1,5 +1,5 @@
 export default {
-  testMatch: ['**/?(*.)+(spec|test).+(mts|ts|tsx|mjs|js)'],
+  testMatch: ['**/packages/**/?(*.)+(spec|test).+(mts|ts|tsx|mjs|js)'],
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
   extensionsToTreatAsEsm: ['.ts', '.mts'],

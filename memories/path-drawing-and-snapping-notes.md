@@ -1,5 +1,7 @@
 # Path drawing and snapping
 
+- Equal-spacing snapping prepares neighbours once in `Snaplines.calculateSnaplines`, reuses them across pointer updates on both axes, and discards them in `clearSnaplines`. Recalculate after geometry changes. `EqualSpacing.test.ts` covers spacing, obstruction, guides and cache refresh/cleanup.
+
 - Freehand `DrawPathTool` can interpolate linear points with `interpolatePoints` and optional `interpolationDistance`; the default tool enables interpolation. Point-to-point mode remains separate so its angle snapping is unaffected. Hosts can disable freehand with `freehand: false`, for example for fences.
 - `PathDataPolyfill.straightenLine()` uses `calculateAlpha()`'s clockwise screen-space angle and reconstructs Y with `y - Math.sin(angle) * length`. Reversing that sign flips vertical snapping.
 

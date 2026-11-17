@@ -4,7 +4,7 @@ import type { ISize } from '../../../interfaces/ISize.js';
 import { OverlayLayerView } from './overlayLayerView.js';
 import { OverlayLayer } from "./extensions/OverlayLayer.js";
 import { IRect } from "../../../interfaces/IRect.js";
-import { EqualSpacingSnap, getEqualSpacingSnap } from '../../helper/EqualSpacingHelper.js';
+import { EqualSpacingSnap, createEqualSpacingSnapper } from '../../helper/EqualSpacingHelper.js';
 
 const overlayLayer = OverlayLayer.Normal;
 
@@ -19,6 +19,7 @@ export class Snaplines {
   private _positionsV: [number, IRect][] = [];
   private _positionsMiddleV: [number, IRect][] = [];
   private _outerRect: DOMRect;
+  private _spacingSnap: ReturnType<typeof createEqualSpacingSnapper>;
 
   constructor(overlayLayer: OverlayLayerView) {
     this._overlayLayerView = overlayLayer;
@@ -30,6 +31,7 @@ export class Snaplines {
   }
 
   clearSnaplines() {
+    this._spacingSnap = undefined;
     if (this._overlayLayerView.removeAllNodesWithClass)
       this._overlayLayerView.removeAllNodesWithClass('svg-snapline');
     this._positionsH = [];
@@ -46,6 +48,10 @@ export class Snaplines {
     this._positionsMiddleH = providedSnaplines.positionsMiddleH;
     this._positionsV = providedSnaplines.positionsV;
     this._positionsMiddleV = providedSnaplines.positionsMiddleV;
+    const neighbours = [...new Set(this._positionsMiddleH.map(x => x[1]))].map(r => ({
+      x: r.x - this._outerRect.x, y: r.y - this._outerRect.y, width: r.width, height: r.height
+    }));
+    this._spacingSnap = createEqualSpacingSnapper(neighbours);
   }
 
   //return the snapped position
@@ -140,12 +146,9 @@ export class Snaplines {
     let spacingH: EqualSpacingSnap;
     let spacingV: EqualSpacingSnap;
     if (size && size.width > 0 && size.height > 0) {
-      const neighbours = [...new Set(this._positionsMiddleH.map(x => x[1]))].map(r => ({
-        x: r.x - this._outerRect.x, y: r.y - this._outerRect.y, width: r.width, height: r.height
-      }));
       const rect = { ...position, ...size };
-      spacingH = getEqualSpacingSnap(rect, neighbours, true, this.snapOffset);
-      spacingV = getEqualSpacingSnap(rect, neighbours, false, this.snapOffset);
+      spacingH = this._spacingSnap?.(rect, true, this.snapOffset);
+      spacingV = this._spacingSnap?.(rect, false, this.snapOffset);
       if (spacingH && (Math.abs(spacingH.position - position.x) < minDiffH || spacingH.position === posH)) {
         posH = spacingH.position;
         if (Math.abs(spacingH.position - position.x) < minDiffH) pH = undefined;
