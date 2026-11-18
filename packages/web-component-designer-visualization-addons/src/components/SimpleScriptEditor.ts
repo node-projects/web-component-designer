@@ -404,7 +404,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
       pg.instanceServiceContainer = this.instanceServiceContainer;
       pg.bindableObjectsTarget = "script";
 
-      pg.getTypeInfo = (obj, type) =>
+      pg.getTypeInfo = async (obj, type) =>
         typeInfoFromJsonSchema(this.propertiesTypeInfo, obj, type);
       pg.showHead = false;
       pg.typeName = "IScriptMultiplexValue";
@@ -660,7 +660,7 @@ export class SimpleScriptEditor extends BaseCustomWebComponentConstructorAppend 
 
     this._propertygrid.setNameColumnWidth(130);
 
-    this._propertygrid.getTypeInfo = (obj, type) => {
+    this._propertygrid.getTypeInfo = async (obj, type) => {
       const info = typeInfoFromJsonSchema(this.scriptCommandsTypeInfo, obj, type);
       // trueCommands/elseCommands of "If" are edited as nested tree nodes, not in the property grid
       if (info && (type === "If" || obj?.type === "If")) {
