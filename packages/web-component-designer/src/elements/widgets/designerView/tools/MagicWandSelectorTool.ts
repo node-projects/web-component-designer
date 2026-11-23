@@ -33,7 +33,7 @@ export class MagicWandSelectorTool implements ITool {
         this._path.style.strokeWidth = '' + (1 / designerCanvas.scaleFactor);
         this._path.style.strokeDasharray = '' + (2 / designerCanvas.scaleFactor);
         this._pathD = "M" + currentPoint.x + " " + currentPoint.y;
-        this._path.setAttribute("D", this._pathD);
+        this._path.setAttribute("d", this._pathD);
         designerCanvas.overlayLayer.addOverlay(this.constructor.name, this._path, OverlayLayer.Foreground);
         break;
 
@@ -54,28 +54,14 @@ export class MagicWandSelectorTool implements ITool {
         if ((hasCommandKey(event) || event.altKey) && designerCanvas.instanceServiceContainer.selectionService.selectedElements)
           inSelectionElements.push(...designerCanvas.instanceServiceContainer.selectionService.selectedElements);
 
-        let point: DOMPointInit = designerCanvas.overlayLayer.createPoint();
         for (let e of elements) {
-          let elementRect = designerCanvas.getNormalizedElementCoordinates(e);
-          point.x = elementRect.x;
-          point.y = elementRect.y;
-          const p1 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
-          point.x = elementRect.x + elementRect.width;
-          point.y = elementRect.y;
-          const p2 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
-          point.x = elementRect.x;
-          point.y = elementRect.y + elementRect.height;
-          const p3 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
-          point.x = elementRect.x + elementRect.width;
-          point.y = elementRect.y + elementRect.height;
-          const p4 = this._path.isPointInFill(point) || this._path.isPointInStroke(point);
-          if (p1 && p2 && p3 && p4) {
+          if (this._containsElement(designerCanvas, e)) {
             const desItem = DesignItem.GetOrCreateDesignItem(e, e, designerCanvas.serviceContainer, designerCanvas.instanceServiceContainer);
             if (!inSelectionElements.includes(desItem) && !event.altKey) {
               inSelectionElements.push(desItem);
             } else if (event.altKey) {
               const idx = inSelectionElements.indexOf(desItem);
-              inSelectionElements.splice(idx, 1)
+              if (idx >= 0) inSelectionElements.splice(idx, 1)
             }
           }
         }
@@ -89,6 +75,36 @@ export class MagicWandSelectorTool implements ITool {
         designerCanvas.serviceContainer.globalContext.finishedWithTool(this);
         break;
     }
+  }
+
+  private _containsElement(canvas: IDesignerCanvas, element: Element): boolean {
+    const inside = (point: DOMPointInit) => this._path.isPointInFill(point) || this._path.isPointInStroke(point);
+    const win = element.ownerDocument.defaultView ?? window;
+    if (canvas.serviceContainer.options.svgEditingMode === 'content' && element instanceof win.SVGElement) {
+      // Select painted content, never its page-sized layer or definition resources.
+      if (!(element instanceof win.SVGGraphicsElement) || element instanceof win.SVGSVGElement || element instanceof win.SVGGElement
+        || element.closest('defs,marker,clipPath,mask,pattern,symbol')) return false;
+      const style = win.getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') return false;
+      if (element instanceof win.SVGGeometryElement) {
+        if (style.fill === 'none' && style.stroke === 'none') return false;
+        const screen = element.getScreenCTM(), lasso = this._path.getScreenCTM();
+        if (!screen || !lasso) return false;
+        const matrix = lasso.inverse().multiply(screen);
+        const length = element.getTotalLength();
+        if (!(length > 0)) return false;
+        // Sample in screen units so curves and transformed paths retain the same
+        // containment tolerance at every zoom. Empty bounding-box corners are irrelevant.
+        const samples = Math.max(1, Math.ceil(length * Math.hypot(screen.a, screen.b, screen.c, screen.d) / 2));
+        for (let i = 0; i <= samples; i++) {
+          if (!inside(element.getPointAtLength(length * i / samples).matrixTransform(matrix))) return false;
+        }
+        return true;
+      }
+    }
+    const rect = canvas.getNormalizedElementCoordinates(element);
+    return inside({ x: rect.x, y: rect.y }) && inside({ x: rect.x + rect.width, y: rect.y })
+      && inside({ x: rect.x, y: rect.y + rect.height }) && inside({ x: rect.x + rect.width, y: rect.y + rect.height });
   }
 
   keyboardEventHandler(designerCanvas: IDesignerCanvas, event: KeyboardEvent, currentElement: Element) { }
