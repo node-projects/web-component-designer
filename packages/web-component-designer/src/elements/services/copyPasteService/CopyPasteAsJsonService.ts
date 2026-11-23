@@ -1,34 +1,25 @@
+import { createClipboardCopyData, type ClipboardCopyData as ICopyPasteJsonData } from "./ClipboardCopyData.js";
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { DomConverter } from "../../widgets/designerView/DomConverter.js";
 import { ICopyPasteService } from "./ICopyPasteService.js";
 import { ServiceContainer } from '../ServiceContainer.js';
 import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { IRect } from "../../../interfaces/IRect.js";
 import { copyToClipboard, getFromClipboard, getTextFromClipboard } from "../../helper/ClipboardHelper.js";
 import { DesignItem } from "../../item/DesignItem.js";
-import { filterChildPlaceItems } from "../../helper/LayoutHelper.js";
-
-interface ICopyPasteJsonData {
-  html?: string;
-  positions?: IRect[];
-}
 
 interface IClipboardPasteData {
   html: string;
-  positions: IRect[] | null;
+  positions: (IRect | null)[] | null;
   imageData: Blob | null;
 }
 
 export class CopyPasteAsJsonService implements ICopyPasteService {
   async copyItems(designItems: IDesignItem[]): Promise<void> {
-    const items = filterChildPlaceItems(designItems);
-    const copyText = DomConverter.ConvertToString(items, false);
-    const positions = items.map(x => x.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(x.element));
-    const data: ICopyPasteJsonData = { html: copyText, positions: positions };
-    copyToClipboard([["text/html", copyText], ["text/plain", copyText], ["application/json", JSON.stringify(data)]]);
+    const data = createClipboardCopyData(designItems);
+    await copyToClipboard([["text/html", data.html], ["text/plain", data.html], ["application/json", JSON.stringify(data)]]);
   }
 
-  async getPasteItems(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<[designItems: IDesignItem[], positions?: IRect[]]> {
+  async getPasteItems(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<[designItems: IDesignItem[], positions?: (IRect | null)[]]> {
     const pasteData = await this._readClipboardPasteData();
     if (pasteData.imageData) {
       let di = await DesignItem.createDesignItemFromImageBlob(serviceContainer, instanceServiceContainer, pasteData.imageData);
@@ -44,7 +35,7 @@ export class CopyPasteAsJsonService implements ICopyPasteService {
 
   private async _readClipboardPasteData(): Promise<IClipboardPasteData> {
     let html = '';
-    let positions: IRect[] | null = null;
+    let positions: (IRect | null)[] | null = null;
     let imageData: Blob | null = null;
 
     const items = await getFromClipboard();

@@ -453,6 +453,54 @@ test('content mode edits painted geometry directly and hides only its toolbar wh
 });
 
 
+test('copying SVG content preserves its namespace, ancestor transforms and marker resources', async t => {
+  const page = await setup(t);
+  const result = await page.evaluate(async () => {
+    canvas.serviceContainer.options.svgEditingMode = 'content';
+    await view.parseDesignerHTML('<svg style="position:absolute;left:0;top:0;width:100%;height:100%"><defs><marker id="arrow"><path d="M0 0L10 5L0 10Z"></path></marker></defs><g transform="translate(40 20) rotate(15)"><path id="copiedPath" d="M100 240H260V140" fill="none" stroke="green" marker-end="url(#arrow)"></path></g><path id="otherPath" d="M10 10L20 20"></path></svg><svg style="position:absolute;left:0;top:0;width:100%;height:100%"><line id="copiedLine" x1="340" y1="150" x2="430" y2="150" stroke="blue"></line></svg>');
+    const root = canvas.rootDesignItem;
+    const items = [...root.children(true)].filter(item => ['copiedPath', 'copiedLine'].includes(item.id));
+    let copied = '';
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+      write: async () => { throw new Error('Use clipboard text fallback.'); },
+      writeText: async text => { copied = text; },
+      read: async () => [{ types: ['text/plain'], getType: async () => new Blob([copied], { type: 'text/plain' }) }],
+    } });
+    const snapshot = item => {
+      const element = item.element, matrix = element.getScreenCTM(), length = element.getTotalLength();
+      return [0, 0.5, 1].map(fraction => {
+        const point = element.getPointAtLength(length * fraction).matrixTransform(matrix);
+        return { x: point.x, y: point.y };
+      });
+    };
+    const before = items.map(snapshot);
+    canvas.instanceServiceContainer.selectionService.setSelectedElements(items);
+    await canvas.handleCopyCommand();
+    canvas.instanceServiceContainer.undoService.clear();
+    await canvas.handlePasteCommand(false);
+    const pasted = canvas.instanceServiceContainer.selectionService.selectedElements;
+    const layers = pasted.map(item => item.element.ownerSVGElement);
+    const result = { before, after: pasted.map(snapshot), types: pasted.map(item => item.element.localName),
+      namespaces: pasted.map(item => item.element.namespaceURI),
+      layerStyles: layers.map(layer => [layer.style.left, layer.style.top, layer.style.width, layer.style.height]),
+      rootLayers: layers.every(layer => [...root.children()].some(item => item.element === layer)),
+      resource: !!layers[0].querySelector('marker#arrow'), otherCopied: layers.some(layer => !!layer.querySelector('#otherPath')),
+      count: canvas.instanceServiceContainer.undoService.undoCount };
+    canvas.instanceServiceContainer.undoService.undo();
+    result.removed = pasted.every(item => !item.element.isConnected);
+    return result;
+  });
+  assert.deepEqual(result.types, ['path', 'line']);
+  assert.deepEqual(result.namespaces, ['http://www.w3.org/2000/svg', 'http://www.w3.org/2000/svg']);
+  assert.deepEqual(result.layerStyles, [['0px', '0px', '100%', '100%'], ['0px', '0px', '100%', '100%']]);
+  assert.equal(result.resource, true); assert.equal(result.otherCopied, false);
+  assert.equal(result.rootLayers, true); assert.equal(result.removed, true); assert.equal(result.count, 1);
+  for (let i = 0; i < result.before.length; i++) for (let p = 0; p < result.before[i].length; p++) {
+    assert.ok(Math.abs(result.before[i][p].x - result.after[i][p].x) < 0.05);
+    assert.ok(Math.abs(result.before[i][p].y - result.after[i][p].y) < 0.05);
+  }
+});
+
 test('a constrained path preset accepts a dragged first leg without becoming freehand',async t=>{
   const page=await setup(t);
   await page.evaluate(()=>{
