@@ -5,6 +5,27 @@ let identityMatrix: number[] = [
   0, 0, 0, 1
 ];
 
+const placementTransforms = new WeakMap<HTMLElement, { inline: string; priority: string; computed: string }>();
+
+/** Freeze the rendered baseline before a temporary placement transform replaces it. */
+export function beginPlacementTransform(element: HTMLElement) {
+  const transform = { inline: element.style.transform, priority: element.style.getPropertyPriority('transform'),
+    computed: getComputedStyle(element).transform };
+  placementTransforms.set(element, transform);
+  return transform;
+}
+
+export function getPlacementTransform(element: HTMLElement) {
+  return placementTransforms.get(element) ?? beginPlacementTransform(element);
+}
+
+export function restorePlacementTransform(element: HTMLElement) {
+  const transform = getPlacementTransform(element);
+  element.style.setProperty('transform', transform.inline, transform.priority);
+  placementTransforms.delete(element);
+  return transform;
+}
+
 export function combineTransforms(element: HTMLElement, actualTransforms: string, requestedTransformation: string) {
   if (actualTransforms == null || actualTransforms == '') {
     element.style.transform = requestedTransformation;
