@@ -2,7 +2,7 @@ import type { IPoint } from '../../../interfaces/IPoint.js';
 import type { IPlacementService } from './IPlacementService.js';
 import type { IDesignItem } from '../../item/IDesignItem.js';
 import { DomConverter } from '../../widgets/designerView/DomConverter.js';
-import { combineTransforms, extractTranslationFromDOMMatrix } from '../../helper/TransformHelper.js';
+import { beginPlacementTransform, combineTransforms, extractTranslationFromDOMMatrix, getPlacementTransform, restorePlacementTransform } from '../../helper/TransformHelper.js';
 import { filterChildPlaceItems, getDesignItemCurrentPos, placeDesignItem, transformOffsetByInverseLinearMatrix } from '../../helper/LayoutHelper.js';
 import { DesignerCanvas } from '../../widgets/designerView/designerCanvas.js';
 import { ExtensionType } from '../../widgets/designerView/extensions/ExtensionType.js';
@@ -123,6 +123,8 @@ export class DefaultPlacementService implements IPlacementService {
   }
 
   startPlace(event: MouseEvent, placementView: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
+    for (const item of filterChildPlaceItems(filterNonElementItems(items)))
+      beginPlacementTransform(<HTMLElement>item.element);
   }
 
   place(event: MouseEvent, designerCanvas: IDesignerCanvas, container: IDesignItem, startPoint: IPoint, offsetInControl: IPoint, newPoint: IPoint, items: IDesignItem[]) {
@@ -156,7 +158,7 @@ export class DefaultPlacementService implements IPlacementService {
       }
 
       const translationMatrix = new DOMMatrix().translate(transformedPoint.x, transformedPoint.y);
-      combineTransforms((<HTMLElement>designItem.element), designItem.getStyle('transform'), translationMatrix.toString());
+      combineTransforms((<HTMLElement>designItem.element), getPlacementTransform(<HTMLElement>designItem.element).computed, translationMatrix.toString());
     }
     items[0].instanceServiceContainer.designerCanvas?.raiseDesignItemsChanged(filteredItems, 'place', false);
   }
@@ -201,9 +203,10 @@ export class DefaultPlacementService implements IPlacementService {
     let filteredItems = filterChildPlaceItems(items);
     for (const designItem of filteredItems) {
       let translation: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix((<HTMLElement>designItem.element).style.transform));
-      const stylesMapOffset: DOMPoint = extractTranslationFromDOMMatrix(new DOMMatrix(designItem.getStyle('transform') ?? ''));
-      (<HTMLElement>designItem.element).style.transform = designItem.getStyle('transform') ?? '';
-      let track = { x: translation.x, y: translation.y };
+      const originalTransform = restorePlacementTransform(<HTMLElement>designItem.element);
+      const baseline = new DOMMatrix(originalTransform.computed);
+      const originalOffset: DOMPoint = extractTranslationFromDOMMatrix(baseline);
+      let track = { x: translation.x - originalOffset.x, y: translation.y - originalOffset.y };
 
       const cs = getComputedStyle(designItem.element);
       let m = new DOMMatrix();
@@ -217,9 +220,9 @@ export class DefaultPlacementService implements IPlacementService {
         track = m.transformPoint(track);
       }
 
-      let placementOffset = { x: track.x - stylesMapOffset.x, y: track.y - stylesMapOffset.y };
+      let placementOffset = { x: track.x, y: track.y };
       if (usesSvgGeometryPlacement(designItem)) {
-        placementOffset = transformOffsetByInverseLinearMatrix(placementOffset, new DOMMatrix(designItem.getStyle('transform') ?? ''));
+        placementOffset = transformOffsetByInverseLinearMatrix(placementOffset, baseline);
       }
 
       placeDesignItem(container, designItem, placementOffset, 'position');
