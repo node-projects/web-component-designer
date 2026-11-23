@@ -701,7 +701,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
     let lastCopiedPrimaryItemBackup = this._lastCopiedPrimaryItem;
     let nextPasteOffset = this._currentPasteOffset + this.pasteOffset;
     let pasteContainer = this.rootDesignItem;
-    let pCon = lastCopiedPrimaryItemBackup?.parent ?? this.instanceServiceContainer.selectionService.primarySelection;
+    const svgContent = this.serviceContainer.options.svgEditingMode === 'content';
+    let pCon = svgContent && designItems.some(item => item.element instanceof item.window.SVGSVGElement)
+      ? this.rootDesignItem : lastCopiedPrimaryItemBackup?.parent ?? this.instanceServiceContainer.selectionService.primarySelection;
     while (pCon != null) {
       const containerStyle = getComputedStyle(pCon.element);
       let newContainerService: IPlacementService;
@@ -734,7 +736,9 @@ export class DesignerCanvas extends BaseCustomWebComponentLazyAppend implements 
         for (let di of designItems)
           intializationService.init(di);
       }
-      this.instanceServiceContainer.selectionService.setSelectedElements(designItems);
+      const selection = svgContent ? designItems.flatMap(item => item.element instanceof item.window.SVGSVGElement
+        ? [...item.children(true)].filter(child => getGeometryReader(child.element) && !child.element.closest('defs,marker,clipPath,mask,pattern,symbol')) : [item]) : designItems;
+      this.instanceServiceContainer.selectionService.setSelectedElements(selection);
     }
     grp.commit();
 

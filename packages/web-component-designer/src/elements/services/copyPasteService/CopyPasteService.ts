@@ -1,25 +1,22 @@
+import { createClipboardCopyData } from "./ClipboardCopyData.js";
 import { IDesignItem } from "../../item/IDesignItem.js";
-import { DomConverter } from "../../widgets/designerView/DomConverter.js";
 import { ICopyPasteService } from "./ICopyPasteService.js";
 import { ServiceContainer } from '../ServiceContainer.js';
 import { InstanceServiceContainer } from '../InstanceServiceContainer.js';
 import { IRect } from "../../../interfaces/IRect.js";
 import { copyToClipboard, getFromClipboard, getTextFromClipboard } from "../../helper/ClipboardHelper.js";
-import { filterChildPlaceItems } from "../../helper/LayoutHelper.js";
 
 export const positionsJsonMime = 'web text/positions';
 
 export class CopyPasteService implements ICopyPasteService {
   async copyItems(designItems: IDesignItem[]): Promise<void> {
-    const items = filterChildPlaceItems(designItems);
-    const copyText = DomConverter.ConvertToString(items, false);
-    const positions = items.map(x => x.instanceServiceContainer.designerCanvas.getNormalizedElementCoordinates(x.element));
-    copyToClipboard([["text/html", copyText], [positionsJsonMime, JSON.stringify(positions)]]);
+    const { html, positions } = createClipboardCopyData(designItems);
+    await copyToClipboard([["text/html", html], [positionsJsonMime, JSON.stringify(positions)]]);
   }
 
-  async getPasteItems(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<[designItems: IDesignItem[], positions?: IRect[]]> {
+  async getPasteItems(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<[designItems: IDesignItem[], positions?: (IRect | null)[]]> {
     let html = '';
-    let positions: IRect[] | null = null;
+    let positions: (IRect | null)[] | null = null;
     const items = await getFromClipboard();
     if (items != null) {
       try {

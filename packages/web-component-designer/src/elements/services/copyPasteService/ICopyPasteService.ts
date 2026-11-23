@@ -5,6 +5,6 @@ import { ServiceContainer } from "../ServiceContainer.js";
 
 export interface ICopyPasteService {
   copyItems(designItems: IDesignItem[]): Promise<void>
-  /** Return detached paste items after applying the optional copyPreparationService. */
-  getPasteItems(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<[designItems: IDesignItem[], positions?: IRect[]]>
+  /** Return detached paste items after applying copyPreparationService. Null positions retain SVG geometry coordinates. */
+  getPasteItems(serviceContainer: ServiceContainer, instanceServiceContainer: InstanceServiceContainer): Promise<[designItems: IDesignItem[], positions?: (IRect | null)[]]>
 }

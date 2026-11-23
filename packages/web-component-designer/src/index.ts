@@ -67,6 +67,7 @@ export type { IElementAtPointService } from "./elements/services/elementAtPointS
 
 export * from "./elements/services/copyPasteService/CopyPasteService.js";
 export * from "./elements/services/copyPasteService/CopyPasteAsJsonService.js";
+export * from "./elements/services/copyPasteService/ClipboardCopyData.js";
 export type { ICopyPasteService } from "./elements/services/copyPasteService/ICopyPasteService.js";
 export * from "./elements/services/copyPasteService/PasteFormatSnapshot.js";
 
