@@ -57,6 +57,22 @@ This mounts the document editor with its Designer, Code, Split, and Preview tabs
 
 The core package depends on `@node-projects/base-custom-webcomponent`. Rich code editors and other integrations live in optional packages, so you can choose the dependencies your application needs.
 
+### Extended color picker
+
+Set `services.options.colorEditor = 'extended'` to add CSS named color swatches and 16 reusable color slots to the designer's custom color picker. The default setting is `'basic'`. Click a palette swatch to use its color and select its slot. To replace it, choose a new color and click **+** next to **Saved colors**.
+
+The slots persist in browser local storage and are shared by designers on the same origin. To use application storage, provide synchronous or asynchronous callbacks through `services.options.colorPaletteStorage`.
+
+```ts
+services.options.colorEditor = 'extended';
+services.options.colorPaletteStorage = {
+  load: () => loadPalette(), // Up to 16 CSS color strings, with null for preset colors.
+  save: (slot, color) => savePaletteSlot(slot, color), // slot ranges from 0 to 15.
+};
+```
+
+Standalone `<node-projects-color-input>` controls can select the picker with `color-editor="extended"` or `color-editor="basic"`. For an inline picker, use `<node-projects-extended-color-editor>` and assign its `paletteStorage` property before mounting to supply custom storage.
+
 ## Screenshots
 
 The full demo in a light theme, with the same HTML document and selected button:

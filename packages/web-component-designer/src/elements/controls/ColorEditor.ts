@@ -1,9 +1,15 @@
-import { bindDesignerUiTranslation, designerUiServiceContainer, designerTranslation } from '../services/translationService/DesignerUiTranslation.js';
+import { bindDesignerUiTranslation, designerUiServiceContainer, designerTranslation, setDesignerUiTranslation } from '../services/translationService/DesignerUiTranslation.js';
 import { BaseCustomWebComponentConstructorAppend, css, html, TypedEvent } from '@node-projects/base-custom-webcomponent';
 import { w3color } from '../helper/w3color.js';
 
 export type ColorEditorMode = 'rgb' | 'hsl' | 'cmyk' | 'oklab' | 'oklch';
 export type ColorEditorValueChangedEventArgs = { newValue?: string, oldValue?: string };
+
+export interface ColorPaletteStorage {
+  load(): ReadonlyArray<string | null> | Promise<ReadonlyArray<string | null>>;
+  /** Save one slot, indexed from 0 to 15. */
+  save(slot: number, color: string): void | Promise<void>;
+}
 
 type RgbaColor = { r: number, g: number, b: number, a: number };
 type HsvColor = { h: number, s: number, v: number };
@@ -464,12 +470,20 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
     this._setColor(parsed, false, true, true);
   }
 
-  private _setColor(color: RgbaColor, preview: boolean, renderChannels = true, syncHue = false) {
+  protected _selectColor(value: string) {
+    const parsed = parseColor(value);
+    if (!parsed || this.readOnly || this.disabled)
+      return;
+    this._mode = inferColorMode(value) ?? this._mode;
+    this._setColor(parsed, false, true, true, value);
+  }
+
+  private _setColor(color: RgbaColor, preview: boolean, renderChannels = true, syncHue = false, value?: string) {
     const oldValue = this._value;
     this._color = normalizeColor(color);
     if (syncHue)
       this._syncHueFromColor();
-    this._value = this._formatColor();
+    this._value = value ?? this._formatColor();
     this._render(renderChannels);
     if (preview)
       this.valuePreviewChanged.emit({ newValue: this._value, oldValue });
@@ -521,6 +535,259 @@ export class ColorEditor extends BaseCustomWebComponentConstructorAppend {
     const hsv = rgbToHsv(this._color);
     if (hsv.s > epsilon && hsv.v > epsilon)
       this._hue = normalizeHue(hsv.h);
+  }
+}
+
+const defaultPalette = [
+  '#000000', '#808080', '#800000', '#ff0000', '#ff8000', '#ffff00', '#008000', '#00ff00',
+  '#ffffff', '#c0c0c0', '#800080', '#ff00ff', '#008080', '#00ffff', '#000080', '#0000ff'
+];
+const paletteStoragePrefix = 'node-projects-web-component-designer-color-palette-';
+const browserPaletteStorage: ColorPaletteStorage = {
+  load() {
+    return defaultPalette.map((_, slot) => localStorage.getItem(paletteStoragePrefix + slot));
+  },
+  save(slot, color) {
+    localStorage.setItem(paletteStoragePrefix + slot, color);
+  }
+};
+
+export class ExtendedColorEditor extends ColorEditor {
+
+  private static readonly _paletteStyle = css`
+    #editor {
+      max-height: calc(100dvh - 16px);
+      overflow: auto;
+    }
+
+    #named-colors summary, #save-color, #saved-colors button, #no-paint {
+      box-sizing: border-box;
+      min-height: 26px;
+      border: 1px solid var(--wcd-color-border, #596c7a);
+      border-radius: 5px;
+      background: var(--wcd-color-surface, #161a1f);
+      color: inherit;
+      font: inherit;
+    }
+
+    #color-entry, #palette-heading {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #no-paint, #save-color { flex: none; width: 26px; padding: 0; cursor: pointer; }
+    #save-color:disabled { opacity: .55; cursor: default; }
+    #save-color { font-size: 16px; }
+
+    #named-colors summary { padding: 4px 8px; cursor: pointer; }
+    #named-color-options {
+      max-height: 128px;
+      overflow: auto;
+      border: 1px solid var(--wcd-color-border, #596c7a);
+      border-radius: 5px;
+      margin-top: 4px;
+    }
+
+    #named-color-options button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 4px 8px;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    #named-color-options button:is(:hover, :focus-visible) {
+      background: var(--wcd-color-surface, #161a1f);
+    }
+
+    #named-color-options .palette-swatch {
+      box-sizing: border-box;
+      width: 20px;
+      height: 16px;
+      border: 1px solid var(--wcd-color-border, #596c7a);
+      border-radius: 3px;
+    }
+
+    #color-palette {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    #saved-colors {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    #saved-colors button { padding: 0; cursor: pointer; }
+    #saved-colors button[aria-pressed="true"] {
+      outline: 2px solid var(--wcd-color-focus, #79b8ff);
+      outline-offset: 1px;
+    }
+
+    #saved-colors .palette-swatch, #named-color-options .palette-swatch {
+      background:
+        linear-gradient(var(--palette-swatch), var(--palette-swatch)),
+        repeating-conic-gradient(#999 0% 25%, #e6e6e6 0% 50%) 0 0 / 8px 8px;
+    }
+
+    #no-paint {
+      background:
+        linear-gradient(135deg, transparent 43%, #a52424 43% 57%, transparent 57%),
+        repeating-conic-gradient(#999 0% 25%, #e6e6e6 0% 50%) 0 0 / 8px 8px;
+    }
+
+    #color-status:empty { display: none; }
+  `;
+
+  private static readonly _paletteTemplate = html`
+    <div id="color-entry"></div>
+    <details id="named-colors">
+      <summary data-wcd-i18n-text="Named colors">Named colors</summary>
+      <div id="named-color-options"></div>
+    </details>
+    <fieldset id="color-palette" aria-labelledby="saved-colors-label" disabled>
+      <div id="palette-heading">
+        <span id="saved-colors-label" data-wcd-i18n-text="Saved colors">Saved colors</span>
+        <button id="save-color" type="button" disabled aria-label="Save current color to selected slot" title="Save current color to selected slot"
+          data-wcd-i18n-aria-label="Save current color to selected slot" data-wcd-i18n-title="Save current color to selected slot">+</button>
+      </div>
+      <div id="saved-colors"></div>
+      <div id="color-status" role="status"></div>
+    </fieldset>
+  `;
+
+  public paletteStorage: ColorPaletteStorage = browserPaletteStorage;
+
+  private _colors = defaultPalette.slice();
+  private _slots: HTMLButtonElement[];
+  private _selectedSlot = -1;
+
+  static get observedAttributes() { return ['readonly', 'disabled']; }
+
+  attributeChangedCallback() {
+    this._syncPaletteInteractivity();
+  }
+
+  override ready() {
+    super.ready();
+    this.shadowRoot.adoptedStyleSheets = [...this.shadowRoot.adoptedStyleSheets, ExtendedColorEditor._paletteStyle];
+    this._getDomElement('editor').append(ExtendedColorEditor._paletteTemplate.content.cloneNode(true));
+    this._syncPaletteInteractivity();
+
+    const noPaint = this._getDomElement<HTMLButtonElement>('no-paint');
+    noPaint.removeAttribute('data-wcd-i18n-text');
+    noPaint.textContent = '';
+    setDesignerUiTranslation(noPaint, 'No paint', 'aria-label');
+    setDesignerUiTranslation(noPaint, 'No paint', 'title');
+    this._getDomElement('color-entry').append(this._getDomElement('text'), noPaint);
+
+    const names = this._getDomElement<HTMLDetailsElement>('named-colors');
+    const options = this._getDomElement('named-color-options');
+    for (const name of [...w3color.getColorArr('names').map(name => name.toLowerCase()), 'transparent'].sort()) {
+      const button = this.ownerDocument.createElement('button');
+      button.type = 'button';
+      const swatch = this.ownerDocument.createElement('span');
+      swatch.className = 'palette-swatch';
+      swatch.style.setProperty('--palette-swatch', name);
+      button.append(swatch, name);
+      button.onclick = () => {
+        this._selectColor(name);
+        names.open = false;
+        names.querySelector('summary').focus();
+      };
+      options.append(button);
+    }
+
+    const grid = this._getDomElement('saved-colors');
+    this._slots = defaultPalette.map((_, slot) => {
+      const button = this.ownerDocument.createElement('button');
+      button.type = 'button';
+      button.className = 'palette-swatch';
+      button.onclick = () => {
+        this._selectedSlot = slot;
+        this._setPaletteStatus('');
+        this._renderPalette();
+        this._selectColor(this._colors[slot]);
+      };
+      grid.append(button);
+      return button;
+    });
+    this._getDomElement<HTMLButtonElement>('save-color').onclick = () => this._saveColor();
+    this._renderPalette();
+    void this._loadPalette();
+  }
+
+  private _syncPaletteInteractivity() {
+    const inactive = this.readOnly || this.disabled;
+    this._getDomElement('named-colors')?.toggleAttribute('inert', inactive);
+    const noPaint = this._getDomElement<HTMLButtonElement>('no-paint');
+    if (noPaint) noPaint.disabled = inactive;
+    this._getDomElement('color-palette')?.toggleAttribute('inert', inactive);
+  }
+
+  private async _loadPalette() {
+    try {
+      const colors = await this.paletteStorage.load();
+      this._colors = defaultPalette.map((fallback, slot) => {
+        const color = colors[slot];
+        return typeof color === 'string' && parseColor(color) ? color : fallback;
+      });
+      this._renderPalette();
+      this._getDomElement<HTMLFieldSetElement>('color-palette').disabled = false;
+    } catch {
+      this._setPaletteStatus('Could not load saved colors');
+    }
+  }
+
+  private async _saveColor() {
+    const palette = this._getDomElement<HTMLFieldSetElement>('color-palette');
+    const slot = this._selectedSlot;
+    if (slot < 0 || palette.disabled || this.readOnly || this.disabled)
+      return;
+    const color = this.value;
+    if (!parseColor(color)) {
+      this._setPaletteStatus('Choose a color before saving');
+      return;
+    }
+    palette.disabled = true;
+    try {
+      await this.paletteStorage.save(slot, color);
+      this._colors[slot] = color;
+      this._setPaletteStatus('');
+    } catch {
+      this._setPaletteStatus('Could not save color. Try again.');
+    } finally {
+      palette.disabled = false;
+      this._renderPalette();
+    }
+  }
+
+  private _renderPalette() {
+    this._getDomElement<HTMLButtonElement>('save-color').disabled = this._selectedSlot < 0;
+    for (const [slot, button] of this._slots.entries()) {
+      const color = this._colors[slot];
+      const params = { slot: String(slot + 1), color };
+      setDesignerUiTranslation(button, 'Color {slot}, {color}', 'aria-label', params);
+      setDesignerUiTranslation(button, '{color}', 'title', params);
+      button.setAttribute('aria-pressed', String(slot === this._selectedSlot));
+      button.style.setProperty('--palette-swatch', toCssRgb(parseColor(color)));
+    }
+  }
+
+  private _setPaletteStatus(message: string) {
+    setDesignerUiTranslation(this._getDomElement('color-status'), message);
   }
 }
 
@@ -582,6 +849,7 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
   private _button: HTMLButtonElement;
   private _popup: HTMLDivElement;
   private _popupTranslation: { dispose(): void };
+  private _popupResizeObserver: ResizeObserver;
   private _editor: ColorEditor;
   private _ignoreNextClick = false;
   private _outsidePointerHandler = (event: PointerEvent) => this._handleOutsidePointer(event);
@@ -672,7 +940,16 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
     this._popup.style.zIndex = '100000';
     this._popup.style.width = '280px';
 
-    this._editor = document.createElement('node-projects-color-editor') as ColorEditor;
+    const container = designerUiServiceContainer(this);
+    const variant = this.getAttribute('color-editor') ?? container?.options.colorEditor;
+    if (variant === 'extended') {
+      const editor = new ExtendedColorEditor();
+      if (container?.options.colorPaletteStorage)
+        editor.paletteStorage = container.options.colorPaletteStorage;
+      this._editor = editor;
+    } else {
+      this._editor = new ColorEditor();
+    }
     this._editor.toggleAttribute('allow-none', this.hasAttribute('allow-none'));
     this._editor.value = this._value;
     this._editor.valuePreviewChanged.on(e => {
@@ -684,10 +961,13 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
       this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
     });
     this._popup.appendChild(this._editor);
-    const container = designerUiServiceContainer(this);
     if (container) this._popupTranslation = bindDesignerUiTranslation(this._editor.shadowRoot, container);
     document.body.appendChild(this._popup);
     this._positionPopup();
+    if (variant === 'extended') {
+      this._popupResizeObserver = new ResizeObserver(() => this._positionPopup());
+      this._popupResizeObserver.observe(this._popup);
+    }
     window.addEventListener('resize', () => this._positionPopup(), { once: true });
     window.addEventListener('scroll', () => this._positionPopup(), { once: true, capture: true });
     window.addEventListener('keydown', this._windowKeyHandler);
@@ -730,6 +1010,8 @@ export class ColorInput extends BaseCustomWebComponentConstructorAppend {
     }
     window.removeEventListener('pointerdown', this._outsidePointerHandler, true);
     window.removeEventListener('keydown', this._windowKeyHandler);
+    this._popupResizeObserver?.disconnect();
+    this._popupResizeObserver = null;
     this._popupTranslation?.dispose();
     this._popup?.remove();
     this._popup = null;
@@ -1093,4 +1375,5 @@ function round(value: number, decimals: number) {
 }
 
 customElements.define('node-projects-color-editor', ColorEditor);
+customElements.define('node-projects-extended-color-editor', ExtendedColorEditor);
 customElements.define('node-projects-color-input', ColorInput);

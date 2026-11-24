@@ -1,3 +1,4 @@
+import type { ColorPaletteStorage } from '../controls/ColorEditor.js';
 import type { IPropertyGridExtensionProvider } from '../widgets/propertyGrid/IPropertyGridExtensionProvider.js';
 import { IPropertiesService } from './propertiesService/IPropertiesService.js';
 import { IPlacementService } from './placementService/IPlacementService.js';
@@ -166,6 +167,8 @@ export class ServiceContainer extends BaseServiceContainer<ServiceNameMap> {
   public readonly globalContext: GlobalContext = new GlobalContext(this);
 
   public readonly options = {
+    colorEditor: 'basic' as 'basic' | 'extended',
+    colorPaletteStorage: undefined as ColorPaletteStorage | undefined,
     zoomDesignerBackground: true,
     svgEditingMode: 'object' as 'object' | 'content',
     svgEditingToolbar: true,
